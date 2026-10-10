@@ -4,21 +4,25 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 `session-resume` skill does), then CLAUDE.md and `docs/plan.md`._
 
 ## Where things stand
-- Scaffolded with wow-addon-kit (0.1.0: Core, log window, popup helper; `/dl`, `/dopamine`), linked into
-  `_classic_beta_`, plan written (`docs/plan.md`) and its open questions settled with the user.
-- In progress: none.
-- **Next up: 0.1** (plan roadmap): `CHAT_MSG_LOOT` self parsing → one popup with the rotating
-  `PlayerModel:SetItem` model (icon-card fallback), quality sound (built-in kits), quality threshold;
-  `/dl test`, `/dl model <id>`, `/dl debug` raw loot logging; `tools/test_lootmsg.lua`.
+- **0.1.1** (roadmap 0.1) pushed: `LootMsg.lua` (pure parser of the `LOOT_ITEM_*SELF*` templates,
+  `tools/test_lootmsg.lua`), `LootFeed.lua` (CHAT_MSG_LOOT → item data → popup; vendor buys skipped;
+  `/dl test`, `/dl model`, `/dl quality`, `/dl check`), `Sounds.lua` (tier kits with fallbacks, `/dl sounds`),
+  `Popup.lua` (dark card, quality beam + glow, `PlayerModel:SetItem` for weapons/shields/helms/
+  shoulders with flipping icon-card fallback, max 3 stacked, hover holds, Shift+click links,
+  click dismisses). Reviewer run; its 10 findings fixed.
+- In progress: none. Waiting on the user's first 0.1 test.
+- **Next up**: tune from the test (model camera/zoom, which sounds exist), then **0.2** filters +
+  Settings page + seen set (NEW) + upgrade badge.
 
 ## Verified in game (by the user)
-- (nothing yet)
+- 0.1.0 scaffold loads (in the AddOns list), `/dl help` prints the commands.
 
 ## Not yet verified
-- Addon loads (full game restart the first time), `/dl help` lists commands in chat.
-- The three big unknowns 0.1 settles: loot global strings (`LOOT_ITEM_SELF*`), `PlayerModel:SetItem` on
-  Forever, which SOUNDKIT ids play. Also: Alt+Right-click on a bag item doesn't use it, and
-  `GetMouseButtonClicked()` works inside the `HandleModifiedItemClick` hook.
+- 0.1.1 everything. The three big unknowns: loot global strings (`/dl check`), `PlayerModel:SetItem`
+  on Forever (`/dl model <id>`; does `GetModelFileID` report a file?), which SOUNDKIT ids play
+  (`/dl sounds`). Model camera framing is a guess (`SetPosition(0,0,0)`, cam distance 1).
+- Later: Alt+Right-click on a bag item doesn't use it; `GetMouseButtonClicked()` inside the
+  `HandleModifiedItemClick` hook (0.3).
 
 ## User preferences (stated in chat; follow them)
 - **Privacy first**: the only public identity is the handle **Bempis**. Never the real name, email,
@@ -45,4 +49,5 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 - (none)
 
 ## Recent history (newest first)
+- 2026-10-09 0.1.1: first loot popups (model or card), tier sounds, test/check commands.
 - 2026-10-09 0.1.0: scaffolded with wow-addon-kit 0.4.0 (privacy guard), plan written and settled.

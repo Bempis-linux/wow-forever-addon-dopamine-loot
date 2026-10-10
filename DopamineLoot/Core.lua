@@ -55,7 +55,7 @@ function ns:ADDON_LOADED(name)
   if name ~= ADDON then return end
   ev:UnregisterEvent("ADDON_LOADED")
   InitDB()
-  self:RegisterEvents("PLAYER_LOGIN", "PLAYER_ENTERING_WORLD")
+  self:RegisterEvents("PLAYER_LOGIN")
   for _, fn in ipairs(inits) do fn() end
 end
 
@@ -94,9 +94,9 @@ local function ChatHelp(unknown)
   Line(" help", "show this list")
 end
 
-SLASH_DL1 = "/dl"
-SLASH_DL2 = "/dopamine"
-SlashCmdList.DL = function(msg)
+SLASH_DOPAMINELOOT1 = "/dl"
+SLASH_DOPAMINELOOT2 = "/dopamine"
+SlashCmdList.DOPAMINELOOT = function(msg)
   msg = strtrim((msg or ""):lower())
   local word, rest = msg:match("^(%S*)%s*(.-)$")
   if msg == "" then

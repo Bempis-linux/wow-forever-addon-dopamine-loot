@@ -2,3 +2,5 @@
 # e.g. optional dependencies read through _G:  Undefined field `LibQuestieDB`
 # Pre-C_AddOns fallback, absent from retail annotations on purpose
 Undefined global `GetAddOnMetadata`
+# Pre-C_Container bag functions and HandleModifiedItemClick: read through _G with guards
+Undefined field `(GetContainerNumSlots|GetContainerItemLink|HandleModifiedItemClick)`
