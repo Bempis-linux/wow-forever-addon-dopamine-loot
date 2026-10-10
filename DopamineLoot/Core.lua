@@ -76,6 +76,12 @@ function ns.AddCommand(name, help, fn)
   commands[name] = { help = help, fn = fn }
 end
 
+-- Run a command as if typed (the settings page's Test buttons use this)
+function ns.RunCommand(name, rest)
+  local c = commands[name]
+  if c and c.fn then c.fn(rest or "") end
+end
+
 local toggles = {}
 function ns.AddToggle(word, key, label)
   toggles[word] = { key = key, label = label }
@@ -87,7 +93,7 @@ local function ChatHelp(unknown)
   if unknown then print(ns.PREFIX .. Y .. ("unknown command \"%s\"|r"):format(unknown)) end
   print(ns.PREFIX .. Y .. "v" .. ns.Version() .. " commands:|r")
   local function Line(cmd, help) print(("  |cffffffff/dl%s|r - %s%s|r"):format(cmd, Y, help)) end
-  if ns.ToggleUI then Line("", "open or close the " .. ns.TITLE .. " window") end
+  if ns.ToggleUI then Line("", "open the settings") end
   for _, name in ipairs(order) do Line(" " .. name, commands[name].help) end
   Line(" log", "open or close the log window")
   Line(" debug", "toggle debug logging")

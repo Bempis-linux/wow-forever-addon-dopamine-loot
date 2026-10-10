@@ -33,7 +33,9 @@ end
 
 ns.AddToggle("popup", "noPopup", "loot popups")
 
-local pool, shown = {}, {}
+local pool, shown, waiting = {}, {}, {}
+local MAX_WAITING = 12
+local ShowWaiting -- defined below ShowLoot; Update calls it
 local driver = CreateFrame("Frame")
 
 local function Gradient(tex, r, g, b, bottomA, topA)
@@ -79,7 +81,13 @@ local function Create()
   p.model = CreateFrame("PlayerModel", nil, s)
   p.model:SetPoint("TOPLEFT", 2, -2)
   p.model:SetPoint("BOTTOMRIGHT", -2, 2)
-  p.model:SetScript("OnModelLoaded", function() p:CheckModel("loaded") end)
+  p.model:SetScript("OnModelLoaded", function(m)
+    if p.mode == "model" then -- reloaded after the UI was hidden: keep the framing
+      m:SetPosition(0, 0, 0)
+      if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.settings.modelZoom or 1) end
+    end
+    p:CheckModel("loaded")
+  end)
 
   p.card = CreateFrame("Frame", nil, s)
   p.card:SetSize(CARD, CARD)
@@ -140,7 +148,7 @@ local function Create()
     if why == "loaded" or (fileID and fileID ~= 0) then
       self.mode = "model"
       m:SetPosition(0, 0, 0)
-      if m.SetCamDistanceScale then m:SetCamDistanceScale(1) end
+      if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.settings.modelZoom or 1) end
       self.card:Hide()
     else -- timed out without a model
       self.mode = "card"
@@ -210,6 +218,7 @@ local function Update(_, dt)
       Release(p)
     end
   end
+  ShowWaiting()
   if #shown == 0 then driver:SetScript("OnUpdate", nil) end
 end
 
@@ -222,9 +231,7 @@ local function Badges(item)
   return table.concat(b, "   ")
 end
 
--- item: { link, id, count, quality, name, icon, equipLoc, ilvl, typeText, src, test, forceModel }
--- onModel(mode, fileID, why) is called once the display path is decided (/dl model uses it)
-function ns:ShowLoot(item, onModel)
+local function Pop(item, onModel)
   local p = table.remove(pool) or Create()
   p.item, p.onModel = item, onModel
   local q = item.quality or 1
@@ -251,7 +258,6 @@ function ns:ShowLoot(item, onModel)
   p:ClearAllPoints()
   p:SetPoint("TOP", UIParent, "TOP", 0, p.y)
   table.insert(shown, 1, p)
-  for i = MAX_SHOWN + 1, #shown do shown[i]:Leave(FAST_OUT_T) end -- too many: the oldest leave quickly
   p.mode = "card"
   p.card:SetWidth(CARD) -- a reused popup keeps the last frame's flip
   p.card.icon:SetDesaturated(false)
@@ -273,7 +279,42 @@ function ns:ShowLoot(item, onModel)
   end
   if p.mode == "card" and p.onModel then p.onModel("card", nil, "no model path"); p.onModel = nil end
 
-  self:PlayTierSound(q)
+  ns:PlayTierSound(q)
   driver:SetScript("OnUpdate", Update)
   return p
+end
+
+-- Popups still on screen and not leaving; the oldest of them
+local function Active()
+  local n, oldest = 0, nil
+  for _, p in ipairs(shown) do
+    if not p.outAge then n, oldest = n + 1, p end
+  end
+  return n, oldest
+end
+
+-- After each frame: waiting items take the free slots
+function ShowWaiting() -- the local declared at the top
+  while waiting[1] and Active() < MAX_SHOWN do
+    local w = table.remove(waiting, 1)
+    Pop(w.item, w.onModel)
+  end
+end
+
+-- item: { link, id, count, quality, name, icon, equipLoc, ilvl, typeText, src, test, forceModel }
+-- onModel(mode, fileID, why) is called once the display path is decided (/dl model uses it).
+-- With MAX_SHOWN on screen, a better item (or a preview) pushes the oldest out; anything else
+-- waits for a free slot, so a rain's blues are all seen in turn.
+function ns:ShowLoot(item, onModel)
+  local n, oldest = Active()
+  if n >= MAX_SHOWN and oldest then
+    local q, oq = item.quality or 1, oldest.item and oldest.item.quality or 1
+    if not (item.push or q > oq) then
+      if #waiting >= MAX_WAITING then table.remove(waiting, 1) end
+      waiting[#waiting + 1] = { item = item, onModel = onModel }
+      return
+    end
+    oldest:Leave(FAST_OUT_T)
+  end
+  return Pop(item, onModel)
 end

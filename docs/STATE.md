@@ -4,23 +4,32 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 `session-resume` skill does), then CLAUDE.md and `docs/plan.md`._
 
 ## Where things stand
-- **0.1.1** (roadmap 0.1) pushed: `LootMsg.lua` (pure parser of the `LOOT_ITEM_*SELF*` templates,
-  `tools/test_lootmsg.lua`), `LootFeed.lua` (CHAT_MSG_LOOT → item data → popup; vendor buys skipped;
-  `/dl test`, `/dl model`, `/dl quality`, `/dl check`), `Sounds.lua` (tier kits with fallbacks, `/dl sounds`),
-  `Popup.lua` (dark card, quality beam + glow, `PlayerModel:SetItem` for weapons/shields/helms/
-  shoulders with flipping icon-card fallback, max 3 stacked, hover holds, Shift+click links,
-  click dismisses). Reviewer run; its 10 findings fixed.
-- In progress: none. Waiting on the user's first 0.1 test.
-- **Next up**: tune from the test (model camera/zoom, which sounds exist), then **0.2** filters +
-  Settings page + seen set (NEW) + upgrade badge.
+- **0.2.0** pushed (the user asked for rain + a settings window before filters, so the roadmap's
+  "rain lite" moved up): `Rain.lua` (pure physics `ns.RainCore` + sprite pool; worst first, best last;
+  Rare+ stays as popups; merges a new burst into one in flight; scales with UI height; substeps at
+  low fps; `tools/test_rain.lua`), burst collector in `LootFeed.lua` (0.4 s quiet / 2 s max; 3+ →
+  rain; big bursts in combat wait for PLAYER_REGEN_ENABLED), popup waiting queue (max 3 on screen;
+  better items and previews push the oldest out), `Settings.lua` (Options > AddOns; `/dl` opens it):
+  popups on/off, min quality with a Test per quality, 3D size number + Test, sound on/off + channel +
+  check all, rain on/off, "rain from N", stay quality, test rain with a number field + Test, debug,
+  log, check client. Commands added: `/dl rain [n]`, `/dl zoom`, `/dl settings`. Two reviewer runs; fixed.
+- In progress: none. Waiting on the user's 0.2 test.
+- **Next up**: tune rain/popups from the test; then the plan's 0.2 work (filters, seen set/NEW,
+  upgrade badge), 0.3 inspector, then design/look pass (the user wants functionality first).
 
 ## Verified in game (by the user)
-- 0.1.0 scaffold loads (in the AddOns list), `/dl help` prints the commands.
+- 0.1.0 scaffold loads, `/dl help` prints the commands.
+- 0.1.1: popups with **rotating 3D models** (Thunderfury, Smite's Mighty Hammer, Arcanite Reaper);
+  `/dl model 12784` → "model file 144817 [loaded]" (`SetItem` + `GetModelFileID` work on Forever);
+  `/dl test` with qualities; `/dl sounds` plays.
 
 ## Not yet verified
-- 0.1.1 everything. The three big unknowns: loot global strings (`/dl check`), `PlayerModel:SetItem`
-  on Forever (`/dl model <id>`; does `GetModelFileID` report a file?), which SOUNDKIT ids play
-  (`/dl sounds`). Model camera framing is a guess (`SetPosition(0,0,0)`, cam distance 1).
+- 0.2.0 everything: rain (`/dl rain 8`, `/dl rain 30`), settings page layout (right column at
+  COL2 = 320; not clipped?), number fields, combat deferral, real looting (popup + rain from a
+  multi-item corpse), `/dl check` output (loot templates present?). Icon rotation + tex-coord crop
+  on rain sprites (`SetRotation` with `SetTexCoord`) may show icon borders: watch for it.
+- Model framing: Arcanite Reaper looked small at zoom 1 (screenshot); `/dl zoom` / the 3D size field
+  exists to tune it.
 - Later: Alt+Right-click on a bag item doesn't use it; `GetMouseButtonClicked()` inside the
   `HandleModifiedItemClick` hook (0.3).
 
@@ -49,5 +58,6 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 - (none)
 
 ## Recent history (newest first)
+- 2026-10-10 0.2.0: loot rain, settings page with Test buttons, popup queue, combat deferral.
 - 2026-10-09 0.1.1: first loot popups (model or card), tier sounds, test/check commands.
 - 2026-10-09 0.1.0: scaffolded with wow-addon-kit 0.4.0 (privacy guard), plan written and settled.

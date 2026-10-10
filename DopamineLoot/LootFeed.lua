@@ -73,28 +73,85 @@ function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
   if src == "pushed" and merchantOpen then src = "bought" end
   if self.settings.noPopup or self.settings.enabled == false or src == "bought" then return end
   ns.ItemData(link, count, src, function(d)
-    if (d.quality or 0) >= ns.MinQuality() then ns:ShowLoot(d) end
+    if (d.quality or 0) >= ns.MinQuality() then ns.Collect(d) end
   end)
+end
+
+---------------------------------------------------------------------------
+-- Bursts: loot that arrives together (one loot window, one turn-in) is collected for a moment
+-- (0.4 s after the last item, 2 s at most). 3+ items (setting) rain; fewer get popups. A big
+-- burst looted mid-fight waits and rains when combat ends (small ones pop up right away).
+---------------------------------------------------------------------------
+local RAIN_MIN, QUIET, MAX_WAIT = 3, 0.4, 2
+local burst, burstStart, gen = nil, 0, 0
+local afterCombat = {} -- big bursts looted mid-fight, rained together when combat ends
+
+function ns.RainMin() return ns.settings.rainMin or RAIN_MIN end
+
+local function Play(items)
+  if #items >= ns.RainMin() and not ns.settings.noRain then
+    ns:Rain(items)
+  else
+    for _, d in ipairs(items) do ns:ShowLoot(d) end
+  end
+end
+
+local function FlushBurst()
+  local items = burst
+  burst = nil
+  if not items then return end
+  if InCombatLockdown() and #items >= ns.RainMin() and not ns.settings.noRain then
+    for _, d in ipairs(items) do afterCombat[#afterCombat + 1] = d end
+    return
+  end
+  Play(items)
+end
+
+function ns:PLAYER_REGEN_ENABLED()
+  if #afterCombat == 0 then return end
+  local items = afterCombat
+  afterCombat = {}
+  C_Timer.After(0.5, function() Play(items) end)
+end
+ns.OnInit(function() ns:RegisterEvents("PLAYER_REGEN_ENABLED") end)
+
+function ns.Collect(d)
+  if ns.settings.noRain then return ns:ShowLoot(d) end -- nothing to collect for
+  if not burst then burst, burstStart = {}, GetTime() end
+  burst[#burst + 1] = d
+  gen = gen + 1
+  local my = gen
+  local wait = math.max(0, math.min(QUIET, burstStart + MAX_WAIT - GetTime()))
+  C_Timer.After(wait, function() if my == gen then FlushBurst() end end)
 end
 
 ---------------------------------------------------------------------------
 -- Commands
 ---------------------------------------------------------------------------
-local function OwnItems(quality)
-  local found = {}
-  local function Add(link)
-    if not link then return end
-    local _, _, q, _, _, _, _, _, equipLoc = GetInfo(link)
-    if q == quality then found[#found + 1] = { link = link, model = ns.MODEL_SLOTS[equipLoc or ""] } end
+-- Every item link in your bags and on you
+local function ForEachOwn(fn)
+  for slot = 1, 19 do
+    local link = GetInventoryItemLink("player", slot)
+    if link then fn(link) end
   end
-  for slot = 1, 19 do Add(GetInventoryItemLink("player", slot)) end
   local NumSlots = C_Container and C_Container.GetContainerNumSlots or _G.GetContainerNumSlots
   local ItemLink = C_Container and C_Container.GetContainerItemLink or _G.GetContainerItemLink
   if NumSlots and ItemLink then
     for bag = 0, 4 do
-      for slot = 1, NumSlots(bag) or 0 do Add(ItemLink(bag, slot)) end
+      for slot = 1, NumSlots(bag) or 0 do
+        local link = ItemLink(bag, slot)
+        if link then fn(link) end
+      end
     end
   end
+end
+
+local function OwnItems(quality)
+  local found = {}
+  ForEachOwn(function(link)
+    local _, _, q, _, _, _, _, _, equipLoc = GetInfo(link)
+    if q == quality then found[#found + 1] = { link = link, model = ns.MODEL_SLOTS[equipLoc or ""] } end
+  end)
   -- prefer things with a model, so the preview shows off
   local withModel = {}
   for _, f in ipairs(found) do if f.model then withModel[#withModel + 1] = f end end
@@ -104,7 +161,7 @@ end
 
 local function Preview(item, count)
   ns.ItemData(item, count, "loot", function(d)
-    d.test = true
+    d.test, d.push = true, true
     ns:ShowLoot(d)
   end)
 end
@@ -124,6 +181,41 @@ ns.AddCommand("test", "preview a popup: /dl test [uncommon|rare|epic|legendary|i
   Preview(ids[math.random(#ids)])
 end)
 
+-- /dl rain N: N items from your bags and gear (plus a blue, and a purple from 8 up, so you see the
+-- good stuff stay) rain down as if you'd looted them all at once
+ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]", function(arg)
+  local n = math.min(math.max(math.floor(tonumber(arg) or 8), 1), 60)
+  local own = {}
+  ForEachOwn(function(link) own[#own + 1] = link end)
+  local picks = {}
+  if n >= 4 then picks[#picks + 1] = TEST_IDS[3][math.random(#TEST_IDS[3])] end
+  if n >= 8 then picks[#picks + 1] = TEST_IDS[4][math.random(#TEST_IDS[4])] end
+  while #picks < n do picks[#picks + 1] = #own > 0 and own[math.random(#own)] or 2589 end -- Linen Cloth
+  local items, waiting, started = {}, #picks, false
+  local function Go()
+    if started then return end
+    started = true
+    if #items > 0 then ns:Rain(items) end
+  end
+  for _, it in ipairs(picks) do
+    ns.ItemData(it, 1, "loot", function(d)
+      d.test = true
+      items[#items + 1] = d
+      waiting = waiting - 1
+      if waiting == 0 then Go() end
+    end)
+  end
+  C_Timer.After(1.5, Go) -- don't wait forever for an item the client won't load
+end)
+
+-- How close the camera sits to item models in popups (smaller = bigger item)
+ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 1]", function(arg)
+  local z = tonumber(arg)
+  if z and z >= 0.3 and z <= 2 then ns.settings.modelZoom = z end
+  ns.Print("model zoom: " .. (ns.settings.modelZoom or 1) .. " (try /dl test epic to see it)")
+  ns:ShowLog()
+end)
+
 ns.AddCommand("model", "check how an item shows: /dl model <itemID>", function(arg)
   local id = tonumber(arg) or M.ItemID(arg)
   if not id then ns.Print("usage: /dl model <itemID>"); ns:ShowLog(); return end
@@ -133,7 +225,7 @@ ns.AddCommand("model", "check how an item shows: /dl model <itemID>", function(a
   end)
   ns.ItemData(id, 1, "loot", function(d)
     answered = true
-    d.test, d.forceModel = true, true
+    d.test, d.forceModel, d.push = true, true, true
     ns:ShowLoot(d, function(mode, fileID, why)
       ns.Print(("model check %s (%s): %s%s [%s]"):format(d.name, tostring(d.equipLoc), mode,
         fileID and (" file " .. fileID) or "", why))

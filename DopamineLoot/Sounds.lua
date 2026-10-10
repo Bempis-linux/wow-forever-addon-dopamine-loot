@@ -37,12 +37,27 @@ function ns:PlayTierSound(quality, force)
   end
 end
 
+-- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
+local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
+local BOUNCE = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" }
+TIERS.burst, TIERS.bounce = BURST, BOUNCE
+
+local function PlayFirst(slot, list)
+  if ns.settings.noSound then return end
+  if working[slot] and ns.PlayKit(working[slot]) then return end
+  for _, key in ipairs(list) do
+    if ns.PlayKit(key) then working[slot] = key; return end
+  end
+end
+function ns:PlayBurstSound() PlayFirst("burst", BURST) end
+function ns:PlayBounceSound() PlayFirst("bounce", BOUNCE) end
+
 -- /dl sounds: play every candidate one after another and log which exist (for picking defaults)
 ns.AddCommand("sounds", "play and check every loot sound", function()
   local list = {}
-  for q = 0, 5 do
-    for _, key in ipairs(TIERS[q]) do
-      if not list[key] then list[key] = true; list[#list + 1] = { q = q, key = key } end
+  for _, slot in ipairs({ 0, 1, 2, 3, 4, 5, "burst", "bounce" }) do
+    for _, key in ipairs(TIERS[slot]) do
+      if not list[key] then list[key] = true; list[#list + 1] = { q = slot, key = key } end
     end
   end
   ns:ShowLog()
@@ -51,7 +66,7 @@ ns.AddCommand("sounds", "play and check every loot sound", function()
     C_Timer.After((i - 1) * 1.5, function()
       local id = SOUNDKIT and SOUNDKIT[s.key]
       local played = id and ns.PlayKit(s.key)
-      ns.Print(("quality %d  %s (%s): %s"):format(s.q, s.key, tostring(id),
+      ns.Print(("%s  %s (%s): %s"):format(type(s.q) == "number" and ("quality " .. s.q) or s.q, s.key, tostring(id),
         not id and "not in SOUNDKIT" or played and "plays" or "will not play"))
     end)
   end
