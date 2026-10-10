@@ -54,6 +54,11 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 - Process: preflight → commit → push after each working increment; reviewer agent before big changes.
   The user tests in game and sends screenshots; give a short "to test" list and say `/reload` vs restart.
 - Answers: concise summaries.
+- **Every new `/dl` command also goes on the settings page** with meaningful controls (number fields
+  or drag sliders, Test buttons); visual settings drive a **live popup preview** on the page with a
+  quality and kind (weapon/armor/non-equippable) picker. Now a kit rule (house-style 0.5.0).
+- Popups: all four styles as options; C2 halo lens is the favorite. Weapons upright.
+- Rain ideas all accepted (plan "Rain ideas"); floor shadows low priority; Escape-to-skip a setting.
 
 ## Gotchas and environment notes
 - Bash tool collapses `\\` to `\`: write Lua with Write/Edit only.

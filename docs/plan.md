@@ -478,7 +478,7 @@ No existing addon named "Dopamine Loot" was found.
 |---|---|
 | **0.1** done | `CHAT_MSG_LOOT` self parsing -> a **single popup** with the rotating `PlayerModel:SetItem` model (card fallback), quality sound, quality threshold; `/dl test`, `/dl model`, `/dl check`, `/dl sounds`. Verified: SetItem works on Forever |
 | **0.2** done | (reordered at the user's request) **Loot rain (lite)** + **Settings page** with Test buttons and number fields; burst collector, popup queue, combat deferral, landing height, `/dl rain N`. Offline: `test_rain.lua` |
-| **0.3** | **Look & feel pass** (user request 2026-10-10): clean, good-looking, feels good to get an item. Popup redesign from the mockups (item only, weapons upright, highlight behind, no heavy box; concept picked with the user); rain polish (see "Rain ideas"); consistent quality colors, fonts and motion; sounds layered per tier. Settle with mockups before code |
+| **0.3** | **Look & feel pass** (user request 2026-10-10): clean, good-looking, feels good to get an item. **Popup styles, all selectable in Settings**: A Relic (item only on a soft glow), B Beam (light column + ring), C Halo lens (**C2**, the user's favorite: clear center, a ring in the quality color fading both ways like the banner bent round, thin bright rim, details beside it; likely default), D Banner (quality ribbon fading at both ends). Weapons upright (`/dl roll` experiment). **Live preview on the settings page**: a real popup drawn on the page that updates as controls move; pick its quality (poor..legendary) and kind (weapon / armor / non-equippable). Sliders (drag) for size, roll, duration, scale. Rain: see "Rain ideas" (picked) |
 | **0.4** | **Filters**: seen set (seed + NEW badge), ignore/always-show/whitelist/blacklist, sources, money threshold, instances-only; ilvl **upgrade badge** + upgrades-only filter; per-tier sound picker. Offline: `test_filters.lua`, `test_upgrade.lua` |
 | **0.5** | **Inspector**: recent loot list, Alt+Right-click hook, drag/zoom/pan, turntable, lighting presets, tooltip + typed description, mannequin "Try on", spinning card for non-model items, share to chat; minimap button |
 | **0.6** | **Chest show** (Vampire-Survivors feel): anticipation shake, coin fountain, slot-machine counter, gold burst, final reveal with beam and screen flourish, skip; original generated textures and pitch-stepped chimes (ffmpeg now installed); reduced-motion and no-flash switches |
@@ -486,16 +486,19 @@ No existing addon named "Dopamine Loot" was found.
 | **0.8** | **Smarter upgrades**: usability via `C_PlayerInfo.CanUseItem`/tooltip, per-class stat weights (editable), Pawn when present; "upgrade at level N" |
 | later | Dungeon recap show, screenshot mode, mail attachments, account-wide "never seen" view, sound packs, 3D props for non-model items, localization |
 
-### Rain ideas (draft for 0.3, to pick with the user)
+### Rain ideas (picked with the user 2026-10-10)
 
-- **Sprites**: rounded icon tiles with a thin quality rim and a soft shadow on the floor that shrinks as they rise; trails for Rare+ (a few fading ghost copies).
-- **Escalation**: launch cadence speeds up through the burst; the bounce tick climbs in pitch per item (needs our own chimes); a short screen-edge pulse when an Epic lands.
-- **Landing**: items pile instead of overlapping (simple side-by-side spreading on rest); a dust puff (small sprite burst) on the first bounce.
-- **Gathering**: when it settles, small stuff gets sucked toward the bag icon (bag-bar position) instead of only fading; the counter flies into the bag with it.
-- **Best item last**: a pause before the last (best) launch, a brighter arc, and it lands center screen before becoming its popup.
-- **Coins**: money looted in the burst rains as coin sprites with a coin-count roll-up.
-- **Control**: click a resting item to inspect it (0.5), Escape to skip; size and spray strength in Settings.
-
+In for 0.3 (in rough order):
+- **Best item last**: a pause before the best launch, a brighter arc, it lands center screen, then becomes its popup.
+- **Escalation**: launch cadence speeds up through the burst; the bounce tick climbs in pitch per item (our own
+  chimes via ffmpeg); a short screen-edge pulse when an Epic lands.
+- **Spacing + dust puff**: resting items spread side by side instead of overlapping; a small puff on the first bounce.
+- **Gathering**: when it settles, small stuff is pulled into the bag (backpack button) instead of only fading.
+- **Trails** for Rare+ (fading ghost copies).
+- **Coins**: money in the burst rains as coin sprites with a rolling total.
+- **Click to inspect** a resting item (needs the 0.5 inspector; until then it opens the popup), and **skip with
+  Escape**, which is a setting (on/off).
+Low priority (try, may drop): **floor shadows** under sprites (may look odd over UI).
 Test checklist for 0.1 (in game, after a full restart for the new addon):
 `/dump select(4, GetBuildInfo())` (16001); the global-string `/dump` above; loot a mob (single popup); loot
 a green; buy something from a vendor (source `pushed`); `/dl model 2489` plus a helm, a chest and the

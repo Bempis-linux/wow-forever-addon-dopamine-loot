@@ -53,5 +53,9 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
 - Inspector opens with **Alt+Right-click** (Baganator owns Alt+click), configurable.
 - 3+ shown items → loot rain; Rare+ or 6+ → full chest show (Vampire-Survivors feel); deferred in combat.
 - Seen set and loot history per character; settings account-wide. No login toast.
+- **Settings page parity** (kit house-style): every `/dl` command that changes a setting or runs a
+  test also has a control on the settings page (number field or drag slider, choice, Test button);
+  visual settings update a live preview on the page.
+- Popup styles A Relic / B Beam / C Halo lens (C2, user favorite) / D Banner are all options.
 - Presentation: original assets only (generated textures, synthesized chimes) or game sounds by ID;
   never copied art/audio. Models driven by hand in `OnUpdate`, set after `Show()`, no AnimationGroups.
