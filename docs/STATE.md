@@ -39,6 +39,13 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
   90; 270 if upside down). Number boxes were empty on first open of the Look page (OnShow didn't
   fire) → filled at creation. Halo was "a little ugly" (fat, harsh band) → thinner, softer band + crisp
   rim (closer to mockup C2); Beam's ring overlapped the name → ring above the name, light rises from it.
+- 0.3.2 verified (screenshots): weapons stand upright with pitch 90 and turn; Relic and Banner liked
+  ("very nice"); Beam and Halo "not super great" → mockups v2 approved → **0.3.3**: Beam v2 (Cone +
+  Disc + rising motes), Halo v2 (dark Lens + Halo + Sweep arc turning, item fitted inside via per-style
+  zoom 1.3, fading divider), every style: MORPHEUS title font (locale-safe), arrival flash and Rare+
+  spark burst (after the 0.3 s fade-in), item level only on gear (classID). Reviewer run, fixed.
+- Waiting on the user: Relic v2 / Banner v2 ideas (mockup shown 2026-10-10: relic = core glow + slow
+  light rays + floor shadow; banner = diamond emblem breaking the band, shine sweep, text inside band).
 
 ## Verified in game (by the user, 0.2.0 video 2026-10-10)
 - Rain works and the user likes the physics ("pretty good honestly"); Rare stays as a popup; "+N"
