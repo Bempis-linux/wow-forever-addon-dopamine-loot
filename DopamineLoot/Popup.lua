@@ -112,6 +112,7 @@ local function Pop(item, onModel)
   p:EnableMouse(true)
   p:SetFrameStrata(item.test and "DIALOG" or "HIGH") -- previews show above the settings window
   p:Show()
+  p.fxDelay = IN_T -- the flash and sparks wait for the fade-in
   p:SetItem(item) -- after Show: the model needs a visible frame
   ns:PlayTierSound(item.quality or 1)
   driver:SetScript("OnUpdate", Update)

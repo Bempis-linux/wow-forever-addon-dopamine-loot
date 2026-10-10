@@ -37,7 +37,7 @@ function ns.ItemData(item, count, src, fn)
     if type(item) == "string" and item:find("|Hitem:", 1, true) then link = item end -- keep the exact link
     return {
       link = link, id = M.ItemID(link), count = count or 1, quality = quality, name = name, icon = icon,
-      equipLoc = equipLoc, ilvl = ilvl, typeText = TypeText(equipLoc, itemType, subType, classID), src = src,
+      equipLoc = equipLoc, ilvl = ilvl, typeText = TypeText(equipLoc, itemType, subType, classID), src = src, classID = classID,
     }
   end
   local d = Build()

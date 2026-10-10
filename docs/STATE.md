@@ -23,7 +23,7 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 
 ## 0.3.0 (pushed, not yet seen in game)
 - `View.lua`: shared popup view, 4 styles (relic, beam, halo = default, banner) on generated art
-  (`tools/gen_textures.lua` → `Media/Glow|Halo|Ring|Beam|Banner.tga`, white tinted by quality);
+  (`tools/gen_textures.lua` → `Media/*.tga`, white tinted by quality);
   weapons stood up with `Model:SetRoll` ("Weapon tilt", default 90, unverified in game); per-style
   click areas (SetHitRectInsets); popups fit-limited (2 for tall styles).
 - `Look.lua`: Options > AddOns > Dopamine Loot > **Popup look** (`/dl look`): style choice, sliders
