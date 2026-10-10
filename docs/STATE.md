@@ -13,8 +13,7 @@ _Last checkpoint: 2026-10-10, after 0.3.5 (db3ebb4). Read this first in a new se
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
 - In progress: none.
 - **Next up** (suggested order):
-  1. **Real-play verification** before the beta closes (~2026-10-21; launch 2026-11-04; see "Not
-     yet verified"; top risk).
+  1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
   2. Relic v2 / Banner v2 if the user wants them (waiting on the user).
   3. Per-tier arrival sounds, then the picked rain ideas (plan "Rain ideas": best item last,
      escalation with rising-pitch chimes via ffmpeg, spacing + dust puff, gathering into the bag,
@@ -55,6 +54,8 @@ _Last checkpoint: 2026-10-10, after 0.3.5 (db3ebb4). Read this first in a new se
   tests in game and sends screenshots or **videos**; give a short "to test" list and say `/reload`
   vs full restart (new files or changed textures = restart).
 - Answers: concise summaries.
+- **No rush and no deadlines**: the user is not racing to finish. Never suggest changing plans or
+  priorities because of a date (beta end, launch); order work by what makes the addon better.
 
 ## Gotchas and environment notes
 - Bash tool collapses `\\` to `\`: write Lua with Write/Edit only (sed is fine for plain text).
