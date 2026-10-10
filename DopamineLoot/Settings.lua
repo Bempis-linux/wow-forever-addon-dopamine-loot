@@ -105,6 +105,7 @@ local function NumberBox(parent, width, get, set, min, max, tip, fmt)
   Tip(e, tip)
   refreshers[#refreshers + 1] = Show
   e.Show_ = Show
+  if ns.settings then Show() end -- filled in now too: OnShow may not fire for a page shown on its first open
   return e
 end
 
@@ -143,7 +144,9 @@ local function Slider(parent, label, width, min, max, step, get, set, tip, fmt, 
   end, min, max, tip, fmt)
   box:SetPoint("LEFT", s, "RIGHT", 10, 0)
   Tip(s, tip)
-  refreshers[#refreshers + 1] = function() quiet = true; s:SetValue(get()); quiet = false end
+  local function Sync() quiet = true; s:SetValue(get()); quiet = false end
+  refreshers[#refreshers + 1] = Sync
+  if ns.settings then Sync() end
   s.label = text
   return s, text
 end

@@ -48,10 +48,10 @@ end))
 
 Write("Halo", Fill(Canvas(256, 256), function(u, v)
   local r = R(u, v)
-  local band = 0.75 * Bump(r, 0.74, 0.14)  -- the ring, fading inward and outward
-  local rim = 0.95 * Bump(r, 0.86, 0.012)  -- thin bright rim
-  local inner = 0.35 * Bump(r, 0.6, 0.008) -- a fainter inner line
-  return r > 0.98 and 0 or band + rim + inner
+  local band = 0.42 * Bump(r, 0.76, 0.1)    -- the ring, fading inward and outward (soft, see-through)
+  local rim = 0.85 * Bump(r, 0.86, 0.008)   -- thin bright rim
+  local haze = 0.12 * Bump(r, 0.86, 0.16)   -- a faint haze around the rim
+  return r > 0.99 and 0 or band + rim + haze
 end))
 
 Write("Ring", Fill(Canvas(128, 128), function(u, v)

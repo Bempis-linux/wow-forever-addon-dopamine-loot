@@ -218,9 +218,9 @@ ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 0.7]"
 end)
 
 -- Weapon tilt (also a slider on the Popup look page)
-ns.AddCommand("roll", "stand weapons up: /dl roll [0-180 degrees, default 90]", function(arg)
+ns.AddCommand("roll", "stand weapons up: /dl roll [0-355 degrees, default 90]", function(arg)
   local d = tonumber(arg)
-  if d then ns.settings.modelRoll = math.min(math.max(d, 0), 180) end
+  if d then ns.settings.weaponTilt = math.floor(d) % 360 end
   ns.LookRefresh()
   ns.Print("weapon tilt: " .. ns.WeaponTilt() .. " degrees (try /dl test epic)")
   ns:ShowLog()

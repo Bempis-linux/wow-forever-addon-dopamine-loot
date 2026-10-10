@@ -91,8 +91,8 @@ local function Create()
     "How big popups are on screen (0.6 to 1.6, default 1).", "size")
   Add("3D zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
     "Camera distance for item models: smaller is closer and bigger (0.3 to 2, default 0.7). Also /dl zoom.", "frame")
-  Add("Weapon tilt", 0, 180, 5, ns.WeaponTilt, function(v) ns.settings.modelRoll = v end,
-    "Turns weapons so they stand up (0 = as the game draws them, 90 = upright; default 90). Also /dl roll.",
+  Add("Weapon tilt", 0, 355, 5, ns.WeaponTilt, function(v) ns.settings.weaponTilt = v end,
+    "Turns weapons so they stand up (0 = as the game draws them, 90 = upright, 270 if it stands on its head; default 90). Also /dl roll.",
     "frame", function(v) return tostring(math.floor(v + 0.5)) end)
   Add("Spin speed", 0, 3, 0.1, ns.SpinSpeed, function(v) ns.settings.spinSpeed = v end,
     "How fast the item turns (0 = still, default 0.9).", "none")

@@ -34,6 +34,11 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 - 0.3.1: first in-game run spammed `View.lua:274 spin0 nil` (preview box OnUpdate ticked before its
   async item loaded); `Tick` now returns until an item is set. Lesson: OnUpdate on a view must guard
   for "nothing set yet".
+- 0.3.1 screenshots (user): all four styles draw; preview works; `SetRoll` spins a weapon around
+  its own length (not upright) → 0.3.2 uses `Model:SetPitch` (setting `weaponTilt`, 0-355, default
+  90; 270 if upside down). Number boxes were empty on first open of the Look page (OnShow didn't
+  fire) → filled at creation. Halo was "a little ugly" (fat, harsh band) → thinner, softer band + crisp
+  rim (closer to mockup C2); Beam's ring overlapped the name → ring above the name, light rises from it.
 
 ## Verified in game (by the user, 0.2.0 video 2026-10-10)
 - Rain works and the user likes the physics ("pretty good honestly"); Rare stays as a popup; "+N"

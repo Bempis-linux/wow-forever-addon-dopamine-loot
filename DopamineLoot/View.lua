@@ -58,7 +58,7 @@ function ns.PopupStyle()
 end
 function ns.PopupScale() return ns.settings.popupScale or 1 end
 function ns.ModelZoom() return ns.settings.modelZoom or 0.7 end
-function ns.WeaponTilt() return ns.settings.modelRoll or 90 end
+function ns.WeaponTilt() return ns.settings.weaponTilt or 90 end
 function ns.SpinSpeed() return ns.settings.spinSpeed or 0.9 end
 function ns.HoldTime(q) -- seconds on screen: the setting, a little longer for better items
   return (ns.settings.popupHold or 5) + math.max(0, math.min(q or 2, 5) - 2) * 1
@@ -135,14 +135,15 @@ function ns.CreateView(f)
         self.glow:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
         self.glow:Show()
       else
-        self.beam:SetSize(110, L.h)
-        self.beam:SetPoint("BOTTOM", self.stage, "BOTTOM", 0, -6)
-        self.beam:Show()
-        self.ring:SetSize(110, 26)
-        self.ring:SetPoint("CENTER", self.stage, "BOTTOM", 0, 2)
+        -- the light rises out of the ring the item hovers over; both sit above the name
+        self.ring:SetSize(96, 20)
+        self.ring:SetPoint("CENTER", self.stage, "BOTTOM", 0, 16)
         self.ring:Show()
+        self.beam:SetSize(96, L.h - 40)
+        self.beam:SetPoint("BOTTOM", self.ring, "CENTER", 0, 0)
+        self.beam:Show()
       end
-      self.name:SetPoint("TOP", self.stage, "BOTTOM", 0, -6)
+      self.name:SetPoint("TOP", self.stage, "BOTTOM", 0, -4)
       self.name:SetWidth(L.w - 20)
       self.name:SetJustifyH("CENTER")
       self.info:SetPoint("TOP", self.name, "BOTTOM", 0, -3)
@@ -240,9 +241,9 @@ function ns.CreateView(f)
     local m = self.model
     m:SetPosition(0, 0, 0)
     if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom()) end
-    if m.SetRoll then
+    if m.SetPitch then -- pitch tips the long axis up (roll spun it around its own length)
       local upright = self.item and UPRIGHT[self.item.equipLoc or ""]
-      m:SetRoll(upright and math.rad(ns.WeaponTilt()) or 0)
+      m:SetPitch(upright and math.rad(ns.WeaponTilt()) or 0)
     end
   end
 
