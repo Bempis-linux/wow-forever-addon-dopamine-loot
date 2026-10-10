@@ -14,8 +14,12 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
   check all, rain on/off, "rain from N", stay quality, test rain with a number field + Test, debug,
   log, check client. Commands added: `/dl rain [n]`, `/dl zoom`, `/dl settings`. Two reviewer runs; fixed.
 - In progress: none. Waiting on the user's 0.2 test.
-- **Next up**: tune rain/popups from the test; then the plan's 0.2 work (filters, seen set/NEW,
-  upgrade badge), 0.3 inspector, then design/look pass (the user wants functionality first).
+- **Next up**: 0.3 look & feel pass: pick a popup concept (mockups A Relic, B Beam, C Inspect lens,
+  D Banner shown in chat 2026-10-10) and rain ideas (plan "Rain ideas"); then 0.4 filters (seen set/NEW,
+  upgrade badge), 0.5 inspector, 0.6 chest show. 0.2.2 adds `/dl roll <deg>` to test upright weapons
+  (`Model:SetRoll`) for the popup redesign; result not known yet.
+- User feedback 2026-10-10: popup card frame "doesn't look super great"; wants just the item (weapons
+  vertical) with a highlight behind; rain is "an extremely good start"; landing height now a setting.
 
 ## Verified in game (by the user, 0.2.0 video 2026-10-10)
 - Rain works and the user likes the physics ("pretty good honestly"); Rare stays as a popup; "+N"
