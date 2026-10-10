@@ -49,6 +49,9 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 
 ## Gotchas and environment notes
 - Bash tool collapses `\\` to `\`: write Lua with Write/Edit only.
+- Kit plugin is installed twice (user scope + Loredex project scope). After pushing a kit change:
+  `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis --scope user`
+  (and the project-scope update from the Loredex folder). The CLI lives under %APPDATA%\Claude\claude-code.
 - Game must be closed before editing anything under the client's `WTF` folder.
 - 3D models: set after `Show()`; no AnimationGroups on frames holding models (drive by hand).
 - Baganator is installed and uses Alt+click; Questie, ATT, HuntersFieldGuide also installed (see plan).
