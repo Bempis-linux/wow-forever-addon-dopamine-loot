@@ -272,8 +272,9 @@ function ns.CreateView(f)
 
   -- One frame of animation: the item turns, the light breathes
   function f:Tick(dt)
+    if not self.item then return end -- the preview ticks before its item has loaded
     self.age = (self.age or 0) + dt
-    local angle = self.spin0 + self.age * ns.SpinSpeed()
+    local angle = (self.spin0 or 0) + self.age * ns.SpinSpeed()
     if self.mode == "model" or self.mode == "pending" then
       self.model:SetFacing(angle)
     else
