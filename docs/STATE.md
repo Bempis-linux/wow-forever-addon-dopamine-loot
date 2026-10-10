@@ -1,20 +1,29 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-10, after 0.3.5 (db3ebb4). Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-10 (end of day), after 0.3.5 (db3ebb4) + paused 0.3.6 work. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
 ## Where things stand
-- **0.3.5 pushed**, working tree clean. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
+- **0.3.5 pushed**; uncommitted work in the tree (see "In progress"). Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
   (plan roadmap row 0.3 lists what's done and what's left).
 - Done in 0.3: four popup styles (Relic, Beam v2, Halo lens v2 = default, Banner) on generated art;
   weapons upright via `Model:SetPitch` (setting `weaponTilt`, default 90); MORPHEUS title font;
   arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic rays + 14 sparks +
   3 orbiting; Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
-- In progress: none.
+- **In progress (uncommitted, paused 2026-10-10 at the user's request): Relic v2 + Banner v2 +
+  Relic as the default style.** The user picked both v2 versions and "relic as default".
+  - Done in the working tree: `ns.PopupStyle()` falls back to "relic"; new art Diamond.tga,
+    DiamondEdge.tga, Shine.tga (tools/gen_textures.lua); View.lua: relicRays (Rays turning slowly),
+    core glow, floor shadow; banner emblem (Diamond fill + edge) at the stage, shineClip frame with a
+    Shine streak sweeping the band every 5 s, badges on the info line inside the band, banner stage
+    y -6 to sit on the band; style tips updated; .toc says 0.3.6.
+  - Left: preflight (never ran on these edits), check the new art with ffmpeg, a reviewer pass,
+    commit + push 0.3.6, then the user tests (`/dl look`, full restart for new textures). Saved
+    settings keep the style already picked; only fresh settings get Relic by default.
 - **Next up** (suggested order):
   1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
-  2. Relic v2 / Banner v2 if the user wants them (waiting on the user).
+  2. Finish the paused Relic v2 / Banner v2 work (see "In progress").
   3. Per-tier arrival sounds, then the picked rain ideas (plan "Rain ideas": best item last,
      escalation with rising-pitch chimes via ffmpeg, spacing + dust puff, gathering into the bag,
      trails, coins, Escape-to-skip setting; floor shadows low priority).
@@ -77,9 +86,7 @@ _Last checkpoint: 2026-10-10, after 0.3.5 (db3ebb4). Read this first in a new se
 - Baganator owns Alt+click; Questie, ATT, HuntersFieldGuide, Details are installed.
 
 ## Open questions / waiting on the user
-- Relic v2 (slow light rays, floor shadow) and Banner v2 (diamond emblem, shine sweep, text in the
-  band): wanted, or keep as is?
-- Default style: Halo lens is the default, but Relic got the warmest reaction. Switch the default?
+- (none: Relic is the default, both v2 versions approved)
 
 ## Recent history (newest first)
 - 2026-10-10 0.3.5: arrivals by rarity in every style (Wave, Rays art).
