@@ -6,8 +6,8 @@
 --   beam    a cone of light rising from a glowing disc, sparks drifting up through it
 --   halo    a dark lens inside a ring in the quality color, a bright arc sweeping round, details beside
 --   banner  a ribbon in the quality color fading at both ends, the item standing over it
--- Every style: the name in the game's title font, a flash of light as it appears, and a burst of
--- sparks for Rare and better.
+-- Every style: the name in the game's title font, a flash of light as it appears, and an arrival by
+-- rarity (Rare a spark ring; Epic light rays and orbiting sparks; Legendary shockwaves and embers).
 -- Models: set only after the frame is shown, and again when it's shown after being hidden (the
 -- client drops them); never inside an animation group (moved and faded by hand).
 local _, ns = ...
@@ -21,8 +21,13 @@ local TITLE_FONT = (LOCALE == "ruRU" and "Fonts\\MORPHEUS_CYR.TTF")
   or ((LOCALE == "koKR" or LOCALE == "zhCN" or LOCALE == "zhTW") and nil)
   or "Fonts\\MORPHEUS.TTF"
 local CARD = 56
-local MOTES = 8
-local FLASH_T, BURST_T = 0.45, 0.8
+local RISE, SPARKS, ORBIT, EMBERS = 8, 18, 3, 6 -- beam's rising motes; arrival sparks; epic orbit; legendary embers
+local FLASH_T, BURST_T, RAYS_T, WAVE_T, FOUNTAIN_T = 0.45, 0.8, 0.7, 0.9, 1.5
+local GRAVITY = -420 -- legendary ember fountain, px/s^2
+
+-- Arrival by rarity (every style): Rare a ring of sparks; Epic light rays, a bigger burst, then
+-- sparks circling the item; Legendary shockwaves, a fountain of embers and embers drifting up
+local function Tier(q) return q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or nil end
 
 ns.STYLES = {
   { key = "relic", label = "Relic", tip = "Just the item standing on a soft glow, the name below it. No box." },
@@ -130,9 +135,20 @@ function ns.CreateView(f)
   f.fx = CreateFrame("Frame", nil, f)
   f.fx:SetAllPoints()
   f.fx:SetFrameLevel(f.stage:GetFrameLevel() + 5)
-  f.flash = Tex(f.fx, "ARTWORK", MEDIA .. "Glow", "ADD") -- under the text (OVERLAY)
-  f.motes = {}
-  for i = 1, MOTES do f.motes[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Mote", "ADD") end
+  -- (all in ARTWORK: under the text, which is OVERLAY)
+  f.rays = Tex(f.fx, "ARTWORK", MEDIA .. "Rays", "ADD", -1)
+  f.flash = Tex(f.fx, "ARTWORK", MEDIA .. "Glow", "ADD")
+  f.waves = { Tex(f.fx, "ARTWORK", MEDIA .. "Wave", "ADD"), Tex(f.fx, "ARTWORK", MEDIA .. "Wave", "ADD") }
+  local function Motes(n)
+    local list = {}
+    for i = 1, n do list[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Mote", "ADD", 1) end
+    return list
+  end
+  f.rise, f.sparks, f.orbit, f.embers = Motes(RISE), Motes(SPARKS), Motes(ORBIT), Motes(EMBERS)
+  f.fxAll = { f.rays, f.flash, f.waves[1], f.waves[2] }
+  for _, list in ipairs({ f.rise, f.sparks, f.orbit, f.embers }) do
+    for _, m in ipairs(list) do f.fxAll[#f.fxAll + 1] = m end
+  end
 
   f.name = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   f.info = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -149,11 +165,9 @@ function ns.CreateView(f)
     self:SetSize(L.w, L.h)
     self:SetHitRectInsets(L.hit[1], L.hit[2], L.hit[3], L.hit[4])
     for _, t in ipairs(self.art) do t:Hide(); t:ClearAllPoints() end
-    self.motesShown = style == "beam" -- beam's motes rise all the time; others only burst
-    for i, m in ipairs(self.motes) do
-      local s = style == "beam" and 5 + (i % 3) or 7
-      m:SetSize(s, s)
-      m:ClearAllPoints()
+    for _, t in ipairs(self.fxAll) do t:Hide(); t:ClearAllPoints() end
+    for i, m in ipairs(self.rise) do -- beam's motes rise through the light all the time
+      m:SetSize(5 + (i % 3), 5 + (i % 3))
       m:SetShown(style == "beam")
     end
     self.fx:SetFrameLevel(self.stage:GetFrameLevel() + 5)
@@ -165,8 +179,7 @@ function ns.CreateView(f)
     else
       self.stage:SetPoint("CENTER", self, "CENTER", sx, sy)
     end
-    self.flash:ClearAllPoints()
-    self.flash:SetPoint("CENTER", self.stage, "CENTER")
+    for _, t in ipairs({ self.flash, self.rays, self.waves[1], self.waves[2] }) do t:SetPoint("CENTER", self.stage, "CENTER") end
     if TITLE_FONT then self.name:SetFont(TITLE_FONT, L.font, "") end
     local face = self.name:GetFont()
     if not (TITLE_FONT and face and face:lower():find("morpheus")) then self.name:SetFontObject("GameFontNormalLarge") end
@@ -251,7 +264,27 @@ function ns.CreateView(f)
       self.line:SetVertexColor(r, g, b, 0.6)
     end
     self.flash:SetVertexColor(math.min(1, r + 0.4), math.min(1, g + 0.4), math.min(1, b + 0.4), 1)
-    for _, m in ipairs(self.motes) do m:SetVertexColor(math.min(1, r + 0.5), math.min(1, g + 0.5), math.min(1, b + 0.5), 1) end
+    local lr, lg, lb = math.min(1, r + 0.5), math.min(1, g + 0.5), math.min(1, b + 0.5) -- lighter tint
+    for _, t in ipairs(self.fxAll) do
+      if t ~= self.flash then t:SetVertexColor(lr, lg, lb, 1) end
+    end
+    self.waves[1]:SetVertexColor(r, g, b, 1)
+    -- this arrival's sparks: a ring (rare, epic) or a fountain thrown up at random (legendary)
+    self.tier = Tier(q)
+    self.arrived = false
+    local n = self.tier == "rare" and 8 or self.tier == "epic" and 14 or SPARKS
+    self.sparkCount = n
+    for i, m in ipairs(self.sparks) do
+      if self.tier == "legendary" then
+        m.vx, m.vy = (math.random() - 0.5) * 220, 180 + math.random() * 160
+      else
+        m.ang = i / n * 2 * math.pi + 0.3 -- spread over the sparks this tier shows: a full ring
+      end
+      local s = self.tier == "legendary" and 4 + (i % 4) or 7
+      m:SetSize(s, s)
+    end
+    for i, m in ipairs(self.embers) do m.phase = i / EMBERS; m:SetSize(4 + (i % 3), 4 + (i % 3)) end
+    for _, m in ipairs(self.orbit) do m:SetSize(6, 6) end
     self.glowBase = q >= 4 and 0.9 or q >= 3 and 0.75 or 0.6
     self.card.edge:SetVertexColor(r, g, b, 1)
     self.card.icon:SetTexture(item.icon or QUESTION)
@@ -361,32 +394,96 @@ function ns.CreateView(f)
       self.flash:Hide()
     end
 
-    -- sparks: beam style keeps them rising through the light; Rare+ in other styles get a burst
+    -- beam style: motes rise through the light all the time
     if self.style == "beam" then
-      for i, m in ipairs(self.motes) do
-        local t = (age * 0.35 + i / MOTES) % 1
+      for i, m in ipairs(self.rise) do
+        local t = (age * 0.35 + i / RISE) % 1
         local x = math.sin(i * 2.7 + age * 0.8) * 30 * (1 - t * 0.6)
         m:SetPoint("CENTER", self.stage, "BOTTOM", x, 12 + t * 150)
         m:SetAlpha(math.sin(math.pi * t) * 0.9)
       end
-    elseif self.q >= 3 and fx >= 0 and fx < BURST_T then
-      local a = fx / BURST_T
-      local dist = (40 + self.L.stage[3] * 0.5) * (1 - (1 - a) * (1 - a))
-      for i, m in ipairs(self.motes) do
-        local ang = i / MOTES * 2 * math.pi + 0.4
-        m:SetPoint("CENTER", self.stage, "BOTTOM", math.cos(ang) * dist, self.L.stage[4] / 2 + math.sin(ang) * dist)
-        m:SetAlpha(1 - a)
-        if not self.motesShown then m:Show() end
-      end
-      self.motesShown = true
-    elseif self.motesShown and self.style ~= "beam" then
-      for _, m in ipairs(self.motes) do m:Hide() end
-      self.motesShown = false
     end
+    if self.tier and fx >= 0 then self:Arrival(fx) end
 
     if self.mode == "pending" then
       self.pendingAge = (self.pendingAge or 0) + dt
       if self.pendingAge > 1 then self:CheckModel("timeout") end
+    end
+  end
+
+  -- The arrival by rarity; fx = seconds since the popup finished fading in
+  function f:Arrival(fx)
+    local tier, sparks = self.tier, self.sparks
+    local cy = self.L.stage[4] / 2 -- offsets below are from the stage's bottom: this is its middle
+    local reach = 40 + self.L.stage[3] * 0.5
+    if not self.arrived then -- first frame: show what this tier uses
+      self.arrived = true
+      for i, m in ipairs(sparks) do m:SetShown(i <= self.sparkCount) end
+      self.rays:SetShown(tier == "epic")
+      self.waves[1]:SetShown(tier == "legendary")
+      self.waves[2]:SetShown(tier == "legendary")
+      for _, m in ipairs(self.orbit) do m:SetShown(tier == "epic") end
+      for _, m in ipairs(self.embers) do m:SetShown(tier == "legendary") end
+    end
+
+    -- the burst (rare, epic: a ring flying out; legendary: a fountain that rises and falls back)
+    local burstT = tier == "legendary" and FOUNTAIN_T or BURST_T
+    if fx < burstT then
+      local a = fx / burstT
+      for i = 1, self.sparkCount do
+        local m = sparks[i]
+        if tier == "legendary" then
+          m:SetPoint("CENTER", self.stage, "BOTTOM", m.vx * fx, cy + m.vy * fx + 0.5 * GRAVITY * fx * fx)
+        else
+          local dist = reach * (tier == "epic" and 1.25 or 1) * (1 - (1 - a) * (1 - a))
+          m:SetPoint("CENTER", self.stage, "BOTTOM", math.cos(m.ang) * dist, cy + math.sin(m.ang) * dist)
+        end
+        m:SetAlpha(1 - a * a)
+      end
+    elseif sparks[1]:IsShown() then
+      for _, m in ipairs(sparks) do m:Hide() end
+    end
+
+    if tier == "epic" then
+      -- light rays flare and turn a little, then fade
+      if fx < RAYS_T then
+        local a = fx / RAYS_T
+        local size = 140 + 120 * a
+        self.rays:SetSize(size, size)
+        self.rays:SetRotation(a * 0.6)
+        self.rays:SetAlpha(math.sin(math.pi * a) * 0.9)
+      elseif self.rays:IsShown() then
+        self.rays:Hide()
+      end
+      -- three sparks circle the item for as long as it's on screen
+      local radius = self.L.stage[3] * 0.48
+      local fade = math.min(1, math.max(0, (fx - 0.3) / 0.4))
+      for i, m in ipairs(self.orbit) do
+        local ang = fx * 2.2 + i / ORBIT * 2 * math.pi
+        m:SetPoint("CENTER", self.stage, "BOTTOM", math.cos(ang) * radius, cy + math.sin(ang) * radius * 0.45)
+        m:SetAlpha(fade * (0.6 - 0.4 * math.sin(ang))) -- dimmer on the far (upper) side
+      end
+    elseif tier == "legendary" then
+      -- two shockwaves ripple out
+      for k, w in ipairs(self.waves) do
+        local t = (fx - (k - 1) * 0.22) / WAVE_T
+        if t >= 0 and t < 1 then
+          local size = 40 + 300 * t
+          w:SetSize(size, size)
+          w:SetAlpha((1 - t) * 0.95)
+        elseif t < 0 then
+          w:SetAlpha(0) -- the second one waits a moment
+        elseif w:IsShown() then
+          w:Hide()
+        end
+      end
+      -- embers drift up for as long as it stays
+      for i, m in ipairs(self.embers) do
+        local t = (fx * 0.3 + m.phase) % 1
+        local x = math.sin(i * 1.9 + fx * 0.7) * 34
+        m:SetPoint("CENTER", self.stage, "BOTTOM", x, 6 + t * (self.L.stage[4] + 40))
+        m:SetAlpha(math.sin(math.pi * t) * 0.85 * math.min(1, fx / 0.6)) -- fade in after the shockwave
+      end
     end
   end
 

@@ -44,6 +44,11 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
   Disc + rising motes), Halo v2 (dark Lens + Halo + Sweep arc turning, item fitted inside via per-style
   zoom 1.3, fading divider), every style: MORPHEUS title font (locale-safe), arrival flash and Rare+
   spark burst (after the 0.3 s fade-in), item level only on gear (classID). Reviewer run, fixed.
+- 0.3.3 screenshots: Relic "looks really good", flash and sparks liked; Beam had a hard line at the
+  bottom → 0.3.4 cone fades in at its foot, bigger disc. User: rarity arrivals should apply to all
+  styles → **0.3.5**: `f:Arrival` per tier in every style (Rare 8-spark ring; Epic Rays flare + 14
+  sparks + 3 orbiting; Legendary 2 Wave shockwaves + 18-spark gravity fountain + rising embers);
+  beam's rising motes separate. New art Wave.tga, Rays.tga. Reviewer run, fixed.
 - Waiting on the user: Relic v2 / Banner v2 ideas (mockup shown 2026-10-10: relic = core glow + slow
   light rays + floor shadow; banner = diamond emblem breaking the band, shine sweep, text inside band).
 

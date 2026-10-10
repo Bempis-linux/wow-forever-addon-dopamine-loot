@@ -8,6 +8,8 @@
 --   Cone, Disc   beam v2: a light cone and the glowing floor disc
 --   Mote      a small soft spark (rising motes, sparkle bursts)
 --   Lens, Sweep  halo v2: the dark lens inside the ring and the bright arc that sweeps round it
+--   Wave      a thin glowing ring that expands (legendary shockwave)
+--   Rays      soft light spokes from the center (epic arrival)
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
 
@@ -101,4 +103,17 @@ Write("Banner", Fill(Canvas(256, 64), function(u, v)
   local body = 0.8 * (v > 0.12 and v < 0.88 and 1 or 0)
   local lines = Bump(v, 0.1, 0.025) + Bump(v, 0.9, 0.025)
   return ends * (body + lines)
+end))
+
+Write("Wave", Fill(Canvas(128, 128), function(u, v)
+  local r = R(u, v)
+  return r >= 1 and 0 or Bump(r, 0.88, 0.03) + 0.35 * Bump(r, 0.85, 0.1)
+end))
+
+Write("Rays", Fill(Canvas(256, 256), function(u, v)
+  local r = R(u, v)
+  if r >= 1 then return 0 end
+  local ang = math.atan(u - 0.5, v - 0.5)
+  local spokes = math.max(0, math.cos(6 * ang)) ^ 10 + 0.5 * math.max(0, math.cos(6 * ang + math.pi)) ^ 16
+  return spokes * (1 - r) ^ 0.9 * math.min(1, r / 0.12)
 end))
