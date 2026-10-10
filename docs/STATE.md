@@ -1,114 +1,90 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a new session (the kit's
-`session-resume` skill does), then CLAUDE.md and `docs/plan.md`._
+_Last checkpoint: 2026-10-10, after 0.3.5 (db3ebb4). Read this first in a new session (the kit's
+`session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
 ## Where things stand
-- **0.2.0** pushed (the user asked for rain + a settings window before filters, so the roadmap's
-  "rain lite" moved up): `Rain.lua` (pure physics `ns.RainCore` + sprite pool; worst first, best last;
-  Rare+ stays as popups; merges a new burst into one in flight; scales with UI height; substeps at
-  low fps; `tools/test_rain.lua`), burst collector in `LootFeed.lua` (0.4 s quiet / 2 s max; 3+ →
-  rain; big bursts in combat wait for PLAYER_REGEN_ENABLED), popup waiting queue (max 3 on screen;
-  better items and previews push the oldest out), `Settings.lua` (Options > AddOns; `/dl` opens it):
-  popups on/off, min quality with a Test per quality, 3D size number + Test, sound on/off + channel +
-  check all, rain on/off, "rain from N", stay quality, test rain with a number field + Test, debug,
-  log, check client. Commands added: `/dl rain [n]`, `/dl zoom`, `/dl settings`. Two reviewer runs; fixed.
-- In progress: none. Waiting on the user's 0.2 test.
-- **Next up**: 0.3 look & feel pass: pick a popup concept (mockups A Relic, B Beam, C Inspect lens,
-  D Banner shown in chat 2026-10-10) and rain ideas (plan "Rain ideas"); then 0.4 filters (seen set/NEW,
-  upgrade badge), 0.5 inspector, 0.6 chest show. 0.2.2 adds `/dl roll <deg>` to test upright weapons
-  (`Model:SetRoll`) for the popup redesign; result not known yet.
-- User feedback 2026-10-10: popup card frame "doesn't look super great"; wants just the item (weapons
-  vertical) with a highlight behind; rain is "an extremely good start"; landing height now a setting.
+- **0.3.5 pushed**, working tree clean. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
+  (plan roadmap row 0.3 lists what's done and what's left).
+- Done in 0.3: four popup styles (Relic, Beam v2, Halo lens v2 = default, Banner) on generated art;
+  weapons upright via `Model:SetPitch` (setting `weaponTilt`, default 90); MORPHEUS title font;
+  arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic rays + 14 sparks +
+  3 orbiting; Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
+  with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
+- In progress: none.
+- **Next up** (suggested order):
+  1. **Real-play verification** before the beta closes (see "Not yet verified"; top risk).
+  2. Relic v2 / Banner v2 if the user wants them (waiting on the user).
+  3. Per-tier arrival sounds, then the picked rain ideas (plan "Rain ideas": best item last,
+     escalation with rising-pitch chimes via ffmpeg, spacing + dust puff, gathering into the bag,
+     trails, coins, Escape-to-skip setting; floor shadows low priority).
+  4. 0.4 filters (seen set/NEW, upgrade badge), 0.5 inspector (Alt+Right-click), 0.6 chest show.
 
-## 0.3.0 (pushed, not yet seen in game)
-- `View.lua`: shared popup view, 4 styles (relic, beam, halo = default, banner) on generated art
-  (`tools/gen_textures.lua` → `Media/*.tga`, white tinted by quality);
-  weapons stood up with `Model:SetRoll` ("Weapon tilt", default 90, unverified in game); per-style
-  click areas (SetHitRectInsets); popups fit-limited (2 for tall styles).
-- `Look.lua`: Options > AddOns > Dopamine Loot > **Popup look** (`/dl look`): style choice, sliders
-  (size, 3D zoom, weapon tilt, spin speed, time on screen) with number fields, live preview box with
-  quality + kind (weapon/helm/no model) buttons, "Show as a real popup", "Check any item ID".
-  Settings helpers shared as `ns.UI` (Slider is new). Reviewer run; 11 findings fixed.
-- Needs a **full restart** (new files and textures).
-- 0.3.1: first in-game run spammed `View.lua:274 spin0 nil` (preview box OnUpdate ticked before its
-  async item loaded); `Tick` now returns until an item is set. Lesson: OnUpdate on a view must guard
-  for "nothing set yet".
-- 0.3.1 screenshots (user): all four styles draw; preview works; `SetRoll` spins a weapon around
-  its own length (not upright) → 0.3.2 uses `Model:SetPitch` (setting `weaponTilt`, 0-355, default
-  90; 270 if upside down). Number boxes were empty on first open of the Look page (OnShow didn't
-  fire) → filled at creation. Halo was "a little ugly" (fat, harsh band) → thinner, softer band + crisp
-  rim (closer to mockup C2); Beam's ring overlapped the name → ring above the name, light rises from it.
-- 0.3.2 verified (screenshots): weapons stand upright with pitch 90 and turn; Relic and Banner liked
-  ("very nice"); Beam and Halo "not super great" → mockups v2 approved → **0.3.3**: Beam v2 (Cone +
-  Disc + rising motes), Halo v2 (dark Lens + Halo + Sweep arc turning, item fitted inside via per-style
-  zoom 1.3, fading divider), every style: MORPHEUS title font (locale-safe), arrival flash and Rare+
-  spark burst (after the 0.3 s fade-in), item level only on gear (classID). Reviewer run, fixed.
-- 0.3.3 screenshots: Relic "looks really good", flash and sparks liked; Beam had a hard line at the
-  bottom → 0.3.4 cone fades in at its foot, bigger disc. User: rarity arrivals should apply to all
-  styles → **0.3.5**: `f:Arrival` per tier in every style (Rare 8-spark ring; Epic Rays flare + 14
-  sparks + 3 orbiting; Legendary 2 Wave shockwaves + 18-spark gravity fountain + rising embers);
-  beam's rising motes separate. New art Wave.tga, Rays.tga. Reviewer run, fixed.
-- Waiting on the user: Relic v2 / Banner v2 ideas (mockup shown 2026-10-10: relic = core glow + slow
-  light rays + floor shadow; banner = diamond emblem breaking the band, shine sweep, text inside band).
-
-## Verified in game (by the user, 0.2.0 video 2026-10-10)
-- Rain works and the user likes the physics ("pretty good honestly"); Rare stays as a popup; "+N"
-  counter; no icon-border glitch from SetRotation + SetTexCoord. Settings page fits (COL2 = 320), Test
-  buttons and number fields work. Zoom 0.6 visibly bigger than 1 → default now 0.7 (0.2.1).
-- 0.2.1: floor moved from 25% height to the screen bottom (user request). Not yet seen in game.
-- 0.1.0 scaffold loads, `/dl help` prints the commands.
-- 0.1.1: popups with **rotating 3D models** (Thunderfury, Smite's Mighty Hammer, Arcanite Reaper);
-  `/dl model 12784` → "model file 144817 [loaded]" (`SetItem` + `GetModelFileID` work on Forever);
-  `/dl test` with qualities; `/dl sounds` plays.
+## Verified in game (by the user)
+- 0.1: addon loads; `/dl help`; `PlayerModel:SetItem` + `GetModelFileID` work on Forever
+  (`/dl model 12784` → file 144817); `/dl test` qualities; `/dl sounds` plays.
+- 0.2 (video): rain physics liked; Rare stays as a popup; "+N" counter; settings page fits
+  (COL2 = 320); Test buttons and number fields work; floor at the screen bottom (0.2.1) confirmed.
+- 0.3 (screenshots): all four styles draw; preview + sliders work; weapons stand upright with pitch
+  90 and turn; Relic "looks really good"; flash + sparks liked; Beam v2 / Halo v2 approved from mockups.
 
 ## Not yet verified
-- 0.2.0 everything: rain (`/dl rain 8`, `/dl rain 30`), settings page layout (right column at
-  COL2 = 320; not clipped?), number fields, combat deferral, real looting (popup + rain from a
-  multi-item corpse), `/dl check` output (loot templates present?). Icon rotation + tex-coord crop
-  on rain sprites (`SetRotation` with `SetTexCoord`) may show icon borders: watch for it.
-- Model framing: Arcanite Reaper looked small at zoom 1 (screenshot); `/dl zoom` / the 3D size field
-  exists to tune it.
-- Later: Alt+Right-click on a bag item doesn't use it; `GetMouseButtonClicked()` inside the
-  `HandleModifiedItemClick` hook (0.3).
+- **Real looting has never been seen**: every test so far used previews. Check: `/dl check` (do the
+  `LOOT_ITEM_SELF*` templates exist?), loot a green from a mob (popup), a 3+ item corpse (rain), a
+  vendor buy (must NOT pop), crafting ("crafted" badge), a quest reward ("received"), a dungeon
+  (are loot lines secret values? `/dl debug` logs them), combat deferral (big loot mid-fight rains
+  after combat), performance with 3 popups + rain.
+- 0.2.2 rain sprites rotating/squashing as one piece; landing-height field.
+- 0.3.4 beam foot (no hard line), 0.3.5 rarity arrivals (all styles), 0.3.3 item level hidden on
+  non-gear, the title font on screen, sweep direction on the halo.
+- 0.5 later: Alt+Right-click on a bag item doesn't use it; `GetMouseButtonClicked()` in the
+  `HandleModifiedItemClick` hook.
 
 ## User preferences (stated in chat; follow them)
-- **Privacy first**: the only public identity is the handle **Bempis**. Never the real name, email,
-  Windows username, Battle.net account ID, character names or realm in anything tracked, committed or
-  pushed. Repo-local git identity (Bempis + GitHub noreply); never touch the global git config.
-  `.privacy-patterns`, `CLAUDE.local.md` and `.luarc.json` (machine paths) stay gitignored. The kit's
-  pre-push hook enforces it; never `--no-verify` unless the user says so.
-- Same working style as Loredex: only `/dl help` prints to chat; everything else goes to the log window
-  or popups. Original assets and flavor text only.
-- Presentation and sound matter most; the chest show should feel like Vampire Survivors' treasure chest.
-- Inspector shortcut: Alt+Right-click. ffmpeg (winget) is OK to install at 0.5 for original chimes.
-- Process: preflight → commit → push after each working increment; reviewer agent before big changes.
-  The user tests in game and sends screenshots; give a short "to test" list and say `/reload` vs restart.
+- **Privacy first**: the only public identity is **Bempis**. Never the real name, email, Windows
+  username, Battle.net account ID, character names or realm in anything tracked or pushed (pasted
+  BugSack dumps contain the character name: never copy it). Repo-local git identity; kit pre-push
+  guard enforces it; never `--no-verify` unless the user says so.
+- **Every `/dl` command also gets a settings control** (number field or drag slider, Test button);
+  visual settings drive the live preview (kit house-style "Settings page parity").
+- **Mockups before visual changes**; the user picks, then build. All styles stay as options.
+- Presentation and sound matter most; the chest show should feel like Vampire Survivors' chest.
+- Only `/dl help` prints to chat. Original assets only (generated art; game sounds by ID).
+- Process: preflight → commit → push each increment; reviewer agent before big changes. The user
+  tests in game and sends screenshots or **videos**; give a short "to test" list and say `/reload`
+  vs full restart (new files or changed textures = restart).
 - Answers: concise summaries.
-- **Every new `/dl` command also goes on the settings page** with meaningful controls (number fields
-  or drag sliders, Test buttons); visual settings drive a **live popup preview** on the page with a
-  quality and kind (weapon/armor/non-equippable) picker. Now a kit rule (house-style 0.5.0).
-- Popups: all four styles as options; C2 halo lens is the favorite. Weapons upright.
-- Rain ideas all accepted (plan "Rain ideas"); floor shadows low priority; Escape-to-skip a setting.
 
 ## Gotchas and environment notes
-- Bash tool collapses `\\` to `\`: write Lua with Write/Edit only.
-- The user sends test **videos** (`%USERPROFILE%\Videos\Captures\*.mp4`). ffmpeg is installed (winget
-  Gyan.FFmpeg; binaries under `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\...\bin`, not on
-  PATH until a new shell). Contact sheet: `-vf "fps=1,scale=640:-1,drawtext=fontfile=C\\:/Windows/Fonts/arial.ttf:text='%{pts\:hms}':...,tile=3x3"`
-  into the scratchpad, then Read the PNGs; full frames with `-ss <t> -frames:v 1`.
-- Kit plugin is installed twice (user scope + Loredex project scope). After pushing a kit change:
-  `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis --scope user`
-  (and the project-scope update from the Loredex folder). The CLI lives under %APPDATA%\Claude\claude-code.
-- Game must be closed before editing anything under the client's `WTF` folder.
-- 3D models: set after `Show()`; no AnimationGroups on frames holding models (drive by hand).
-- Baganator is installed and uses Alt+click; Questie, ATT, HuntersFieldGuide also installed (see plan).
-- Loredex's `_reference/wow-ui-source` is empty; Blizzard UI code is read from the Ketho annotations.
+- Bash tool collapses `\\` to `\`: write Lua with Write/Edit only (sed is fine for plain text).
+- **Videos**: ffmpeg is installed (winget Gyan.FFmpeg, under
+  `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\...\bin`, not on PATH). Contact sheet:
+  `-vf "fps=1,scale=640:-1,drawtext=fontfile=C\\:/Windows/Fonts/arial.ttf:text='%{pts\:hms}':x=8:y=8:fontsize=28:fontcolor=yellow:box=1:boxcolor=black,tile=3x3"`
+  into the scratchpad, then Read the PNGs. Art check: overlay the TGAs tinted with `lutrgb` on a
+  dark color source and Read the PNG.
+- Kit plugin is installed at user scope and at the Loredex project scope: after a kit push run
+  `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis
+  --scope user` and the plain update (CLI under `%APPDATA%\Claude\claude-code`).
+- Models: set after `Show()`, re-set OnShow; no AnimationGroups on model frames. `SetRoll` spins a
+  weapon around its own length; `SetPitch` stands it up.
+- OnUpdate on a view must guard for "nothing set yet" (0.3.1 spammed `spin0 nil` from the preview).
+- Settings sub-pages may never fire OnShow on first open: fill controls at creation.
+- Texture rotation works (`Texture:SetRotation`); a ColorTexture doesn't rotate, use a file.
+- Game must be closed before editing the client's `WTF` folder. BugGrabber saves to
+  `<client>\WTF\Account\<account>\SavedVariables\!BugGrabber.lua` (see CLAUDE.local.md).
+- Baganator owns Alt+click; Questie, ATT, HuntersFieldGuide, Details are installed.
 
 ## Open questions / waiting on the user
-- (none)
+- Relic v2 (slow light rays, floor shadow) and Banner v2 (diamond emblem, shine sweep, text in the
+  band): wanted, or keep as is?
+- Default style: Halo lens is the default, but Relic got the warmest reaction. Switch the default?
 
 ## Recent history (newest first)
-- 2026-10-10 0.2.0: loot rain, settings page with Test buttons, popup queue, combat deferral.
-- 2026-10-09 0.1.1: first loot popups (model or card), tier sounds, test/check commands.
-- 2026-10-09 0.1.0: scaffolded with wow-addon-kit 0.4.0 (privacy guard), plan written and settled.
+- 2026-10-10 0.3.5: arrivals by rarity in every style (Wave, Rays art).
+- 2026-10-10 0.3.4: beam light fades into its disc.
+- 2026-10-10 0.3.3: Beam v2, Halo v2, title font, arrival flash and sparks.
+- 2026-10-10 0.3.2: weapons upright (pitch), softer halo, look page fills its numbers.
+- 2026-10-10 0.3.0-0.3.1: four popup styles, Popup look page with live preview; preview nil fix.
+- 2026-10-10 kit 0.5.0: settings page parity rule; kit 0.4.x: pre-push privacy guard.
+- 2026-10-10 0.2.x: loot rain, settings page, landing height, rain sprites in sync.
+- 2026-10-09 0.1.x: scaffold, plan, first popups with 3D models.
