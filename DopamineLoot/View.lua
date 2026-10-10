@@ -30,10 +30,10 @@ local GRAVITY = -420 -- legendary ember fountain, px/s^2
 local function Tier(q) return q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or nil end
 
 ns.STYLES = {
-  { key = "relic", label = "Relic", tip = "Just the item standing on a soft glow, the name below it. No box." },
+  { key = "relic", label = "Relic", tip = "Just the item floating in a soft glow, slow light rays turning behind it, the name below. No box." },
   { key = "beam", label = "Beam", tip = "A cone of light rises from a glowing disc under the item, sparks drifting up." },
   { key = "halo", label = "Halo lens", tip = "The item in a dark lens ringed in its color, a bright arc sweeping round; details beside it." },
-  { key = "banner", label = "Banner", tip = "A ribbon in the item's color, the item standing over it." },
+  { key = "banner", label = "Banner", tip = "A ribbon in the item's color, the item on a diamond emblem, a shine sweeping across." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);
@@ -42,7 +42,7 @@ local LAYOUT = {
   relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   halo = { w = 400, h = 190, stage = { -110, 0, 104, 116 }, text = "right", hit = { 15, 10, 15, 15 }, zoom = 1.3, font = 18 },
-  banner = { w = 420, h = 170, stage = { -140, 4, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
+  banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
 }
 
 -- Items that have a model of their own; body armor is textures on a body (mannequin view later)
@@ -71,7 +71,7 @@ end
 -- Look settings (all on the "Popup look" settings page)
 function ns.PopupStyle()
   local s = ns.settings.popupStyle
-  return LAYOUT[s or ""] and s or "halo"
+  return LAYOUT[s or ""] and s or "relic"
 end
 function ns.PopupScale() return ns.settings.popupScale or 1 end
 function ns.ModelZoom() return ns.settings.modelZoom or 0.7 end
@@ -116,7 +116,19 @@ function ns.CreateView(f)
   f.bannerBottom = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- that fades out at both ends
   f.disc = Tex(f, "BORDER", MEDIA .. "Disc", "ADD")
   f.line = Tex(f, "BORDER", "Interface\\Buttons\\WHITE8X8")
-  f.art = { f.glow, f.cone, f.lens, f.halo, f.sweep, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line }
+  -- relic v2: slow rays behind the glow, a bright core, a soft shadow under the floating item
+  f.relicRays = Tex(f, "BACKGROUND", MEDIA .. "Rays", "ADD", -1)
+  f.core = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD", 1)
+  f.shadow = Tex(f, "BORDER", MEDIA .. "Disc")
+  -- banner v2: a diamond emblem behind the item, breaking the band's edges
+  f.emblem = Tex(f, "BORDER", MEDIA .. "Diamond", nil, 2)
+  f.emblemEdge = Tex(f, "BORDER", MEDIA .. "DiamondEdge", "ADD", 3)
+  f.art = { f.glow, f.cone, f.lens, f.halo, f.sweep, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
+    f.relicRays, f.core, f.shadow, f.emblem, f.emblemEdge }
+  -- banner v2: a streak of light sweeping across the band, clipped to it
+  f.shineClip = CreateFrame("Frame", nil, f)
+  if f.shineClip.SetClipsChildren then f.shineClip:SetClipsChildren(true) end
+  f.shine = Tex(f.shineClip, "ARTWORK", MEDIA .. "Shine", "ADD") -- drawn tilted
 
   f.stage = CreateFrame("Frame", nil, f)
   f.model = CreateFrame("PlayerModel", nil, f.stage)
@@ -187,9 +199,18 @@ function ns.CreateView(f)
 
     if style == "relic" or style == "beam" then
       if style == "relic" then
+        self.relicRays:SetSize(250, 250)
+        self.relicRays:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
+        self.relicRays:Show()
         self.glow:SetSize(210, 210)
         self.glow:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
         self.glow:Show()
+        self.core:SetSize(90, 90)
+        self.core:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
+        self.core:Show()
+        self.shadow:SetSize(76, 14)
+        self.shadow:SetPoint("CENTER", self.stage, "BOTTOM", 0, 4)
+        self.shadow:Show()
       else
         -- the light widens toward the glowing disc the item hovers over, above the name
         self.disc:SetSize(150, 34)
@@ -232,14 +253,26 @@ function ns.CreateView(f)
       self.bannerBottom:SetSize(L.w, 2)
       self.bannerBottom:SetPoint("TOP", self.banner, "BOTTOM", 0, 1)
       self.bannerBottom:Show()
+      -- the emblem sits under the item, taller than the band so it breaks its edges
+      local ex = L.w / 2 + L.stage[1] -- the stage's center, from the band's left edge
+      for _, t in ipairs({ self.emblem, self.emblemEdge }) do
+        t:SetSize(96, 96)
+        t:SetPoint("CENTER", self.banner, "LEFT", ex, 0)
+        t:Show()
+      end
+      self.shineClip:SetAllPoints(self.banner)
+      self.shineClip:Show()
+      self.shine:SetSize(90, 90)
+      self.shine:Hide() -- Tick shows it for each sweep
       self.name:SetPoint("BOTTOMLEFT", self.banner, "LEFT", 150, 0)
       self.name:SetWidth(L.w - 190)
       self.name:SetJustifyH("LEFT")
       self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
       self.info:SetJustifyH("LEFT")
-      self.badges:SetPoint("TOPLEFT", self.banner, "BOTTOMLEFT", 150, -4)
+      self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0) -- on the info line, inside the band
       self.badges:SetJustifyH("LEFT")
     end
+    if style ~= "banner" then self.shineClip:Hide() end
   end
 
   -- Fill in an item. Call after the frame is shown (the model needs a visible frame).
@@ -250,6 +283,12 @@ function ns.CreateView(f)
     local r, g, b = ns.QualityColor(q)
     self.r, self.g, self.b, self.q = r, g, b, q
     self.glow:SetVertexColor(r, g, b, 0.9)
+    self.relicRays:SetVertexColor(math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, b + 0.3), 0.4)
+    self.core:SetVertexColor(math.min(1, r + 0.45), math.min(1, g + 0.45), math.min(1, b + 0.45), 0.8)
+    self.shadow:SetVertexColor(0, 0, 0, 0.6)
+    self.emblem:SetVertexColor(r * 0.22, g * 0.22, b * 0.22, 0.95)
+    self.emblemEdge:SetVertexColor(math.min(1, r + 0.2), math.min(1, g + 0.2), math.min(1, b + 0.2), 1)
+    self.shine:SetVertexColor(math.min(1, r + 0.6), math.min(1, g + 0.6), math.min(1, b + 0.6), 0.55)
     self.cone:SetVertexColor(r, g, b, 0.85)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     self.lens:SetVertexColor(r * 0.1, g * 0.1, b * 0.1, 0.9) -- nearly black with a hint of the color
@@ -295,6 +334,18 @@ function ns.CreateView(f)
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
     self.info:SetText(table.concat(info, "  -  "))
     self.badges:SetText(Badges(item))
+    if self.style == "banner" then
+      -- badges ride the info line inside the band; under the name if there's no info, below it if too long
+      self.badges:ClearAllPoints()
+      local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
+      if iw == 0 then
+        self.badges:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
+      elseif iw + 12 + self.badges:GetStringWidth() > self.L.w - 190 then
+        self.badges:SetPoint("TOPLEFT", self.info, "BOTTOMLEFT", 0, -2)
+      else
+        self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
+      end
+    end
     self.age = 0
     self.spin0 = (math.random() - 0.5) * 0.8 -- start facing roughly toward you
     self.card:SetWidth(CARD)
@@ -401,6 +452,20 @@ function ns.CreateView(f)
         local x = math.sin(i * 2.7 + age * 0.8) * 30 * (1 - t * 0.6)
         m:SetPoint("CENTER", self.stage, "BOTTOM", x, 12 + t * 150)
         m:SetAlpha(math.sin(math.pi * t) * 0.9)
+      end
+    end
+    if self.style == "relic" then
+      self.relicRays:SetRotation(age * 0.12) -- slow, so it reads as light, not a spinner
+      self.core:SetAlpha(0.7 + 0.3 * math.sin(age * 2.4))
+    elseif self.style == "banner" then
+      -- a shine sweeps across the band on arrival, then again every few seconds
+      local t = fx >= 0 and fx % 5 or -1
+      if t >= 0 and t < 0.9 then
+        local w = self.L.w
+        self.shine:SetPoint("CENTER", self.shineClip, "LEFT", -40 + (w + 80) * (t / 0.9), 0)
+        if not self.shine:IsShown() then self.shine:Show() end
+      elseif self.shine:IsShown() then
+        self.shine:Hide()
       end
     end
     if self.tier and fx >= 0 then self:Arrival(fx) end

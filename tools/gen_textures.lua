@@ -9,7 +9,8 @@
 --   Mote      a small soft spark (rising motes, sparkle bursts)
 --   Lens, Sweep  halo v2: the dark lens inside the ring and the bright arc that sweeps round it
 --   Wave      a thin glowing ring that expands (legendary shockwave)
---   Rays      soft light spokes from the center (epic arrival)
+--   Rays      soft light spokes from the center (epic arrival, relic v2 background)
+--   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
 
@@ -116,4 +117,24 @@ Write("Rays", Fill(Canvas(256, 256), function(u, v)
   local ang = math.atan(u - 0.5, v - 0.5)
   local spokes = math.max(0, math.cos(6 * ang)) ^ 10 + 0.5 * math.max(0, math.cos(6 * ang + math.pi)) ^ 16
   return spokes * (1 - r) ^ 0.9 * math.min(1, r / 0.12)
+end))
+
+-- Banner v2: a diamond emblem behind the item (a dark fill and a bright edge, tinted separately)
+local function D(u, v) return math.abs(u - 0.5) + math.abs(v - 0.5) end -- 0.5 = the diamond's edge
+Write("Diamond", Fill(Canvas(128, 128), function(u, v)
+  local d = D(u, v)
+  return d < 0.44 and 0.92 or (d < 0.47 and 0.92 * (0.47 - d) / 0.03 or 0)
+end))
+Write("DiamondEdge", Fill(Canvas(128, 128), function(u, v)
+  local d = D(u, v)
+  return Bump(d, 0.455, 0.007) + 0.3 * Bump(d, 0.455, 0.03)
+end))
+
+-- Banner v2: a soft streak of light, drawn tilted (square, so it needs no rotation in game)
+local SHINE_TILT = 0.35
+Write("Shine", Fill(Canvas(128, 128), function(u, v)
+  local du, dv = u - 0.5, v - 0.5
+  local c, s = math.cos(SHINE_TILT), math.sin(SHINE_TILT)
+  local across, along = du * c - dv * s, du * s + dv * c
+  return 0.8 * Bump(across, 0, 0.07) * math.cos(math.pi * math.min(0.5, math.abs(along) * 1.1))
 end))

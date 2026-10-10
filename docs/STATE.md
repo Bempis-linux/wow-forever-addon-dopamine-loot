@@ -1,29 +1,24 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-10 (end of day), after 0.3.5 (db3ebb4) + paused 0.3.6 work. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-10, with 0.3.6. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
 ## Where things stand
-- **0.3.5 pushed**; uncommitted work in the tree (see "In progress"). Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
+- **0.3.6 pushed**, waiting on the user's in-game test. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
   (plan roadmap row 0.3 lists what's done and what's left).
-- Done in 0.3: four popup styles (Relic, Beam v2, Halo lens v2 = default, Banner) on generated art;
+- Done in 0.3: four popup styles (Relic v2 = default, Beam v2, Halo lens v2, Banner v2) on generated art;
   weapons upright via `Model:SetPitch` (setting `weaponTilt`, default 90); MORPHEUS title font;
   arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic rays + 14 sparks +
   3 orbiting; Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
-- **In progress (uncommitted, paused 2026-10-10 at the user's request): Relic v2 + Banner v2 +
-  Relic as the default style.** The user picked both v2 versions and "relic as default".
-  - Done in the working tree: `ns.PopupStyle()` falls back to "relic"; new art Diamond.tga,
-    DiamondEdge.tga, Shine.tga (tools/gen_textures.lua); View.lua: relicRays (Rays turning slowly),
-    core glow, floor shadow; banner emblem (Diamond fill + edge) at the stage, shineClip frame with a
-    Shine streak sweeping the band every 5 s, badges on the info line inside the band, banner stage
-    y -6 to sit on the band; style tips updated; .toc says 0.3.6.
-  - Left: preflight (never ran on these edits), check the new art with ffmpeg, a reviewer pass,
-    commit + push 0.3.6, then the user tests (`/dl look`, full restart for new textures). Saved
-    settings keep the style already picked; only fresh settings get Relic by default.
+- 0.3.6 (Relic v2 + Banner v2, Relic the default): relic rays turning slowly, pulsing core, floor
+  shadow; banner diamond emblem (Diamond + DiamondEdge art), Shine streak sweeping the band every
+  5 s (drawn pre-tilted in a square texture: `SetRotation` on a non-square box skews it), badges on
+  the info line (under the name if no info, below info if too long; placed in SetItem). Saved
+  settings keep the style already picked; only fresh settings get Relic.
 - **Next up** (suggested order):
-  1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
-  2. Finish the paused Relic v2 / Banner v2 work (see "In progress").
+  1. **User tests 0.3.6** (full restart for the new textures): `/dl look`, Relic + Banner.
+  2. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
   3. Per-tier arrival sounds, then the picked rain ideas (plan "Rain ideas": best item last,
      escalation with rising-pitch chimes via ffmpeg, spacing + dust puff, gathering into the bag,
      trails, coins, Escape-to-skip setting; floor shadows low priority).
@@ -80,7 +75,10 @@ _Last checkpoint: 2026-10-10 (end of day), after 0.3.5 (db3ebb4) + paused 0.3.6 
   weapon around its own length; `SetPitch` stands it up.
 - OnUpdate on a view must guard for "nothing set yet" (0.3.1 spammed `spin0 nil` from the preview).
 - Settings sub-pages may never fire OnShow on first open: fill controls at creation.
-- Texture rotation works (`Texture:SetRotation`); a ColorTexture doesn't rotate, use a file.
+- Texture rotation works (`Texture:SetRotation`) on square boxes only (a non-square box skews);
+  a ColorTexture doesn't rotate, use a file. Generated textures must be power-of-two sizes.
+- Run `tools/gen_textures.lua` with the sumneko lua-language-server exe as the Lua runtime
+  (`lua-language-server.exe tools/gen_textures.lua`, as preflight does for the tests).
 - Game must be closed before editing the client's `WTF` folder. BugGrabber saves to
   `<client>\WTF\Account\<account>\SavedVariables\!BugGrabber.lua` (see CLAUDE.local.md).
 - Baganator owns Alt+click; Questie, ATT, HuntersFieldGuide, Details are installed.
@@ -89,6 +87,7 @@ _Last checkpoint: 2026-10-10 (end of day), after 0.3.5 (db3ebb4) + paused 0.3.6 
 - (none: Relic is the default, both v2 versions approved)
 
 ## Recent history (newest first)
+- 2026-10-10 0.3.6: Relic v2 (default) and Banner v2 (emblem, shine sweep).
 - 2026-10-10 0.3.5: arrivals by rarity in every style (Wave, Rays art).
 - 2026-10-10 0.3.4: beam light fades into its disc.
 - 2026-10-10 0.3.3: Beam v2, Halo v2, title font, arrival flash and sparks.
