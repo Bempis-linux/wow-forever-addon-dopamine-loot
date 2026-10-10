@@ -63,7 +63,8 @@ Write("Cone", Fill(Canvas(128, 256), function(u, v)
   local x = math.abs(u - 0.5) / half
   local across = x >= 1 and 0 or (1 - x * x) ^ 1.5 -- soft sides
   local core = 0.6 * Bump(u, 0.5, 0.05 + 0.04 * (1 - v))
-  return (0.75 * across + core * across) * (1 - v) ^ 1.3
+  local foot = math.min(1, v / 0.14) ^ 1.5           -- fades in from the bottom edge: no hard line
+  return (0.75 * across + core * across) * (1 - v) ^ 1.3 * foot
 end))
 
 -- Beam v2: the glowing floor disc (squashed into an ellipse in game)

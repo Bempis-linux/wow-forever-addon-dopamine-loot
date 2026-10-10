@@ -179,11 +179,11 @@ function ns.CreateView(f)
         self.glow:Show()
       else
         -- the light widens toward the glowing disc the item hovers over, above the name
-        self.disc:SetSize(120, 26)
+        self.disc:SetSize(150, 34)
         self.disc:SetPoint("CENTER", self.stage, "BOTTOM", 0, 10)
         self.disc:Show()
         self.cone:SetSize(150, L.h - 30)
-        self.cone:SetPoint("BOTTOM", self.disc, "CENTER", 0, -2)
+        self.cone:SetPoint("BOTTOM", self.disc, "CENTER", 0, -14) -- its soft foot sinks into the disc
         self.cone:Show()
       end
       self.name:SetPoint("TOP", self.stage, "BOTTOM", 0, -6)
