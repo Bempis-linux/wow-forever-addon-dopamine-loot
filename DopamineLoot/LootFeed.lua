@@ -217,6 +217,14 @@ ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 0.7]"
   ns:ShowLog()
 end)
 
+-- Experiment for the popup redesign: stand weapons upright by rolling the model
+ns.AddCommand("roll", "tilt item models (experiment): /dl roll [degrees, e.g. 90]", function(arg)
+  local d = tonumber(arg)
+  if d then ns.settings.modelRoll = d % 360 end
+  ns.Print("model roll: " .. (ns.settings.modelRoll or 0) .. " degrees (try /dl test epic)")
+  ns:ShowLog()
+end)
+
 ns.AddCommand("model", "check how an item shows: /dl model <itemID>", function(arg)
   local id = tonumber(arg) or M.ItemID(arg)
   if not id then ns.Print("usage: /dl model <itemID>"); ns:ShowLog(); return end

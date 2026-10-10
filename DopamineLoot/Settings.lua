@@ -174,8 +174,18 @@ local function CreatePanel()
   local minAfter = Label(panel, "GameFontHighlight", "items looted at once")
   minAfter:SetPoint("LEFT", minBox, "RIGHT", 8, 0)
 
+  local floorLabel = Label(panel, "GameFontHighlight", "Land")
+  floorLabel:SetPoint("TOPLEFT", minLabel, "BOTTOMLEFT", 0, -16)
+  local floorBox = NumberBox(panel, 36, function() return ns.settings.rainFloor or 0 end,
+    function(v) ns.settings.rainFloor = math.floor(v) end, 0, 30,
+    "Where falling items land, as a percent of the screen height up from the bottom " ..
+    "(0 = the bottom edge, up to 30; raise it to land above your action bars).")
+  floorBox:SetPoint("LEFT", floorLabel, "RIGHT", 10, 0)
+  local floorAfter = Label(panel, "GameFontHighlight", "% up from the bottom")
+  floorAfter:SetPoint("LEFT", floorBox, "RIGHT", 8, 0)
+
   local stay = Label(panel, "GameFontHighlightSmall", "Stay on screen as popups afterwards:")
-  stay:SetPoint("TOPLEFT", minLabel, "BOTTOMLEFT", 0, -16)
+  stay:SetPoint("TOPLEFT", floorLabel, "BOTTOMLEFT", 0, -16)
   last = Choice(panel, {
     { value = 2, label = "|cff1eff00Uncommon|r and up" },
     { value = 3, label = "|cff0070ddRare|r and up (recommended)" },

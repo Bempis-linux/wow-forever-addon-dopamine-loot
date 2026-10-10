@@ -85,6 +85,7 @@ local function Create()
     if p.mode == "model" then -- reloaded after the UI was hidden: keep the framing
       m:SetPosition(0, 0, 0)
       if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom()) end
+      if m.SetRoll then m:SetRoll(math.rad(ns.settings.modelRoll or 0)) end -- experiment: /dl roll
     end
     p:CheckModel("loaded")
   end)
@@ -149,6 +150,7 @@ local function Create()
       self.mode = "model"
       m:SetPosition(0, 0, 0)
       if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom()) end
+      if m.SetRoll then m:SetRoll(math.rad(ns.settings.modelRoll or 0)) end -- experiment: /dl roll
       self.card:Hide()
     else -- timed out without a model
       self.mode = "card"

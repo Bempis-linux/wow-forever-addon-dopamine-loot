@@ -71,7 +71,7 @@ if not CreateFrame then return end
 
 local SIZE, MAX_SPRITES, MAX_TIME = 40, 40, 4.5
 local FADE_T = 0.6
-local FLOOR = 2 -- items land on the bottom edge of the screen
+-- where items land: ns.settings.rainFloor percent of the screen height up from the bottom (0 = the edge)
 local SQUASH_T = 0.09
 
 ns.AddToggle("rain", "noRain", "loot rain")
@@ -99,7 +99,10 @@ local function Sprite()
   if s then return s end
   local f = CreateFrame("Frame", nil, Layer())
   f:SetSize(SIZE, SIZE)
+  -- all three layers hang off the frame's edges, so the squash stretches them together, and
+  -- each gets the same rotation (a plain color texture wouldn't rotate, so the edge is a file)
   f.edge = f:CreateTexture(nil, "BACKGROUND")
+  f.edge:SetTexture("Interface\\Buttons\\WHITE8X8")
   f.edge:SetAllPoints()
   f.icon = f:CreateTexture(nil, "ARTWORK")
   f.icon:SetPoint("TOPLEFT", 2, -2)
@@ -108,8 +111,8 @@ local function Sprite()
   f.glow = f:CreateTexture(nil, "OVERLAY")
   f.glow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
   f.glow:SetBlendMode("ADD")
-  f.glow:SetSize(SIZE * 1.8, SIZE * 1.8)
-  f.glow:SetPoint("CENTER")
+  f.glow:SetPoint("TOPLEFT", -SIZE * 0.4, SIZE * 0.4)
+  f.glow:SetPoint("BOTTOMRIGHT", SIZE * 0.4, -SIZE * 0.4)
   return { f = f }
 end
 
@@ -134,21 +137,22 @@ local function Update(_, dt)
   st.age = st.age + dt
   local W, H = layer:GetWidth(), layer:GetHeight()
   local k = H / 768 -- physics constants are tuned for a 768-unit-tall UI
-  bounds.left, bounds.right, bounds.floor, bounds.k = SIZE, W - SIZE, FLOOR, k -- the bottom edge of the screen
+  bounds.left, bounds.right, bounds.k = SIZE, W - SIZE, k
+  bounds.floor = 2 + H * (ns.settings.rainFloor or 0) / 100
 
   -- launch the next sprites on schedule
   while st.queue[1] and st.age >= st.nextLaunch do
     local item = table.remove(st.queue, 1)
     local s = Sprite()
     s.item, s.q = item, item.quality or 1
-    s.x, s.y = W / 2 + math.random(-20, 20), H * 0.38
+    s.x, s.y = W / 2 + math.random(-20, 20), math.max(H * 0.38, bounds.floor + H * 0.13)
     s.vx = math.random(-320, 320) * k
     s.vy = (math.random(650, 950) + (s.q >= 3 and 150 or 0)) * k -- the good stuff flies higher
     s.e = 0.45 + math.random() * 0.2
     s.spin = (math.random() - 0.5) * 8
     s.rot, s.bounces, s.resting, s.squash, s.stays = 0, 0, false, 0, false
     local r, g, b = ns.QualityColor(s.q)
-    s.f.edge:SetColorTexture(r, g, b, 1)
+    s.f.edge:SetVertexColor(r, g, b, 1)
     s.f.icon:SetTexture(item.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
     s.f.glow:SetVertexColor(r, g, b)
     s.f.glow:SetShown(s.q >= 3)
@@ -176,7 +180,9 @@ local function Update(_, dt)
       w, h = SIZE * 1.3, SIZE * 0.7
     end
     s.f:SetSize(w, h)
+    s.f.edge:SetRotation(s.rot)
     s.f.icon:SetRotation(s.rot)
+    s.f.glow:SetRotation(s.rot)
     s.f:ClearAllPoints()
     s.f:SetPoint("BOTTOM", layer, "BOTTOMLEFT", s.x, s.y)
   end
