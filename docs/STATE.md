@@ -21,6 +21,17 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 - User feedback 2026-10-10: popup card frame "doesn't look super great"; wants just the item (weapons
   vertical) with a highlight behind; rain is "an extremely good start"; landing height now a setting.
 
+## 0.3.0 (pushed, not yet seen in game)
+- `View.lua`: shared popup view, 4 styles (relic, beam, halo = default, banner) on generated art
+  (`tools/gen_textures.lua` → `Media/Glow|Halo|Ring|Beam|Banner.tga`, white tinted by quality);
+  weapons stood up with `Model:SetRoll` ("Weapon tilt", default 90, unverified in game); per-style
+  click areas (SetHitRectInsets); popups fit-limited (2 for tall styles).
+- `Look.lua`: Options > AddOns > Dopamine Loot > **Popup look** (`/dl look`): style choice, sliders
+  (size, 3D zoom, weapon tilt, spin speed, time on screen) with number fields, live preview box with
+  quality + kind (weapon/helm/no model) buttons, "Show as a real popup", "Check any item ID".
+  Settings helpers shared as `ns.UI` (Slider is new). Reviewer run; 11 findings fixed.
+- Needs a **full restart** (new files and textures).
+
 ## Verified in game (by the user, 0.2.0 video 2026-10-10)
 - Rain works and the user likes the physics ("pretty good honestly"); Rare stays as a popup; "+N"
   counter; no icon-border glitch from SetRotation + SetTexCoord. Settings page fits (COL2 = 320), Test

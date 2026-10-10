@@ -18,7 +18,6 @@ local QUALITY_NAMES = { [0] = "poor", "common", "uncommon", "rare", "epic", "leg
 local TEST_IDS = { [2] = { 15211 }, [3] = { 5191, 7230 }, [4] = { 12784, 19364 }, [5] = { 19019, 17182 } }
 
 function ns.MinQuality() return ns.settings.minQuality or 2 end
-function ns.ModelZoom() return ns.settings.modelZoom or 0.7 end -- 0.7: weapons fill the stage (tested)
 
 local function TypeText(equipLoc, itemType, subType, classID)
   local slot = equipLoc and equipLoc ~= "" and _G[equipLoc] or nil
@@ -213,15 +212,17 @@ end)
 ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 0.7]", function(arg)
   local z = tonumber(arg)
   if z and z >= 0.3 and z <= 2 then ns.settings.modelZoom = z end
+  ns.LookRefresh()
   ns.Print("model zoom: " .. (ns.ModelZoom()) .. " (try /dl test epic to see it)")
   ns:ShowLog()
 end)
 
--- Experiment for the popup redesign: stand weapons upright by rolling the model
-ns.AddCommand("roll", "tilt item models (experiment): /dl roll [degrees, e.g. 90]", function(arg)
+-- Weapon tilt (also a slider on the Popup look page)
+ns.AddCommand("roll", "stand weapons up: /dl roll [0-180 degrees, default 90]", function(arg)
   local d = tonumber(arg)
-  if d then ns.settings.modelRoll = d % 360 end
-  ns.Print("model roll: " .. (ns.settings.modelRoll or 0) .. " degrees (try /dl test epic)")
+  if d then ns.settings.modelRoll = math.min(math.max(d, 0), 180) end
+  ns.LookRefresh()
+  ns.Print("weapon tilt: " .. ns.WeaponTilt() .. " degrees (try /dl test epic)")
   ns:ShowLog()
 end)
 

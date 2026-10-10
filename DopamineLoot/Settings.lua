@@ -87,13 +87,13 @@ local function Button(parent, text, width, onClick)
 end
 
 -- A small number field: Enter or clicking away keeps the value (clamped), Escape undoes
-local function NumberBox(parent, width, get, set, min, max, tip)
+local function NumberBox(parent, width, get, set, min, max, tip, fmt)
   local e = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
   e:SetSize(width, 20)
   e:SetAutoFocus(false)
   e:SetJustifyH("CENTER")
-  e:SetMaxLetters(4)
-  local function Show() e:SetText(tostring(get())) end
+  e:SetMaxLetters(5)
+  local function Show() e:SetText((fmt or tostring)(get())) end
   local function Commit()
     local v = tonumber((e:GetText():gsub(",", "."))) -- "0,55" where a comma is the decimal mark
     if v then set(math.min(math.max(v, min), max)) end
@@ -104,8 +104,57 @@ local function NumberBox(parent, width, get, set, min, max, tip)
   e:SetScript("OnEscapePressed", function(self) Show(); self:ClearFocus() end)
   Tip(e, tip)
   refreshers[#refreshers + 1] = Show
+  e.Show_ = Show
   return e
 end
+
+-- A drag slider with its number field beside it; both change the setting at once, and onChange
+-- runs on every move (the live preview redraws). label above, min..max in steps.
+local function Slider(parent, label, width, min, max, step, get, set, tip, fmt, onChange)
+  fmt = fmt or function(v) return tostring(math.floor(v * 100 + 0.5) / 100) end
+  local text = Label(parent, "GameFontHighlight", label)
+  local s = CreateFrame("Slider", nil, parent, "BackdropTemplate")
+  s:SetOrientation("HORIZONTAL")
+  s:SetSize(width, 16)
+  s:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 0, -4)
+  s:SetBackdrop({
+    bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
+    edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+    tile = true, tileSize = 8, edgeSize = 8, insets = { left = 3, right = 3, top = 6, bottom = 6 },
+  })
+  s:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  s:SetMinMaxValues(min, max)
+  s:SetValueStep(step)
+  if s.SetObeyStepOnDrag then s:SetObeyStepOnDrag(true) end
+  s:EnableMouseWheel(true)
+  local box
+  local quiet = false
+  local function Apply(v)
+    v = math.min(math.max(math.floor(v / step + 0.5) * step, min), max)
+    set(v)
+    if box then box:SetText(fmt(v)) end
+    if onChange then onChange() end
+  end
+  s:SetScript("OnValueChanged", function(_, v) if not quiet then Apply(v) end end)
+  s:SetScript("OnMouseWheel", function(self, d) self:SetValue(self:GetValue() + d * step) end)
+  box = NumberBox(parent, 44, get, function(v)
+    quiet = true; s:SetValue(v); quiet = false
+    Apply(v)
+  end, min, max, tip, fmt)
+  box:SetPoint("LEFT", s, "RIGHT", 10, 0)
+  Tip(s, tip)
+  refreshers[#refreshers + 1] = function() quiet = true; s:SetValue(get()); quiet = false end
+  s.label = text
+  return s, text
+end
+
+local function RefreshAll() for _, r in ipairs(refreshers) do r() end end
+
+-- Shared with the "Popup look" page (Look.lua)
+ns.UI = {
+  Label = Label, Tip = Tip, Check = Check, Toggle = Toggle, Choice = Choice, Button = Button,
+  NumberBox = NumberBox, Slider = Slider, Refresh = RefreshAll,
+}
 
 local function CreatePanel()
   panel = CreateFrame("Frame")
@@ -136,14 +185,9 @@ local function CreatePanel()
   local legendary = Button(panel, "Test legendary", 112, function() ns.RunCommand("test", "legendary") end)
   legendary:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 194, -2)
 
-  local zoomLabel = Label(panel, "GameFontHighlight", "3D item size")
+  local zoomLabel = Button(panel, "Popup look and live preview...", 220, function() ns:OpenLook() end)
   zoomLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -32)
-  local zoom = NumberBox(panel, 40, function() return ns.ModelZoom() end,
-    function(v) ns.settings.modelZoom = v end, 0.3, 2,
-    "Camera distance for item models in popups: smaller numbers show the item bigger (0.3 to 2, default 0.7).")
-  zoom:SetPoint("LEFT", zoomLabel, "RIGHT", 12, 0)
-  local zoomTest = Button(panel, "Test", 56, function() ns.RunCommand("test", "epic") end)
-  zoomTest:SetPoint("LEFT", zoom, "RIGHT", 8, 0)
+  Tip(zoomLabel, "Style, size, 3D zoom, weapon tilt, spin and time on screen, with a live popup preview.")
 
   ---------------------------------------------------------------- left: sound
   local sound = Label(panel, "GameFontNormal", "Sound")
@@ -224,6 +268,7 @@ local function CreatePanel()
   -- Forever uses the retail Settings window (Options > AddOns)
   category = Settings.RegisterCanvasLayoutCategory(panel, ns.TITLE)
   Settings.RegisterAddOnCategory(category)
+  ns.settingsCategory = category
 end
 
 function ns:OpenSettings()
