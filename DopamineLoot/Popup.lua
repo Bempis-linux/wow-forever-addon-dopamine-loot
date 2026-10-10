@@ -84,7 +84,7 @@ local function Create()
   p.model:SetScript("OnModelLoaded", function(m)
     if p.mode == "model" then -- reloaded after the UI was hidden: keep the framing
       m:SetPosition(0, 0, 0)
-      if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.settings.modelZoom or 1) end
+      if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom()) end
     end
     p:CheckModel("loaded")
   end)
@@ -148,7 +148,7 @@ local function Create()
     if why == "loaded" or (fileID and fileID ~= 0) then
       self.mode = "model"
       m:SetPosition(0, 0, 0)
-      if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.settings.modelZoom or 1) end
+      if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom()) end
       self.card:Hide()
     else -- timed out without a model
       self.mode = "card"

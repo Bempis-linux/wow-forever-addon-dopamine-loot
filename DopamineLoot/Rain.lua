@@ -71,6 +71,7 @@ if not CreateFrame then return end
 
 local SIZE, MAX_SPRITES, MAX_TIME = 40, 40, 4.5
 local FADE_T = 0.6
+local FLOOR = 2 -- items land on the bottom edge of the screen
 local SQUASH_T = 0.09
 
 ns.AddToggle("rain", "noRain", "loot rain")
@@ -133,7 +134,7 @@ local function Update(_, dt)
   st.age = st.age + dt
   local W, H = layer:GetWidth(), layer:GetHeight()
   local k = H / 768 -- physics constants are tuned for a 768-unit-tall UI
-  bounds.left, bounds.right, bounds.floor, bounds.k = SIZE, W - SIZE, H * 0.25, k
+  bounds.left, bounds.right, bounds.floor, bounds.k = SIZE, W - SIZE, FLOOR, k -- the bottom edge of the screen
 
   -- launch the next sprites on schedule
   while st.queue[1] and st.age >= st.nextLaunch do

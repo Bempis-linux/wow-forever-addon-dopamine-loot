@@ -17,7 +17,11 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 - **Next up**: tune rain/popups from the test; then the plan's 0.2 work (filters, seen set/NEW,
   upgrade badge), 0.3 inspector, then design/look pass (the user wants functionality first).
 
-## Verified in game (by the user)
+## Verified in game (by the user, 0.2.0 video 2026-10-10)
+- Rain works and the user likes the physics ("pretty good honestly"); Rare stays as a popup; "+N"
+  counter; no icon-border glitch from SetRotation + SetTexCoord. Settings page fits (COL2 = 320), Test
+  buttons and number fields work. Zoom 0.6 visibly bigger than 1 → default now 0.7 (0.2.1).
+- 0.2.1: floor moved from 25% height to the screen bottom (user request). Not yet seen in game.
 - 0.1.0 scaffold loads, `/dl help` prints the commands.
 - 0.1.1: popups with **rotating 3D models** (Thunderfury, Smite's Mighty Hammer, Arcanite Reaper);
   `/dl model 12784` → "model file 144817 [loaded]" (`SetItem` + `GetModelFileID` work on Forever);
@@ -49,6 +53,10 @@ _Last checkpoint: 2026-10-09, after the scaffold + plan. Read this first in a ne
 
 ## Gotchas and environment notes
 - Bash tool collapses `\\` to `\`: write Lua with Write/Edit only.
+- The user sends test **videos** (`%USERPROFILE%\Videos\Captures\*.mp4`). ffmpeg is installed (winget
+  Gyan.FFmpeg; binaries under `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\...\bin`, not on
+  PATH until a new shell). Contact sheet: `-vf "fps=1,scale=640:-1,drawtext=fontfile=C\\:/Windows/Fonts/arial.ttf:text='%{pts\:hms}':...,tile=3x3"`
+  into the scratchpad, then Read the PNGs; full frames with `-ss <t> -frames:v 1`.
 - Kit plugin is installed twice (user scope + Loredex project scope). After pushing a kit change:
   `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis --scope user`
   (and the project-scope update from the Loredex folder). The CLI lives under %APPDATA%\Claude\claude-code.

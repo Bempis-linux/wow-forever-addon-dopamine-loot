@@ -18,6 +18,7 @@ local QUALITY_NAMES = { [0] = "poor", "common", "uncommon", "rare", "epic", "leg
 local TEST_IDS = { [2] = { 15211 }, [3] = { 5191, 7230 }, [4] = { 12784, 19364 }, [5] = { 19019, 17182 } }
 
 function ns.MinQuality() return ns.settings.minQuality or 2 end
+function ns.ModelZoom() return ns.settings.modelZoom or 0.7 end -- 0.7: weapons fill the stage (tested)
 
 local function TypeText(equipLoc, itemType, subType, classID)
   local slot = equipLoc and equipLoc ~= "" and _G[equipLoc] or nil
@@ -209,10 +210,10 @@ ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]"
 end)
 
 -- How close the camera sits to item models in popups (smaller = bigger item)
-ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 1]", function(arg)
+ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 0.7]", function(arg)
   local z = tonumber(arg)
   if z and z >= 0.3 and z <= 2 then ns.settings.modelZoom = z end
-  ns.Print("model zoom: " .. (ns.settings.modelZoom or 1) .. " (try /dl test epic to see it)")
+  ns.Print("model zoom: " .. (ns.ModelZoom()) .. " (try /dl test epic to see it)")
   ns:ShowLog()
 end)
 

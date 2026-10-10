@@ -18,7 +18,7 @@ local b
 for _, H in ipairs({ 768, 1080, 1700 }) do
   for _, fps in ipairs({ 60, 15 }) do
     local W, k = H * 16 / 9, H / 768
-    b = { left = 40, right = W - 40, floor = H * 0.25, k = k }
+    b = { left = 40, right = W - 40, floor = 2, k = k }
     local worstTime, outside = 0, 0
     for _ = 1, 200 do
       local s = { x = W / 2, y = H * 0.38, vx = math.random(-320, 320) * k,

@@ -138,9 +138,9 @@ local function CreatePanel()
 
   local zoomLabel = Label(panel, "GameFontHighlight", "3D item size")
   zoomLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -32)
-  local zoom = NumberBox(panel, 40, function() return ns.settings.modelZoom or 1 end,
+  local zoom = NumberBox(panel, 40, function() return ns.ModelZoom() end,
     function(v) ns.settings.modelZoom = v end, 0.3, 2,
-    "Camera distance for item models in popups: smaller numbers show the item bigger (0.3 to 2, default 1).")
+    "Camera distance for item models in popups: smaller numbers show the item bigger (0.3 to 2, default 0.7).")
   zoom:SetPoint("LEFT", zoomLabel, "RIGHT", 12, 0)
   local zoomTest = Button(panel, "Test", 56, function() ns.RunCommand("test", "epic") end)
   zoomTest:SetPoint("LEFT", zoom, "RIGHT", 8, 0)
