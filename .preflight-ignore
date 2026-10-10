@@ -1,0 +1,4 @@
+# Lint findings wow-preflight should ignore (one regex per line). Add project-specific noise here,
+# e.g. optional dependencies read through _G:  Undefined field `LibQuestieDB`
+# Pre-C_AddOns fallback, absent from retail annotations on purpose
+Undefined global `GetAddOnMetadata`

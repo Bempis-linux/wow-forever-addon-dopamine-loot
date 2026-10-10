@@ -1,0 +1,17 @@
+# Reference material (Blizzard UI source exports, other people's addons)
+_reference/
+
+# Packaging output
+.release/
+*.zip
+
+# Machine-specific and personal (never commit)
+CLAUDE.local.md
+.privacy-patterns
+.luarc.json
+.claude/settings.local.json
+
+# Editor / OS
+.vscode/settings.json
+Thumbs.db
+desktop.ini

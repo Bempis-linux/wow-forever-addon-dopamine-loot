@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "bempis": {
+      "source": { "source": "github", "repo": "Bempis-linux/wow-addon-kit" }
+    }
+  },
+  "enabledPlugins": {
+    "wow-addon-kit@bempis": true
+  }
+}

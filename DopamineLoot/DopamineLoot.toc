@@ -1,0 +1,13 @@
+## Interface: 16001
+## Title: Dopamine Loot
+## Notes: Loot that feels like loot: 3D item popups, treasure rain, and an item inspector.
+## Author: Bempis
+## Version: 0.1.0
+## SavedVariables: DopamineLootDB
+## SavedVariablesPerCharacter: DopamineLootCharDB
+## IconTexture: Interface\Icons\INV_Misc_QuestionMark
+## AddonCompartmentFunc: DopamineLoot_OnCompartmentClick
+
+Core.lua
+Output.lua
+Popup.lua
