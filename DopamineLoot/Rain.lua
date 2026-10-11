@@ -149,6 +149,14 @@ function Core.Mix(items, coins)
   return out
 end
 
+-- How big a haul is, for the chest's opening sound: "big" with anything Rare or better, "medium"
+-- from 6 items or 1 gold, else "small" (a few grays, whites or greens and some copper)
+function Core.HaulSize(items, copper)
+  for _, it in ipairs(items) do if (it.quality or 0) >= 3 then return "big" end end
+  if #items >= 6 or (copper or 0) >= 10000 then return "medium" end
+  return "small"
+end
+
 -- "1g 20s 5c", "1g20s", "35s", "250" (copper) -> copper, or nil
 function Core.ParseMoney(text)
   text = (text or ""):lower():gsub("%s+", "")
@@ -226,6 +234,17 @@ end
 local function On(key) return fxOn[key] end
 
 ns.AddToggle("rain", "noRain", "loot rain")
+local OPEN_NAMES = { size = "by haul size", always = "always the big sound", never = "never" }
+ns.AddCommand("opensound", "the treasure chest's opening sound: /dl opensound [size | always | never]", function(arg)
+  arg = (arg or ""):lower():match("%S+")
+  if OPEN_NAMES[arg] then
+    ns.settings.openSound = arg ~= "size" and arg or nil
+    if ns.UI then ns.UI.Refresh() end
+  end
+  ns.Print("treasure chest opening sound: " .. OPEN_NAMES[ns.settings.openSound or "size"])
+  ns:ShowLog()
+end)
+
 ns.AddCommand("rainfx", "loot rain effects: /dl rainfx [name off|on]", function(arg)
   local word, value = (arg or ""):lower():match("^(%S+)%s+(%S+)$")
   for _, fx in ipairs(ns.RAIN_FX) do
@@ -894,6 +913,9 @@ function ns:Rain(items, copper)
   layer.money:SetText("")
   layer.money:SetAlpha(1)
   if On("Escape") then escFrame:Show() end
-  ns:PlayBurstSound()
+  -- the chest opening: as big as the haul (setting openSound: "size", "always", "never")
+  local open = ns.settings.openSound or "size"
+  local size = open == "always" and "big" or open == "never" and "small" or Core.HaulSize(all, copper)
+  if size == "big" then ns:PlayBurstSound() elseif size == "medium" then ns:PlayChestPop() end
   driver:SetScript("OnUpdate", Update)
 end

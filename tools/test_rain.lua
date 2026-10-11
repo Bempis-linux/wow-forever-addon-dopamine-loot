@@ -145,6 +145,13 @@ local mixedM = C.Mix({ { n = "a" } }, (C.MergePlan(23540)))
 local grouped = 0
 for _, it in ipairs(mixedM) do if it.coin and it.group then grouped = grouped + 1 end end
 Check("merge piles keep their group in the launch queue", grouped == 20)
+-- 10. The chest's opening sound follows the haul's size
+local grays = { { quality = 0 }, { quality = 0 }, { quality = 1 } }
+Check("a few grays and copper: small", C.HaulSize(grays, 54) == "small")
+Check("1 gold makes it medium", C.HaulSize(grays, 10000) == "medium")
+Check("6 items make it medium", C.HaulSize({ {}, {}, {}, {}, {}, {} }, 0) == "medium")
+Check("anything Rare makes it big", C.HaulSize({ { quality = 0 }, { quality = 3 } }, 0) == "big")
+Check("coins only, little money: small", C.HaulSize({}, 3520) == "small")
 Check("money parses: 1g 20s 5c", C.ParseMoney("1g 20s 5c") == 12005)
 Check("money parses: plain copper and 35s", C.ParseMoney("250") == 250 and C.ParseMoney("35s") == 3500)
 Check("money rejects junk", C.ParseMoney("lots") == nil)

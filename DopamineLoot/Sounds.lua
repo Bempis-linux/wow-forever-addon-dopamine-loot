@@ -73,6 +73,9 @@ end
 function ns:PlayLaunchSound(isCoin, n) PlaySet(isCoin and "LaunchCoin" or "LaunchItem", n) end -- leaving the chest
 function ns:PlayClink(n) PlaySet("Clink", n) end                                                -- a coin lands
 function ns:PlayMergeSound(metal, k) PlaySet(metal == "gold" and "MergeGold" or "MergeSilver", 2 * k - 1, 0) end
+function ns:PlayChestPop() -- a medium haul's chest opening: a soft lid pop (big hauls get a game sound)
+  if not self.settings.noSound then PlaySoundFile(MEDIA .. "ChestPop.ogg", Channel()) end
+end
 function ns:PlayGatherSound()
   if not self.settings.noSound then PlaySoundFile(MEDIA .. "Gather.ogg", Channel()) end
 end

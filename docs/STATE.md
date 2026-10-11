@@ -1,13 +1,15 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-11, with 0.3.10. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-11, with 0.3.11. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
 **Words the user uses:** the **treasure chest** = where the rain's items and coins spray out from
 (the spawn point, middle of the screen); the **ground** = where they land (rainFloor).
 
 ## Where things stand
-- **0.3.10 pushed** (coins, quests, merge-up, chest sounds); 0.3.9 seen in game ("looks pretty
+- **0.3.11 pushed** (chest opening sound by haul size). 0.3.10 seen in game: "working and looking
+  pretty good"; the one criticism (the opening sound too dramatic for a level 3 looting grays) led
+  to 0.3.11. Earlier: 0.3.9 seen in game ("looks pretty
   good" — screenshot only of coins, which led to 0.3.10); 0.3.8 arrival sounds not yet heard. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
   (plan roadmap row 0.3 lists what's done and what's left).
 - Done in 0.3: four popup styles (Relic v2 = default, Beam v2, Halo lens v2, Banner v2) on generated art;
@@ -15,6 +17,10 @@ _Last checkpoint: 2026-10-11, with 0.3.10. Read this first in a new session (the
   arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic 14-spark ring;
   Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
+- 0.3.11 the treasure chest's opening sound follows the haul (`Core.HaulSize`): small (no Rare+,
+  <6 items, <1g) silent; medium (6+ items or 1g+) ChestPop.ogg (generated soft lid pop); big (any
+  Rare+) the game BURST kit as before. Setting `openSound` size (default) / always / never: effects
+  page choice, `/dl opensound`.
 - 0.3.10 money: coins are the game's money icons (Interface\MoneyFrame\UI-Gold/Silver/CopperIcon,
   no frame). `Core.CoinPlan` (log curve, max 30; real gold as gold, silver fills, a few copper).
   New effect **Merge** (`Core.MergePlan`, user's idea): each top coin (gold, else silver; 5 piles
@@ -56,10 +62,10 @@ _Last checkpoint: 2026-10-11, with 0.3.10. Read this first in a new session (the
   the info line (under the name if no info, below info if too long; placed in SetItem). Saved
   settings keep the style already picked; only fresh settings get Relic.
 - **Next up** (suggested order):
-  1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
-  2. **User tests 0.3.10** (full restart: new sounds): Test money buttons (merge-up), Test quest
-     reward, a real quest turn-in with money, a mob with 1g+; the effects page; Escape skip; plus
-     0.3.8 arrival sounds. Tune from video. Sounds were approved as "a really good start" (mockup tones).
+  1. **User tests 0.3.11** (full restart: new ChestPop.ogg): a small haul opens silently, 6+ items
+     or 1g+ pops softly, Rare+ gets the big sound; the effects page choice.
+  2. **Real-play verification** of what's left (see "Not yet verified"): quest turn-ins with money,
+     vendor buy (must NOT pop), dungeons (secret values?), combat deferral, crafting badge.
   3. Rain polish the user asks for (the rain comes first, before more popup work); sound tweaks.
   4. 0.4 filters (seen set/NEW, upgrade badge), 0.5 inspector (Alt+Right-click), 0.6 chest show.
 
@@ -70,13 +76,15 @@ _Last checkpoint: 2026-10-11, with 0.3.10. Read this first in a new session (the
   (COL2 = 320); Test buttons and number fields work; floor at the screen bottom (0.2.1) confirmed.
 - 0.3 (screenshots): all four styles draw; preview + sliders work; weapons stand upright with pitch
   90 and turn; Relic "looks really good"; flash + sparks liked; Beam v2 / Halo v2 approved from mockups.
+- 0.3.10 (2026-10-11): **real looting works** — a level 3 mob's grays and copper rained (the user's
+  rain threshold set to 2 items, quality threshold lowered), coins from looted money included; the
+  coin icons, merge-up, test money/quest buttons "working and looking pretty good".
 
 ## Not yet verified
-- **Real looting has never been seen**: every test so far used previews. Check: `/dl check` (do the
-  `LOOT_ITEM_SELF*` templates exist?), loot a green from a mob (popup), a 3+ item corpse (rain), a
-  vendor buy (must NOT pop), crafting ("crafted" badge), a quest reward ("received"), a dungeon
-  (are loot lines secret values? `/dl debug` logs them), combat deferral (big loot mid-fight rains
-  after combat), performance with 3 popups + rain.
+- Real looting: a mob's corpse rains (seen 0.3.10). Still unseen: a single green from a mob
+  (popup), a vendor buy (must NOT pop), crafting ("crafted" badge), a quest turn-in with money (coin
+  rain + the reward item last), a dungeon (are loot lines secret values? `/dl debug` logs them),
+  combat deferral (big loot mid-fight rains after combat), performance with 3 popups + rain.
 - 0.2.2 rain sprites rotating/squashing as one piece; landing-height field.
 - 0.3.4 beam foot (no hard line), 0.3.5 rarity arrivals (all styles), 0.3.3 item level hidden on
   non-gear, the title font on screen.
@@ -134,6 +142,7 @@ _Last checkpoint: 2026-10-11, with 0.3.10. Read this first in a new session (the
 - (none: Relic is the default, both v2 versions approved)
 
 ## Recent history (newest first)
+- 2026-10-11 0.3.11: chest opening sound by haul size (silent / soft pop / big).
 - 2026-10-11 0.3.10: coins as money icons, merge-up, quest money rains, chest + coin sounds.
 - 2026-10-10 0.3.9: loot rain effects (13 switches, own settings page), coins from looted money.
 - 2026-10-10 0.3.8: arrival sounds per tier (synthesized OGGs).

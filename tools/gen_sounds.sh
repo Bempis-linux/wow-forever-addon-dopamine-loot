@@ -86,3 +86,7 @@ for n in $(seq 0 10); do
   done
 done
 render Gather 0.45 0.3 "$(glide 0 350 900 0.3 3)"
+
+#   ChestPop           a medium haul's chest opening: a soft low lid "thock" and a little sparkle
+#                      (small hauls open silently, big ones with a game sound)
+render ChestPop 0.6 0.4 "0.9*$(boom 0 85 170 16)+0.25*(random(0)*2-1)*exp(-70*t)+0.3*$(bell 0.05 1568 7)+0.2*$(bell 0.09 2093 8)" "lowpass=f=6000"

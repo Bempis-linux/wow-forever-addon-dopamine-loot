@@ -59,8 +59,18 @@ local function Create()
   quest:SetPoint("TOPLEFT", coinLabel, "BOTTOMLEFT", -4, -14)
   UI.Tip(quest, "An item and some money, rained together the way a quest turn-in plays (/dl testquest).")
 
+  -- the chest's opening sound (/dl opensound)
+  local openLabel = UI.Label(panel, "GameFontHighlightSmall", "Sound as the treasure chest opens:")
+  openLabel:SetPoint("TOPLEFT", quest, "BOTTOMLEFT", 4, -16)
+  local last = UI.Choice(panel, {
+    { value = "size", label = "By haul size (recommended)",
+      tip = "Silent for a few grays, greens and copper; a soft pop from 6 items or 1 gold; the big game sound when something Rare or better is in it." },
+    { value = "always", label = "Always the big sound", tip = "Every rain opens with the big game sound." },
+    { value = "never", label = "Never", tip = "No opening sound; the items and coins leaving the chest still whoosh." },
+  }, function() return ns.settings.openSound or "size" end, function(v) ns.settings.openSound = v end, openLabel)
+
   local back = UI.Button(panel, "Main settings", 120, function() ns:OpenSettings() end)
-  back:SetPoint("TOPLEFT", quest, "BOTTOMLEFT", 0, -18)
+  back:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -14)
 
   panel:SetScript("OnShow", function() UI.Refresh() end)
   UI.Refresh() -- sub-pages may not get OnShow on their first open: fill the switches now
