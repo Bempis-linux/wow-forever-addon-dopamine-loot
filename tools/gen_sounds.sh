@@ -90,3 +90,21 @@ render Gather 0.45 0.3 "$(glide 0 350 900 0.3 3)"
 #   ChestPop           a medium haul's chest opening: a soft low lid "thock" and a little sparkle
 #                      (small hauls open silently, big ones with a game sound)
 render ChestPop 0.6 0.4 "0.9*$(boom 0 85 170 16)+0.25*(random(0)*2-1)*exp(-70*t)+0.3*$(bell 0.05 1568 7)+0.2*$(bell 0.09 2093 8)" "lowpass=f=6000"
+
+# Chest show
+#   ChestRattle1..3    the chest knocking about as it shakes (short wooden knocks, three to vary)
+#   Tease00..05        the seam's light climbing a rarity: a chime a step higher each time
+#   ChestBurst         the lid flying off: a boom under a bright chord
+#   ChestBurstGold     the same for the golden chest (Legendary): bigger, brighter
+#   PouchPop           the loot pouch bursting open: a quick soft pop
+for i in 1 2 3; do
+  f=$(awk "BEGIN{print 90 + 25 * $i}")
+  render "ChestRattle$i" 0.18 0.32 "$(boom 0 "$f" "$(awk "BEGIN{print $f * 1.8}")" 30)+0.35*(random(0)*2-1)*exp(-90*t)" "lowpass=f=2500"
+done
+for n in $(seq 0 5); do
+  st=$(semis $((n * 2))); id=$(printf '%02d' "$n")
+  render "Tease$id" 0.7 0.24 "$(bell 0 "$(hz 660 "$st")" 5)+0.45*$(bell 0 "$(hz 990 "$st")" 6)"
+done
+render ChestBurst 1.6 0.3 "1.0*$(boom 0 50 220 3.2)+0.3*(random(0)*2-1)*exp(-30*t)+0.55*($(bell 0.04 523.25 2.6)+$(bell 0.04 659.25 2.6)+$(bell 0.04 783.99 2.6))" "lowpass=f=9000,$ROOM"
+render ChestBurstGold 2.2 0.28 "1.1*$(boom 0 45 220 2.4)+0.35*(random(0)*2-1)*exp(-26*t)+0.5*($(bell 0.04 783.99 2.2)+$(bell 0.04 987.77 2.2)+$(bell 0.04 1174.66 2.2)+$(bell 0.04 1567.98 2))+0.4*$(bell 0.35 2093 3)+0.35*$(bell 0.47 2637 3)" "lowpass=f=10000,$ROOM"
+render PouchPop 0.3 0.4 "$(glide 0 260 620 0.09 18)+0.2*(random(0)*2-1)*exp(-80*t)"

@@ -252,6 +252,7 @@ ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]"
   local picks = {}
   if n >= 4 then picks[#picks + 1] = TEST_IDS[3][math.random(#TEST_IDS[3])] end
   if n >= 8 then picks[#picks + 1] = TEST_IDS[4][math.random(#TEST_IDS[4])] end
+  if n >= 12 then picks[#picks + 1] = TEST_IDS[5][math.random(#TEST_IDS[5])] end -- the golden chest
   while #picks < n do picks[#picks + 1] = #own > 0 and own[math.random(#own)] or 2589 end -- Linen Cloth
   local items, waiting, started = {}, #picks, false
   local function Go()

@@ -41,6 +41,14 @@
     <button data-s="g2">2g 35s 40c</button>
     <button data-s="g25">25g</button>
   </div>
+  <h2>Chest show</h2>
+  <div class="row">
+    <button id="again" title="Replays the last scene; within 20 s it counts as a streak">Loot again</button>
+    <button data-s="lucky">Lucky drop</button>
+  </div>
+  <label style="margin-top:4px">Small hauls come from
+    <select id="small"><option value="pouch">a loot pouch</option><option value="portal">a portal</option><option value="none">nothing (as now)</option></select>
+  </label>
   <h2>Ideas</h2>
   <div id="toggles"></div>
   <h2>Watch</h2>
@@ -85,13 +93,21 @@ const IDEAS = [
   ["hitstop", "Hit-stop", "a split-second slow-mo + shake when the best lands", true],
   ["names", "Name labels", "Rare+ show their name while resting", true],
   ["escape", "Skip with Escape", "a setting in the addon"],
+  ["chest", "Treasure chest", "big hauls come out of a chest, small ones from the pouch/portal picked above", true],
+  ["shake", "Chest shake", "it rattles before opening, longer for better hauls", true],
+  ["tease", "Rarity tease", "light from the seams climbs white → green → blue → purple", true],
+  ["burst", "Lid burst + rays", "the lid flies off with rays in the best item's color", true],
+  ["cards", "Card flip (click)", "Rare+ land as face-down cards; click each to flip (off by default)", true, true],
+  ["streak", "Loot streak", "loot again within 20 s: x2, x3… each step a bit bigger", true],
+  ["tally", "Session tally", "a running 'this session' summary, top right", true],
+  ["records", "Personal records", "banners for the best drop or most money from one loot", true],
 ];
 const on = {};
 const tg = document.getElementById("toggles");
-for (const [key, label, tip, mine] of IDEAS) {
-  on[key] = true;
+for (const [key, label, tip, mine, off] of IDEAS) {
+  on[key] = !off;
   const l = document.createElement("label");
-  l.innerHTML = `<input type="checkbox" checked data-k="${key}"><span>${label}${mine ? '<span class="new">new</span>' : ""}<small>${tip}</small></span>`;
+  l.innerHTML = `<input type="checkbox" ${off ? "" : "checked"} data-k="${key}"><span>${label}${mine ? '<span class="new">new</span>' : ""}<small>${tip}</small></span>`;
   tg.appendChild(l);
 }
 tg.addEventListener("change", e => { on[e.target.dataset.k] = e.target.checked; });
@@ -155,6 +171,7 @@ const SCENES = {
   s35: { qs: [], copper: 3520 },
   g2: { qs: [], copper: 23540 },
   g25: { qs: [], copper: 251234 },
+  lucky: { qs: [1, 2, 2, 4], copper: 5320, lucky: true },
 };
 
 // ---- coins: the game's gold/silver/copper (drawn here; the addon uses the real icons) ----
@@ -218,7 +235,7 @@ let R = null; // the current rain
 let popups = [], fx = [], pulse = null, shake = 0, timeScale = 1, stopT = 0;
 const B = () => ({ left: SIZE, right: VW - SIZE, floor: 30 });
 
-function start(name) {
+function start(name, again) {
   const sc = SCENES[name];
   const items = sc.qs.map((q, i) => item(q, i)).sort((a, b) => a.q - b.q);
   let plan = { coins: [], merges: [] };
@@ -233,7 +250,11 @@ function start(name) {
     copper: sc.copper, coins: plan.coins.length, coinsLanded: 0, shownCopper: 0, settleAt: null, done: false, gathered: 0,
     merges: plan.merges, mergeStarted: false, coinOut: 0, itemOut: 0, mergesDone: 0 };
   popups = []; fx = []; pulse = null;
-  tone(140, 0.25, 0.15, "triangle");
+  lastScene = name; R.sc = sc;
+  noteStreak(again);
+  R.box = makeBox(sc);
+  if (R.box) R.next = Infinity; // nothing leaves until the container opens
+  else tone(140, 0.25, 0.15, "triangle");
 }
 
 function interval(i, n) {
@@ -300,9 +321,12 @@ function startMerge() { // each pile gathers on its middle, one pile after anoth
 
 function settle() { // hand off: Rare+ become popups, the rest gathers or fades
   R.settleAt = R.age;
+  tallyRain(R.sc);
   let pd = 0, gd = 0;
   const order = R.sprites.slice().sort((a, b) => a.x - b.x);
+  if (on.cards) { const good = order.filter(s => s.q >= 3); if (good.length) startCards(good); }
   for (const s of order) {
+    if (s.leaving === "card") continue;
     if (s.q >= 3) { s.leaving = "popup"; s.leaveAt = R.age + pd; pd += 0.15; }
     else if (on.gather) { s.leaving = "gather"; s.leaveAt = R.age + 0.35 + gd; gd += 0.045; s.sx = s.x; s.sy = s.y; }
     else { s.leaving = "fade"; s.leaveAt = R.age + 0.35; }
@@ -333,12 +357,15 @@ function update(dt) {
   if (!R || R.done) return;
   R.age += dt;
   const b = B();
-  while (R.queue.length && R.age >= R.next) {
-    launch(R.queue.shift(), false);
-    R.next += interval(R.launched++, R.total);
+  if (R.box) updateBox(R.box, dt);
+  if (!R.box || R.box.open) {
+    while (R.queue.length && R.age >= R.next) {
+      launch(R.queue.shift(), false);
+      R.next += interval(R.launched++, R.total);
+    }
+    if (!R.queue.length && R.best && R.bestAt === null) R.bestAt = R.age + 0.55; // a beat of silence
+    if (R.best && R.bestAt !== null && R.age >= R.bestAt) { launch(R.best, true); R.best = null; tone(220, 0.35, 0.1, "triangle"); }
   }
-  if (!R.queue.length && R.best && R.bestAt === null) R.bestAt = R.age + 0.55; // a beat of silence
-  if (R.best && R.bestAt !== null && R.age >= R.bestAt) { launch(R.best, true); R.best = null; tone(220, 0.35, 0.1, "triangle"); }
   let allRest = !R.queue.length && !R.best;
   // coins joining up: they hop together, and when the last one arrives, the bigger coin pops out
   for (const m of R.merges) {
@@ -397,6 +424,19 @@ function update(dt) {
     for (const s of R.sprites) {
       if (R.age < s.leaveAt) { busy = true; continue; }
       const t = R.age - s.leaveAt;
+      if (s.leaving === "card") { // fly up into the row, wait for a click (or 8 s), flip, then pop up
+        const u = Math.min(1, t / 0.4), e = 1 - (1 - u) * (1 - u);
+        s.x = s.sx + (s.cx - s.sx) * e; s.y = s.sy + (s.cy - s.sy) * e;
+        if (s.flipped) s.flipT += dt;
+        if (!s.flipped && R.age - R.cardsAt > 8) flipCard(s);
+        if (R.cards.every(c => c.flipped && c.flipT > 0.3)) {
+          R.cardsDone = R.cardsDone ?? R.age;
+          const ct = R.age - R.cardsDone - 0.9;
+          if (ct >= 0) { if (!s.handed) { s.handed = true; popup(s.it); } s.alpha = Math.max(0, 1 - ct / 0.4); if (ct < 0.4) busy = true; }
+          else busy = true;
+        } else busy = true;
+        continue;
+      }
       if (s.leaving === "popup") {
         if (!s.handed) { s.handed = true; popup(s.it); }
         s.y += dt * 500; s.alpha = Math.max(0, 1 - t / 0.5); if (t < 0.5) busy = true;
@@ -436,11 +476,19 @@ function drawSprite(s, alpha, x = s.x, y = s.y, rot = s.rot) {
   if (s.q >= 3) { ctx.shadowColor = c; ctx.shadowBlur = (s.best ? 28 : 16) * scale; }
   ctx.fillStyle = c; ctx.fillRect(X(-w / 2), X(-h / 2), X(w), X(h));
   ctx.shadowBlur = 0;
-  ctx.fillStyle = "#1b1712"; ctx.fillRect(X(-w / 2 + 2), X(-h / 2 + 2), X(w - 4), X(h - 4));
-  ctx.font = `${X(Math.min(w, h) * 0.62)}px serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(s.it.glyph, 0, X(2));
+  ctx.fillStyle = hidden(s) ? "#2b2114" : "#1b1712"; ctx.fillRect(X(-w / 2 + 2), X(-h / 2 + 2), X(w - 4), X(h - 4));
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  if (hidden(s)) { // face down until its card is flipped: only the rarity's glow gives a hint
+    ctx.font = `700 ${X(Math.min(w, h) * 0.6)}px Georgia, serif`; ctx.fillStyle = hexA(c, 0.9);
+    ctx.fillText("?", 0, X(1));
+  } else {
+    ctx.font = `${X(Math.min(w, h) * 0.62)}px serif`;
+    ctx.fillText(s.it.glyph, 0, X(2));
+  }
   ctx.restore();
 }
+// with Card flip on, Rare+ stay a "?" from the chest until you flip them
+function hidden(s) { return on.cards && !s.it.coin && s.q >= 3 && !s.flipped; }
 
 function draw() {
   const W = cv.width, H = cv.height;
@@ -459,6 +507,7 @@ function draw() {
 
   if (R && !R.done) {
     const floor = 30;
+    if (R.box) drawBox(R.box);
     for (const s of R.sprites) { // shadows and beams first, under everything
       const a = s.alpha ?? 1;
       if (on.shadows && !s.leaving || on.shadows && s.leaving === "fade") {
@@ -495,8 +544,9 @@ function draw() {
         ctx.shadowColor = QC[s.q]; ctx.shadowBlur = 14 * scale; ctx.fillStyle = QC[s.q];
         ctx.fillRect(X(-sz / 2), X(-sz / 2), X(sz), X(sz)); ctx.restore();
       });
+      if (s.leaving === "card") { drawCard(s); continue; }
       drawSprite(s, s.alpha ?? 1);
-      if (on.names && s.resting && s.q >= 3 && !s.leaving) {
+      if (on.names && s.resting && s.q >= 3 && !s.leaving && !hidden(s)) {
         ctx.globalAlpha = Math.min(1, s.restAge / 0.3);
         ctx.font = `600 ${X(13)}px Georgia, serif`; ctx.fillStyle = QC[s.q]; ctx.textAlign = "center";
         ctx.shadowColor = "#000"; ctx.shadowBlur = 4 * scale;
@@ -530,11 +580,276 @@ function draw() {
     ctx.globalAlpha = 1;
   });
   ctx.restore();
+  drawOverlays();
   if (pulse) { // the screen edge glows in the item's color
     const a = Math.sin(Math.PI * pulse.age / 0.6) * 0.55;
     const rg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
     rg.addColorStop(0, pulse.color + "00"); rg.addColorStop(1, pulse.color);
     ctx.globalAlpha = a; ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  }
+}
+
+// =====================================================================================
+// ---- the chest show: containers, shake, rarity tease, lid burst, cards, streak, tally ----
+// =====================================================================================
+const STREAK_WINDOW = 20; // seconds to loot again and keep the streak (the addon might use 30)
+const SESSION = { copper: 0, q: [0, 0, 0, 0, 0, 0] }, RECORD = { copper: 0, bestQ: -1 };
+const STREAK = { n: 0, last: -1e9, copper: 0, items: 0, ended: true };
+let banners = [], smallStyle = "pouch", lastScene = "trash";
+const nowS = () => performance.now() / 1000;
+function banner(text, color = "#ffd100") { banners.push({ text, color, age: 0 }); if (banners.length > 3) banners.shift(); }
+
+function haulSize(qs, copper) {
+  if (qs.some(q => q >= 3)) return "big";
+  if (qs.length >= 6 || copper >= 10000) return "medium";
+  return "small";
+}
+
+// Which container a haul comes out of, how long it shakes, and the colors its seams climb through
+function makeBox(sc) {
+  if (!on.chest) return null;
+  const qs = sc.qs, bq = qs.length ? Math.max(...qs) : -1;
+  let size = haulSize(qs, sc.copper);
+  if (on.streak && STREAK.n >= 3 && size === "small") size = "medium"; // a streak makes small hauls feel bigger
+  if (on.streak && STREAK.n >= 5 && size === "medium") size = "big";
+  const kind = sc.lucky ? "gold" : size === "small" ? (smallStyle === "none" ? null : smallStyle) : "chest";
+  if (!kind) return null;
+  const streakExtra = on.streak ? 0.08 * Math.min(STREAK.n - 1, 5) : 0;
+  let shakeT = kind === "pouch" ? 0.22 : kind === "portal" ? 0.35 : kind === "gold" ? 1.3 : size === "big" ? 0.9 : 0.35;
+  if ((kind === "chest" || kind === "gold") && !on.shake) shakeT = 0.15;
+  shakeT += streakExtra;
+  const top = Math.max(bq, 1), steps = [];
+  if (on.tease && (kind === "gold" || (kind === "chest" && size === "big"))) for (let q = 1; q <= top; q++) steps.push(q);
+  else steps.push(kind === "chest" ? 1 : top);
+  return { kind, size, bq, color: QC[top], t: 0, shakeT, steps, idx: 0, open: false, openT: 0, x: VW / 2, y: V_H * 0.38, rattle: 0 };
+}
+
+function openBox(box) {
+  box.open = true; box.openT = 0;
+  R.next = R.age; // the rain starts now
+  if (box.kind === "pouch") sweep(260, 620, 0.09, 0.08, "triangle");
+  else if (box.kind === "portal") sweep(180, 900, 0.3, 0.06, "sine");
+  else if (box.size === "big" || box.kind === "gold") {
+    sweep(220, 55, 0.45, 0.16, "sine"); // a boom as the lid goes
+    chord(box.kind === "gold" ? [784, 988, 1175, 1568] : [523, 659, 784], 0.7, 0.06);
+  } else { sweep(160, 90, 0.12, 0.12, "sine"); tone(1568, 0.15, 0.04); } // a soft lid pop
+}
+
+function updateBox(box, dt) {
+  box.t += dt;
+  if (box.open) { box.openT += dt; return; }
+  const u = Math.min(1, box.t / box.shakeT);
+  if ((box.kind === "chest" || box.kind === "gold") && on.shake) { // rattles, quicker as it builds
+    box.rattle -= dt;
+    if (box.rattle <= 0) { box.rattle = 0.11 - 0.05 * u; tone(110 + Math.random() * 60, 0.035, 0.05 + 0.04 * u, "square"); }
+  }
+  const idx = Math.min(box.steps.length - 1, Math.floor(u * box.steps.length));
+  if (idx > box.idx) { // the light climbs a rarity: a chime a step up, and a flash
+    box.idx = idx; box.flash = 1;
+    tone(note(660, idx * 2), 0.25, 0.07); tone(note(990, idx * 2), 0.2, 0.03);
+  }
+  if (box.t >= box.shakeT) openBox(box);
+}
+
+function drawBox(box) {
+  const fade = R.settleAt !== null ? Math.max(0, 1 - (R.age - R.settleAt) / 0.6) : 1;
+  if (fade <= 0) return;
+  const u = Math.min(1, box.t / box.shakeT), c = QC[box.steps[box.idx]] || box.color;
+  box.flash = Math.max(0, (box.flash || 0) - 0.06);
+  ctx.save();
+  ctx.globalAlpha = fade;
+  let jx = 0, rot = 0;
+  if (!box.open && on.shake && (box.kind === "chest" || box.kind === "gold")) {
+    const amp = 1.5 + 5 * u;
+    jx = (Math.random() - 0.5) * 2 * amp; rot = (Math.random() - 0.5) * 0.08 * u;
+  }
+  const cx = X(box.x + jx), mouthY = Y(box.y);
+  if (box.kind === "pouch") return drawPouch(box, cx, mouthY, fade), ctx.restore();
+  if (box.kind === "portal") return drawPortal(box, cx, mouthY), ctx.restore();
+  // rays out of the open chest, in the best item's color
+  if (box.open && on.burst && (box.size === "big" || box.kind === "gold") && box.openT < 1.4) {
+    const a = Math.max(0, 1 - box.openT / 1.4);
+    for (let i = 0; i < 9; i++) {
+      const ang = -Math.PI / 2 + (i - 4) * 0.2 + Math.sin(box.openT * 2 + i) * 0.03, len = X(300);
+      const g = ctx.createLinearGradient(cx, mouthY, cx + Math.cos(ang) * len, mouthY + Math.sin(ang) * len);
+      g.addColorStop(0, hexA(box.color, 0.55 * a)); g.addColorStop(1, hexA(box.color, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(cx, mouthY);
+      ctx.lineTo(cx + Math.cos(ang - 0.06) * len, mouthY + Math.sin(ang - 0.06) * len);
+      ctx.lineTo(cx + Math.cos(ang + 0.06) * len, mouthY + Math.sin(ang + 0.06) * len); ctx.fill();
+    }
+  }
+  const gold = box.kind === "gold";
+  const W = X(gold ? 110 : 100), BH = X(52), LH = X(26);
+  ctx.translate(cx, mouthY); ctx.rotate(rot);
+  // body: planks, iron (or gold) bands, a lock plate
+  ctx.fillStyle = gold ? "#c9962a" : "#6b4423"; ctx.fillRect(-W / 2, 0, W, BH);
+  ctx.strokeStyle = gold ? "#8a6414" : "#4a2e17"; ctx.lineWidth = X(2);
+  for (let i = 1; i < 3; i++) { ctx.beginPath(); ctx.moveTo(-W / 2, (BH * i) / 3); ctx.lineTo(W / 2, (BH * i) / 3); ctx.stroke(); }
+  ctx.fillStyle = gold ? "#fff1b0" : "#3c3c42";
+  for (const bx of [-W * 0.3, W * 0.3]) ctx.fillRect(bx - X(5), 0, X(10), BH);
+  ctx.strokeStyle = gold ? "#7a5610" : "#2a1a0d"; ctx.lineWidth = X(2.5); ctx.strokeRect(-W / 2, 0, W, BH);
+  // light inside / at the seam
+  const glow = box.open ? 1 : (on.tease || box.size === "big" || gold) ? 0.25 + 0.75 * u : 0.15;
+  ctx.shadowColor = c; ctx.shadowBlur = X(10 + 30 * glow + 25 * box.flash);
+  ctx.fillStyle = hexA(c, Math.min(1, 0.5 + 0.5 * glow)); ctx.fillRect(-W / 2 + X(3), -X(2), W - X(6), X(4));
+  ctx.shadowBlur = 0;
+  // the lid: closed, flying off (burst) or tipped open
+  ctx.save();
+  if (box.open) {
+    if (on.burst && (box.size === "big" || gold)) {
+      const t = box.openT; ctx.globalAlpha = fade * Math.max(0, 1 - t / 0.7);
+      ctx.translate(X(40) * t, -X(320) * t + X(300) * t * t); ctx.rotate(-2.2 * t);
+    } else { ctx.translate(0, -LH * 0.6); ctx.rotate(-0.5); }
+  }
+  ctx.fillStyle = gold ? "#d9a535" : "#7a4e29";
+  roundRect(-W / 2, -LH, W, LH, X(10)); ctx.fill();
+  ctx.strokeStyle = gold ? "#7a5610" : "#2a1a0d"; ctx.lineWidth = X(2.5); ctx.stroke();
+  ctx.fillStyle = gold ? "#fff1b0" : "#3c3c42";
+  for (const bx of [-W * 0.3, W * 0.3]) ctx.fillRect(bx - X(5), -LH, X(10), LH);
+  ctx.fillStyle = gold ? "#fff6c8" : "#d8b24a"; ctx.fillRect(-X(7), -X(10), X(14), X(14)); // lock
+  ctx.restore();
+  if (gold) for (let i = 0; i < 6; i++) { // lucky sparkle
+    const a = box.t * 3 + i, sx = Math.cos(a) * W * 0.7, sy = -LH - X(10) + Math.sin(a * 1.3) * X(30);
+    ctx.fillStyle = `rgba(255,248,200,${0.5 + 0.5 * Math.sin(a * 5)})`; ctx.beginPath(); ctx.arc(sx, sy, X(2.5), 0, 7); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawPouch(box, cx, mouthY, fade) {
+  const t = box.t, open = box.open;
+  const jig = open ? 0 : Math.sin(t * 45) * 0.12;
+  const deflate = open ? Math.min(1, box.openT / 0.8) : 0;
+  const rx = X(24) * (1 + jig), ry = X(22) * (1 - 0.35 * deflate);
+  ctx.globalAlpha = fade * (open ? Math.max(0, 1 - Math.max(0, box.openT - 0.6) / 0.5) : 1);
+  ctx.fillStyle = "#8a5a2b"; ctx.strokeStyle = "#4a2e14"; ctx.lineWidth = X(2);
+  ctx.beginPath(); ctx.ellipse(cx, mouthY + ry + X(6), rx, ry, 0, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#6e4520"; ctx.fillRect(cx - X(10), mouthY, X(20), X(8)); // the neck
+  ctx.fillStyle = "#c9a45a"; ctx.fillRect(cx - X(12), mouthY + X(5), X(24), X(3)); // drawstring
+  if (open) { // the mouth, with a glint of what was inside
+    ctx.fillStyle = "#2a1a0d"; ctx.beginPath(); ctx.ellipse(cx, mouthY, X(12), X(4), 0, 0, 7); ctx.fill();
+    ctx.shadowColor = box.color; ctx.shadowBlur = X(14) * Math.max(0, 1 - box.openT);
+    ctx.fillStyle = hexA(box.color, 0.6 * Math.max(0, 1 - box.openT)); ctx.beginPath(); ctx.ellipse(cx, mouthY, X(10), X(3), 0, 0, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function drawPortal(box, cx, mouthY) {
+  const opening = box.open ? 1 : Math.min(1, box.t / box.shakeT);
+  const closing = (!R.queue.length && !R.best && box.open) ? Math.min(1, (box.closeT = (box.closeT || 0) + 1 / 60) / 0.4) : 0;
+  const r = X(38) * opening * (1 - closing);
+  if (r <= 0.5) return;
+  ctx.save(); ctx.translate(cx, mouthY);
+  ctx.fillStyle = "rgba(10,8,20,0.85)"; ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.35, 0, 0, 7); ctx.fill();
+  ctx.shadowColor = box.color; ctx.shadowBlur = X(16); ctx.strokeStyle = box.color; ctx.lineWidth = X(3);
+  ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.35, 0, 0, 7); ctx.stroke();
+  ctx.shadowBlur = 0; ctx.strokeStyle = hexA(box.color, 0.5); ctx.lineWidth = X(1.5);
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(0, 0, r * (0.3 + 0.2 * i), r * 0.35 * (0.3 + 0.2 * i), box.t * (2 + i), 0, 4); ctx.stroke(); }
+  ctx.restore();
+}
+
+function hexA(hex, a) { // "#rrggbb" + alpha
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${Math.max(0, Math.min(1, a))})`;
+}
+
+// ---- cards: Rare+ land face down; click each to flip it (pack opening) ----
+const CARD_W = 66, CARD_H = 92;
+function startCards(list) {
+  R.cards = list; R.cardsAt = R.age;
+  const gap = 84, x0 = VW / 2 - (gap * (list.length - 1)) / 2;
+  list.forEach((s, i) => {
+    s.leaving = "card"; s.leaveAt = R.age + i * 0.1; s.sx = s.x; s.sy = s.y;
+    s.cx = x0 + i * gap; s.cy = V_H * 0.52; s.flipped = false; s.flipT = 0;
+  });
+}
+function flipCard(s) {
+  if (s.flipped) return;
+  s.flipped = true; s.flipT = 0;
+  tone(note(523, s.q * 2), 0.3, 0.08); tone(note(784, s.q * 2), 0.3, 0.05);
+  if (s.q >= 4) sweep(300, 1200, 0.3, 0.05, "sine");
+}
+cv.addEventListener("click", e => {
+  if (!R || !R.cards) return;
+  const dpr = window.devicePixelRatio || 1, vx = e.clientX * dpr / scale, vy = V_H - e.clientY * dpr / scale;
+  for (const s of R.cards) if (Math.abs(vx - s.x) < CARD_W / 2 && vy > s.y && vy < s.y + CARD_H) flipCard(s);
+});
+function drawCard(s) {
+  const u = Math.min(1, s.flipT / 0.3), showFace = s.flipped && u >= 0.5;
+  const w = CARD_W * Math.max(0.04, Math.abs(Math.cos(Math.PI * (s.flipped ? u : 0)))), c = QC[s.q];
+  ctx.save(); ctx.globalAlpha = s.alpha ?? 1;
+  ctx.translate(X(s.x), Y(s.y + CARD_H / 2));
+  ctx.shadowColor = c; ctx.shadowBlur = X(showFace ? 16 : 10 + 8 * Math.sin(R.age * 4));
+  ctx.fillStyle = showFace ? "#16130e" : "#2b2114"; ctx.strokeStyle = c; ctx.lineWidth = X(2.5);
+  roundRect(X(-w / 2), X(-CARD_H / 2), X(w), X(CARD_H), X(6)); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0;
+  if (w > 20) {
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if (showFace) {
+      ctx.font = `${X(30)}px serif`; ctx.fillText(s.it.glyph, 0, X(-10));
+      ctx.font = `600 ${X(9.5)}px Georgia, serif`; ctx.fillStyle = c;
+      const words = s.it.name.split(" "), half = Math.ceil(words.length / 2);
+      ctx.fillText(words.slice(0, half).join(" "), 0, X(22)); ctx.fillText(words.slice(half).join(" "), 0, X(33));
+    } else { ctx.font = `700 ${X(26)}px Georgia, serif`; ctx.fillStyle = hexA(c, 0.85); ctx.fillText("?", 0, 0); }
+  }
+  ctx.restore();
+}
+
+// ---- after a rain: the session tally, records, and the streak's running totals ----
+function tallyRain(sc) {
+  SESSION.copper += sc.copper;
+  for (const q of sc.qs) SESSION.q[q] = (SESSION.q[q] || 0) + 1;
+  STREAK.copper += sc.copper; STREAK.items += sc.qs.length;
+  if (!on.records) return;
+  const bq = sc.qs.length ? Math.max(...sc.qs) : -1;
+  if (sc.copper > RECORD.copper && RECORD.copper > 0) banner(`New record: most money from one loot — ${moneyText(sc.copper)}`);
+  if (bq > RECORD.bestQ && RECORD.bestQ >= 0 && bq >= 2) banner(`Best drop this session!`, QC[bq]);
+  RECORD.copper = Math.max(RECORD.copper, sc.copper); RECORD.bestQ = Math.max(RECORD.bestQ, bq);
+}
+function moneyText(c) {
+  const g = Math.floor(c / 10000), s = Math.floor(c / 100) % 100, cp = c % 100;
+  return `${g ? g + "g " : ""}${g || s ? s + "s " : ""}${cp}c`;
+}
+function noteStreak(again) { // called as each rain starts; only "Loot again" (another kill) keeps a streak going
+  const t = nowS();
+  if (on.streak && again && t - STREAK.last < STREAK_WINDOW) STREAK.n++;
+  else { STREAK.n = 1; STREAK.copper = 0; STREAK.items = 0; }
+  STREAK.last = t; STREAK.ended = false;
+  if (on.streak && STREAK.n === 5) { banner("Loot streak x5!", "#ff9b3d"); chord([659, 831, 988, 1319], 0.6, 0.05); }
+}
+function drawOverlays() {
+  const t = nowS();
+  // streak: a badge by the counter with its timer draining; a summary when it runs out
+  if (on.streak && STREAK.n > 1 && !STREAK.ended) {
+    const left = 1 - (t - STREAK.last) / STREAK_WINDOW;
+    if (left <= 0) {
+      STREAK.ended = true;
+      banner(`Streak x${STREAK.n} ended · ${moneyText(STREAK.copper)} · ${STREAK.items} items`, "#ff9b3d");
+    } else {
+      const x = VW / 2 + 95, y = V_H * 0.5;
+      ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.font = `700 ${X(18)}px Georgia, serif`;
+      ctx.fillStyle = "#ff9b3d"; ctx.shadowColor = "#000"; ctx.shadowBlur = 5 * scale;
+      ctx.fillText(`x${STREAK.n} streak`, X(x), Y(y));
+      ctx.shadowBlur = 0; ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(X(x), Y(y - 14), X(80), X(4));
+      ctx.fillStyle = "#ff9b3d"; ctx.fillRect(X(x), Y(y - 14), X(80 * left), X(4));
+    }
+  }
+  // banners at the top
+  banners.forEach(b => b.age += 1 / 60);
+  banners = banners.filter(b => b.age < 3);
+  banners.forEach((b, i) => {
+    const a = Math.min(1, b.age / 0.2) * Math.min(1, (3 - b.age) / 0.4);
+    ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `700 ${X(20)}px Georgia, serif`; ctx.fillStyle = b.color; ctx.shadowColor = "#000"; ctx.shadowBlur = 6 * scale;
+    ctx.fillText(b.text, X(VW / 2), Y(V_H * 0.93 - i * 30 - 8 * Math.max(0, 0.2 - b.age)));
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  });
+  // the session tally, top right
+  if (on.tally && (SESSION.copper || SESSION.q.some(Boolean))) {
+    const lines = [["This session", "#c9b98a"], [moneyText(SESSION.copper), "#ffd100"]];
+    for (let q = 5; q >= 2; q--) if (SESSION.q[q]) lines.push([`${SESSION.q[q]} × ${["", "", "green", "blue", "purple", "orange"][q]}`, QC[q]]);
+    ctx.fillStyle = "rgba(8,8,12,0.7)"; roundRect(X(VW - 175), Y(V_H - 12), X(160), X(14 + 17 * lines.length), X(6)); ctx.fill();
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    lines.forEach(([txt, col], i) => { ctx.font = `${i ? 600 : 700} ${X(13)}px Georgia, serif`; ctx.fillStyle = col; ctx.fillText(txt, X(VW - 165), Y(V_H - 18 - 17 * i)); });
   }
 }
 
@@ -547,6 +862,8 @@ function frame(now) {
   try { update(dt); draw(); } catch (e) { console.error(e); R = null; }
 }
 document.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => start(b.dataset.s)));
+document.getElementById("again").addEventListener("click", () => start(lastScene, true));
+document.getElementById("small").addEventListener("change", e => { smallStyle = e.target.value; });
 requestAnimationFrame(frame);
 setTimeout(() => start("boss"), 400);
 </script>

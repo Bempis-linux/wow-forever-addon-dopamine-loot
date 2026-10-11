@@ -157,6 +157,25 @@ function Core.HaulSize(items, copper)
   return "small"
 end
 
+-- The container a haul comes out of (the chest show): the loot pouch for a small haul, the treasure
+-- chest for the rest (medium: a quick pop open; big: it shakes while the light in its seams climbs
+-- the rarities to the best one, then the lid bursts off), the golden chest with a Legendary in it.
+-- opts = {shake, tease} (the switches). Returns {kind, size, best, shakeT, steps}.
+function Core.BoxPlan(items, copper, opts)
+  local size, best = Core.HaulSize(items, copper), -1
+  for _, it in ipairs(items) do best = math.max(best, it.quality or 0) end
+  local kind = best >= 5 and "gold" or size == "small" and "pouch" or "chest"
+  local shakeT = kind == "pouch" and 0.22 or kind == "gold" and 1.3 or size == "big" and 0.9 or 0.35
+  if kind ~= "pouch" and not opts.shake then shakeT = 0.15 end
+  local steps, top = {}, math.max(best, 1)
+  if opts.tease and (kind == "gold" or size == "big") then
+    for q = 1, top do steps[#steps + 1] = q end
+  else
+    steps[1] = kind == "chest" and 1 or top
+  end
+  return { kind = kind, size = size, best = best, shakeT = shakeT, steps = steps }
+end
+
 -- "1g 20s 5c", "1g20s", "35s", "250" (copper) -> copper, or nil
 function Core.ParseMoney(text)
   text = (text or ""):lower():gsub("%s+", "")
@@ -224,6 +243,10 @@ ns.RAIN_FX = {
   { key = "Beam", word = "beam", label = "Loot beam", tip = "A pillar of light over resting Rare and better items, taller for the best one." },
   { key = "Hitstop", word = "hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands." },
   { key = "Names", word = "names", label = "Name labels", tip = "Rare and better items show their name while they rest." },
+  { key = "Chest", word = "chest", label = "Treasure chest", tip = "Loot comes out of a container: a pouch for small hauls, the treasure chest for bigger ones, a golden chest for a Legendary." },
+  { key = "Shake", word = "shake", label = "Chest shake", tip = "The chest rattles before it opens, longer for better hauls." },
+  { key = "Tease", word = "tease", label = "Rarity tease", tip = "While it shakes, light from the chest's seams climbs white, green, blue, purple... up to the best item inside." },
+  { key = "Burst", word = "burst", label = "Lid burst", tip = "On a big haul the lid flies off and rays of light in the best item's color shine out." },
   { key = "Escape", word = "escape", label = "Skip with Escape", tip = "Escape ends the rain at once; the good items still become popups." },
 }
 -- The switches, read once per frame (RefreshFx) rather than per sprite
@@ -263,6 +286,7 @@ ns.AddCommand("rainfx", "loot rain effects: /dl rainfx [name off|on]", function(
 end)
 
 local layer, top, driver, escFrame
+local box, HideBox -- the chest show's container (further down)
 local sprites, pool, dust = {}, {}, {}
 local bounds = {}
 local state -- nil | the running rain (see ns:Rain)
@@ -391,6 +415,7 @@ local function Finish()
     layer.pulse:Hide()
     layer.bagGlow:Hide()
     for _, t in ipairs(layer.flashTex) do t:Hide() end
+    HideBox()
     layer:ClearAllPoints()
     layer:SetAllPoints(UIParent)
   end
@@ -540,6 +565,178 @@ local function Settle(st)
   end
 end
 
+---------------------------------------------------------------------------
+-- The chest show: the container the rain comes out of (Core.BoxPlan picks it). Every layer is a
+-- 128-unit square with the same center, so they stack, tint apart (wood, iron, gold) and turn
+-- together; the chest's seam is 0.1 of its size above the center, the pouch's mouth 0.22.
+---------------------------------------------------------------------------
+local BOX = 128
+local WOOD, WOOD_LID, PLANK, IRON = { 0.42, 0.27, 0.14 }, { 0.5, 0.32, 0.17 }, { 0.22, 0.13, 0.06 }, { 0.3, 0.3, 0.33 }
+local GOLD, GOLD_LID, GOLD_PLANK, GOLD_TRIM = { 0.8, 0.6, 0.16 }, { 0.86, 0.65, 0.2 }, { 0.55, 0.4, 0.1 }, { 1, 0.93, 0.6 }
+-- (box, the frame and its layers, is made once by MakeBox)
+
+local function MakeBox()
+  box = CreateFrame("Frame", nil, layer)
+  box:SetAllPoints()
+  box:SetFrameLevel(layer:GetFrameLevel() + 2) -- behind the sprites: they come out of it
+  local function T(file, lay, _, blend) return Tex(box, lay, MEDIA .. file, blend) end -- sublevels set below
+  box.rays = T("Rays", "BACKGROUND", nil, "ADD")
+  box.inner = T("Glow", "BORDER", nil, "ADD")
+  box.body, box.planks = T("ChestBody", "ARTWORK"), T("ChestPlanks", "ARTWORK")
+  box.bands, box.lock = T("ChestBands", "ARTWORK"), T("ChestLock", "ARTWORK")
+  box.seam = T("ChestSeam", "OVERLAY", nil, "ADD")
+  box.lid, box.lidBands = T("ChestLid", "OVERLAY"), T("ChestLidBands", "OVERLAY")
+  box.pBody, box.pShade = T("PouchBody", "ARTWORK"), T("PouchShade", "ARTWORK")
+  box.pString, box.pMouth = T("PouchString", "ARTWORK"), T("PouchMouth", "OVERLAY")
+  box.planks:SetDrawLayer("ARTWORK", 1); box.bands:SetDrawLayer("ARTWORK", 2); box.lock:SetDrawLayer("ARTWORK", 3)
+  box.lidBands:SetDrawLayer("OVERLAY", 2)
+  box.pShade:SetDrawLayer("ARTWORK", 1); box.pString:SetDrawLayer("ARTWORK", 2)
+  box.chest = { box.body, box.planks, box.bands, box.lock }
+  box.lidParts = { box.lid, box.lidBands }
+  box.pouch = { box.pBody, box.pShade, box.pString }
+  box.sparks = {}
+  for i = 1, 6 do box.sparks[i] = T("Mote", "OVERLAY", nil, "ADD") end
+  box.all = { box.rays, box.inner, box.seam, box.pMouth }
+  for _, list in ipairs({ box.chest, box.lidParts, box.pouch, box.sparks }) do
+    for _, t in ipairs(list) do box.all[#box.all + 1] = t end
+  end
+end
+
+function HideBox()
+  if box then for _, t in ipairs(box.all) do t:Hide() end end
+end
+
+-- Dress the layers for this haul's container (colors) and hide what it doesn't use
+local function SetUpBox(b)
+  if not box then MakeBox() end
+  HideBox()
+  local gold = b.kind == "gold"
+  local function Tint(t, c, a) t:SetVertexColor(c[1], c[2], c[3], a or 1) end
+  if b.kind == "pouch" then
+    Tint(box.pBody, { 0.54, 0.35, 0.17 }); Tint(box.pShade, { 0, 0, 0 }, 0.45)
+    Tint(box.pString, { 0.8, 0.65, 0.35 }); Tint(box.pMouth, { 0.12, 0.07, 0.03 })
+  else
+    Tint(box.body, gold and GOLD or WOOD); Tint(box.planks, gold and GOLD_PLANK or PLANK)
+    Tint(box.bands, gold and GOLD_TRIM or IRON); Tint(box.lock, gold and { 1, 0.97, 0.8 } or { 0.85, 0.68, 0.3 })
+    Tint(box.lid, gold and GOLD_LID or WOOD_LID); Tint(box.lidBands, gold and GOLD_TRIM or IRON)
+    for _, sp in ipairs(box.sparks) do Tint(sp, { 1, 0.97, 0.78 }) end
+  end
+  local r, g, bl = ns.QualityColor(math.max(b.best, 1))
+  b.r, b.g, b.b = r, g, bl
+  box.rays:SetVertexColor(r, g, bl, 1)
+  box.inner:SetVertexColor(math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, bl + 0.3), 1)
+end
+
+local function Rattle()
+  if not ns.settings.noSound then
+    PlaySoundFile(("%sChestRattle%d.ogg"):format(MEDIA, math.random(3)), ns.settings.soundChannel or "SFX")
+  end
+end
+
+-- The container opens: the rain starts, with the opening sound (setting openSound)
+local function OpenBox(st, b)
+  b.open, b.openT = true, 0
+  st.nextLaunch = st.age
+  local open = ns.settings.openSound or "size"
+  if open == "never" or ns.settings.noSound then return end
+  local file = b.kind == "gold" and "ChestBurstGold" or b.kind == "pouch" and "PouchPop"
+    or b.size == "big" and "ChestBurst" or "ChestPop"
+  if open == "always" then file = b.kind == "gold" and "ChestBurstGold" or "ChestBurst" end
+  PlaySoundFile(MEDIA .. file .. ".ogg", ns.settings.soundChannel or "SFX")
+end
+
+-- Shake, climb the tease, open
+local function UpdateBox(st, dt)
+  local b = st.box
+  b.t = b.t + dt
+  if b.open then b.openT = b.openT + dt; return end
+  local u = math.min(1, b.t / b.shakeT)
+  if b.kind ~= "pouch" and On("Shake") then -- knocks, quicker as it builds
+    b.rattle = b.rattle - dt
+    if b.rattle <= 0 then b.rattle = 0.11 - 0.05 * u; Rattle() end
+  end
+  local idx = math.min(#b.steps, math.floor(u * #b.steps) + 1)
+  if idx > b.idx then -- the light climbs a rarity: a chime a step up and a flash
+    b.idx, b.flash = idx, 1
+    if not ns.settings.noSound then
+      PlaySoundFile(("%sTease%02d.ogg"):format(MEDIA, math.min(idx - 1, 5)), ns.settings.soundChannel or "SFX")
+    end
+  end
+  if b.t >= b.shakeT then OpenBox(st, b) end
+end
+
+local function DrawBox(st, k, dt)
+  local b = st.box
+  local fade = st.settleAt and math.max(0, 1 - (st.age - st.settleAt) / FADE_T) or 1
+  if b.hidden then return end
+  if fade <= 0 then b.hidden = true; return HideBox() end
+  local cx, mouth = b.x, b.y
+  local u = math.min(1, b.t / b.shakeT)
+  b.flash = math.max(0, (b.flash or 0) - dt * 4)
+  local function Place(t, x, y, size, rot, alpha)
+    t:ClearAllPoints()
+    t:SetPoint("CENTER", layer, "BOTTOMLEFT", x, y)
+    t:SetSize(size, size)
+    t:SetRotation(rot or 0)
+    t:SetAlpha((alpha or 1) * fade)
+    t:Show()
+  end
+  if b.kind == "pouch" then
+    local jig = b.open and 0 or math.sin(b.t * 45) * 0.12
+    local deflate = b.open and math.min(1, b.openT / 0.8) or 0
+    local a = b.open and math.max(0, 1 - math.max(0, b.openT - 0.6) / 0.5) or 1
+    local cy = mouth - 0.22 * BOX
+    for _, t in ipairs(box.pouch) do
+      Place(t, cx, cy, BOX, 0, a)
+      t:SetSize(BOX * (1 + jig), BOX * (1 - 0.3 * deflate)) -- jiggles, then sags as it empties
+    end
+    if b.open then Place(box.pMouth, cx, cy, BOX, 0, a) else box.pMouth:Hide() end
+    return
+  end
+  local jx, rot = 0, 0
+  if not b.open and On("Shake") then
+    local amp = 1.5 + 5 * u
+    jx, rot = (math.random() - 0.5) * 2 * amp, (math.random() - 0.5) * 0.08 * u
+  end
+  local cy = mouth - 0.1 * BOX
+  for _, t in ipairs(box.chest) do Place(t, cx + jx, cy, BOX, rot) end
+  -- the seam's light (climbing the rarities while it shakes), then the light inside once open
+  local q = b.steps[b.idx] or 1
+  local r, g, bl = ns.QualityColor(q)
+  local glow = b.open and 1 or (b.size == "big" or b.kind == "gold") and 0.3 + 0.7 * u or 0.2
+  box.seam:SetVertexColor(r, g, bl, 1)
+  Place(box.seam, cx + jx, cy, BOX, rot, math.min(1, glow + b.flash))
+  if b.open then
+    Place(box.inner, cx, mouth, 90 + 40 * math.min(1, b.openT * 3), 0, math.max(0, 1 - b.openT / 1.5) * 0.9)
+  else
+    box.inner:Hide()
+  end
+  -- the lid: shut, flying off (a big haul's burst) or tipped back
+  local big = b.size == "big" or b.kind == "gold"
+  for _, t in ipairs(box.lidParts) do
+    if not b.open then
+      Place(t, cx + jx, cy, BOX, rot)
+    elseif On("Burst") and big then
+      local tt = b.openT
+      if tt < 0.7 then Place(t, cx + 40 * tt, cy + (320 * tt - 300 * tt * tt) * k, BOX, -2.2 * tt, 1 - tt / 0.7) else t:Hide() end
+    else
+      Place(t, cx - 6, cy + 0.06 * BOX, BOX, 0.45)
+    end
+  end
+  -- rays out of the open chest in the best item's color
+  if b.open and On("Burst") and big and b.openT < 1.4 then
+    Place(box.rays, cx, mouth, 330, b.openT * 0.3, (1 - b.openT / 1.4) * 0.8)
+  else
+    box.rays:Hide()
+  end
+  if b.kind == "gold" then -- lucky gold glitters
+    for i, sp in ipairs(box.sparks) do
+      local a = b.t * 3 + i
+      Place(sp, cx + math.cos(a) * 70, mouth + 18 + math.sin(a * 1.3) * 26, 7, 0, 0.5 + 0.5 * math.sin(a * 5))
+    end
+  end
+end
+
 local function Update(_, dt)
   local st = state
   if not st then return Finish() end
@@ -565,18 +762,25 @@ local function Update(_, dt)
   bounds.left, bounds.right, bounds.k = SIZE, W - SIZE, k
   bounds.floor = 2 + H * (ns.settings.rainFloor or 0) / 100
 
-  -- launch the next sprites on schedule; the best waits a beat after the rest
-  while st.queue[1] and st.age >= st.nextLaunch do
-    Launch(st, table.remove(st.queue, 1), false, W, H, k)
-    st.launched = st.launched + 1
-    st.nextLaunch = st.nextLaunch + Core.Interval(st.launched, st.total, On("Escalate"))
-    if not st.queue[1] then st.lastLaunch = st.age end
+  -- the container shakes and opens first; then the next sprites launch on schedule (the best a
+  -- beat after the rest)
+  if st.box then
+    UpdateBox(st, dt)
+    DrawBox(st, k, dt)
   end
-  if st.best and not st.queue[1] then
-    st.bestAt = st.bestAt or st.age + BEST_PAUSE
-    if st.age >= st.bestAt then
-      Launch(st, st.best, true, W, H, k)
-      st.best, st.lastLaunch = nil, st.age
+  if not st.box or st.box.open then
+    while st.queue[1] and st.age >= st.nextLaunch do
+      Launch(st, table.remove(st.queue, 1), false, W, H, k)
+      st.launched = st.launched + 1
+      st.nextLaunch = st.nextLaunch + Core.Interval(st.launched, st.total, On("Escalate"))
+      if not st.queue[1] then st.lastLaunch = st.age end
+    end
+    if st.best and not st.queue[1] then
+      st.bestAt = st.bestAt or st.age + BEST_PAUSE
+      if st.age >= st.bestAt then
+        Launch(st, st.best, true, W, H, k)
+        st.best, st.lastLaunch = nil, st.age
+      end
     end
   end
 
@@ -860,7 +1064,7 @@ end
 function ns:Rain(items, copper)
   copper = copper or 0
   RefreshFx()
-  local carried, baseCopper = 0, 0
+  local carried, baseCopper, oldBox = 0, 0, nil
   if state then
     if not state.settleAt then
       -- a new burst while one is still in the air: everything not yet handed off joins the new one,
@@ -874,6 +1078,7 @@ function ns:Rain(items, copper)
       local shown = math.floor(state.shownCopper)
       baseCopper = state.baseCopper + shown
       copper = copper + math.max(0, state.copper - shown)
+      oldBox = state.box
       Finish()
     else
       Skip() -- already settling: the good items still waiting in line pop up now
@@ -913,9 +1118,24 @@ function ns:Rain(items, copper)
   layer.money:SetText("")
   layer.money:SetAlpha(1)
   if On("Escape") then escFrame:Show() end
-  -- the chest opening: as big as the haul (setting openSound: "size", "always", "never")
-  local open = ns.settings.openSound or "size"
-  local size = open == "always" and "big" or open == "never" and "small" or Core.HaulSize(all, copper)
-  if size == "big" then ns:PlayBurstSound() elseif size == "medium" then ns:PlayChestPop() end
+  if On("Chest") then
+    -- out of a container: nothing leaves until it opens (UpdateBox opens it, with its sound)
+    local b = Core.BoxPlan(all, copper, { shake = On("Shake"), tease = On("Tease") })
+    local W, H = layer:GetWidth(), layer:GetHeight()
+    local floor = 2 + H * (ns.settings.rainFloor or 0) / 100
+    b.x, b.y = W / 2, math.max(H * 0.38, floor + H * 0.13) -- where Launch sends things from
+    b.t, b.idx, b.open, b.openT, b.rattle, b.flash = 0, 1, false, 0, 0, 0 -- idx 1: the first color needs no chime
+    SetUpBox(b)
+    state.box, state.nextLaunch = b, math.huge
+    if oldBox then -- loot joining a rain in progress: the container carries on, it does not start over
+      if oldBox.open then b.open, b.openT, state.nextLaunch = true, oldBox.openT, 0
+      else b.t, b.idx = math.min(oldBox.t, b.shakeT), math.min(oldBox.idx, #b.steps) end
+    end
+  else
+    -- no container: the opening sound alone, as big as the haul (setting openSound)
+    local open = ns.settings.openSound or "size"
+    local size = open == "always" and "big" or open == "never" and "small" or Core.HaulSize(all, copper)
+    if size == "big" then ns:PlayBurstSound() elseif size == "medium" then ns:PlayChestPop() end
+  end
   driver:SetScript("OnUpdate", Update)
 end

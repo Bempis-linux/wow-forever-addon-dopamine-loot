@@ -169,4 +169,18 @@ local wide = { { x = 600, half = 20, wide = true } }
 local wx = C.Slot(600, { half = 20, wide = true }, wide, 40, 1880)
 Check("two named items keep 150 apart", math.abs(wx - 600) >= 150, ("%.0f"):format(wx))
 
+-- 11. The chest show's container
+local on = { shake = true, tease = true }
+local b = C.BoxPlan({ { quality = 0 }, { quality = 1 } }, 54, on)
+Check("a small haul comes out of the pouch", b.kind == "pouch" and b.shakeT < 0.3)
+b = C.BoxPlan({ {}, {}, {}, {}, {}, { quality = 2 } }, 0, on)
+Check("a medium haul: the chest, a quick pop, no tease", b.kind == "chest" and b.size == "medium" and #b.steps == 1)
+b = C.BoxPlan({ { quality = 1 }, { quality = 4 } }, 0, on)
+Check("an Epic: the chest shakes and the tease climbs white..purple", b.kind == "chest" and b.size == "big"
+  and #b.steps == 4 and b.steps[4] == 4 and b.shakeT >= 0.9)
+b = C.BoxPlan({ { quality = 5 } }, 0, on)
+Check("a Legendary: the golden chest", b.kind == "gold" and b.steps[#b.steps] == 5)
+b = C.BoxPlan({ { quality = 4 } }, 0, { shake = false, tease = false })
+Check("shake and tease off: a short beat, one color", b.shakeT < 0.2 and #b.steps == 1)
+
 print(fails == 0 and "all passed" or (fails .. " failed"))

@@ -276,7 +276,7 @@ local function CreatePanel()
   testLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -12)
   local testBox = NumberBox(panel, 36, function() return ns.settings.testRain or 8 end,
     function(v) ns.settings.testRain = math.floor(v) end, 1, 60,
-    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple.")
+    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple, from 12 one is orange.")
   testBox:SetPoint("LEFT", testLabel, "RIGHT", 10, 0)
   local testAfter = Label(panel, "GameFontHighlight", "items")
   testAfter:SetPoint("LEFT", testBox, "RIGHT", 8, 0)

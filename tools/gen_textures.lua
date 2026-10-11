@@ -11,6 +11,7 @@
 --   Wave      a thin glowing ring that expands (legendary shockwave)
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 --   Pillar, Vignette   loot rain: the light pillar over resting Rare+, the Epic screen-edge pulse
+--   Chest*, Pouch*, Rays   chest show: the treasure chest and loot pouch in layers (tinted), burst rays
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
 
@@ -131,4 +132,69 @@ end))
 Write("Vignette", Fill(Canvas(256, 256), function(u, v)
   local t = math.max(0, math.min(1, (R(u, v) - 0.55) / 0.75))
   return t * t * (3 - 2 * t)
+end))
+
+-- The treasure chest and the loot pouch (chest show). Every layer is a 128 x 128 square sharing the
+-- same center, so in game they stack exactly, tint separately (wood, iron, gold) and can all turn
+-- together. The chest's seam (where the lid meets the body) is at v = 0.6; the pouch's mouth at 0.72.
+local function Smooth(e0, e1, x) local t = math.max(0, math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t) end
+local AA = 0.008 -- soft edge, about one pixel
+local function InRect(u, v, x0, x1, y0, y1) -- 1 inside, soft at the edges
+  return Smooth(x0 - AA, x0 + AA, u) * (1 - Smooth(x1 - AA, x1 + AA, u)) * Smooth(y0 - AA, y0 + AA, v) * (1 - Smooth(y1 - AA, y1 + AA, v))
+end
+local function InEllipse(u, v, cx, cy, rx, ry) -- 1 inside, soft at the edge
+  local d = math.sqrt(((u - cx) / rx) ^ 2 + ((v - cy) / ry) ^ 2)
+  return 1 - Smooth(1 - AA / math.min(rx, ry), 1 + AA / math.min(rx, ry), d)
+end
+local L, Rr, B0, SEAM, LT = 0.1, 0.9, 0.25, 0.6, 0.72 -- body left/right/bottom, seam, lid shoulder
+local function Body(u, v) return InRect(u, v, L, Rr, B0, SEAM) end
+local function Lid(u, v) return math.max(InRect(u, v, L, Rr, SEAM, LT), InEllipse(u, v, 0.5, LT, 0.4, 0.085) * (v >= LT - 0.01 and 1 or 0)) end
+local function Rim(inside, u, v, fn) -- a band just inside a shape's edge: inside minus a shrunk copy
+  return math.max(0, inside - fn(u, v))
+end
+local function Bands(u, v) return math.max(InRect(u, v, 0.255, 0.305, 0, 1), InRect(u, v, 0.695, 0.745, 0, 1)) end
+
+Write("ChestBody", Fill(Canvas(128, 128), Body))
+Write("ChestPlanks", Fill(Canvas(128, 128), function(u, v)
+  return InRect(u, v, L, Rr, B0, SEAM) * math.max(Bump(v, B0 + 0.35 / 3, 0.006), Bump(v, B0 + 0.7 / 3, 0.006))
+end))
+Write("ChestBands", Fill(Canvas(128, 128), function(u, v)
+  local body = Body(u, v)
+  local inner = InRect(u, v, L + 0.018, Rr - 0.018, B0 + 0.018, SEAM - 0.012)
+  return math.max(body * Bands(u, v), Rim(body, u, v, function() return inner end))
+end))
+Write("ChestLid", Fill(Canvas(128, 128), Lid))
+Write("ChestLidBands", Fill(Canvas(128, 128), function(u, v)
+  local lid = Lid(u, v)
+  local inner = math.max(InRect(u, v, L + 0.018, Rr - 0.018, SEAM + 0.012, LT), InEllipse(u, v, 0.5, LT, 0.382, 0.067) * (v >= LT - 0.01 and 1 or 0))
+  return math.max(lid * Bands(u, v), math.max(0, lid - inner))
+end))
+Write("ChestLock", Fill(Canvas(128, 128), function(u, v)
+  local plate = InRect(u, v, 0.45, 0.55, 0.54, 0.665)
+  local hole = math.max(InEllipse(u, v, 0.5, 0.615, 0.014, 0.014), InRect(u, v, 0.494, 0.506, 0.57, 0.615))
+  return math.max(0, plate - hole)
+end))
+Write("ChestSeam", Fill(Canvas(128, 128), function(u, v)
+  local across = Smooth(L - 0.02, L + 0.06, u) * (1 - Smooth(Rr - 0.06, Rr + 0.02, u))
+  return across * (Bump(v, SEAM, 0.01) + 0.45 * Bump(v, SEAM, 0.045))
+end))
+
+local PCX, PCY, PRX, PRY, MOUTH = 0.5, 0.36, 0.3, 0.27, 0.72
+local function Sack(u, v)
+  return math.max(InEllipse(u, v, PCX, PCY, PRX, PRY), InRect(u, v, 0.43, 0.57, 0.55, MOUTH), InEllipse(u, v, 0.5, MOUTH, 0.1, 0.035))
+end
+Write("PouchBody", Fill(Canvas(128, 128), Sack))
+Write("PouchShade", Fill(Canvas(128, 128), function(u, v) -- darker toward the bottom and the left
+  return Sack(u, v) * (0.75 * (1 - Smooth(0.12, 0.5, v)) + 0.35 * (1 - Smooth(0.2, 0.55, u)))
+end))
+Write("PouchString", Fill(Canvas(128, 128), function(u, v) return InRect(u, v, 0.4, 0.6, 0.615, 0.645) end))
+Write("PouchMouth", Fill(Canvas(128, 128), function(u, v) return InEllipse(u, v, 0.5, MOUTH, 0.085, 0.028) end))
+
+-- Chest show: soft light spokes from the center (the rays out of a chest bursting open)
+Write("Rays", Fill(Canvas(256, 256), function(u, v)
+  local r = R(u, v)
+  if r >= 1 then return 0 end
+  local ang = math.atan(u - 0.5, v - 0.5)
+  local spokes = math.max(0, math.cos(6 * ang)) ^ 10 + 0.5 * math.max(0, math.cos(6 * ang + math.pi)) ^ 16
+  return spokes * (1 - r) ^ 0.9 * math.min(1, r / 0.12)
 end))

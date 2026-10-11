@@ -36,7 +36,7 @@ local function Create()
   testLabel:SetPoint("TOPLEFT", colTop.bottom, "BOTTOMLEFT", 4, -18)
   local testBox = UI.NumberBox(panel, 36, function() return ns.settings.testRain or 8 end,
     function(v) ns.settings.testRain = math.floor(v) end, 1, 60,
-    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple; some money too.")
+    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple, from 12 one is orange (the golden chest); some money too.")
   testBox:SetPoint("LEFT", testLabel, "RIGHT", 10, 0)
   local testAfter = UI.Label(panel, "GameFontHighlight", "items")
   testAfter:SetPoint("LEFT", testBox, "RIGHT", 8, 0)
@@ -64,7 +64,7 @@ local function Create()
   openLabel:SetPoint("TOPLEFT", quest, "BOTTOMLEFT", 4, -16)
   local last = UI.Choice(panel, {
     { value = "size", label = "By haul size (recommended)",
-      tip = "Silent for a few grays, greens and copper; a soft pop from 6 items or 1 gold; the big game sound when something Rare or better is in it." },
+      tip = "A small haul: the pouch's little pop (silent without the treasure chest); 6 items or 1 gold: a soft lid pop; something Rare or better: the lid bursting off (a bigger one for a Legendary)." },
     { value = "always", label = "Always the big sound", tip = "Every rain opens with the big game sound." },
     { value = "never", label = "Never", tip = "No opening sound; the items and coins leaving the chest still whoosh." },
   }, function() return ns.settings.openSound or "size" end, function(v) ns.settings.openSound = v end, openLabel)
