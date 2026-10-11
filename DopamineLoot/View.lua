@@ -4,10 +4,11 @@
 -- icon on a card that flips like a coin.
 --   relic   just the item on a soft glow, name below
 --   beam    a cone of light rising from a glowing disc, sparks drifting up through it
---   halo    a dark lens inside a ring in the quality color, a bright arc sweeping round, details beside
---   banner  a ribbon in the quality color fading at both ends, the item standing over it
+--   halo    a dark lens inside a ring in the quality color, details beside
+--   banner  a ribbon in the quality color fading at both ends, the item on a diamond emblem, a shine
+--           sweeping across now and then
 -- Every style: the name in the game's title font, a flash of light as it appears, and an arrival by
--- rarity (Rare a spark ring; Epic light rays and orbiting sparks; Legendary shockwaves and embers).
+-- rarity (Rare and Epic a spark ring; Legendary shockwaves and embers). The light holds still.
 -- Models: set only after the frame is shown, and again when it's shown after being hidden (the
 -- client drops them); never inside an animation group (moved and faded by hand).
 local _, ns = ...
@@ -21,18 +22,18 @@ local TITLE_FONT = (LOCALE == "ruRU" and "Fonts\\MORPHEUS_CYR.TTF")
   or ((LOCALE == "koKR" or LOCALE == "zhCN" or LOCALE == "zhTW") and nil)
   or "Fonts\\MORPHEUS.TTF"
 local CARD = 56
-local RISE, SPARKS, ORBIT, EMBERS = 8, 18, 3, 6 -- beam's rising motes; arrival sparks; epic orbit; legendary embers
-local FLASH_T, BURST_T, RAYS_T, WAVE_T, FOUNTAIN_T = 0.45, 0.8, 0.7, 0.9, 1.5
+local RISE, SPARKS, EMBERS = 8, 18, 6 -- beam's rising motes; arrival sparks; legendary embers
+local FLASH_T, BURST_T, WAVE_T, FOUNTAIN_T = 0.45, 0.8, 0.9, 1.5
 local GRAVITY = -420 -- legendary ember fountain, px/s^2
 
--- Arrival by rarity (every style): Rare a ring of sparks; Epic light rays, a bigger burst, then
--- sparks circling the item; Legendary shockwaves, a fountain of embers and embers drifting up
+-- Arrival by rarity (every style): Rare a ring of sparks; Epic a bigger ring; Legendary
+-- shockwaves, a fountain of embers and embers drifting up
 local function Tier(q) return q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or nil end
 
 ns.STYLES = {
-  { key = "relic", label = "Relic", tip = "Just the item floating in a soft glow, slow light rays turning behind it, the name below. No box." },
+  { key = "relic", label = "Relic", tip = "Just the item floating in a soft glow, the name below. No box." },
   { key = "beam", label = "Beam", tip = "A cone of light rises from a glowing disc under the item, sparks drifting up." },
-  { key = "halo", label = "Halo lens", tip = "The item in a dark lens ringed in its color, a bright arc sweeping round; details beside it." },
+  { key = "halo", label = "Halo lens", tip = "The item in a dark lens ringed in its color; details beside it." },
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color, the item on a diamond emblem, a shine sweeping across." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
@@ -110,21 +111,17 @@ function ns.CreateView(f)
   f.cone = Tex(f, "BACKGROUND", MEDIA .. "Cone", "ADD")
   f.lens = Tex(f, "BACKGROUND", MEDIA .. "Lens")
   f.halo = Tex(f, "BACKGROUND", MEDIA .. "Halo", "ADD", 1)
-  f.sweep = Tex(f, "BACKGROUND", MEDIA .. "Sweep", "ADD", 2)
   f.banner = Tex(f, "BACKGROUND", MEDIA .. "Banner")
   f.bannerTop = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- the banner squashed thin: an edge line
   f.bannerBottom = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- that fades out at both ends
   f.disc = Tex(f, "BORDER", MEDIA .. "Disc", "ADD")
   f.line = Tex(f, "BORDER", "Interface\\Buttons\\WHITE8X8")
-  -- relic v2: slow rays behind the glow, a bright core, a soft shadow under the floating item
-  f.relicRays = Tex(f, "BACKGROUND", MEDIA .. "Rays", "ADD", -1)
-  f.core = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD", 1)
-  f.shadow = Tex(f, "BORDER", MEDIA .. "Disc")
+  f.shadow = Tex(f, "BORDER", MEDIA .. "Disc") -- relic: a soft shadow under the floating item
   -- banner v2: a diamond emblem behind the item, breaking the band's edges
   f.emblem = Tex(f, "BORDER", MEDIA .. "Diamond", nil, 2)
   f.emblemEdge = Tex(f, "BORDER", MEDIA .. "DiamondEdge", "ADD", 3)
-  f.art = { f.glow, f.cone, f.lens, f.halo, f.sweep, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
-    f.relicRays, f.core, f.shadow, f.emblem, f.emblemEdge }
+  f.art = { f.glow, f.cone, f.lens, f.halo, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
+    f.shadow, f.emblem, f.emblemEdge }
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
   if f.shineClip.SetClipsChildren then f.shineClip:SetClipsChildren(true) end
@@ -148,7 +145,6 @@ function ns.CreateView(f)
   f.fx:SetAllPoints()
   f.fx:SetFrameLevel(f.stage:GetFrameLevel() + 5)
   -- (all in ARTWORK: under the text, which is OVERLAY)
-  f.rays = Tex(f.fx, "ARTWORK", MEDIA .. "Rays", "ADD", -1)
   f.flash = Tex(f.fx, "ARTWORK", MEDIA .. "Glow", "ADD")
   f.waves = { Tex(f.fx, "ARTWORK", MEDIA .. "Wave", "ADD"), Tex(f.fx, "ARTWORK", MEDIA .. "Wave", "ADD") }
   local function Motes(n)
@@ -156,9 +152,9 @@ function ns.CreateView(f)
     for i = 1, n do list[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Mote", "ADD", 1) end
     return list
   end
-  f.rise, f.sparks, f.orbit, f.embers = Motes(RISE), Motes(SPARKS), Motes(ORBIT), Motes(EMBERS)
-  f.fxAll = { f.rays, f.flash, f.waves[1], f.waves[2] }
-  for _, list in ipairs({ f.rise, f.sparks, f.orbit, f.embers }) do
+  f.rise, f.sparks, f.embers = Motes(RISE), Motes(SPARKS), Motes(EMBERS)
+  f.fxAll = { f.flash, f.waves[1], f.waves[2] }
+  for _, list in ipairs({ f.rise, f.sparks, f.embers }) do
     for _, m in ipairs(list) do f.fxAll[#f.fxAll + 1] = m end
   end
 
@@ -191,7 +187,7 @@ function ns.CreateView(f)
     else
       self.stage:SetPoint("CENTER", self, "CENTER", sx, sy)
     end
-    for _, t in ipairs({ self.flash, self.rays, self.waves[1], self.waves[2] }) do t:SetPoint("CENTER", self.stage, "CENTER") end
+    for _, t in ipairs({ self.flash, self.waves[1], self.waves[2] }) do t:SetPoint("CENTER", self.stage, "CENTER") end
     if TITLE_FONT then self.name:SetFont(TITLE_FONT, L.font, "") end
     local face = self.name:GetFont()
     if not (TITLE_FONT and face and face:lower():find("morpheus")) then self.name:SetFontObject("GameFontNormalLarge") end
@@ -199,15 +195,9 @@ function ns.CreateView(f)
 
     if style == "relic" or style == "beam" then
       if style == "relic" then
-        self.relicRays:SetSize(250, 250)
-        self.relicRays:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
-        self.relicRays:Show()
         self.glow:SetSize(210, 210)
         self.glow:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
         self.glow:Show()
-        self.core:SetSize(90, 90)
-        self.core:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
-        self.core:Show()
         self.shadow:SetSize(76, 14)
         self.shadow:SetPoint("CENTER", self.stage, "BOTTOM", 0, 4)
         self.shadow:Show()
@@ -228,7 +218,7 @@ function ns.CreateView(f)
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
       self.badges:SetJustifyH("CENTER")
     elseif style == "halo" then
-      for _, t in ipairs({ self.lens, self.halo, self.sweep }) do
+      for _, t in ipairs({ self.lens, self.halo }) do
         t:SetSize(176, 176)
         t:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
         t:Show()
@@ -283,8 +273,6 @@ function ns.CreateView(f)
     local r, g, b = ns.QualityColor(q)
     self.r, self.g, self.b, self.q = r, g, b, q
     self.glow:SetVertexColor(r, g, b, 0.9)
-    self.relicRays:SetVertexColor(math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, b + 0.3), 0.4)
-    self.core:SetVertexColor(math.min(1, r + 0.45), math.min(1, g + 0.45), math.min(1, b + 0.45), 0.8)
     self.shadow:SetVertexColor(0, 0, 0, 0.6)
     self.emblem:SetVertexColor(r * 0.22, g * 0.22, b * 0.22, 0.95)
     self.emblemEdge:SetVertexColor(math.min(1, r + 0.2), math.min(1, g + 0.2), math.min(1, b + 0.2), 1)
@@ -293,7 +281,6 @@ function ns.CreateView(f)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     self.lens:SetVertexColor(r * 0.1, g * 0.1, b * 0.1, 0.9) -- nearly black with a hint of the color
     self.halo:SetVertexColor(r, g, b, 1)
-    self.sweep:SetVertexColor(math.min(1, r + 0.5), math.min(1, g + 0.5), math.min(1, b + 0.5), 1)
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
     self.bannerBottom:SetVertexColor(r, g, b, 1)
@@ -323,8 +310,12 @@ function ns.CreateView(f)
       m:SetSize(s, s)
     end
     for i, m in ipairs(self.embers) do m.phase = i / EMBERS; m:SetSize(4 + (i % 3), 4 + (i % 3)) end
-    for _, m in ipairs(self.orbit) do m:SetSize(6, 6) end
-    self.glowBase = q >= 4 and 0.9 or q >= 3 and 0.75 or 0.6
+    -- the light holds still (brighter for better items); only the item turns
+    local glow = q >= 4 and 0.9 or q >= 3 and 0.75 or 0.6
+    self.glow:SetAlpha(glow)
+    self.cone:SetAlpha(glow)
+    self.disc:SetAlpha(0.9)
+    self.halo:SetAlpha(0.9)
     self.card.edge:SetVertexColor(r, g, b, 1)
     self.card.icon:SetTexture(item.icon or QUESTION)
     self.name:SetText(item.name or "?")
@@ -424,12 +415,6 @@ function ns.CreateView(f)
       local v = back and 0.45 or 1
       self.card.icon:SetVertexColor(v, v, v)
     end
-    local pulse = math.min(1, (self.glowBase or 0.6) + 0.15 * math.sin(age * 2.4))
-    self.glow:SetAlpha(pulse)
-    self.cone:SetAlpha(pulse)
-    self.disc:SetAlpha(0.8 + 0.2 * math.sin(age * 3))
-    self.halo:SetAlpha(0.8 + 0.2 * math.sin(age * 2))
-    if self.style == "halo" then self.sweep:SetRotation(age * 1.8) end -- head first round the rim
 
     -- arrival effects start once the popup has faded in (fxDelay), or they'd play while invisible
     local fx = age - (self.fxDelay or 0)
@@ -454,10 +439,7 @@ function ns.CreateView(f)
         m:SetAlpha(math.sin(math.pi * t) * 0.9)
       end
     end
-    if self.style == "relic" then
-      self.relicRays:SetRotation(age * 0.12) -- slow, so it reads as light, not a spinner
-      self.core:SetAlpha(0.7 + 0.3 * math.sin(age * 2.4))
-    elseif self.style == "banner" then
+    if self.style == "banner" then
       -- a shine sweeps across the band on arrival, then again every few seconds
       local t = fx >= 0 and fx % 5 or -1
       if t >= 0 and t < 0.9 then
@@ -484,10 +466,8 @@ function ns.CreateView(f)
     if not self.arrived then -- first frame: show what this tier uses
       self.arrived = true
       for i, m in ipairs(sparks) do m:SetShown(i <= self.sparkCount) end
-      self.rays:SetShown(tier == "epic")
       self.waves[1]:SetShown(tier == "legendary")
       self.waves[2]:SetShown(tier == "legendary")
-      for _, m in ipairs(self.orbit) do m:SetShown(tier == "epic") end
       for _, m in ipairs(self.embers) do m:SetShown(tier == "legendary") end
     end
 
@@ -509,26 +489,7 @@ function ns.CreateView(f)
       for _, m in ipairs(sparks) do m:Hide() end
     end
 
-    if tier == "epic" then
-      -- light rays flare and turn a little, then fade
-      if fx < RAYS_T then
-        local a = fx / RAYS_T
-        local size = 140 + 120 * a
-        self.rays:SetSize(size, size)
-        self.rays:SetRotation(a * 0.6)
-        self.rays:SetAlpha(math.sin(math.pi * a) * 0.9)
-      elseif self.rays:IsShown() then
-        self.rays:Hide()
-      end
-      -- three sparks circle the item for as long as it's on screen
-      local radius = self.L.stage[3] * 0.48
-      local fade = math.min(1, math.max(0, (fx - 0.3) / 0.4))
-      for i, m in ipairs(self.orbit) do
-        local ang = fx * 2.2 + i / ORBIT * 2 * math.pi
-        m:SetPoint("CENTER", self.stage, "BOTTOM", math.cos(ang) * radius, cy + math.sin(ang) * radius * 0.45)
-        m:SetAlpha(fade * (0.6 - 0.4 * math.sin(ang))) -- dimmer on the far (upper) side
-      end
-    elseif tier == "legendary" then
+    if tier == "legendary" then
       -- two shockwaves ripple out
       for k, w in ipairs(self.waves) do
         local t = (fx - (k - 1) * 0.22) / WAVE_T

@@ -7,9 +7,8 @@
 --   Banner    a band fading to nothing at both ends, bright edge lines (style D "Banner")
 --   Cone, Disc   beam v2: a light cone and the glowing floor disc
 --   Mote      a small soft spark (rising motes, sparkle bursts)
---   Lens, Sweep  halo v2: the dark lens inside the ring and the bright arc that sweeps round it
+--   Lens      halo v2: the dark lens inside the ring
 --   Wave      a thin glowing ring that expands (legendary shockwave)
---   Rays      soft light spokes from the center (epic arrival, relic v2 background)
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
@@ -89,16 +88,6 @@ Write("Lens", Fill(Canvas(128, 128), function(u, v)
   return r > 0.8 and 0 or 0.85 * (0.8 - r) / 0.14
 end))
 
--- Halo v2: a bright arc riding the rim, head at the top, tail fading behind it; turned in game
-Write("Sweep", Fill(Canvas(256, 256), function(u, v)
-  local r = R(u, v)
-  local ang = math.atan(u - 0.5, v - 0.5)          -- 0 at the top, growing clockwise
-  if ang < 0 then ang = ang + 2 * math.pi end
-  local tail = 1.1                                 -- radians of tail
-  local along = ang > tail and 0 or (1 - ang / tail) ^ 2
-  return along * (Bump(r, 0.86, 0.014) + 0.35 * Bump(r, 0.86, 0.05))
-end))
-
 Write("Banner", Fill(Canvas(256, 64), function(u, v)
   local ends = math.sin(math.pi * u) ^ 1.6           -- fades to nothing at both ends
   local body = 0.8 * (v > 0.12 and v < 0.88 and 1 or 0)
@@ -111,13 +100,6 @@ Write("Wave", Fill(Canvas(128, 128), function(u, v)
   return r >= 1 and 0 or Bump(r, 0.88, 0.03) + 0.35 * Bump(r, 0.85, 0.1)
 end))
 
-Write("Rays", Fill(Canvas(256, 256), function(u, v)
-  local r = R(u, v)
-  if r >= 1 then return 0 end
-  local ang = math.atan(u - 0.5, v - 0.5)
-  local spokes = math.max(0, math.cos(6 * ang)) ^ 10 + 0.5 * math.max(0, math.cos(6 * ang + math.pi)) ^ 16
-  return spokes * (1 - r) ^ 0.9 * math.min(1, r / 0.12)
-end))
 
 -- Banner v2: a diamond emblem behind the item (a dark fill and a bright edge, tinted separately)
 local function D(u, v) return math.abs(u - 0.5) + math.abs(v - 0.5) end -- 0.5 = the diamond's edge

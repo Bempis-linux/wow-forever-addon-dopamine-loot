@@ -1,24 +1,27 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-10, with 0.3.6. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-10, with 0.3.7. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
 ## Where things stand
-- **0.3.6 pushed**, waiting on the user's in-game test. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
+- **0.3.7 pushed** (calmer look). Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
   (plan roadmap row 0.3 lists what's done and what's left).
 - Done in 0.3: four popup styles (Relic v2 = default, Beam v2, Halo lens v2, Banner v2) on generated art;
   weapons upright via `Model:SetPitch` (setting `weaponTilt`, default 90); MORPHEUS title font;
-  arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic rays + 14 sparks +
-  3 orbiting; Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
+  arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic 14-spark ring;
+  Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
-- 0.3.6 (Relic v2 + Banner v2, Relic the default): relic rays turning slowly, pulsing core, floor
-  shadow; banner diamond emblem (Diamond + DiamondEdge art), Shine streak sweeping the band every
+- 0.3.7 (user: "went a little overboard"): removed the breathing glow/cone/disc/halo (light is now
+  static, brighter for better items), the halo sweep arc, relic rays + pulsing core, epic rays and
+  orbiting sparks; deleted Sweep.tga and Rays.tga. Kept (user likes them): spark bursts, legendary
+  shockwaves/embers, banner shine, arrival flash, beam's rising motes, the turning item.
+- 0.3.6 (Relic v2 + Banner v2, Relic the default): floor shadow under the relic; banner diamond emblem (Diamond + DiamondEdge art), Shine streak sweeping the band every
   5 s (drawn pre-tilted in a square texture: `SetRotation` on a non-square box skews it), badges on
   the info line (under the name if no info, below info if too long; placed in SetItem). Saved
   settings keep the style already picked; only fresh settings get Relic.
 - **Next up** (suggested order):
-  1. **User tests 0.3.6** (full restart for the new textures): `/dl look`, Relic + Banner.
-  2. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
+  1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
+  2. Quick look at 0.3.7 in `/dl look` (all styles calmer) whenever convenient.
   3. Per-tier arrival sounds, then the picked rain ideas (plan "Rain ideas": best item last,
      escalation with rising-pitch chimes via ffmpeg, spacing + dust puff, gathering into the bag,
      trails, coins, Escape-to-skip setting; floor shadows low priority).
@@ -40,7 +43,7 @@ _Last checkpoint: 2026-10-10, with 0.3.6. Read this first in a new session (the 
   after combat), performance with 3 popups + rain.
 - 0.2.2 rain sprites rotating/squashing as one piece; landing-height field.
 - 0.3.4 beam foot (no hard line), 0.3.5 rarity arrivals (all styles), 0.3.3 item level hidden on
-  non-gear, the title font on screen, sweep direction on the halo.
+  non-gear, the title font on screen.
 - 0.5 later: Alt+Right-click on a bag item doesn't use it; `GetMouseButtonClicked()` in the
   `HandleModifiedItemClick` hook.
 
@@ -52,6 +55,8 @@ _Last checkpoint: 2026-10-10, with 0.3.6. Read this first in a new session (the 
 - **Every `/dl` command also gets a settings control** (number field or drag slider, Test button);
   visual settings drive the live preview (kit house-style "Settings page parity").
 - **Mockups before visual changes**; the user picks, then build. All styles stay as options.
+- **Restraint in motion**: the user found constant ambient animation too much (0.3.7). Keep looping
+  effects rare; one-shot arrival bursts are welcome. Don't add new idle animations without asking.
 - Presentation and sound matter most; the chest show should feel like Vampire Survivors' chest.
 - Only `/dl help` prints to chat. Original assets only (generated art; game sounds by ID).
 - Process: preflight → commit → push each increment; reviewer agent before big changes. The user
@@ -87,6 +92,7 @@ _Last checkpoint: 2026-10-10, with 0.3.6. Read this first in a new session (the 
 - (none: Relic is the default, both v2 versions approved)
 
 ## Recent history (newest first)
+- 2026-10-10 0.3.7: calmer look (static light; no halo sweep, relic rays, epic rays/orbit).
 - 2026-10-10 0.3.6: Relic v2 (default) and Banner v2 (emblem, shine sweep).
 - 2026-10-10 0.3.5: arrivals by rarity in every style (Wave, Rays art).
 - 2026-10-10 0.3.4: beam light fades into its disc.
