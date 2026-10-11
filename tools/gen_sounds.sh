@@ -6,6 +6,7 @@
 #   ArrivalEpic       a soft thump, a rising bell arpeggio, then a warm chord that blooms and rings out
 #   ArrivalLegendary  a deep, long boom with the shockwave, then a bright bell chord and a high sparkle
 #   Tick00..Tick14    loot rain: a short tick per landed item, climbing a semitone each
+#   (and the money / treasure chest sets at the end: LaunchItem, LaunchCoin, Clink, Merge*, Gather)
 # Run: bash tools/gen_sounds.sh   (needs ffmpeg; set FFMPEG or have it on PATH or in WinGet's folder)
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -30,9 +31,9 @@ boom() {
   echo "gte(t,$s)*sin(2*PI*($lo*$u+($hi-$lo)/6*(1-exp(-6*$u))))*exp(-$d*$u)"
 }
 render() { # NAME SECONDS GAIN EXPR [EXTRA FILTERS]
-  local fade; fade=$(awk "BEGIN{print $2 - 0.3}")
+  local fl fade; fl=$(awk "BEGIN{d = $2 / 3; print (d < 0.3 ? d : 0.3)}"); fade=$(awk "BEGIN{print $2 - $fl}")
   "$FF" -y -loglevel error -f lavfi -i "aevalsrc=exprs='$3*($4)':s=44100:d=$2" \
-    -af "${5:+$5,}afade=t=out:st=$fade:d=0.3,alimiter=limit=0.89" -c:a libvorbis -q:a 5 "$OUT/$1.ogg"
+    -af "${5:+$5,}afade=t=out:st=$fade:d=$fl,alimiter=limit=0.89" -c:a libvorbis -q:a 5 "$OUT/$1.ogg"
   echo "wrote $OUT/$1.ogg"
 }
 ROOM="aecho=0.8:0.6:70|140:0.25|0.15" # a little room so it rings out
@@ -57,3 +58,31 @@ for i in $(seq 0 14); do
   f=$(awk "BEGIN{print 880 * 2 ^ ($i / 12)}")
   render "$(printf 'Tick%02d' "$i")" 0.35 0.3 "$(bell 0 "$f" 14)"
 done
+
+# Loot rain, money and the treasure chest. Each set climbs a major pentatonic scale (n = 0..10:
+# 0 2 4 7 9 12 14 16 19 21 24 semitones), so a long run of them never sounds like one note.
+#   LaunchItem00..10   leaving the chest: a soft upward "fwip" (an item)
+#   LaunchCoin00..10   leaving the chest: a quick light "tink" (a coin)
+#   Clink00..10        a coin landing: two inharmonic partials, like metal
+#   MergeSilver00..10, MergeGold00..10   a pile of coins joining up into one: a bright chime
+#   Gather             a pile hopping together before it joins (a soft rising slide)
+semis() { local p=(0 2 4 7 9); echo $(( ${p[$1 % 5]} + 12 * ($1 / 5) )); }
+hz() { awk "BEGIN{print $1 * 2 ^ ($2 / 12)}"; }
+# glide START F0 F1 DUR DECAY: a sine sliding exponentially from F0 to F1 over DUR, fading
+glide() {
+  local s=$1 f0=$2 f1=$3 d=$4 k=$5 u="(t-$1)" r
+  r=$(awk "BEGIN{print log($3 / $2)}")
+  echo "gte(t,$s)*min(1,$u*200)*sin(2*PI*$f0*$d/$r*(exp($r*min($u,$d)/$d)-1))*exp(-$k*$u)"
+}
+for n in $(seq 0 10); do
+  st=$(semis "$n"); id=$(printf '%02d' "$n")
+  render "LaunchItem$id" 0.3 0.42 "$(glide 0 "$(hz 180 "$st")" "$(hz 420 "$st")" 0.13 14)"
+  render "LaunchCoin$id" 0.2 0.3 "$(glide 0 "$(hz 700 "$st")" "$(hz 1300 "$st")" 0.07 30)"
+  f=$(hz 1000 "$st")
+  render "Clink$id" 0.3 0.3 "sin(2*PI*$f*t)*exp(-28*t)+0.5*sin(2*PI*$f*2.76*t)*exp(-50*t)"
+  for metal in Silver:1047 Gold:1318; do
+    b=$(hz "${metal#*:}" "$st")
+    render "Merge${metal%%:*}$id" 0.9 0.19 "$(bell 0 "$b" 4.5)+0.6*$(bell 0 "$(awk "BEGIN{print $b * 1.5}")" 4)+0.3*$(bell 0 "$(awk "BEGIN{print $b * 2}")" 6)"
+  done
+done
+render Gather 0.45 0.3 "$(glide 0 350 900 0.3 3)"

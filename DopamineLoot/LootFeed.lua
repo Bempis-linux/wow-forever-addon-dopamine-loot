@@ -79,18 +79,29 @@ end
 
 ---------------------------------------------------------------------------
 -- Bursts: loot that arrives together (one loot window, one turn-in) is collected for a moment
--- (0.4 s after the last item, 2 s at most). 3+ items (setting) rain; fewer get popups. A big
--- burst looted mid-fight waits and rains when combat ends (small ones pop up right away).
+-- (0.4 s after the last item, 2 s at most). 3+ items (setting) rain; so does money: always from a
+-- quest turn-in, from loot once it reaches the "money rains from" amount (setting, default 1 gold).
+-- Otherwise items get popups. A rain looted mid-fight waits and plays when combat ends (small
+-- ones pop up right away).
 ---------------------------------------------------------------------------
-local RAIN_MIN, QUIET, MAX_WAIT = 3, 0.4, 2
+local RAIN_MIN, QUIET, MAX_WAIT, COIN_RAIN_MIN = 3, 0.4, 2, 10000
 local burst, burstStart, gen = nil, 0, 0
-local afterCombat = {} -- big bursts looted mid-fight, rained together when combat ends
+local afterCombat = {} -- rains looted mid-fight, played together when combat ends
 
 function ns.RainMin() return ns.settings.rainMin or RAIN_MIN end
+function ns.CoinRainMin() return ns.settings.coinRainMin or COIN_RAIN_MIN end
 
--- items: the burst's item data; items.copper: money looted with them (rains as coins, never alone)
+-- items: the burst's item data; items.copper: money that came with them; items.quest: a turn-in
+local function Rains(items)
+  if ns.settings.noRain then return false end
+  if #items >= ns.RainMin() then return true end
+  local copper = items.copper or 0
+  if copper <= 0 or ns.settings.noRainCoins then return false end
+  return items.quest or copper >= ns.CoinRainMin()
+end
+
 local function Play(items)
-  if #items >= ns.RainMin() and not ns.settings.noRain then
+  if Rains(items) then
     ns:Rain(items, items.copper)
   else
     for _, d in ipairs(items) do ns:ShowLoot(d) end
@@ -101,16 +112,17 @@ local function FlushBurst()
   local items = burst
   burst = nil
   if not items then return end
-  if InCombatLockdown() and #items >= ns.RainMin() and not ns.settings.noRain then
+  if InCombatLockdown() and Rains(items) then
     for _, d in ipairs(items) do afterCombat[#afterCombat + 1] = d end
     afterCombat.copper = (afterCombat.copper or 0) + (items.copper or 0)
+    afterCombat.quest = afterCombat.quest or items.quest
     return
   end
   Play(items)
 end
 
 function ns:PLAYER_REGEN_ENABLED()
-  if #afterCombat == 0 then return end
+  if #afterCombat == 0 and not afterCombat.copper then return end
   local items = afterCombat
   afterCombat = {}
   C_Timer.After(0.5, function() Play(items) end)
@@ -127,27 +139,53 @@ local function Burst()
   return burst
 end
 
+-- Loot and quest windows: money (and items) that arrive while one is open, or within a second of
+-- it closing, belong to it. A quest's reward window is QUEST_COMPLETE until QUEST_FINISHED.
+local lootOpen, lootClosedAt, questOpen, questClosedAt, money = false, 0, false, 0, nil
+local function InQuest() return questOpen or GetTime() - questClosedAt <= 1 end
+local function InLoot() return lootOpen or GetTime() - lootClosedAt <= 1 end
+
 function ns.Collect(d)
   if ns.settings.noRain then return ns:ShowLoot(d) end -- nothing to collect for
   local b = Burst()
   b[#b + 1] = d
+  if InQuest() then b.quest = true end
 end
 
--- Money: the gain in your gold while a loot window is open (or just closed) joins the burst.
--- Read from GetMoney, so no money line is parsed; vendor sales, mail and quests don't count.
-local lootOpen, lootClosedAt, money = false, 0, nil
-function ns:LOOT_OPENED() lootOpen, money = true, GetMoney() end -- the baseline, taken in world
+-- Money: the gain in your gold during a loot or quest window joins the burst. Read from GetMoney,
+-- so no money line is parsed; vendor sales and mail don't count. The baseline is taken when a
+-- window opens (in the world, so it's never the 0 from before login).
+function ns:LOOT_OPENED() lootOpen, money = true, GetMoney() end
 function ns:LOOT_CLOSED() lootOpen, lootClosedAt = false, GetTime() end
+function ns:QUEST_COMPLETE() questOpen, money = true, GetMoney() end
+function ns:QUEST_FINISHED() if questOpen then questOpen, questClosedAt = false, GetTime() end end
+function ns:PLAYER_ENTERING_WORLD() money = GetMoney() end -- in the world: the real amount
+local unclaimed, unclaimedAt = 0, 0 -- a gain outside any window, in case a turn-in claims it
+-- the server's own turn-in (also for quests that skip the reward window): its second opens now
+function ns:QUEST_TURNED_IN(_, _, moneyReward)
+  questClosedAt = GetTime()
+  -- its money may have come just before this event, with no window open: claim it now
+  if (moneyReward or 0) > 0 and unclaimed > 0 and GetTime() - unclaimedAt <= 1 and not ns.settings.noRain then
+    local b = Burst()
+    b.copper, b.quest = (b.copper or 0) + unclaimed, true
+  end
+  unclaimed = 0
+end
 function ns:PLAYER_MONEY()
   local now = GetMoney()
   local gain = money and now - money or 0
   money = now
   if gain <= 0 or ns.settings.noRain or merchantOpen then return end
-  if not lootOpen and GetTime() - lootClosedAt > 1 then return end
+  local quest = InQuest()
+  if not quest and not InLoot() then unclaimed, unclaimedAt = gain, GetTime(); return end
   local b = Burst()
   b.copper = (b.copper or 0) + gain
+  if quest then b.quest = true end
 end
-ns.OnInit(function() ns:RegisterEvents("LOOT_OPENED", "LOOT_CLOSED", "PLAYER_MONEY") end)
+ns.OnInit(function()
+  ns:RegisterEvents("LOOT_OPENED", "LOOT_CLOSED", "QUEST_COMPLETE", "QUEST_FINISHED", "QUEST_TURNED_IN",
+    "PLAYER_MONEY", "PLAYER_ENTERING_WORLD")
+end)
 
 ---------------------------------------------------------------------------
 -- Commands
@@ -230,6 +268,43 @@ ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]"
     end)
   end
   C_Timer.After(1.5, Go) -- don't wait forever for an item the client won't load
+end)
+
+-- Money in commands: "1g 20s 5c", "35s", or plain copper
+local function Money(arg) return ns.RainCore.ParseMoney(arg) end
+local function MoneyName(copper)
+  local g, s, c = math.floor(copper / 10000), math.floor(copper / 100) % 100, copper % 100
+  local out = {}
+  if g > 0 then out[#out + 1] = g .. "g" end
+  if s > 0 then out[#out + 1] = s .. "s" end
+  if c > 0 or #out == 0 then out[#out + 1] = c .. "c" end
+  return table.concat(out, " ")
+end
+ns.MoneyName = MoneyName
+
+ns.AddCommand("coinrain", "money alone rains from this much loot: /dl coinrain [1g | 50s | 20c]", function(arg)
+  local v = Money(arg)
+  if v then ns.settings.coinRainMin = math.max(0, v); if ns.UI then ns.UI.Refresh() end end
+  local min = ns.CoinRainMin()
+  ns.Print(("money from loot rains on its own from %s (quest money always rains)"):format(min > 0 and MoneyName(min) or "any amount"))
+  ns:ShowLog()
+end)
+
+ns.AddCommand("testcoins", "preview a coin rain: /dl testcoins [amount, default 2g 35s]", function(arg)
+  if ns.settings.noRainCoins then
+    ns.Print("coins are switched off (Loot rain effects page, or /dl rainfx coins on)")
+    return ns:ShowLog()
+  end
+  ns:Rain({}, Money(arg) or 23500)
+end)
+
+-- A quest reward: one of your green or blue items and some money, rained together
+ns.AddCommand("testquest", "preview a quest reward (an item and money)", function()
+  local pick = OwnItems(3) or OwnItems(2) or TEST_IDS[3][math.random(#TEST_IDS[3])]
+  ns.ItemData(pick, 1, "received", function(d)
+    d.test = true
+    ns:Rain({ d }, math.random(3, 25) * 1000)
+  end)
 end)
 
 -- How close the camera sits to item models in popups (smaller = bigger item)

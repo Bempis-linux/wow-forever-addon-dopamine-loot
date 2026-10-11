@@ -59,6 +59,24 @@ function ns:PlayStepTick(n)
   PlaySoundFile(STEP_FILE:format(math.min(math.max((n or 1) - 1, 0), 14)), Channel())
 end
 
+-- The treasure chest and money (tools/gen_sounds.sh): each set climbs a pentatonic step per call,
+-- n = 1 for the first; a set never plays twice within its gap, so a fast burst can't buzz
+local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
+local lastSet = {}
+local function PlaySet(name, n, gap)
+  if ns.settings.noSound then return end
+  local now = GetTime()
+  if now - (lastSet[name] or 0) < (gap or 0.04) then return end
+  lastSet[name] = now
+  PlaySoundFile(("%s%s%02d.ogg"):format(MEDIA, name, math.min(math.max((n or 1) - 1, 0), 10)), Channel())
+end
+function ns:PlayLaunchSound(isCoin, n) PlaySet(isCoin and "LaunchCoin" or "LaunchItem", n) end -- leaving the chest
+function ns:PlayClink(n) PlaySet("Clink", n) end                                                -- a coin lands
+function ns:PlayMergeSound(metal, k) PlaySet(metal == "gold" and "MergeGold" or "MergeSilver", 2 * k - 1, 0) end
+function ns:PlayGatherSound()
+  if not self.settings.noSound then PlaySoundFile(MEDIA .. "Gather.ogg", Channel()) end
+end
+
 -- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
 local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
 local BOUNCE = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" }

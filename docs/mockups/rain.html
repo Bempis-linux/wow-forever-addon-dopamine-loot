@@ -33,6 +33,14 @@
     <button data-s="boss">Boss</button>
     <button data-s="legend">Legendary</button>
   </div>
+  <h2>Money</h2>
+  <div class="row">
+    <button data-s="quest">Quest: item + 2g 35s</button>
+    <button data-s="c54">54c</button>
+    <button data-s="s35">35s 20c</button>
+    <button data-s="g2">2g 35s 40c</button>
+    <button data-s="g25">25g</button>
+  </div>
   <h2>Ideas</h2>
   <div id="toggles"></div>
   <h2>Watch</h2>
@@ -71,6 +79,7 @@ const IDEAS = [
   ["gather", "Gathering", "small stuff flies into the bag"],
   ["trails", "Trails", "Rare+ leave fading ghost copies"],
   ["coins", "Coins", "money rains as coins with a rolling total"],
+  ["merge", "Coins merge up", "money sprays as the coin below and joins up into what you got", true],
   ["shadows", "Floor shadows", "a shadow under each item"],
   ["beam", "Loot beam", "a pillar of light over resting Rare+", true],
   ["hitstop", "Hit-stop", "a split-second slow-mo + shake when the best lands", true],
@@ -90,9 +99,13 @@ let speed = 1;
 document.getElementById("speed").addEventListener("input", e => { speed = +e.target.value; document.getElementById("spd").textContent = speed.toFixed(1) + "x"; });
 
 // ---- sound: simple synthesized tones, only to judge timing ----
-let ac;
+let ac, toneWindow = 0, tonesInWindow = 0;
 function tone(freq, dur = 0.1, vol = 0.12, type = "sine") {
   if (!document.getElementById("sound").checked) return;
+  // at most 6 tones per 50 ms (a chord fits), so nothing can ever flood the speakers
+  const now = performance.now();
+  if (now - toneWindow > 50) { toneWindow = now; tonesInWindow = 0; }
+  if (++tonesInWindow > 6) return;
   ac = ac || new (window.AudioContext || window.webkitAudioContext)();
   const o = ac.createOscillator(), g = ac.createGain();
   o.type = type; o.frequency.value = freq;
@@ -102,6 +115,30 @@ function tone(freq, dur = 0.1, vol = 0.12, type = "sine") {
   o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + dur + 0.02);
 }
 function chord(freqs, dur, vol) { freqs.forEach(f => tone(f, dur, vol)); }
+// a tone that slides from f0 to f1: launches out of the treasure chest, coins gathering
+function sweep(f0, f1, dur = 0.12, vol = 0.08, type = "triangle") {
+  if (!document.getElementById("sound").checked) return;
+  const now = performance.now();
+  if (now - toneWindow > 50) { toneWindow = now; tonesInWindow = 0; }
+  if (++tonesInWindow > 6) return;
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(ac.destination); o.start(); o.stop(t + dur + 0.02);
+}
+// a scale that climbs without getting shrill: major pentatonic steps, n = 0, 1, 2, ...
+const PENTA = [0, 2, 4, 7, 9];
+function note(base, n) { n = Math.min(n, 10); return base * Math.pow(2, (PENTA[n % 5] + 12 * Math.floor(n / 5)) / 12); }
+// sounds: leaving the chest (a quick upward whoosh) vs landing (a clink or tick), each climbing
+function launchSound(s, n) {
+  if (s.it.coin) sweep(note(700, n), note(1300, n), 0.07, 0.035, "sine"); // a light "tink" upward
+  else sweep(note(180, n), note(420, n), 0.13, 0.07, "triangle");           // a soft "fwip"
+}
+function coinClink(n) { // two inharmonic partials, like metal
+  const f = note(1000, n);
+  tone(f, 0.09, 0.05, "sine"); tone(f * 2.76, 0.05, 0.025, "sine");
+}
 
 // ---- items ----
 const QC = ["#9d9d9d", "#ffffff", "#1eff00", "#0070dd", "#a335ee", "#ff8000"];
@@ -113,7 +150,58 @@ const SCENES = {
   haul: { qs: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3], copper: 4821 },
   boss: { qs: [0, 1, 1, 2, 2, 2, 2, 3, 3, 4, 1, 0], copper: 23410 },
   legend: { qs: [1, 2, 2, 3, 3, 4, 5, 0], copper: 61200 },
+  quest: { qs: [3], copper: 23540 },
+  c54: { qs: [], copper: 54 },
+  s35: { qs: [], copper: 3520 },
+  g2: { qs: [], copper: 23540 },
+  g25: { qs: [], copper: 251234 },
 };
+
+// ---- coins: the game's gold/silver/copper (drawn here; the addon uses the real icons) ----
+const COIN = {
+  gold: { fill: "#f4c542", rim: "#8a6410", size: 24, value: 10000 },
+  silver: { fill: "#d9dee5", rim: "#69727d", size: 21, value: 100 },
+  copper: { fill: "#d4884a", rim: "#6e3a14", size: 19, value: 1 },
+};
+const log10 = Math.log10;
+// Plain: real gold pieces as gold, silver fills, a few copper (what 0.3.9+ does in the addon)
+function plainPlan(A) {
+  const out = [];
+  if (A <= 0) return out;
+  let n = Math.max(3, Math.min(30, Math.floor(3 + 6.5 * log10(A)), A));
+  const g = Math.floor(A / 10000), s = Math.floor(A / 100) % 100, c = A % 100;
+  const gold = g > 0 ? Math.max(1, Math.min(g, Math.floor(n / 2))) : 0;
+  const hasS = g > 0 || s > 0;
+  let cop = c > 0 ? Math.min(c, hasS ? 3 : n) : 0;
+  const silver = hasS ? Math.max(n - gold - cop, s > 0 ? 1 : 0) : 0;
+  if (!hasS) cop = n;
+  for (let i = 0; i < cop; i++) out.push({ coin: "copper" });
+  for (let i = 0; i < silver; i++) out.push({ coin: "silver" });
+  for (let i = 0; i < gold; i++) out.push({ coin: "gold" });
+  return out;
+}
+// Merge-up: each top coin you got arrives as a pile of the coin below that joins up into it;
+// the change that can't make a whole top coin stays as it is
+function mergePlan(A) {
+  const g = Math.floor(A / 10000), s = Math.floor(A / 100) % 100, c = A % 100;
+  const top = g > 0 ? "gold" : s > 0 ? "silver" : "copper";
+  if (top === "copper") return { coins: plainPlan(A), merges: [] };
+  const lower = top === "gold" ? "silver" : "copper";
+  const have = top === "gold" ? g : s;
+  const nTop = Math.min(have, 5);
+  const per = Math.max(5, Math.min(10, Math.floor(26 / nTop)));
+  const coins = [], merges = [];
+  for (let k = 1; k <= nTop; k++) {
+    merges.push({ group: k, into: top });
+    for (let j = 0; j < per; j++) coins.push({ coin: lower, group: k });
+  }
+  for (let k = nTop; k < Math.min(have, nTop + 6); k++) coins.push({ coin: top }); // more than 5: the rest come whole
+  const leftS = top === "gold" ? s : 0, leftC = c;
+  for (let i = 0; i < (leftS ? Math.min(leftS, 2 + Math.floor(leftS / 12)) : 0); i++) coins.push({ coin: "silver" });
+  for (let i = 0; i < (leftC ? Math.min(leftC, 2 + Math.floor(leftC / 20)) : 0); i++) coins.push({ coin: "copper" });
+  for (let i = coins.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [coins[i], coins[j]] = [coins[j], coins[i]]; }
+  return { coins, merges };
+}
 
 // ---- state ----
 const cv = document.getElementById("c"), ctx = cv.getContext("2d");
@@ -133,16 +221,17 @@ const B = () => ({ left: SIZE, right: VW - SIZE, floor: 30 });
 function start(name) {
   const sc = SCENES[name];
   const items = sc.qs.map((q, i) => item(q, i)).sort((a, b) => a.q - b.q);
+  let plan = { coins: [], merges: [] };
+  if (on.coins) plan = on.merge ? mergePlan(sc.copper) : { coins: plainPlan(sc.copper), merges: [] };
   let best = null;
-  if (on.bestLast) best = items.pop();
-  const coins = on.coins ? Math.min(14, 4 + Math.floor(Math.log10(sc.copper + 1) * 2)) : 0;
-  // coins go out early, mixed in with the junk
-  const queue = [];
-  let ci = coins;
-  items.forEach((it, i) => { queue.push(it); if (ci > 0 && i % 1 === 0) { queue.push({ coin: true }); ci--; } });
-  while (ci-- > 0) queue.splice(Math.min(queue.length, 2 + ci), 0, { coin: true });
+  if (on.bestLast && (items.length > 1 || (items.length === 1 && plan.coins.length))) best = items.pop();
+  // coins go out early, mixed in with the junk (more coins than items: the rest go first)
+  const queue = [], cs = plan.coins.slice();
+  while (cs.length > items.length) queue.push(cs.shift());
+  items.forEach(it => { queue.push(it); if (cs.length) queue.push(cs.shift()); });
   R = { age: 0, next: 0, queue, launched: 0, total: queue.length, best, bestAt: null, sprites: [], landed: 0, ticks: 0,
-    copper: sc.copper, coins, coinsLanded: 0, shownCopper: 0, settleAt: null, done: false, gathered: 0 };
+    copper: sc.copper, coins: plan.coins.length, coinsLanded: 0, shownCopper: 0, settleAt: null, done: false, gathered: 0,
+    merges: plan.merges, mergeStarted: false, coinOut: 0, itemOut: 0, mergesDone: 0 };
   popups = []; fx = []; pulse = null;
   tone(140, 0.25, 0.15, "triangle");
 }
@@ -159,7 +248,9 @@ function launch(it, isBest) {
     e: 0.45 + Math.random() * 0.2, spin: (Math.random() - 0.5) * 8, rot: 0, bounces: 0, resting: false,
     squash: 0, trail: [], size: it.coin ? 18 : SIZE, best: isBest, restAge: 0 };
   if (it.coin) { s.vy = 500 + Math.random() * 350; s.e = 0.5; }
-  if (isBest) { s.x = VW / 2; s.vx = 0; s.vy = 1150; s.e = 0.5; // peaks around 85% of the screen height s.spin = 0; }
+  if (isBest) { s.x = VW / 2; s.vx = 0; s.vy = 1150; s.e = 0.5; s.spin = 0; } // peaks around 85% of the screen height
+  if (it.coin) s.size = COIN[it.coin].size;
+  if (!isBest && !it.merged) launchSound(s, it.coin ? R.coinOut++ : R.itemOut++);
   R.sprites.push(s);
 }
 
@@ -182,8 +273,8 @@ function onLand(s) {
   if (s.bounces !== 1) return;
   R.landed++;
   if (s.it.coin) {
-    R.coinsLanded++;
-    tone(1900 + Math.random() * 300, 0.05, 0.05, "square");
+    if (!s.it.merged) R.coinsLanded++;
+    if (!s.it.merged) coinClink(R.coinsLanded - 1);
   } else {
     const idx = R.ticks++;
     if (s.best) {
@@ -194,6 +285,17 @@ function onLand(s) {
   if (on.dust) for (let i = 0; i < 7; i++) fx.push({ kind: "dust", x: s.x + (Math.random() - 0.5) * s.size, y: 30,
     vx: (Math.random() - 0.5) * 140, vy: 20 + Math.random() * 50, age: 0, life: 0.45 });
   if (on.pulse && s.q >= 4) pulse = { color: QC[s.q], age: 0 };
+}
+
+function startMerge() { // each pile gathers on its middle, one pile after another
+  R.mergeStarted = true; R.restHold = 0;
+  R.merges.forEach((m, i) => {
+    m.members = R.sprites.filter(s => s.it.group === m.group);
+    if (!m.members.length) { m.done = true; return; }
+    m.x = m.members.reduce((a, s) => a + s.x, 0) / m.members.length;
+    m.at = R.age + i * 0.28;
+    m.members.forEach((s, j) => { s.joining = true; s.mx = s.x; s.my = s.y; s.delay = j * 0.02; s.tx = undefined; });
+  });
 }
 
 function settle() { // hand off: Rare+ become popups, the rest gathers or fades
@@ -238,8 +340,33 @@ function update(dt) {
   if (!R.queue.length && R.best && R.bestAt === null) R.bestAt = R.age + 0.55; // a beat of silence
   if (R.best && R.bestAt !== null && R.age >= R.bestAt) { launch(R.best, true); R.best = null; tone(220, 0.35, 0.1, "triangle"); }
   let allRest = !R.queue.length && !R.best;
+  // coins joining up: they hop together, and when the last one arrives, the bigger coin pops out
+  for (const m of R.merges) {
+    if (m.at === undefined || m.done) continue;
+    if (!m.swished && R.age >= m.at) { m.swished = true; sweep(350, 900, 0.3, 0.03, "sine"); } // the pile gathering
+    allRest = false;
+    let arrived = true;
+    for (const s of m.members) {
+      const u = Math.min(1, Math.max(0, (R.age - m.at - s.delay) / 0.32)), e = u * u;
+      s.x = s.mx + (m.x - s.mx) * e;
+      s.y = s.my + Math.sin(Math.PI * u) * 46;
+      s.shrink = 1 - 0.35 * e;
+      if (u < 1) arrived = false;
+    }
+    if (arrived) {
+      m.done = true;
+      R.sprites = R.sprites.filter(s => !m.members.includes(s));
+      launch({ coin: m.into, merged: true }, false);
+      const c = R.sprites[R.sprites.length - 1];
+      Object.assign(c, { x: m.x, y: 30, vx: 0, vy: 430, e: 0.35, spin: 0, merged: true });
+      fx.push({ kind: "flash", x: m.x, y: 30 + c.size / 2, vx: 0, vy: 0, age: 0, life: 0.4, color: COIN[m.into].fill });
+      const k = R.mergesDone++; // each coin that forms rings a step higher than the last
+      const base = m.into === "gold" ? 1318 : 1047;
+      tone(note(base, k * 2), 0.3, 0.1); tone(note(base * 1.5, k * 2), 0.35, 0.06); tone(note(base * 2, k * 2), 0.2, 0.03);
+    }
+  }
   for (const s of R.sprites) {
-    if (s.leaving) continue;
+    if (s.leaving || s.joining) continue;
     if (advance(s, dt, b)) onLand(s);
     if (!s.resting) { allRest = false; s.rot += s.spin * dt; }
     else {
@@ -261,8 +388,10 @@ function update(dt) {
     }
   }
   if (on.coins) R.shownCopper += (R.copper * (R.coins ? R.coinsLanded / R.coins : 1) - R.shownCopper) * Math.min(1, dt * 6);
-  if ((allRest || R.age > 7) && R.settleAt === null) R.restHold = (R.restHold || 0) + dt;
-  if (R.restHold > 0.7 && R.settleAt === null) settle();
+  if ((allRest || R.age > 9) && R.settleAt === null) R.restHold = (R.restHold || 0) + dt;
+  if (R.restHold > 0.5 && R.settleAt === null) {
+    if (R.merges.length && !R.mergeStarted) startMerge(); else settle();
+  }
   if (R.settleAt !== null) {
     let busy = false;
     for (const s of R.sprites) {
@@ -296,8 +425,11 @@ function drawSprite(s, alpha, x = s.x, y = s.y, rot = s.rot) {
   ctx.globalAlpha = alpha;
   ctx.translate(X(x), Y(y + h / 2)); ctx.rotate(-rot);
   if (s.it.coin) {
-    ctx.fillStyle = "#e8b923"; ctx.strokeStyle = "#7a5a0a"; ctx.lineWidth = 2 * scale;
+    const cn = COIN[s.it.coin];
+    ctx.fillStyle = cn.fill; ctx.strokeStyle = cn.rim; ctx.lineWidth = 2 * scale;
     ctx.beginPath(); ctx.ellipse(0, 0, X(w / 2), X(h / 2), 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 1.5 * scale; // a glint, like the money icons
+    if (w > 12 && h > 12) { ctx.beginPath(); ctx.ellipse(0, 0, X(w / 2 - 4), X(h / 2 - 4), 0, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke(); }
     ctx.restore(); return;
   }
   const c = QC[s.q];
@@ -345,6 +477,12 @@ function draw() {
     }
     for (const f of fx) {
       const u = f.age / f.life;
+      if (f.kind === "flash") { // a burst of light where coins join up
+        const rg = ctx.createRadialGradient(X(f.x), Y(f.y), 0, X(f.x), Y(f.y), X(14 + 46 * u));
+        rg.addColorStop(0, `rgba(255,250,220,${0.95 * (1 - u)})`); rg.addColorStop(1, "rgba(255,230,150,0)");
+        ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(X(f.x), Y(f.y), X(14 + 46 * u), 0, Math.PI * 2); ctx.fill();
+        continue;
+      }
       ctx.fillStyle = `rgba(190,175,150,${0.45 * (1 - u)})`;
       ctx.beginPath(); ctx.arc(X(f.x), Y(f.y), X(3 + 7 * u), 0, Math.PI * 2); ctx.fill();
     }
@@ -402,11 +540,11 @@ function draw() {
 
 let last = performance.now();
 function frame(now) {
+  requestAnimationFrame(frame); // first: one bad frame must not stop the animation for good
   let dt = Math.min(0.1, (now - last) / 1000) * speed; last = now;
   if (stopT > 0) { stopT -= dt; dt *= 0.2; }
   if (shake > 0) shake = Math.max(0, shake - dt * (stopT > 0 ? 5 : 1));
-  update(dt); draw();
-  requestAnimationFrame(frame);
+  try { update(dt); draw(); } catch (e) { console.error(e); R = null; }
 }
 document.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => start(b.dataset.s)));
 requestAnimationFrame(frame);

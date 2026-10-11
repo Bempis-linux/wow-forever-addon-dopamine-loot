@@ -45,8 +45,22 @@ local function Create()
     ns.RunCommand("rain", tostring(ns.settings.testRain or 8))
   end)
   test:SetPoint("LEFT", testAfter, "RIGHT", 10, 0)
+  -- coin rains of a few sizes (/dl testcoins) and a quest reward (/dl testquest)
+  local coinLabel = UI.Label(panel, "GameFontHighlight", "Test money")
+  coinLabel:SetPoint("TOPLEFT", testLabel, "BOTTOMLEFT", 0, -18)
+  local prev = coinLabel
+  for _, amount in ipairs({ "54c", "35s 20c", "2g 35s", "25g" }) do
+    local b = UI.Button(panel, amount, 70, function() ns.RunCommand("testcoins", amount) end)
+    b:SetPoint("LEFT", prev, "RIGHT", prev == coinLabel and 10 or 4, 0)
+    UI.Tip(b, "Rain " .. amount .. " as coins (/dl testcoins " .. amount .. ").")
+    prev = b
+  end
+  local quest = UI.Button(panel, "Test quest reward", 150, function() ns.RunCommand("testquest") end)
+  quest:SetPoint("TOPLEFT", coinLabel, "BOTTOMLEFT", -4, -14)
+  UI.Tip(quest, "An item and some money, rained together the way a quest turn-in plays (/dl testquest).")
+
   local back = UI.Button(panel, "Main settings", 120, function() ns:OpenSettings() end)
-  back:SetPoint("TOPLEFT", testLabel, "BOTTOMLEFT", -4, -18)
+  back:SetPoint("TOPLEFT", quest, "BOTTOMLEFT", 0, -18)
 
   panel:SetScript("OnShow", function() UI.Refresh() end)
   UI.Refresh() -- sub-pages may not get OnShow on their first open: fill the switches now

@@ -75,22 +75,92 @@ function Core.Interval(i, n, escalate)
   return start - start * 0.7 * (1 - (1 - t) * (1 - t))
 end
 
--- How many coin sprites a sum of money gets: a few for copper, more for gold, 14 at most
-function Core.CoinCount(copper)
-  if not copper or copper <= 0 then return 0 end
-  return math.min(14, 4 + math.floor(math.log(copper + 1) / math.log(10) * 2))
+-- The coins a sum of money rains as, in launch order (copper, silver, gold): more money, more
+-- coins (a log curve, 30 at most, never more coins than copper pieces). Real gold pieces come out
+-- as gold coins (up to half), copper as a few copper, and silver fills the rest, so 2 gold rains
+-- as 2 gold and 28 silver, 35 silver as 26 silver, 54 copper as 14 copper.
+Core.MAX_COINS = 30
+function Core.CoinPlan(copper)
+  local plan = {}
+  copper = math.floor(copper or 0)
+  if copper <= 0 then return plan end
+  local n = math.floor(3 + 6.5 * math.log(copper) / math.log(10))
+  n = math.min(math.max(3, n), Core.MAX_COINS, copper)
+  local g, s, c = math.floor(copper / 10000), math.floor(copper / 100) % 100, copper % 100
+  local gold = g > 0 and math.max(1, math.min(g, math.floor(n / 2))) or 0
+  local hasSilver = g > 0 or s > 0
+  local cop = c > 0 and math.min(c, hasSilver and 3 or n) or 0
+  local silver = hasSilver and math.max(n - gold - cop, s > 0 and 1 or 0) or 0
+  if not hasSilver then cop = n end
+  for _ = 1, cop do plan[#plan + 1] = "copper" end
+  for _ = 1, silver do plan[#plan + 1] = "silver" end
+  for _ = 1, gold do plan[#plan + 1] = "gold" end
+  return plan
 end
 
--- The launch queue: items in order with coins mixed in among the first ones (money comes out
--- with the junk, the good stuff after)
+-- Coins that merge up: each top coin you got (gold, else silver; 5 at most) sprays out as a pile of
+-- the coin below that later joins up into it; more than 5 come whole (up to 6 more), and the change
+-- that can't make a whole top coin stays as it is. Copper alone has nothing to join into.
+-- Returns coins (entries {coin = kind, group = pile or nil}, shuffled) and merges ({group, into}).
+-- 2g 35s 40c: 2 piles of 10 silver -> 2 gold, plus 4 silver and 4 copper of change.
+function Core.MergePlan(copper)
+  copper = math.floor(copper or 0)
+  local g, s, c = math.floor(copper / 10000), math.floor(copper / 100) % 100, copper % 100
+  local top = g > 0 and "gold" or s > 0 and "silver" or nil
+  local coins, merges = {}, {}
+  if not top then
+    for i, kind in ipairs(Core.CoinPlan(copper)) do coins[i] = { coin = kind } end
+    return coins, merges
+  end
+  local lower, have = top == "gold" and "silver" or "copper", top == "gold" and g or s
+  local piles = math.min(have, 5)
+  local per = math.max(5, math.min(10, math.floor(26 / piles)))
+  for p = 1, piles do
+    merges[p] = { group = p, into = top }
+    for _ = 1, per do coins[#coins + 1] = { coin = lower, group = p } end
+  end
+  for _ = piles + 1, math.min(have, piles + 6) do coins[#coins + 1] = { coin = top } end
+  local leftS = top == "gold" and s or 0
+  for _ = 1, leftS > 0 and math.min(leftS, 2 + math.floor(leftS / 12)) or 0 do coins[#coins + 1] = { coin = "silver" } end
+  for _ = 1, c > 0 and math.min(c, 2 + math.floor(c / 20)) or 0 do coins[#coins + 1] = { coin = "copper" } end
+  for i = #coins, 2, -1 do -- shuffled, so the piles' coins land all over
+    local j = math.random(i)
+    coins[i], coins[j] = coins[j], coins[i]
+  end
+  return coins, merges
+end
+
+-- The launch queue: items in order with the coins mixed in among the first ones (money comes
+-- out with the junk, the good stuff after); coins = a CoinPlan (kinds) or MergePlan (entries)
 function Core.Mix(items, coins)
   local out = {}
-  for i, it in ipairs(items) do
-    out[#out + 1] = it
-    if i <= coins then out[#out + 1] = { coin = true } end
+  local extra = #coins - #items -- more coins than items: the rest go out first
+  local ci = 1
+  local function Coin()
+    local c = coins[ci]
+    ci = ci + 1
+    return type(c) == "table" and c or { coin = c }
   end
-  for _ = #items + 1, coins do table.insert(out, 1, { coin = true }) end
+  for _ = 1, math.max(0, extra) do out[#out + 1] = Coin() end
+  for _, it in ipairs(items) do
+    out[#out + 1] = it
+    if coins[ci] then out[#out + 1] = Coin() end
+  end
   return out
+end
+
+-- "1g 20s 5c", "1g20s", "35s", "250" (copper) -> copper, or nil
+function Core.ParseMoney(text)
+  text = (text or ""):lower():gsub("%s+", "")
+  if text == "" then return nil end
+  if text:match("^%d+$") then return tonumber(text) end
+  local total, rest = 0, text
+  for num, unit in text:gmatch("(%d+)([gsc])") do
+    total = total + tonumber(num) * (unit == "g" and 10000 or unit == "s" and 100 or 1)
+  end
+  rest = rest:gsub("%d+[gsc]", "")
+  if rest ~= "" then return nil end
+  return total
 end
 
 -- Where a resting sprite settles so it doesn't overlap the others: the nearest free x to x.
@@ -119,12 +189,17 @@ if not CreateFrame then return end
 
 local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local WHITE = "Interface\\Buttons\\WHITE8X8"
-local COIN_ICON = "Interface\\Icons\\INV_Misc_Coin_01"
-local SIZE, COIN_SIZE, MAX_SPRITES = 40, 20, 40
+-- the game's own coin icons (the money frame's), bigger for better metal
+local COIN = {
+  gold = { file = "Interface\\MoneyFrame\\UI-GoldIcon", size = 24 },
+  silver = { file = "Interface\\MoneyFrame\\UI-SilverIcon", size = 21 },
+  copper = { file = "Interface\\MoneyFrame\\UI-CopperIcon", size = 19 },
+}
+local SIZE, MAX_SPRITES = 40, 40
 local FADE_T, SQUASH_T, SETTLE_HOLD = 0.6, 0.09, 0.7
 local GHOSTS, GHOST_EVERY, DUST = 6, 0.035, 7
 local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
-local GATHER_T = 0.45
+local GATHER_T, JOIN_T, FLASH_T = 0.45, 0.32, 0.4
 
 -- The effects, each a switch (setting "noRain" .. key; all on by default)
 ns.RAIN_FX = {
@@ -136,6 +211,7 @@ ns.RAIN_FX = {
   { key = "Gather", word = "gather", label = "Gather into the bag", tip = "When it settles, what doesn't stay as a popup flies into your backpack." },
   { key = "Trails", word = "trails", label = "Trails", tip = "Rare and better items leave a fading trail in their color." },
   { key = "Coins", word = "coins", label = "Coins", tip = "Money you loot rains as coins, with a total that counts up." },
+  { key = "Merge", word = "merge", label = "Coins merge up", tip = "Gold arrives as a pile of silver (silver as copper) that joins up into it once it lands; the change stays as it is." },
   { key = "Shadows", word = "shadows", label = "Floor shadows", tip = "A soft shadow under each item, smaller the higher it flies." },
   { key = "Beam", word = "beam", label = "Loot beam", tip = "A pillar of light over resting Rare and better items, taller for the best one." },
   { key = "Hitstop", word = "hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands." },
@@ -196,6 +272,7 @@ local function Layer()
   layer.bagGlow:SetBlendMode("ADD")
   layer.bagGlow:SetVertexColor(1, 0.85, 0.4)
   layer.bagGlow:Hide()
+  layer.flashTex = {} -- merge flashes, made as needed
   driver = CreateFrame("Frame")
   -- Escape: a named frame in UISpecialFrames, shown while it rains; Escape hides it, which skips
   escFrame = CreateFrame("Frame", "DopamineLootRainSkip", UIParent)
@@ -253,6 +330,7 @@ local function Release(s)
   s.beam:Hide()
   s.name:Hide()
   for _, g in ipairs(s.ghosts) do g:Hide() end
+  s.ghostsShown = false
   pool[#pool + 1] = s
 end
 
@@ -293,6 +371,7 @@ local function Finish()
     layer.money:SetAlpha(0)
     layer.pulse:Hide()
     layer.bagGlow:Hide()
+    for _, t in ipairs(layer.flashTex) do t:Hide() end
     layer:ClearAllPoints()
     layer:SetAllPoints(UIParent)
   end
@@ -316,7 +395,7 @@ local function Launch(st, item, isBest, W, H, k)
   local s = Sprite()
   s.item, s.coin, s.best = item, item.coin, isBest
   s.q = item.coin and 0 or (item.quality or 1)
-  s.size = item.coin and COIN_SIZE or SIZE
+  s.size = item.coin and COIN[item.coin].size or SIZE
   s.x, s.y = W / 2 + math.random(-20, 20), math.max(H * 0.38, bounds.floor + H * 0.13)
   s.vx = math.random(-320, 320) * k
   s.vy = (math.random(650, 950) + (s.q >= 3 and 150 or 0)) * k -- the good stuff flies higher
@@ -327,11 +406,25 @@ local function Launch(st, item, isBest, W, H, k)
   s.rot, s.bounces, s.resting, s.squash = 0, 0, false, 0
   s.tx, s.leaving, s.leaveAt, s.handed, s.inBag, s.alpha, s.shrink = nil, nil, nil, nil, nil, 1, 1
   s.restAge, s.trailT, s.trail = 0, 0, {}
+  s.joining, s.mx, s.my, s.delay = nil, nil, nil, nil
   local r, g, b = ns.QualityColor(s.q)
-  if s.coin then r, g, b = 0.95, 0.75, 0.2 end
   s.r, s.g, s.b = r, g, b
   s.f.edge:SetVertexColor(r, g, b, 1)
-  s.f.icon:SetTexture(s.coin and COIN_ICON or item.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+  -- a coin is just the game's coin icon, round, no box; an item is its icon in a quality frame
+  local icon = s.f.icon
+  icon:ClearAllPoints()
+  if s.coin then
+    s.f.edge:Hide()
+    icon:SetAllPoints()
+    icon:SetTexCoord(0, 1, 0, 1)
+    icon:SetTexture(COIN[item.coin].file)
+  else
+    s.f.edge:Show()
+    icon:SetPoint("TOPLEFT", 2, -2)
+    icon:SetPoint("BOTTOMRIGHT", -2, 2)
+    icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+    icon:SetTexture(item.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+  end
   s.f.glow:SetVertexColor(r, g, b)
   s.f.glow:SetShown(s.q >= 3)
   s.shadow:SetShown(On("Shadows"))
@@ -342,6 +435,12 @@ local function Launch(st, item, isBest, W, H, k)
   s.f:SetAlpha(1)
   s.f:Show()
   sprites[#sprites + 1] = s
+  -- leaving the treasure chest: a whoosh that climbs through the burst (the best has its moment
+  -- on landing; a coin made by a merge has its chime)
+  if not isBest and not item.merged then
+    if s.coin then st.coinsOut = st.coinsOut + 1 else st.itemsOut = st.itemsOut + 1 end
+    ns:PlayLaunchSound(s.coin, s.coin and st.coinsOut or st.itemsOut)
+  end
   return s
 end
 
@@ -362,8 +461,9 @@ end
 
 local function OnLand(st, s)
   if s.coin then
+    if s.item.merged then return end -- its chime already rang
     st.coinsLanded = st.coinsLanded + 1
-    Tick(0)
+    ns:PlayClink(st.coinsLanded) -- a clink a step higher per coin down
     return
   end
   st.landed = st.landed + 1
@@ -375,6 +475,30 @@ local function OnLand(st, s)
   if On("Pulse") and s.q >= 4 then
     st.pulseAge = 0
     layer.pulse:SetVertexColor(s.r, s.g, s.b, 1)
+  end
+end
+
+-- Everything down, coins that merge up first: each pile gathers on its middle, one after another
+local function StartMerge(st)
+  st.mergeStarted, st.hold = true, 0
+  for i, m in ipairs(st.merges) do
+    m.members = {}
+    local sum = 0
+    for _, s in ipairs(sprites) do
+      if s.coin and s.item.group == m.group and not s.leaving then
+        m.members[#m.members + 1] = s
+        sum = sum + s.x
+      end
+    end
+    if m.members[1] then
+      m.x = sum / #m.members
+      m.at = st.age + (i - 1) * 0.28
+      for j, s in ipairs(m.members) do
+        s.joining, s.mx, s.my, s.delay, s.tx = m, s.x, s.y, (j - 1) * 0.02, nil
+      end
+    else
+      m.done = true
+    end
   end
 end
 
@@ -438,9 +562,41 @@ local function Update(_, dt)
   end
 
   local allResting = not st.queue[1] and not st.best
+  -- coins joining up: each pile hops together, and when its last coin arrives the bigger coin
+  -- pops out of a flash with its chime (one pile after another)
+  local merging = false
+  for _, m in ipairs(st.merges) do
+    if m.at and not m.done then merging = true end
+    if m.at and not m.done and st.age >= m.at then
+      allResting = false
+      if not m.started then m.started = true; ns:PlayGatherSound() end
+      local arrived = true
+      for _, s in ipairs(m.members) do
+        local u = math.min(1, math.max(0, (st.age - m.at - s.delay) / JOIN_T))
+        local e = u * u
+        s.x = s.mx + (m.x - s.mx) * e
+        s.y = s.my + math.sin(math.pi * u) * 46 * k
+        s.shrink = 1 - 0.35 * e
+        if u < 1 then arrived = false end
+      end
+      if arrived then
+        m.done = true
+        for i = #sprites, 1, -1 do
+          if sprites[i].joining == m then Release(table.remove(sprites, i)) end
+        end
+        local c = Launch(st, { coin = m.into, merged = true }, false, W, H, k)
+        c.x, c.y, c.vx, c.vy, c.e, c.spin = m.x, bounds.floor, 0, 430 * k, 0.35, 0
+        st.mergesDone = st.mergesDone + 1
+        ns:PlayMergeSound(m.into, st.mergesDone)
+        st.flashes[#st.flashes + 1] = { x = m.x, y = bounds.floor + c.size / 2, age = 0 }
+      end
+    elseif m.at and not m.done then
+      allResting = false
+    end
+  end
   local taken
   for _, s in ipairs(sprites) do
-    if not s.leaving then
+    if not s.leaving and not s.joining then
       if Core.Advance(s, dt, bounds) then
         s.squash = SQUASH_T
         if s.bounces == 1 then OnLand(st, s) elseif s.bounces == 2 and not s.coin then Tick(0) end
@@ -487,9 +643,11 @@ local function Update(_, dt)
   end
 
   -- settle once everything rests (or it's been going long enough), after a moment to look
-  if st.lastLaunch and not st.settleAt and (allResting or st.age > st.lastLaunch + 4.5) then
+  if st.lastLaunch and not st.settleAt and (allResting or (not merging and st.age > st.lastLaunch + 4.5)) then
     st.hold = st.hold + dt
-    if st.hold >= SETTLE_HOLD then Settle(st) end
+    if st.hold >= SETTLE_HOLD then
+      if st.merges[1] and not st.mergeStarted then StartMerge(st) else Settle(st) end
+    end
   end
 
   local bx, by
@@ -582,20 +740,23 @@ local function Update(_, dt)
     elseif s.name:IsShown() then
       s.name:Hide()
     end
-    for i, gh in ipairs(s.ghosts) do
-      local p = s.trail[i]
-      if p then
-        local u = i / (#s.trail + 1)
-        local gs = s.size * (1 - 0.45 * u)
-        gh:SetSize(gs, gs)
-        gh:SetRotation(p.rot)
-        gh:SetAlpha(0.45 * (1 - u))
-        gh:ClearAllPoints()
-        gh:SetPoint("CENTER", layer, "BOTTOMLEFT", p.x, p.y + s.size / 2)
-        gh:Show()
-      elseif gh:IsShown() then
-        gh:Hide()
+    if s.trail[1] or s.ghostsShown then -- most sprites (all coins) never trail: skip them cheaply
+      for i, gh in ipairs(s.ghosts) do
+        local p = s.trail[i]
+        if p then
+          local u = i / (#s.trail + 1)
+          local gs = s.size * (1 - 0.45 * u)
+          gh:SetSize(gs, gs)
+          gh:SetRotation(p.rot)
+          gh:SetAlpha(0.45 * (1 - u))
+          gh:ClearAllPoints()
+          gh:SetPoint("CENTER", layer, "BOTTOMLEFT", p.x, p.y + s.size / 2)
+          gh:Show()
+        elseif gh:IsShown() then
+          gh:Hide()
+        end
       end
+      s.ghostsShown = s.trail[1] ~= nil
     end
   end
 
@@ -624,6 +785,27 @@ local function Update(_, dt)
     else
       layer.pulse:SetAlpha(math.sin(math.pi * st.pulseAge / PULSE_T) * 0.55)
       layer.pulse:Show()
+    end
+  end
+  -- a burst of light where a pile of coins joined up
+  for i, fl in ipairs(st.flashes) do
+    local t = layer.flashTex[i]
+    if not t then
+      t = Tex(top, "ARTWORK", MEDIA .. "Glow", "ADD")
+      t:SetVertexColor(1, 0.95, 0.75)
+      layer.flashTex[i] = t
+    end
+    fl.age = fl.age + dt
+    local u = fl.age / FLASH_T
+    if u >= 1 then
+      t:Hide()
+    else
+      local size = 30 + 90 * u
+      t:SetSize(size, size)
+      t:ClearAllPoints()
+      t:SetPoint("CENTER", layer, "BOTTOMLEFT", fl.x, fl.y)
+      t:SetAlpha(1 - u)
+      t:Show()
     end
   end
   if st.bagBump > 0 then
@@ -691,16 +873,22 @@ function ns:Rain(items, copper)
   local all = {}
   for i, it in ipairs(list) do all[i] = it end
   local best
-  if On("Best") and #list > 1 then best = table.remove(list) end
-  if not list[1] and not best then return end
-  local coins = On("Coins") and Core.CoinCount(copper) or 0
-  local queue = Core.Mix(list, coins)
+  local plan, merges = {}, {}
+  if On("Coins") then
+    if On("Merge") then plan, merges = Core.MergePlan(copper) else plan = Core.CoinPlan(copper) end
+  end
+  local coins = #plan
+  -- the best flies last; a lone item (a quest reward) does too when coins rain with it
+  if On("Best") and (#list > 1 or (#list == 1 and coins > 0)) then best = table.remove(list) end
+  if not list[1] and not best and coins == 0 then return end
+  local queue = Core.Mix(list, plan)
   state = {
     age = 0, nextLaunch = 0, queue = queue, launched = 0, total = #queue, best = best, extra = extra,
     all = all, handedOff = {}, stayQuality = ns.settings.stayQuality or 3,
     landed = 0, copper = coins > 0 and copper or 0, coins = coins, coinsLanded = 0, shownCopper = 0,
     baseCopper = On("Coins") and baseCopper or 0,
     hold = 0, fadeOut = 0, gathered = 0, bagBump = 0, stopT = 0, shake = 0,
+    merges = merges, mergesDone = 0, flashes = {}, coinsOut = 0, itemsOut = 0,
   }
   layer.count:SetText("")
   layer.money:SetText("")

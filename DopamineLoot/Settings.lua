@@ -241,8 +241,31 @@ local function CreatePanel()
   local floorAfter = Label(panel, "GameFontHighlight", "% up from the bottom")
   floorAfter:SetPoint("LEFT", floorBox, "RIGHT", 8, 0)
 
+  -- money alone rains from this much (gold, silver, copper fields; quest money always rains)
+  local coinLabel = Label(panel, "GameFontHighlight", "Money rains from")
+  coinLabel:SetPoint("TOPLEFT", floorLabel, "BOTTOMLEFT", 0, -16)
+  local prevField = coinLabel
+  local function Part(v, mult) return mult == 10000 and math.floor(v / 10000) or math.floor(v / mult) % 100 end
+  for _, unit in ipairs({ { "g", 10000, 999 }, { "s", 100, 99 }, { "c", 1, 99 } }) do
+    local mult, max = unit[2], unit[3]
+    local box = NumberBox(panel, 30, function() return Part(ns.CoinRainMin(), mult) end, function(n)
+      -- the total from all three parts with this one replaced (0 = any amount)
+      local v = ns.CoinRainMin()
+      local parts = { [10000] = Part(v, 10000), [100] = Part(v, 100), [1] = Part(v, 1) }
+      parts[mult] = math.floor(n)
+      ns.settings.coinRainMin = parts[10000] * 10000 + parts[100] * 100 + parts[1]
+      C_Timer.After(0, RefreshAll) -- the other two fields show the new total too
+    end, 0, max,
+      "Money looted from a corpse rains as coins on its own (even with few items) from this much. " ..
+      "Quest turn-in money always rains. 0 = any amount. Also /dl coinrain 1g.")
+    box:SetPoint("LEFT", prevField, "RIGHT", prevField == coinLabel and 10 or 4, 0)
+    local u = Label(panel, "GameFontHighlight", unit[1])
+    u:SetPoint("LEFT", box, "RIGHT", 2, 0)
+    prevField = u
+  end
+
   local stay = Label(panel, "GameFontHighlightSmall", "Stay on screen as popups afterwards:")
-  stay:SetPoint("TOPLEFT", floorLabel, "BOTTOMLEFT", 0, -16)
+  stay:SetPoint("TOPLEFT", coinLabel, "BOTTOMLEFT", 0, -16)
   last = Choice(panel, {
     { value = 2, label = "|cff1eff00Uncommon|r and up" },
     { value = 3, label = "|cff0070ddRare|r and up (recommended)" },

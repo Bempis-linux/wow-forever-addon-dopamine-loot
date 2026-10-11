@@ -1,16 +1,33 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-10, with 0.3.9. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-11, with 0.3.10. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
+**Words the user uses:** the **treasure chest** = where the rain's items and coins spray out from
+(the spawn point, middle of the screen); the **ground** = where they land (rainFloor).
+
 ## Where things stand
-- **0.3.9 pushed** (loot rain effects), not yet seen in game; 0.3.8 arrival sounds not yet heard. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
+- **0.3.10 pushed** (coins, quests, merge-up, chest sounds); 0.3.9 seen in game ("looks pretty
+  good" — screenshot only of coins, which led to 0.3.10); 0.3.8 arrival sounds not yet heard. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
   (plan roadmap row 0.3 lists what's done and what's left).
 - Done in 0.3: four popup styles (Relic v2 = default, Beam v2, Halo lens v2, Banner v2) on generated art;
   weapons upright via `Model:SetPitch` (setting `weaponTilt`, default 90); MORPHEUS title font;
   arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic 14-spark ring;
   Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
+- 0.3.10 money: coins are the game's money icons (Interface\MoneyFrame\UI-Gold/Silver/CopperIcon,
+  no frame). `Core.CoinPlan` (log curve, max 30; real gold as gold, silver fills, a few copper).
+  New effect **Merge** (`Core.MergePlan`, user's idea): each top coin (gold, else silver; 5 piles
+  max, more come whole) sprays as a pile of the coin below that hops together after landing and
+  pops the bigger coin out of a flash with a chime; change stays. Quests: QUEST_COMPLETE..
+  QUEST_FINISHED (+1 s) and QUEST_TURNED_IN (claims a gain from just before it; reward-less
+  turn-ins) mark bursts `.quest`; quest money always rains, loot money alone rains
+  from `coinRainMin` (default 1g, 0 = any; main page g/s/c fields, `/dl coinrain`); a lone item + coins
+  flies as the best item. Sounds (user: coin pings sounded the same; wants chest sounds different
+  from ground sounds): LaunchItem/LaunchCoin (leaving the chest), Clink (coin lands), MergeSilver/
+  MergeGold (one step higher per merge), Gather (pile hops) — each set climbs a major pentatonic
+  scale (00..10), throttled in `PlaySet`. Tests: `/dl testcoins <amount>`, `/dl testquest`, Test
+  money buttons on the effects page. Prototyped first in `docs/mockups/rain.html` (Money buttons).
 - 0.3.9 loot rain effects, built from the HTML prototype `docs/mockups/rain.html` (same physics;
   the user tried every toggle and wants all, each a setting): best item last (held back, a 0.55 s
   pause, launched straight up at `Core.BEST_VY`, settles at the center and owns it), escalation
@@ -40,8 +57,9 @@ _Last checkpoint: 2026-10-10, with 0.3.9. Read this first in a new session (the 
   settings keep the style already picked; only fresh settings get Relic.
 - **Next up** (suggested order):
   1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
-  2. **User tests 0.3.9** (full restart: new file, textures, sounds): the rain with every effect,
-     the effects page, Escape skip, real money from a mob; plus 0.3.8 arrival sounds. Tune from video.
+  2. **User tests 0.3.10** (full restart: new sounds): Test money buttons (merge-up), Test quest
+     reward, a real quest turn-in with money, a mob with 1g+; the effects page; Escape skip; plus
+     0.3.8 arrival sounds. Tune from video. Sounds were approved as "a really good start" (mockup tones).
   3. Rain polish the user asks for (the rain comes first, before more popup work); sound tweaks.
   4. 0.4 filters (seen set/NEW, upgrade badge), 0.5 inspector (Alt+Right-click), 0.6 chest show.
 
@@ -80,6 +98,8 @@ _Last checkpoint: 2026-10-10, with 0.3.9. Read this first in a new session (the 
   later. The rain may be busy (all effects on) — the restraint rule is about the popups' idle loops.
 - Settings pages may scroll when they need to (don't cram); none needs it yet.
 - Motion ideas: prototype them as an HTML mockup the user can toggle (docs/mockups/), then port.
+  **Never run bulk or fast-forwarded scripted tests in the browser pane without asking** (one run
+  froze the user's PC and spammed sound); mute the page and check one short scene at most.
 - Only `/dl help` prints to chat. Original assets only (generated art; game sounds by ID).
 - Process: preflight → commit → push each increment; reviewer agent before big changes. The user
   tests in game and sends screenshots or **videos**; give a short "to test" list and say `/reload`
@@ -114,6 +134,7 @@ _Last checkpoint: 2026-10-10, with 0.3.9. Read this first in a new session (the 
 - (none: Relic is the default, both v2 versions approved)
 
 ## Recent history (newest first)
+- 2026-10-11 0.3.10: coins as money icons, merge-up, quest money rains, chest + coin sounds.
 - 2026-10-10 0.3.9: loot rain effects (13 switches, own settings page), coins from looted money.
 - 2026-10-10 0.3.8: arrival sounds per tier (synthesized OGGs).
 - 2026-10-10 0.3.7: calmer look (static light; no halo sweep, relic rays, epic rays/orbit).

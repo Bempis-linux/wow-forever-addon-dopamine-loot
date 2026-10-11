@@ -92,18 +92,62 @@ for _, n in ipairs({ 3, 8, 20, 40 }) do
   Check(("n=%d: the escalating burst lasts under 2 s"):format(n), esc < 2, ("%.2f s"):format(esc))
 end
 
--- 8. Coins: none without money, more for more, never over 14; mixed in with the first items
-Check("no money, no coins", C.CoinCount(0) == 0 and C.CoinCount(nil) == 0)
-Check("more money, more coins", C.CoinCount(50) < C.CoinCount(50000))
-Check("at most 14 coins", C.CoinCount(10 ^ 9) == 14)
-local mixed = C.Mix({ { n = "a" }, { n = "b" }, { n = "c" } }, 2)
+-- 8. Coins: which and how many; mixed in with the first items
+local function Plan(copper)
+  local n = { gold = 0, silver = 0, copper = 0 }
+  for _, kind in ipairs(C.CoinPlan(copper)) do n[kind] = n[kind] + 1 end
+  return n, #C.CoinPlan(copper)
+end
+Check("no money, no coins", #C.CoinPlan(0) == 0 and #C.CoinPlan(nil) == 0)
+Check("1 copper: 1 coin, 2 copper: 2 coins", #C.CoinPlan(1) == 1 and #C.CoinPlan(2) == 2)
+local p, n = Plan(5)
+Check("5 copper: 5 copper coins", p.copper == 5 and n == 5, n .. " coins")
+p = Plan(54)
+Check("54 copper: only copper coins", p.copper > 5 and p.silver == 0 and p.gold == 0)
+p = Plan(3520)
+Check("35s 20c: mostly silver, a few copper", p.silver > 10 and p.copper == 3 and p.gold == 0)
+p, n = Plan(20000)
+Check("2g: 2 gold coins and silver filling out", p.gold == 2 and p.silver > 10 and p.copper == 0, n .. " coins")
+_, n = Plan(10 ^ 9)
+Check("never more than MAX_COINS", n == C.MAX_COINS)
+local order = C.CoinPlan(12340)
+Check("coins launch copper, then silver, then gold", order[1] == "copper" and order[#order] == "gold")
+local mixed = C.Mix({ { n = "a" }, { n = "b" }, { n = "c" } }, { "copper", "silver" })
 local shape = {}
 for i, it in ipairs(mixed) do shape[i] = it.coin and "$" or it.n end
 Check("coins go out among the first items", table.concat(shape) == "a$b$c", table.concat(shape))
-local many = C.Mix({ { n = "a" } }, 3)
+local many = C.Mix({ { n = "a" } }, { "copper", "copper", "silver" })
 local coinCount = 0
 for _, it in ipairs(many) do if it.coin then coinCount = coinCount + 1 end end
 Check("every coin is queued even with few items", #many == 4 and coinCount == 3)
+Check("coins only, no items", #C.Mix({}, { "gold" }) == 1)
+-- merge-up: piles of the coin below that join into each top coin; change stays as it is
+local function MPlan(copper)
+  local coins, merges = C.MergePlan(copper)
+  local n, piles = { gold = 0, silver = 0, copper = 0 }, {}
+  for _, c in ipairs(coins) do
+    n[c.coin] = n[c.coin] + 1
+    if c.group then piles[c.group] = (piles[c.group] or 0) + 1 end
+  end
+  return n, merges, piles, #coins
+end
+local mn, mm, mp = MPlan(23540)
+Check("2g 35s 40c: two piles of silver become two gold", #mm == 2 and mm[1].into == "gold" and mp[1] == 10 and mp[2] == 10)
+Check("2g 35s 40c: some silver and copper change stays", mn.silver > 20 and mn.copper > 0 and mn.gold == 0)
+mn, mm, mp = MPlan(3520)
+Check("35s 20c: piles of copper become silver (5 at most)", #mm == 5 and mm[1].into == "silver" and mp[1] == 5)
+mn, mm = MPlan(54)
+Check("54c: copper only, nothing merges", #mm == 0 and mn.copper > 0 and mn.silver == 0)
+local _, m25, _, n25 = MPlan(251234)
+local whole = select(1, MPlan(251234)).gold
+Check("25g: 5 piles, 6 more whole gold, under 50 coins", #m25 == 5 and whole == 6 and n25 < 50, n25 .. " coins")
+local mixedM = C.Mix({ { n = "a" } }, (C.MergePlan(23540)))
+local grouped = 0
+for _, it in ipairs(mixedM) do if it.coin and it.group then grouped = grouped + 1 end end
+Check("merge piles keep their group in the launch queue", grouped == 20)
+Check("money parses: 1g 20s 5c", C.ParseMoney("1g 20s 5c") == 12005)
+Check("money parses: plain copper and 35s", C.ParseMoney("250") == 250 and C.ParseMoney("35s") == 3500)
+Check("money rejects junk", C.ParseMoney("lots") == nil)
 
 -- 9. Spacing: resting items never overlap, Rare+ with names keep a name's width apart
 local taken = {}
