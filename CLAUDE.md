@@ -23,17 +23,18 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Core.lua                 saved data, events, /dl commands (ns.AddCommand, ns.RunCommand)
   Output.lua               log window (all output except /dl help)
   LootMsg.lua              pure parser of "You receive loot" lines (tools/test_lootmsg.lua)
-  Sounds.lua               tier sounds by SOUNDKIT with fallbacks; /dl sounds
+  Sounds.lua               tier sounds by SOUNDKIT with fallbacks, arrival sounds (OGG); /dl sounds
   View.lua                 the popup view: 4 styles, model or flip card, flash, rarity arrivals
   Popup.lua                popup stack, motion, waiting queue (uses View)
   Rain.lua                 loot rain: pure physics ns.RainCore (tools/test_rain.lua) + sprites
   LootFeed.lua             CHAT_MSG_LOOT -> item data -> burst collector -> popup or rain; commands
   Settings.lua             main settings page; shared controls ns.UI (Slider, NumberBox, ...)
   Look.lua                 "Popup look" sub-page: style, sliders, live preview
-  Media/*.tga              original art, written by tools/gen_textures.lua (white, tinted in game)
+  Media/*.tga, *.ogg       original art (tools/gen_textures.lua, white, tinted in game) and arrival
+                           sounds (tools/gen_sounds.sh, ffmpeg-synthesized)
 docs/plan.md             design, data model, roadmap, rain ideas
 docs/STATE.md            session handoff
-tools/                   gen_textures.lua, test_*.lua (run by wow-preflight)
+tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight)
 ```
 
 ## Session continuity (read first)

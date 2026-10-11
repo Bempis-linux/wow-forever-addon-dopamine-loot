@@ -465,6 +465,7 @@ function ns.CreateView(f)
     local reach = 40 + self.L.stage[3] * 0.5
     if not self.arrived then -- first frame: show what this tier uses
       self.arrived = true
+      ns:PlayArrivalSound(tier)
       for i, m in ipairs(sparks) do m:SetShown(i <= self.sparkCount) end
       self.waves[1]:SetShown(tier == "legendary")
       self.waves[2]:SetShown(tier == "legendary")

@@ -37,6 +37,17 @@ function ns:PlayTierSound(quality, force)
   end
 end
 
+-- Arrival sounds: our own synthesized OGGs (tools/gen_sounds.sh), layered on the tier sound and
+-- started by View.lua with the arrival effects (Rare spark ring, Epic ring, Legendary shockwave)
+local ARRIVAL_FILE = "Interface\\AddOns\\DopamineLoot\\Media\\Arrival%s.ogg"
+local ARRIVAL = { rare = "Rare", epic = "Epic", legendary = "Legendary" }
+ns.AddToggle("arrivalsound", "noArrivalSound", "arrival sounds")
+
+function ns:PlayArrivalSound(tier)
+  if self.settings.noSound or self.settings.noArrivalSound or not ARRIVAL[tier] then return end
+  PlaySoundFile(ARRIVAL_FILE:format(ARRIVAL[tier]), Channel())
+end
+
 -- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
 local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
 local BOUNCE = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" }

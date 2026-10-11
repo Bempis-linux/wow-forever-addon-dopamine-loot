@@ -203,6 +203,16 @@ local function CreatePanel()
   }, function() return ns.settings.soundChannel or "SFX" end, function(v) ns.settings.soundChannel = v end, soundOn)
   local checkSounds = Button(panel, "Check all sounds", 130, function() ns.RunCommand("sounds") end)
   checkSounds:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -8)
+  local arrivalOn = Toggle(panel, "Arrival sounds", "noArrivalSound",
+    "A chime with the sparks for Rare and Epic, a boom and chord with the Legendary shockwave.")
+  arrivalOn:SetPoint("TOPLEFT", checkSounds, "BOTTOMLEFT", -4, -6)
+  local prev
+  for _, q in ipairs({ "rare", "epic", "legendary" }) do
+    local b = Button(panel, q:sub(1, 1):upper() .. q:sub(2), 80, function() ns.RunCommand("test", q) end)
+    if prev then b:SetPoint("LEFT", prev, "RIGHT", 4, 0) else b:SetPoint("TOPLEFT", arrivalOn, "BOTTOMLEFT", 4, -4) end
+    Tip(b, "Show a " .. q .. " test popup with its arrival and sound.")
+    prev = b
+  end
 
   ---------------------------------------------------------------- right: loot rain
   local rain = Label(panel, "GameFontNormal", "Loot rain")
