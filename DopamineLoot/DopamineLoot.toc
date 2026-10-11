@@ -2,7 +2,7 @@
 ## Title: Dopamine Loot
 ## Notes: Loot that feels like loot: 3D item popups, treasure rain, and an item inspector.
 ## Author: Bempis
-## Version: 0.3.8
+## Version: 0.3.9
 ## SavedVariables: DopamineLootDB
 ## SavedVariablesPerCharacter: DopamineLootCharDB
 ## IconTexture: Interface\Icons\INV_Misc_Bag_10_Green
@@ -18,3 +18,4 @@ Rain.lua
 LootFeed.lua
 Settings.lua
 Look.lua
+RainFx.lua

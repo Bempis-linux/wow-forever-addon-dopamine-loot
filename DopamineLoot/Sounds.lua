@@ -48,6 +48,17 @@ function ns:PlayArrivalSound(tier)
   PlaySoundFile(ARRIVAL_FILE:format(ARRIVAL[tier]), Channel())
 end
 
+-- Loot rain escalation: tick n (1 = the first item down) climbs a semitone per item, up to 15 steps
+local STEP_FILE = "Interface\\AddOns\\DopamineLoot\\Media\\Tick%02d.ogg"
+local lastStep = 0
+function ns:PlayStepTick(n)
+  if self.settings.noSound then return end
+  local now = GetTime()
+  if now - lastStep < 0.05 then return end -- a fast rattle skips ticks; the pitch still climbs
+  lastStep = now
+  PlaySoundFile(STEP_FILE:format(math.min(math.max((n or 1) - 1, 0), 14)), Channel())
+end
+
 -- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
 local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
 local BOUNCE = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" }

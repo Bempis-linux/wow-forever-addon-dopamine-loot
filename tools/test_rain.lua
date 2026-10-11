@@ -68,4 +68,54 @@ Check("launch order worst to best", table.concat(names, ",") == "w,g1,g2,rare,ep
 Check("rare stays at threshold 3", C.Stays({ quality = 3 }, 3))
 Check("green fades at threshold 3", not C.Stays({ quality = 2 }, 3))
 
+-- 6. The best item's straight-up launch stays under the top edge and lands where it started
+for _, H in ipairs({ 768, 1080, 1700 }) do
+  local k = H / 768
+  local bb = { left = 40, right = H * 2 - 40, floor = 2, k = k }
+  local s6 = { x = H, y = H * 0.38, vx = 0, vy = C.BEST_VY * k, e = 0.5 }
+  local peak, t = 0, 0
+  while not s6.resting and t < 10 do C.Advance(s6, 1 / 60, bb); peak = math.max(peak, s6.y); t = t + 1 / 60 end
+  Check(("H=%d: the best item peaks under the top edge"):format(H), peak + 40 < H, ("peak %.0f of %d"):format(peak, H))
+  Check(("H=%d: the best item lands in the middle"):format(H), s6.x == H, ("x %.1f"):format(s6.x))
+end
+
+-- 7. Launch timing: escalation speeds up, and a burst takes about as long either way
+for _, n in ipairs({ 3, 8, 20, 40 }) do
+  local plain, esc, faster = 0, 0, true
+  for i = 1, n do
+    plain = plain + C.Interval(i, n, false)
+    local v = C.Interval(i, n, true)
+    if i > 1 and v > C.Interval(i - 1, n, true) + 1e-9 then faster = false end
+    esc = esc + v
+  end
+  Check(("n=%d: escalation never slows down"):format(n), faster)
+  Check(("n=%d: the escalating burst lasts under 2 s"):format(n), esc < 2, ("%.2f s"):format(esc))
+end
+
+-- 8. Coins: none without money, more for more, never over 14; mixed in with the first items
+Check("no money, no coins", C.CoinCount(0) == 0 and C.CoinCount(nil) == 0)
+Check("more money, more coins", C.CoinCount(50) < C.CoinCount(50000))
+Check("at most 14 coins", C.CoinCount(10 ^ 9) == 14)
+local mixed = C.Mix({ { n = "a" }, { n = "b" }, { n = "c" } }, 2)
+local shape = {}
+for i, it in ipairs(mixed) do shape[i] = it.coin and "$" or it.n end
+Check("coins go out among the first items", table.concat(shape) == "a$b$c", table.concat(shape))
+local many = C.Mix({ { n = "a" } }, 3)
+local coinCount = 0
+for _, it in ipairs(many) do if it.coin then coinCount = coinCount + 1 end end
+Check("every coin is queued even with few items", #many == 4 and coinCount == 3)
+
+-- 9. Spacing: resting items never overlap, Rare+ with names keep a name's width apart
+local taken = {}
+local overlap = false
+for i = 1, 30 do
+  local x = C.Slot(600 + (i % 3) * 5, { half = 20 }, taken, 40, 1880)
+  for _, o in ipairs(taken) do if math.abs(o.x - x) < 46 then overlap = true end end
+  taken[#taken + 1] = { x = x, half = 20 }
+end
+Check("30 items piled on one spot spread without overlapping", not overlap)
+local wide = { { x = 600, half = 20, wide = true } }
+local wx = C.Slot(600, { half = 20, wide = true }, wide, 40, 1880)
+Check("two named items keep 150 apart", math.abs(wx - 600) >= 150, ("%.0f"):format(wx))
+
 print(fails == 0 and "all passed" or (fails .. " failed"))

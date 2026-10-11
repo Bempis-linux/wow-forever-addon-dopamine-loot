@@ -5,6 +5,7 @@
 #   ArrivalRare       two soft bell notes with the spark ring
 #   ArrivalEpic       a soft thump, a rising bell arpeggio, then a warm chord that blooms and rings out
 #   ArrivalLegendary  a deep, long boom with the shockwave, then a bright bell chord and a high sparkle
+#   Tick00..Tick14    loot rain: a short tick per landed item, climbing a semitone each
 # Run: bash tools/gen_sounds.sh   (needs ffmpeg; set FFMPEG or have it on PATH or in WinGet's folder)
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -49,3 +50,10 @@ BOOM="1.1*$(boom 0 38 140 1.8)+0.7*$(boom 0 28 70 1.2)+0.5*(random(0)*2-1)*exp(-
 CHORD="$(bell 0.18 523.25 2.2)+$(bell 0.18 659.25 2.2)+$(bell 0.18 783.99 2.2)+0.9*$(bell 0.18 1046.5 2)"
 SPARK="0.6*$(bell 0.55 2093 3)+0.5*$(bell 0.68 2637 3)"
 render ArrivalLegendary 3.2 0.3 "$BOOM+0.6*($CHORD)+$SPARK" "lowpass=f=9000,$ROOM"
+
+# Loot rain escalation: a short soft tick per landed item, one semitone higher each time
+# (Tick00 = A5 ... Tick14 = B6); the game has no pitch control, so each step is its own file
+for i in $(seq 0 14); do
+  f=$(awk "BEGIN{print 880 * 2 ^ ($i / 12)}")
+  render "$(printf 'Tick%02d' "$i")" 0.35 0.3 "$(bell 0 "$f" 14)"
+done

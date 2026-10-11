@@ -88,9 +88,10 @@ local afterCombat = {} -- big bursts looted mid-fight, rained together when comb
 
 function ns.RainMin() return ns.settings.rainMin or RAIN_MIN end
 
+-- items: the burst's item data; items.copper: money looted with them (rains as coins, never alone)
 local function Play(items)
   if #items >= ns.RainMin() and not ns.settings.noRain then
-    ns:Rain(items)
+    ns:Rain(items, items.copper)
   else
     for _, d in ipairs(items) do ns:ShowLoot(d) end
   end
@@ -102,6 +103,7 @@ local function FlushBurst()
   if not items then return end
   if InCombatLockdown() and #items >= ns.RainMin() and not ns.settings.noRain then
     for _, d in ipairs(items) do afterCombat[#afterCombat + 1] = d end
+    afterCombat.copper = (afterCombat.copper or 0) + (items.copper or 0)
     return
   end
   Play(items)
@@ -115,15 +117,37 @@ function ns:PLAYER_REGEN_ENABLED()
 end
 ns.OnInit(function() ns:RegisterEvents("PLAYER_REGEN_ENABLED") end)
 
-function ns.Collect(d)
-  if ns.settings.noRain then return ns:ShowLoot(d) end -- nothing to collect for
+-- Add to the burst being collected (or start one), and flush it once loot stops arriving
+local function Burst()
   if not burst then burst, burstStart = {}, GetTime() end
-  burst[#burst + 1] = d
   gen = gen + 1
   local my = gen
   local wait = math.max(0, math.min(QUIET, burstStart + MAX_WAIT - GetTime()))
   C_Timer.After(wait, function() if my == gen then FlushBurst() end end)
+  return burst
 end
+
+function ns.Collect(d)
+  if ns.settings.noRain then return ns:ShowLoot(d) end -- nothing to collect for
+  local b = Burst()
+  b[#b + 1] = d
+end
+
+-- Money: the gain in your gold while a loot window is open (or just closed) joins the burst.
+-- Read from GetMoney, so no money line is parsed; vendor sales, mail and quests don't count.
+local lootOpen, lootClosedAt, money = false, 0, nil
+function ns:LOOT_OPENED() lootOpen, money = true, GetMoney() end -- the baseline, taken in world
+function ns:LOOT_CLOSED() lootOpen, lootClosedAt = false, GetTime() end
+function ns:PLAYER_MONEY()
+  local now = GetMoney()
+  local gain = money and now - money or 0
+  money = now
+  if gain <= 0 or ns.settings.noRain or merchantOpen then return end
+  if not lootOpen and GetTime() - lootClosedAt > 1 then return end
+  local b = Burst()
+  b.copper = (b.copper or 0) + gain
+end
+ns.OnInit(function() ns:RegisterEvents("LOOT_OPENED", "LOOT_CLOSED", "PLAYER_MONEY") end)
 
 ---------------------------------------------------------------------------
 -- Commands
@@ -195,7 +219,7 @@ ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]"
   local function Go()
     if started then return end
     started = true
-    if #items > 0 then ns:Rain(items) end
+    if #items > 0 then ns:Rain(items, n * math.random(150, 1800)) end -- some test money too
   end
   for _, it in ipairs(picks) do
     ns.ItemData(it, 1, "loot", function(d)

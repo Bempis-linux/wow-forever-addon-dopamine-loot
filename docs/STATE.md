@@ -1,16 +1,28 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-10, with 0.3.8. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-10, with 0.3.9. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions) and `docs/plan.md` (roadmap, rain ideas)._
 
 ## Where things stand
-- **0.3.8 pushed** (arrival sounds), not yet heard in game. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
+- **0.3.9 pushed** (loot rain effects), not yet seen in game; 0.3.8 arrival sounds not yet heard. Roadmap 0.1 and 0.2 done; **0.3 look & feel in progress**
   (plan roadmap row 0.3 lists what's done and what's left).
 - Done in 0.3: four popup styles (Relic v2 = default, Beam v2, Halo lens v2, Banner v2) on generated art;
   weapons upright via `Model:SetPitch` (setting `weaponTilt`, default 90); MORPHEUS title font;
   arrival flash; **arrivals by rarity in every style** (Rare 8-spark ring; Epic 14-spark ring;
   Legendary 2 shockwaves + ember fountain + rising embers); Popup look page (`/dl look`)
   with live preview, quality/kind pickers, sliders (size, 3D zoom, weapon tilt, spin, time on screen).
+- 0.3.9 loot rain effects, built from the HTML prototype `docs/mockups/rain.html` (same physics;
+  the user tried every toggle and wants all, each a setting): best item last (held back, a 0.55 s
+  pause, launched straight up at `Core.BEST_VY`, settles at the center and owns it), escalation
+  (`Core.Interval` speeds up; `ns:PlayStepTick(n)` plays Tick00..14.ogg a semitone higher per
+  landing and per item gathered), Epic+ screen-edge glow (Vignette.tga), spacing (`Core.Slot`;
+  named Rare+ keep 150 apart), dust puffs (Mote), gathering into the backpack (curve to
+  `MainMenuBarBackpackButton`, our glow over it; Blizzard's button untouched), trails (6 ghosts
+  every 35 ms), coins + rolling total (money = PLAYER_MONEY gain while the loot window is open or
+  <1 s closed, baseline at LOOT_OPENED; carried as `burst.copper`; never rains alone), floor
+  shadows, loot beam (Pillar.tga), hit-stop + shake, name labels, Escape skip (named frame in
+  UISpecialFrames; OnHide → Skip, good items still pop). Settings: `noRain<Key>` per effect,
+  "Loot rain effects" sub-page (RainFx.lua, two columns + Test), `/dl rainfx [name off|on]`.
 - 0.3.8 arrival sounds: original OGGs synthesized by `tools/gen_sounds.sh` (ffmpeg aevalsrc: soft
   bells, pads, falling-sine booms, aecho room). Rare = two bells; Epic = thump, arpeggio, blooming
   chord, shimmer (user wanted Epic "more satisfying, they aren't common in classic"); Legendary =
@@ -28,10 +40,9 @@ _Last checkpoint: 2026-10-10, with 0.3.8. Read this first in a new session (the 
   settings keep the style already picked; only fresh settings get Relic.
 - **Next up** (suggested order):
   1. **Real-play verification** whenever the user plays (see "Not yet verified"; biggest unknown).
-  2. Hear 0.3.8 in game (full restart: new OGG files): settings Test buttons; loudness vs the game.
-  3. The picked rain ideas (plan "Rain ideas": best item last,
-     escalation with rising-pitch chimes via ffmpeg, spacing + dust puff, gathering into the bag,
-     trails, coins, Escape-to-skip setting; floor shadows low priority).
+  2. **User tests 0.3.9** (full restart: new file, textures, sounds): the rain with every effect,
+     the effects page, Escape skip, real money from a mob; plus 0.3.8 arrival sounds. Tune from video.
+  3. Rain polish the user asks for (the rain comes first, before more popup work); sound tweaks.
   4. 0.4 filters (seen set/NEW, upgrade badge), 0.5 inspector (Alt+Right-click), 0.6 chest show.
 
 ## Verified in game (by the user)
@@ -65,6 +76,10 @@ _Last checkpoint: 2026-10-10, with 0.3.8. Read this first in a new session (the 
 - **Restraint in motion**: the user found constant ambient animation too much (0.3.7). Keep looping
   effects rare; one-shot arrival bursts are welcome. Don't add new idle animations without asking.
 - Presentation and sound matter most; the chest show should feel like Vampire Survivors' chest.
+- **The loot rain is the user's favorite part**: make it feel the best first; popups get more polish
+  later. The rain may be busy (all effects on) — the restraint rule is about the popups' idle loops.
+- Settings pages may scroll when they need to (don't cram); none needs it yet.
+- Motion ideas: prototype them as an HTML mockup the user can toggle (docs/mockups/), then port.
 - Only `/dl help` prints to chat. Original assets only (generated art; game sounds by ID).
 - Process: preflight → commit → push each increment; reviewer agent before big changes. The user
   tests in game and sends screenshots or **videos**; give a short "to test" list and say `/reload`
@@ -99,6 +114,7 @@ _Last checkpoint: 2026-10-10, with 0.3.8. Read this first in a new session (the 
 - (none: Relic is the default, both v2 versions approved)
 
 ## Recent history (newest first)
+- 2026-10-10 0.3.9: loot rain effects (13 switches, own settings page), coins from looted money.
 - 2026-10-10 0.3.8: arrival sounds per tier (synthesized OGGs).
 - 2026-10-10 0.3.7: calmer look (static light; no halo sweep, relic rays, epic rays/orbit).
 - 2026-10-10 0.3.6: Relic v2 (default) and Banner v2 (emblem, shine sweep).

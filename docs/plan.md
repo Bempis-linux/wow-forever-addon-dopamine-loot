@@ -478,7 +478,7 @@ No existing addon named "Dopamine Loot" was found.
 |---|---|
 | **0.1** done | `CHAT_MSG_LOOT` self parsing -> a **single popup** with the rotating `PlayerModel:SetItem` model (card fallback), quality sound, quality threshold; `/dl test`, `/dl model`, `/dl check`, `/dl sounds`. Verified: SetItem works on Forever |
 | **0.2** done | (reordered at the user's request) **Loot rain (lite)** + **Settings page** with Test buttons and number fields; burst collector, popup queue, combat deferral, landing height, `/dl rain N`. Offline: `test_rain.lua` |
-| **0.3** in progress | **Look & feel pass**. Done (0.3.0-0.3.8): four popup styles on generated art (Relic v2 = default, Beam v2, Halo lens v2, Banner v2), weapons upright via `Model:SetPitch`, title font, arrival flash, **arrivals by rarity in every style** (Rare spark ring; Epic bigger ring; Legendary shockwaves + ember fountain + rising embers), Popup look page with live preview + sliders; 0.3.7 calmed it down (no breathing light, halo sweep, relic rays, epic rays/orbit); 0.3.8 **arrival sounds** (original synthesized OGGs per tier, timed with the arrival, toggle + Test buttons). Left: the picked rain ideas below, legendary screen-edge pulse behind a "no screen flashes" switch, reduced-motion switch |
+| **0.3** in progress | **Look & feel pass**. Done (0.3.0-0.3.9): four popup styles on generated art (Relic v2 = default, Beam v2, Halo lens v2, Banner v2), weapons upright via `Model:SetPitch`, title font, arrival flash, **arrivals by rarity in every style** (Rare spark ring; Epic bigger ring; Legendary shockwaves + ember fountain + rising embers), Popup look page with live preview + sliders; 0.3.7 calmed it down (no breathing light, halo sweep, relic rays, epic rays/orbit); 0.3.8 **arrival sounds** (original synthesized OGGs per tier, timed with the arrival, toggle + Test buttons); 0.3.9 **loot rain effects** (see "Rain ideas"), each a switch on its own settings page. Left: legendary screen-edge pulse behind a "no screen flashes" switch, reduced-motion switch |
 | **0.4** | **Filters**: seen set (seed + NEW badge), ignore/always-show/whitelist/blacklist, sources, money threshold, instances-only; ilvl **upgrade badge** + upgrades-only filter; per-tier sound picker. Offline: `test_filters.lua`, `test_upgrade.lua` |
 | **0.5** | **Inspector**: recent loot list, Alt+Right-click hook, drag/zoom/pan, turntable, lighting presets, tooltip + typed description, mannequin "Try on", spinning card for non-model items, share to chat; minimap button |
 | **0.6** | **Chest show** (Vampire-Survivors feel): anticipation shake, coin fountain, slot-machine counter, gold burst, final reveal with beam and screen flourish, skip; original generated textures and pitch-stepped chimes (ffmpeg now installed); reduced-motion and no-flash switches |
@@ -488,17 +488,13 @@ No existing addon named "Dopamine Loot" was found.
 
 ### Rain ideas (picked with the user 2026-10-10)
 
-In for 0.3 (in rough order):
-- **Best item last**: a pause before the best launch, a brighter arc, it lands center screen, then becomes its popup.
-- **Escalation**: launch cadence speeds up through the burst; the bounce tick climbs in pitch per item (our own
-  chimes via ffmpeg); a short screen-edge pulse when an Epic lands.
-- **Spacing + dust puff**: resting items spread side by side instead of overlapping; a small puff on the first bounce.
-- **Gathering**: when it settles, small stuff is pulled into the bag (backpack button) instead of only fading.
-- **Trails** for Rare+ (fading ghost copies).
-- **Coins**: money in the burst rains as coin sprites with a rolling total.
-- **Click to inspect** a resting item (needs the 0.5 inspector; until then it opens the popup), and **skip with
-  Escape**, which is a setting (on/off).
-Low priority (try, may drop): **floor shadows** under sprites (may look odd over UI).
+**Built in 0.3.9** (the user tried every one in `docs/mockups/rain.html` and wants them all, each a switch on
+the "Loot rain effects" page): best item last, escalation (speeding launches + rising-pitch ticks), Epic
+screen-edge glow, spacing, dust puff, gathering into the bag, trails, coins with a rolling total, floor shadows,
+plus three added from the mockup: **loot beam** over resting Rare+, **hit-stop** when the best lands, **name
+labels** on resting Rare+; and skip with Escape. The user: the rain is the part they like most and it should
+feel the best, before the popups get more polish.
+Still open: **click to inspect** a resting item (needs the 0.5 inspector).
 Test checklist for 0.1 (in game, after a full restart for the new addon):
 `/dump select(4, GetBuildInfo())` (16001); the global-string `/dump` above; loot a mob (single popup); loot
 a green; buy something from a vendor (source `pushed`); `/dl model 2489` plus a helm, a chest and the

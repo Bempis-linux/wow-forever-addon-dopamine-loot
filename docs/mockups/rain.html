@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loot Rain Mockup</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.86); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 250px; max-height: calc(100% - 20px); overflow: auto;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; }
+  #panel h1 { font-size: 14px; margin: 0 0 6px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 10px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .row { display: flex; flex-wrap: wrap; gap: 4px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; }
+  button:hover { background: #3a3220; }
+  label { display: flex; align-items: flex-start; gap: 6px; padding: 2px 0; cursor: pointer; }
+  label input { margin-top: 2px; }
+  label small { color: var(--muted); display: block; }
+  .new { color: #7fd0ff; font-size: 10px; margin-left: 4px; }
+  input[type=range] { width: 100%; }
+  #hint { color: var(--muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="panel">
+  <h1>Loot rain mockup</h1>
+  <div class="row">
+    <button data-s="trash">Trash mob</button>
+    <button data-s="haul">Big haul</button>
+    <button data-s="boss">Boss</button>
+    <button data-s="legend">Legendary</button>
+  </div>
+  <h2>Ideas</h2>
+  <div id="toggles"></div>
+  <h2>Watch</h2>
+  <label>Speed <span id="spd">1.0x</span></label>
+  <input id="speed" type="range" min="0.2" max="1" step="0.1" value="1">
+  <label><input type="checkbox" id="sound" checked> Sound (mockup tones)</label>
+  <div id="hint">Esc skips (when "Skip with Escape" is on). Click a button to replay.</div>
+</div>
+<script>
+"use strict";
+// ---- physics: a straight port of Rain.lua's ns.RainCore (768-unit-tall virtual screen) ----
+const GRAVITY = -1800, MIN_BOUNCE = 170, FRICTION = 0.82, SIZE = 40, V_H = 768;
+function step(s, dt, b) {
+  if (s.resting) return false;
+  dt = Math.min(dt, 1 / 30);
+  s.vy += GRAVITY * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+  if (s.x < b.left) { s.x = b.left; s.vx = Math.abs(s.vx) * 0.8; }
+  else if (s.x > b.right) { s.x = b.right; s.vx = -Math.abs(s.vx) * 0.8; }
+  if (s.y <= b.floor && s.vy < 0) {
+    s.y = b.floor; s.bounces++;
+    const up = -s.vy * s.e; s.vx *= FRICTION;
+    if (up < MIN_BOUNCE) { s.vy = 0; s.vx = 0; s.resting = true; } else s.vy = up;
+    return true;
+  }
+  return false;
+}
+function advance(s, dt, b) { let hit = false; while (dt > 0 && !s.resting) { const h = Math.min(dt, 1 / 30); if (step(s, h, b)) hit = true; dt -= h; } return hit; }
+
+// ---- toggles ----
+const IDEAS = [
+  ["bestLast", "Best item last", "pause, a high arc, lands center, becomes its popup"],
+  ["escalate", "Escalation", "launches speed up; bounce ticks climb in pitch"],
+  ["pulse", "Epic edge pulse", "the screen edge glows when an Epic+ lands"],
+  ["spacing", "Spacing", "resting items spread out instead of piling up"],
+  ["dust", "Dust puff", "a small puff on the first bounce"],
+  ["gather", "Gathering", "small stuff flies into the bag"],
+  ["trails", "Trails", "Rare+ leave fading ghost copies"],
+  ["coins", "Coins", "money rains as coins with a rolling total"],
+  ["shadows", "Floor shadows", "a shadow under each item"],
+  ["beam", "Loot beam", "a pillar of light over resting Rare+", true],
+  ["hitstop", "Hit-stop", "a split-second slow-mo + shake when the best lands", true],
+  ["names", "Name labels", "Rare+ show their name while resting", true],
+  ["escape", "Skip with Escape", "a setting in the addon"],
+];
+const on = {};
+const tg = document.getElementById("toggles");
+for (const [key, label, tip, mine] of IDEAS) {
+  on[key] = true;
+  const l = document.createElement("label");
+  l.innerHTML = `<input type="checkbox" checked data-k="${key}"><span>${label}${mine ? '<span class="new">new</span>' : ""}<small>${tip}</small></span>`;
+  tg.appendChild(l);
+}
+tg.addEventListener("change", e => { on[e.target.dataset.k] = e.target.checked; });
+let speed = 1;
+document.getElementById("speed").addEventListener("input", e => { speed = +e.target.value; document.getElementById("spd").textContent = speed.toFixed(1) + "x"; });
+
+// ---- sound: simple synthesized tones, only to judge timing ----
+let ac;
+function tone(freq, dur = 0.1, vol = 0.12, type = "sine") {
+  if (!document.getElementById("sound").checked) return;
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, ac.currentTime);
+  g.gain.linearRampToValueAtTime(vol, ac.currentTime + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+  o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + dur + 0.02);
+}
+function chord(freqs, dur, vol) { freqs.forEach(f => tone(f, dur, vol)); }
+
+// ---- items ----
+const QC = ["#9d9d9d", "#ffffff", "#1eff00", "#0070dd", "#a335ee", "#ff8000"];
+const GLYPH = ["🦴", "🧵", "🧪", "🗡️", "🛡️", "⚔️", "💍", "🔮", "🏹", "📜", "🍖", "👢"];
+const NAMES = { 3: ["Blade of Cunning", "Tidecaller Mantle", "Ironhide Girdle"], 4: ["Skullflame Shield", "Ring of Saturation"], 5: ["Thunderfury"] };
+function item(q, i) { return { q, glyph: GLYPH[(i * 7 + q * 3) % GLYPH.length], name: (NAMES[q] || ["Linen Cloth", "Ruined Pelt", "Minor Healing Potion", "Copper Bar"])[i % (NAMES[q] || [0, 0, 0, 0]).length] }; }
+const SCENES = {
+  trash: { qs: [0, 0, 1, 2], copper: 154 },
+  haul: { qs: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3], copper: 4821 },
+  boss: { qs: [0, 1, 1, 2, 2, 2, 2, 3, 3, 4, 1, 0], copper: 23410 },
+  legend: { qs: [1, 2, 2, 3, 3, 4, 5, 0], copper: 61200 },
+};
+
+// ---- state ----
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+let scale = 1, VW = 1200, bag = { x: 0, y: 0, bump: 0 };
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  scale = cv.height / V_H; VW = cv.width / scale;
+  bag.x = VW - 60; bag.y = 40;
+}
+addEventListener("resize", resize); resize();
+
+let R = null; // the current rain
+let popups = [], fx = [], pulse = null, shake = 0, timeScale = 1, stopT = 0;
+const B = () => ({ left: SIZE, right: VW - SIZE, floor: 30 });
+
+function start(name) {
+  const sc = SCENES[name];
+  const items = sc.qs.map((q, i) => item(q, i)).sort((a, b) => a.q - b.q);
+  let best = null;
+  if (on.bestLast) best = items.pop();
+  const coins = on.coins ? Math.min(14, 4 + Math.floor(Math.log10(sc.copper + 1) * 2)) : 0;
+  // coins go out early, mixed in with the junk
+  const queue = [];
+  let ci = coins;
+  items.forEach((it, i) => { queue.push(it); if (ci > 0 && i % 1 === 0) { queue.push({ coin: true }); ci--; } });
+  while (ci-- > 0) queue.splice(Math.min(queue.length, 2 + ci), 0, { coin: true });
+  R = { age: 0, next: 0, queue, launched: 0, total: queue.length, best, bestAt: null, sprites: [], landed: 0, ticks: 0,
+    copper: sc.copper, coins, coinsLanded: 0, shownCopper: 0, settleAt: null, done: false, gathered: 0 };
+  popups = []; fx = []; pulse = null;
+  tone(140, 0.25, 0.15, "triangle");
+}
+
+function interval(i, n) {
+  if (!on.escalate) return Math.min(0.09, 1.4 / n);
+  const t = n > 1 ? i / (n - 1) : 1;
+  return 0.17 - 0.125 * (1 - (1 - t) * (1 - t)); // starts slow, rattles out faster
+}
+
+function launch(it, isBest) {
+  const s = { it, q: it.coin ? -1 : it.q, x: VW / 2 + (Math.random() * 40 - 20), y: V_H * 0.38,
+    vx: (Math.random() * 640 - 320), vy: 650 + Math.random() * 300 + (it.q >= 3 ? 150 : 0),
+    e: 0.45 + Math.random() * 0.2, spin: (Math.random() - 0.5) * 8, rot: 0, bounces: 0, resting: false,
+    squash: 0, trail: [], size: it.coin ? 18 : SIZE, best: isBest, restAge: 0 };
+  if (it.coin) { s.vy = 500 + Math.random() * 350; s.e = 0.5; }
+  if (isBest) { s.x = VW / 2; s.vx = 0; s.vy = 1150; s.e = 0.5; // peaks around 85% of the screen height s.spin = 0; }
+  R.sprites.push(s);
+}
+
+function landSlot(s) { // the nearest free spot along the floor
+  const taken = R.sprites.filter(o => o !== s && o.resting && !o.leaving && o.tx !== undefined);
+  // good items keep a name's width between them; everything else just doesn't overlap
+  const gapTo = o => (on.names && s.q >= 3 && o.q >= 3) ? 150 : (s.size + o.size) / 2 + 6;
+  for (let k = 0; k < 200; k++) {
+    for (const sign of [1, -1]) {
+      const x = s.x + sign * k * 6;
+      if (x < SIZE || x > VW - SIZE) continue;
+      if (taken.every(o => Math.abs(o.tx - x) >= gapTo(o))) return x;
+    }
+  }
+  return s.x;
+}
+
+function onLand(s) {
+  s.squash = 0.09;
+  if (s.bounces !== 1) return;
+  R.landed++;
+  if (s.it.coin) {
+    R.coinsLanded++;
+    tone(1900 + Math.random() * 300, 0.05, 0.05, "square");
+  } else {
+    const idx = R.ticks++;
+    if (s.best) {
+      chord([523, 659, 784, 1047], 0.8, 0.08);
+      if (on.hitstop) { stopT = 0.22; shake = 0.3; }
+    } else tone(on.escalate ? 520 * Math.pow(2, Math.min(idx, 18) / 12) : 700, 0.09, 0.1);
+  }
+  if (on.dust) for (let i = 0; i < 7; i++) fx.push({ kind: "dust", x: s.x + (Math.random() - 0.5) * s.size, y: 30,
+    vx: (Math.random() - 0.5) * 140, vy: 20 + Math.random() * 50, age: 0, life: 0.45 });
+  if (on.pulse && s.q >= 4) pulse = { color: QC[s.q], age: 0 };
+}
+
+function settle() { // hand off: Rare+ become popups, the rest gathers or fades
+  R.settleAt = R.age;
+  let pd = 0, gd = 0;
+  const order = R.sprites.slice().sort((a, b) => a.x - b.x);
+  for (const s of order) {
+    if (s.q >= 3) { s.leaving = "popup"; s.leaveAt = R.age + pd; pd += 0.15; }
+    else if (on.gather) { s.leaving = "gather"; s.leaveAt = R.age + 0.35 + gd; gd += 0.045; s.sx = s.x; s.sy = s.y; }
+    else { s.leaving = "fade"; s.leaveAt = R.age + 0.35; }
+  }
+}
+
+function skip() {
+  if (!R || R.done) return;
+  const all = R.sprites.map(s => s.it).concat(R.queue).concat(R.best ? [R.best] : []);
+  R.sprites = []; R.queue = []; R.best = null; R.done = true;
+  all.filter(it => !it.coin && it.q >= 3).forEach((it, i) => setTimeout(() => popup(it), i * 150));
+}
+addEventListener("keydown", e => { if (e.key === "Escape" && on.escape) skip(); });
+
+function popup(it) {
+  popups.push({ it, age: 0 });
+  if (popups.length > 3) popups.shift();
+}
+
+// ---- update ----
+function update(dt) {
+  for (const p of popups) p.age += dt;
+  popups = popups.filter(p => p.age < 3.4);
+  for (const f of fx) { f.age += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy -= 60 * dt; }
+  fx = fx.filter(f => f.age < f.life);
+  if (pulse) { pulse.age += dt; if (pulse.age > 0.6) pulse = null; }
+  bag.bump = Math.max(0, bag.bump - dt * 4);
+  if (!R || R.done) return;
+  R.age += dt;
+  const b = B();
+  while (R.queue.length && R.age >= R.next) {
+    launch(R.queue.shift(), false);
+    R.next += interval(R.launched++, R.total);
+  }
+  if (!R.queue.length && R.best && R.bestAt === null) R.bestAt = R.age + 0.55; // a beat of silence
+  if (R.best && R.bestAt !== null && R.age >= R.bestAt) { launch(R.best, true); R.best = null; tone(220, 0.35, 0.1, "triangle"); }
+  let allRest = !R.queue.length && !R.best;
+  for (const s of R.sprites) {
+    if (s.leaving) continue;
+    if (advance(s, dt, b)) onLand(s);
+    if (!s.resting) { allRest = false; s.rot += s.spin * dt; }
+    else {
+      s.rot *= 1 - Math.min(1, dt * 10);
+      s.restAge += dt;
+      if (s.best && s.tx === undefined) {
+        s.tx = VW / 2; // the best owns the middle: whatever rests there makes room
+        if (on.spacing) for (const o of R.sprites) if (o !== s && o.tx !== undefined && Math.abs(o.tx - s.tx) < 150) o.tx = undefined;
+      } else if (on.spacing && s.tx === undefined) s.tx = landSlot(s);
+      if (s.tx !== undefined) s.x += (s.tx - s.x) * Math.min(1, dt * 8);
+    }
+    if (s.squash > 0) s.squash -= dt;
+    // a ghost every 35 ms, so they spread out along the arc instead of hiding under the item
+    s.trailT = (s.trailT || 0) + dt;
+    if (s.trailT >= 0.035) {
+      s.trailT = 0;
+      if (on.trails && s.q >= 3 && !s.resting) { s.trail.unshift({ x: s.x, y: s.y, rot: s.rot }); if (s.trail.length > 6) s.trail.pop(); }
+      else if (s.trail.length) s.trail.pop();
+    }
+  }
+  if (on.coins) R.shownCopper += (R.copper * (R.coins ? R.coinsLanded / R.coins : 1) - R.shownCopper) * Math.min(1, dt * 6);
+  if ((allRest || R.age > 7) && R.settleAt === null) R.restHold = (R.restHold || 0) + dt;
+  if (R.restHold > 0.7 && R.settleAt === null) settle();
+  if (R.settleAt !== null) {
+    let busy = false;
+    for (const s of R.sprites) {
+      if (R.age < s.leaveAt) { busy = true; continue; }
+      const t = R.age - s.leaveAt;
+      if (s.leaving === "popup") {
+        if (!s.handed) { s.handed = true; popup(s.it); }
+        s.y += dt * 500; s.alpha = Math.max(0, 1 - t / 0.5); if (t < 0.5) busy = true;
+      } else if (s.leaving === "gather") {
+        const T = 0.45, u = Math.min(1, t / T), e = u * u;
+        const cx = (s.sx + bag.x) / 2, cy = Math.max(s.sy, bag.y) + 220;
+        s.x = (1 - e) * (1 - e) * s.sx + 2 * (1 - e) * e * cx + e * e * bag.x;
+        s.y = (1 - e) * (1 - e) * s.sy + 2 * (1 - e) * e * cy + e * e * bag.y;
+        s.shrink = 1 - 0.6 * e;
+        if (u >= 1 && !s.inBag) { s.inBag = true; bag.bump = 1; tone(880 * Math.pow(2, Math.min(R.gathered++, 16) / 12), 0.05, 0.06); }
+        if (!s.inBag) busy = true;
+      } else { s.alpha = Math.max(0, 1 - t / 0.6); if (t < 0.6) busy = true; }
+    }
+    if (!busy) { R.fadeOut = (R.fadeOut || 0) + dt; if (R.fadeOut > 0.6) R.done = true; }
+  }
+}
+
+// ---- draw ----
+const X = x => x * scale, Y = y => (V_H - y) * scale;
+function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function drawSprite(s, alpha, x = s.x, y = s.y, rot = s.rot) {
+  const sz = s.size * (s.shrink ?? 1);
+  let w = sz, h = sz;
+  if (s.squash > 0) { w *= 1.3; h *= 0.7; }
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(X(x), Y(y + h / 2)); ctx.rotate(-rot);
+  if (s.it.coin) {
+    ctx.fillStyle = "#e8b923"; ctx.strokeStyle = "#7a5a0a"; ctx.lineWidth = 2 * scale;
+    ctx.beginPath(); ctx.ellipse(0, 0, X(w / 2), X(h / 2), 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore(); return;
+  }
+  const c = QC[s.q];
+  if (s.q >= 3) { ctx.shadowColor = c; ctx.shadowBlur = (s.best ? 28 : 16) * scale; }
+  ctx.fillStyle = c; ctx.fillRect(X(-w / 2), X(-h / 2), X(w), X(h));
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#1b1712"; ctx.fillRect(X(-w / 2 + 2), X(-h / 2 + 2), X(w - 4), X(h - 4));
+  ctx.font = `${X(Math.min(w, h) * 0.62)}px serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(s.it.glyph, 0, X(2));
+  ctx.restore();
+}
+
+function draw() {
+  const W = cv.width, H = cv.height;
+  // a dusky "game world" so the colors read like they would in game
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#1c2430"); g.addColorStop(0.6, "#2a2a26"); g.addColorStop(1, "#1a1712");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  if (shake > 0) ctx.translate((Math.random() - 0.5) * 8 * scale * shake / 0.3, (Math.random() - 0.5) * 8 * scale * shake / 0.3);
+  // action bar hint and the bag button
+  ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(X(VW / 2 - 260), Y(26), X(520), X(26));
+  const bs = 34 * (1 + 0.18 * bag.bump);
+  ctx.fillStyle = "#3b2a17"; ctx.strokeStyle = "#c9a45a"; ctx.lineWidth = 2 * scale;
+  roundRect(X(bag.x - bs / 2), Y(bag.y + bs / 2), X(bs), X(bs), 5 * scale); ctx.fill(); ctx.stroke();
+  ctx.font = `${X(bs * 0.6)}px serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("🎒", X(bag.x), Y(bag.y));
+
+  if (R && !R.done) {
+    const floor = 30;
+    for (const s of R.sprites) { // shadows and beams first, under everything
+      const a = s.alpha ?? 1;
+      if (on.shadows && !s.leaving || on.shadows && s.leaving === "fade") {
+        const hgt = Math.max(0, s.y - floor), k = Math.max(0, 1 - hgt / 400);
+        ctx.fillStyle = `rgba(0,0,0,${0.4 * k * a})`;
+        ctx.beginPath(); ctx.ellipse(X(s.x), Y(floor - 2), X(s.size * (0.3 + 0.35 * k)), X(4 + 3 * k), 0, 0, Math.PI * 2); ctx.fill();
+      }
+      if (on.beam && s.resting && s.q >= 3) {
+        const fade = Math.min(1, s.restAge / 0.3) * a, h = s.best ? 260 : 170, c = QC[s.q];
+        const bg = ctx.createLinearGradient(0, Y(s.y), 0, Y(s.y + h));
+        bg.addColorStop(0, c + "aa"); bg.addColorStop(1, c + "00");
+        ctx.globalAlpha = fade; ctx.fillStyle = bg;
+        ctx.fillRect(X(s.x - 11), Y(s.y + h), X(22), X(h)); ctx.fillRect(X(s.x - 3), Y(s.y + h * 1.15), X(6), X(h * 1.15));
+        ctx.globalAlpha = 1;
+      }
+    }
+    for (const f of fx) {
+      const u = f.age / f.life;
+      ctx.fillStyle = `rgba(190,175,150,${0.45 * (1 - u)})`;
+      ctx.beginPath(); ctx.arc(X(f.x), Y(f.y), X(3 + 7 * u), 0, Math.PI * 2); ctx.fill();
+    }
+    for (const s of R.sprites) {
+      if (s.inBag) continue;
+      s.trail.forEach((t, i) => { // a glowing square in the item's color, smaller and fainter further back
+        const u = (i + 1) / (s.trail.length + 1), sz = s.size * (1 - 0.45 * u);
+        ctx.save(); ctx.globalAlpha = 0.55 * (1 - u) * (s.alpha ?? 1);
+        ctx.translate(X(t.x), Y(t.y + s.size / 2)); ctx.rotate(-t.rot);
+        ctx.shadowColor = QC[s.q]; ctx.shadowBlur = 14 * scale; ctx.fillStyle = QC[s.q];
+        ctx.fillRect(X(-sz / 2), X(-sz / 2), X(sz), X(sz)); ctx.restore();
+      });
+      drawSprite(s, s.alpha ?? 1);
+      if (on.names && s.resting && s.q >= 3 && !s.leaving) {
+        ctx.globalAlpha = Math.min(1, s.restAge / 0.3);
+        ctx.font = `600 ${X(13)}px Georgia, serif`; ctx.fillStyle = QC[s.q]; ctx.textAlign = "center";
+        ctx.shadowColor = "#000"; ctx.shadowBlur = 4 * scale;
+        ctx.fillText(s.it.name, X(s.x), Y(s.y + SIZE + 14 + (on.beam ? 6 : 0)));
+        ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+      }
+    }
+    // the +N counter and the money total
+    const fade = R.fadeOut ? Math.max(0, 1 - R.fadeOut / 0.6) : 1;
+    ctx.globalAlpha = fade; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `700 ${X(30)}px Georgia, serif`; ctx.fillStyle = "#ffd100";
+    ctx.shadowColor = "#000"; ctx.shadowBlur = 6 * scale;
+    const items = R.ticks;
+    if (items) ctx.fillText(`+${items}`, X(VW / 2), Y(V_H * 0.5));
+    if (on.coins && R.coins) {
+      const c = Math.round(R.shownCopper), gld = Math.floor(c / 10000), sil = Math.floor(c / 100) % 100, cop = c % 100;
+      ctx.font = `600 ${X(17)}px Georgia, serif`;
+      ctx.fillText(`${gld ? gld + "g " : ""}${gld || sil ? sil + "s " : ""}${cop}c`, X(VW / 2), Y(V_H * 0.5 - 30));
+    }
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  }
+  // popups stand in for the real popup (only the slot, not the look)
+  popups.forEach((p, i) => {
+    const a = Math.min(1, p.age / 0.25) * Math.min(1, (3.4 - p.age) / 0.4), c = QC[p.it.q];
+    const w = 260, h = 46, x = VW / 2 - w / 2, y = V_H * 0.82 - i * 54;
+    ctx.globalAlpha = a; ctx.fillStyle = "rgba(10,10,14,0.85)"; ctx.strokeStyle = c; ctx.lineWidth = 1.5 * scale;
+    roundRect(X(x), Y(y), X(w), X(h), 6 * scale); ctx.fill(); ctx.stroke();
+    ctx.font = `${X(24)}px serif`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillStyle = "#fff";
+    ctx.fillText(p.it.glyph, X(x + 12), Y(y - h / 2));
+    ctx.font = `600 ${X(15)}px Georgia, serif`; ctx.fillStyle = c; ctx.fillText(p.it.name, X(x + 48), Y(y - h / 2));
+    ctx.globalAlpha = 1;
+  });
+  ctx.restore();
+  if (pulse) { // the screen edge glows in the item's color
+    const a = Math.sin(Math.PI * pulse.age / 0.6) * 0.55;
+    const rg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+    rg.addColorStop(0, pulse.color + "00"); rg.addColorStop(1, pulse.color);
+    ctx.globalAlpha = a; ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  }
+}
+
+let last = performance.now();
+function frame(now) {
+  let dt = Math.min(0.1, (now - last) / 1000) * speed; last = now;
+  if (stopT > 0) { stopT -= dt; dt *= 0.2; }
+  if (shake > 0) shake = Math.max(0, shake - dt * (stopT > 0 ? 5 : 1));
+  update(dt); draw();
+  requestAnimationFrame(frame);
+}
+document.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => start(b.dataset.s)));
+requestAnimationFrame(frame);
+setTimeout(() => start("boss"), 400);
+</script>
+</body>
+</html>

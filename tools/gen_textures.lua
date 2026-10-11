@@ -10,6 +10,7 @@
 --   Lens      halo v2: the dark lens inside the ring
 --   Wave      a thin glowing ring that expands (legendary shockwave)
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
+--   Pillar, Vignette   loot rain: the light pillar over resting Rare+, the Epic screen-edge pulse
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
 
@@ -119,4 +120,15 @@ Write("Shine", Fill(Canvas(128, 128), function(u, v)
   local c, s = math.cos(SHINE_TILT), math.sin(SHINE_TILT)
   local across, along = du * c - dv * s, du * s + dv * c
   return 0.8 * Bump(across, 0, 0.07) * math.cos(math.pi * math.min(0.5, math.abs(along) * 1.1))
+end))
+
+-- Loot rain: a pillar of light over resting Rare+ (bright at its foot, fading up; tinted in game)
+Write("Pillar", Fill(Canvas(64, 256), function(u, v)
+  return 0.7 * Bump(u, 0.5, 0.2) * (1 - v) ^ 1.4 + 0.6 * Bump(u, 0.5, 0.05) * (1 - v) ^ 0.8
+end))
+
+-- Loot rain: the screen-edge pulse when an Epic+ lands (clear middle, soft glow at the edges)
+Write("Vignette", Fill(Canvas(256, 256), function(u, v)
+  local t = math.max(0, math.min(1, (R(u, v) - 0.55) / 0.75))
+  return t * t * (3 - 2 * t)
 end))
