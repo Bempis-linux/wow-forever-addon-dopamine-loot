@@ -244,6 +244,7 @@ ns.RAIN_FX = {
   { key = "Hitstop", word = "hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands." },
   { key = "Names", word = "names", label = "Name labels", tip = "Rare and better items show their name while they rest." },
   { key = "Chest", word = "chest", label = "Treasure chest", tip = "Loot comes out of a container: a pouch for small hauls, the treasure chest for bigger ones, a golden chest for a Legendary." },
+  { key = "Models", word = "models", label = "Game chests (3D)", tip = "The pouch, chest and golden chest are the game's own 3D sack and chests, and the lid really opens. Off: our drawn ones." },
   { key = "Shake", word = "shake", label = "Chest shake", tip = "The chest rattles before it opens, longer for better hauls." },
   { key = "Tease", word = "tease", label = "Rarity tease", tip = "While it shakes, light from the chest's seams climbs white, green, blue, purple... up to the best item inside." },
   { key = "Burst", word = "burst", label = "Lid burst", tip = "On a big haul the lid flies off and rays of light in the best item's color shine out." },
@@ -286,7 +287,7 @@ ns.AddCommand("rainfx", "loot rain effects: /dl rainfx [name off|on]", function(
 end)
 
 local layer, top, driver, escFrame
-local box, HideBox -- the chest show's container (further down)
+local box, HideBox, LoadGameBox -- the chest show's container (further down)
 local sprites, pool, dust = {}, {}, {}
 local bounds = {}
 local state -- nil | the running rain (see ns:Rain)
@@ -324,6 +325,10 @@ local function Layer()
   -- (hidden with the UI too, on Alt+Z or a cinematic: only a real Escape skips)
   escFrame:SetScript("OnHide", function() if state and UIParent:IsShown() then Skip() end end)
   if UISpecialFrames then table.insert(UISpecialFrames, "DopamineLootRainSkip") end
+  -- the UI back after Alt+Z or a cinematic: the game's container dropped its model while hidden
+  layer:HookScript("OnShow", function()
+    if state and state.box and state.box.game and not state.box.hidden then LoadGameBox(state.box) end
+  end)
   return layer
 end
 
@@ -575,6 +580,17 @@ local WOOD, WOOD_LID, PLANK, IRON = { 0.42, 0.27, 0.14 }, { 0.5, 0.32, 0.17 }, {
 local GOLD, GOLD_LID, GOLD_PLANK, GOLD_TRIM = { 0.8, 0.6, 0.16 }, { 0.86, 0.65, 0.2 }, { 0.55, 0.4, 0.1 }, { 1, 0.93, 0.6 }
 -- (box, the frame and its layers, is made once by MakeBox)
 
+-- The game's own containers (switch "Models"; picked by the user on the Blizzard assets page): the
+-- model file and the size of its frame. The chests stand shut on animation 0, play 148 to open and
+-- hold 149 open (146 closes, 147 holds shut); the sack has no animations, so it is jiggled by hand.
+local GAME_BOX = {
+  pouch = { file = 200442, size = 150 }, -- Stolen Supply Sack
+  chest = { file = 219372, size = 210 }, -- Strongbox
+  gold = { file = 200953, size = 250 },  -- the large ornate chest (Treasure of the Shen'dralar)
+}
+local ANIM_SHUT, ANIM_OPEN, ANIM_OPENED, ANIM_OPEN_T = 0, 148, 149, 0.6
+local MODEL_WAIT = 0.6 -- not loaded by then: our drawn container takes over
+
 local function MakeBox()
   box = CreateFrame("Frame", nil, layer)
   box:SetAllPoints()
@@ -600,16 +616,71 @@ local function MakeBox()
   for _, list in ipairs({ box.chest, box.lidParts, box.pouch, box.sparks }) do
     for _, t in ipairs(list) do box.all[#box.all + 1] = t end
   end
+  -- the game's container: above the glows behind it, below the sprites coming out of it; the light
+  -- inside an open chest sits in front of the model (still behind the sprites)
+  local m = CreateFrame("PlayerModel", nil, box)
+  m:SetFrameLevel(box:GetFrameLevel() + 1)
+  m:SetScript("OnModelLoaded", function(self) self.loaded, self.anim = true, nil end) -- anim set again
+  m:Hide()
+  box.model = m
+  box.front = CreateFrame("Frame", nil, box)
+  box.front:SetAllPoints()
+  box.front:SetFrameLevel(box:GetFrameLevel() + 2)
+  box.light = Tex(box.front, "ARTWORK", MEDIA .. "Glow", "ADD")
+  box.all[#box.all + 1] = box.light
 end
 
 function HideBox()
-  if box then for _, t in ipairs(box.all) do t:Hide() end end
+  if box then
+    for _, t in ipairs(box.all) do t:Hide() end
+    box.model:Hide()
+  end
 end
+
+-- Load the game's container (b.game) into the model frame, placed and sized first (models load
+-- for the frame they're in), shown, cleared, then set; OnModelLoaded marks it ready
+function LoadGameBox(b)
+  local m, g = box.model, b.game
+  m:ClearAllPoints()
+  m:SetPoint("CENTER", layer, "BOTTOMLEFT", b.x, b.y - 0.12 * g.size)
+  m:SetSize(g.size, g.size)
+  m:SetAlpha(1)
+  m:Show() -- models are set after Show()
+  m.loaded, m.anim, m.loadStart = false, nil, GetTime()
+  if m.ClearModel then m:ClearModel() end
+  if not pcall(m.SetModel, m, g.file) then b.game = nil; m:Hide(); return end
+  pcall(m.SetPosition, m, 0, 0, 0)
+  pcall(m.SetCamDistanceScale, m, 1)
+  pcall(m.SetFacing, m, 0)
+end
+
+-- Load the three containers once, unseen, so the first show of a session needn't wait for the disk
+local function WarmGameBoxes()
+  Layer()
+  if not box then MakeBox() end
+  local m = box.model
+  local files = { GAME_BOX.pouch.file, GAME_BOX.chest.file, GAME_BOX.gold.file }
+  local function Next(i)
+    if state then return end -- a show started: it loads its own
+    if not files[i] then if m.ClearModel then m:ClearModel() end; m:Hide(); return end
+    m:ClearAllPoints()
+    m:SetPoint("BOTTOMLEFT", layer, "BOTTOMLEFT", 0, 0)
+    m:SetSize(2, 2)
+    m:SetAlpha(0)
+    m:Show()
+    pcall(m.SetModel, m, files[i])
+    C_Timer.After(1, function() Next(i + 1) end)
+  end
+  Next(1)
+end
+ns.OnInit(function() C_Timer.After(8, WarmGameBoxes) end)
 
 -- Dress the layers for this haul's container (colors) and hide what it doesn't use
 local function SetUpBox(b)
   if not box then MakeBox() end
-  HideBox()
+  for _, t in ipairs(box.all) do t:Hide() end
+  b.game = On("Models") and GAME_BOX[b.kind] or nil
+  if b.game then LoadGameBox(b) else box.model:Hide() end
   local gold = b.kind == "gold"
   local function Tint(t, c, a) t:SetVertexColor(c[1], c[2], c[3], a or 1) end
   if b.kind == "pouch" then
@@ -665,6 +736,60 @@ local function UpdateBox(st, dt)
   if b.t >= b.shakeT then OpenBox(st, b) end
 end
 
+-- The game's container (b.game): the model moved by hand (shake, the sack's jiggle and hop), the
+-- chest's own animations for the lid, and our light around it: the rarity tease glowing behind it
+-- while it shakes, then the light inside, the rays and the gold's glitter once open
+local function DrawGameBox(b, k, u, fade, Place)
+  local m, size = box.model, b.game.size
+  local cx, mouth = b.x, b.y
+  local jx, hop, turn, a = 0, 0, 0, fade
+  if b.kind == "pouch" then
+    if b.open then -- it hops as it bursts open, then fades away
+      local t = b.openT
+      hop = math.max(0, 120 * t - 200 * t * t) * k
+      a = fade * math.max(0, 1 - math.max(0, t - 0.5) / 0.5)
+    else
+      jx, turn = math.sin(b.t * 45) * 3, math.sin(b.t * 30) * 0.15
+    end
+  elseif not b.open and On("Shake") then
+    local amp = 1.5 + 5 * u
+    jx, turn = (math.random() - 0.5) * 2 * amp, (math.random() - 0.5) * 0.2 * u
+  end
+  m:ClearAllPoints()
+  m:SetPoint("CENTER", layer, "BOTTOMLEFT", cx + jx, mouth - 0.12 * size + hop)
+  m:SetSize(size, size)
+  pcall(m.SetFacing, m, turn)
+  m:SetAlpha(a)
+  pcall(m.SetModelAlpha, m, a)
+  if b.kind ~= "pouch" and m.loaded then -- shut, opening, then held open
+    local want = not b.open and ANIM_SHUT or b.openT < ANIM_OPEN_T and ANIM_OPEN or ANIM_OPENED
+    if m.anim ~= want then pcall(m.SetAnimation, m, want); m.anim = want end
+  end
+  if b.kind == "pouch" then return end
+  local big = b.size == "big" or b.kind == "gold"
+  if not b.open then
+    local r, g, bl = ns.QualityColor(b.steps[b.idx] or 1)
+    local glow = big and 0.25 + 0.6 * u or 0.15
+    box.inner:SetVertexColor(r, g, bl, 1)
+    Place(box.inner, cx + jx, mouth - 0.1 * size, size * (0.9 + 0.2 * u), 0, math.min(1, glow + b.flash))
+  else -- the light inside, in front of the open chest
+    box.inner:Hide()
+    box.light:SetVertexColor(math.min(1, b.r + 0.3), math.min(1, b.g + 0.3), math.min(1, b.b + 0.3), 1)
+    Place(box.light, cx, mouth, 90 + 40 * math.min(1, b.openT * 3), 0, math.max(0, 1 - b.openT / 1.5) * 0.9)
+  end
+  if b.open and On("Burst") and big and b.openT < 1.4 then
+    Place(box.rays, cx, mouth, 330, b.openT * 0.3, (1 - b.openT / 1.4) * 0.8)
+  else
+    box.rays:Hide()
+  end
+  if b.kind == "gold" then
+    for i, sp in ipairs(box.sparks) do
+      local t = b.t * 3 + i
+      Place(sp, cx + math.cos(t) * size * 0.32, mouth + 18 + math.sin(t * 1.3) * 26, 7, 0, 0.5 + 0.5 * math.sin(t * 5))
+    end
+  end
+end
+
 local function DrawBox(st, k, dt)
   local b = st.box
   local fade = st.settleAt and math.max(0, 1 - (st.age - st.settleAt) / FADE_T) or 1
@@ -681,6 +806,11 @@ local function DrawBox(st, k, dt)
     t:SetAlpha((alpha or 1) * fade)
     t:Show()
   end
+  if b.game and not box.model.loaded and GetTime() - (box.model.loadStart or 0) > MODEL_WAIT then
+    b.game = nil -- the model didn't come in time: our drawn container from here on
+    box.model:Hide()
+  end
+  if b.game then return DrawGameBox(b, k, u, fade, Place) end
   if b.kind == "pouch" then
     local jig = b.open and 0 or math.sin(b.t * 45) * 0.12
     local deflate = b.open and math.min(1, b.openT / 0.8) or 0
@@ -1128,7 +1258,7 @@ function ns:Rain(items, copper)
     SetUpBox(b)
     state.box, state.nextLaunch = b, math.huge
     if oldBox then -- loot joining a rain in progress: the container carries on, it does not start over
-      if oldBox.open then b.open, b.openT, state.nextLaunch = true, oldBox.openT, 0
+      if oldBox.open then b.open, b.openT, b.t, state.nextLaunch = true, oldBox.openT, oldBox.t, 0
       else b.t, b.idx = math.min(oldBox.t, b.shakeT), math.min(oldBox.idx, #b.steps) end
     end
   else

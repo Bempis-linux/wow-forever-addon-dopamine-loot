@@ -31,8 +31,8 @@ local MODELS = {
   { display = 54912, name = "Mission chest, Alliance (display)" },
   { display = 54913, name = "Mission chest, Horde (display)" },
 }
--- Animation IDs with a known meaning (filled in once the user has watched 146-149 in game)
-local ANIM_NAMES = { [0] = "stand" }
+-- What the chest animations do (the user watched them on Footlocker A, 2026-10-12; 149 assumed)
+local ANIM_NAMES = { [0] = "stand", [146] = "closes", [147] = "held shut", [148] = "opens", [149] = "held open?" }
 
 local TEXTURES = {
   { file = "Interface\\Cooldown\\star4", add = true },
@@ -493,7 +493,7 @@ local function Create()
   for i, a in ipairs({ 0, 146, 147, 148, 149 }) do
     local b = UI.Button(panel, tostring(a), 48, function() PlayAnim(a) end)
     if i == 1 then b:SetPoint("TOPLEFT", aPrev, "BOTTOMLEFT", 0, -4) else b:SetPoint("LEFT", quick, "RIGHT", 4, 0) end
-    UI.Tip(b, ("Play animation %d."):format(a))
+    UI.Tip(b, ("Play animation %d (%s)."):format(a, ANIM_NAMES[a]))
     quick = b
   end
   local animText = UI.Label(panel, "GameFontHighlightSmall", "")

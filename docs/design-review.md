@@ -7,6 +7,23 @@ Evidence comes from the wow-api-researcher pass (annotations plus addons that lo
 Forever DB, Questie, Details, Baganator). **[V]** means unproven on Forever: the in-game asset check
 (proposed below) settles it. Every Blizzard asset keeps our custom one as its fallback.
 
+## Picks and findings (2026-10-12, after the in-game asset check)
+
+- **Containers (built in 0.4.3, switch "Game chests (3D)")**: loot pouch → sack model **200442**
+  (Stolen Supply Sack); treasure chest → **219372** (Strongbox); golden chest → **200953** (large ornate
+  chest). Our drawn containers stay as the fallback and behind the switch.
+- **Chest animations** (seen on Footlocker A): 146 closes, 147 does nothing visible (held shut),
+  148 opens; 149 untested (assumed held open). Chests stand shut on 0. Sacks, one lockbox, one
+  footlocker and the barrow cache have no animations; 219372 and 200952 also have 153/154.
+- **Client facts**: every listed texture and atlas exists (including the retail loot-toast,
+  LegendaryToast, BonusChest and bags-glow atlases); all fonts but Nimrod; all 25 sound kits are in
+  the table; the 3 mission-chest creature displays don't load.
+- **Sounds**: the user likes most of them but **no level-up or quest sounds** (they'd be confused
+  with the real events). The user prefers not to describe sounds one by one: offer Blizzard sounds as
+  choices with Play buttons on the settings page (settings cleanup) instead.
+- Still open: sparkles (star4), counter font (SKURRI), a "Blizzard toast" popup style, bags-glow
+  on rain icons.
+
 ## Animation
 
 | Piece | Now (custom) | Blizzard option | Recommendation |
