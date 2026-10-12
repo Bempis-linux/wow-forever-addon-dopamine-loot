@@ -301,6 +301,10 @@ local function CreatePanel()
   local check = Button(panel, "Check client", 110, function() ns.RunCommand("check") end)
   check:SetPoint("LEFT", log, "RIGHT", 8, 0)
   Tip(check, "Report which game features this client has (for bug reports).")
+  local assets = Button(panel, "Blizzard assets...", 150, function() ns:OpenAssets() end)
+  assets:SetPoint("TOPLEFT", log, "BOTTOMLEFT", 0, -8)
+  Tip(assets, "See and hear the game's own chests, glows, sounds and fonts that could join the show, " ..
+    "and check which exist on this client (/dl assets).")
 
   panel:SetScript("OnShow", function() for _, r in ipairs(refreshers) do r() end end)
 
