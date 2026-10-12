@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-12, with 0.4.4. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-12, with 0.4.5. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap: 0.3
 row = everything done in look & feel; 0.4 row = the chest show plan) and `docs/design-review.md`
 (custom vs. Blizzard asset per piece; the user's picks so far at its top)._
@@ -9,7 +9,7 @@ row = everything done in look & feel; 0.4 row = the chest show plan) and `docs/d
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.4 pushed**. Since 0.4.3 the chest show's containers are the **game's own models** (user's
+- **0.4.5 pushed** (loot leaves from inside the container: start INSIDE below the mouth within MOUTH_HALF[kind], behind the container until it crosses the mouth, growing from 0.3; user said items seemed to spawn above/beside the containers; gold chest at cam 2.6 now fits, user: "better"). Since 0.4.3 the chest show's containers are the **game's own models** (user's
   picks): sack 200442 for the pouch, Strongbox 219372 for the chest, large ornate chest 200953 for
   gold (Rain.lua GAME_BOX {file, size, cam}, LoadGameBox, DrawGameBox; switch "Models" = "Game
   chests (3D)", on by default; drawn containers when off or when a model hasn't loaded in 0.6 s).
@@ -42,10 +42,10 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
      Alt+Z mid-show.)
   2. Remaining design-review picks: star4 sparkles, SKURRI counter font, "Blizzard toast" popup
      style, bags-glow on rain icons; Blizzard sounds as choices with Play buttons (no level-up/quest).
-  3. 0.4.5 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
+  3. 0.4.6 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
      ended" summary), session tally, personal records banners.
-  4. 0.4.6 card flip (click), off by default: Rare+ fly out as "?" until their card is flipped.
-  5. 0.4.7 settings cleanup (user asked 2026-10-12): pages organized by topic, better controls,
+  4. 0.4.7 card flip (click), off by default: Rare+ fly out as "?" until their card is flipped.
+  5. 0.4.8 settings cleanup (user asked 2026-10-12): pages organized by topic, better controls,
      discuss every setting with the user first (keep/improve/merge/drop), mockup first.
   6. Reduced-motion and no-screen-flash switches. Lucky drops skipped (idea: Questie drop rate <5%).
   7. Then 0.5 inspector, 0.6 filters (NEW/UPGRADE badges; swapped with the chest show).
@@ -120,6 +120,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   (Decided earlier: pouch for small hauls, 30 s streak, lucky drops later, card flip off by default.)
 
 ## Recent history (newest first; details in the plan's 0.3/0.4 rows and git log)
+- 2026-10-12 0.4.5: loot rises out of the container (from inside the mouth, growing); gold chest fits.
 - 2026-10-12 0.4.4: gold chest camera pulled back (sack and Strongbox verified in game, lid holds open).
 - 2026-10-12 0.4.3: game containers (sack, Strongbox, large ornate chest) with real lid animations.
 - 2026-10-12 0.4.2: settings fields refill on every open (panels created hidden); animation buttons 0/146-149.

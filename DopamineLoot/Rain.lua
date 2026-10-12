@@ -288,6 +288,9 @@ end)
 
 local layer, top, driver, escFrame
 local box, HideBox, LoadGameBox -- the chest show's container (further down)
+-- Loot leaves from inside the container: within half its mouth's width of the middle, INSIDE units
+-- below the mouth, behind the container's front until it crosses the mouth, small and growing (Launch)
+local MOUTH_HALF, INSIDE = { pouch = 6, chest = 24, gold = 34 }, 14
 local sprites, pool, dust = {}, {}, {}
 local bounds = {}
 local state -- nil | the running rain (see ns:Rain)
@@ -446,6 +449,15 @@ local function Launch(st, item, isBest, W, H, k)
   s.q = item.coin and 0 or (item.quality or 1)
   s.size = item.coin and COIN[item.coin].size or SIZE
   s.x, s.y = W / 2 + math.random(-20, 20), math.max(H * 0.38, bounds.floor + H * 0.13)
+  -- out of a container: from just inside its mouth, behind its front until it has risen out
+  local b = st.box
+  s.inside, s.grow = nil, 1
+  if b and not b.hidden and not item.merged then
+    local half = MOUTH_HALF[b.kind] or 20
+    s.x, s.y = b.x + math.random(-half, half), b.y - INSIDE
+    s.inside, s.grow = b.y, 0.3 -- behind its front until it crosses the mouth; small, growing as it comes out
+  end
+  s.f:SetFrameLevel(layer:GetFrameLevel() + (s.inside and 1 or 5))
   s.vx = math.random(-320, 320) * k
   s.vy = (math.random(650, 950) + (s.q >= 3 and 150 or 0)) * k -- the good stuff flies higher
   s.e = 0.45 + math.random() * 0.2
@@ -982,6 +994,11 @@ local function Update(_, dt)
       end
     end
     if s.squash > 0 then s.squash = s.squash - dt end
+    if s.grow < 1 then s.grow = math.min(1, s.grow + dt * 6) end
+    if s.inside and (s.y >= s.inside or s.vy < 0) then -- out of the container: in front of it now
+      s.inside = nil
+      s.f:SetFrameLevel(layer:GetFrameLevel() + 5)
+    end
     -- a ghost every few frames, so they spread out along the arc instead of hiding under it
     s.trailT = s.trailT + dt
     if s.trailT >= GHOST_EVERY then
@@ -1054,7 +1071,7 @@ local function Update(_, dt)
       f:Hide()
       s.shadow:Hide()
     else
-      local size = s.size * s.shrink
+      local size = s.size * s.shrink * s.grow
       local w, h = size, size
       if s.squash > 0 then w, h = size * 1.3, size * 0.7 end
       f:SetSize(w, h)
