@@ -472,6 +472,7 @@ local function Create()
   m:SetScript("OnMouseWheel", function(self, d)
     view.zoom = math.min(math.max((view.zoom or 1) - d * 0.1, 0.2), 4)
     pcall(self.SetCamDistanceScale, self, view.zoom)
+    view.animText:SetText(("zoom %.1f (wheel)"):format(view.zoom))
   end)
   view.model = m
   box:SetScript("OnShow", function() if view.entry then ShowModel(view.entry) end end)

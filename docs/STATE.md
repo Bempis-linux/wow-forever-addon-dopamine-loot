@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-12, with 0.4.3. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-12, with 0.4.4. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap: 0.3
 row = everything done in look & feel; 0.4 row = the chest show plan) and `docs/design-review.md`
 (custom vs. Blizzard asset per piece; the user's picks so far at its top)._
@@ -9,14 +9,15 @@ row = everything done in look & feel; 0.4 row = the chest show plan) and `docs/d
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.3 pushed**: the chest show's containers are the **game's own models** (user's picks): sack
-  200442 for the pouch, Strongbox 219372 for the chest, large ornate chest 200953 for gold
-  (Rain.lua GAME_BOX, LoadGameBox, DrawGameBox; switch "Models" = "Game chests (3D)", on by
-  default; drawn containers when off or when a model hasn't loaded in 0.6 s). Lid: anim 0 shut, 148
-  opens, 149 held open (**149 is an assumption**: if the lid snaps shut after opening, change
-  ANIM_OPENED), ANIM_OPEN_T 0.6 s (tune to 148's length). The three files are warmed 8 s after
-  login. Not yet seen in game: framing (GAME_BOX sizes, the -0.12*size offset, facing 0) will
-  likely need tuning from a screenshot.
+- **0.4.4 pushed**. Since 0.4.3 the chest show's containers are the **game's own models** (user's
+  picks): sack 200442 for the pouch, Strongbox 219372 for the chest, large ornate chest 200953 for
+  gold (Rain.lua GAME_BOX {file, size, cam}, LoadGameBox, DrawGameBox; switch "Models" = "Game
+  chests (3D)", on by default; drawn containers when off or when a model hasn't loaded in 0.6 s).
+  Lid: anim 0 shut, 148 opens, 149 holds it open (**confirmed in game**). ANIM_OPEN_T 0.6 s. The
+  three files are warmed 8 s after login. **Verified in game (screenshots)**: the sack and the open
+  Strongbox look right. The gold chest is a big model and was cut off at cam 1 (only a strip of its
+  lid showed): 0.4.4 sets its cam to 2.6, **unverified**. The Blizzard assets page now shows the
+  zoom on the mouse wheel, so the user can read off the right value.
 - 0.4.2: settings empty-fields fix, animation buttons 0/146-149. 0.4.1: asset check. 0.4.0: drawn
   chest show containers (**verified in game 2026-10-12**). 0.3 (look & feel) is done.
 - 2026-10-12: the user wants **Blizzard assets used where they fit** (not only our generated ones);
@@ -35,15 +36,16 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   User on Footlocker A: 146 closes, 147 nothing visible, 148 opens; 149 untested. Picks and the
   "no level-up/quest sounds" rule are in design-review.md ("Picks and findings").
 - **Next up** (the 0.4 row in docs/plan.md has the full plan, picked in the mockup):
-  1. User tests 0.4.3 (`/reload` is enough): settings fields filled; Test rain 3 / 8 / 12 with the
+  1. User tests 0.4.4: Test rain 12, the gold chest whole and sized like the others? Settings fields
+     filled after /reload? (Earlier 0.4.3 list: Test rain 3 / 8 / 12 with the
      game sack / Strongbox / ornate chest; does the lid open and stay open; framing and size;
-     Alt+Z mid-show. Screenshot if the framing is off.
+     Alt+Z mid-show.)
   2. Remaining design-review picks: star4 sparkles, SKURRI counter font, "Blizzard toast" popup
      style, bags-glow on rain icons; Blizzard sounds as choices with Play buttons (no level-up/quest).
-  3. 0.4.4 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
+  3. 0.4.5 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
      ended" summary), session tally, personal records banners.
-  4. 0.4.5 card flip (click), off by default: Rare+ fly out as "?" until their card is flipped.
-  5. 0.4.6 settings cleanup (user asked 2026-10-12): pages organized by topic, better controls,
+  4. 0.4.6 card flip (click), off by default: Rare+ fly out as "?" until their card is flipped.
+  5. 0.4.7 settings cleanup (user asked 2026-10-12): pages organized by topic, better controls,
      discuss every setting with the user first (keep/improve/merge/drop), mockup first.
   6. Reduced-motion and no-screen-flash switches. Lucky drops skipped (idea: Questie drop rate <5%).
   7. Then 0.5 inspector, 0.6 filters (NEW/UPGRADE badges; swapped with the chest show).
@@ -114,10 +116,11 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   !BugGrabber.lua` (paths in CLAUDE.local.md). Baganator owns Alt+click; Questie, ATT, Details installed.
 
 ## Open questions / waiting on the user
-- Does anim 149 hold the lid open? How the game containers look (framing, size).
+- Gold chest framing at cam 2.6 (the Blizzard assets page now shows the zoom on the wheel).
   (Decided earlier: pouch for small hauls, 30 s streak, lucky drops later, card flip off by default.)
 
 ## Recent history (newest first; details in the plan's 0.3/0.4 rows and git log)
+- 2026-10-12 0.4.4: gold chest camera pulled back (sack and Strongbox verified in game, lid holds open).
 - 2026-10-12 0.4.3: game containers (sack, Strongbox, large ornate chest) with real lid animations.
 - 2026-10-12 0.4.2: settings fields refill on every open (panels created hidden); animation buttons 0/146-149.
 - 2026-10-12 0.4.1: asset check (/dl assets, Blizzard assets page); design review of custom vs. Blizzard assets; kit 0.6.0 rule.

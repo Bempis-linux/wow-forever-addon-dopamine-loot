@@ -581,12 +581,12 @@ local GOLD, GOLD_LID, GOLD_PLANK, GOLD_TRIM = { 0.8, 0.6, 0.16 }, { 0.86, 0.65, 
 -- (box, the frame and its layers, is made once by MakeBox)
 
 -- The game's own containers (switch "Models"; picked by the user on the Blizzard assets page): the
--- model file and the size of its frame. The chests stand shut on animation 0, play 148 to open and
+-- model file, the size of its frame and its camera distance. The chests stand shut on animation 0, play 148 to open and
 -- hold 149 open (146 closes, 147 holds shut); the sack has no animations, so it is jiggled by hand.
 local GAME_BOX = {
-  pouch = { file = 200442, size = 150 }, -- Stolen Supply Sack
-  chest = { file = 219372, size = 210 }, -- Strongbox
-  gold = { file = 200953, size = 250 },  -- the large ornate chest (Treasure of the Shen'dralar)
+  pouch = { file = 200442, size = 150, cam = 1 }, -- Stolen Supply Sack
+  chest = { file = 219372, size = 210, cam = 1 }, -- Strongbox
+  gold = { file = 200953, size = 250, cam = 2.6 },  -- the large ornate chest (a big model: camera pulled back)
 }
 local ANIM_SHUT, ANIM_OPEN, ANIM_OPENED, ANIM_OPEN_T = 0, 148, 149, 0.6
 local MODEL_WAIT = 0.6 -- not loaded by then: our drawn container takes over
@@ -650,7 +650,7 @@ function LoadGameBox(b)
   if m.ClearModel then m:ClearModel() end
   if not pcall(m.SetModel, m, g.file) then b.game = nil; m:Hide(); return end
   pcall(m.SetPosition, m, 0, 0, 0)
-  pcall(m.SetCamDistanceScale, m, 1)
+  pcall(m.SetCamDistanceScale, m, g.cam or 1)
   pcall(m.SetFacing, m, 0)
 end
 
