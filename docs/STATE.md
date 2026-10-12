@@ -35,8 +35,11 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   3. 0.4.2 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
      ended" summary), session tally, personal records banners.
   4. 0.4.3 card flip (click), off by default: Rare+ fly out as "?" until their card is flipped.
-  5. Reduced-motion and no-screen-flash switches. Lucky drops skipped (idea: Questie drop rate <5%).
-  6. Then 0.5 inspector, 0.6 filters (NEW/UPGRADE badges; swapped with the chest show).
+  5. 0.4.4 settings cleanup (user asked 2026-10-12): pages organized by topic, better controls,
+     discuss every setting with the user first (keep/improve/merge/drop), mockup first. Fix the empty
+     fields bug (Known bugs) sooner if cheap.
+  6. Reduced-motion and no-screen-flash switches. Lucky drops skipped (idea: Questie drop rate <5%).
+  7. Then 0.5 inspector, 0.6 filters (NEW/UPGRADE badges; swapped with the chest show).
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; models via `PlayerModel:SetItem` work on Forever; rain physics liked;
@@ -45,6 +48,12 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - 0.3.9-0.3.11: rain effects "look pretty good"; **real looting works** (a level 3 mob's grays and
   copper rained, coins included); coin icons, merge-up, Test money/quest buttons; opening sound by
   haul size ("looking good").
+
+## Known bugs
+- **Settings fields show empty** when the settings page is opened (reported 2026-10-12; unsure whether
+  after login, after /reload, or on any reopen: ask/repro). Likely the same cause as the OnShow
+  gotcha below: panels are created shown, so OnShow (which refills the fields) doesn't fire; try
+  `panel:Hide()` after CreateFrame in Settings.lua, Look.lua, RainFx.lua (Assets.lua already does).
 
 ## Not yet verified
 - A single green from a mob (popup), a vendor buy (must NOT pop), crafting ("crafted" badge), a real
