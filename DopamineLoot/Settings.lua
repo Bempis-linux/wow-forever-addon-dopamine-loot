@@ -161,6 +161,7 @@ ns.UI = {
 
 local function CreatePanel()
   panel = CreateFrame("Frame")
+  panel:Hide() -- the Settings window shows it, so OnShow refills the fields on every open
   panel.name = ns.TITLE
 
   local title = Label(panel, "GameFontNormalLarge", ns.TITLE)

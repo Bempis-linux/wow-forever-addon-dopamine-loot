@@ -62,6 +62,7 @@ end
 local function Create()
   local UI = ns.UI
   panel = CreateFrame("Frame")
+  panel:Hide() -- the Settings window shows it, so OnShow refills the fields on every open
   panel.name = "Popup look"
 
   local title = UI.Label(panel, "GameFontNormalLarge", "Popup look")

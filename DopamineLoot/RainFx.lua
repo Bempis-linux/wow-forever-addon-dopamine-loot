@@ -8,6 +8,7 @@ local panel, sub
 local function Create()
   local UI = ns.UI
   panel = CreateFrame("Frame")
+  panel:Hide() -- the Settings window shows it, so OnShow refills the fields on every open
   panel.name = "Loot rain effects"
 
   local title = UI.Label(panel, "GameFontNormalLarge", "Loot rain effects")

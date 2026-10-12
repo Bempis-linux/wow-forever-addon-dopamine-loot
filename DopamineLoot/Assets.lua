@@ -31,8 +31,8 @@ local MODELS = {
   { display = 54912, name = "Mission chest, Alliance (display)" },
   { display = 54913, name = "Mission chest, Horde (display)" },
 }
--- Animation IDs with a known meaning (Blizzard's mission chest); the rest are found by scanning
-local ANIM_NAMES = { [0] = "stand", [148] = "closed (mission chest)", [154] = "opening (mission chest)" }
+-- Animation IDs with a known meaning (filled in once the user has watched 146-149 in game)
+local ANIM_NAMES = { [0] = "stand" }
 
 local TEXTURES = {
   { file = "Interface\\Cooldown\\star4", add = true },
@@ -489,10 +489,11 @@ local function Create()
     0, 999, "Type an animation number and press Enter to play it.")
   aBox:SetPoint("LEFT", aNext, "RIGHT", 10, 0)
   local quick = aPrev
-  for i, q in ipairs({ { 148, "Closed" }, { 154, "Opening" }, { 0, "Stand" } }) do
-    local b = UI.Button(panel, q[2], 74, function() PlayAnim(q[1]) end)
+  -- the animations every chest has (the scan found 0 and 146-149 on all of them)
+  for i, a in ipairs({ 0, 146, 147, 148, 149 }) do
+    local b = UI.Button(panel, tostring(a), 48, function() PlayAnim(a) end)
     if i == 1 then b:SetPoint("TOPLEFT", aPrev, "BOTTOMLEFT", 0, -4) else b:SetPoint("LEFT", quick, "RIGHT", 4, 0) end
-    UI.Tip(b, ("Animation %d: %s."):format(q[1], ANIM_NAMES[q[1]]))
+    UI.Tip(b, ("Play animation %d."):format(a))
     quick = b
   end
   local animText = UI.Label(panel, "GameFontHighlightSmall", "")
