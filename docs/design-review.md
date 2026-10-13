@@ -15,6 +15,13 @@ Forever DB, Questie, Details, Baganator). **[V]** means unproven on Forever: the
 - **Chest animations** (seen on Footlocker A): 146 closes, 147 does nothing visible (held shut),
   148 opens; 149 untested (assumed held open). Chests stand shut on 0. Sacks, one lockbox, one
   footlocker and the barrow cache have no animations; 219372 and 200952 also have 153/154.
+- **Built so far**: 0.4.3 containers; 0.4.4 gold chest camera `cam = 2.6` (a big model, cut off at
+  1; "better" in game); 0.4.5 loot starts inside the mouth (`MOUTH_HALF`, `INSIDE`), behind the
+  container until it crosses the mouth, growing from 0.3 (unverified). Models are warmed 8 s after
+  login; a model not loaded in 0.6 s falls back to the drawn container.
+- **Model scan** (client 1.60.1.70338): all 17 game-object fileIDs load. Animations 0 + 146-149 on
+  196976, 196979, 200953, 199748, 196982, 196988, 196989; 219372 and 200952 add 153/154; lockbox
+  197617, footlocker 198238, barrow cache, the sacks and the beam 382335 have only 0.
 - **Client facts**: every listed texture and atlas exists (including the retail loot-toast,
   LegendaryToast, BonusChest and bags-glow atlases); all fonts but Nimrod; all 25 sound kits are in
   the table; the 3 mission-chest creature displays don't load.
