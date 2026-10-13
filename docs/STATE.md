@@ -1,131 +1,97 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-12, with 0.4.5. Read this first in a new session (the kit's
-`session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap: 0.3
-row = everything done in look & feel; 0.4 row = the chest show plan) and `docs/design-review.md`
-(custom vs. Blizzard asset per piece; the user's picks so far at its top)._
+_Last checkpoint: 2026-10-12, after 0.4.5. Read this first in a new session (the kit's
+`session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
+the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
 **Words the user uses:** the **treasure chest** = where the rain's items and coins come out (the spawn
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.5 pushed** (loot leaves from inside the container: start INSIDE below the mouth within MOUTH_HALF[kind], behind the container until it crosses the mouth, growing from 0.3; user said items seemed to spawn above/beside the containers; gold chest at cam 2.6 now fits, user: "better"). Since 0.4.3 the chest show's containers are the **game's own models** (user's
-  picks): sack 200442 for the pouch, Strongbox 219372 for the chest, large ornate chest 200953 for
-  gold (Rain.lua GAME_BOX {file, size, cam}, LoadGameBox, DrawGameBox; switch "Models" = "Game
-  chests (3D)", on by default; drawn containers when off or when a model hasn't loaded in 0.6 s).
-  Lid: anim 0 shut, 148 opens, 149 holds it open (**confirmed in game**). ANIM_OPEN_T 0.6 s. The
-  three files are warmed 8 s after login. **Verified in game (screenshots)**: the sack and the open
-  Strongbox look right. The gold chest is a big model and was cut off at cam 1 (only a strip of its
-  lid showed): 0.4.4 sets its cam to 2.6, **unverified**. The Blizzard assets page now shows the
-  zoom on the mouse wheel, so the user can read off the right value.
-- 0.4.2: settings empty-fields fix, animation buttons 0/146-149. 0.4.1: asset check. 0.4.0: drawn
-  chest show containers (**verified in game 2026-10-12**). 0.3 (look & feel) is done.
-- 2026-10-12: the user wants **Blizzard assets used where they fit** (not only our generated ones);
-  kit 0.6.0 made "custom vs. Blizzard options per piece" a house-style rule. `docs/design-review.md`
-  lists every piece with both options (recommendations: real 3D chest models with their open
-  animation, star4 sparkles, SKURRI numbers, quest-complete sound; keep our pitch-climbing sets,
-  physics, rays). `Assets.lua`: `/dl assets` + the "Blizzard assets" sub-page (button under Other on
-  the main page): steppers for chest/sack models (animation scan, buttons 0 146 147 148 149, drag to
-  turn, wheel to zoom), textures/atlases, sounds (Play), fonts. Results in `DopamineLootDB.assetCheck`.
-- **Asset check results (client 1.60.1.70338)**: all 44 textures/atlases exist (the retail loot-toast,
-  LegendaryToast, BonusChest, bags-glow atlases too); fonts all but Nimrod; all 25 sound kits are in
-  the table (only the backpack/coin ones played by ear so far). Models: all 17 game-object fileIDs
-  load; the 3 mission-chest creature displays (71671, 54912, 54913) do not. Chest animations: 0 and
-  146-149 on 196976, 196979, 200953, 199748, 196982, 196988, 196989; 219372 and 200952 add 153/154;
-  lockbox 197617, footlocker 198238, barrow cache, sacks and the beam have only 0 (no open anim).
-  User on Footlocker A: 146 closes, 147 nothing visible, 148 opens; 149 untested. Picks and the
-  "no level-up/quest sounds" rule are in design-review.md ("Picks and findings").
-- **Next up** (the 0.4 row in docs/plan.md has the full plan, picked in the mockup):
-  1. User tests 0.4.4: Test rain 12, the gold chest whole and sized like the others? Settings fields
-     filled after /reload? (Earlier 0.4.3 list: Test rain 3 / 8 / 12 with the
-     game sack / Strongbox / ornate chest; does the lid open and stay open; framing and size;
-     Alt+Z mid-show.)
+- **0.4.5 pushed**, working tree clean. 0.3 (look & feel) is done; 0.4 (chest show) in progress.
+- The chest show's containers are the **game's own models** since 0.4.3 (user's picks on the
+  Blizzard assets page): sack 200442 = pouch, Strongbox 219372 = chest, large ornate chest 200953 =
+  gold. Rain.lua: `GAME_BOX {file, size, cam}`, `LoadGameBox`, `DrawGameBox`, `WarmGameBoxes`;
+  lid anims 0 shut → 148 opens → 149 held open (`ANIM_OPEN_T` 0.6 s). Switch "Game chests (3D)"
+  (`noRainModels`); the drawn containers (0.4.0) are the fallback. Details: design-review.md.
+- 0.4.5: loot starts inside the container's mouth and grows out (user reported it seemed to spawn
+  above/beside). **Unverified**; if still off, the model's vertical placement (`b.y - 0.12*size`)
+  vs. its real opening needs tuning per model from a screenshot taken as it opens.
+- `Assets.lua` (0.4.1): `/dl assets` + "Blizzard assets" sub-page (main page → Other): model/
+  animation viewer (wheel shows zoom), textures/atlases, sounds with Play, fonts. Results in
+  `DopamineLootDB.assetCheck`.
+- **Next up**:
+  1. User tests 0.4.5 (`/reload`): Test rain 3 / 8 / 12, does loot come out of the sack / Strongbox /
+     gold chest? Settings fields filled after /reload (0.4.2 fix)?
   2. Remaining design-review picks: star4 sparkles, SKURRI counter font, "Blizzard toast" popup
-     style, bags-glow on rain icons; Blizzard sounds as choices with Play buttons (no level-up/quest).
+     style, bags-glow on rain icons; Blizzard sounds as choices with Play buttons.
   3. 0.4.6 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
      ended" summary), session tally, personal records banners.
-  4. 0.4.7 card flip (click), off by default: Rare+ fly out as "?" until their card is flipped.
-  5. 0.4.8 settings cleanup (user asked 2026-10-12): pages organized by topic, better controls,
-     discuss every setting with the user first (keep/improve/merge/drop), mockup first.
-  6. Reduced-motion and no-screen-flash switches. Lucky drops skipped (idea: Questie drop rate <5%).
-  7. Then 0.5 inspector, 0.6 filters (NEW/UPGRADE badges; swapped with the chest show).
+  4. 0.4.7 card flip (click), off by default.
+  5. 0.4.8 settings cleanup (user asked): pages by topic, better controls; go through every setting
+     with the user first (keep/improve/merge/drop), mockup first.
+  6. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
-- 0.1-0.2: loads; `/dl help`; models via `PlayerModel:SetItem` work on Forever; rain physics liked;
-  settings page, Test buttons, number fields, landing height.
-- 0.3: all four popup styles, preview + sliders, weapons upright, flash + sparks; the calmer 0.3.7.
-- 0.3.9-0.3.11: rain effects "look pretty good"; **real looting works** (a level 3 mob's grays and
-  copper rained, coins included); coin icons, merge-up, Test money/quest buttons; opening sound by
-  haul size ("looking good").
-- 0.4.0-0.4.1: test rain 3 / 8 / 12 = pouch / chest / golden chest; Escape skip works; the effects
-  page's "Main settings" button is not cut off; the asset check runs and saves.
+- 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
+- 0.3: all four popup styles, preview + sliders, weapons upright; rain effects; **real looting works**
+  (grays and copper rained, coins included); coin merge-up, Test money/quest; opening sound by size.
+- 0.4.0-0.4.4: pouch / chest / golden chest at test rain 3 / 8 / 12; Escape skip; effects page not
+  cut off; asset check runs and saves; game sack and Strongbox look right, lid opens and stays open;
+  gold chest fits at cam 2.6 ("better").
 
 ## Known bugs
-- **Settings fields show empty** after a `/reload` (user, 2026-10-12). 0.4.2 fix: panels were created
-  shown, so the Settings window's Show() never fired OnShow (which refills the fields); now
-  `panel:Hide()` after CreateFrame in Settings.lua, Look.lua, RainFx.lua, Assets.lua. **Unverified.**
-- Old BugGrabber entries `View.lua:274/276 spin0 nil` (sessions 15-16, before 0.3.x guards): already
-  fixed (`self.spin0 or 0`); ignore unless they come back.
+- **Settings fields empty after /reload** (user). 0.4.2 creates every settings panel hidden so the
+  Settings window's Show() fires OnShow (which refills them). **Fix unverified.**
+- Old BugGrabber `View.lua spin0 nil` (sessions 15-16) is already fixed; ignore unless it returns.
 
 ## Not yet verified
-- A single green from a mob (popup), a vendor buy (must NOT pop), crafting ("crafted" badge), a real
-  quest turn-in with money (coins + the reward item last; QUEST_TURNED_IN path), a dungeon (are loot
-  lines secret values? `/dl debug`), combat deferral, performance with a big rain + popups.
-- 0.3.8 arrival sounds by ear in game; gathering with Bagnon/Baganator hiding the backpack button
-  (falls back to bottom right).
-- The open chest stays until the rain settles and covers the best item's beam behind it: fade the
-  body after ~1.5 s if that looks wrong (not reported as a problem).
+- A single green from a mob (popup), a vendor buy (must NOT pop), crafting, a real quest turn-in
+  with money, a dungeon (secret loot lines? `/dl debug`), combat deferral, big-rain performance.
+- Arrival sounds by ear; gathering when Baganator hides the backpack button; Alt+Z mid chest show
+  (the model should reload with the UI).
 
 ## User preferences (stated in chat; follow them)
 - **Privacy first**: the only public identity is **Bempis**; nothing else personal in tracked files
-  or commits (pasted BugSack dumps contain the character name: never copy it). Repo-local git
-  identity; the kit's pre-push guard enforces it; never `--no-verify` unless the user says so.
-- **Every `/dl` command also gets a settings control** (house-style "Settings page parity").
-  Settings pages may scroll when they need to; none does yet.
-- **Mockups before visual changes; motion ideas as an HTML mockup** the user toggles
-  (`docs/mockups/rain.html`), then port. **Never run bulk or fast-forwarded scripted tests in the
-  browser pane without asking** (one froze the user's PC and spammed sound); read the console instead.
-- **The loot rain is the user's favorite part**; it may be busy. The popups stay calm (the user found
-  idle animation "a little overboard", 0.3.7): no new looping popup animations without asking.
-- Presentation and sound matter most. Sounds: chest sounds differ from ground sounds; repeated sounds
-  climb in pitch (pentatonic sets) so they never sound like one note; small hauls stay light.
-- Only `/dl help` prints to chat. Assets: Blizzard assets (models, textures, icons, sounds by path
-  or ID) are welcome where they fit, not only our generated ones; in design, offer custom vs.
-  Blizzard options per piece and let the user pick. Never ship extracted or borrowed files.
+  or commits (BugSack dumps contain the character name: never copy it). Repo-local git identity;
+  the pre-push guard enforces it; never `--no-verify` unless the user says so.
+- **Every `/dl` command also gets a settings control** (house-style parity).
+- **Mockups before visual changes** (`docs/mockups/rain.html` for motion). **Never run bulk scripted
+  tests in the browser pane without asking** (one froze the user's PC); read the console instead.
+- **The loot rain is the user's favorite part**; it may be busy. Popups stay calm: no new looping
+  popup animations without asking.
+- Presentation and sound matter most. Repeated sounds climb in pitch; small hauls stay light.
+  **No level-up or quest sounds** (confusing). The user prefers picking sounds by ear with Play
+  buttons over describing them.
+- **Assets**: Blizzard assets (by path/fileID/atlas/SOUNDKIT) are welcome where they fit; offer
+  custom vs. Blizzard per piece and let the user pick (kit 0.6.0 house style). Never ship
+  extracted or borrowed files.
+- Only `/dl help` prints to chat.
 - Process: preflight → reviewer agent for big changes → commit → push; then a short "to test" list
-  saying `/reload` vs **full restart** (new files: textures, sounds, .toc = restart).
-- Answers: concise. **No rush, no deadlines**: never reorder work because of a date.
+  saying `/reload` vs **full restart** (new files, .toc = restart).
+- Answers: concise. **No rush, no deadlines.**
 
 ## Gotchas and environment notes
 - Bash tool collapses `\\` to `\`: write Lua with Write/Edit only (sed is fine for plain text).
-- No node/lua on PATH: Lua runs via the sumneko `lua-language-server.exe` (preflight finds it), e.g.
-  `lua-language-server.exe tools/gen_textures.lua`. It is Lua 5.4: no `math.log10` (use log/log(10)).
-- ffmpeg (winget Gyan.FFmpeg, `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\...\bin`, not on
-  PATH): renders sounds (`bash tools/gen_sounds.sh`), art checks (tinted `lutrgb` overlays on a dark
-  `color` source → PNG), video contact sheets. **gen_sounds.sh re-encodes every OGG with new bytes**:
-  afterwards `git checkout -- DopamineLoot/Media/` keeps only the new (untracked) files.
-- WoW only finds media files that existed at client start: new textures/sounds need a full restart.
-- `Texture:SetRotation` only on square textures (non-square skews); ColorTextures don't rotate;
-  generated textures must be power-of-two. Models: set after `Show()`, no AnimationGroups.
-- Settings pages: create the panel frame hidden (`panel:Hide()`), or OnShow never fires. Cause
-  (reviewer, 2026-10-12): the panel frame is created shown; `panel:Hide()` after CreateFrame (done in
-  all four pages, 0.4.2) lets the Settings window's Show() fire OnShow every open.
-- Kit plugin updates: `claude plugin marketplace update bempis`, then `claude plugin update
-  wow-addon-kit@bempis --scope user` (CLI under `%APPDATA%\Claude\claude-code`).
-- Game closed before editing `WTF`. BugGrabber: `<client>\WTF\Account\<account>\SavedVariables\
-  !BugGrabber.lua` (paths in CLAUDE.local.md). Baganator owns Alt+click; Questie, ATT, Details installed.
+  No python. No node/lua on PATH: Lua runs via the sumneko `lua-language-server.exe`
+  (preflight finds it); it is Lua 5.4.
+- ffmpeg (winget Gyan.FFmpeg, not on PATH) for sounds (`bash tools/gen_sounds.sh`, which re-encodes
+  every OGG: `git checkout -- DopamineLoot/Media/` after) and art checks.
+- New media files need a full game restart. `SetRotation` only on square textures. Models: set
+  after `Show()`, placed and sized first, `ClearModel()` before `SetModel`, no AnimationGroups;
+  models drop while hidden (reload on show). Big world models need `SetCamDistanceScale` > 1.
+- Settings pages: create the panel hidden (`panel:Hide()`) or OnShow never fires.
+- Roadmap version labels shift when fixes take a patch number; renumber plan.md + this file together.
+- Kit updates: `claude plugin marketplace update bempis`, then `claude plugin update
+  wow-addon-kit@bempis --scope user`. Kit source: `C:\dev\wow-addons\wow-addon-kit`.
+- Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
 
 ## Open questions / waiting on the user
-- Gold chest framing at cam 2.6 (the Blizzard assets page now shows the zoom on the wheel).
-  (Decided earlier: pouch for small hauls, 30 s streak, lucky drops later, card flip off by default.)
+- Does loot now come out of each container (0.4.5)? Are the settings fields filled?
 
-## Recent history (newest first; details in the plan's 0.3/0.4 rows and git log)
-- 2026-10-12 0.4.5: loot rises out of the container (from inside the mouth, growing); gold chest fits.
-- 2026-10-12 0.4.4: gold chest camera pulled back (sack and Strongbox verified in game, lid holds open).
-- 2026-10-12 0.4.3: game containers (sack, Strongbox, large ornate chest) with real lid animations.
-- 2026-10-12 0.4.2: settings fields refill on every open (panels created hidden); animation buttons 0/146-149.
-- 2026-10-12 0.4.1: asset check (/dl assets, Blizzard assets page); design review of custom vs. Blizzard assets; kit 0.6.0 rule.
-- 2026-10-11 0.4.0: chest show containers (pouch, chest with shake/tease/burst, golden chest).
-- 2026-10-11 0.3.11: opening sound by haul size. 0.3.10: coin icons, merge-up, quest money, chest sounds.
-- 2026-10-10 0.3.9: loot rain effects. 0.3.8: arrival sounds. 0.3.7: calmer popups. 0.3.6: Relic v2 default.
-- 2026-10-09/10 0.1-0.3.5: scaffold, popups with 3D models, rain, settings, four styles, rarity arrivals.
+## Recent history (newest first; details in plan.md and git log)
+- 2026-10-12 0.4.5: loot rises out of the container's mouth. 0.4.4: gold chest camera.
+- 2026-10-12 0.4.3: game containers with real lid animations. 0.4.2: settings fields fix.
+- 2026-10-12 0.4.1: asset check; design review; kit 0.6.0 custom vs. Blizzard rule.
+- 2026-10-11 0.4.0: drawn chest show containers. 0.3.10-0.3.11: coins, quest money, chest sounds.
+- 2026-10-09/10 0.1-0.3.9: scaffold, popups, rain, settings, four styles, arrivals, rain effects.
