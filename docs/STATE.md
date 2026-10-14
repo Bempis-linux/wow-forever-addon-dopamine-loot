@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.10. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.11. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.10 pushed**, tree clean. 0.4 = popup polish + loot rain from the ground (chest show set aside).
+- **0.4.11 pushed**, tree clean. 0.4.11: Toast frames are atlases only (plain LessAwesome up to Rare, gold MoreAwesome for Epic+; the LootToast.blp slice from retail coords drew a broken bar on Forever); the label line never wraps (shrinks up to 2 pt). 0.4 = popup polish + loot rain from the ground (chest show set aside).
 - **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
   burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
   turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
@@ -24,9 +24,9 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. User tests 0.4.10 (`/reload`): Toast at each rarity incl. a long name; rain "Loot flies from";
+  1. User tests 0.4.11 (`/reload`): Toast at each rarity incl. a long name, clicking through them in the preview; rain "Loot flies from";
      settings fields filled after /reload?
-  2. **0.4.11 sound picker** per rarity with Play buttons: the game's own loot sounds (check they play)
+  2. **Sound picker** per rarity with Play buttons: the game's own loot sounds (check they play)
      and ours, layered or alone. User: our synthesized sounds feel artificial, no punch (current and
      "short stab" best, "swell" bad); a little more drama, short, not tiresome; **no level-up/quest**.
   3. **Popup placement**: popups feel "in your face" and get in the way; satisfying but **not
@@ -83,7 +83,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   after `Show()`, placed and sized first, `ClearModel()` before `SetModel`, no AnimationGroups;
   models drop while hidden (reload on show). Big world models need `SetCamDistanceScale` > 1.
 - Settings pages: create the panel hidden (`panel:Hide()`) or OnShow never fires.
-- Roadmap version labels shift when fixes take a patch number; renumber plan.md + this file together.
+- Roadmap: name upcoming work, not version numbers (fixes keep taking the next patch number).
 - Kit updates: `claude plugin marketplace update bempis`, then `claude plugin update
   wow-addon-kit@bempis --scope user`. Kit source: `C:\dev\wow-addons\wow-addon-kit`.
 - Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.

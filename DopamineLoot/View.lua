@@ -40,10 +40,8 @@ local ARRIVAL = {
 -- The loot toast, laid out like the game's own (LootWonAlertFrameTemplate, AlertFrameSystems.xml):
 -- a 276 x 96 frame; the 52 x 52 icon at (22, -23) from its top left in a border by quality; a label
 -- line beside the icon's top; the name in the dark box beside it (167 x 33, two lines, centered).
--- The frame: the plain one below Rare (LessAwesome), the default one for Rare and Epic (a slice of
--- LootToast.blp), the gold one for a Legendary (MoreAwesome, the game's "upgraded" toast).
-local TOAST_FILE = "Interface\\LootFrame\\LootToast"
-local TOAST_COORDS = { 0.28222656, 0.55175781, 0.578125, 0.953125 }
+-- The frame: the plain one up to Rare (LessAwesome), the gold one for Epic and Legendary (MoreAwesome,
+-- the game's "upgraded" toast); the border shows the exact rarity.
 local TOAST_LESS, TOAST_MORE, TOAST_GLOW, TOAST_SHEEN = "LootToast-LessAwesome", "LootToast-MoreAwesome", "loottoast-glow", "loottoast-sheen"
 local TOAST_BORDER = { -- the game's LOOT_BORDER_BY_QUALITY
   [1] = "loottoast-itemborder-white", [2] = "loottoast-itemborder-green", [3] = "loottoast-itemborder-blue",
@@ -195,6 +193,7 @@ function ns.CreateView(f)
   f.name = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   f.info = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   f.info:SetTextColor(0.8, 0.76, 0.68)
+  if f.info.SetWordWrap then f.info:SetWordWrap(false) end -- one line in every style
   f.badges = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   if f.name.SetMaxLines then f.name:SetMaxLines(2) end
   if f.name.SetWordWrap then f.name:SetWordWrap(true) end
@@ -230,6 +229,8 @@ function ns.CreateView(f)
     if not (TITLE_FONT and face and face:lower():find("morpheus")) then self.name:SetFontObject("GameFontNormalLarge") end
     for _, fs in ipairs({ self.name, self.info, self.badges }) do fs:ClearAllPoints() end
     self.info:SetWidth(0) -- only the toast gives its label line a fixed width
+    self.info:SetFontObject("GameFontHighlightSmall") -- the toast may have shrunk it
+    self.info:SetTextColor(0.8, 0.76, 0.68)
 
     if style == "relic" or style == "beam" then
       if style == "relic" then
@@ -329,16 +330,10 @@ function ns.CreateView(f)
     self.cone:SetVertexColor(r, g, b, 0.85)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     if self.style == "toast" then
-      -- the frame by quality: plain below Rare, the default for Rare and Epic, gold for a Legendary
+      -- the frame by quality: plain up to Rare, gold for Epic and Legendary
+      -- (not the default frame: it's a slice of LootToast.blp, whose layout differs on this client)
       local bg = self.toastBg
-      if q >= 5 then
-        bg:SetAtlas(TOAST_MORE, false)
-      elseif q >= 3 or not HasAtlas(TOAST_LESS) then
-        bg:SetTexture(TOAST_FILE)
-        bg:SetTexCoord(TOAST_COORDS[1], TOAST_COORDS[2], TOAST_COORDS[3], TOAST_COORDS[4])
-      else
-        bg:SetAtlas(TOAST_LESS, false)
-      end
+      bg:SetAtlas(q >= 4 and TOAST_MORE or TOAST_LESS, false)
       bg:SetSize(self.L.w, self.L.h)
       -- the game's item border in the quality's color (at its own size), else a tinted icon frame
       local bd, border = self.card.border, TOAST_BORDER[math.max(1, math.min(q, 5))]
@@ -420,6 +415,15 @@ function ns.CreateView(f)
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
     self.info:SetText(table.concat(info, "  -  "))
+    if self.style == "toast" then -- the label line stays one line: a size or two smaller if it must
+      local face, size, flags = self.info:GetFont()
+      local measure = self.info.GetUnboundedStringWidth or self.info.GetStringWidth
+      local s = size or 10
+      while face and s > (size or 10) - 2 and measure(self.info) > 167 do
+        s = s - 1
+        self.info:SetFont(face, s, flags or "")
+      end
+    end
     self.badges:SetText(Badges(item))
     local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
     if self.style == "banner" then
