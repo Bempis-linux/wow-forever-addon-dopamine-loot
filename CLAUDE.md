@@ -40,6 +40,7 @@ docs/plan.md             design, data model, roadmap, rain ideas
 docs/mockups/            HTML mockups (rain.html: the rain prototype, same physics, effect toggles)
 docs/STATE.md            session handoff
 tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight)
+deprecated/chest-show/   the set-aside chest show (Rain.lua as of 0.4.5, media, README); not loaded
 ```
 
 ## Session continuity (read first)
@@ -69,8 +70,9 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   bag events never create records.
 - Default filter Uncommon+; NEW/UPGRADE are badges and louder tiers, not filters.
 - Inspector opens with **Alt+Right-click** (Baganator owns Alt+click), configurable.
-- 3+ shown items, quest money, or loot money from a setting (default 1g) → loot rain; Rare+ or 6+ → full
-  chest show (Vampire-Survivors feel); deferred in combat. The rain's spawn point is the "treasure chest".
+- 3+ shown items, quest money, or loot money from a setting (default 1g) → loot rain (Vampire-Survivors
+  feel); deferred in combat. The loot flies up from the ground by default (setting `rainFrom`). The chest
+  show (containers, shake, rarity tease) was set aside 2026-10-14: `deprecated/chest-show/`, not loaded.
 - Seen set and loot history per character; settings account-wide. No login toast.
 - **Settings page parity** (kit house-style): every `/dl` command that changes a setting or runs a
   test also has a control on the settings page (number field or drag slider, choice, Test button);

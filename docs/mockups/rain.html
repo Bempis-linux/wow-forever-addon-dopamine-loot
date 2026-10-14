@@ -42,6 +42,9 @@
     <button data-s="g25">25g</button>
   </div>
   <h2>Chest show</h2>
+  <label style="margin-bottom:4px">Loot flies from
+    <select id="from"><option value="ground">the ground, middle (a fountain)</option><option value="spread">the ground, spread out</option><option value="below">below the bottom edge</option><option value="middle">the treasure chest (0.4 now)</option></select>
+  </label>
   <div class="row">
     <button id="again" title="Replays the last scene; within 20 s it counts as a streak">Loot again</button>
     <button data-s="lucky">Lucky drop</button>
@@ -271,6 +274,11 @@ function launch(it, isBest) {
   if (it.coin) { s.vy = 500 + Math.random() * 350; s.e = 0.5; }
   if (isBest) { s.x = VW / 2; s.vx = 0; s.vy = 1150; s.e = 0.5; s.spin = 0; } // peaks around 85% of the screen height
   if (it.coin) s.size = COIN[it.coin].size;
+  if (launchFrom !== "middle" && !it.merged) { // from the ground (or below it): faster, so it peaks as high as from the middle
+    const y0 = launchFrom === "below" ? -SIZE : B().floor;
+    s.vy = Math.sqrt(s.vy * s.vy + 2 * -GRAVITY * (V_H * 0.38 - y0)); s.y = y0;
+    if (launchFrom === "spread" && !isBest) s.x = VW * (0.25 + Math.random() * 0.5);
+  }
   if (!isBest && !it.merged) launchSound(s, it.coin ? R.coinOut++ : R.itemOut++);
   R.sprites.push(s);
 }
@@ -595,7 +603,7 @@ function draw() {
 const STREAK_WINDOW = 20; // seconds to loot again and keep the streak (the addon might use 30)
 const SESSION = { copper: 0, q: [0, 0, 0, 0, 0, 0] }, RECORD = { copper: 0, bestQ: -1 };
 const STREAK = { n: 0, last: -1e9, copper: 0, items: 0, ended: true };
-let banners = [], smallStyle = "pouch", lastScene = "trash";
+let banners = [], smallStyle = "pouch", lastScene = "trash", launchFrom = "ground";
 const nowS = () => performance.now() / 1000;
 function banner(text, color = "#ffd100") { banners.push({ text, color, age: 0 }); if (banners.length > 3) banners.shift(); }
 
@@ -607,7 +615,7 @@ function haulSize(qs, copper) {
 
 // Which container a haul comes out of, how long it shakes, and the colors its seams climb through
 function makeBox(sc) {
-  if (!on.chest) return null;
+  if (!on.chest || launchFrom !== "middle") return null; // no container when loot flies from the ground
   const qs = sc.qs, bq = qs.length ? Math.max(...qs) : -1;
   let size = haulSize(qs, sc.copper);
   if (on.streak && STREAK.n >= 3 && size === "small") size = "medium"; // a streak makes small hauls feel bigger
@@ -864,6 +872,7 @@ function frame(now) {
 document.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => start(b.dataset.s)));
 document.getElementById("again").addEventListener("click", () => start(lastScene, true));
 document.getElementById("small").addEventListener("change", e => { smallStyle = e.target.value; });
+document.getElementById("from").addEventListener("change", e => { launchFrom = e.target.value; });
 requestAnimationFrame(frame);
 setTimeout(() => start("boss"), 400);
 </script>

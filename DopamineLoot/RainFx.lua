@@ -37,7 +37,7 @@ local function Create()
   testLabel:SetPoint("TOPLEFT", colTop.bottom, "BOTTOMLEFT", 4, -18)
   local testBox = UI.NumberBox(panel, 36, function() return ns.settings.testRain or 8 end,
     function(v) ns.settings.testRain = math.floor(v) end, 1, 60,
-    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple, from 12 one is orange (the golden chest); some money too.")
+    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple, from 12 one is orange; some money too.")
   testBox:SetPoint("LEFT", testLabel, "RIGHT", 10, 0)
   local testAfter = UI.Label(panel, "GameFontHighlight", "items")
   testAfter:SetPoint("LEFT", testBox, "RIGHT", 8, 0)
@@ -60,18 +60,35 @@ local function Create()
   quest:SetPoint("TOPLEFT", coinLabel, "BOTTOMLEFT", -4, -14)
   UI.Tip(quest, "An item and some money, rained together the way a quest turn-in plays (/dl testquest).")
 
-  -- the chest's opening sound (/dl opensound)
-  local openLabel = UI.Label(panel, "GameFontHighlightSmall", "Sound as the treasure chest opens:")
-  openLabel:SetPoint("TOPLEFT", quest, "BOTTOMLEFT", 4, -16)
-  local last = UI.Choice(panel, {
+  -- where the loot flies from (/dl rainfrom)
+  local fromLabel = UI.Label(panel, "GameFontHighlightSmall", "Loot flies from:")
+  fromLabel:SetPoint("TOPLEFT", quest, "BOTTOMLEFT", 4, -16)
+  local fromTips = {
+    ground = "A fountain from the middle of the ground (where items land).",
+    spread = "Items shoot up from anywhere along the middle of the ground; the best one from the middle.",
+    below = "From just under the bottom edge of the screen.",
+    middle = "From the middle of the screen, as the first versions did.",
+  }
+  local fromOptions = {}
+  for _, v in ipairs(ns.RainCore.FROM) do
+    fromOptions[#fromOptions + 1] = { value = v, label = ns.FROM_NAMES[v] .. (v == "ground" and " (default)" or ""),
+      tip = fromTips[v] .. " (/dl rainfrom " .. v .. ")" }
+  end
+  local fromLast = UI.Choice(panel, fromOptions, function() return ns.settings.rainFrom or "ground" end,
+    function(v) ns.settings.rainFrom = v ~= "ground" and v or nil end, fromLabel)
+
+  -- the burst's sound (/dl opensound), in the second column beside it
+  local openLabel = UI.Label(panel, "GameFontHighlightSmall", "Sound as the loot bursts out:")
+  openLabel:SetPoint("TOPLEFT", fromLabel, "TOPLEFT", 296, 0)
+  UI.Choice(panel, {
     { value = "size", label = "By haul size (recommended)",
-      tip = "A small haul: the pouch's little pop (silent without the treasure chest); 6 items or 1 gold: a soft lid pop; something Rare or better: the lid bursting off (a bigger one for a Legendary)." },
-    { value = "always", label = "Always the big sound", tip = "Every rain opens with the big game sound." },
-    { value = "never", label = "Never", tip = "No opening sound; the items and coins leaving the chest still whoosh." },
+      tip = "A few grays, whites or greens: no sound; 6 items or 1 gold: a soft pop; something Rare or better: a big burst." },
+    { value = "always", label = "Always the big sound", tip = "Every rain starts with the big game sound." },
+    { value = "never", label = "Never", tip = "No burst sound; the items and coins still whoosh as they fly." },
   }, function() return ns.settings.openSound or "size" end, function(v) ns.settings.openSound = v end, openLabel)
 
   local back = UI.Button(panel, "Main settings", 120, function() ns:OpenSettings() end)
-  back:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -14)
+  back:SetPoint("TOPLEFT", fromLast, "BOTTOMLEFT", 0, -14)
 
   panel:SetScript("OnShow", function() UI.Refresh() end)
   UI.Refresh() -- sub-pages may not get OnShow on their first open: fill the switches now

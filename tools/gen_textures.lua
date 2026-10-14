@@ -11,7 +11,7 @@
 --   Wave      a thin glowing ring that expands (legendary shockwave)
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 --   Pillar, Vignette   loot rain: the light pillar over resting Rare+, the Epic screen-edge pulse
---   Chest*, Pouch*, Rays   chest show: the treasure chest and loot pouch in layers (tinted), burst rays
+--   Chest*, Pouch*, Rays   deprecated chest show (written to deprecated/chest-show/Media/)
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
 
@@ -133,6 +133,10 @@ Write("Vignette", Fill(Canvas(256, 256), function(u, v)
   local t = math.max(0, math.min(1, (R(u, v) - 0.55) / 0.75))
   return t * t * (3 - 2 * t)
 end))
+
+-- Deprecated (the chest show was set aside 2026-10-14): these go to deprecated/chest-show/Media/,
+-- not into the addon. See deprecated/chest-show/README.md.
+DIR = root .. "deprecated/chest-show/Media/"
 
 -- The treasure chest and the loot pouch (chest show). Every layer is a 128 x 128 square sharing the
 -- same center, so in game they stack exactly, tint separately (wood, iron, gold) and can all turn

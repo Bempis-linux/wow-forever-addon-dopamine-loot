@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-12, after 0.4.5. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.6. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,35 +8,34 @@ the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.5 pushed**, working tree clean. 0.3 (look & feel) is done; 0.4 (chest show) in progress.
-- The chest show's containers are the **game's own models** since 0.4.3 (user's picks on the
-  Blizzard assets page): sack 200442 = pouch, Strongbox 219372 = chest, large ornate chest 200953 =
-  gold. Rain.lua: `GAME_BOX {file, size, cam}`, `LoadGameBox`, `DrawGameBox`, `WarmGameBoxes`;
-  lid anims 0 shut → 148 opens → 149 held open (`ANIM_OPEN_T` 0.6 s). Switch "Game chests (3D)"
-  (`noRainModels`); the drawn containers (0.4.0) are the fallback. Details: design-review.md.
-- 0.4.5: loot starts inside the container's mouth and grows out (user reported it seemed to spawn
-  above/beside). **Unverified**; if still off, the model's vertical placement (`b.y - 0.12*size`)
-  vs. its real opening needs tuning per model from a screenshot taken as it opens.
-- `Assets.lua` (0.4.1): `/dl assets` + "Blizzard assets" sub-page (main page → Other): model/
-  animation viewer (wheel shows zoom), textures/atlases, sounds with Play, fonts. Results in
-  `DopamineLootDB.assetCheck`.
+- **0.4.6 pushed**. 0.3 (look & feel) is done; 0.4 in progress.
+- 2026-10-14: the user found the chest show "a bit much" and **set it aside**: code (Rain.lua as of
+  0.4.5) and media moved to `deprecated/chest-show/` (README there; not loaded). The generators now
+  write chest art/sounds into that folder. Instead, **loot flies up from the ground** (setting
+  `rainFrom`, `/dl rainfrom`, a choice on the effects page): ground fountain (default) / spread along
+  the ground / below the bottom edge / middle of the screen (the 0.3 rain); `Core.LaunchSpeed` launches
+  lower items faster so they peak as high (tested). The user wants **all four options kept**. Loot
+  beams over resting items: the user likes them, keep.
+- `Assets.lua` (0.4.1): `/dl assets` + "Blizzard assets" page (main page → Other), kept as a tool.
 - **Next up**:
-  1. User tests 0.4.5 (`/reload`): Test rain 3 / 8 / 12, does loot come out of the sack / Strongbox /
-     gold chest? Settings fields filled after /reload (0.4.2 fix)?
-  2. Remaining design-review picks: star4 sparkles, SKURRI counter font, "Blizzard toast" popup
-     style, bags-glow on rain icons; Blizzard sounds as choices with Play buttons.
-  3. 0.4.6 hooks: loot streak (30 s window; from x3 small hauls get the chest; x5 fanfare; "streak
-     ended" summary), session tally, personal records banners.
-  4. 0.4.7 card flip (click), off by default.
-  5. 0.4.8 settings cleanup (user asked): pages by topic, better controls; go through every setting
-     with the user first (keep/improve/merge/drop), mockup first.
-  6. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
+  1. User tests 0.4.6 (`/reload`): Test rain with each "Loot flies from" choice; burst sound by haul
+     size; settings fields filled after /reload (0.4.2 fix)?
+  2. **Popup polish** (user, 2026-10-14), mockup first (`docs/mockups/popups.html`, to build). The
+     user's words: the popup animations feel "mockupy" and amateur; keep them **simple and build
+     on them**. Specifics: the arrival sparks are too uniform (an even ring outwards) for Rare/Epic/
+     Legendary; Beam's floating sparks conflict with them (Beam's rising sparks maybe only for higher
+     rarities); **Halo lens looks the worst** of the four; "spinning beam" and "twirling 3 dot"
+     animations look amateur (unclear which: ask or show variants). Sounds: **a little more
+     dramatic, but short and not tiresome**. Offer Blizzard options too (loot-toast art exists).
+  3. Hooks (loot streak, session tally, records; no chest now), card flip (off by default),
+     settings cleanup (pages by topic; go through every setting with the user first, mockup first).
+  4. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
 - 0.3: all four popup styles, preview + sliders, weapons upright; rain effects; **real looting works**
   (grays and copper rained, coins included); coin merge-up, Test money/quest; opening sound by size.
-- 0.4.0-0.4.4: pouch / chest / golden chest at test rain 3 / 8 / 12; Escape skip; effects page not
+- 0.4.0-0.4.4 (chest show, now set aside): containers worked; Escape skip; effects page not
   cut off; asset check runs and saves; game sack and Strongbox look right, lid opens and stays open;
   gold chest fits at cam 2.6 ("better").
 
@@ -48,8 +47,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 ## Not yet verified
 - A single green from a mob (popup), a vendor buy (must NOT pop), crafting, a real quest turn-in
   with money, a dungeon (secret loot lines? `/dl debug`), combat deferral, big-rain performance.
-- Arrival sounds by ear; gathering when Baganator hides the backpack button; Alt+Z mid chest show
-  (the model should reload with the UI).
+- Arrival sounds by ear; gathering when Baganator hides the backpack button.
 
 ## User preferences (stated in chat; follow them)
 - **Privacy first**: the only public identity is **Bempis**; nothing else personal in tracked files
@@ -87,9 +85,11 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
 
 ## Open questions / waiting on the user
-- Does loot now come out of each container (0.4.5)? Are the settings fields filled?
+- Which popup animations are the "spinning beam" and "twirling 3 dot" ones? Drop Halo lens or redo it?
+- Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-10-14 0.4.6: chest show set aside (deprecated/chest-show/); loot flies from the ground (rainFrom).
 - 2026-10-12 0.4.5: loot rises out of the container's mouth. 0.4.4: gold chest camera.
 - 2026-10-12 0.4.3: game containers with real lid animations. 0.4.2: settings fields fix.
 - 2026-10-12 0.4.1: asset check; design review; kit 0.6.0 custom vs. Blizzard rule.

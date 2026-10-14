@@ -91,7 +91,8 @@ render Gather 0.45 0.3 "$(glide 0 350 900 0.3 3)"
 #                      (small hauls open silently, big ones with a game sound)
 render ChestPop 0.6 0.4 "0.9*$(boom 0 85 170 16)+0.25*(random(0)*2-1)*exp(-70*t)+0.3*$(bell 0.05 1568 7)+0.2*$(bell 0.09 2093 8)" "lowpass=f=6000"
 
-# Chest show
+# Chest show: deprecated (set aside 2026-10-14), written to deprecated/chest-show/Media/, not the addon
+OUT=deprecated/chest-show/Media
 #   ChestRattle1..3    the chest knocking about as it shakes (short wooden knocks, three to vary)
 #   Tease00..05        the seam's light climbing a rarity: a chime a step higher each time
 #   ChestBurst         the lid flying off: a boom under a bright chord
