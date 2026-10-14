@@ -1,7 +1,7 @@
--- Dopamine Loot "Popup look" settings page (Options > AddOns > Dopamine Loot > Popup look): the
--- popup style and sliders on the left, a live popup on the right that changes as you drag. Pick the
--- preview's quality and kind (weapon, helm, something with no model) under it; "Show as a real
--- popup" pops one on screen with the same look.
+-- Dopamine Loot "Popups" settings page (Options > AddOns > Dopamine Loot > Popups; custom, not native:
+-- it has the live preview): when popups show, their look and the 3D item on the left, a live popup
+-- on the right that changes as you drag. Pick the preview's quality and kind under it; "Show as a
+-- real popup" pops one on screen with the same look; "Check any item ID" is /dl model.
 local _, ns = ...
 
 local PREVIEW_W, PREVIEW_H = 300, 250
@@ -63,43 +63,60 @@ local function Create()
   local UI = ns.UI
   panel = CreateFrame("Frame")
   panel:Hide() -- the Settings window shows it, so OnShow refills the fields on every open
-  panel.name = "Popup look"
+  panel.name = "Popups"
 
-  local title = UI.Label(panel, "GameFontNormalLarge", "Popup look")
+  local title = UI.Label(panel, "GameFontNormalLarge", "Popups")
   title:SetPoint("TOPLEFT", 16, -16)
   local intro = UI.Label(panel, "GameFontHighlightSmall",
-    "Pick a style and drag the sliders: the popup on the right changes as you go.")
+    "A card at the top of the screen for each item you loot. Changes show in the preview at once.")
   intro:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 
-  ---------------------------------------------------------------- left: style and sliders
-  local styleLabel = UI.Label(panel, "GameFontNormal", "Style")
-  styleLabel:SetPoint("TOPLEFT", intro, "BOTTOMLEFT", 0, -16)
-  local options = {}
-  for _, s in ipairs(ns.STYLES) do options[#options + 1] = { value = s.key, label = s.label, tip = s.tip } end
-  local last = UI.Choice(panel, options, function() return ns.PopupStyle() end,
-    function(v) ns.settings.popupStyle = v; Changed("item") end, styleLabel)
-
+  ---------------------------------------------------------------- left: when, look, the 3D item
+  local last
+  local function Header(text, gap)
+    local h = UI.Label(panel, "GameFontNormal", text)
+    h:SetPoint("TOPLEFT", last or intro, "BOTTOMLEFT", 0, gap or -16)
+    last = h
+  end
+  local function Pick(label, width, options, get, set, tip)
+    local text = UI.Label(panel, "GameFontHighlight", label)
+    text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -10)
+    local d = UI.Dropdown(panel, width, options, get, set, tip)
+    d:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 0, -4)
+    last = d
+  end
   local function Add(label, min, max, step, get, set, tip, what, fmt)
     local s, text = UI.Slider(panel, label, 150, min, max, step, get, set, tip, fmt, function() Changed(what) end)
-    text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -14)
+    text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -12)
     last = s
     return s
   end
-  local lookLabel = UI.Label(panel, "GameFontNormal", "Look")
-  lookLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -12)
-  last = lookLabel
+
+  Header("When")
+  Pick("Show popups for", 220, ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
+    function(v) ns.settings.minQuality = v end,
+    "The lowest quality that gets a popup; lower ones still count, just quietly. Also /dl quality.")
+  Add("Time on screen (s)", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
+    function(v) ns.settings.popupHold = v end,
+    "Seconds a popup stays (2 to 15, default 5); better items stay a little longer. Hovering holds it.", "none")
+
+  Header("Look")
+  local styles = {}
+  for _, s in ipairs(ns.STYLES) do styles[#styles + 1] = { s.key, s.label, s.tip } end
+  Pick("Style", 220, styles, function() return ns.PopupStyle() end,
+    function(v) ns.settings.popupStyle = v; Changed("item") end,
+    "Relic: the item in a soft glow. Beam: a cone of light rises under it. Banner: a ribbon in its color.")
   Add("Size", 0.6, 1.6, 0.05, ns.PopupScale, function(v) ns.settings.popupScale = v end,
     "How big popups are on screen (0.6 to 1.6, default 1).", "size")
-  Add("3D zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
+
+  Header("The 3D item")
+  Add("Zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
     "Camera distance for item models: smaller is closer and bigger (0.3 to 2, default 0.7). Also /dl zoom.", "frame")
   Add("Weapon tilt", 0, 355, 5, ns.WeaponTilt, function(v) ns.settings.weaponTilt = v end,
     "Turns weapons so they stand up (0 = as the game draws them, 90 = upright, 270 if it stands on its head; default 90). Also /dl roll.",
     "frame", function(v) return tostring(math.floor(v + 0.5)) end)
   Add("Sway speed", 0, 3, 0.1, ns.SpinSpeed, function(v) ns.settings.spinSpeed = v end,
     "How fast the item sways side to side (0 = still, default 0.9). Epic and better turn once to face you first.", "none")
-  Add("Time on screen (s)", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
-    function(v) ns.settings.popupHold = v end,
-    "Seconds a popup stays (2 to 15, default 5); better items stay a little longer. Hovering holds it.", "none")
 
   ---------------------------------------------------------------- right: the live preview
   box = CreateFrame("Frame", nil, panel, "BackdropTemplate")
@@ -179,9 +196,9 @@ local function Create()
   panel:SetScript("OnShow", function() UI.Refresh(); Mark(qButtons, pick.quality); Mark(kButtons, pick.kind) end)
 
   if Settings.RegisterCanvasLayoutSubcategory and ns.settingsCategory then
-    sub = Settings.RegisterCanvasLayoutSubcategory(ns.settingsCategory, panel, "Popup look")
+    sub = Settings.RegisterCanvasLayoutSubcategory(ns.settingsCategory, panel, "Popups")
   else -- no subcategories: its own entry
-    sub = Settings.RegisterCanvasLayoutCategory(panel, ns.TITLE .. " - Popup look")
+    sub = Settings.RegisterCanvasLayoutCategory(panel, ns.TITLE .. " - Popups")
     Settings.RegisterAddOnCategory(sub)
   end
 end
@@ -192,4 +209,4 @@ function ns:OpenLook()
 end
 
 ns.OnInit(function() if not panel then Create() end end)
-ns.AddCommand("look", "open the popup look page with the live preview", function() ns:OpenLook() end)
+ns.AddCommand("look", "open the Popups settings page (live preview)", function() ns:OpenLook() end)

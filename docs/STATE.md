@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.14. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.15. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.14 pushed**, tree clean. 0.4 = popup polish + loot rain from the ground.
+- **0.4.15 pushed**, tree clean. 0.4 = popup polish + loot rain from the ground.
 - **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
   burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
   turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
@@ -20,19 +20,22 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
+- **Settings rebuilt (0.4.15)** from `docs/mockups/settings.html` (user approved: native + custom mix,
+  3 main switches on the first page, placement as its own Popups group later): Dopamine Loot (native:
+  Popups/Rain/Sounds switches, quick tests), Popups (custom, Look.lua: when, style dropdown, size, the
+  3D item, preview, item ID check), Loot rain (native, RainFx.lua), Sounds (native, Pages.lua: **popup
+  sound picker**, a game kit per rarity row `sound2..5` that plays on pick + our chime per rarity
+  `noChime3..5`, "Play all"), Advanced (native: debug, log, check client, asset check), Blizzard assets.
+  `/dl sounds` and `/dl arrivalsound` removed (old noArrivalSound migrated). **Not yet seen in game.**
 - **Next up**:
-  1. User tests 0.4.14 (`/reload`): Popup look shows Relic, Beam, Banner (no Toast); rain "Loot flies from";
-     settings fields filled after /reload?
-  2. **Settings cleanup first** (user, 2026-10-14: before adding more settings), mockup `docs/mockups/settings.html`: pages General / Popups / Loot rain / Sounds / Advanced, radio check-box lists become dropdowns, tests merged, rain effects grouped; native Blizzard layout (Settings.RegisterVerticalLayoutCategory, as BugSack does on Forever, incl. a sound dropdown that plays on pick) for all but Popups (custom, live preview). Waiting for the user's review. Then the
-     **sound picker** per rarity with Play buttons, on the new Sounds page: the game's own loot sounds (check they play)
-     and ours, layered or alone. User: our synthesized sounds feel artificial, no punch (current and
-     "short stab" best, "swell" bad); a little more drama, short, not tiresome; **no level-up/quest**.
-  3. **Popup placement**: popups feel "in your face" and get in the way; satisfying but **not
+  1. User tests 0.4.15 (`/reload`): every page opens and looks tidy; dropdowns, sliders, buttons work;
+     the sound picker plays on pick; "Defaults" doesn't blast four sounds; settings filled after /reload.
+     If a native control is missing, check `/dump Settings.CreateSlider, CreateSettingsButtonInitializer`.
+  2. **Popup placement**: popups feel "in your face" and get in the way; satisfying but **not
      blocking**. Mockup first (position, size, hold time, click-through, compact low tiers).
-  4. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
-  5. Hooks (streak, tally, records), card flip (off by default), settings cleanup (pages by topic;
-     every setting discussed with the user first, mockup first).
-  6. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
+  3. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
+  4. Hooks (streak, tally, records), card flip (off by default).
+  5. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
@@ -90,6 +93,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-10-14 0.4.15: settings rebuilt by topic (native pages + custom Popups); popup sound picker.
 - 2026-10-14 0.4.6-0.4.14: chest show set aside, loot flies from the ground; popup polish (arrival by
   rarity, sway, weapons face you, long names); Toast style tried (0.4.7-0.4.13), set aside.
 - 2026-10-12 0.4.1-0.4.5: asset check, design review (kit 0.6.0 rule), chest show with game models.

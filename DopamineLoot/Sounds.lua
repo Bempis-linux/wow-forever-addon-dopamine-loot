@@ -1,20 +1,31 @@
--- Dopamine Loot sounds: one sound per item quality, from the game's own sound kits (played by ID,
--- nothing shipped). Each tier lists candidates best first; the first that the client reports it
--- will play is remembered. Retail-era kits may be missing on Forever: /dl sounds checks them all.
+-- Dopamine Loot sounds. Popups: per rarity a game sound (picked on the Sounds settings page, played
+-- by ID, nothing shipped) plus, for Rare and up, our own chime with the arrival effects. The rain:
+-- our pitch-climbing sets (the game can't change a sound's pitch) and a game sound for the burst.
 local _, ns = ...
 
--- quality: 0 poor, 1 common, 2 uncommon, 3 rare, 4 epic, 5 legendary, 6 artifact, 7 heirloom
-local TIERS = {
-  [0] = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" },
-  [1] = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" },
-  [2] = { "UI_TRANSMOG_ITEM_CLICK", "IG_BACKPACK_COIN_OK", "LOOT_WINDOW_COIN_SOUND" },
-  [3] = { "UI_RAID_LOOT_TOAST_LESSER_ITEM_WON", "UI_ITEM_UPGRADE_UI_ITEM_UPGRADED_RARE", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_COIN_OK" },
-  [4] = { "UI_EPICLOOT_TOAST", "UI_WARFORGED_ITEM_LOOT_TOAST", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_COIN_OK" },
-  [5] = { "UI_LEGENDARY_LOOT_TOAST", "UI_EPICLOOT_TOAST", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_COIN_OK" },
+-- The popup sound choices: game sound kits (SOUNDKIT keys) by row. Row 2 covers Uncommon and below.
+-- "none" plays nothing. Kits the client doesn't have are left out of the list.
+ns.POPUP_SOUNDS = {
+  { key = "LOOT_WINDOW_COIN_SOUND", label = "Coins" },
+  { key = "IG_BACKPACK_COIN_OK", label = "Coin clink" },
+  { key = "UI_TRANSMOG_ITEM_CLICK", label = "Soft click" },
+  { key = "PICK_UP_GEMS", label = "Gems" },
+  { key = "UI_RAID_LOOT_TOAST_LESSER_ITEM_WON", label = "Loot won (raid)" },
+  { key = "UI_PERSONAL_LOOT_BANNER", label = "Personal loot banner" },
+  { key = "UI_BONUS_LOOT_ROLL_END", label = "Bonus roll" },
+  { key = "UI_STORE_UNWRAP", label = "Unwrap" },
+  { key = "UI_EPICLOOT_TOAST", label = "Epic loot toast" },
+  { key = "UI_WARFORGED_ITEM_LOOT_TOAST", label = "Warforged loot toast" },
+  { key = "UI_LEGENDARY_LOOT_TOAST", label = "Legendary loot toast" },
+  { key = "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK_GOLD_SUCCESS", label = "Gold chest unlock" },
 }
-ns.SOUND_TIERS = TIERS
-
-local working = {} -- [quality] = kit key that played
+ns.SOUND_ROWS = { -- the rows on the Sounds page: rarity, label, default sound
+  { q = 2, label = "Uncommon (and below)", default = "UI_TRANSMOG_ITEM_CLICK" },
+  { q = 3, label = "Rare", default = "UI_RAID_LOOT_TOAST_LESSER_ITEM_WON" },
+  { q = 4, label = "Epic", default = "UI_EPICLOOT_TOAST" },
+  { q = 5, label = "Legendary", default = "UI_LEGENDARY_LOOT_TOAST" },
+}
+local function Row(q) return math.min(math.max(q or 2, 2), 5) end
 
 ns.AddToggle("sound", "noSound", "loot sounds")
 
@@ -28,24 +39,48 @@ function ns.PlayKit(key)
   return willPlay and true or false
 end
 
-function ns:PlayTierSound(quality, force)
-  if self.settings.noSound and not force then return end
-  local q = math.min(math.max(quality or 2, 0), 5)
-  if working[q] and ns.PlayKit(working[q]) then return end
-  for _, key in ipairs(TIERS[q]) do
-    if ns.PlayKit(key) then working[q] = key; return end
-  end
+-- The sound picked for a rarity (setting "sound2".."sound5"); a kit this client lacks falls back to
+-- the row's default, then to a plain coin clink, so a popup is never silent by accident
+function ns.PopupSound(q)
+  local r = Row(q)
+  local key = ns.settings["sound" .. r] or ns.SOUND_ROWS[r - 1].default
+  if key == "none" or (SOUNDKIT and SOUNDKIT[key]) then return key end
+  key = ns.SOUND_ROWS[r - 1].default
+  if SOUNDKIT and SOUNDKIT[key] then return key end
+  return "IG_BACKPACK_COIN_OK"
 end
 
--- Arrival sounds: our own synthesized OGGs (tools/gen_sounds.sh), layered on the tier sound and
--- started by View.lua with the arrival effects (Rare spark ring, Epic ring, Legendary shockwave)
+function ns:PlayTierSound(quality, force)
+  if self.settings.noSound and not force then return end
+  local key = ns.PopupSound(quality)
+  if key ~= "none" then ns.PlayKit(key) end
+end
+
+-- Arrival chimes: our own synthesized OGGs (tools/gen_sounds.sh), layered on the game sound and
+-- started by View.lua with the arrival effects; each rarity's chime is a switch ("noChime3".."5")
 local ARRIVAL_FILE = "Interface\\AddOns\\DopamineLoot\\Media\\Arrival%s.ogg"
 local ARRIVAL = { rare = "Rare", epic = "Epic", legendary = "Legendary" }
-ns.AddToggle("arrivalsound", "noArrivalSound", "arrival sounds")
+local TIER_Q = { rare = 3, epic = 4, legendary = 5 }
 
-function ns:PlayArrivalSound(tier)
-  if self.settings.noSound or self.settings.noArrivalSound or not ARRIVAL[tier] then return end
+function ns:PlayArrivalSound(tier, force)
+  if not ARRIVAL[tier] then return end
+  if not force and (self.settings.noSound or self.settings["noChime" .. TIER_Q[tier]]) then return end
   PlaySoundFile(ARRIVAL_FILE:format(ARRIVAL[tier]), Channel())
+end
+
+-- The old one switch for every chime (before 0.4.15) becomes the three per-rarity switches
+ns.OnInit(function()
+  if ns.settings.noArrivalSound then
+    for q = 3, 5 do ns.settings["noChime" .. q] = true end
+    ns.settings.noArrivalSound = nil
+  end
+end)
+
+-- What a popup of this quality sounds like, both layers (the Play buttons on the Sounds page)
+function ns:PreviewPopupSound(q)
+  self:PlayTierSound(q, true)
+  local tier = q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or nil
+  if tier and not self.settings["noChime" .. q] then self:PlayArrivalSound(tier, true) end
 end
 
 -- Loot rain escalation: tick n (1 = the first item down) climbs a semitone per item, up to 15 steps
@@ -83,34 +118,14 @@ end
 -- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
 local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
 local BOUNCE = { "LOOT_WINDOW_COIN_SOUND", "IG_BACKPACK_COIN_OK" }
-TIERS.burst, TIERS.bounce = BURST, BOUNCE
 
-local function PlayFirst(slot, list)
+local working = {} -- [list] = the kit that played last time
+local function PlayFirst(list)
   if ns.settings.noSound then return end
-  if working[slot] and ns.PlayKit(working[slot]) then return end
+  if working[list] and ns.PlayKit(working[list]) then return end
   for _, key in ipairs(list) do
-    if ns.PlayKit(key) then working[slot] = key; return end
+    if ns.PlayKit(key) then working[list] = key; return end
   end
 end
-function ns:PlayBurstSound() PlayFirst("burst", BURST) end
-function ns:PlayBounceSound() PlayFirst("bounce", BOUNCE) end
-
--- /dl sounds: play every candidate one after another and log which exist (for picking defaults)
-ns.AddCommand("sounds", "play and check every loot sound", function()
-  local list = {}
-  for _, slot in ipairs({ 0, 1, 2, 3, 4, 5, "burst", "bounce" }) do
-    for _, key in ipairs(TIERS[slot]) do
-      if not list[key] then list[key] = true; list[#list + 1] = { q = slot, key = key } end
-    end
-  end
-  ns:ShowLog()
-  ns.Print(("checking %d sounds, one every 1.5 s"):format(#list))
-  for i, s in ipairs(list) do
-    C_Timer.After((i - 1) * 1.5, function()
-      local id = SOUNDKIT and SOUNDKIT[s.key]
-      local played = id and ns.PlayKit(s.key)
-      ns.Print(("%s  %s (%s): %s"):format(type(s.q) == "number" and ("quality " .. s.q) or s.q, s.key, tostring(id),
-        not id and "not in SOUNDKIT" or played and "plays" or "will not play"))
-    end)
-  end
-end)
+function ns:PlayBurstSound() PlayFirst(BURST) end
+function ns:PlayBounceSound() PlayFirst(BOUNCE) end

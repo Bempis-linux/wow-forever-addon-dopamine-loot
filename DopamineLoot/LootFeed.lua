@@ -285,7 +285,7 @@ ns.MoneyName = MoneyName
 
 ns.AddCommand("coinrain", "money alone rains from this much loot: /dl coinrain [1g | 50s | 20c]", function(arg)
   local v = Money(arg)
-  if v then ns.settings.coinRainMin = math.max(0, v); if ns.UI then ns.UI.Refresh() end end
+  if v then ns.settings.coinRainMin = math.max(0, v); if ns.SettingChanged then ns.SettingChanged("coinRainMin") end end
   local min = ns.CoinRainMin()
   ns.Print(("money from loot rains on its own from %s (quest money always rains)"):format(min > 0 and MoneyName(min) or "any amount"))
   ns:ShowLog()
@@ -293,7 +293,7 @@ end)
 
 ns.AddCommand("testcoins", "preview a coin rain: /dl testcoins [amount, default 2g 35s]", function(arg)
   if ns.settings.noRainCoins then
-    ns.Print("coins are switched off (Loot rain effects page, or /dl rainfx coins on)")
+    ns.Print("coins are switched off (Loot rain page, or /dl rainfx coins on)")
     return ns:ShowLog()
   end
   ns:Rain({}, Money(arg) or 23500)

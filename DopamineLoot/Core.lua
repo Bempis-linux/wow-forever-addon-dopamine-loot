@@ -56,7 +56,10 @@ function ns:ADDON_LOADED(name)
   ev:UnregisterEvent("ADDON_LOADED")
   InitDB()
   self:RegisterEvents("PLAYER_LOGIN")
-  for _, fn in ipairs(inits) do fn() end
+  for _, fn in ipairs(inits) do -- one broken feature must not stop the ones after it
+    local ok, err = pcall(fn)
+    if not ok then geterrorhandler()(err) end
+  end
 end
 
 function ns:PLAYER_LOGIN()
@@ -113,10 +116,12 @@ SlashCmdList.DOPAMINELOOT = function(msg)
     ns:ToggleLog()
   elseif msg == "debug" then
     ns.settings.debug = not ns.settings.debug or nil
+    if ns.SettingChanged then ns.SettingChanged("debug") end
     ns.Print("debug " .. (ns.settings.debug and "on" or "off"))
     ns:ShowLog()
   elseif toggles[word] and (rest == "on" or rest == "off") then
     ns.settings[toggles[word].key] = (rest == "off") or nil
+    if ns.SettingChanged then ns.SettingChanged(toggles[word].key) end
     ns.Print(toggles[word].label .. " " .. rest)
     ns:ShowLog()
   elseif commands[word] and commands[word].fn then

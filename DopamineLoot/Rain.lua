@@ -251,7 +251,7 @@ ns.AddCommand("opensound", "the sound as the loot bursts out: /dl opensound [siz
   arg = (arg or ""):lower():match("%S+")
   if OPEN_NAMES[arg] then
     ns.settings.openSound = arg ~= "size" and arg or nil
-    if ns.UI then ns.UI.Refresh() end
+    if ns.SettingChanged then ns.SettingChanged("openSound") end
   end
   ns.Print("burst sound: " .. OPEN_NAMES[ns.settings.openSound or "size"])
   ns:ShowLog()
@@ -264,7 +264,7 @@ ns.AddCommand("rainfrom", "where the loot flies from: /dl rainfrom [ground | spr
   arg = (arg or ""):lower():match("%S+")
   if ns.FROM_NAMES[arg] then
     ns.settings.rainFrom = arg ~= "ground" and arg or nil
-    if ns.UI then ns.UI.Refresh() end
+    if ns.SettingChanged then ns.SettingChanged("rainFrom") end
   end
   ns.Print("loot flies from " .. ns.FROM_NAMES[ns.settings.rainFrom or "ground"])
   ns:ShowLog()
@@ -275,7 +275,7 @@ ns.AddCommand("rainfx", "loot rain effects: /dl rainfx [name off|on]", function(
   for _, fx in ipairs(ns.RAIN_FX) do
     if word == fx.word and (value == "on" or value == "off") then
       ns.settings["noRain" .. fx.key] = value == "off" or nil
-      if ns.UI then ns.UI.Refresh() end
+      if ns.SettingChanged then ns.SettingChanged("noRain" .. fx.key) end
       ns.Print(("%s: %s"):format(fx.label, value))
       return ns:ShowLog()
     end

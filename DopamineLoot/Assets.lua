@@ -554,8 +554,6 @@ local function Create()
   fontInfo:SetPoint("TOPLEFT", sample, "BOTTOMLEFT", 0, -6)
   view.fontInfo = fontInfo
 
-  local back = UI.Button(panel, "Main settings", 120, function() ns:OpenSettings() end)
-  back:SetPoint("TOPLEFT", fontInfo, "BOTTOMLEFT", -2, -14)
 
   -- fill every viewer now: sub-pages may not get OnShow on their first open
   view.entry = MODELS[1]

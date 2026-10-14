@@ -1,20 +1,21 @@
--- Dopamine Loot settings: a page under Options > AddOns (also /dl and /dl settings).
--- Two columns: popups + sound on the left, loot rain + other on the right. Every effect has a
--- Test button; tests that take a number have a number field beside them.
+-- Dopamine Loot settings (Options > AddOns > Dopamine Loot; also /dl and /dl settings). One topic
+-- per page (docs/mockups/settings.html): Dopamine Loot (the main switches, quick tests), Popups
+-- (Look.lua, custom: it has the live preview), Loot rain (RainFx.lua), Sounds and Advanced
+-- (Pages.lua), and the Blizzard assets tool (Assets.lua). All but Popups and the asset tool use the
+-- game's native settings layout (ns.Native below); the custom pages share the controls in ns.UI.
 local _, ns = ...
 
-local panel, category
-local refreshers = {} -- each control re-reads its setting when the page opens
-local COL2 = 320
+local category
+local refreshers = {} -- each custom control re-reads its setting when its page opens
 
-local QUALITIES = {
-  { value = 0, label = "|cff9d9d9dPoor|r and up" },
-  { value = 1, label = "|cffffffffCommon|r and up" },
-  { value = 2, label = "|cff1eff00Uncommon|r and up (recommended)" },
-  { value = 3, label = "|cff0070ddRare|r and up" },
-  { value = 4, label = "|cffa335eeEpic|r and up" },
+-- "Show popups for" choices, shared with the Popups page
+ns.QUALITY_CHOICES = {
+  { 0, "|cff9d9d9dPoor|r and up" },
+  { 1, "|cffffffffCommon|r and up" },
+  { 2, "|cff1eff00Uncommon|r and up (default)" },
+  { 3, "|cff0070ddRare|r and up" },
+  { 4, "|cffa335eeEpic|r and up" },
 }
-local TEST_WORDS = { [0] = "poor", "common", "uncommon", "rare", "epic", "legendary" }
 
 local function Label(parent, font, text)
   local fs = parent:CreateFontString(nil, "OVERLAY", font)
@@ -151,176 +152,155 @@ local function Slider(parent, label, width, min, max, step, get, set, tip, fmt, 
   return s, text
 end
 
+-- A dropdown in the game's own style (WowStyle1DropdownTemplate, as Baganator uses on Forever):
+-- options = { { value, label, tip }, ... }; shows the picked one; set runs when you pick
+local function Dropdown(parent, width, options, get, set, tip)
+  local d = CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
+  d:SetWidth(width)
+  local radio = true -- radio entries show the picked one themselves; plain buttons need SetText
+  d:SetupMenu(function(_, root)
+    radio = root.CreateRadio ~= nil
+    for _, o in ipairs(options) do
+      local value = o[1]
+      if radio then
+        root:CreateRadio(o[2], function() return get() == value end, function() set(value) end, value)
+      else
+        root:CreateButton(o[2], function() set(value); d:SetText(o[2]) end)
+      end
+    end
+  end)
+  local function Show()
+    if d.GenerateMenu then d:GenerateMenu() end
+    if not radio then
+      for _, o in ipairs(options) do if o[1] == get() then d:SetText(o[2]) end end
+    end
+  end
+  if tip then -- hooked: the template has its own enter/leave behavior
+    d:HookScript("OnEnter", function(self)
+      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+      GameTooltip:SetText(tip, 1, 1, 1, 1, true)
+      GameTooltip:Show()
+    end)
+    d:HookScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
+  end
+  refreshers[#refreshers + 1] = Show
+  if ns.settings then Show() end
+  return d
+end
+
 local function RefreshAll() for _, r in ipairs(refreshers) do r() end end
 
--- Shared with the "Popup look" page (Look.lua)
+-- Shared by the custom pages ("Popups" in Look.lua, "Blizzard assets" in Assets.lua)
 ns.UI = {
   Label = Label, Tip = Tip, Check = Check, Toggle = Toggle, Choice = Choice, Button = Button,
-  NumberBox = NumberBox, Slider = Slider, Refresh = RefreshAll,
+  NumberBox = NumberBox, Slider = Slider, Dropdown = Dropdown, Refresh = RefreshAll,
 }
 
-local function CreatePanel()
-  panel = CreateFrame("Frame")
-  panel:Hide() -- the Settings window shows it, so OnShow refills the fields on every open
-  panel.name = ns.TITLE
+---------------------------------------------------------------------------
+-- The native pages (Blizzard's own settings layout, as BugSack uses on Forever): the game's check
+-- boxes, sliders and dropdowns, laid out for us and found by the Options search box. Every setting
+-- is a proxy that reads and writes ns.settings, so the /dl commands and these pages share one value.
+---------------------------------------------------------------------------
+local N = {}
+ns.Native = N
+local function Var(key) return "DOPAMINELOOT_" .. key:upper() end
 
-  local title = Label(panel, "GameFontNormalLarge", ns.TITLE)
-  title:SetPoint("TOPLEFT", 16, -16)
-  local version = Label(panel, "GameFontDisableSmall", "")
-  version:SetPoint("LEFT", title, "RIGHT", 8, -1)
-  refreshers[#refreshers + 1] = function() version:SetText("v" .. ns.Version()) end
-  local intro = Label(panel, "GameFontHighlightSmall",
-    "Loot that feels like loot: your drops pop up turning in 3D, and big hauls rain down.")
-  intro:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
+-- A /dl command changed a setting: an open page (native or custom) shows the new value at once
+function ns.SettingChanged(key)
+  if Settings and Settings.NotifyUpdate then pcall(Settings.NotifyUpdate, Var(key)) end
+  RefreshAll()
+end
 
-  ---------------------------------------------------------------- left: popups
-  local popups = Label(panel, "GameFontNormal", "Popups")
-  popups:SetPoint("TOPLEFT", intro, "BOTTOMLEFT", 0, -18)
-  local popOn = Toggle(panel, "Show loot popups", "noPopup",
-    "A card at the top of the screen for each item you loot, with the item turning in 3D.")
-  popOn:SetPoint("TOPLEFT", popups, "BOTTOMLEFT", 0, -4)
-  local minQ = Label(panel, "GameFontHighlightSmall", "Pop up for (Test shows one of that quality):")
-  minQ:SetPoint("TOPLEFT", popOn, "BOTTOMLEFT", 4, -6)
-  local last = Choice(panel, QUALITIES, function() return ns.MinQuality() end,
-    function(v) ns.settings.minQuality = v end, minQ, function(cb, o)
-      local test = Button(panel, "Test", 56, function() ns.RunCommand("test", TEST_WORDS[o.value]) end)
-      test:SetPoint("LEFT", cb, "LEFT", 250, 0)
+function N.Page(name, parent)
+  if parent then return Settings.RegisterVerticalLayoutSubcategory(parent, name) end
+  local cat, layout = Settings.RegisterVerticalLayoutCategory(name)
+  Settings.RegisterAddOnCategory(cat)
+  return cat, layout
+end
+
+function N.Header(layout, text, tip)
+  if CreateSettingsListSectionHeaderInitializer then
+    layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(text, tip))
+  end
+end
+
+-- A check box. off = the setting is a "no..." flag (checked means on), as most of ours are
+function N.Toggle(cat, key, label, tip, off)
+  local setting = Settings.RegisterProxySetting(cat, Var(key), Settings.VarType.Boolean, label, off and true or false,
+    function() if off then return not ns.settings[key] end return ns.settings[key] and true or false end,
+    function(v) if off then ns.settings[key] = (not v) or nil else ns.settings[key] = v or nil end end)
+  Settings.CreateCheckbox(cat, setting, tip)
+  return setting
+end
+
+-- A slider with its value at the right; fmt(v) -> text (default: the number)
+function N.Slider(cat, key, label, min, max, step, default, tip, fmt)
+  local setting = Settings.RegisterProxySetting(cat, Var(key), Settings.VarType.Number, label, default,
+    function() return ns.settings[key] or default end,
+    function(v) ns.settings[key] = v end)
+  local options = Settings.CreateSliderOptions(min, max, step)
+  options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right,
+    fmt or function(v) return tostring(math.floor(v * 100 + 0.5) / 100) end)
+  Settings.CreateSlider(cat, setting, options, tip)
+  return setting
+end
+
+-- A dropdown: options = { { value, label, tip }, ... } or a function returning that; the default
+-- value is stored as nil (every reader falls back to it); onSet(v) runs after a pick
+function N.Choice(cat, key, label, options, default, tip, onSet)
+  local kind = type(default) == "number" and Settings.VarType.Number or Settings.VarType.String
+  local setting = Settings.RegisterProxySetting(cat, Var(key), kind, label, default,
+    function() local v = ns.settings[key]; if v == nil then return default end return v end,
+    function(v)
+      if v == default then ns.settings[key] = nil else ns.settings[key] = v end
+      if onSet then onSet(v) end
     end)
-  local legendary = Button(panel, "Test legendary", 112, function() ns.RunCommand("test", "legendary") end)
-  legendary:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 194, -2)
-
-  local zoomLabel = Button(panel, "Popup look and live preview...", 220, function() ns:OpenLook() end)
-  zoomLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -32)
-  Tip(zoomLabel, "Style, size, 3D zoom, weapon tilt, sway and time on screen, with a live popup preview.")
-
-  ---------------------------------------------------------------- left: sound
-  local sound = Label(panel, "GameFontNormal", "Sound")
-  sound:SetPoint("TOPLEFT", zoomLabel, "BOTTOMLEFT", -4, -22)
-  local soundOn = Toggle(panel, "Play loot sounds", "noSound", "A sound for each popup, louder for better items.")
-  soundOn:SetPoint("TOPLEFT", sound, "BOTTOMLEFT", 0, -4)
-  last = Choice(panel, {
-    { value = "SFX", label = "With sound effects", tip = "Follows your sound-effects volume (and its mute)." },
-    { value = "Master", label = "With the master volume", tip = "Plays even with sound effects muted." },
-  }, function() return ns.settings.soundChannel or "SFX" end, function(v) ns.settings.soundChannel = v end, soundOn)
-  local checkSounds = Button(panel, "Check all sounds", 130, function() ns.RunCommand("sounds") end)
-  checkSounds:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -8)
-  local arrivalOn = Toggle(panel, "Arrival sounds", "noArrivalSound",
-    "A chime with the sparks for Rare and Epic, a boom and chord with the Legendary shockwave.")
-  arrivalOn:SetPoint("TOPLEFT", checkSounds, "BOTTOMLEFT", -4, -6)
-  local prev
-  for _, q in ipairs({ "rare", "epic", "legendary" }) do
-    local b = Button(panel, q:sub(1, 1):upper() .. q:sub(2), 80, function() ns.RunCommand("test", q) end)
-    if prev then b:SetPoint("LEFT", prev, "RIGHT", 4, 0) else b:SetPoint("TOPLEFT", arrivalOn, "BOTTOMLEFT", 4, -4) end
-    Tip(b, "Show a " .. q .. " test popup with its arrival and sound.")
-    prev = b
+  local function Options()
+    local c = Settings.CreateControlTextContainer()
+    for _, o in ipairs(type(options) == "function" and options() or options) do c:Add(o[1], o[2], o[3]) end
+    return c:GetData()
   end
+  Settings.CreateDropdown(cat, setting, Options, tip)
+  return setting
+end
 
-  ---------------------------------------------------------------- right: loot rain
-  local rain = Label(panel, "GameFontNormal", "Loot rain")
-  rain:SetPoint("TOPLEFT", intro, "BOTTOMLEFT", COL2, -18)
-  local rainOn = Toggle(panel, "Rain big hauls", "noRain",
-    "When you loot several items at once, they spray up and bounce down the screen. " ..
-    "In combat it waits until the fight is over.")
-  rainOn:SetPoint("TOPLEFT", rain, "BOTTOMLEFT", 0, -4)
-
-  local minLabel = Label(panel, "GameFontHighlight", "Rain from")
-  minLabel:SetPoint("TOPLEFT", rainOn, "BOTTOMLEFT", 4, -10)
-  local minBox = NumberBox(panel, 36, function() return ns.RainMin() end,
-    function(v) ns.settings.rainMin = math.floor(v) end, 2, 20,
-    "How many items looted together make it rain (2 to 20, default 3). Fewer get popups.")
-  minBox:SetPoint("LEFT", minLabel, "RIGHT", 10, 0)
-  local minAfter = Label(panel, "GameFontHighlight", "items looted at once")
-  minAfter:SetPoint("LEFT", minBox, "RIGHT", 8, 0)
-
-  local floorLabel = Label(panel, "GameFontHighlight", "Land")
-  floorLabel:SetPoint("TOPLEFT", minLabel, "BOTTOMLEFT", 0, -16)
-  local floorBox = NumberBox(panel, 36, function() return ns.settings.rainFloor or 0 end,
-    function(v) ns.settings.rainFloor = math.floor(v) end, 0, 30,
-    "Where falling items land, as a percent of the screen height up from the bottom " ..
-    "(0 = the bottom edge, up to 30; raise it to land above your action bars).")
-  floorBox:SetPoint("LEFT", floorLabel, "RIGHT", 10, 0)
-  local floorAfter = Label(panel, "GameFontHighlight", "% up from the bottom")
-  floorAfter:SetPoint("LEFT", floorBox, "RIGHT", 8, 0)
-
-  -- money alone rains from this much (gold, silver, copper fields; quest money always rains)
-  local coinLabel = Label(panel, "GameFontHighlight", "Money rains from")
-  coinLabel:SetPoint("TOPLEFT", floorLabel, "BOTTOMLEFT", 0, -16)
-  local prevField = coinLabel
-  local function Part(v, mult) return mult == 10000 and math.floor(v / 10000) or math.floor(v / mult) % 100 end
-  for _, unit in ipairs({ { "g", 10000, 999 }, { "s", 100, 99 }, { "c", 1, 99 } }) do
-    local mult, max = unit[2], unit[3]
-    local box = NumberBox(panel, 30, function() return Part(ns.CoinRainMin(), mult) end, function(n)
-      -- the total from all three parts with this one replaced (0 = any amount)
-      local v = ns.CoinRainMin()
-      local parts = { [10000] = Part(v, 10000), [100] = Part(v, 100), [1] = Part(v, 1) }
-      parts[mult] = math.floor(n)
-      ns.settings.coinRainMin = parts[10000] * 10000 + parts[100] * 100 + parts[1]
-      C_Timer.After(0, RefreshAll) -- the other two fields show the new total too
-    end, 0, max,
-      "Money looted from a corpse rains as coins on its own (even with few items) from this much. " ..
-      "Quest turn-in money always rains. 0 = any amount. Also /dl coinrain 1g.")
-    box:SetPoint("LEFT", prevField, "RIGHT", prevField == coinLabel and 10 or 4, 0)
-    local u = Label(panel, "GameFontHighlight", unit[1])
-    u:SetPoint("LEFT", box, "RIGHT", 2, 0)
-    prevField = u
+-- A button on its own row (label on the left, the button on the right)
+function N.Button(layout, label, text, onClick, tip)
+  if CreateSettingsButtonInitializer then
+    layout:AddInitializer(CreateSettingsButtonInitializer(label, text, onClick, tip, true))
   end
+end
 
-  local stay = Label(panel, "GameFontHighlightSmall", "Stay on screen as popups afterwards:")
-  stay:SetPoint("TOPLEFT", coinLabel, "BOTTOMLEFT", 0, -16)
-  last = Choice(panel, {
-    { value = 2, label = "|cff1eff00Uncommon|r and up" },
-    { value = 3, label = "|cff0070ddRare|r and up (recommended)" },
-    { value = 4, label = "|cffa335eeEpic|r and up" },
-  }, function() return ns.settings.stayQuality or 3 end, function(v) ns.settings.stayQuality = v end, stay)
+---------------------------------------------------------------------------
+-- The first page: the three main switches and quick tests
+---------------------------------------------------------------------------
+local TESTS = { { 2, "|cff1eff00Uncommon|r" }, { 3, "|cff0070ddRare|r" }, { 4, "|cffa335eeEpic|r" }, { 5, "|cffff8000Legendary|r" } }
+local TEST_WORDS = { [2] = "uncommon", [3] = "rare", [4] = "epic", [5] = "legendary" }
 
-  local testLabel = Label(panel, "GameFontHighlight", "Test with")
-  testLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -12)
-  local testBox = NumberBox(panel, 36, function() return ns.settings.testRain or 8 end,
-    function(v) ns.settings.testRain = math.floor(v) end, 1, 60,
-    "How many items the test rain drops (1 to 60). From 4 one is blue, from 8 one is purple, from 12 one is orange.")
-  testBox:SetPoint("LEFT", testLabel, "RIGHT", 10, 0)
-  local testAfter = Label(panel, "GameFontHighlight", "items")
-  testAfter:SetPoint("LEFT", testBox, "RIGHT", 8, 0)
-  local testRain = Button(panel, "Test", 56, function()
-    testBox:ClearFocus() -- keeps a number typed without pressing Enter
-    ns.RunCommand("rain", tostring(ns.settings.testRain or 8))
-  end)
-  testRain:SetPoint("LEFT", testAfter, "RIGHT", 10, 0)
-  local effects = Button(panel, "Loot rain effects...", 160, function() ns:OpenRainFx() end)
-  effects:SetPoint("TOPLEFT", testLabel, "BOTTOMLEFT", -4, -12)
-  Tip(effects, "Best item last, coins, gathering into the bag, loot beams and more: a switch for each.")
-
-  ---------------------------------------------------------------- right: other
-  local other = Label(panel, "GameFontNormal", "Other")
-  other:SetPoint("TOPLEFT", effects, "BOTTOMLEFT", 0, -22)
-  local debug = Check(panel, "Debug logging", "Log every loot line as it's read (in the log window).")
-  debug:SetPoint("TOPLEFT", other, "BOTTOMLEFT", 0, -4)
-  debug:SetScript("OnClick", function(self) ns.settings.debug = self:GetChecked() or nil end)
-  refreshers[#refreshers + 1] = function() debug:SetChecked(ns.settings.debug and true or false) end
-  local log = Button(panel, "Open log", 100, function() ns:ShowLog() end)
-  log:SetPoint("TOPLEFT", debug, "BOTTOMLEFT", 4, -10)
-  local check = Button(panel, "Check client", 110, function() ns.RunCommand("check") end)
-  check:SetPoint("LEFT", log, "RIGHT", 8, 0)
-  Tip(check, "Report which game features this client has (for bug reports).")
-  local assets = Button(panel, "Blizzard assets...", 150, function() ns:OpenAssets() end)
-  assets:SetPoint("TOPLEFT", log, "BOTTOMLEFT", 0, -8)
-  Tip(assets, "See and hear the game's own chests, glows, sounds and fonts that could join the show, " ..
-    "and check which exist on this client (/dl assets).")
-
-  panel:SetScript("OnShow", function() for _, r in ipairs(refreshers) do r() end end)
-
-  -- Forever uses the retail Settings window (Options > AddOns)
-  category = Settings.RegisterCanvasLayoutCategory(panel, ns.TITLE)
-  Settings.RegisterAddOnCategory(category)
-  ns.settingsCategory = category
+local function CreateGeneral()
+  local cat, layout = N.Page(ns.TITLE)
+  category = cat
+  ns.settingsCategory = cat
+  N.Header(layout, "Features")
+  N.Toggle(cat, "noPopup", "Loot popups", "A card at the top of the screen for each item you loot, the item turning in 3D. (/dl popup off)", true)
+  N.Toggle(cat, "noRain", "Loot rain", "When you loot several things at once, they spray up and bounce down; the best lands last. In combat it waits until the fight is over. (/dl rain off)", true)
+  ns.soundSetting = N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once. (/dl sound off)", true)
+  N.Header(layout, "Try it")
+  N.Choice(cat, "testQuality", "Test popup quality", TESTS, 4, "Which quality the Test popup button shows.")
+  N.Button(layout, "A popup", "Test popup", function() ns.RunCommand("test", TEST_WORDS[ns.settings.testQuality or 4]) end,
+    "Show a test popup of the quality picked above (/dl test epic).")
+  N.Button(layout, "A loot rain", "Test rain", function() ns.RunCommand("rain", tostring(ns.settings.testRain or 8)) end,
+    "Rain test loot (how many: on the Loot rain page). /dl rain 8")
+  N.Button(layout, "A quest reward", "Test reward", function() ns.RunCommand("testquest") end,
+    "An item and some money, rained together the way a quest turn-in plays (/dl testquest).")
 end
 
 function ns:OpenSettings()
-  if not panel then CreatePanel() end
+  if not category then CreateGeneral() end
   Settings.OpenToCategory(category:GetID())
 end
 
-ns.OnInit(function() if not panel then CreatePanel() end end)
+ns.OnInit(function() if not category then CreateGeneral() end end)
 ns.AddCommand("settings", "open the settings page", function() ns:OpenSettings() end)
 
 -- /dl (and the minimap compartment) opens the settings until the inspector exists
