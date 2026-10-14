@@ -188,6 +188,7 @@ function ns.CreateView(f)
   f.info:SetTextColor(0.8, 0.76, 0.68)
   f.badges = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   if f.name.SetMaxLines then f.name:SetMaxLines(2) end
+  if f.name.SetWordWrap then f.name:SetWordWrap(true) end
   f.name:SetShadowColor(0, 0, 0, 1)
   f.name:SetShadowOffset(1, -1)
 
@@ -258,7 +259,7 @@ function ns.CreateView(f)
       self.sheen:SetAtlas(TOAST_SHEEN, true)
       self.sheen:Hide() -- Tick sweeps it across once
       local textX = L.w / 2 + L.stage[1] + L.stage[3] / 2 + 14 -- just right of the icon
-      self.name:SetPoint("BOTTOMLEFT", self, "LEFT", textX, 2)
+      self.name:SetPoint("TOPLEFT", self, "LEFT", textX, L.stage[4] / 2 + L.stage[2] + 2) -- level with the icon's top
       self.name:SetWidth(L.w - textX - 18)
       self.name:SetJustifyH("LEFT")
       self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -3)
@@ -376,6 +377,18 @@ function ns.CreateView(f)
     self.card.edge:SetVertexColor(r, g, b, 1)
     self.card.icon:SetTexture(item.icon or QUESTION)
     self.name:SetText(item.name or "?")
+    -- a long name: a size or two smaller until it fits on one line (wrapping to two only if even
+    -- the smallest doesn't), so it never spills out of the band or the toast
+    local face, size, flags = self.name:GetFont()
+    if face and size then
+      local width = self.name:GetWidth()
+      local measure = self.name.GetUnboundedStringWidth or self.name.GetStringWidth
+      local s = self.L.font
+      while s > self.L.font - 5 and width > 0 and measure(self.name) > width do
+        s = s - 1
+        self.name:SetFont(face, s, flags or "")
+      end
+    end
     self.name:SetTextColor(r, g, b)
     local info = {}
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
@@ -396,6 +409,8 @@ function ns.CreateView(f)
     end
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
+    -- weapons stood upright show their edge at facing 0: a quarter turn shows the flat side
+    self.face = (UPRIGHT[item.equipLoc or ""] and ns.WeaponTilt() ~= 0) and math.pi / 2 or 0
     self.card:SetWidth(self.cardW)
     self.card.icon:SetDesaturated(false)
     self.card.icon:SetVertexColor(1, 1, 1)
@@ -479,7 +494,7 @@ function ns.CreateView(f)
       end
     end
     if self.mode == "model" or self.mode == "pending" then
-      self.model:SetFacing(angle)
+      self.model:SetFacing(angle + (self.face or 0))
     elseif not self.L.icon then -- a card tilts with the sway and never shows its back
       self.card:SetWidth(self.cardW * (0.78 + 0.22 * math.abs(math.cos(angle))))
     end

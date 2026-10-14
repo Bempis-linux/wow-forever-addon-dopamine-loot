@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.7. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.8. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.7 pushed**: popup polish from the user's picks in `docs/mockups/popups.html` (View.lua):
+- **0.4.8 pushed** (upright weapons face you with their flat side: facing + pi/2 when Weapon tilt is not 0; long names shrink up to 5 pt to fit one line, else wrap to 2; Toast text starts level with the icon top; user: popups "looking pretty good"). 0.4.7: popup polish from the user's picks in `docs/mockups/popups.html` (View.lua):
   arrival by rarity (`ARRIVAL` table: Rare 10 burst sparks; Epic 14 + 5 star4 glints; Legendary 22
   + 7 glints, 2 shockwaves, embers), sway (Epic+ turn once first; "Sway speed" slider, setting still
   `spinSpeed`), cards tilt (no gray back), Beam motes Rare+ only (5, slow), **Halo lens replaced by
@@ -28,7 +28,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   1. User tests 0.4.6 + 0.4.7 (`/reload` is enough): popups Rare/Epic/
      Legendary in each style incl. Toast (Popup look page); Test rain with each "Loot flies from"
      choice; settings fields filled after /reload (0.4.2 fix)?
-  2. **0.4.8 sound picker** per rarity (Rare/Epic/Legendary) with Play buttons: the game's own loot
+  2. **0.4.9 sound picker** per rarity (Rare/Epic/Legendary) with Play buttons: the game's own loot
      sounds (verified to play on Forever) and ours, layered or alone. The user: our synthesized
      arrival sounds feel artificial, no punch (current and "short stab" were best; "swell" bad);
      wants a little more drama, short, not tiresome; **no level-up or quest sounds**.
@@ -96,6 +96,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-10-14 0.4.8: weapons sway facing you; long names fit; Toast text aligned.
 - 2026-10-14 0.4.7: popup polish (arrival by rarity, sway, Toast style replaces Halo lens).
 - 2026-10-14 0.4.6: chest show set aside (deprecated/chest-show/); loot flies from the ground (rainFrom).
 - 2026-10-12 0.4.5: loot rises out of the container's mouth. 0.4.4: gold chest camera.
