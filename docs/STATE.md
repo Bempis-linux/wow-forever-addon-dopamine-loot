@@ -2,51 +2,46 @@
 
 _Last checkpoint: 2026-10-14, after 0.4.10. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
-the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
+popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
 **Words the user uses:** the **treasure chest** = where the rain's items and coins come out (the spawn
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.10 pushed**: Toast rebuilt on Blizzard's own layout (LootWonAlertFrameTemplate in the annotations' AlertFrameSystems.xml): 276x96, icon 52 at (22,-23), label line (our info) at (81,-18), name in the dark box (84,-42, 167x33, 2 lines centered); frame by quality (LessAwesome below Rare, default LootToast.blp slice for Rare/Epic, gold MoreAwesome for Legendary); border LOOT_BORDER_BY_QUALITY at atlas size. User on 0.4.9: name ran into the box edge, icon misplaced, text outside the dark box, gold border on every rarity. **0.4.10 unverified.** 0.4.9: text centering (replaced). User: Banner text OK, sway fixed. 0.4.8 (upright weapons face you with their flat side: facing + pi/2 when Weapon tilt is not 0; long names shrink up to 5 pt to fit one line, else wrap to 2; Toast text starts level with the icon top; user: popups "looking pretty good"). 0.4.7: popup polish from the user's picks in `docs/mockups/popups.html` (View.lua):
-  arrival by rarity (`ARRIVAL` table: Rare 10 burst sparks; Epic 14 + 5 star4 glints; Legendary 22
-  + 7 glints, 2 shockwaves, embers), sway (Epic+ turn once first; "Sway speed" slider, setting still
-  `spinSpeed`), cards tilt (no gray back), Beam motes Rare+ only (5, slow), **Halo lens replaced by
-  Toast** (the game's loot-toast atlases; shows the icon, not the model; `ns.ToastAvailable`; a
-  saved "halo" becomes "toast"). Halo.tga/Lens.tga deleted. Entrance unchanged (the user saw no
-  difference). **Not yet seen in game**: toast framing (icon slot vs. the atlas art) may need tuning.
-- 0.4.6: chest show set aside (below).
-- 2026-10-14: the user found the chest show "a bit much" and **set it aside**: code (Rain.lua as of
-  0.4.5) and media moved to `deprecated/chest-show/` (README there; not loaded). The generators now
-  write chest art/sounds into that folder. Instead, **loot flies up from the ground** (setting
-  `rainFrom`, `/dl rainfrom`, a choice on the effects page): ground fountain (default) / spread along
-  the ground / below the bottom edge / middle of the screen (the 0.3 rain); `Core.LaunchSpeed` launches
-  lower items faster so they peak as high (tested). The user wants **all four options kept**. Loot
-  beams over resting items: the user likes them, keep.
-- `Assets.lua` (0.4.1): `/dl assets` + "Blizzard assets" page (main page → Other), kept as a tool.
+- **0.4.10 pushed**, tree clean. 0.4 = popup polish + loot rain from the ground (chest show set aside).
+- **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
+  burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
+  turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
+  long names shrink up to 5 pt, then wrap to 2; Beam motes Rare+ only. Styles: Relic (default), Beam,
+  **Toast**, Banner. Halo lens dropped (a saved "halo" becomes "toast").
+- **Toast** (0.4.10): Blizzard's own layout from LootWonAlertFrameTemplate (annotations'
+  AlertFrameSystems.xml): 276x96, icon 52 at (22,-23), label line (our info) at (81,-18), name in the
+  dark box (84,-42, 167x33). Frame by quality: LessAwesome below Rare, the default LootToast.blp
+  slice for Rare/Epic, gold MoreAwesome for Legendary; border LOOT_BORDER_BY_QUALITY. **Unverified**
+  (0.4.9 had the name outside the box, a misplaced icon, gold border on every rarity).
+- **Loot rain** flies from the ground (setting `rainFrom`: ground fountain default / spread / below /
+  middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
+  `deprecated/chest-show/` (README; not loaded; generators write its media there).
+- `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. User tests 0.4.6 + 0.4.7 (`/reload` is enough): popups Rare/Epic/
-     Legendary in each style incl. Toast (Popup look page); Test rain with each "Loot flies from"
-     choice; settings fields filled after /reload (0.4.2 fix)?
-  2. **0.4.11 sound picker** per rarity (Rare/Epic/Legendary) with Play buttons: the game's own loot
-     sounds (verified to play on Forever) and ours, layered or alone. The user: our synthesized
-     arrival sounds feel artificial, no punch (current and "short stab" were best; "swell" bad);
-     wants a little more drama, short, not tiresome; **no level-up or quest sounds**.
-  3. **Popup placement** (user, 2026-10-14): popups feel "in your face" and get in the way; they
-     should be satisfying but **not blocking**. Mockup first (position, size, hold time, click-through,
-     compact low tiers...).
-  4. **Armor in 3D** (user asked 2026-10-14): body armor on a mannequin in popups (after placement).
-  5. Hooks (loot streak, session tally, records; no chest now), card flip (off by default),
-     settings cleanup (pages by topic; go through every setting with the user first, mockup first).
+  1. User tests 0.4.10 (`/reload`): Toast at each rarity incl. a long name; rain "Loot flies from";
+     settings fields filled after /reload?
+  2. **0.4.11 sound picker** per rarity with Play buttons: the game's own loot sounds (check they play)
+     and ours, layered or alone. User: our synthesized sounds feel artificial, no punch (current and
+     "short stab" best, "swell" bad); a little more drama, short, not tiresome; **no level-up/quest**.
+  3. **Popup placement**: popups feel "in your face" and get in the way; satisfying but **not
+     blocking**. Mockup first (position, size, hold time, click-through, compact low tiers).
+  4. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
+  5. Hooks (streak, tally, records), card flip (off by default), settings cleanup (pages by topic;
+     every setting discussed with the user first, mockup first).
   6. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
-- 0.3: all four popup styles, preview + sliders, weapons upright; rain effects; **real looting works**
-  (grays and copper rained, coins included); coin merge-up, Test money/quest; opening sound by size.
-- 0.4.0-0.4.4 (chest show, now set aside): containers worked; Escape skip; effects page not
-  cut off; asset check runs and saves; game sack and Strongbox look right, lid opens and stays open;
-  gold chest fits at cam 2.6 ("better").
+- 0.3: popup styles, preview + sliders, weapons upright; rain effects; **real looting works** (grays
+  and copper rained, coins included); coin merge-up, Test money/quest; opening sound by size.
+- 0.4: the chest show worked (now set aside); Escape skip; asset check; popup arrivals and sway
+  "looking pretty good"; weapons face you while swaying (0.4.8); Banner long names OK (0.4.9).
 
 ## Known bugs
 - **Settings fields empty after /reload** (user). 0.4.2 creates every settings panel hidden so the
@@ -97,13 +92,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
-- 2026-10-14 0.4.10: Toast rebuilt on the game's own toast layout; frame and border by quality.
-- 2026-10-14 0.4.9: Toast text centered on the icon.
-- 2026-10-14 0.4.8: weapons sway facing you; long names fit; Toast text aligned.
-- 2026-10-14 0.4.7: popup polish (arrival by rarity, sway, Toast style replaces Halo lens).
-- 2026-10-14 0.4.6: chest show set aside (deprecated/chest-show/); loot flies from the ground (rainFrom).
-- 2026-10-12 0.4.5: loot rises out of the container's mouth. 0.4.4: gold chest camera.
-- 2026-10-12 0.4.3: game containers with real lid animations. 0.4.2: settings fields fix.
-- 2026-10-12 0.4.1: asset check; design review; kit 0.6.0 custom vs. Blizzard rule.
-- 2026-10-11 0.4.0: drawn chest show containers. 0.3.10-0.3.11: coins, quest money, chest sounds.
+- 2026-10-14 0.4.6-0.4.10: chest show set aside, loot flies from the ground; popup polish (arrival by
+  rarity, sway, weapons face you, long names); Toast style on the game's own toast layout.
+- 2026-10-12 0.4.1-0.4.5: asset check, design review (kit 0.6.0 rule), chest show with game models.
+- 2026-10-11 0.4.0: drawn chest show. 0.3.10-0.3.11: coins, quest money, chest sounds.
 - 2026-10-09/10 0.1-0.3.9: scaffold, popups, rain, settings, four styles, arrivals, rain effects.
