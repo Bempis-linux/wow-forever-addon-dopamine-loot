@@ -281,7 +281,7 @@ function ns.CreateView(f)
       self.name:SetWidth(167)
       self.name:SetJustifyH("LEFT")
       if self.name.SetJustifyV then self.name:SetJustifyV("MIDDLE") end
-      self.badges:SetPoint("TOPLEFT", self, "TOPLEFT", 84, -77)
+      self.badges:SetPoint("RIGHT", self, "TOPLEFT", 81 + 167, -24) -- SetItem puts them at the label line's end
       self.badges:SetJustifyH("LEFT")
     else -- banner
       self.banner:SetSize(L.w, 58)
@@ -415,11 +415,17 @@ function ns.CreateView(f)
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
     self.info:SetText(table.concat(info, "  -  "))
-    if self.style == "toast" then -- the label line stays one line: a size or two smaller if it must
+    if self.style == "toast" then
+      -- the label line: the badges at its right end, the details in what's left of it (a size or two
+      -- smaller if they must, cut short with "..." if even that doesn't fit); all inside the frame
+      self.badges:SetText(Badges(item))
+      local bw = self.badges:GetText() ~= "" and self.badges:GetStringWidth() + 8 or 0
+      local room = 167 - bw
+      self.info:SetWidth(room)
       local face, size, flags = self.info:GetFont()
       local measure = self.info.GetUnboundedStringWidth or self.info.GetStringWidth
       local s = size or 10
-      while face and s > (size or 10) - 2 and measure(self.info) > 167 do
+      while face and s > (size or 10) - 2 and measure(self.info) > room do
         s = s - 1
         self.info:SetFont(face, s, flags or "")
       end
@@ -436,10 +442,10 @@ function ns.CreateView(f)
       else
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
       end
-    elseif self.style == "toast" and iw > 0 and iw + 10 + self.badges:GetStringWidth() <= 167 then
-      -- toast: badges join the label line when they fit (else they stay under the name's box)
+    elseif self.style == "toast" then -- the badges at the right end of the label line
       self.badges:ClearAllPoints()
-      self.badges:SetPoint("LEFT", self.info, "LEFT", iw + 10, 0)
+      self.badges:SetPoint("RIGHT", self, "TOPLEFT", 81 + 167, -18 - self.info:GetStringHeight() / 2)
+      self.badges:SetJustifyH("RIGHT")
     end
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD

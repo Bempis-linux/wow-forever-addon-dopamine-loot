@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.11. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.12. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.11 pushed**, tree clean. 0.4.11: Toast frames are atlases only (plain LessAwesome up to Rare, gold MoreAwesome for Epic+; the LootToast.blp slice from retail coords drew a broken bar on Forever); the label line never wraps (shrinks up to 2 pt). 0.4 = popup polish + loot rain from the ground (chest show set aside).
+- **0.4.12 pushed**, tree clean (0.4.12: Toast badges at the right end of the label line, the details shorten to fit; user saw 0.4.11 frames and colors right per rarity). 0.4.11: Toast frames are atlases only (plain LessAwesome up to Rare, gold MoreAwesome for Epic+; the LootToast.blp slice from retail coords drew a broken bar on Forever); the label line never wraps (shrinks up to 2 pt). 0.4 = popup polish + loot rain from the ground (chest show set aside).
 - **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
   burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
   turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
