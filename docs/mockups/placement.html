@@ -35,6 +35,8 @@
     background: linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,.25)); font: 13px Georgia, serif; text-shadow: 1px 1px 0 #000; white-space: nowrap; }
   .p.compact .ic { width: 22px; height: 22px; border: 1px solid; border-radius: 3px; background: linear-gradient(#c87a2a, #5a2a10); }
   .hit { outline: 1px dashed rgba(255,255,255,.35); outline-offset: -1px; }
+  .ui.edit { background: rgba(80, 160, 220, .14); border: 1px dashed rgba(120, 190, 240, .7); color: #9fd0f0; }
+  #screen.hideedit .ui.edit { display: none; }
   #combat { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); color: #ff5555; font-weight: 600; display: none; }
 </style>
 </head>
@@ -46,15 +48,16 @@
   <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button><button data-q="5">Legendary</button>
   <button id="burst">A burst (5 items)</button>
   <label class="check"><input type="checkbox" id="fight"> In combat</label>
+  <label class="check"><input type="checkbox" id="edit" checked> Show the frames that appear sometimes (edit mode)</label>
 
   <h2>Where</h2>
   <label>Position
     <select id="pos">
-      <option value="top">Top center (now)</option>
-      <option value="upper">Upper middle, a little lower</option>
-      <option value="right" selected>Right side, under the quest tracker</option>
-      <option value="left">Left side, above the chat</option>
-      <option value="bags">Above the bars and bags (bottom right)</option>
+      <option value="top">Top center (now; over the encounter bar)</option>
+      <option value="upper">Upper middle, under the encounter bar</option>
+      <option value="upleft">Upper left, between the party frames and you</option>
+      <option value="midright" selected>Right of you, mid-screen</option>
+      <option value="right">Right side, under the quest tracker (it grows there)</option>
       <option value="bottom">Above the action bars (bottom middle)</option>
     </select>
     <small>Later: drag to move, like the rain's landing height.</small>
@@ -105,6 +108,14 @@
   <div class="ui" style="left:19%;top:89%;width:38.5%;height:9%">Action bars</div>
   <div class="ui" style="left:42.5%;top:89%;width:14.5%;height:9%;background:transparent;border:none"></div>
   <div class="ui" style="left:58%;top:87%;width:23%;height:11%">More bars, bags</div>
+  <!-- frames that only show sometimes (from the user's edit-mode screenshot) -->
+  <div class="ui edit" style="left:1%;top:14%;width:10.5%;height:22.5%">Party / raid frames</div>
+  <div class="ui edit" style="left:65.8%;top:1%;width:20.2%;height:21.5%">Buffs and debuffs</div>
+  <div class="ui edit" style="left:44.5%;top:9%;width:11%;height:9%">Encounter bar</div>
+  <div class="ui edit" style="left:85%;top:41.5%;width:15%;height:58%">(quest tracker grows here)</div>
+  <div class="ui edit" style="left:5.7%;top:58.5%;width:13.1%;height:11%">Extra abilities</div>
+  <div class="ui edit" style="left:30%;top:66.5%;width:40%;height:6.5%">Target, focus, cast bar</div>
+  <div class="ui edit" style="left:80.3%;top:66.5%;width:13.2%;height:14%">Loot / extra</div>
   <div class="char" style="top:57%"></div>
   <div class="mob" style="left:40%;top:38%"></div><div class="mob" style="left:46%;top:30%"></div>
   <div class="note">your character and the fight</div>
@@ -151,10 +162,10 @@ function anchor(w, h) {
   const S = $("screen").getBoundingClientRect(), W = S.width, H = S.height;
   switch ($("pos").value) {
     case "top": return { x: W / 2 - w / 2, y: H * 0.06, dir: 1 };
-    case "upper": return { x: W / 2 - w / 2, y: H * 0.12, dir: 1 };
+    case "upper": return { x: W / 2 - w / 2, y: H * 0.2, dir: 1 };
+    case "upleft": return { x: W * 0.14, y: H * 0.18, dir: 1 };
+    case "midright": return { x: W * 0.63, y: H * 0.25, dir: 1 };
     case "right": return { x: W * 0.99 - w, y: H * 0.44, dir: 1 };
-    case "left": return { x: W * 0.02, y: H * 0.71, dir: -1 };
-    case "bags": return { x: W * 0.81 - w, y: H * 0.86, dir: -1 };
     case "bottom": return { x: W * 0.38 - w / 2, y: H * 0.88, dir: -1 };
   }
 }
@@ -191,6 +202,7 @@ document.querySelectorAll("[data-q]").forEach(b => b.addEventListener("click", (
 $("burst").addEventListener("click", () => [2, 2, 3, 2, 4].forEach((q, i) => setTimeout(() => loot(q), i * 350)));
 $("size").addEventListener("input", e => { $("szv").textContent = e.target.value; layout(); });
 ["pos", "max"].forEach(id => $(id).addEventListener("change", layout));
+$("edit").addEventListener("change", e => $("screen").classList.toggle("hideedit", !e.target.checked));
 $("fight").addEventListener("change", e => {
   $("combat").style.display = e.target.checked ? "block" : "none";
   if (!e.target.checked && waiting.length) { waiting.splice(0).forEach((q, i) => setTimeout(() => loot(q), i * 350)); }
