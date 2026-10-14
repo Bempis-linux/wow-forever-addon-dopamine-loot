@@ -87,7 +87,10 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
 
 ## Open questions / waiting on the user
-- Which popup animations are the "spinning beam" and "twirling 3 dot" ones? Drop Halo lens or redo it?
+- Popup mockup picks per row (arrival, legendary extras, beam motes, item motion, entrance, sound).
+  User 2026-10-14: the "spinning beam" / "twirling 3 dot" animations were already scrapped (0.3.7);
+  Halo lens: leaning to drop it, curious about a redesign (idea: a "Toast" style from the game's
+  loot-toast art in its place).
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
