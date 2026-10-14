@@ -77,8 +77,11 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
 - **Settings page parity** (kit house-style): every `/dl` command that changes a setting or runs a
   test also has a control on the settings page (number field or drag slider, choice, Test button);
   visual settings update a live preview on the page.
-- Popup styles Relic (default) / Beam / Halo lens / Banner are all options; weapons stand upright
-  (`Model:SetPitch`, not SetRoll). Arrivals by rarity play in every style.
+- Popup styles Relic (default) / Beam / Toast (the game's loot-toast art, replaced Halo lens in 0.4.7) / Banner
+  are all options; weapons stand upright
+  (`Model:SetPitch`, not SetRoll). Arrivals by rarity play in every style: Rare a burst of sparks,
+  Epic adds star4 glints, Legendary more of both plus two shockwaves and embers (picked in
+  docs/mockups/popups.html). Items sway; Epic+ turn once first. Keep popup animations simple.
 - Visual changes: show mockups first, the user picks, then build. Generated art comes from
   `tools/gen_textures.lua` (check it rendered with ffmpeg before pushing).
 - Assets: Blizzard's game assets (models, textures, icons, sounds, referenced by path or ID) and our

@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.6. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.7. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,14 @@ the chest show) and `docs/design-review.md` (custom vs. Blizzard asset per piece
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.6 pushed**. 0.3 (look & feel) is done; 0.4 in progress.
+- **0.4.7 pushed**: popup polish from the user's picks in `docs/mockups/popups.html` (View.lua):
+  arrival by rarity (`ARRIVAL` table: Rare 10 burst sparks; Epic 14 + 5 star4 glints; Legendary 22
+  + 7 glints, 2 shockwaves, embers), sway (Epic+ turn once first; "Sway speed" slider, setting still
+  `spinSpeed`), cards tilt (no gray back), Beam motes Rare+ only (5, slow), **Halo lens replaced by
+  Toast** (the game's loot-toast atlases; shows the icon, not the model; `ns.ToastAvailable`; a
+  saved "halo" becomes "toast"). Halo.tga/Lens.tga deleted. Entrance unchanged (the user saw no
+  difference). **Not yet seen in game**: toast framing (icon slot vs. the atlas art) may need tuning.
+- 0.4.6: chest show set aside (below).
 - 2026-10-14: the user found the chest show "a bit much" and **set it aside**: code (Rain.lua as of
   0.4.5) and media moved to `deprecated/chest-show/` (README there; not loaded). The generators now
   write chest art/sounds into that folder. Instead, **loot flies up from the ground** (setting
@@ -18,20 +25,19 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   beams over resting items: the user likes them, keep.
 - `Assets.lua` (0.4.1): `/dl assets` + "Blizzard assets" page (main page → Other), kept as a tool.
 - **Next up**:
-  1. User tests 0.4.6 (`/reload`): Test rain with each "Loot flies from" choice; burst sound by haul
-     size; settings fields filled after /reload (0.4.2 fix)?
-  2. **Popup polish** (user, 2026-10-14), mockup built: `docs/mockups/popups.html` (each control starts
-     on "now"; arrival ring/burst/glints/flash, legendary extras, beam motes, item motion, entrance,
-     arrival sounds now/swell/stab made with the gen_sounds.sh math). Waiting for the user's picks. The
-     user's words: the popup animations feel "mockupy" and amateur; keep them **simple and build
-     on them**. Specifics: the arrival sparks are too uniform (an even ring outwards) for Rare/Epic/
-     Legendary; Beam's floating sparks conflict with them (Beam's rising sparks maybe only for higher
-     rarities); **Halo lens looks the worst** of the four; "spinning beam" and "twirling 3 dot"
-     animations look amateur (unclear which: ask or show variants). Sounds: **a little more
-     dramatic, but short and not tiresome**. Offer Blizzard options too (loot-toast art exists).
-  3. Hooks (loot streak, session tally, records; no chest now), card flip (off by default),
+  1. User tests 0.4.6 + 0.4.7 (`/reload` is enough): popups Rare/Epic/
+     Legendary in each style incl. Toast (Popup look page); Test rain with each "Loot flies from"
+     choice; settings fields filled after /reload (0.4.2 fix)?
+  2. **0.4.8 sound picker** per rarity (Rare/Epic/Legendary) with Play buttons: the game's own loot
+     sounds (verified to play on Forever) and ours, layered or alone. The user: our synthesized
+     arrival sounds feel artificial, no punch (current and "short stab" were best; "swell" bad);
+     wants a little more drama, short, not tiresome; **no level-up or quest sounds**.
+  3. **Popup placement** (user, 2026-10-14): popups feel "in your face" and get in the way; they
+     should be satisfying but **not blocking**. Mockup first (position, size, hold time, click-through,
+     compact low tiers...).
+  4. Hooks (loot streak, session tally, records; no chest now), card flip (off by default),
      settings cleanup (pages by topic; go through every setting with the user first, mockup first).
-  4. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
+  5. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
@@ -87,13 +93,10 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
 
 ## Open questions / waiting on the user
-- Popup mockup picks per row (arrival, legendary extras, beam motes, item motion, entrance, sound).
-  User 2026-10-14: the "spinning beam" / "twirling 3 dot" animations were already scrapped (0.3.7);
-  Halo lens: leaning to drop it, curious about a redesign (idea: a "Toast" style from the game's
-  loot-toast art in its place).
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-10-14 0.4.7: popup polish (arrival by rarity, sway, Toast style replaces Halo lens).
 - 2026-10-14 0.4.6: chest show set aside (deprecated/chest-show/); loot flies from the ground (rainFrom).
 - 2026-10-12 0.4.5: loot rises out of the container's mouth. 0.4.4: gold chest camera.
 - 2026-10-12 0.4.3: game containers with real lid animations. 0.4.2: settings fields fix.

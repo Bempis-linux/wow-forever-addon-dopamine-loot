@@ -75,7 +75,9 @@ local function Create()
   local styleLabel = UI.Label(panel, "GameFontNormal", "Style")
   styleLabel:SetPoint("TOPLEFT", intro, "BOTTOMLEFT", 0, -16)
   local options = {}
-  for _, s in ipairs(ns.STYLES) do options[#options + 1] = { value = s.key, label = s.label, tip = s.tip } end
+  for _, s in ipairs(ns.STYLES) do -- Toast only where the client has the game's toast art
+    if s.key ~= "toast" or ns.ToastAvailable() then options[#options + 1] = { value = s.key, label = s.label, tip = s.tip } end
+  end
   local last = UI.Choice(panel, options, function() return ns.PopupStyle() end,
     function(v) ns.settings.popupStyle = v; Changed("item") end, styleLabel)
 
@@ -95,8 +97,8 @@ local function Create()
   Add("Weapon tilt", 0, 355, 5, ns.WeaponTilt, function(v) ns.settings.weaponTilt = v end,
     "Turns weapons so they stand up (0 = as the game draws them, 90 = upright, 270 if it stands on its head; default 90). Also /dl roll.",
     "frame", function(v) return tostring(math.floor(v + 0.5)) end)
-  Add("Spin speed", 0, 3, 0.1, ns.SpinSpeed, function(v) ns.settings.spinSpeed = v end,
-    "How fast the item turns (0 = still, default 0.9).", "none")
+  Add("Sway speed", 0, 3, 0.1, ns.SpinSpeed, function(v) ns.settings.spinSpeed = v end,
+    "How fast the item sways side to side (0 = still, default 0.9). Epic and better turn once to face you first.", "none")
   Add("Time on screen (s)", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
     function(v) ns.settings.popupHold = v end,
     "Seconds a popup stays (2 to 15, default 5); better items stay a little longer. Hovering holds it.", "none")

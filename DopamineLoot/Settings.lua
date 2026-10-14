@@ -191,7 +191,7 @@ local function CreatePanel()
 
   local zoomLabel = Button(panel, "Popup look and live preview...", 220, function() ns:OpenLook() end)
   zoomLabel:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, -32)
-  Tip(zoomLabel, "Style, size, 3D zoom, weapon tilt, spin and time on screen, with a live popup preview.")
+  Tip(zoomLabel, "Style, size, 3D zoom, weapon tilt, sway and time on screen, with a live popup preview.")
 
   ---------------------------------------------------------------- left: sound
   local sound = Label(panel, "GameFontNormal", "Sound")

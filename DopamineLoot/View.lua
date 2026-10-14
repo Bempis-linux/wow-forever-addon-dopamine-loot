@@ -1,14 +1,16 @@
 -- Dopamine Loot popup view: draws one item in one of four styles. The real popups (Popup.lua) and
 -- the live preview on the settings page (Look.lua) both use it, so the preview is exactly what you
--- get. The item turns: its 3D model where the client has one (weapons stand upright), otherwise its
--- icon on a card that flips like a coin.
+-- get. The item sways gently (Epic and better turn once to face you first): its 3D model where the
+-- client has one (weapons stand upright), otherwise its icon on a card that tilts.
 --   relic   just the item on a soft glow, name below
---   beam    a cone of light rising from a glowing disc, sparks drifting up through it
---   halo    a dark lens inside a ring in the quality color, details beside
+--   beam    a cone of light rising from a glowing disc (sparks drifting up through it for Rare+)
+--   toast   the game's own loot toast: the icon in a framed banner, name beside it (Blizzard art,
+--           so only where the client has the atlases; otherwise Relic)
 --   banner  a ribbon in the quality color fading at both ends, the item on a diamond emblem, a shine
 --           sweeping across now and then
--- Every style: the name in the game's title font, a flash of light as it appears, and an arrival by
--- rarity (Rare and Epic a spark ring; Legendary shockwaves and embers). The light holds still.
+-- Every style: the name in the game's title font, a flash of light as it appears, and an arrival
+-- that grows with rarity (picked in docs/mockups/popups.html): Rare a burst of sparks; Epic star
+-- glints (the game's star4) and a bigger burst; Legendary more of both, two shockwaves and embers.
 -- Models: set only after the frame is shown, and again when it's shown after being hidden (the
 -- client drops them); never inside an animation group (moved and faded by hand).
 local _, ns = ...
@@ -22,18 +24,33 @@ local TITLE_FONT = (LOCALE == "ruRU" and "Fonts\\MORPHEUS_CYR.TTF")
   or ((LOCALE == "koKR" or LOCALE == "zhCN" or LOCALE == "zhTW") and nil)
   or "Fonts\\MORPHEUS.TTF"
 local CARD = 56
-local RISE, SPARKS, EMBERS = 8, 18, 6 -- beam's rising motes; arrival sparks; legendary embers
-local FLASH_T, BURST_T, WAVE_T, FOUNTAIN_T = 0.45, 0.8, 0.9, 1.5
-local GRAVITY = -420 -- legendary ember fountain, px/s^2
+local STAR = "Interface\\Cooldown\\star4" -- the game's four-point sparkle
+local RISE, SPARKS, GLINTS, EMBERS = 5, 22, 7, 6 -- beam's rising motes; burst sparks; star glints; embers
+local FLASH_T, WAVE_T, GLINT_T = 0.45, 0.9, 0.42
 
--- Arrival by rarity (every style): Rare a ring of sparks; Epic a bigger ring; Legendary
--- shockwaves, a fountain of embers and embers drifting up
+-- Arrival by rarity (every style): how many burst sparks, how far and long they fly (k), how many
+-- glints; Legendary also gets two shockwaves and embers drifting up
 local function Tier(q) return q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or nil end
+local ARRIVAL = {
+  rare = { sparks = 10, k = 1, glints = 0 },
+  epic = { sparks = 14, k = 1.15, glints = 5 },
+  legendary = { sparks = 22, k = 1.3, glints = 7 },
+}
+
+-- The loot toast's art (the game's atlases; checked once, as older clients may not have them)
+local TOAST_BG, TOAST_GLOW, TOAST_SHEEN = "LootToast-MoreAwesome", "loottoast-glow", "loottoast-sheen"
+local TOAST_BORDER = { [3] = "loottoast-itemborder-blue", [4] = "loottoast-itemborder-purple", [5] = "loottoast-itemborder-orange" }
+local function HasAtlas(name) return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil end
+local toastOK
+function ns.ToastAvailable()
+  if toastOK == nil then toastOK = HasAtlas(TOAST_BG) and HasAtlas(TOAST_GLOW) and HasAtlas(TOAST_SHEEN) end
+  return toastOK
+end
 
 ns.STYLES = {
   { key = "relic", label = "Relic", tip = "Just the item floating in a soft glow, the name below. No box." },
-  { key = "beam", label = "Beam", tip = "A cone of light rises from a glowing disc under the item, sparks drifting up." },
-  { key = "halo", label = "Halo lens", tip = "The item in a dark lens ringed in its color; details beside it." },
+  { key = "beam", label = "Beam", tip = "A cone of light rises from a glowing disc under the item; sparks drift up through it for Rare and better." },
+  { key = "toast", label = "Toast", tip = "The game's own loot toast: the item's icon in a framed banner, the name beside it." },
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color, the item on a diamond emblem, a shine sweeping across." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
@@ -42,7 +59,7 @@ ns.STYLES = {
 local LAYOUT = {
   relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
-  halo = { w = 400, h = 190, stage = { -110, 0, 104, 116 }, text = "right", hit = { 15, 10, 15, 15 }, zoom = 1.3, font = 18 },
+  toast = { w = 290, h = 110, stage = { -100, -2, 52, 52 }, text = "toast", hit = { 10, 10, 10, 10 }, zoom = 1, font = 16, icon = true },
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
 }
 
@@ -72,6 +89,8 @@ end
 -- Look settings (all on the "Popup look" settings page)
 function ns.PopupStyle()
   local s = ns.settings.popupStyle
+  if s == "halo" then s = "toast"; ns.settings.popupStyle = s end -- Halo lens was dropped in 0.4.7; Toast took its place
+  if s == "toast" and not ns.ToastAvailable() then s = "relic" end
   return LAYOUT[s or ""] and s or "relic"
 end
 function ns.PopupScale() return ns.settings.popupScale or 1 end
@@ -109,8 +128,9 @@ function ns.CreateView(f)
   -- background art, all white textures tinted with the quality color
   f.glow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.cone = Tex(f, "BACKGROUND", MEDIA .. "Cone", "ADD")
-  f.lens = Tex(f, "BACKGROUND", MEDIA .. "Lens")
-  f.halo = Tex(f, "BACKGROUND", MEDIA .. "Halo", "ADD", 1)
+  -- toast: the game's loot toast frame and its glow (atlases set in Layout)
+  f.toastBg = Tex(f, "BACKGROUND")
+  f.toastGlow = Tex(f, "BACKGROUND", nil, "ADD", 1)
   f.banner = Tex(f, "BACKGROUND", MEDIA .. "Banner")
   f.bannerTop = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- the banner squashed thin: an edge line
   f.bannerBottom = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- that fades out at both ends
@@ -120,12 +140,13 @@ function ns.CreateView(f)
   -- banner v2: a diamond emblem behind the item, breaking the band's edges
   f.emblem = Tex(f, "BORDER", MEDIA .. "Diamond", nil, 2)
   f.emblemEdge = Tex(f, "BORDER", MEDIA .. "DiamondEdge", "ADD", 3)
-  f.art = { f.glow, f.cone, f.lens, f.halo, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
+  f.art = { f.glow, f.cone, f.toastBg, f.toastGlow, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
     f.shadow, f.emblem, f.emblemEdge }
-  -- banner v2: a streak of light sweeping across the band, clipped to it
+  -- banner v2: a streak of light sweeping across the band, clipped to it (toast: the game's sheen)
   f.shineClip = CreateFrame("Frame", nil, f)
   if f.shineClip.SetClipsChildren then f.shineClip:SetClipsChildren(true) end
   f.shine = Tex(f.shineClip, "ARTWORK", MEDIA .. "Shine", "ADD") -- drawn tilted
+  f.sheen = Tex(f.shineClip, "ARTWORK", nil, "ADD")
 
   f.stage = CreateFrame("Frame", nil, f)
   f.model = CreateFrame("PlayerModel", nil, f.stage)
@@ -139,6 +160,8 @@ function ns.CreateView(f)
   f.card.icon:SetPoint("TOPLEFT", 2, -2)
   f.card.icon:SetPoint("BOTTOMRIGHT", -2, 2)
   f.card.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+  f.card.border = Tex(f.card, "OVERLAY") -- toast: the item border around the icon
+  f.card.border:SetPoint("CENTER")
 
   -- in front of the item: the arrival flash and the sparks
   f.fx = CreateFrame("Frame", nil, f)
@@ -153,8 +176,10 @@ function ns.CreateView(f)
     return list
   end
   f.rise, f.sparks, f.embers = Motes(RISE), Motes(SPARKS), Motes(EMBERS)
+  f.glints = {}
+  for i = 1, GLINTS do f.glints[i] = Tex(f.fx, "ARTWORK", STAR, "ADD", 2) end
   f.fxAll = { f.flash, f.waves[1], f.waves[2] }
-  for _, list in ipairs({ f.rise, f.sparks, f.embers }) do
+  for _, list in ipairs({ f.rise, f.sparks, f.glints, f.embers }) do
     for _, m in ipairs(list) do f.fxAll[#f.fxAll + 1] = m end
   end
 
@@ -174,10 +199,12 @@ function ns.CreateView(f)
     self:SetHitRectInsets(L.hit[1], L.hit[2], L.hit[3], L.hit[4])
     for _, t in ipairs(self.art) do t:Hide(); t:ClearAllPoints() end
     for _, t in ipairs(self.fxAll) do t:Hide(); t:ClearAllPoints() end
-    for i, m in ipairs(self.rise) do -- beam's motes rise through the light all the time
-      m:SetSize(5 + (i % 3), 5 + (i % 3))
-      m:SetShown(style == "beam")
-    end
+    for i, m in ipairs(self.rise) do m:SetSize(4 + (i % 2), 4 + (i % 2)) end -- beam's motes (SetItem shows them for Rare+)
+    local cs = L.icon and L.stage[3] or CARD
+    self.card:SetSize(cs, cs)
+    self.card.border:Hide()
+    self.shine:Hide()
+    self.sheen:Hide()
     self.fx:SetFrameLevel(self.stage:GetFrameLevel() + 5)
     local sx, sy, sw, sh = L.stage[1], L.stage[2], L.stage[3], L.stage[4]
     self.stage:ClearAllPoints()
@@ -217,21 +244,26 @@ function ns.CreateView(f)
       self.info:SetJustifyH("CENTER")
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
       self.badges:SetJustifyH("CENTER")
-    elseif style == "halo" then
-      for _, t in ipairs({ self.lens, self.halo }) do
-        t:SetSize(176, 176)
-        t:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
-        t:Show()
-      end
-      self.name:SetPoint("BOTTOMLEFT", self, "LEFT", 196, 6)
-      self.name:SetWidth(L.w - 206)
+    elseif style == "toast" then
+      -- the game's loot toast: its frame at its own size, the icon on the left, the text beside it
+      self.toastBg:SetAtlas(TOAST_BG, true)
+      self.toastBg:SetPoint("CENTER", self, "CENTER", 0, 0)
+      self.toastBg:Show()
+      self.toastGlow:SetAtlas(TOAST_GLOW, true)
+      self.toastGlow:SetPoint("CENTER", self.toastBg, "CENTER", 0, 0)
+      self.toastGlow:SetAlpha(0) -- Tick flares it on arrival
+      self.toastGlow:Show()
+      self.shineClip:SetAllPoints(self.toastBg)
+      self.shineClip:Show()
+      self.sheen:SetAtlas(TOAST_SHEEN, true)
+      self.sheen:Hide() -- Tick sweeps it across once
+      local textX = L.w / 2 + L.stage[1] + L.stage[3] / 2 + 14 -- just right of the icon
+      self.name:SetPoint("BOTTOMLEFT", self, "LEFT", textX, 2)
+      self.name:SetWidth(L.w - textX - 18)
       self.name:SetJustifyH("LEFT")
-      self.line:SetSize(L.w - 210, 1)
-      self.line:SetPoint("TOPLEFT", self, "LEFT", 196, 0)
-      self.line:Show()
-      self.info:SetPoint("TOPLEFT", self.line, "BOTTOMLEFT", 0, -6)
+      self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -3)
       self.info:SetJustifyH("LEFT")
-      self.badges:SetPoint("TOPLEFT", self.info, "BOTTOMLEFT", 0, -4)
+      self.badges:SetPoint("TOPLEFT", self.info, "BOTTOMLEFT", 0, -2)
       self.badges:SetJustifyH("LEFT")
     else -- banner
       self.banner:SetSize(L.w, 58)
@@ -262,7 +294,7 @@ function ns.CreateView(f)
       self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0) -- on the info line, inside the band
       self.badges:SetJustifyH("LEFT")
     end
-    if style ~= "banner" then self.shineClip:Hide() end
+    if style ~= "banner" and style ~= "toast" then self.shineClip:Hide() end
   end
 
   -- Fill in an item. Call after the frame is shown (the model needs a visible frame).
@@ -279,8 +311,22 @@ function ns.CreateView(f)
     self.shine:SetVertexColor(math.min(1, r + 0.6), math.min(1, g + 0.6), math.min(1, b + 0.6), 0.55)
     self.cone:SetVertexColor(r, g, b, 0.85)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
-    self.lens:SetVertexColor(r * 0.1, g * 0.1, b * 0.1, 0.9) -- nearly black with a hint of the color
-    self.halo:SetVertexColor(r, g, b, 1)
+    if self.style == "toast" then
+      -- the game's border for Rare and up; a tinted icon frame below that
+      local bd = self.card.border
+      if TOAST_BORDER[math.min(q, 5)] and HasAtlas(TOAST_BORDER[math.min(q, 5)]) then
+        bd:SetAtlas(TOAST_BORDER[math.min(q, 5)], false)
+        bd:SetVertexColor(1, 1, 1, 1)
+      else
+        bd:SetTexture("Interface\\COMMON\\WhiteIconFrame")
+        bd:SetTexCoord(0, 1, 0, 1) -- an atlas from a Rare+ toast left its coordinates behind
+        bd:SetVertexColor(r, g, b, 1)
+      end
+      local s = self.L.stage[3] * 1.18
+      bd:SetSize(s, s)
+      bd:Show()
+      self.toastGlow:SetVertexColor(math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, b + 0.3), 1)
+    end
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
     self.bannerBottom:SetVertexColor(r, g, b, 1)
@@ -295,27 +341,38 @@ function ns.CreateView(f)
       if t ~= self.flash then t:SetVertexColor(lr, lg, lb, 1) end
     end
     self.waves[1]:SetVertexColor(r, g, b, 1)
-    -- this arrival's sparks: a ring (rare, epic) or a fountain thrown up at random (legendary)
+    -- this arrival: a burst of uneven sparks thrown mostly up and out, slowing as they go, and star
+    -- glints popping around the item; more, bigger and farther the rarer it is
     self.tier = Tier(q)
     self.arrived = false
-    local n = self.tier == "rare" and 8 or self.tier == "epic" and 14 or SPARKS
-    self.sparkCount = n
-    for i, m in ipairs(self.sparks) do
-      if self.tier == "legendary" then
-        m.vx, m.vy = (math.random() - 0.5) * 220, 180 + math.random() * 160
-      else
-        m.ang = i / n * 2 * math.pi + 0.3 -- spread over the sparks this tier shows: a full ring
+    local A = ARRIVAL[self.tier or ""]
+    self.sparkCount, self.glintCount = A and A.sparks or 0, A and A.glints or 0
+    if A then
+      local reach = (40 + self.L.stage[3] * 0.5) / 105 -- the mockup's distances were for a 130-wide stage
+      local spread = self.tier == "legendary" and 0.95 or 0.8
+      for _, m in ipairs(self.sparks) do
+        local ang = math.pi / 2 + (math.random() * 2 - 1) * math.pi * spread
+        local sp = (140 + math.random() * 190) * A.k * reach
+        m.vx, m.vy = math.cos(ang) * sp, math.sin(ang) * sp
+        m.delay, m.life, m.tw = math.random() * 0.09, (0.45 + math.random() * 0.5) * A.k, math.random() * 6.28
+        local s = (1.6 + math.random() * 2) * (0.9 + 0.1 * A.k) * 4.5
+        m:SetSize(s, s)
       end
-      local s = self.tier == "legendary" and 4 + (i % 4) or 7
-      m:SetSize(s, s)
+      for i, m in ipairs(self.glints) do
+        local ang, rr = math.random() * 2 * math.pi, 105 * reach * (0.42 + math.random() * 0.38)
+        m.x, m.y = math.cos(ang) * rr, math.sin(ang) * rr * 0.85
+        m.delay = 0.05 + (i - 1) * 0.075 + math.random() * 0.05
+        m.size = (14 + math.random() * 8) * (self.tier == "legendary" and 1.25 or 1) * 2.2 -- star4 has room around the star
+        m.rot = (math.random() - 0.5) * 0.6
+      end
     end
     for i, m in ipairs(self.embers) do m.phase = i / EMBERS; m:SetSize(4 + (i % 3), 4 + (i % 3)) end
+    for _, m in ipairs(self.rise) do m:SetShown(self.style == "beam" and q >= 3) end -- beam's sparks: Rare and up
     -- the light holds still (brighter for better items); only the item turns
     local glow = q >= 4 and 0.9 or q >= 3 and 0.75 or 0.6
     self.glow:SetAlpha(glow)
     self.cone:SetAlpha(glow)
     self.disc:SetAlpha(0.9)
-    self.halo:SetAlpha(0.9)
     self.card.edge:SetVertexColor(r, g, b, 1)
     self.card.icon:SetTexture(item.icon or QUESTION)
     self.name:SetText(item.name or "?")
@@ -338,8 +395,8 @@ function ns.CreateView(f)
       end
     end
     self.age = 0
-    self.spin0 = (math.random() - 0.5) * 0.8 -- start facing roughly toward you
-    self.card:SetWidth(CARD)
+    self.cardW = self.L.icon and self.L.stage[3] or CARD
+    self.card:SetWidth(self.cardW)
     self.card.icon:SetDesaturated(false)
     self.card.icon:SetVertexColor(1, 1, 1)
     self:SetModel()
@@ -351,6 +408,10 @@ function ns.CreateView(f)
     self.mode = "card"
     self.card:Show()
     m:Hide()
+    if self.L and self.L.icon then -- this style shows the icon (toast)
+      if self.onModel then self.onModel("card", nil, "style shows the icon"); self.onModel = nil end
+      return
+    end
     if not item or not (item.forceModel or ns.MODEL_SLOTS[item.equipLoc or ""]) or not m.SetItem then
       if self.onModel then self.onModel("card", nil, "no model path"); self.onModel = nil end
       return
@@ -404,16 +465,23 @@ function ns.CreateView(f)
     if not self.item then return end -- the preview ticks before its item has loaded
     self.age = (self.age or 0) + dt
     local age = self.age
-    local angle = (self.spin0 or 0) + age * ns.SpinSpeed()
+    -- it sways gently side to side around facing you; Epic and better first turn once all the way
+    -- round (easing out) to face you (the "Sway speed" setting; 0 holds it still)
+    local speed, angle = ns.SpinSpeed(), 0
+    local TURN = 1.4
+    if speed > 0 then
+      if self.q >= 4 and age < TURN then
+        local a = age / TURN
+        angle = (1 - (1 - a) * (1 - a) * (1 - a)) * 2 * math.pi
+      else
+        local t = self.q >= 4 and age - TURN or age
+        angle = (self.q >= 4 and 0.3 or 0.45) * math.sin(t * speed)
+      end
+    end
     if self.mode == "model" or self.mode == "pending" then
       self.model:SetFacing(angle)
-    else
-      local c = math.cos(angle * 1.3)
-      local back = c < 0
-      self.card:SetWidth(math.max(2, CARD * math.abs(c)))
-      self.card.icon:SetDesaturated(back)
-      local v = back and 0.45 or 1
-      self.card.icon:SetVertexColor(v, v, v)
+    elseif not self.L.icon then -- a card tilts with the sway and never shows its back
+      self.card:SetWidth(self.cardW * (0.78 + 0.22 * math.abs(math.cos(angle))))
     end
 
     -- arrival effects start once the popup has faded in (fxDelay), or they'd play while invisible
@@ -430,13 +498,26 @@ function ns.CreateView(f)
       self.flash:Hide()
     end
 
-    -- beam style: motes rise through the light all the time
-    if self.style == "beam" then
+    -- beam style, Rare and up: a few motes rise slowly through the light
+    if self.style == "beam" and self.q >= 3 then
       for i, m in ipairs(self.rise) do
-        local t = (age * 0.35 + i / RISE) % 1
-        local x = math.sin(i * 2.7 + age * 0.8) * 30 * (1 - t * 0.6)
+        local t = (age * 0.2 + i / RISE) % 1
+        local x = math.sin(i * 2.1) * 26 * (1 - t * 0.5)
         m:SetPoint("CENTER", self.stage, "BOTTOM", x, 12 + t * 150)
-        m:SetAlpha(math.sin(math.pi * t) * 0.9)
+        m:SetAlpha(math.sin(math.pi * t) * 0.7)
+      end
+    end
+    if self.style == "toast" then
+      -- the game's toast glow flares once as it arrives, then its sheen sweeps across once
+      local g = fx >= 0 and fx < 0.8 and math.sin(math.pi * fx / 0.8) or 0
+      self.toastGlow:SetAlpha(g)
+      local t = fx - 0.15
+      if t >= 0 and t < 0.85 then
+        local w = self.shineClip:GetWidth()
+        self.sheen:SetPoint("CENTER", self.shineClip, "LEFT", -60 + (w + 120) * (t / 0.85), 0)
+        if not self.sheen:IsShown() then self.sheen:Show() end
+      elseif self.sheen:IsShown() then
+        self.sheen:Hide()
       end
     end
     if self.style == "banner" then
@@ -460,34 +541,50 @@ function ns.CreateView(f)
 
   -- The arrival by rarity; fx = seconds since the popup finished fading in
   function f:Arrival(fx)
-    local tier, sparks = self.tier, self.sparks
-    local cy = self.L.stage[4] / 2 -- offsets below are from the stage's bottom: this is its middle
-    local reach = 40 + self.L.stage[3] * 0.5
+    local tier, sparks, glints = self.tier, self.sparks, self.glints
     if not self.arrived then -- first frame: show what this tier uses
       self.arrived = true
       ns:PlayArrivalSound(tier)
-      for i, m in ipairs(sparks) do m:SetShown(i <= self.sparkCount) end
+      self.fxDone = false
       self.waves[1]:SetShown(tier == "legendary")
       self.waves[2]:SetShown(tier == "legendary")
       for _, m in ipairs(self.embers) do m:SetShown(tier == "legendary") end
     end
 
-    -- the burst (rare, epic: a ring flying out; legendary: a fountain that rises and falls back)
-    local burstT = tier == "legendary" and FOUNTAIN_T or BURST_T
-    if fx < burstT then
-      local a = fx / burstT
-      for i = 1, self.sparkCount do
-        local m = sparks[i]
-        if tier == "legendary" then
-          m:SetPoint("CENTER", self.stage, "BOTTOM", m.vx * fx, cy + m.vy * fx + 0.5 * GRAVITY * fx * fx)
-        else
-          local dist = reach * (tier == "epic" and 1.25 or 1) * (1 - (1 - a) * (1 - a))
-          m:SetPoint("CENTER", self.stage, "BOTTOM", math.cos(m.ang) * dist, cy + math.sin(m.ang) * dist)
+    -- the burst: each spark leaves after its own short delay, flies fast and slows (drag), sinks a
+    -- little, twinkles and fades; the glints pop in and out one after another, turning slightly
+    if not self.fxDone then
+      local live = false
+      for i, m in ipairs(sparks) do
+        local t = fx - (m.delay or 0)
+        if i <= self.sparkCount and t >= 0 and t < m.life then
+          local travel = (1 - math.exp(-4 * t)) / 4
+          m:SetPoint("CENTER", self.stage, "CENTER", m.vx * travel, m.vy * travel - 70 * t * t)
+          m:SetAlpha(math.max(0, (1 - t / m.life) * (0.7 + 0.3 * math.sin(t * 38 + m.tw))))
+          if not m:IsShown() then m:Show() end
+          live = true
+        elseif m:IsShown() then
+          m:Hide()
         end
-        m:SetAlpha(1 - a * a)
+        if i <= self.sparkCount and t < 0 then live = true end
       end
-    elseif sparks[1]:IsShown() then
-      for _, m in ipairs(sparks) do m:Hide() end
+      for i, m in ipairs(glints) do
+        local t = fx - (m.delay or 0)
+        if i <= self.glintCount and t >= 0 and t < GLINT_T then
+          local u = t / GLINT_T
+          local grow = math.sin(math.pi * u)
+          m:SetPoint("CENTER", self.stage, "CENTER", m.x, m.y)
+          m:SetSize(math.max(1, m.size * grow), math.max(1, m.size * grow))
+          m:SetRotation(m.rot + u * 0.6)
+          m:SetAlpha(grow)
+          if not m:IsShown() then m:Show() end
+          live = true
+        elseif m:IsShown() then
+          m:Hide()
+        end
+        if i <= self.glintCount and t < 0 then live = true end
+      end
+      if not live then self.fxDone = true end
     end
 
     if tier == "legendary" then
