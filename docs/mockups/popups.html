@@ -45,6 +45,7 @@
   </label>
   <label>Arrival (Rare and up)
     <select id="arrival">
+      <option value="rarity" selected>By rarity (your pick): Rare a burst; Epic glints + burst; Legendary more of both</option>
       <option value="ring">Now: an even ring of dots</option>
       <option value="burst">Burst: uneven sparks, slowing, twinkling</option>
       <option value="glints">Glints: a few star glints around the item</option>
@@ -62,12 +63,13 @@
   <label>Beam style's rising sparks
     <select id="motes">
       <option value="always">Now: always, 8 wobbling</option>
-      <option value="rare">Rare and up only, fewer and slower</option>
+      <option value="rare" selected>Rare and up only, fewer and slower</option>
       <option value="off">Off</option>
     </select>
   </label>
   <label>Item motion
     <select id="motion">
+      <option value="rarity" selected>By rarity (your pick): sway; Epic and up turn once first</option>
       <option value="spin">Now: keeps turning</option>
       <option value="sway">Sways gently side to side</option>
       <option value="once">Turns once to face you, then sways</option>
@@ -89,6 +91,7 @@
       <option value="now">Now (Rare chime, Epic arpeggio, Legendary boom and chord)</option>
       <option value="swell">Swell into a hit: rises, then lands</option>
       <option value="stab">Short stab: one punchy hit, quick tail</option>
+      <option value="punch">Punchier stab: sharper attack, heavier low hit</option>
       <option value="none">None</option>
     </select>
     <small>In game the item's tier sound (a game sound) plays with it.</small>
@@ -139,7 +142,22 @@ function makeArrival(q) {
   const fx = { tier, parts: [], waves: [], embers: [] };
   if (!tier) return fx;
   const mode = opt("arrival"), reach = 105;
-  if (mode === "ring") {
+  if (mode === "rarity") { // burst for every tier, glints from Epic, both bigger the rarer
+    const k = tier === "rare" ? 1 : tier === "epic" ? 1.15 : 1.3;
+    const nb = tier === "rare" ? 10 : tier === "epic" ? 14 : 22;
+    for (let i = 0; i < nb; i++) {
+      const ang = -Math.PI / 2 + rand(-1, 1) * Math.PI * (tier === "legendary" ? 0.95 : 0.8);
+      const sp = rand(140, 330) * k;
+      fx.parts.push({ kind: "burst", vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, delay: rand(0, 0.09),
+        life: rand(0.45, 0.95) * k, size: rand(1.6, 3.6) * (0.9 + 0.1 * k), tw: rand(0, 6.28) });
+    }
+    const ng = tier === "epic" ? 5 : tier === "legendary" ? 7 : 0;
+    for (let i = 0; i < ng; i++) {
+      const ang = rand(0, Math.PI * 2), r = reach * rand(0.42, 0.8);
+      fx.parts.push({ kind: "glint", x: Math.cos(ang) * r, y: Math.sin(ang) * r * 0.85, delay: 0.05 + i * 0.075 + rand(0, 0.05),
+        life: 0.42, size: rand(14, 22) * (tier === "legendary" ? 1.25 : 1), rot: rand(-0.3, 0.3) });
+    }
+  } else if (mode === "ring") {
     if (tier === "legendary") { // the current fountain thrown up at random, falling back
       for (let i = 0; i < 18; i++) fx.parts.push({ kind: "fountain", vx: rand(-110, 110), vy: rand(180, 340), size: 4 + (i % 4), life: 1.5 });
     } else {
@@ -229,7 +247,8 @@ function card(x, y, angle, c, coin) {
 
 // ---- one frame ----
 function itemAngle(age) {
-  const m = opt("motion");
+  let m = opt("motion");
+  if (m === "rarity") m = P.q >= 4 ? "once" : "sway";
   if (m === "spin") return P.spin0 + age * 0.9;
   if (m === "sway") return 0.45 * Math.sin(age * 0.9);
   if (m === "once") {
@@ -441,6 +460,16 @@ const VOICES = {
     4: [1.0, 0.34, sum(scale(0.85, boom(0, 55, 150, 9)), scale(0.3, noise(0, 50)), scale(0.75, sum(bell(0, 1046.5, 6), bell(0, 1318.5, 6), bell(0, 1568, 6))), scale(0.5, bell(0.06, 2093, 7)))],
     5: [1.4, 0.32, sum(scale(1.1, boom(0, 36, 150, 4)), scale(0.45, noise(0, 34)), scale(0.7, sum(bell(0, 523.25, 4), bell(0, 659.25, 4), bell(0, 783.99, 4), bell(0, 1046.5, 4))), scale(0.45, bell(0.08, 2093, 5)))],
   },
+};
+// punchier: a click of noise on the attack, a low hit pushed into soft saturation, a shorter tail
+const click = s => t => { const u = t - s; return u < 0 ? 0 : (Math.random() * 2 - 1) * Math.exp(-260 * u); };
+const sat = (k, f) => t => Math.tanh(k * f(t)) / Math.tanh(k);
+VOICES.punch = {
+  3: [0.7, 0.42, sum(scale(0.35, click(0)), scale(0.7, sat(2.2, boom(0, 70, 220, 16))), bell(0.004, 1318.5, 9), scale(0.6, bell(0.004, 1975.5, 9)))],
+  4: [0.9, 0.36, sum(scale(0.4, click(0)), scale(0.95, sat(2.5, boom(0, 50, 180, 10))), scale(0.25, noise(0, 45)),
+    scale(0.7, sum(bell(0.004, 1046.5, 6.5), bell(0.004, 1318.5, 6.5), bell(0.004, 1568, 6.5))), scale(0.45, bell(0.05, 2093, 8)))],
+  5: [1.3, 0.34, sum(scale(0.45, click(0)), scale(1.1, sat(2.8, boom(0, 34, 170, 4.5))), scale(0.5, sat(2, boom(0, 26, 60, 3.5))), scale(0.4, noise(0, 32)),
+    scale(0.7, sum(bell(0.004, 523.25, 4.2), bell(0.004, 659.25, 4.2), bell(0.004, 783.99, 4.2), bell(0.004, 1046.5, 4.2))), scale(0.45, bell(0.07, 2093, 5)))],
 };
 const cache = {};
 function render(voice, q) {
