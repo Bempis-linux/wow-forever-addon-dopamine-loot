@@ -259,7 +259,8 @@ function ns.CreateView(f)
       self.sheen:SetAtlas(TOAST_SHEEN, true)
       self.sheen:Hide() -- Tick sweeps it across once
       local textX = L.w / 2 + L.stage[1] + L.stage[3] / 2 + 14 -- just right of the icon
-      self.name:SetPoint("TOPLEFT", self, "LEFT", textX, L.stage[4] / 2 + L.stage[2] + 2) -- level with the icon's top
+      self.textX = textX
+      self.name:SetPoint("TOPLEFT", self, "LEFT", textX, L.stage[4] / 2 + L.stage[2] + 2) -- SetItem centers the text block on the icon
       self.name:SetWidth(L.w - textX - 18)
       self.name:SetJustifyH("LEFT")
       self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -3)
@@ -395,16 +396,27 @@ function ns.CreateView(f)
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
     self.info:SetText(table.concat(info, "  -  "))
     self.badges:SetText(Badges(item))
-    if self.style == "banner" then
-      -- badges ride the info line inside the band; under the name if there's no info, below it if too long
+    if self.style == "banner" or self.style == "toast" then
+      -- badges ride the info line; under the name if there's no info, below it if too long
       self.badges:ClearAllPoints()
       local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
+      local room = self.style == "toast" and self.name:GetWidth() or self.L.w - 190
+      local below = false
       if iw == 0 then
         self.badges:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
-      elseif iw + 12 + self.badges:GetStringWidth() > self.L.w - 190 then
+      elseif iw + 12 + self.badges:GetStringWidth() > room then
         self.badges:SetPoint("TOPLEFT", self.info, "BOTTOMLEFT", 0, -2)
+        below = true
       else
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
+      end
+      if self.style == "toast" then
+        -- the whole text block (name, info, badges) centered on the icon, so a two-line name stays
+        -- inside the frame
+        local h = self.name:GetStringHeight() + 3 + (iw > 0 and self.info:GetStringHeight() or 0)
+        if self.badges:GetText() ~= "" and (below or iw == 0) then h = h + 2 + self.badges:GetStringHeight() end
+        self.name:ClearAllPoints()
+        self.name:SetPoint("TOPLEFT", self, "LEFT", self.textX, self.L.stage[2] + h / 2)
       end
     end
     self.age = 0
