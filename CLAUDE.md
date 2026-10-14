@@ -41,6 +41,7 @@ docs/mockups/            HTML mockups (rain.html: the rain prototype, same physi
 docs/STATE.md            session handoff
 tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight)
 deprecated/chest-show/   the set-aside chest show (Rain.lua as of 0.4.5, media, README); not loaded
+deprecated/toast/        the set-aside Toast popup style (View.lua as of 0.4.13, an unfinished diff, README)
 ```
 
 ## Session continuity (read first)
@@ -77,7 +78,8 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
 - **Settings page parity** (kit house-style): every `/dl` command that changes a setting or runs a
   test also has a control on the settings page (number field or drag slider, choice, Test button);
   visual settings update a live preview on the page.
-- Popup styles Relic (default) / Beam / Toast (the game's loot-toast art, replaced Halo lens in 0.4.7) / Banner
+- Popup styles Relic (default) / Beam / Banner (Halo lens dropped 0.4.7; the Toast style set aside 0.4.14:
+  `deprecated/toast/`, README lists what needs work)
   are all options; weapons stand upright
   (`Model:SetPitch`, not SetRoll). Arrivals by rarity play in every style: Rare a burst of sparks,
   Epic adds star4 glints, Legendary more of both plus two shockwaves and embers (picked in

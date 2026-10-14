@@ -1,11 +1,9 @@
--- Dopamine Loot popup view: draws one item in one of four styles. The real popups (Popup.lua) and
+-- Dopamine Loot popup view: draws one item in one of three styles. The real popups (Popup.lua) and
 -- the live preview on the settings page (Look.lua) both use it, so the preview is exactly what you
 -- get. The item sways gently (Epic and better turn once to face you first): its 3D model where the
 -- client has one (weapons stand upright), otherwise its icon on a card that tilts.
 --   relic   just the item on a soft glow, name below
 --   beam    a cone of light rising from a glowing disc (sparks drifting up through it for Rare+)
---   toast   the game's own loot toast: the icon in a framed banner, name beside it (Blizzard art,
---           so only where the client has the atlases; otherwise Relic)
 --   banner  a ribbon in the quality color fading at both ends, the item on a diamond emblem, a shine
 --           sweeping across now and then
 -- Every style: the name in the game's title font, a flash of light as it appears, and an arrival
@@ -37,27 +35,9 @@ local ARRIVAL = {
   legendary = { sparks = 22, k = 1.3, glints = 7 },
 }
 
--- The loot toast, laid out like the game's own (LootWonAlertFrameTemplate, AlertFrameSystems.xml):
--- a 276 x 96 frame; the 52 x 52 icon at (22, -23) from its top left in a border by quality; a label
--- line beside the icon's top; the name in the dark box beside it (167 x 33, two lines, centered).
--- The frame: the plain one up to Rare (LessAwesome), the gold one for Epic and Legendary (MoreAwesome,
--- the game's "upgraded" toast); the border shows the exact rarity.
-local TOAST_LESS, TOAST_MORE, TOAST_GLOW, TOAST_SHEEN = "LootToast-LessAwesome", "LootToast-MoreAwesome", "loottoast-glow", "loottoast-sheen"
-local TOAST_BORDER = { -- the game's LOOT_BORDER_BY_QUALITY
-  [1] = "loottoast-itemborder-white", [2] = "loottoast-itemborder-green", [3] = "loottoast-itemborder-blue",
-  [4] = "loottoast-itemborder-purple", [5] = "loottoast-itemborder-orange",
-}
-local function HasAtlas(name) return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil end
-local toastOK
-function ns.ToastAvailable()
-  if toastOK == nil then toastOK = HasAtlas(TOAST_MORE) and HasAtlas(TOAST_LESS) and HasAtlas(TOAST_GLOW) and HasAtlas(TOAST_SHEEN) end
-  return toastOK
-end
-
 ns.STYLES = {
   { key = "relic", label = "Relic", tip = "Just the item floating in a soft glow, the name below. No box." },
   { key = "beam", label = "Beam", tip = "A cone of light rises from a glowing disc under the item; sparks drift up through it for Rare and better." },
-  { key = "toast", label = "Toast", tip = "The game's own loot toast: the item's icon in a framed banner, the name beside it." },
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color, the item on a diamond emblem, a shine sweeping across." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
@@ -66,7 +46,6 @@ ns.STYLES = {
 local LAYOUT = {
   relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
-  toast = { w = 276, h = 96, stage = { -90, -1, 52, 52 }, text = "toast", hit = { 4, 4, 4, 4 }, zoom = 1, font = 15, icon = true },
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
 }
 
@@ -96,8 +75,7 @@ end
 -- Look settings (all on the "Popup look" settings page)
 function ns.PopupStyle()
   local s = ns.settings.popupStyle
-  if s == "halo" then s = "toast"; ns.settings.popupStyle = s end -- Halo lens was dropped in 0.4.7; Toast took its place
-  if s == "toast" and not ns.ToastAvailable() then s = "relic" end
+  if s == "halo" or s == "toast" then s = "relic"; ns.settings.popupStyle = s end -- both set aside (0.4.7, 0.4.14)
   return LAYOUT[s or ""] and s or "relic"
 end
 function ns.PopupScale() return ns.settings.popupScale or 1 end
@@ -135,9 +113,6 @@ function ns.CreateView(f)
   -- background art, all white textures tinted with the quality color
   f.glow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.cone = Tex(f, "BACKGROUND", MEDIA .. "Cone", "ADD")
-  -- toast: the game's loot toast frame and its glow (atlases set in Layout)
-  f.toastBg = Tex(f, "BACKGROUND")
-  f.toastGlow = Tex(f, "BACKGROUND", nil, "ADD", 1)
   f.banner = Tex(f, "BACKGROUND", MEDIA .. "Banner")
   f.bannerTop = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- the banner squashed thin: an edge line
   f.bannerBottom = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- that fades out at both ends
@@ -147,13 +122,12 @@ function ns.CreateView(f)
   -- banner v2: a diamond emblem behind the item, breaking the band's edges
   f.emblem = Tex(f, "BORDER", MEDIA .. "Diamond", nil, 2)
   f.emblemEdge = Tex(f, "BORDER", MEDIA .. "DiamondEdge", "ADD", 3)
-  f.art = { f.glow, f.cone, f.toastBg, f.toastGlow, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
+  f.art = { f.glow, f.cone, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
     f.shadow, f.emblem, f.emblemEdge }
-  -- banner v2: a streak of light sweeping across the band, clipped to it (toast: the game's sheen)
+  -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
   if f.shineClip.SetClipsChildren then f.shineClip:SetClipsChildren(true) end
   f.shine = Tex(f.shineClip, "ARTWORK", MEDIA .. "Shine", "ADD") -- drawn tilted
-  f.sheen = Tex(f.shineClip, "ARTWORK", nil, "ADD")
 
   f.stage = CreateFrame("Frame", nil, f)
   f.model = CreateFrame("PlayerModel", nil, f.stage)
@@ -167,8 +141,6 @@ function ns.CreateView(f)
   f.card.icon:SetPoint("TOPLEFT", 2, -2)
   f.card.icon:SetPoint("BOTTOMRIGHT", -2, 2)
   f.card.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-  f.card.border = Tex(f.card, "OVERLAY") -- toast: the item border around the icon
-  f.card.border:SetPoint("CENTER")
 
   -- in front of the item: the arrival flash and the sparks
   f.fx = CreateFrame("Frame", nil, f)
@@ -211,9 +183,7 @@ function ns.CreateView(f)
     for i, m in ipairs(self.rise) do m:SetSize(4 + (i % 2), 4 + (i % 2)) end -- beam's motes (SetItem shows them for Rare+)
     local cs = L.icon and L.stage[3] or CARD
     self.card:SetSize(cs, cs)
-    self.card.border:Hide()
     self.shine:Hide()
-    self.sheen:Hide()
     self.fx:SetFrameLevel(self.stage:GetFrameLevel() + 5)
     local sx, sy, sw, sh = L.stage[1], L.stage[2], L.stage[3], L.stage[4]
     self.stage:ClearAllPoints()
@@ -228,8 +198,6 @@ function ns.CreateView(f)
     local face = self.name:GetFont()
     if not (TITLE_FONT and face and face:lower():find("morpheus")) then self.name:SetFontObject("GameFontNormalLarge") end
     for _, fs in ipairs({ self.name, self.info, self.badges }) do fs:ClearAllPoints() end
-    self.info:SetWidth(0) -- only the toast gives its label line a fixed width
-    self.info:SetFontObject("GameFontHighlightSmall") -- the toast may have shrunk it
     self.info:SetTextColor(0.8, 0.76, 0.68)
 
     if style == "relic" or style == "beam" then
@@ -256,33 +224,6 @@ function ns.CreateView(f)
       self.info:SetJustifyH("CENTER")
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
       self.badges:SetJustifyH("CENTER")
-    elseif style == "toast" then
-      -- the game's loot toast (frame chosen by quality in SetItem), its glow and its sheen
-      self.toastBg:SetSize(L.w, L.h)
-      self.toastBg:SetPoint("CENTER", self, "CENTER", 0, 0)
-      self.toastBg:Show()
-      self.toastGlow:SetAtlas(TOAST_GLOW, false)
-      self.toastGlow:SetSize(286, 109)
-      self.toastGlow:SetPoint("CENTER", self, "CENTER", 0, 0)
-      self.toastGlow:SetAlpha(0) -- Tick flares it on arrival
-      self.toastGlow:Show()
-      self.shineClip:SetAllPoints(self.toastBg)
-      self.shineClip:Show()
-      self.sheen:SetAtlas(TOAST_SHEEN, false)
-      self.sheen:SetSize(171, 75)
-      self.sheen:Hide() -- Tick sweeps it across once
-      -- the label line beside the icon's top: the item's type and level
-      self.info:SetPoint("TOPLEFT", self, "TOPLEFT", 81, -18)
-      self.info:SetWidth(167)
-      self.info:SetJustifyH("LEFT")
-      -- the name fills the dark box: two lines at most, centered up and down
-      self.name:SetPoint("TOPLEFT", self, "TOPLEFT", 84, -42)
-      self.name:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 84, -75)
-      self.name:SetWidth(167)
-      self.name:SetJustifyH("LEFT")
-      if self.name.SetJustifyV then self.name:SetJustifyV("MIDDLE") end
-      self.badges:SetPoint("RIGHT", self, "TOPLEFT", 81 + 167, -24) -- SetItem puts them at the label line's end
-      self.badges:SetJustifyH("LEFT")
     else -- banner
       self.banner:SetSize(L.w, 58)
       self.banner:SetPoint("CENTER", self, "CENTER", 0, -6)
@@ -312,7 +253,7 @@ function ns.CreateView(f)
       self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0) -- on the info line, inside the band
       self.badges:SetJustifyH("LEFT")
     end
-    if style ~= "banner" and style ~= "toast" then self.shineClip:Hide() end
+    if style ~= "banner" then self.shineClip:Hide() end
   end
 
   -- Fill in an item. Call after the frame is shown (the model needs a visible frame).
@@ -329,27 +270,6 @@ function ns.CreateView(f)
     self.shine:SetVertexColor(math.min(1, r + 0.6), math.min(1, g + 0.6), math.min(1, b + 0.6), 0.55)
     self.cone:SetVertexColor(r, g, b, 0.85)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
-    if self.style == "toast" then
-      -- the frame by quality: plain up to Rare, gold for Epic and Legendary
-      -- (not the default frame: it's a slice of LootToast.blp, whose layout differs on this client)
-      local bg = self.toastBg
-      -- at each frame's own size, centered (the plain one is 276 x 80, the gold one 276 x 96: stretching the
-      -- plain one to 96 made its dark box taller than the gold one's)
-      bg:SetAtlas(q >= 4 and TOAST_MORE or TOAST_LESS, true)
-      -- the game's item border in the quality's color (at its own size), else a tinted icon frame
-      local bd, border = self.card.border, TOAST_BORDER[math.max(1, math.min(q, 5))]
-      if border and HasAtlas(border) then
-        bd:SetAtlas(border, true)
-        bd:SetVertexColor(1, 1, 1, 1)
-      else
-        bd:SetTexture("Interface\\COMMON\\WhiteIconFrame")
-        bd:SetTexCoord(0, 1, 0, 1) -- an atlas from an earlier toast left its coordinates behind
-        bd:SetVertexColor(r, g, b, 1)
-        bd:SetSize(self.L.stage[3] * 1.18, self.L.stage[3] * 1.18)
-      end
-      bd:Show()
-      self.toastGlow:SetVertexColor(1, 1, 1, 1) -- the game's own gold glow, as its toasts have
-    end
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
     self.bannerBottom:SetVertexColor(r, g, b, 1)
@@ -400,7 +320,7 @@ function ns.CreateView(f)
     self.card.icon:SetTexture(item.icon or QUESTION)
     self.name:SetText(item.name or "?")
     -- a long name: a size or two smaller until it fits on one line (wrapping to two only if even
-    -- the smallest doesn't), so it never spills out of the band or the toast
+    -- the smallest doesn't), so it never spills out of the band
     local face, size, flags = self.name:GetFont()
     if face and size then
       local width = self.name:GetWidth()
@@ -416,21 +336,6 @@ function ns.CreateView(f)
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
     self.info:SetText(table.concat(info, "  -  "))
-    if self.style == "toast" then
-      -- the label line: the badges at its right end, the details in what's left of it (a size or two
-      -- smaller if they must, cut short with "..." if even that doesn't fit); all inside the frame
-      self.badges:SetText(Badges(item))
-      local bw = self.badges:GetText() ~= "" and self.badges:GetStringWidth() + 8 or 0
-      local room = 167 - bw
-      self.info:SetWidth(room)
-      local face, size, flags = self.info:GetFont()
-      local measure = self.info.GetUnboundedStringWidth or self.info.GetStringWidth
-      local s = size or 10
-      while face and s > (size or 10) - 2 and measure(self.info) > room do
-        s = s - 1
-        self.info:SetFont(face, s, flags or "")
-      end
-    end
     self.badges:SetText(Badges(item))
     local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
     if self.style == "banner" then
@@ -443,10 +348,6 @@ function ns.CreateView(f)
       else
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
       end
-    elseif self.style == "toast" then -- the badges at the right end of the label line
-      self.badges:ClearAllPoints()
-      self.badges:SetPoint("RIGHT", self, "TOPLEFT", 81 + 167, -18 - self.info:GetStringHeight() / 2)
-      self.badges:SetJustifyH("RIGHT")
     end
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
@@ -464,10 +365,6 @@ function ns.CreateView(f)
     self.mode = "card"
     self.card:Show()
     m:Hide()
-    if self.L and self.L.icon then -- this style shows the icon (toast)
-      if self.onModel then self.onModel("card", nil, "style shows the icon"); self.onModel = nil end
-      return
-    end
     if not item or not (item.forceModel or ns.MODEL_SLOTS[item.equipLoc or ""]) or not m.SetItem then
       if self.onModel then self.onModel("card", nil, "no model path"); self.onModel = nil end
       return
@@ -561,19 +458,6 @@ function ns.CreateView(f)
         local x = math.sin(i * 2.1) * 26 * (1 - t * 0.5)
         m:SetPoint("CENTER", self.stage, "BOTTOM", x, 12 + t * 150)
         m:SetAlpha(math.sin(math.pi * t) * 0.7)
-      end
-    end
-    if self.style == "toast" then
-      -- the game's toast glow flares once as it arrives, then its sheen sweeps across once
-      local g = fx >= 0 and fx < 0.8 and math.sin(math.pi * fx / 0.8) or 0
-      self.toastGlow:SetAlpha(g)
-      local t = fx - 0.15
-      if t >= 0 and t < 0.85 then
-        local w = self.shineClip:GetWidth()
-        self.sheen:SetPoint("CENTER", self.shineClip, "LEFT", -60 + (w + 120) * (t / 0.85), 0)
-        if not self.sheen:IsShown() then self.sheen:Show() end
-      elseif self.sheen:IsShown() then
-        self.sheen:Hide()
       end
     end
     if self.style == "banner" then

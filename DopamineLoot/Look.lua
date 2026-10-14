@@ -75,9 +75,7 @@ local function Create()
   local styleLabel = UI.Label(panel, "GameFontNormal", "Style")
   styleLabel:SetPoint("TOPLEFT", intro, "BOTTOMLEFT", 0, -16)
   local options = {}
-  for _, s in ipairs(ns.STYLES) do -- Toast only where the client has the game's toast art
-    if s.key ~= "toast" or ns.ToastAvailable() then options[#options + 1] = { value = s.key, label = s.label, tip = s.tip } end
-  end
+  for _, s in ipairs(ns.STYLES) do options[#options + 1] = { value = s.key, label = s.label, tip = s.tip } end
   local last = UI.Choice(panel, options, function() return ns.PopupStyle() end,
     function(v) ns.settings.popupStyle = v; Changed("item") end, styleLabel)
 

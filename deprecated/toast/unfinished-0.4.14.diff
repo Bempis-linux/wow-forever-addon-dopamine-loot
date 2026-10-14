@@ -1,0 +1,56 @@
+diff --git a/DopamineLoot/View.lua b/DopamineLoot/View.lua
+index 2412cca..450b7de 100644
+--- a/DopamineLoot/View.lua
++++ b/DopamineLoot/View.lua
+@@ -330,12 +330,11 @@ function ns.CreateView(f)
+     self.cone:SetVertexColor(r, g, b, 0.85)
+     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
+     if self.style == "toast" then
+-      -- the frame by quality: plain up to Rare, gold for Epic and Legendary
+-      -- (not the default frame: it's a slice of LootToast.blp, whose layout differs on this client)
++      -- one frame for every rarity (the plain toast at the game's 276 x 96, so every dark box is the
++      -- same; the gold one's smaller box doesn't fit the text): the border and the name show the rarity
+       local bg = self.toastBg
+-      -- at each frame's own size, centered (the plain one is 276 x 80, the gold one 276 x 96: stretching the
+-      -- plain one to 96 made its dark box taller than the gold one's)
+-      bg:SetAtlas(q >= 4 and TOAST_MORE or TOAST_LESS, true)
++      bg:SetAtlas(TOAST_LESS, false)
++      bg:SetSize(self.L.w, self.L.h)
+       -- the game's item border in the quality's color (at its own size), else a tinted icon frame
+       local bd, border = self.card.border, TOAST_BORDER[math.max(1, math.min(q, 5))]
+       if border and HasAtlas(border) then
+@@ -417,19 +416,22 @@ function ns.CreateView(f)
+     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
+     self.info:SetText(table.concat(info, "  -  "))
+     if self.style == "toast" then
+-      -- the label line: the badges at its right end, the details in what's left of it (a size or two
+-      -- smaller if they must, cut short with "..." if even that doesn't fit); all inside the frame
+-      self.badges:SetText(Badges(item))
+-      local bw = self.badges:GetText() ~= "" and self.badges:GetStringWidth() + 8 or 0
+-      local room = 167 - bw
+-      self.info:SetWidth(room)
+-      local face, size, flags = self.info:GetFont()
+-      local measure = self.info.GetUnboundedStringWidth or self.info.GetStringWidth
+-      local s = size or 10
+-      while face and s > (size or 10) - 2 and measure(self.info) > room do
+-        s = s - 1
+-        self.info:SetFont(face, s, flags or "")
++      -- the label line holds the details at full size; "crafted", "received", "preview" join it only
++      -- when they fit (else they're left off); a stack's count sits on the icon, as in the game's own
++      self.info:SetWidth(167)
++      local words = {}
++      if item.src == "created" then words[#words + 1] = "crafted" elseif item.src == "pushed" then words[#words + 1] = "received" end
++      if item.test then words[#words + 1] = "preview" end
++      if words[1] then
++        local base = self.info:GetText()
++        local sep = base ~= "" and "   " or ""
++        self.info:SetText(base .. sep .. "|cff9d9d9d" .. table.concat(words, "  ") .. "|r")
++        local measure = self.info.GetUnboundedStringWidth or self.info.GetStringWidth
++        if measure(self.info) > 167 then self.info:SetText(base) end
+       end
++      local count = item.count or 1
++      self.card.count:SetText(count > 1 and tostring(count) or "")
++      self.card.count:Show()
+     end
+     self.badges:SetText(Badges(item))
+     local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0

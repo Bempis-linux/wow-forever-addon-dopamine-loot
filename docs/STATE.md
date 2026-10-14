@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.13. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.14. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,23 +8,20 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.13 pushed**, tree clean (0.4.13: toast frames at their native atlas size, LessAwesome 276x80, MoreAwesome 276x96 (from assetCheck); stretching the plain one made its dark box bigger than the gold one's. 0.4.12: Toast badges at the right end of the label line, the details shorten to fit; user saw 0.4.11 frames and colors right per rarity). 0.4.11: Toast frames are atlases only (plain LessAwesome up to Rare, gold MoreAwesome for Epic+; the LootToast.blp slice from retail coords drew a broken bar on Forever); the label line never wraps (shrinks up to 2 pt). 0.4 = popup polish + loot rain from the ground (chest show set aside).
+- **0.4.14 pushed**, tree clean. 0.4 = popup polish + loot rain from the ground.
 - **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
   burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
   turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
   long names shrink up to 5 pt, then wrap to 2; Beam motes Rare+ only. Styles: Relic (default), Beam,
-  **Toast**, Banner. Halo lens dropped (a saved "halo" becomes "toast").
-- **Toast** (0.4.10): Blizzard's own layout from LootWonAlertFrameTemplate (annotations'
-  AlertFrameSystems.xml): 276x96, icon 52 at (22,-23), label line (our info) at (81,-18), name in the
-  dark box (84,-42, 167x33). Frame by quality: LessAwesome below Rare, the default LootToast.blp
-  slice for Rare/Epic, gold MoreAwesome for Legendary; border LOOT_BORDER_BY_QUALITY. **Unverified**
-  (0.4.9 had the name outside the box, a misplaced icon, gold border on every rarity).
+  Banner. Halo lens dropped (0.4.7). **Toast set aside 2026-10-14** (0.4.7-0.4.13 never looked right:
+  the two toast frames have different inner boxes): `deprecated/toast/` (README: what we know and
+  what needs work); a saved "halo"/"toast" becomes Relic.
 - **Loot rain** flies from the ground (setting `rainFrom`: ground fountain default / spread / below /
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. User tests 0.4.11 (`/reload`): Toast at each rarity incl. a long name, clicking through them in the preview; rain "Loot flies from";
+  1. User tests 0.4.14 (`/reload`): Popup look shows Relic, Beam, Banner (no Toast); rain "Loot flies from";
      settings fields filled after /reload?
   2. **Sound picker** per rarity with Play buttons: the game's own loot sounds (check they play)
      and ours, layered or alone. User: our synthesized sounds feel artificial, no punch (current and
@@ -92,8 +89,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
-- 2026-10-14 0.4.6-0.4.10: chest show set aside, loot flies from the ground; popup polish (arrival by
-  rarity, sway, weapons face you, long names); Toast style on the game's own toast layout.
+- 2026-10-14 0.4.6-0.4.14: chest show set aside, loot flies from the ground; popup polish (arrival by
+  rarity, sway, weapons face you, long names); Toast style tried (0.4.7-0.4.13), set aside.
 - 2026-10-12 0.4.1-0.4.5: asset check, design review (kit 0.6.0 rule), chest show with game models.
 - 2026-10-11 0.4.0: drawn chest show. 0.3.10-0.3.11: coins, quest money, chest sounds.
 - 2026-10-09/10 0.1-0.3.9: scaffold, popups, rain, settings, four styles, arrivals, rain effects.
