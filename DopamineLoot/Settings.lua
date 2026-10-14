@@ -247,7 +247,7 @@ end
 
 -- A dropdown: options = { { value, label, tip }, ... } or a function returning that; the default
 -- value is stored as nil (every reader falls back to it); onSet(v) runs after a pick
-function N.Choice(cat, key, label, options, default, tip, onSet, noControl) -- noControl: the caller draws it
+function N.Choice(cat, key, label, options, default, tip, onSet)
   local kind = type(default) == "number" and Settings.VarType.Number or Settings.VarType.String
   local setting = Settings.RegisterProxySetting(cat, Var(key), kind, label, default,
     function() local v = ns.settings[key]; if v == nil then return default end return v end,
@@ -260,7 +260,7 @@ function N.Choice(cat, key, label, options, default, tip, onSet, noControl) -- n
     for _, o in ipairs(type(options) == "function" and options() or options) do c:Add(o[1], o[2], o[3]) end
     return c:GetData()
   end
-  if not noControl then Settings.CreateDropdown(cat, setting, Options, tip) end
+  Settings.CreateDropdown(cat, setting, Options, tip)
   return setting
 end
 
