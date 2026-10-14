@@ -333,8 +333,9 @@ function ns.CreateView(f)
       -- the frame by quality: plain up to Rare, gold for Epic and Legendary
       -- (not the default frame: it's a slice of LootToast.blp, whose layout differs on this client)
       local bg = self.toastBg
-      bg:SetAtlas(q >= 4 and TOAST_MORE or TOAST_LESS, false)
-      bg:SetSize(self.L.w, self.L.h)
+      -- at each frame's own size, centered (the plain one is 276 x 80, the gold one 276 x 96: stretching the
+      -- plain one to 96 made its dark box taller than the gold one's)
+      bg:SetAtlas(q >= 4 and TOAST_MORE or TOAST_LESS, true)
       -- the game's item border in the quality's color (at its own size), else a tinted icon frame
       local bd, border = self.card.border, TOAST_BORDER[math.max(1, math.min(q, 5))]
       if border and HasAtlas(border) then
