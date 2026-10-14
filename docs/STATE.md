@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.19. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.20. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,40 +8,41 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.19 pushed**: Sounds page tidied (user: "disorganized and messy"): General (switch, volume, Play all), then one section per rarity (colored header; Sound, Our chime for Rare+, Preview/Play). **Known game bug, accepted (user)**: after any addon's native settings page was shown, scrolling the game's Social page blocks IsUserOAuthed() and blames that addon (reproduced with BugSack alone); native pages kept. 0.4.18 removed the custom SoundRow anyway (stock controls only). 0.4.17: Play and picking play both layers. 0.4.16: each popup sound row on the Sounds page has a speaker Play button beside its dropdown, a custom row like BugSack's (SoundRow in Pages.lua); user on 0.4.15: pages "look pretty good and seem to work", sound picking was too much trial and error; the long Advanced asset-check label is OK for now, the tool goes away later). 0.4 = popup polish + loot rain from the ground.
-- **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
-  burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
-  turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
-  long names shrink up to 5 pt, then wrap to 2; Beam motes Rare+ only. Styles: Relic (default), Beam,
-  Banner. Halo lens dropped (0.4.7). **Toast set aside 2026-10-14** (0.4.7-0.4.13 never looked right:
-  the two toast frames have different inner boxes): `deprecated/toast/` (README: what we know and
-  what needs work); a saved "halo"/"toast" becomes Relic.
+- **0.4.20 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
+  ground.
+- **Popup placement (0.4.20, unverified)**: user picked right of you mid-screen; Poor/Common compact,
+  an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
+  size 0.8 (the user's saved 1.05 kept), 2 at once, time by rarity 2.5/4/6/8 s, clicks pass through
+  (hover holds up to 10 s, not while mouselooking), compact in combat. Popup.lua `POPUP_POSITIONS`,
+  `ns.PopupCompact`; View "compact" layout (one line, icon, no model, no arrival).
+- **Settings (0.4.15-0.4.19)**: pages Dopamine Loot (native: 3 switches, tests), Popups (custom,
+  Look.lua: rows When / Look / Placement / The 3D item + live preview + item ID check), Loot rain,
+  Sounds (per rarity: Sound dropdown, Our chime, Preview/Play; Play all), Advanced (all native,
+  Settings.lua `ns.Native`), Blizzard assets. **Known game bug, accepted**: after any addon's native
+  page was shown, scrolling the game's Social page blocks `IsUserOAuthed()` and blames that addon
+  (reproduced with BugSack alone). Custom rows on the pooled settings frames were removed (0.4.18).
+- **Popups** (View.lua): arrival by rarity (`ARRIVAL`, star4 glints from Epic), sway (Epic+ turn once),
+  weapons face you, long names shrink. Styles Relic (default), Beam, Banner; Toast set aside in
+  `deprecated/toast/` (README: what needs work).
 - **Loot rain** flies from the ground (setting `rainFrom`: ground fountain default / spread / below /
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
-- **Settings rebuilt (0.4.15)** from `docs/mockups/settings.html` (user approved: native + custom mix,
-  3 main switches on the first page, placement as its own Popups group later): Dopamine Loot (native:
-  Popups/Rain/Sounds switches, quick tests), Popups (custom, Look.lua: when, style dropdown, size, the
-  3D item, preview, item ID check), Loot rain (native, RainFx.lua), Sounds (native, Pages.lua: **popup
-  sound picker**, a game kit per rarity row `sound2..5` that plays on pick + our chime per rarity
-  `noChime3..5`, "Play all"), Advanced (native: debug, log, check client, asset check), Blizzard assets.
-  `/dl sounds` and `/dl arrivalsound` removed (old noArrivalSound migrated). **Not yet seen in game.**
 - **Next up**:
-  1. User tests 0.4.15 (`/reload`): every page opens and looks tidy; dropdowns, sliders, buttons work;
-     the sound picker plays on pick; "Defaults" doesn't blast four sounds; settings filled after /reload.
-     If a native control is missing, check `/dump Settings.CreateSlider, CreateSettingsButtonInitializer`.
-  2. **Popup placement**, mockup `docs/mockups/placement.html` (laid out like the user's screen: free space upper middle, left above chat, right under the quest tracker); waiting for picks. Popups feel "in your face" and get in the way; satisfying but **not
-     blocking**. Mockup first (position, size, hold time, click-through, compact low tiers).
+  1. User tests 0.4.20 (`/reload`): popups appear right of the character mid-screen; Poor/Common (and
+     an Uncommon looted beside something better) come as one-line compact popups; clicks pass through,
+     hovering holds (max 10 s); 2 at once; the Popups page rows (When / Look / Placement / The 3D item)
+     look tidy and fit beside the preview (dropdown text may be cut: shorten labels). Screenshot to tune.
+  2. Sounds page (0.4.19) not yet confirmed tidy in game.
   3. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
-  4. Hooks (streak, tally, records), card flip (off by default).
+  4. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   5. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
 - 0.3: popup styles, preview + sliders, weapons upright; rain effects; **real looting works** (grays
   and copper rained, coins included); coin merge-up, Test money/quest; opening sound by size.
-- 0.4: the chest show worked (now set aside); Escape skip; asset check; popup arrivals and sway
+- 0.4: the chest show worked (now set aside); Escape skip; asset check; popup arrivals and sway; settings pages by topic and the sound picker work (0.4.15-0.4.18); the Social-page "blocked" popup is a game bug (reproduced with BugSack)
   "looking pretty good"; weapons face you while swaying (0.4.8); Banner long names OK (0.4.9).
 
 ## Known bugs
@@ -93,10 +94,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
-- 2026-10-14 0.4.19: Sounds page tidied (a section per rarity).
-- 2026-10-14 0.4.18: fixed a taint (Social settings page blocked) from the custom sound row.
-- 2026-10-14 0.4.16: Play buttons beside each popup sound.
-- 2026-10-14 0.4.15: settings rebuilt by topic (native pages + custom Popups); popup sound picker.
+- 2026-10-14 0.4.20: popup placement (right of you, compact low rarities, click-through).
+- 2026-10-14 0.4.15-0.4.19: settings rebuilt by topic, sound picker, Sounds page tidied.
 - 2026-10-14 0.4.6-0.4.14: chest show set aside, loot flies from the ground; popup polish (arrival by
   rarity, sway, weapons face you, long names); Toast style tried (0.4.7-0.4.13), set aside.
 - 2026-10-12 0.4.1-0.4.5: asset check, design review (kit 0.6.0 rule), chest show with game models.

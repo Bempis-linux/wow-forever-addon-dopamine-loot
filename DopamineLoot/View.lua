@@ -47,6 +47,8 @@ local LAYOUT = {
   relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
+  -- low rarities and combat (Popup.lua decides): one line, the icon and the name
+  compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
 
 -- Items that have a model of their own; body armor is textures on a body (mannequin view later)
@@ -78,12 +80,15 @@ function ns.PopupStyle()
   if s == "halo" or s == "toast" then s = "relic"; ns.settings.popupStyle = s end -- both set aside (0.4.7, 0.4.14)
   return LAYOUT[s or ""] and s or "relic"
 end
-function ns.PopupScale() return ns.settings.popupScale or 1 end
+function ns.PopupScale() return ns.settings.popupScale or 0.8 end
 function ns.ModelZoom() return ns.settings.modelZoom or 0.7 end
 function ns.WeaponTilt() return ns.settings.weaponTilt or 90 end
 function ns.SpinSpeed() return ns.settings.spinSpeed or 0.9 end
-function ns.HoldTime(q) -- seconds on screen: the setting, a little longer for better items
-  return (ns.settings.popupHold or 5) + math.max(0, math.min(q or 2, 5) - 2) * 1
+-- Seconds on screen by rarity: the setting is the base (default 5),
+-- times 0.5 up to Uncommon (and compact), 0.8 Rare, 1.2 Epic, 1.6 Legendary: 2.5 / 4 / 6 / 8 s
+local HOLD = { [0] = 0.5, 0.5, 0.5, 0.8, 1.2, 1.6 }
+function ns.HoldTime(q)
+  return (ns.settings.popupHold or 5) * HOLD[math.min(math.max(q or 2, 0), 5)]
 end
 
 local function Tex(parent, layer, file, blend, sub)
@@ -114,6 +119,7 @@ function ns.CreateView(f)
   f.glow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.cone = Tex(f, "BACKGROUND", MEDIA .. "Cone", "ADD")
   f.banner = Tex(f, "BACKGROUND", MEDIA .. "Banner")
+  f.bar = Tex(f, "BACKGROUND", "Interface\\Buttons\\WHITE8X8") -- compact: a dark strip fading to the right
   f.bannerTop = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- the banner squashed thin: an edge line
   f.bannerBottom = Tex(f, "BORDER", MEDIA .. "Banner", "ADD") -- that fades out at both ends
   f.disc = Tex(f, "BORDER", MEDIA .. "Disc", "ADD")
@@ -122,7 +128,7 @@ function ns.CreateView(f)
   -- banner v2: a diamond emblem behind the item, breaking the band's edges
   f.emblem = Tex(f, "BORDER", MEDIA .. "Diamond", nil, 2)
   f.emblemEdge = Tex(f, "BORDER", MEDIA .. "DiamondEdge", "ADD", 3)
-  f.art = { f.glow, f.cone, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
+  f.art = { f.glow, f.cone, f.bar, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
     f.shadow, f.emblem, f.emblemEdge }
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
@@ -173,7 +179,7 @@ function ns.CreateView(f)
   f.name:SetShadowOffset(1, -1)
 
   function f:Layout()
-    local style = ns.PopupStyle()
+    local style = self.styleOverride or ns.PopupStyle()
     local L = LAYOUT[style]
     self.style, self.L = style, L
     self:SetSize(L.w, L.h)
@@ -224,6 +230,21 @@ function ns.CreateView(f)
       self.info:SetJustifyH("CENTER")
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
       self.badges:SetJustifyH("CENTER")
+    elseif style == "compact" then
+      -- one line: the icon, then the name on a dark strip that fades out to the right
+      self.bar:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+      self.bar:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
+      if self.bar.SetGradient and CreateColor then
+        self.bar:SetGradient("HORIZONTAL", CreateColor(0, 0, 0, 0.75), CreateColor(0, 0, 0, 0))
+      else
+        self.bar:SetVertexColor(0, 0, 0, 0.6)
+      end
+      self.bar:Show()
+      self.name:SetPoint("LEFT", self.stage, "RIGHT", 7, 0)
+      self.name:SetWidth(L.w - L.stage[3] - 20)
+      self.name:SetJustifyH("LEFT")
+      self.badges:SetPoint("LEFT", self.name, "RIGHT", 6, 0)
+      self.badges:SetJustifyH("LEFT")
     else -- banner
       self.banner:SetSize(L.w, 58)
       self.banner:SetPoint("CENTER", self, "CENTER", 0, -6)
@@ -259,6 +280,7 @@ function ns.CreateView(f)
   -- Fill in an item. Call after the frame is shown (the model needs a visible frame).
   function f:SetItem(item)
     self.item = item
+    self.styleOverride = item.compact and "compact" or nil -- Popup.lua decides (low rarity, combat)
     self:Layout()
     local q = item.quality or 1
     local r, g, b = ns.QualityColor(q)
@@ -286,7 +308,7 @@ function ns.CreateView(f)
     self.waves[1]:SetVertexColor(r, g, b, 1)
     -- this arrival: a burst of uneven sparks thrown mostly up and out, slowing as they go, and star
     -- glints popping around the item; more, bigger and farther the rarer it is
-    self.tier = Tier(q)
+    self.tier = self.style ~= "compact" and Tier(q) or nil -- a compact popup has no arrival
     self.arrived = false
     local A = ARRIVAL[self.tier or ""]
     self.sparkCount, self.glintCount = A and A.sparks or 0, A and A.glints or 0
@@ -335,8 +357,13 @@ function ns.CreateView(f)
     local info = {}
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
-    self.info:SetText(table.concat(info, "  -  "))
+    self.info:SetText(self.style == "compact" and "" or table.concat(info, "  -  "))
     self.badges:SetText(Badges(item))
+    if self.style == "compact" then -- the name only as wide as it is, so the badges follow it on the strip
+      local bw = self.badges:GetText() ~= "" and self.badges:GetStringWidth() + 6 or 0
+      local measure = self.name.GetUnboundedStringWidth or self.name.GetStringWidth
+      self.name:SetWidth(math.max(20, math.min(measure(self.name) + 2, self.L.w - self.L.stage[3] - 20 - bw)))
+    end
     local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
     if self.style == "banner" then
       -- badges ride the info line inside the band; under the name if there's no info, below it if too long
@@ -365,6 +392,10 @@ function ns.CreateView(f)
     self.mode = "card"
     self.card:Show()
     m:Hide()
+    if self.L and self.L.icon then -- the compact line shows the icon, never a model
+      if self.onModel then self.onModel("card", nil, "compact popup"); self.onModel = nil end
+      return
+    end
     if not item or not (item.forceModel or ns.MODEL_SLOTS[item.equipLoc or ""]) or not m.SetItem then
       if self.onModel then self.onModel("card", nil, "no model path"); self.onModel = nil end
       return
@@ -441,7 +472,7 @@ function ns.CreateView(f)
     local fx = age - (self.fxDelay or 0)
 
     -- the arrival flash: a burst of light that grows and fades (bigger for better items)
-    if fx >= 0 and fx < FLASH_T then
+    if fx >= 0 and fx < FLASH_T and self.style ~= "compact" then
       local a = fx / FLASH_T
       local size = (70 + 190 * a) * (self.q >= 4 and 1.3 or 1)
       self.flash:SetSize(size, size)

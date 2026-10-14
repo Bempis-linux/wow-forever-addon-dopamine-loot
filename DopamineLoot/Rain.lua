@@ -432,7 +432,10 @@ function Skip()
   for _, item in ipairs(st.all) do
     if not st.handedOff[item] and Core.Stays(item, st.stayQuality) then keep[#keep + 1] = item end
   end
-  for i, item in ipairs(keep) do C_Timer.After((i - 1) * 0.15, function() ns:ShowLoot(item) end) end
+  for i, item in ipairs(keep) do
+    item.burstBest = st.bestQ -- the best of the haul: an Uncommon beside a Rare goes compact
+    C_Timer.After((i - 1) * 0.15, function() ns:ShowLoot(item) end)
+  end
 end
 
 local function Launch(st, item, isBest, W, H, k)
@@ -714,6 +717,7 @@ local function Update(_, dt)
           if not s.handed then
             s.handed, st.handedOff[s.item] = true, true
             local item = s.item
+            item.burstBest = st.bestQ
             ns:ShowLoot(item)
           end
           s.y = s.y + dt * 500 -- rises toward the popups as it fades
@@ -934,13 +938,15 @@ function ns:Rain(items, copper)
   if On("Best") and (#list > 1 or (#list == 1 and coins > 0)) then best = table.remove(list) end
   if not list[1] and not best and coins == 0 then return end
   local queue = Core.Mix(list, plan)
+  local bestQ = 0
+  for _, it in ipairs(all) do bestQ = math.max(bestQ, it.quality or 0) end
   state = {
     age = 0, nextLaunch = 0, queue = queue, launched = 0, total = #queue, best = best, extra = extra,
     all = all, handedOff = {}, stayQuality = ns.settings.stayQuality or 3,
     landed = 0, copper = coins > 0 and copper or 0, coins = coins, coinsLanded = 0, shownCopper = 0,
     baseCopper = On("Coins") and baseCopper or 0,
     hold = 0, fadeOut = 0, gathered = 0, bagBump = 0, stopT = 0, shake = 0,
-    merges = merges, mergesDone = 0, flashes = {}, coinsOut = 0, itemsOut = 0,
+    merges = merges, mergesDone = 0, flashes = {}, coinsOut = 0, itemsOut = 0, bestQ = bestQ,
   }
   layer.count:SetText("")
   layer.money:SetText("")

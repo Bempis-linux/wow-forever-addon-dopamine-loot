@@ -42,6 +42,7 @@ local function Changed(what)
     local shown = {}
     for k, v in pairs(d) do shown[k] = v end
     shown.quality, shown.test = pick.quality, true
+    shown.compact = ns.PopupCompact(shown) -- what this quality looks like now (low rarities, combat)
     view:SetItem(shown)
   elseif what == "frame" and view.mode == "model" then
     view:Frame()
@@ -68,46 +69,87 @@ local function Create()
   local title = UI.Label(panel, "GameFontNormalLarge", "Popups")
   title:SetPoint("TOPLEFT", 16, -16)
   local intro = UI.Label(panel, "GameFontHighlightSmall",
-    "A card at the top of the screen for each item you loot. Changes show in the preview at once.")
+    "A card for each item you loot. Changes show in the preview at once.")
   intro:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 
-  ---------------------------------------------------------------- left: when, look, the 3D item
-  local last
-  local function Header(text, gap)
+  ---------------------------------------------------------------- left: when, look, placement, the 3D item
+  -- every setting is one row: its label on the left, its control from LABEL_W on (the same column
+  -- for all), grouped under a header per topic
+  local LABEL_W = 120
+  local last -- always a label in the left column, so everything stacks in one straight column
+  local function Header(text)
     local h = UI.Label(panel, "GameFontNormal", text)
-    h:SetPoint("TOPLEFT", last or intro, "BOTTOMLEFT", 0, gap or -16)
+    h:SetPoint("TOPLEFT", last or intro, "BOTTOMLEFT", 0, -16)
     last = h
   end
-  local function Pick(label, width, options, get, set, tip)
+  local function RowLabel(label)
     local text = UI.Label(panel, "GameFontHighlight", label)
-    text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -10)
-    local d = UI.Dropdown(panel, width, options, get, set, tip)
-    d:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 0, -4)
-    last = d
+    text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -16)
+    text:SetWidth(LABEL_W - 6)
+    if text.SetWordWrap then text:SetWordWrap(false) end
+    return text
+  end
+  local function Pick(label, options, get, set, tip)
+    local text = RowLabel(label)
+    local d = UI.Dropdown(panel, 164, options, get, set, tip)
+    d:SetPoint("LEFT", text, "LEFT", LABEL_W, 0)
+    last = text
   end
   local function Add(label, min, max, step, get, set, tip, what, fmt)
-    local s, text = UI.Slider(panel, label, 150, min, max, step, get, set, tip, fmt, function() Changed(what) end)
-    text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -12)
-    last = s
-    return s
+    local s, text = UI.Slider(panel, "", 96, min, max, step, get, set, tip, fmt, function() Changed(what) end)
+    local row = RowLabel(label)
+    text:Hide()
+    s:ClearAllPoints()
+    s:SetPoint("LEFT", row, "LEFT", LABEL_W, 0)
+    last = row
   end
 
   Header("When")
-  Pick("Show popups for", 220, ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
+  Pick("Show popups for", ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
     function(v) ns.settings.minQuality = v end,
     "The lowest quality that gets a popup; lower ones still count, just quietly. Also /dl quality.")
-  Add("Time on screen (s)", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
+  Add("Time on screen", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
     function(v) ns.settings.popupHold = v end,
-    "Seconds a popup stays (2 to 15, default 5); better items stay a little longer. Hovering holds it.", "none")
+    "Seconds a popup stays, by rarity: half this up to Uncommon, x0.8 Rare, x1.2 Epic, x1.6 Legendary (default 5: 2.5 / 4 / 6 / 8 s). Hovering holds it.", "none")
+  Pick("Uncommon and lower", {
+    { "smart", "Smart (default)", "Poor and Common come as one line; an Uncommon too, unless it's the best of what you looted." },
+    { "always", "Always compact", "Poor, Common and Uncommon always come as one line." },
+    { "never", "Full popups", "Every popup is a full one." },
+  }, function() return ns.settings.popupLow or "smart" end,
+    function(v) ns.settings.popupLow = v ~= "smart" and v or nil end,
+    "Compact = one line, the icon and the name. Poor and Common, and an Uncommon looted beside something better.")
+  Pick("In combat", {
+    { "compact", "Compact (default)", "Every popup comes as one line until the fight is over." },
+    { "same", "Same as always", "Combat changes nothing." },
+    { "defer", "Wait until after", "Popups wait and show one after another when the fight ends." },
+  }, function() return ns.settings.popupCombat or "compact" end,
+    function(v) ns.settings.popupCombat = v ~= "compact" and v or nil end,
+    "What popups do while you're fighting.")
 
   Header("Look")
   local styles = {}
   for _, s in ipairs(ns.STYLES) do styles[#styles + 1] = { s.key, s.label, s.tip } end
-  Pick("Style", 220, styles, function() return ns.PopupStyle() end,
+  Pick("Style", styles, function() return ns.PopupStyle() end,
     function(v) ns.settings.popupStyle = v; Changed("item") end,
     "Relic: the item in a soft glow. Beam: a cone of light rises under it. Banner: a ribbon in its color.")
-  Add("Size", 0.6, 1.6, 0.05, ns.PopupScale, function(v) ns.settings.popupScale = v end,
-    "How big popups are on screen (0.6 to 1.6, default 1).", "size")
+  Add("Size", 0.5, 1.6, 0.05, ns.PopupScale, function(v) ns.settings.popupScale = v end,
+    "How big popups are on screen (0.5 to 1.6, default 0.8).", "size")
+
+  Header("Placement")
+  local positions = {}
+  for _, p in ipairs(ns.POPUP_POSITIONS) do positions[#positions + 1] = { p.key, p.label } end
+  Pick("Position", positions, function() return ns.settings.popupPos or "midright" end,
+    function(v) ns.settings.popupPos = v ~= "midright" and v or nil end,
+    "Where popups appear. Right of you, mid-screen stays clear of the quest tracker, the buffs and the fight.")
+  Pick("At once", { { 1, "1" }, { 2, "2 (default)" }, { 3, "3" } }, ns.PopupMax,
+    function(v) ns.settings.popupMax = v ~= 2 and v or nil end,
+    "How many popups can be on screen together; more wait their turn (a better item cuts in).")
+  Pick("Mouse", {
+    { "through", "Pass through (default)", "Popups never block a click; hovering still holds one and shows the item's tooltip." },
+    { "item", "Catches clicks", "Click a popup to dismiss it, Shift+click to link it in chat." },
+  }, function() return ns.settings.popupMouse or "through" end,
+    function(v) ns.settings.popupMouse = v ~= "through" and v or nil end,
+    "Whether popups catch the mouse.")
 
   Header("The 3D item")
   Add("Zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
@@ -173,6 +215,7 @@ local function Create()
     local copy = {}
     for k, v in pairs(d) do copy[k] = v end
     copy.quality, copy.test, copy.push = pick.quality, true, true
+    copy.compact = ns.PopupCompact(copy)
     ns:ShowLoot(copy)
   end
   local real = UI.Button(panel, "Show as a real popup", 170, PopReal)

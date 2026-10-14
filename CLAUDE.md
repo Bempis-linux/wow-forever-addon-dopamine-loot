@@ -89,6 +89,9 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   (`Model:SetPitch`, not SetRoll). Arrivals by rarity play in every style: Rare a burst of sparks,
   Epic adds star4 glints, Legendary more of both plus two shockwaves and embers (picked in
   docs/mockups/popups.html). Items sway; Epic+ turn once first. Keep popup animations simple.
+- Popup placement (0.4.20, picked in docs/mockups/placement.html): right of the character, mid-screen by
+  default; Poor/Common come compact (one line), an Uncommon too unless it is the best of its loot; clicks
+  pass through (hover holds, up to 10 s); 2 at once; time on screen by rarity; compact in combat.
 - Visual changes: show mockups first, the user picks, then build. Generated art comes from
   `tools/gen_textures.lua` (check it rendered with ffmpeg before pushing).
 - Assets: Blizzard's game assets (models, textures, icons, sounds, referenced by path or ID) and our

@@ -104,7 +104,9 @@ local function Play(items)
   if Rains(items) then
     ns:Rain(items, items.copper)
   else
-    for _, d in ipairs(items) do ns:ShowLoot(d) end
+    local best = 0 -- each popup knows the best it was looted with (an Uncommon beside a Rare goes compact)
+    for _, d in ipairs(items) do best = math.max(best, d.quality or 0) end
+    for _, d in ipairs(items) do d.burstBest = best; ns:ShowLoot(d) end
   end
 end
 
@@ -122,6 +124,7 @@ local function FlushBurst()
 end
 
 function ns:PLAYER_REGEN_ENABLED()
+  if ns.PopupsAfterCombat then ns.PopupsAfterCombat() end
   if #afterCombat == 0 and not afterCombat.copper then return end
   local items = afterCombat
   afterCombat = {}
