@@ -40,25 +40,27 @@ local function CreateSounds()
   N.Choice(cat, "soundChannel", "Volume follows", {
     { "SFX", "Sound effects (default)" }, { "Master", "Master volume (plays with effects muted)" },
   }, "SFX", "Which of the game's volume sliders the sounds follow.")
-
-  N.Header(layout, "Popup sounds", "A game sound for each rarity; picking one plays it. Rare and up can add our chime, timed with the sparks.")
-  for _, row in ipairs(ns.SOUND_ROWS) do
-    -- only the game's own controls here: a custom row drawn on the settings list's shared frames
-    -- tainted them, and the game then blocked its own Social page (ADDON_ACTION_FORBIDDEN, 0.4.16)
-    N.Choice(cat, "sound" .. row.q, row.label, SoundOptions, row.default,
-      "The sound a " .. row.label:lower() .. " popup plays. Picking one plays it; Play plays it again.", PickPlayed(row.q))
-    if row.q >= 3 then
-      N.Toggle(cat, "noChime" .. row.q, "   with our chime",
-        "Our own chime on top, timed with the " .. row.label:lower() .. " arrival (the sparks, glints or shockwave).", true)
-    end
-    N.Button(layout, "   hear it", "Play", function() ns:PreviewPopupSound(row.q) end,
-      "Play what a " .. row.label:lower() .. " popup sounds like now (the game sound, plus our chime when it's on).")
-  end
-  N.Button(layout, "Hear each rarity", "Play all", function()
+  N.Button(layout, "Every popup sound", "Play all", function()
     for i, row in ipairs(ns.SOUND_ROWS) do
       C_Timer.After((i - 1) * 1.6, function() ns:PreviewPopupSound(row.q) end)
     end
-  end, "Uncommon, Rare, Epic and Legendary popup sounds one after another, both layers.")
+  end, "Uncommon, Rare, Epic and Legendary popup sounds one after another, as popups play them.")
+
+  -- One section per rarity, the same rows in the same order (only the game's own controls: see
+  -- the kit's note on the settings list's shared frames): Sound, Our chime (Rare and up), Preview
+  local COLOR = { [2] = "|cff1eff00", [3] = "|cff0070dd", [4] = "|cffa335ee", [5] = "|cffff8000" }
+  for _, row in ipairs(ns.SOUND_ROWS) do
+    local name = row.label:lower()
+    N.Header(layout, COLOR[row.q] .. row.label .. "|r popups")
+    N.Choice(cat, "sound" .. row.q, "Sound", SoundOptions, row.default,
+      "The game sound a " .. name .. " popup plays. Picking one plays it.", PickPlayed(row.q))
+    if row.q >= 3 then
+      N.Toggle(cat, "noChime" .. row.q, "Our chime",
+        "Our own chime on top, timed with the " .. name .. " arrival (the sparks, glints or shockwave).", true)
+    end
+    N.Button(layout, "Preview", "Play", function() ns:PreviewPopupSound(row.q) end,
+      "What a " .. name .. " popup sounds like now: the game sound, plus our chime when it's on.")
+  end
 
   N.Header(layout, "Loot rain")
   N.Choice(cat, "openSound", "As the loot bursts out", {

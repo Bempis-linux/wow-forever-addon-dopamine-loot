@@ -20,7 +20,7 @@ ns.POPUP_SOUNDS = {
   { key = "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK_GOLD_SUCCESS", label = "Gold chest unlock" },
 }
 ns.SOUND_ROWS = { -- the rows on the Sounds page: rarity, label, default sound
-  { q = 2, label = "Uncommon (and below)", default = "UI_TRANSMOG_ITEM_CLICK" },
+  { q = 2, label = "Uncommon and lower", default = "UI_TRANSMOG_ITEM_CLICK" },
   { q = 3, label = "Rare", default = "UI_RAID_LOOT_TOAST_LESSER_ITEM_WON" },
   { q = 4, label = "Epic", default = "UI_EPICLOOT_TOAST" },
   { q = 5, label = "Legendary", default = "UI_LEGENDARY_LOOT_TOAST" },

@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.18. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.19. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.18 pushed**: fixes ADDON_ACTION_FORBIDDEN (IsUserOAuthed, scrolling the game's Social settings page after opening our Sounds page; BugGrabber stack): the custom SoundRow (0.4.16) wrote onto the settings list's pooled frames; now only stock controls (native dropdown, chime toggle, a "Play" button row per rarity). Lesson in the kit (0.6.1 conventions). 0.4.17: Play and picking play both layers. 0.4.16: each popup sound row on the Sounds page has a speaker Play button beside its dropdown, a custom row like BugSack's (SoundRow in Pages.lua); user on 0.4.15: pages "look pretty good and seem to work", sound picking was too much trial and error; the long Advanced asset-check label is OK for now, the tool goes away later). 0.4 = popup polish + loot rain from the ground.
+- **0.4.19 pushed**: Sounds page tidied (user: "disorganized and messy"): General (switch, volume, Play all), then one section per rarity (colored header; Sound, Our chime for Rare+, Preview/Play). **Known game bug, accepted (user)**: after any addon's native settings page was shown, scrolling the game's Social page blocks IsUserOAuthed() and blames that addon (reproduced with BugSack alone); native pages kept. 0.4.18 removed the custom SoundRow anyway (stock controls only). 0.4.17: Play and picking play both layers. 0.4.16: each popup sound row on the Sounds page has a speaker Play button beside its dropdown, a custom row like BugSack's (SoundRow in Pages.lua); user on 0.4.15: pages "look pretty good and seem to work", sound picking was too much trial and error; the long Advanced asset-check label is OK for now, the tool goes away later). 0.4 = popup polish + loot rain from the ground.
 - **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
   burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
   turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);
@@ -58,7 +58,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - **Privacy first**: the only public identity is **Bempis**; nothing else personal in tracked files
   or commits (BugSack dumps contain the character name: never copy it). Repo-local git identity;
   the pre-push guard enforces it; never `--no-verify` unless the user says so.
-- **Every `/dl` command also gets a settings control** (house-style parity).
+- **Every `/dl` command also gets a settings control** (house-style parity). **Settings pages must stay tidy** (user, 2026-10-14; kit 0.6.2 rule): design each settings change (section, label, order) before adding it; no messy appended rows.
 - **Mockups before visual changes** (`docs/mockups/rain.html` for motion). **Never run bulk scripted
   tests in the browser pane without asking** (one froze the user's PC); read the console instead.
 - **The loot rain is the user's favorite part**; it may be busy. Popups stay calm: no new looping
@@ -93,6 +93,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-10-14 0.4.19: Sounds page tidied (a section per rarity).
 - 2026-10-14 0.4.18: fixed a taint (Social settings page blocked) from the custom sound row.
 - 2026-10-14 0.4.16: Play buttons beside each popup sound.
 - 2026-10-14 0.4.15: settings rebuilt by topic (native pages + custom Popups); popup sound picker.
