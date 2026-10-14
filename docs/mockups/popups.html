@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loot Popup Mockup</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.88); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 270px; max-height: calc(100% - 20px); overflow: auto;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 10px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .row { display: flex; flex-wrap: wrap; gap: 4px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; }
+  button:hover { background: #3a3220; }
+  button.q2 { color: #1eff00; } button.q3 { color: #3a9cff; } button.q4 { color: #c06cff; } button.q5 { color: #ff8000; }
+  select { width: 100%; background: #1a1712; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 3px; font: inherit; }
+  label { display: block; padding: 3px 0; }
+  label.check { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  small { color: var(--muted); display: block; margin-top: 1px; }
+  .note { color: var(--muted); margin-top: 8px; font-size: 12px; }
+  input[type=range] { width: 100%; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="panel">
+  <h1>Loot popup mockup</h1>
+  <div class="note" style="margin-top:0">Each control starts on how the addon looks now; the other choices are the polish ideas.</div>
+  <h2>Show a popup</h2>
+  <div class="row">
+    <button class="q2" data-q="2">Uncommon</button>
+    <button class="q3" data-q="3">Rare</button>
+    <button class="q4" data-q="4">Epic</button>
+    <button class="q5" data-q="5">Legendary</button>
+  </div>
+  <label class="check"><input type="checkbox" id="card"> No 3D model (an icon card)</label>
+  <label class="check"><input type="checkbox" id="stay" checked> Stay on screen</label>
+
+  <h2>Look</h2>
+  <label>Style
+    <select id="style"><option value="relic">Relic (default)</option><option value="beam">Beam</option><option value="banner">Banner</option><option value="halo">Halo lens</option></select>
+  </label>
+  <label>Arrival (Rare and up)
+    <select id="arrival">
+      <option value="ring">Now: an even ring of dots</option>
+      <option value="burst">Burst: uneven sparks, slowing, twinkling</option>
+      <option value="glints">Glints: a few star glints around the item</option>
+      <option value="flash">Flash only</option>
+    </select>
+    <small>The flash of light plays with every choice.</small>
+  </label>
+  <label>Legendary extras
+    <select id="legend">
+      <option value="now">Now: 2 shockwaves, a fountain, drifting embers</option>
+      <option value="soft">One soft shockwave, slow embers</option>
+      <option value="none">None (just the arrival above)</option>
+    </select>
+  </label>
+  <label>Beam style's rising sparks
+    <select id="motes">
+      <option value="always">Now: always, 8 wobbling</option>
+      <option value="rare">Rare and up only, fewer and slower</option>
+      <option value="off">Off</option>
+    </select>
+  </label>
+  <label>Item motion
+    <select id="motion">
+      <option value="spin">Now: keeps turning</option>
+      <option value="sway">Sways gently side to side</option>
+      <option value="once">Turns once to face you, then sways</option>
+      <option value="still">Holds still</option>
+    </select>
+    <small>A card without a model: "now" flips like a coin (gray back); the others tilt and never show the back.</small>
+  </label>
+  <label>Entrance
+    <select id="enter">
+      <option value="pop">Now: fades in from a little big</option>
+      <option value="settle">Settles down from just above</option>
+    </select>
+  </label>
+
+  <h2>Sound</h2>
+  <label class="check"><input type="checkbox" id="sound" checked> Sound</label>
+  <label>Arrival sound
+    <select id="voice">
+      <option value="now">Now (Rare chime, Epic arpeggio, Legendary boom and chord)</option>
+      <option value="swell">Swell into a hit: rises, then lands</option>
+      <option value="stab">Short stab: one punchy hit, quick tail</option>
+      <option value="none">None</option>
+    </select>
+    <small>In game the item's tier sound (a game sound) plays with it.</small>
+  </label>
+  <label>Volume <input id="vol" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+  <div class="row" style="margin-top:4px">
+    <button data-play="3">Hear Rare</button><button data-play="4">Hear Epic</button><button data-play="5">Hear Legendary</button>
+  </div>
+  <div class="note">Sounds are made with the same recipes as the addon's sound files (tools/gen_sounds.sh), so what you pick here is what gets built.</div>
+</div>
+<script>
+"use strict";
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+addEventListener("resize", resize); resize();
+const $ = id => document.getElementById(id);
+const opt = id => $(id).value;
+
+// ---- items (made-up names) and the game's quality colors ----
+const QC = { 2: [0.12, 1, 0], 3: [0, 0.44, 0.87], 4: [0.64, 0.21, 0.93], 5: [1, 0.5, 0] };
+const ITEMS = {
+  2: { name: "Tarnished Militia Blade", info: "One-Hand Sword  -  item level 18" },
+  3: { name: "Edge of the Quiet Vale", info: "One-Hand Sword  -  item level 33" },
+  4: { name: "Duskforged Greatsword", info: "Two-Hand Sword  -  item level 61" },
+  5: { name: "Emberheart, Oath of Ash", info: "Two-Hand Sword  -  item level 80" },
+};
+const rgba = (c, a, lift = 0) => `rgba(${Math.round(Math.min(1, c[0] + lift) * 255)},${Math.round(Math.min(1, c[1] + lift) * 255)},${Math.round(Math.min(1, c[2] + lift) * 255)},${a})`;
+const rand = (a, b) => a + Math.random() * (b - a);
+
+// ---- the popup ----
+let P = null;
+const IN_T = 0.3, OUT_T = 0.8;
+function show(q) {
+  P = { q, age: 0, spin0: rand(-0.4, 0.4), card: $("card").checked, hold: 4.5 + Math.max(0, q - 2), out: null, fx: null };
+  P.fx = makeArrival(q);
+  arrivalSoundAt = IN_T; soundPlayed = false;
+}
+
+// Arrival particles for this popup, made once (positions relative to the item's center)
+function makeArrival(q) {
+  const tier = q >= 5 ? "legendary" : q === 4 ? "epic" : q === 3 ? "rare" : null;
+  const fx = { tier, parts: [], waves: [], embers: [] };
+  if (!tier) return fx;
+  const mode = opt("arrival"), reach = 105;
+  if (mode === "ring") {
+    if (tier === "legendary") { // the current fountain thrown up at random, falling back
+      for (let i = 0; i < 18; i++) fx.parts.push({ kind: "fountain", vx: rand(-110, 110), vy: rand(180, 340), size: 4 + (i % 4), life: 1.5 });
+    } else {
+      const n = tier === "rare" ? 8 : 14;
+      for (let i = 0; i < n; i++) fx.parts.push({ kind: "ring", ang: i / n * Math.PI * 2 + 0.3, dist: reach * (tier === "epic" ? 1.25 : 1), size: 7, life: 0.8 });
+    }
+  } else if (mode === "burst") {
+    const n = tier === "rare" ? 10 : tier === "epic" ? 16 : 24;
+    for (let i = 0; i < n; i++) {
+      const ang = -Math.PI / 2 + rand(-1, 1) * Math.PI * (tier === "legendary" ? 0.95 : 0.8); // mostly up and out
+      const sp = rand(140, 330) * (tier === "legendary" ? 1.25 : 1);
+      fx.parts.push({ kind: "burst", vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, delay: rand(0, 0.09),
+        life: rand(0.45, 0.95), size: rand(1.6, 3.6), tw: rand(0, 6.28) });
+    }
+  } else if (mode === "glints") {
+    const n = tier === "rare" ? 3 : tier === "epic" ? 5 : 7;
+    for (let i = 0; i < n; i++) {
+      const ang = rand(0, Math.PI * 2), r = reach * rand(0.42, 0.8);
+      fx.parts.push({ kind: "glint", x: Math.cos(ang) * r, y: Math.sin(ang) * r * 0.85, delay: i * 0.075 + rand(0, 0.05),
+        life: 0.42, size: rand(14, 22) * (tier === "legendary" ? 1.25 : 1), rot: rand(-0.3, 0.3) });
+    }
+  }
+  if (tier === "legendary") {
+    const lg = opt("legend");
+    if (lg === "now") { fx.waves = [{ at: 0, soft: false }, { at: 0.22, soft: false }]; }
+    if (lg === "soft") { fx.waves = [{ at: 0.05, soft: true }]; }
+    if (lg !== "none") for (let i = 0; i < 6; i++) fx.embers.push({ phase: i / 6, i, slow: lg === "soft" });
+  }
+  return fx;
+}
+
+// ---- drawing helpers ----
+function glow(x, y, r, c, a, lift = 0) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, rgba(c, a, lift)); g.addColorStop(0.45, rgba(c, a * 0.35, lift)); g.addColorStop(1, rgba(c, 0, lift));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+}
+function mote(x, y, size, c, a) { // the addon's Mote: a soft dot
+  ctx.globalCompositeOperation = "lighter";
+  glow(x, y, size, c, a, 0.5);
+  ctx.globalCompositeOperation = "source-over";
+}
+function spark(x, y, size, c, a) { // a hot core with a small bloom
+  ctx.globalCompositeOperation = "lighter";
+  glow(x, y, size * 3.2, c, a * 0.5, 0.4);
+  ctx.fillStyle = `rgba(255,250,235,${a})`; ctx.beginPath(); ctx.arc(x, y, size * 0.7, 0, Math.PI * 2); ctx.fill();
+  ctx.globalCompositeOperation = "source-over";
+}
+function star(x, y, size, rot, c, a) { // a four-point glint, like the game's star4 sparkle
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalCompositeOperation = "lighter";
+  glow(0, 0, size * 0.6, c, a * 0.6, 0.5);
+  ctx.fillStyle = `rgba(255,252,240,${a})`;
+  for (const [w, h] of [[size * 0.09, size], [size, size * 0.09]]) {
+    ctx.beginPath(); ctx.moveTo(-w, 0); ctx.lineTo(0, -h); ctx.lineTo(w, 0); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore(); ctx.globalCompositeOperation = "source-over";
+}
+
+// The item: a sword seen from the front, turned by squeezing its width (cos of the angle)
+function sword(x, y, angle, c, long) {
+  const sx = Math.cos(angle), shade = 0.75 + 0.25 * Math.abs(sx);
+  ctx.save(); ctx.translate(x, y); ctx.scale(Math.max(0.06, Math.abs(sx)), 1);
+  const L = long ? 1.15 : 1;
+  const steel = ctx.createLinearGradient(-9, 0, 9, 0);
+  steel.addColorStop(0, `rgba(${150 * shade},${160 * shade},${175 * shade},1)`);
+  steel.addColorStop(0.5, `rgba(${235 * shade},${240 * shade},${250 * shade},1)`);
+  steel.addColorStop(1, `rgba(${110 * shade},${118 * shade},${130 * shade},1)`);
+  ctx.fillStyle = steel;
+  ctx.beginPath(); ctx.moveTo(0, -62 * L); ctx.lineTo(8, -48 * L); ctx.lineTo(7, 16); ctx.lineTo(-7, 16); ctx.lineTo(-8, -48 * L); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = rgba(c, 1, 0.15); ctx.fillRect(-26, 16, 52, 7); // guard in the quality color
+  ctx.fillStyle = "#4a3220"; ctx.fillRect(-4, 23, 8, 24);
+  ctx.fillStyle = rgba(c, 1, 0.3); ctx.beginPath(); ctx.arc(0, 51, 5.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function card(x, y, angle, c, coin) {
+  const S = 56;
+  let w, back = false;
+  if (coin) { const k = Math.cos(angle * 1.3); w = Math.max(2, S * Math.abs(k)); back = k < 0; }
+  else w = S * (0.78 + 0.22 * Math.abs(Math.cos(angle))); // tilts, never shows the back
+  ctx.fillStyle = rgba(c, 1); ctx.fillRect(x - w / 2, y - S / 2, w, S);
+  const g = ctx.createLinearGradient(x, y - S / 2, x, y + S / 2);
+  const v = back ? 0.45 : 1;
+  g.addColorStop(0, `rgba(${200 * v},${120 * v},${40 * v},1)`); g.addColorStop(1, `rgba(${90 * v},${40 * v},${20 * v},1)`);
+  ctx.fillStyle = g; ctx.fillRect(x - w / 2 + 2, y - S / 2 + 2, Math.max(0, w - 4), S - 4);
+  if (!back && w > 14) { ctx.fillStyle = `rgba(255,220,150,${0.8 * w / S})`; ctx.beginPath(); ctx.arc(x, y, w * 0.22, 0, Math.PI * 2); ctx.fill(); }
+}
+
+// ---- one frame ----
+function itemAngle(age) {
+  const m = opt("motion");
+  if (m === "spin") return P.spin0 + age * 0.9;
+  if (m === "sway") return 0.45 * Math.sin(age * 0.9);
+  if (m === "once") {
+    const T = 1.4;
+    if (age < T) { const a = age / T; return (1 - (1 - a) * (1 - a) * (1 - a)) * Math.PI * 2; }
+    return 0.3 * Math.sin((age - T) * 0.9);
+  }
+  return 0.35;
+}
+
+function drawPopup(dt) {
+  const p = P, c = QC[p.q], style = opt("style");
+  p.age += dt;
+  if (!$("stay").checked && !p.out && p.age > IN_T + p.hold) p.out = 0;
+  if (p.out !== null) { p.out += dt; if (p.out >= OUT_T) { P = null; return; } }
+  let alpha = 1, scale = 1, dy = 0;
+  if (p.age < IN_T) {
+    const a = p.age / IN_T;
+    if (opt("enter") === "pop") { alpha = a; scale = 1 + 0.15 * (1 - a) * (1 - a); }
+    else { alpha = Math.min(1, a * 1.4); dy = -12 * (1 - a) * (1 - a) * (1 - a); }
+  }
+  if (p.out !== null) { alpha = 1 - p.out / OUT_T; dy -= p.out * 20; }
+  const cx = W / 2 + 120, top = 70 + dy;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.translate(cx, top); ctx.scale(scale, scale); ctx.translate(-cx, -top);
+
+  // layout like View.lua: relic and beam stand the item in the middle with the text below
+  const side = style === "banner" || style === "halo";
+  const ix = side ? cx - (style === "banner" ? 140 : 110) : cx, iy = top + (side ? 85 : 80);
+  const fx = p.age - IN_T; // effects wait for the fade-in
+  const q = p.q;
+  // background art
+  ctx.globalCompositeOperation = "lighter";
+  if (style === "relic") glow(ix, iy, 105, c, q >= 4 ? 0.9 : q >= 3 ? 0.75 : 0.6);
+  if (style === "beam") {
+    const g = ctx.createLinearGradient(0, iy + 72, 0, iy - 150);
+    g.addColorStop(0, rgba(c, 0.7, 0.1)); g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(ix - 75, iy + 72); ctx.lineTo(ix + 75, iy + 72); ctx.lineTo(ix + 40, iy - 150); ctx.lineTo(ix - 40, iy - 150); ctx.fill();
+    ctx.save(); ctx.translate(ix, iy + 72); ctx.scale(1, 0.23); glow(0, 0, 75, c, 0.95, 0.25); ctx.restore();
+  }
+  ctx.globalCompositeOperation = "source-over";
+  if (style === "halo") {
+    ctx.fillStyle = rgba(c.map(v => v * 0.1), 0.9); ctx.beginPath(); ctx.arc(ix, iy, 80, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = rgba(c, 0.9); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(ix, iy, 80, 0, Math.PI * 2); ctx.stroke();
+    glow(ix, iy, 95, c, 0.25);
+    ctx.globalCompositeOperation = "source-over";
+  }
+  if (style === "banner") {
+    const bw = 420, by = iy - 6;
+    const g = ctx.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
+    g.addColorStop(0, rgba(c.map(v => v * 0.3), 0)); g.addColorStop(0.15, rgba(c.map(v => v * 0.3), 0.92));
+    g.addColorStop(0.85, rgba(c.map(v => v * 0.3), 0.92)); g.addColorStop(1, rgba(c.map(v => v * 0.3), 0));
+    ctx.fillStyle = g; ctx.fillRect(cx - bw / 2, by - 29, bw, 58);
+    const e = ctx.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
+    e.addColorStop(0, rgba(c, 0)); e.addColorStop(0.2, rgba(c, 1)); e.addColorStop(0.8, rgba(c, 1)); e.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = e; ctx.fillRect(cx - bw / 2, by - 30, bw, 2); ctx.fillRect(cx - bw / 2, by + 28, bw, 2);
+    ctx.fillStyle = rgba(c.map(v => v * 0.22), 0.95);
+    ctx.beginPath(); ctx.moveTo(ix, by - 48); ctx.lineTo(ix + 48, by); ctx.lineTo(ix, by + 48); ctx.lineTo(ix - 48, by); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = rgba(c, 1, 0.2); ctx.lineWidth = 2; ctx.stroke();
+    // the shine sweep on arrival and every 5 s (current behavior)
+    const t = fx >= 0 ? fx % 5 : -1;
+    if (t >= 0 && t < 0.9) {
+      ctx.save(); ctx.beginPath(); ctx.rect(cx - bw / 2, by - 29, bw, 58); ctx.clip();
+      const sx = cx - bw / 2 - 40 + (bw + 80) * (t / 0.9);
+      ctx.globalCompositeOperation = "lighter"; ctx.translate(sx, by); ctx.rotate(0.35);
+      const s = ctx.createLinearGradient(-25, 0, 25, 0);
+      s.addColorStop(0, "rgba(255,255,255,0)"); s.addColorStop(0.5, rgba(c, 0.55, 0.6)); s.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = s; ctx.fillRect(-25, -60, 50, 120); ctx.restore();
+    }
+  }
+  if (style === "relic") { // the soft shadow under the floating item
+    ctx.save(); ctx.translate(ix, iy + 72); ctx.scale(1, 0.18); glow(0, 0, 38, [0, 0, 0], 0.6); ctx.restore();
+  }
+
+  // the item
+  const ang = itemAngle(p.age);
+  if (p.card) card(ix, iy, ang, c, opt("motion") === "spin"); else sword(ix, iy, ang, c, q >= 4);
+
+  // the arrival flash (every choice)
+  if (fx >= 0 && fx < 0.45) {
+    const a = fx / 0.45, size = (70 + 190 * a) * (q >= 4 ? 1.3 : 1) / 2;
+    ctx.globalCompositeOperation = "lighter"; glow(ix, iy, size, c, (1 - a) * (q >= 3 ? 0.9 : 0.6), 0.4); ctx.globalCompositeOperation = "source-over";
+  }
+  // beam's rising sparks
+  const m = opt("motes");
+  if (style === "beam" && (m === "always" || (m === "rare" && q >= 3))) {
+    const n = m === "always" ? 8 : 5, speed = m === "always" ? 0.35 : 0.2;
+    for (let i = 0; i < n; i++) {
+      const t = (p.age * speed + i / n) % 1;
+      const x = m === "always" ? Math.sin(i * 2.7 + p.age * 0.8) * 30 * (1 - t * 0.6) : Math.sin(i * 2.1) * 26 * (1 - t * 0.5);
+      const a = Math.sin(Math.PI * t) * (m === "always" ? 0.9 : 0.7);
+      m === "always" ? mote(ix + x, iy + 66 - t * 150, 5 + (i % 3), c, a) : spark(ix + x, iy + 66 - t * 150, 1.6 + (i % 2) * 0.6, c, a);
+    }
+  }
+  // the arrival by rarity
+  if (fx >= 0 && p.fx.tier) drawArrival(p.fx, fx, ix, iy, c);
+
+  // text
+  ctx.textBaseline = "alphabetic";
+  const it = ITEMS[q];
+  ctx.font = `19px "Palatino Linotype", "Book Antiqua", Georgia, serif`;
+  ctx.shadowColor = "#000"; ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
+  ctx.fillStyle = rgba(c, 1);
+  if (side) {
+    const tx = style === "banner" ? cx - 60 : cx - 6;
+    ctx.textAlign = "left"; ctx.fillText(it.name, tx, iy - 2);
+    if (style === "halo") { ctx.shadowColor = "transparent"; const g = ctx.createLinearGradient(tx, 0, tx + 190, 0); g.addColorStop(0, rgba(c, 0.9)); g.addColorStop(1, rgba(c, 0)); ctx.fillStyle = g; ctx.fillRect(tx, iy + 4, 190, 1); }
+    ctx.font = "12px system-ui"; ctx.fillStyle = "#ccc2ad"; ctx.fillText(it.info, tx, iy + 20);
+  } else {
+    ctx.textAlign = "center"; ctx.fillText(it.name, ix, iy + 104);
+    ctx.font = "12px system-ui"; ctx.fillStyle = "#ccc2ad"; ctx.fillText(it.info, ix, iy + 122);
+  }
+  ctx.shadowColor = "transparent";
+  ctx.restore();
+}
+
+function drawArrival(f, fx, ix, iy, c) {
+  for (const s of f.parts) {
+    if (s.kind === "ring") {
+      if (fx > s.life) continue;
+      const a = fx / s.life, d = s.dist * (1 - (1 - a) * (1 - a));
+      mote(ix + Math.cos(s.ang) * d, iy - Math.sin(s.ang) * d, s.size, c, 1 - a * a);
+    } else if (s.kind === "fountain") {
+      if (fx > s.life) continue;
+      const a = fx / s.life;
+      mote(ix + s.vx * fx, iy - (s.vy * fx - 210 * fx * fx), s.size, c, 1 - a * a);
+    } else if (s.kind === "burst") {
+      const t = fx - s.delay;
+      if (t < 0 || t > s.life) continue;
+      const k = 4, travel = (1 - Math.exp(-k * t)) / k; // drag: fast out, slowing
+      const x = ix + s.vx * travel, y = iy + s.vy * travel + 70 * t * t; // a little gravity
+      const a = (1 - t / s.life) * (0.7 + 0.3 * Math.sin(t * 38 + s.tw));
+      spark(x, y, s.size, c, Math.max(0, a));
+    } else if (s.kind === "glint") {
+      const t = fx - s.delay;
+      if (t < 0 || t > s.life) continue;
+      const u = t / s.life, grow = Math.sin(Math.PI * u);
+      star(ix + s.x, iy + s.y, s.size * grow, s.rot + u * 0.6, c, grow);
+    }
+  }
+  for (const w of f.waves) {
+    const t = (fx - w.at) / (w.soft ? 1.1 : 0.9);
+    if (t < 0 || t >= 1) continue;
+    const r = (40 + 300 * t) / 2;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = rgba(c, (1 - t) * (w.soft ? 0.5 : 0.95), 0.2); ctx.lineWidth = w.soft ? 10 * (1 - t) + 2 : 5;
+    ctx.beginPath(); ctx.arc(ix, iy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalCompositeOperation = "source-over";
+  }
+  for (const e of f.embers) {
+    const t = (fx * (e.slow ? 0.18 : 0.3) + e.phase) % 1;
+    const x = Math.sin(e.i * 1.9 + fx * (e.slow ? 0.4 : 0.7)) * 34;
+    const a = Math.sin(Math.PI * t) * 0.85 * Math.min(1, fx / 0.6);
+    e.slow ? spark(ix + x, iy + 70 - t * 190, 1.8, c, a) : mote(ix + x, iy + 70 - t * 190, 4 + (e.i % 3), c, a);
+  }
+}
+
+// a dim game-like backdrop so glows read the way they do in game
+function backdrop() {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#1c2230"); g.addColorStop(0.6, "#2a2a26"); g.addColorStop(1, "#151410");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  backdrop();
+  if (P) {
+    if (!soundPlayed && P.age >= arrivalSoundAt) { soundPlayed = true; if (P.q >= 3) playArrival(P.q); }
+    drawPopup(dt);
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---- sound: the same math as tools/gen_sounds.sh, rendered into buffers ----
+let ac = null, arrivalSoundAt = 0, soundPlayed = true;
+const SR = 44100;
+const bell = (s, f, d) => t => { const u = t - s; if (u < 0) return 0; return Math.min(1, u * 150) * ((Math.sin(2 * Math.PI * f * u) + 0.5 * Math.sin(2 * Math.PI * f * 1.004 * u)) * Math.exp(-d * u) + 0.22 * Math.sin(4 * Math.PI * f * u) * Math.exp(-2 * d * u) + 0.06 * Math.sin(6 * Math.PI * f * u) * Math.exp(-3 * d * u)); };
+const pad = (s, f, w, d) => t => { const u = t - s; if (u < 0) return 0; return Math.min(1, u / w) * Math.exp(-d * u) * (Math.sin(2 * Math.PI * f * u) + 0.6 * Math.sin(2 * Math.PI * f * 1.005 * u) + 0.15 * Math.sin(4 * Math.PI * f * u)); };
+const boom = (s, lo, hi, d) => t => { const u = t - s; if (u < 0) return 0; return Math.sin(2 * Math.PI * (lo * u + (hi - lo) / 6 * (1 - Math.exp(-6 * u)))) * Math.exp(-d * u); };
+const noise = (s, d) => t => { const u = t - s; return u < 0 ? 0 : (Math.random() * 2 - 1) * Math.exp(-d * u); };
+// a swell: noise and a tone that rise into the hit at time `at` (the "whoosh up")
+const swell = (at, f) => t => { if (t >= at) return 0; const k = Math.pow(t / at, 2.2); return k * (0.35 * (Math.random() * 2 - 1) * 0.6 + 0.5 * Math.sin(2 * Math.PI * f * (1 + 0.5 * t / at) * t)); };
+const sum = (...fs) => t => fs.reduce((a, f) => a + f(t), 0);
+const scale = (k, f) => t => k * f(t);
+
+const VOICES = {
+  now: { // tools/gen_sounds.sh today
+    3: [1.2, 0.38, sum(bell(0, 1318.5, 5), scale(0.8, bell(0.1, 1975.5, 5)))],
+    4: [2.4, 0.32, sum(scale(0.7, boom(0, 50, 120, 9)), scale(0.8, sum(bell(0.03, 1046.5, 4), bell(0.1, 1318.5, 4), bell(0.17, 1568, 4), scale(1.1, bell(0.24, 2093, 3)))),
+      scale(0.45, sum(pad(0.3, 523.25, 0.25, 1.6), pad(0.3, 783.99, 0.25, 1.6), pad(0.3, 1046.5, 0.25, 1.8), pad(0.3, 1318.5, 0.25, 2))),
+      scale(0.35, bell(0.42, 2637, 3.5)), scale(0.25, bell(0.52, 3136, 3.5)))],
+    5: [3.2, 0.3, sum(scale(1.1, boom(0, 38, 140, 1.8)), scale(0.7, boom(0, 28, 70, 1.2)), scale(0.5, noise(0, 28)),
+      scale(0.6, sum(bell(0.18, 523.25, 2.2), bell(0.18, 659.25, 2.2), bell(0.18, 783.99, 2.2), scale(0.9, bell(0.18, 1046.5, 2)))),
+      scale(0.6, bell(0.55, 2093, 3)), scale(0.5, bell(0.68, 2637, 3)))],
+  },
+  swell: { // rises for a beat, then lands: a thump under a bright chord with a short tail
+    3: [1.1, 0.36, sum(swell(0.16, 660), scale(0.5, boom(0.16, 70, 160, 10)), bell(0.16, 1318.5, 6), scale(0.75, bell(0.16, 1975.5, 6)))],
+    4: [1.5, 0.32, sum(swell(0.24, 523), scale(0.8, boom(0.24, 55, 140, 7)), scale(0.3, noise(0.24, 40)),
+      scale(0.7, sum(bell(0.24, 1046.5, 4.5), bell(0.24, 1318.5, 4.5), bell(0.24, 1568, 4.5))), scale(0.5, bell(0.34, 2093, 5)))],
+    5: [2.0, 0.3, sum(swell(0.32, 392), scale(1.1, boom(0.32, 36, 140, 3)), scale(0.6, boom(0.32, 28, 70, 2.5)), scale(0.45, noise(0.32, 30)),
+      scale(0.65, sum(bell(0.32, 523.25, 3), bell(0.32, 659.25, 3), bell(0.32, 783.99, 3), bell(0.32, 1046.5, 3))),
+      scale(0.5, bell(0.5, 2093, 4)), scale(0.4, bell(0.6, 2637, 4)))],
+  },
+  stab: { // one punchy hit with a quick tail, nothing before it
+    3: [0.8, 0.4, sum(scale(0.5, boom(0, 80, 200, 14)), bell(0, 1318.5, 8), scale(0.7, bell(0, 1975.5, 8)))],
+    4: [1.0, 0.34, sum(scale(0.85, boom(0, 55, 150, 9)), scale(0.3, noise(0, 50)), scale(0.75, sum(bell(0, 1046.5, 6), bell(0, 1318.5, 6), bell(0, 1568, 6))), scale(0.5, bell(0.06, 2093, 7)))],
+    5: [1.4, 0.32, sum(scale(1.1, boom(0, 36, 150, 4)), scale(0.45, noise(0, 34)), scale(0.7, sum(bell(0, 523.25, 4), bell(0, 659.25, 4), bell(0, 783.99, 4), bell(0, 1046.5, 4))), scale(0.45, bell(0.08, 2093, 5)))],
+  },
+};
+const cache = {};
+function render(voice, q) {
+  const key = voice + q;
+  if (cache[key]) return cache[key];
+  const [dur, gain, f] = VOICES[voice][q];
+  const n = Math.floor(dur * SR), dry = new Float32Array(n);
+  const fl = Math.min(0.3, dur / 3), fade = dur - fl;
+  for (let i = 0; i < n; i++) { const t = i / SR; dry[i] = gain * f(t) * (t > fade ? 1 - (t - fade) / fl : 1); }
+  // the "room": aecho=0.8:0.6:70|140:0.25|0.15, then a limiter at 0.89
+  const buf = ac.createBuffer(1, n, SR), out = buf.getChannelData(0);
+  const d1 = Math.round(0.07 * SR), d2 = Math.round(0.14 * SR);
+  for (let i = 0; i < n; i++) {
+    const v = 0.8 * dry[i] + 0.25 * 0.8 * (dry[i - d1] || 0) + 0.15 * 0.8 * (dry[i - d2] || 0);
+    out[i] = Math.max(-0.89, Math.min(0.89, v * 0.6 / 0.6));
+  }
+  return (cache[key] = buf);
+}
+function playArrival(q) {
+  const voice = opt("voice");
+  if (!$("sound").checked || voice === "none") return;
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  const src = ac.createBufferSource(), g = ac.createGain();
+  src.buffer = render(voice, Math.min(5, q)); g.gain.value = +$("vol").value;
+  src.connect(g).connect(ac.destination); src.start();
+}
+
+document.querySelectorAll("[data-q]").forEach(b => b.addEventListener("click", () => show(+b.dataset.q)));
+document.querySelectorAll("[data-play]").forEach(b => b.addEventListener("click", () => playArrival(+b.dataset.play)));
+["style", "arrival", "legend", "motes", "motion", "enter", "card"].forEach(id => $(id).addEventListener("change", () => { if (P) show(P.q); }));
+requestAnimationFrame(frame);
+setTimeout(() => { soundPlayed = true; show(4); soundPlayed = true; arrivalSoundAt = Infinity; }, 300); // a first popup, silent
+</script>
+</body>
+</html>

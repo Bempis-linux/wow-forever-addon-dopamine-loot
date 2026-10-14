@@ -20,7 +20,9 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - **Next up**:
   1. User tests 0.4.6 (`/reload`): Test rain with each "Loot flies from" choice; burst sound by haul
      size; settings fields filled after /reload (0.4.2 fix)?
-  2. **Popup polish** (user, 2026-10-14), mockup first (`docs/mockups/popups.html`, to build). The
+  2. **Popup polish** (user, 2026-10-14), mockup built: `docs/mockups/popups.html` (each control starts
+     on "now"; arrival ring/burst/glints/flash, legendary extras, beam motes, item motion, entrance,
+     arrival sounds now/swell/stab made with the gen_sounds.sh math). Waiting for the user's picks. The
      user's words: the popup animations feel "mockupy" and amateur; keep them **simple and build
      on them**. Specifics: the arrival sparks are too uniform (an even ring outwards) for Rare/Epic/
      Legendary; Beam's floating sparks conflict with them (Beam's rising sparks maybe only for higher
