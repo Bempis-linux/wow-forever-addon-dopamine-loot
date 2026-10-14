@@ -37,13 +37,22 @@ local ARRIVAL = {
   legendary = { sparks = 22, k = 1.3, glints = 7 },
 }
 
--- The loot toast's art (the game's atlases; checked once, as older clients may not have them)
-local TOAST_BG, TOAST_GLOW, TOAST_SHEEN = "LootToast-MoreAwesome", "loottoast-glow", "loottoast-sheen"
-local TOAST_BORDER = { [3] = "loottoast-itemborder-blue", [4] = "loottoast-itemborder-purple", [5] = "loottoast-itemborder-orange" }
+-- The loot toast, laid out like the game's own (LootWonAlertFrameTemplate, AlertFrameSystems.xml):
+-- a 276 x 96 frame; the 52 x 52 icon at (22, -23) from its top left in a border by quality; a label
+-- line beside the icon's top; the name in the dark box beside it (167 x 33, two lines, centered).
+-- The frame: the plain one below Rare (LessAwesome), the default one for Rare and Epic (a slice of
+-- LootToast.blp), the gold one for a Legendary (MoreAwesome, the game's "upgraded" toast).
+local TOAST_FILE = "Interface\\LootFrame\\LootToast"
+local TOAST_COORDS = { 0.28222656, 0.55175781, 0.578125, 0.953125 }
+local TOAST_LESS, TOAST_MORE, TOAST_GLOW, TOAST_SHEEN = "LootToast-LessAwesome", "LootToast-MoreAwesome", "loottoast-glow", "loottoast-sheen"
+local TOAST_BORDER = { -- the game's LOOT_BORDER_BY_QUALITY
+  [1] = "loottoast-itemborder-white", [2] = "loottoast-itemborder-green", [3] = "loottoast-itemborder-blue",
+  [4] = "loottoast-itemborder-purple", [5] = "loottoast-itemborder-orange",
+}
 local function HasAtlas(name) return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil end
 local toastOK
 function ns.ToastAvailable()
-  if toastOK == nil then toastOK = HasAtlas(TOAST_BG) and HasAtlas(TOAST_GLOW) and HasAtlas(TOAST_SHEEN) end
+  if toastOK == nil then toastOK = HasAtlas(TOAST_MORE) and HasAtlas(TOAST_LESS) and HasAtlas(TOAST_GLOW) and HasAtlas(TOAST_SHEEN) end
   return toastOK
 end
 
@@ -59,7 +68,7 @@ ns.STYLES = {
 local LAYOUT = {
   relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
-  toast = { w = 290, h = 110, stage = { -100, -2, 52, 52 }, text = "toast", hit = { 10, 10, 10, 10 }, zoom = 1, font = 16, icon = true },
+  toast = { w = 276, h = 96, stage = { -90, -1, 52, 52 }, text = "toast", hit = { 4, 4, 4, 4 }, zoom = 1, font = 15, icon = true },
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
 }
 
@@ -220,6 +229,7 @@ function ns.CreateView(f)
     local face = self.name:GetFont()
     if not (TITLE_FONT and face and face:lower():find("morpheus")) then self.name:SetFontObject("GameFontNormalLarge") end
     for _, fs in ipairs({ self.name, self.info, self.badges }) do fs:ClearAllPoints() end
+    self.info:SetWidth(0) -- only the toast gives its label line a fixed width
 
     if style == "relic" or style == "beam" then
       if style == "relic" then
@@ -246,26 +256,31 @@ function ns.CreateView(f)
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
       self.badges:SetJustifyH("CENTER")
     elseif style == "toast" then
-      -- the game's loot toast: its frame at its own size, the icon on the left, the text beside it
-      self.toastBg:SetAtlas(TOAST_BG, true)
+      -- the game's loot toast (frame chosen by quality in SetItem), its glow and its sheen
+      self.toastBg:SetSize(L.w, L.h)
       self.toastBg:SetPoint("CENTER", self, "CENTER", 0, 0)
       self.toastBg:Show()
-      self.toastGlow:SetAtlas(TOAST_GLOW, true)
-      self.toastGlow:SetPoint("CENTER", self.toastBg, "CENTER", 0, 0)
+      self.toastGlow:SetAtlas(TOAST_GLOW, false)
+      self.toastGlow:SetSize(286, 109)
+      self.toastGlow:SetPoint("CENTER", self, "CENTER", 0, 0)
       self.toastGlow:SetAlpha(0) -- Tick flares it on arrival
       self.toastGlow:Show()
       self.shineClip:SetAllPoints(self.toastBg)
       self.shineClip:Show()
-      self.sheen:SetAtlas(TOAST_SHEEN, true)
+      self.sheen:SetAtlas(TOAST_SHEEN, false)
+      self.sheen:SetSize(171, 75)
       self.sheen:Hide() -- Tick sweeps it across once
-      local textX = L.w / 2 + L.stage[1] + L.stage[3] / 2 + 14 -- just right of the icon
-      self.textX = textX
-      self.name:SetPoint("TOPLEFT", self, "LEFT", textX, L.stage[4] / 2 + L.stage[2] + 2) -- SetItem centers the text block on the icon
-      self.name:SetWidth(L.w - textX - 18)
-      self.name:SetJustifyH("LEFT")
-      self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -3)
+      -- the label line beside the icon's top: the item's type and level
+      self.info:SetPoint("TOPLEFT", self, "TOPLEFT", 81, -18)
+      self.info:SetWidth(167)
       self.info:SetJustifyH("LEFT")
-      self.badges:SetPoint("TOPLEFT", self.info, "BOTTOMLEFT", 0, -2)
+      -- the name fills the dark box: two lines at most, centered up and down
+      self.name:SetPoint("TOPLEFT", self, "TOPLEFT", 84, -42)
+      self.name:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 84, -75)
+      self.name:SetWidth(167)
+      self.name:SetJustifyH("LEFT")
+      if self.name.SetJustifyV then self.name:SetJustifyV("MIDDLE") end
+      self.badges:SetPoint("TOPLEFT", self, "TOPLEFT", 84, -77)
       self.badges:SetJustifyH("LEFT")
     else -- banner
       self.banner:SetSize(L.w, 58)
@@ -314,20 +329,30 @@ function ns.CreateView(f)
     self.cone:SetVertexColor(r, g, b, 0.85)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     if self.style == "toast" then
-      -- the game's border for Rare and up; a tinted icon frame below that
-      local bd = self.card.border
-      if TOAST_BORDER[math.min(q, 5)] and HasAtlas(TOAST_BORDER[math.min(q, 5)]) then
-        bd:SetAtlas(TOAST_BORDER[math.min(q, 5)], false)
+      -- the frame by quality: plain below Rare, the default for Rare and Epic, gold for a Legendary
+      local bg = self.toastBg
+      if q >= 5 then
+        bg:SetAtlas(TOAST_MORE, false)
+      elseif q >= 3 or not HasAtlas(TOAST_LESS) then
+        bg:SetTexture(TOAST_FILE)
+        bg:SetTexCoord(TOAST_COORDS[1], TOAST_COORDS[2], TOAST_COORDS[3], TOAST_COORDS[4])
+      else
+        bg:SetAtlas(TOAST_LESS, false)
+      end
+      bg:SetSize(self.L.w, self.L.h)
+      -- the game's item border in the quality's color (at its own size), else a tinted icon frame
+      local bd, border = self.card.border, TOAST_BORDER[math.max(1, math.min(q, 5))]
+      if border and HasAtlas(border) then
+        bd:SetAtlas(border, true)
         bd:SetVertexColor(1, 1, 1, 1)
       else
         bd:SetTexture("Interface\\COMMON\\WhiteIconFrame")
-        bd:SetTexCoord(0, 1, 0, 1) -- an atlas from a Rare+ toast left its coordinates behind
+        bd:SetTexCoord(0, 1, 0, 1) -- an atlas from an earlier toast left its coordinates behind
         bd:SetVertexColor(r, g, b, 1)
+        bd:SetSize(self.L.stage[3] * 1.18, self.L.stage[3] * 1.18)
       end
-      local s = self.L.stage[3] * 1.18
-      bd:SetSize(s, s)
       bd:Show()
-      self.toastGlow:SetVertexColor(math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, b + 0.3), 1)
+      self.toastGlow:SetVertexColor(1, 1, 1, 1) -- the game's own gold glow, as its toasts have
     end
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
@@ -396,28 +421,21 @@ function ns.CreateView(f)
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
     self.info:SetText(table.concat(info, "  -  "))
     self.badges:SetText(Badges(item))
-    if self.style == "banner" or self.style == "toast" then
-      -- badges ride the info line; under the name if there's no info, below it if too long
+    local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
+    if self.style == "banner" then
+      -- badges ride the info line inside the band; under the name if there's no info, below it if too long
       self.badges:ClearAllPoints()
-      local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
-      local room = self.style == "toast" and self.name:GetWidth() or self.L.w - 190
-      local below = false
       if iw == 0 then
         self.badges:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
-      elseif iw + 12 + self.badges:GetStringWidth() > room then
+      elseif iw + 12 + self.badges:GetStringWidth() > self.L.w - 190 then
         self.badges:SetPoint("TOPLEFT", self.info, "BOTTOMLEFT", 0, -2)
-        below = true
       else
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
       end
-      if self.style == "toast" then
-        -- the whole text block (name, info, badges) centered on the icon, so a two-line name stays
-        -- inside the frame
-        local h = self.name:GetStringHeight() + 3 + (iw > 0 and self.info:GetStringHeight() or 0)
-        if self.badges:GetText() ~= "" and (below or iw == 0) then h = h + 2 + self.badges:GetStringHeight() end
-        self.name:ClearAllPoints()
-        self.name:SetPoint("TOPLEFT", self, "LEFT", self.textX, self.L.stage[2] + h / 2)
-      end
+    elseif self.style == "toast" and iw > 0 and iw + 10 + self.badges:GetStringWidth() <= 167 then
+      -- toast: badges join the label line when they fit (else they stay under the name's box)
+      self.badges:ClearAllPoints()
+      self.badges:SetPoint("LEFT", self.info, "LEFT", iw + 10, 0)
     end
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
