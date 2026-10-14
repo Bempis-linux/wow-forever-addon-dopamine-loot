@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.16. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-14, after 0.4.17. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.16 pushed**, tree clean (0.4.16: each popup sound row on the Sounds page has a speaker Play button beside its dropdown, a custom row like BugSack's (SoundRow in Pages.lua); user on 0.4.15: pages "look pretty good and seem to work", sound picking was too much trial and error; the long Advanced asset-check label is OK for now, the tool goes away later). 0.4 = popup polish + loot rain from the ground.
+- **0.4.17 pushed** (Play and picking play both layers via ns:PreviewPopupSound). **Open bug: ADDON_ACTION_FORBIDDEN** "DopamineLoot has been blocked from an action only available to the Blizzard UI" when scrolling to the bottom of the game's Social settings page (user, 2026-10-14). Suspect: SoundRow (0.4.16) writes onto pooled SettingsListElementTemplate frames (cbrHandles, data), which Blizzard reuses; waiting for the BugSack stack. 0.4.16: each popup sound row on the Sounds page has a speaker Play button beside its dropdown, a custom row like BugSack's (SoundRow in Pages.lua); user on 0.4.15: pages "look pretty good and seem to work", sound picking was too much trial and error; the long Advanced asset-check label is OK for now, the tool goes away later). 0.4 = popup polish + loot rain from the ground.
 - **Popups** (View.lua; picks from `docs/mockups/popups.html`): arrival by rarity (`ARRIVAL`: Rare 10
   burst sparks; Epic 14 + 5 star4 glints; Legendary 22 + 7 glints, 2 shockwaves, embers); sway, Epic+
   turn once first ("Sway speed" = setting `spinSpeed`); upright weapons face you (`self.face` pi/2);

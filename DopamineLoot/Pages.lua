@@ -8,14 +8,16 @@ local sounds, advanced
 
 -- Picking a sound plays it; "Defaults" resets all four rows in one go, which must not play four
 -- sounds at once: only a frame with a single pick plays
-local picks, pickKey = 0, nil
-local function PickPlayed(key)
-  picks, pickKey = picks + 1, key
-  if picks == 1 then
-    C_Timer.After(0, function()
-      if picks == 1 and pickKey ~= "none" then ns.PlayKit(pickKey) end
-      picks = 0
-    end)
+local picks, pickQ = 0, nil
+local function PickPlayed(q) -- returns the setter for row q: a pick plays what that popup sounds like
+  return function()
+    picks, pickQ = picks + 1, q
+    if picks == 1 then
+      C_Timer.After(0, function()
+        if picks == 1 then ns:PreviewPopupSound(pickQ) end
+        picks = 0
+      end)
+    end
   end
 end
 
@@ -27,9 +29,9 @@ if ScrollBoxFactoryInitializerMixin and SettingsElementHierarchyMixin and Settin
   and Settings.CreateCallbackHandleContainer then
   SoundRow = CreateFromMixins(ScrollBoxFactoryInitializerMixin, SettingsElementHierarchyMixin, SettingsSearchableElementMixin)
 
-  function SoundRow:SetUp(setting, label, tip, options) -- ours; Blizzard never calls it
+  function SoundRow:SetUp(setting, label, tip, options, q) -- ours; Blizzard never calls it
     ScrollBoxFactoryInitializerMixin.Init(self, "SettingsListElementTemplate")
-    self.setting, self.options = setting, options
+    self.setting, self.options, self.q = setting, options, q
     self.data = { name = label, tooltip = tip }
     self:AddSearchTags(label)
   end
@@ -66,10 +68,8 @@ if ScrollBoxFactoryInitializerMixin and SettingsElementHierarchyMixin and Settin
       frame.dlPlay = play
     end
     local drop = frame.dlDrop
-    frame.dlPlay:SetScript("OnClick", function()
-      local v = setting:GetValue()
-      if v ~= "none" then ns.PlayKit(v) end
-    end)
+    local q = self.q
+    frame.dlPlay:SetScript("OnClick", function() ns:PreviewPopupSound(q) end) -- both layers, as a popup plays them
     drop:SetupMenu(function(_, root)
       for _, o in ipairs(options()) do
         root:CreateRadio(o[2], function(v) return setting:GetValue() == v end, function(v) setting:SetValue(v) end, o[1])
@@ -117,10 +117,10 @@ local function CreateSounds()
   N.Header(layout, "Popup sounds", "A game sound for each rarity; picking one plays it. Rare and up can add our chime, timed with the sparks.")
   for _, row in ipairs(ns.SOUND_ROWS) do
     local tip = "The sound a " .. row.label:lower() .. " popup plays. Picking one plays it; the speaker plays it again."
-    local setting = N.Choice(cat, "sound" .. row.q, row.label, SoundOptions, row.default, tip, PickPlayed, SoundRow ~= nil)
+    local setting = N.Choice(cat, "sound" .. row.q, row.label, SoundOptions, row.default, tip, PickPlayed(row.q), SoundRow ~= nil)
     if SoundRow then -- our row with a Play button (else the plain native dropdown was made above)
       local init = CreateFromMixins(SoundRow)
-      init:SetUp(setting, row.label, tip, SoundOptions)
+      init:SetUp(setting, row.label, tip, SoundOptions, row.q)
       layout:AddInitializer(init)
     end
     if row.q >= 3 then
