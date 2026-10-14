@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popup Placement Mockup</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.9); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 260px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 10px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  select { width: 100%; background: #1a1712; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 3px; font: inherit; }
+  label { display: block; padding: 3px 0; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  input[type=range] { width: 100%; }
+  #screen { position: fixed; left: 290px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 65%, #3d4a36, #1b2219 60%, #0f130e); }
+  .ui { position: absolute; border: 1px solid #5a4a28; background: rgba(20, 16, 10, .75); color: #bfb393; font-size: 11px;
+    display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .char { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); width: 60px; height: 110px;
+    background: linear-gradient(#6d5a44, #3b2f22); border-radius: 30px 30px 8px 8px; opacity: .9; }
+  .mob { position: absolute; width: 50px; height: 70px; background: linear-gradient(#5a2a22, #2b1410); border-radius: 22px 22px 6px 6px; }
+  .note { position: absolute; left: 50%; top: 70%; transform: translateX(-50%); color: rgba(255,255,255,.35); font-size: 12px; }
+  #pop { position: absolute; inset: 0; pointer-events: none; }
+  .p { position: absolute; transition: opacity .3s; }
+  .p.full { width: 200px; text-align: center; }
+  .p.full .glow { width: 150px; height: 150px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .p.full .sw { width: 14px; height: 96px; background: linear-gradient(90deg, #8a95a5, #eef2fa, #707885); border-radius: 7px 7px 3px 3px; }
+  .p.full .nm { font: 17px Georgia, serif; text-shadow: 1px 1px 0 #000; margin-top: -10px; }
+  .p.full .in { font-size: 11px; color: #ccc2ad; }
+  .p.compact { display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 4px;
+    background: linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,.25)); font: 13px Georgia, serif; text-shadow: 1px 1px 0 #000; white-space: nowrap; }
+  .p.compact .ic { width: 22px; height: 22px; border: 1px solid; border-radius: 3px; background: linear-gradient(#c87a2a, #5a2a10); }
+  .hit { outline: 1px dashed rgba(255,255,255,.35); outline-offset: -1px; }
+  #combat { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); color: #ff5555; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Popup placement mockup</h1>
+  <small>A stand-in game screen. Loot something and watch where popups land and what they cover.</small>
+  <h2>Loot</h2>
+  <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button><button data-q="5">Legendary</button>
+  <button id="burst">A burst (5 items)</button>
+  <label class="check"><input type="checkbox" id="fight"> In combat</label>
+
+  <h2>Where</h2>
+  <label>Position
+    <select id="pos">
+      <option value="top">Top center (now)</option>
+      <option value="upper">Upper middle, a little lower</option>
+      <option value="right" selected>Right side, under the quest tracker</option>
+      <option value="left">Left side, above the chat</option>
+      <option value="bags">Above the bars and bags (bottom right)</option>
+      <option value="bottom">Above the action bars (bottom middle)</option>
+    </select>
+    <small>Later: drag to move, like the rain's landing height.</small>
+  </label>
+  <label>Size <span id="szv">0.8</span><input id="size" type="range" min="0.5" max="1.2" step="0.05" value="0.8"></label>
+  <label>At once
+    <select id="max"><option value="1">1</option><option value="2" selected>2</option><option value="3">3 (now)</option></select>
+  </label>
+
+  <h2>How much</h2>
+  <label>Uncommon and lower
+    <select id="low">
+      <option value="full">Full popup (now)</option>
+      <option value="compact" selected>Compact: one line, icon and name</option>
+    </select>
+  </label>
+  <label>Time on screen
+    <select id="hold">
+      <option value="now">5 s, a little longer for better items (now)</option>
+      <option value="tier" selected>By rarity: 2.5 s / 4 s / 6 s / 8 s</option>
+    </select>
+  </label>
+  <label>Mouse
+    <select id="mouse">
+      <option value="item">Only the item catches clicks (now)</option>
+      <option value="through" selected>Click-through: hover to hold, nothing blocks</option>
+    </select>
+    <small>Dashed outline = the part that catches the mouse.</small>
+  </label>
+  <label>In combat
+    <select id="combatmode">
+      <option value="same">Same as always (now)</option>
+      <option value="compact" selected>Everything compact</option>
+      <option value="defer">Wait until the fight is over</option>
+    </select>
+  </label>
+  <small style="margin-top:10px">Pick per row what feels least in the way while still a treat; the "now" options show today's behavior.</small>
+</div>
+
+<div id="screen">
+  <!-- laid out like the user's own screen (1920 x 1080 screenshot, as percents) -->
+  <div class="ui" style="left:0.4%;top:0;width:4.6%;height:8%">Issue reporter</div>
+  <div class="ui" style="left:82.5%;top:0.5%;width:4%;height:4%">Buffs</div>
+  <div class="ui" style="left:90.5%;top:3%;width:7.8%;height:14%;border-radius:50%">Minimap</div>
+  <div class="ui" style="left:86%;top:17.5%;width:13.5%;height:24%;align-items:flex-start;padding-top:6px">Quest tracker</div>
+  <div class="ui" style="left:34.5%;top:66%;width:10%;height:7%">You (player frame)</div>
+  <div class="ui" style="left:0;top:73%;width:18%;height:25%;align-items:flex-start;padding-top:6px">Chat</div>
+  <div class="ui" style="left:19%;top:89%;width:38.5%;height:9%">Action bars</div>
+  <div class="ui" style="left:42.5%;top:89%;width:14.5%;height:9%;background:transparent;border:none"></div>
+  <div class="ui" style="left:58%;top:87%;width:23%;height:11%">More bars, bags</div>
+  <div class="char" style="top:57%"></div>
+  <div class="mob" style="left:40%;top:38%"></div><div class="mob" style="left:46%;top:30%"></div>
+  <div class="note">your character and the fight</div>
+  <div id="combat">IN COMBAT</div>
+  <div id="pop"></div>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const QC = { 2: "#1eff00", 3: "#0070dd", 4: "#a335ee", 5: "#ff8000" };
+const NAMES = { 2: "Tarnished Militia Blade", 3: "Edge of the Quiet Vale", 4: "Duskforged Greatsword", 5: "Emberheart, Oath of Ash" };
+const HOLD = { now: q => 5 + Math.max(0, q - 2), tier: q => ({ 2: 2.5, 3: 4, 4: 6, 5: 8 })[q] };
+let pops = [], waiting = [];
+
+function compact(q) {
+  if ($("fight").checked && $("combatmode").value === "compact") return true;
+  return q <= 2 && $("low").value === "compact";
+}
+
+function loot(q) {
+  if ($("fight").checked && $("combatmode").value === "defer") { waiting.push(q); return; }
+  const el = document.createElement("div");
+  const c = QC[q];
+  if (compact(q)) {
+    el.className = "p compact";
+    el.innerHTML = `<span class="ic" style="border-color:${c}"></span><span style="color:${c}">${NAMES[q]}</span>`;
+  } else {
+    el.className = "p full";
+    el.innerHTML = `<div class="glow" style="background:radial-gradient(circle, ${c}cc, ${c}33 45%, transparent 70%)"><div class="sw"></div></div>
+      <div class="nm" style="color:${c}">${NAMES[q]}</div><div class="in">Two-Hand Sword - item level ${20 + q * 12}</div>`;
+  }
+  if ($("mouse").value === "item") el.querySelector(".glow, .ic")?.classList.add("hit");
+  $("pop").appendChild(el);
+  const p = { el, q, born: performance.now(), hold: HOLD[$("hold").value](q) * 1000 };
+  pops.unshift(p);
+  const max = +$("max").value;
+  while (pops.length > max) { const old = pops.pop(); old.el.style.opacity = 0; setTimeout(() => old.el.remove(), 300); }
+  layout();
+}
+
+// Where the stack starts and which way it grows, inside the stand-in screen
+function anchor(w, h) {
+  const S = $("screen").getBoundingClientRect(), W = S.width, H = S.height;
+  switch ($("pos").value) {
+    case "top": return { x: W / 2 - w / 2, y: H * 0.06, dir: 1 };
+    case "upper": return { x: W / 2 - w / 2, y: H * 0.12, dir: 1 };
+    case "right": return { x: W * 0.99 - w, y: H * 0.44, dir: 1 };
+    case "left": return { x: W * 0.02, y: H * 0.71, dir: -1 };
+    case "bags": return { x: W * 0.81 - w, y: H * 0.86, dir: -1 };
+    case "bottom": return { x: W * 0.38 - w / 2, y: H * 0.88, dir: -1 };
+  }
+}
+
+function layout() {
+  const s = +$("size").value;
+  let off = 0;
+  for (const p of pops) {
+    const r = p.el.getBoundingClientRect();
+    const w = p.el.offsetWidth * s, h = p.el.offsetHeight * s;
+    const a = anchor(w, h);
+    p.el.style.transformOrigin = "0 0";
+    p.el.style.transform = `scale(${s})`;
+    p.el.style.left = a.x + "px";
+    p.el.style.top = (a.dir > 0 ? a.y + off : a.y - off - h) + "px";
+    off += h + 6;
+  }
+}
+
+function tick() {
+  const now = performance.now();
+  for (const p of [...pops]) {
+    if (now - p.born > p.hold) {
+      p.el.style.opacity = 0;
+      pops.splice(pops.indexOf(p), 1);
+      setTimeout(() => { p.el.remove(); }, 300);
+      layout();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+document.querySelectorAll("[data-q]").forEach(b => b.addEventListener("click", () => loot(+b.dataset.q)));
+$("burst").addEventListener("click", () => [2, 2, 3, 2, 4].forEach((q, i) => setTimeout(() => loot(q), i * 350)));
+$("size").addEventListener("input", e => { $("szv").textContent = e.target.value; layout(); });
+["pos", "max"].forEach(id => $(id).addEventListener("change", layout));
+$("fight").addEventListener("change", e => {
+  $("combat").style.display = e.target.checked ? "block" : "none";
+  if (!e.target.checked && waiting.length) { waiting.splice(0).forEach((q, i) => setTimeout(() => loot(q), i * 350)); }
+});
+addEventListener("resize", layout);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

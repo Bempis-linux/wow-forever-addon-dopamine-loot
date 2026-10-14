@@ -31,7 +31,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   1. User tests 0.4.15 (`/reload`): every page opens and looks tidy; dropdowns, sliders, buttons work;
      the sound picker plays on pick; "Defaults" doesn't blast four sounds; settings filled after /reload.
      If a native control is missing, check `/dump Settings.CreateSlider, CreateSettingsButtonInitializer`.
-  2. **Popup placement**: popups feel "in your face" and get in the way; satisfying but **not
+  2. **Popup placement**, mockup `docs/mockups/placement.html` (laid out like the user's screen: free space upper middle, left above chat, right under the quest tracker); waiting for picks. Popups feel "in your face" and get in the way; satisfying but **not
      blocking**. Mockup first (position, size, hold time, click-through, compact low tiers).
   3. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
   4. Hooks (streak, tally, records), card flip (off by default).
