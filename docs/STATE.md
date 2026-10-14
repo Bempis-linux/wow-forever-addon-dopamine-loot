@@ -23,7 +23,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - **Next up**:
   1. User tests 0.4.14 (`/reload`): Popup look shows Relic, Beam, Banner (no Toast); rain "Loot flies from";
      settings fields filled after /reload?
-  2. **Sound picker** per rarity with Play buttons: the game's own loot sounds (check they play)
+  2. **Settings cleanup first** (user, 2026-10-14: before adding more settings), mockup `docs/mockups/settings.html`: pages General / Popups / Loot rain / Sounds / Advanced, radio check-box lists become dropdowns, tests merged, rain effects grouped; native Blizzard layout (Settings.RegisterVerticalLayoutCategory, as BugSack does on Forever, incl. a sound dropdown that plays on pick) for all but Popups (custom, live preview). Waiting for the user's review. Then the
+     **sound picker** per rarity with Play buttons, on the new Sounds page: the game's own loot sounds (check they play)
      and ours, layered or alone. User: our synthesized sounds feel artificial, no punch (current and
      "short stab" best, "swell" bad); a little more drama, short, not tiresome; **no level-up/quest**.
   3. **Popup placement**: popups feel "in your face" and get in the way; satisfying but **not

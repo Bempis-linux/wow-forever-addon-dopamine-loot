@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings Cleanup Mockup</title>
+<style>
+  :root { --bg: #0d0b08; --frame: #2a2117; --edge: #6b5430; --gold: #ffd100; --text: #f0e6d0; --muted: #a59a80;
+    --new: #5fd0ff; --moved: #ffb347; --merged: #c99bff; --btn: #5a0f0f; --btnedge: #a33; }
+  html, body { margin: 0; height: 100%; background: radial-gradient(ellipse at 40% 20%, #2b2a35, #0b0a0e); color: var(--text);
+    font: 13px/1.4 "Segoe UI", system-ui, sans-serif; }
+  .wrap { display: flex; gap: 14px; padding: 14px; box-sizing: border-box; min-height: 100%; flex-wrap: wrap; }
+  .window { flex: 1 1 640px; max-width: 900px; background: #14110c; border: 2px solid var(--edge); border-radius: 6px;
+    box-shadow: 0 0 0 2px #000, 0 8px 30px #000a; display: flex; flex-direction: column; min-height: 560px; }
+  .title { text-align: center; color: var(--gold); padding: 6px; border-bottom: 1px solid var(--edge); background: linear-gradient(#3a2c18, #241b10); }
+  .body { display: flex; flex: 1; min-height: 0; }
+  .tree { width: 180px; border-right: 1px solid var(--edge); padding: 8px 0; background: #100d09; }
+  .tree div { padding: 3px 10px 3px 14px; cursor: pointer; color: var(--gold); }
+  .tree div.sub { padding-left: 30px; color: var(--text); }
+  .tree div.sel { background: linear-gradient(90deg, #4a3a1a, transparent); }
+  .page { flex: 1; padding: 14px 20px; overflow: auto; }
+  .page h1 { font: 600 18px Georgia, serif; color: var(--gold); margin: 0 0 2px; }
+  .page .intro { color: var(--muted); margin-bottom: 10px; }
+  .page h2 { font-size: 13px; color: var(--gold); margin: 14px 0 6px; border-bottom: 1px solid #3a2e1c; padding-bottom: 2px; }
+  .row { display: flex; align-items: center; gap: 10px; min-height: 28px; }
+  .row > .lab { width: 210px; flex: none; }
+  .row small { color: var(--muted); }
+  input[type=checkbox] { accent-color: var(--gold); width: 15px; height: 15px; }
+  select { background: #1d1912; color: var(--text); border: 1px solid #7a6440; border-radius: 3px; padding: 2px 4px; font: inherit; min-width: 190px; }
+  input[type=range] { width: 170px; accent-color: var(--gold); }
+  .num { width: 40px; background: #000; color: #fff; border: 1px solid #7a6440; border-radius: 3px; text-align: center; font: inherit; }
+  button { background: linear-gradient(#7a1a1a, var(--btn)); color: var(--gold); border: 1px solid var(--btnedge); border-radius: 3px; padding: 2px 10px; font: inherit; cursor: pointer; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+  .tag { font-size: 10px; border-radius: 3px; padding: 0 4px; margin-left: 6px; border: 1px solid; white-space: nowrap; }
+  .tag.new { color: var(--new); border-color: var(--new); }
+  .tag.moved { color: var(--moved); border-color: var(--moved); }
+  .tag.merged { color: var(--merged); border-color: var(--merged); }
+  .preview { height: 150px; border: 1px solid #5a4a30; background: radial-gradient(circle at 50% 45%, #6a2aa8aa, #000 60%); display: flex;
+    align-items: flex-end; justify-content: center; padding-bottom: 8px; color: #c06cff; font: 15px Georgia, serif; margin: 6px 0; }
+  .notes { flex: 0 1 320px; background: rgba(12,12,18,.9); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 14px; align-self: flex-start; }
+  .notes h3 { color: var(--gold); font-size: 14px; margin: 4px 0 6px; }
+  .notes h4 { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; margin: 12px 0 4px; }
+  .notes li { margin: 3px 0; }
+  .notes .q { color: var(--new); }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } .row > .lab { width: 150px; } .tree { width: 120px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="window">
+    <div class="title">Options — AddOns</div>
+    <div class="body">
+      <div class="tree" id="tree">
+        <div data-p="general" class="sel">Dopamine Loot</div>
+        <div data-p="popups" class="sub">Popups</div>
+        <div data-p="rain" class="sub">Loot rain</div>
+        <div data-p="sounds" class="sub">Sounds</div>
+        <div data-p="advanced" class="sub">Advanced</div>
+      </div>
+      <div class="page" id="page"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Settings cleanup: proposal</h3>
+    <div>One topic per page, the same order every time: <b>on/off → when → how it looks → test it</b>.
+      Click the pages on the left. Tags: <span class="tag new">new</span> <span class="tag moved">moved</span>
+      <span class="tag merged">merged</span>.</div>
+    <h4>Dropped or folded in</h4>
+    <ul>
+      <li>The <b>check-box lists that act as one choice</b> (pop up for Poor…Epic, stay as popups, burst sound, flies from, channel) become <b>dropdowns</b>.</li>
+      <li><b>A Test button per quality + "Test legendary"</b> → one quality dropdown and one Test button.</li>
+      <li><b>"Check all sounds"</b> and the <b>Arrival sounds</b> switch with its 3 buttons → the new per-rarity sound picker (each with Play; "None" turns one off).</li>
+      <li><b>"Test with N items"</b> was on two pages → only on Loot rain.</li>
+      <li><b>"Popup look and live preview…" / "Loot rain effects…" / "Main settings"</b> buttons → not needed: every page is in the list on the left.</li>
+      <li><b>Check any item ID</b> (Popup look) → Advanced.</li>
+      <li><b>Blizzard assets</b> page → its button lives on Advanced (a developer tool, not a setting).</li>
+      <li>The 14 rain effect switches → grouped (Motion, Light, Money, Ending) instead of one long list.</li>
+    </ul>
+    <h4>Built how (custom vs. Blizzard)</h4>
+    <ul>
+      <li><b>Blizzard's native settings layout</b> (what BugSack uses on Forever): the game's own check boxes, sliders and dropdowns, laid out for you, <b>found by the Options search box</b>, a default-reset per setting. No live preview inside it.</li>
+      <li><b>Our custom pages</b> (now): full control, live preview, but hand-placed and they can drift out of line.</li>
+      <li><b>Recommendation: mix.</b> Native for General, Loot rain, Sounds, Advanced; custom only for Popups (it needs the live preview).</li>
+    </ul>
+    <h4>For you to decide</h4>
+    <ul>
+      <li class="q">Native/custom mix OK, or keep everything custom?</li>
+      <li class="q">Anything here you'd drop, rename or move?</li>
+      <li class="q">Master switches on the first page (Popups / Rain / Sounds): useful, or noise?</li>
+      <li class="q">Popup placement (position, size, click-through) gets its own group on Popups when we build it. OK?</li>
+    </ul>
+  </div>
+</div>
+<script>
+"use strict";
+const T = (k) => k ? `<span class="tag ${k}">${k}</span>` : "";
+const chk = (label, on = true, tag = "", tip = "") => `<div class="row"><label><input type="checkbox" ${on ? "checked" : ""}> ${label}</label>${T(tag)}${tip ? `<small>${tip}</small>` : ""}</div>`;
+const sel = (label, opts, tag = "", extra = "") => `<div class="row"><span class="lab">${label}${T(tag)}</span><select>${opts.map(o => `<option>${o}</option>`).join("")}</select>${extra}</div>`;
+const sld = (label, min, max, step, v, tag = "", tip = "") => `<div class="row"><span class="lab">${label}${T(tag)}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" oninput="this.nextElementSibling.value=this.value"><input class="num" value="${v}">${tip ? `<small>${tip}</small>` : ""}</div>`;
+const btn = (t, tag = "") => `<button>${t}</button>${T(tag)}`;
+const QUAL = ["Poor and up", "Common and up", "Uncommon and up (default)", "Rare and up", "Epic and up"];
+const SOUNDS = ["Game: epic loot toast", "Game: legendary loot toast", "Game: raid loot won", "Game: bonus roll", "Ours: chime (now)", "Ours: punchy stab", "Game + ours together", "None"];
+
+const PAGES = {
+  general: `<h1>Dopamine Loot</h1><div class="intro">Loot that feels like loot: your drops pop up turning in 3D, and big hauls rain down. <small>v0.4.x · /dl help</small></div>
+    <h2>Features</h2>
+    ${chk("Loot popups", true, "", "a card for each good item you loot")}
+    ${chk("Loot rain", true, "", "big hauls spray up and bounce down")}
+    ${chk("Sounds", true, "", "turns every Dopamine Loot sound off at once")}
+    <h2>Try it</h2>
+    <div class="row"><span class="lab">A popup${T("merged")}</span><select>${["Uncommon", "Rare", "Epic", "Legendary"].map(o => `<option>${o}</option>`).join("")}</select>${btn("Test")}</div>
+    <div class="row"><span class="lab">A loot rain</span><input class="num" value="8"> items ${btn("Test")}</div>
+    <div class="row"><span class="lab">A quest reward</span>${btn("Test")}</div>
+    <div class="intro" style="margin-top:12px">Everything else is on the pages below this one in the list.</div>`,
+
+  popups: `<h1>Popups</h1><div class="intro">A card at the top of the screen for each item you loot. Changes show in the preview at once.</div>
+    <div class="cols"><div>
+      <h2>When</h2>
+      ${sel("Show popups for", QUAL, "merged")}
+      ${sld("Time on screen (s)", 2, 15, 0.5, 5, "", "")}
+      <h2>Look</h2>
+      ${sel("Style", ["Relic (default)", "Beam", "Banner"], "merged")}
+      ${sld("Size", 0.6, 1.6, 0.05, 1)}
+      <h2>The 3D item</h2>
+      ${sld("Zoom", 0.3, 2, 0.05, 0.7)}
+      ${sld("Weapon tilt", 0, 355, 5, 90)}
+      ${sld("Sway speed", 0, 3, 0.1, 0.9)}
+      <h2>Placement <span class="tag new">new, later</span></h2>
+      <div class="row"><small>position, compact low rarities, click-through: from the placement mockup</small></div>
+    </div><div>
+      <h2>Preview</h2>
+      <div class="preview">Arcanite Reaper</div>
+      <div class="row">${["Poor", "Comm", "Unco", "Rare", "Epic", "Lege"].map(q => `<button>${q}</button>`).join(" ")}</div>
+      <div class="row">${btn("Weapon")} ${btn("Helm")} ${btn("No model")}</div>
+      <div class="row">${btn("Show as a real popup")}</div>
+    </div></div>`,
+
+  rain: `<h1>Loot rain</h1><div class="intro">When you loot several things at once they spray up and bounce down; the best lands last.</div>
+    <div class="cols"><div>
+      <h2>When</h2>
+      <div class="row"><span class="lab">Rain from</span><input class="num" value="3"> items looted at once</div>
+      <div class="row"><span class="lab">Money alone rains from</span><input class="num" value="1">g <input class="num" value="0">s <input class="num" value="0">c</div>
+      <h2>Where</h2>
+      ${sel("Loot flies from", ["The ground, a fountain (default)", "The ground, spread out", "Below the bottom edge", "The middle of the screen"], "moved")}
+      ${sld("Landing height (% up)", 0, 30, 1, 0, "merged")}
+      <h2>Afterwards</h2>
+      ${sel("Stay as popups", ["Uncommon and up", "Rare and up (default)", "Epic and up"], "merged")}
+      ${chk("Gather the rest into the bag", true, "moved")}
+      ${chk("Skip with Escape", true, "moved")}
+      <h2>Test</h2>
+      <div class="row"><span class="lab">Items</span><input class="num" value="8"> ${btn("Test")}</div>
+      <div class="row"><span class="lab">Money</span><select><option>54c</option><option>35s 20c</option><option>2g 35s</option><option>25g</option></select>${btn("Test")}${T("merged")}</div>
+      <div class="row"><span class="lab">Quest reward</span>${btn("Test")}</div>
+    </div><div>
+      <h2>Effects: motion</h2>
+      ${chk("Best item last")}${chk("Escalation")}${chk("Hit-stop")}${chk("Spacing")}
+      <h2>Effects: light</h2>
+      ${chk("Loot beam")}${chk("Trails")}${chk("Floor shadows")}${chk("Dust puff")}${chk("Epic edge glow")}${chk("Name labels")}
+      <h2>Effects: money</h2>
+      ${chk("Coins")}${chk("Coins merge up")}
+    </div></div>`,
+
+  sounds: `<h1>Sounds</h1><div class="intro">Pick by ear: choosing a sound plays it.</div>
+    <h2>General</h2>
+    ${chk("Play sounds", true, "moved")}
+    ${sel("Volume follows", ["Sound effects (default)", "Master volume (plays with effects muted)"], "merged")}
+    <h2>Popup sounds <span class="tag new">new: the sound picker</span></h2>
+    ${["Uncommon", "Rare", "Epic", "Legendary"].map(q => sel(q, SOUNDS, "", btn("Play"))).join("")}
+    <h2>Loot rain</h2>
+    ${sel("As the loot bursts out", ["By haul size (default)", "Always the big sound", "Never"], "moved")}
+    <div class="row"><small>The rising whoosh, clink and tick sets stay ours (the game can't change a sound's pitch).</small></div>`,
+
+  advanced: `<h1>Advanced</h1><div class="intro">For checking things and reporting bugs.</div>
+    <h2>Log and checks</h2>
+    ${chk("Debug logging", false, "", "logs every loot line as it's read")}
+    <div class="row">${btn("Open log")} ${btn("Check client")}</div>
+    <div class="row"><span class="lab">Check any item ID${T("moved")}</span><input class="num" style="width:60px" value="19019"> ${btn("Check")}</div>
+    <h2>Blizzard assets</h2>
+    <div class="row">${btn("Open the asset check…")}${T("moved")}<small>the game's chests, glows, sounds and fonts, found or missing</small></div>`,
+};
+
+function show(p) {
+  document.getElementById("page").innerHTML = PAGES[p];
+  document.querySelectorAll("#tree div").forEach(d => d.classList.toggle("sel", d.dataset.p === p));
+}
+document.querySelectorAll("#tree div").forEach(d => d.addEventListener("click", () => show(d.dataset.p)));
+show("general");
+</script>
+</body>
+</html>
