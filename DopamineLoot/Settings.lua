@@ -289,6 +289,10 @@ local function CreateGeneral()
   N.Choice(cat, "testQuality", "Test popup quality", TESTS, 4, "Which quality the Test popup button shows.")
   N.Button(layout, "A popup", "Test popup", function() ns.RunCommand("test", TEST_WORDS[ns.settings.testQuality or 4]) end,
     "Show a test popup of the quality picked above (/dl test epic).")
+  N.Button(layout, "A popup in combat", "Test combat", function() ns.RunCommand("test", TEST_WORDS[ns.settings.testQuality or 4] .. " combat") end,
+    "The same popup as it looks in a fight (Popups page: In combat). /dl test epic combat")
+  N.Button(layout, "Two items at once", "Test pair", function() ns.RunCommand("testpair") end,
+    "An Uncommon looted beside a Rare: the Rare comes full, the Uncommon compact (/dl testpair).")
   N.Button(layout, "A loot rain", "Test rain", function() ns.RunCommand("rain", tostring(ns.settings.testRain or 8)) end,
     "Rain test loot (how many: on the Loot rain page). /dl rain 8")
   N.Button(layout, "A quest reward", "Test reward", function() ns.RunCommand("testquest") end,

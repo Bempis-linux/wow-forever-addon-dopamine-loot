@@ -224,26 +224,47 @@ local function OwnItems(quality)
   return #pick > 0 and pick[math.random(#pick)].link or nil
 end
 
-local function Preview(item, count)
+-- opts: fight (as if in combat), best (the best quality looted with it). With opts a test follows
+-- the real compact rule; without, it always shows the full popup.
+local function Preview(item, count, opts)
   ns.ItemData(item, count, "loot", function(d)
     d.test, d.push = true, true
+    if opts then
+      d.burstBest = opts.best
+      d.compact = ns.PopupCompact(d, opts.fight)
+    end
     ns:ShowLoot(d)
   end)
 end
 
-ns.AddCommand("test", "preview a popup: /dl test [uncommon|rare|epic|legendary|itemID]", function(arg)
-  local n = tonumber(arg)
-  local id = (n and n > 5) and n or M.ItemID(arg) -- 0-5 are qualities, bigger numbers item IDs
-  if id then return Preview(id) end
-  local q = QUALITY_WORDS[arg] or n or math.random(2, 5)
+local function TestItem(q) -- an item of this quality: one of yours first, else a well-known one
   local own = OwnItems(q)
-  if own then return Preview(own) end
+  if own then return own end
   local ids = TEST_IDS[q]
-  if not ids then
+  return ids and ids[math.random(#ids)]
+end
+
+ns.AddCommand("test", "preview a popup: /dl test [uncommon|rare|epic|legendary|itemID] [combat]", function(arg)
+  local word, extra = (arg or ""):match("^(%S*)%s*(%S*)")
+  local fight = word == "combat" or extra == "combat"
+  if word == "combat" then word = "" end
+  local opts = fight and { fight = true } or nil
+  local n = tonumber(word)
+  local id = (n and n > 5) and n or (word ~= "" and M.ItemID(word)) -- 0-5 are qualities, bigger numbers item IDs
+  if id then return Preview(id, nil, opts) end
+  local q = QUALITY_WORDS[word] or n or math.random(2, 5)
+  local it = TestItem(q)
+  if not it then
     ns.Print(("no %s item in your bags or gear to preview"):format(QUALITY_NAMES[q] or tostring(q)))
     return ns:ShowLog()
   end
-  Preview(ids[math.random(#ids)])
+  Preview(it, nil, opts)
+end)
+
+-- an Uncommon looted beside a Rare: the Rare comes full, the Uncommon compact (Popups page: Low rarities)
+ns.AddCommand("testpair", "preview an Uncommon looted beside a Rare", function()
+  Preview(TestItem(3), nil, { best = 3 })
+  Preview(TestItem(2), nil, { best = 3 })
 end)
 
 -- /dl rain N: N items from your bags and gear (plus a blue, and a purple from 8 up, so you see the

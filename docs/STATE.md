@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-14, after 0.4.20. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-16, after 0.4.21. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,9 +8,9 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.20 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
+- **0.4.21 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
   ground.
-- **Popup placement (0.4.20, unverified)**: user picked right of you mid-screen; Poor/Common compact,
+- **Popup placement (0.4.20; placement looks good to the user; compact/combat via the 0.4.21 tests unverified)**: user picked right of you mid-screen; Poor/Common compact,
   an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
   size 0.8 (the user's saved 1.05 kept), 2 at once, time by rarity 2.5/4/6/8 s, clicks pass through
   (hover holds up to 10 s, not while mouselooking), compact in combat. Popup.lua `POPUP_POSITIONS`,
@@ -29,20 +29,18 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. User tests 0.4.20 (`/reload`): popups appear right of the character mid-screen; Poor/Common (and
-     an Uncommon looted beside something better) come as one-line compact popups; clicks pass through,
-     hovering holds (max 10 s); 2 at once; the Popups page rows (When / Look / Placement / The 3D item)
-     look tidy and fit beside the preview (dropdown text may be cut: shorten labels). Screenshot to tune.
-  2. Sounds page (0.4.19) not yet confirmed tidy in game.
-  3. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
-  4. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
-  5. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
+  1. User tests 0.4.21 (`/reload`): hovering a popup no longer errors (0.4.20 called `MouseIsOver`,
+     which Forever lacks: Popup.lua `OverHit` now); Test combat and Test pair buttons (first settings
+     page; `/dl test epic combat`, `/dl testpair`) show compact popups.
+  2. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
+  3. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
+  4. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
 - 0.3: popup styles, preview + sliders, weapons upright; rain effects; **real looting works** (grays
   and copper rained, coins included); coin merge-up, Test money/quest; opening sound by size.
-- 0.4: the chest show worked (now set aside); Escape skip; asset check; popup arrivals and sway; settings pages by topic and the sound picker work (0.4.15-0.4.18); the Social-page "blocked" popup is a game bug (reproduced with BugSack)
+- 0.4: popup placement right of you (0.4.20), Popups and Sounds pages tidy (0.4.19-0.4.20); the chest show worked (now set aside); Escape skip; asset check; popup arrivals and sway; settings pages by topic and the sound picker work (0.4.15-0.4.18); the Social-page "blocked" popup is a game bug (reproduced with BugSack)
   "looking pretty good"; weapons face you while swaying (0.4.8); Banner long names OK (0.4.9).
 
 ## Known bugs
@@ -81,6 +79,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   (preflight finds it); it is Lua 5.4.
 - ffmpeg (winget Gyan.FFmpeg, not on PATH) for sounds (`bash tools/gen_sounds.sh`, which re-encodes
   every OGG: `git checkout -- DopamineLoot/Media/` after) and art checks.
+- `MouseIsOver` (FrameXML helper) does not exist on Forever: check hit rects by hand.
 - New media files need a full game restart. `SetRotation` only on square textures. Models: set
   after `Show()`, placed and sized first, `ClearModel()` before `SetModel`, no AnimationGroups;
   models drop while hidden (reload on show). Big world models need `SetCamDistanceScale` > 1.
@@ -94,6 +93,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-10-16 0.4.21: hover error fixed (no MouseIsOver on Forever); compact and combat popup tests.
 - 2026-10-14 0.4.20: popup placement (right of you, compact low rarities, click-through).
 - 2026-10-14 0.4.15-0.4.19: settings rebuilt by topic, sound picker, Sounds page tidied.
 - 2026-10-14 0.4.6-0.4.14: chest show set aside, loot flies from the ground; popup polish (arrival by

@@ -399,7 +399,8 @@ All output goes to the log window except `help` (yellow chat). An unknown subcom
 |---|---|
 | `/dl` | Toggle the inspector (recent loot) |
 | `/dl help` | List the commands in chat (yellow) |
-| `/dl test [poor/common/uncommon/rare/epic/legendary]` | Preview a popup (a random fitting item from your bags, or a curated ID list) |
+| `/dl test [poor/common/uncommon/rare/epic/legendary] [combat]` | Preview a popup (a random fitting item from your bags, or a curated ID list); `combat`: as it looks in a fight |
+| `/dl testpair` | An Uncommon looted beside a Rare (the Uncommon comes compact) |
 | `/dl test rain [n]`, `/dl test chest` | Preview the rain / the full chest show |
 | `/dl inspect <item link or ID>` | Open the inspector on an item |
 | `/dl stats` | Session and lifetime stats to the log |

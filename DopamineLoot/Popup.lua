@@ -76,6 +76,17 @@ local function Release(p)
   pool[#pool + 1] = p
 end
 
+-- Is the cursor over the part that would catch clicks (not the empty glow)? By hand: MouseIsOver
+-- doesn't exist on Forever. hit = { left, right, top, bottom } insets, like SetHitRectInsets.
+local NO_HIT = { 0, 0, 0, 0 }
+local function OverHit(p, cx, cy)
+  local l, r, t, b = p:GetLeft(), p:GetRight(), p:GetTop(), p:GetBottom()
+  if not l then return false end
+  local h, s = p.L and p.L.hit or NO_HIT, p:GetEffectiveScale()
+  cx, cy = cx / s, cy / s
+  return cx >= l + h[1] and cx <= r - h[2] and cy <= t - h[3] and cy >= b + h[4]
+end
+
 local slot = {}
 local function Update(_, dt)
   dt = math.min(dt, 0.1)
@@ -107,9 +118,7 @@ local function Update(_, dt)
       -- moved since the popup appeared and not while turning the camera (the cursor sits still then)
       local cx, cy = GetCursorPosition()
       if cx ~= p.cursorX or cy ~= p.cursorY then p.cursorMoved = true end
-      local h = p.L and p.L.hit or { 0, 0, 0, 0 } -- only the part that would catch clicks (not the empty glow)
-      local over = p.cursorMoved and not (IsMouselooking and IsMouselooking())
-        and MouseIsOver(p, -h[3], h[4], h[1], -h[2])
+      local over = p.cursorMoved and not (IsMouselooking and IsMouselooking()) and OverHit(p, cx, cy)
       if over and not p.hover then p.hover = true; ShowTooltip(p)
       elseif not over and p.hover then p.hover = false; if GameTooltip:IsOwned(p) then GameTooltip:Hide() end end
     end
@@ -141,8 +150,9 @@ end
 -- Compact (one line) for low rarities: Poor and Common always; an Uncommon unless it's the best of
 -- what was looted with it (setting popupLow: "smart", "always", "never"); in combat everything
 -- (setting popupCombat "compact", the default)
-function ns.PopupCompact(item) -- the rule itself (the Popups page's preview uses it too)
-  if (ns.settings.popupCombat or "compact") == "compact" and InCombatLockdown() then return true end
+function ns.PopupCompact(item, fight) -- the rule itself (the Popups page's preview and tests use it too;
+  -- fight: as if in combat)
+  if (ns.settings.popupCombat or "compact") == "compact" and (fight or InCombatLockdown()) then return true end
   local q, low = item.quality or 1, ns.settings.popupLow or "smart"
   if q >= 3 or low == "never" then return false end
   if q <= 1 or low == "always" then return true end
