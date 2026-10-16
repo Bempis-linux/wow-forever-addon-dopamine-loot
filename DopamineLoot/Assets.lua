@@ -591,12 +591,14 @@ local SLOT_WORDS = {
   head = 1, shoulder = 3, shoulders = 3, shirt = 4, chest = 5, waist = 6, belt = 6, legs = 7, feet = 8,
   boots = 8, wrist = 9, wrists = 9, hands = 10, gloves = 10, back = 15, cloak = 15, tabard = 19,
 }
--- close-up per slot: { toward the camera, down (shows higher parts), facing }. First guesses, tuned
--- in game with /dl armortest frame
+-- close-up per slot: { toward the camera, height (+ lifts the body: shows lower parts), facing }.
+-- The full view centers on the hips; closer magnifies the height shift. Second guesses from a dwarf
+-- (0.4.22: feet at 1.3/0.75 sat at the top, the shirt at 1.1/-0.35 centered on the belly); tuned in
+-- game with /dl armortest frame
 local CLOSEUP = {
-  [1] = { 1.6, -0.75 }, [3] = { 1.3, -0.6 }, [4] = { 1.1, -0.35 }, [5] = { 1.1, -0.35 },
-  [6] = { 1.3, -0.05 }, [7] = { 0.8, 0.3 }, [8] = { 1.3, 0.75 }, [9] = { 1.3, 0 }, [10] = { 1.3, 0 },
-  [15] = { 0.8, -0.3, math.pi }, [19] = { 1.1, -0.35 },
+  [1] = { 1.6, -0.6 }, [3] = { 1.3, -0.5 }, [4] = { 1.1, -0.5 }, [5] = { 1.1, -0.5 },
+  [6] = { 1.3, -0.1 }, [7] = { 1.0, 0.15 }, [8] = { 1.2, 0.35 }, [9] = { 1.3, 0 }, [10] = { 1.3, 0 },
+  [15] = { 0.8, -0.3, math.pi }, [19] = { 1.1, -0.5 },
 }
 local TRYON = { [0] = "success", "wrong race", "not equippable", "data pending" }
 local DRESS_METHODS = { "SetUnit", "SetAutoDress", "Undress", "TryOn", "UndressSlot", "SetSheathed",
@@ -652,24 +654,36 @@ local function Dress(m, i)
     local log = DopamineLootDB.armorTest.lines
     log[#log + 1] = line
     if ok and r == 3 and tries < 4 then C_Timer.After(1, function() Apply("retry") end) end
+    C_Timer.After(1, function() -- did it stick?
+      if run ~= armorRun then return end
+      local later = ("%s 1 s later: geo ready %s, slot visible %s"):format(i == 1 and "body" or "close-up",
+        tostring(m.IsGeoReady and select(2, pcall(m.IsGeoReady, m))),
+        tostring(m.IsSlotVisible and select(2, pcall(m.IsSlotVisible, m, run.slot))))
+      ns.Print("  " .. later)
+      log[#log + 1] = later
+    end)
   end
-  local loaded = false
-  m:SetScript("OnModelLoaded", function()
-    if loaded then return end -- TryOn may reload the model: apply only on the first load
-    loaded = true
-    Apply("model loaded")
-  end)
+  -- 0.4.22 dressed on OnModelLoaded and nothing stuck (geo not ready yet): wait for IsGeoReady
+  m:SetScript("OnModelLoaded", nil)
   m:Show()
   if m.SetAutoDress then m:SetAutoDress(not run.bare) end
   m:SetUnit("player")
-  C_Timer.After(0.6, function() if not loaded then Apply("0.6 s, no load event yet") end end)
+  local waited = 0
+  m:SetScript("OnUpdate", function(self, dt)
+    waited = waited + dt
+    local ready = self.IsGeoReady and self:IsGeoReady()
+    if ready or waited > 3 then
+      self:SetScript("OnUpdate", nil)
+      Apply((ready and "geo ready after %.1f s" or "not ready after %.1f s"):format(waited))
+    end
+  end)
 end
 
 local function ArmorTest(arg)
   local words = {}
   for w in (arg or ""):gmatch("%S+") do words[#words + 1] = w:lower() end
   if words[1] == "off" then if armor then armor:Hide() end return end
-  if words[1] == "frame" then -- tune the close-up: /dl armortest frame <toward> <down> [facing]
+  if words[1] == "frame" then -- tune the close-up: /dl armortest frame <toward> <height> [facing]
     local run, c = armorRun, armorRun and CLOSEUP[armorRun.slot]
     if not (run and armor and c) then ns.Print("run /dl armortest first"); return ns:ShowLog() end
     c[1], c[2], c[3] = tonumber(words[2]) or c[1], tonumber(words[3]) or c[2], tonumber(words[4]) or c[3]
