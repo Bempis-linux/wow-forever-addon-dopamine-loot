@@ -10,7 +10,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 ## Where things stand
 - **0.4.21 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
   ground.
-- **Popup placement (0.4.20; placement looks good to the user; compact/combat via the 0.4.21 tests unverified)**: user picked right of you mid-screen; Poor/Common compact,
+- **Popup placement (0.4.20; verified: placement, compact Uncommon beside a Rare via Test pair, 0.4.21)**: user picked right of you mid-screen; Poor/Common compact,
   an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
   size 0.8 (the user's saved 1.05 kept), 2 at once, time by rarity 2.5/4/6/8 s, clicks pass through
   (hover holds up to 10 s, not while mouselooking), compact in combat. Popup.lua `POPUP_POSITIONS`,
@@ -29,12 +29,9 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. User tests 0.4.21 (`/reload`): hovering a popup no longer errors (0.4.20 called `MouseIsOver`,
-     which Forever lacks: Popup.lua `OverHit` now); Test combat and Test pair buttons (first settings
-     page; `/dl test epic combat`, `/dl testpair`) show compact popups.
-  2. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
-  3. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
-  4. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
+  1. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
+  2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
+  3. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
