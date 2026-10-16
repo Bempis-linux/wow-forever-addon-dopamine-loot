@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-16, after 0.4.21. Read this first in a new session (the kit's
+_Last checkpoint: 2026-10-16, after 0.4.22. Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,7 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.21 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
+- **0.4.22 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
   ground.
 - **Popup placement (0.4.20; verified: placement, compact Uncommon beside a Rare via Test pair, 0.4.21)**: user picked right of you mid-screen; Poor/Common compact,
   an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
@@ -29,7 +29,11 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. **Armor in 3D** (user asked): body armor on a mannequin in popups (DressUpModel; test first).
+  1. **Armor in 3D** (user asked): body armor on a mannequin in popups. 0.4.22 adds a throwaway probe,
+     `/dl armortest [chest|legs|...|itemID] [dressed]` (Assets.lua; left full body, right slot close-up;
+     `/dl armortest frame <toward> <down> [facing]` tunes the close-up; results in DopamineLootDB.armorTest).
+     Research: DressUpModel creates on Forever (ATT), methods only from retail annotations; no
+     SetCustomRace. Next: user runs it, read armorTest, then mockups (own body / bare / close-up).
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 

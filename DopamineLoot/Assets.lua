@@ -576,3 +576,148 @@ function ns:OpenAssets()
 end
 
 ns.OnInit(function() if not panel then Create() end end)
+
+---------------------------------------------------------------------------
+-- Armor test (/dl armortest): can this client dress a mannequin? A throwaway probe for "armor in
+-- 3D", removed once the real thing is built. Left: your body wearing the item; right: a close-up
+-- of its slot. Results go to the log and DopamineLootDB.armorTest. [V] all of it.
+---------------------------------------------------------------------------
+local ARMOR_SLOTS = { -- equipLoc -> inventory slot
+  INVTYPE_HEAD = 1, INVTYPE_SHOULDER = 3, INVTYPE_BODY = 4, INVTYPE_CHEST = 5, INVTYPE_ROBE = 5,
+  INVTYPE_WAIST = 6, INVTYPE_LEGS = 7, INVTYPE_FEET = 8, INVTYPE_WRIST = 9, INVTYPE_HAND = 10,
+  INVTYPE_CLOAK = 15, INVTYPE_TABARD = 19,
+}
+local SLOT_WORDS = {
+  head = 1, shoulder = 3, shoulders = 3, shirt = 4, chest = 5, waist = 6, belt = 6, legs = 7, feet = 8,
+  boots = 8, wrist = 9, wrists = 9, hands = 10, gloves = 10, back = 15, cloak = 15, tabard = 19,
+}
+-- close-up per slot: { toward the camera, down (shows higher parts), facing }. First guesses, tuned
+-- in game with /dl armortest frame
+local CLOSEUP = {
+  [1] = { 1.6, -0.75 }, [3] = { 1.3, -0.6 }, [4] = { 1.1, -0.35 }, [5] = { 1.1, -0.35 },
+  [6] = { 1.3, -0.05 }, [7] = { 0.8, 0.3 }, [8] = { 1.3, 0.75 }, [9] = { 1.3, 0 }, [10] = { 1.3, 0 },
+  [15] = { 0.8, -0.3, math.pi }, [19] = { 1.1, -0.35 },
+}
+local TRYON = { [0] = "success", "wrong race", "not equippable", "data pending" }
+local DRESS_METHODS = { "SetUnit", "SetAutoDress", "Undress", "TryOn", "UndressSlot", "SetSheathed",
+  "IsGeoReady", "IsSlotVisible", "SetPortraitZoom", "SetKeepModelOnHide", "SetUseTransmogSkin" }
+local armor, armorRun -- the test window; the current run { link, slot, bare }
+
+local function ArmorWindow()
+  if armor then return armor end
+  local f = CreateFrame("Frame", nil, UIParent)
+  f:SetSize(440, 380)
+  f:SetPoint("CENTER", -220, 0)
+  f:SetFrameStrata("DIALOG")
+  local bg = f:CreateTexture(nil, "BACKGROUND")
+  bg:SetAllPoints()
+  bg:SetTexture(WHITE)
+  bg:SetVertexColor(0, 0, 0, 0.75)
+  f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  f.title:SetPoint("TOP", 0, -10)
+  local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+  close:SetPoint("TOPRIGHT", 2, 2)
+  f.models = {}
+  for i = 1, 2 do
+    local ok, m = pcall(CreateFrame, "DressUpModel", nil, f)
+    if not ok then return nil, m end
+    m:SetSize(200, 330)
+    m:SetPoint("BOTTOMLEFT", 13 + (i - 1) * 214, 12)
+    f.models[i] = m
+  end
+  armor = f
+  return f
+end
+
+local function Place(m, slot, closeup)
+  local c = closeup and CLOSEUP[slot] or nil
+  m:SetPosition(c and c[1] or 0, 0, c and c[2] or 0)
+  m:SetFacing(c and c[3] or 0.4) -- turned a little toward you
+end
+
+local function Dress(m, i)
+  local run = armorRun
+  local tries = 0
+  local function Apply(why)
+    if run ~= armorRun then return end -- a newer test started
+    tries = tries + 1
+    if run.bare and m.Undress then m:Undress() end
+    local ok, r = pcall(m.TryOn, m, run.link)
+    Place(m, run.slot, i == 2)
+    local geo = m.IsGeoReady and select(2, pcall(m.IsGeoReady, m))
+    local vis = m.IsSlotVisible and select(2, pcall(m.IsSlotVisible, m, run.slot))
+    local line = ("%s (%s): TryOn %s, geo ready %s, slot visible %s"):format(i == 1 and "body" or "close-up",
+      why, ok and (TRYON[r] or tostring(r)) or ("error " .. tostring(r)), tostring(geo), tostring(vis))
+    ns.Print("  " .. line)
+    local log = DopamineLootDB.armorTest.lines
+    log[#log + 1] = line
+    if ok and r == 3 and tries < 4 then C_Timer.After(1, function() Apply("retry") end) end
+  end
+  local loaded = false
+  m:SetScript("OnModelLoaded", function()
+    if loaded then return end -- TryOn may reload the model: apply only on the first load
+    loaded = true
+    Apply("model loaded")
+  end)
+  m:Show()
+  if m.SetAutoDress then m:SetAutoDress(not run.bare) end
+  m:SetUnit("player")
+  C_Timer.After(0.6, function() if not loaded then Apply("0.6 s, no load event yet") end end)
+end
+
+local function ArmorTest(arg)
+  local words = {}
+  for w in (arg or ""):gmatch("%S+") do words[#words + 1] = w:lower() end
+  if words[1] == "off" then if armor then armor:Hide() end return end
+  if words[1] == "frame" then -- tune the close-up: /dl armortest frame <toward> <down> [facing]
+    local run, c = armorRun, armorRun and CLOSEUP[armorRun.slot]
+    if not (run and armor and c) then ns.Print("run /dl armortest first"); return ns:ShowLog() end
+    c[1], c[2], c[3] = tonumber(words[2]) or c[1], tonumber(words[3]) or c[2], tonumber(words[4]) or c[3]
+    Place(armor.models[2], run.slot, true)
+    ns.Print(("close-up for slot %d: %s %s %s"):format(run.slot, c[1], c[2], tostring(c[3] or 0.4)))
+    return ns:ShowLog()
+  end
+  local bare = true
+  if words[#words] == "dressed" then bare = false; table.remove(words) end
+  local what = words[1] or "chest"
+  local link = SLOT_WORDS[what] and GetInventoryItemLink("player", SLOT_WORDS[what])
+  if not link then
+    local id = tonumber(what) or tonumber((arg or ""):match("item:(%d+)"))
+    if not id and not SLOT_WORDS[what] then
+      ns.Print("usage: /dl armortest [chest | legs | head | ... | itemID] [dressed]; /dl armortest off")
+      return ns:ShowLog()
+    end
+    if not id then ns.Print("nothing equipped in " .. what); return ns:ShowLog() end
+    link = "item:" .. id
+  end
+  local GetInstant = (C_Item and C_Item.GetItemInfoInstant) or GetItemInfoInstant
+  local equipLoc = select(4, GetInstant(link))
+  local slot = SLOT_WORDS[what] or ARMOR_SLOTS[equipLoc or ""]
+  if not slot then ns.Print(("%s is not armor this test can dress (%s)"):format(link, tostring(equipLoc))); return ns:ShowLog() end
+
+  ns:ShowLog()
+  DopamineLootDB.armorTest = { when = date("%Y-%m-%d %H:%M"), item = link:match("item:(%d+)"), slot = slot, lines = {} }
+  local probe = CreateFrame("Frame") -- what exists: methods on a DressUpModel, the game's own dressing room
+  local okWidget, test = pcall(CreateFrame, "DressUpModel", nil, probe)
+  local found = {}
+  for _, k in ipairs(DRESS_METHODS) do
+    if okWidget and test[k] then found[#found + 1] = k else found[#found + 1] = k .. "=MISSING" end
+  end
+  local env = ("DressUpFrame.ModelScene %s, DressUpModelFrame %s, CreateFrame ModelScene %s, C_TransmogCollection %s"):format(
+    tostring(DressUpFrame and DressUpFrame.ModelScene ~= nil), tostring(rawget(_G, "DressUpModelFrame") ~= nil),
+    tostring(pcall(CreateFrame, "ModelScene", nil, probe)), tostring(C_TransmogCollection ~= nil))
+  ns.Print("armor test: " .. link .. (bare and " on a bare body" or " over your own gear"))
+  ns.Print("  DressUpModel: " .. (okWidget and table.concat(found, " ") or ("cannot be created: " .. tostring(test))))
+  ns.Print("  " .. env)
+  DopamineLootDB.armorTest.methods = okWidget and table.concat(found, " ") or tostring(test)
+  DopamineLootDB.armorTest.env = env
+  if not okWidget then return end
+  local f, err = ArmorWindow()
+  if not f then ns.Print("  the test window failed: " .. tostring(err)); return end
+  armorRun = { link = link, slot = slot, bare = bare }
+  f.title:SetText(("Armor test: slot %d  (/dl armortest off)"):format(slot))
+  f:Show()
+  for i, m in ipairs(f.models) do Dress(m, i) end
+end
+
+ns.AddCommand("armortest", "test armor on a mannequin: /dl armortest [chest | legs | ... | itemID] [dressed]", ArmorTest)
