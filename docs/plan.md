@@ -8,7 +8,7 @@ item is revealed last. Any item (recent loot, or Alt+Right-click in your bags) c
 
 | | |
 |---|---|
-| Client | WoW: Forever only (beta folder `_classic_beta_`, `## Interface: 16001`; release folder TBD at launch 2026-11-04) |
+| Client | WoW: Forever only (client folder `_forever_`, `## Interface: 16001`; released 2026-11-04, the beta was `_classic_beta_`) |
 | Folder / TOC | `DopamineLoot/DopamineLoot.toc` (plain unsuffixed TOC, Forever only) |
 | Slash | `/dl`, `/dopamine` (no collision among installed addons) |
 | Saved data | `DopamineLootDB` (account: settings), `DopamineLootCharDB` (per character: seen items, recent loot, stats) |

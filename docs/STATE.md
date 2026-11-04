@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-10-16, after 0.4.23. Read this first in a new session (the kit's
+_Last checkpoint: 2026-11-04, stop point after 0.4.23 (moved to the released client). Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
 popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -8,7 +8,11 @@ popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece;
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **0.4.23 pushed**, tree clean. 0.4 = popup polish, popup placement, settings by topic, rain from the
+- **WoW: Forever released 2026-11-04**: client folder `_forever_` (Interface still 16001, build 1.60.1);
+  the DopamineLoot junction is in place there. The release account has no DopamineLoot saved data yet
+  (beta settings, seen items, armorTest not carried over); BugGrabber/BugSack/Baganator are not
+  installed in `_forever_` yet. Paths in CLAUDE.local.md.
+- **0.4.23 pushed**, tree clean (stop point). 0.4 = popup polish, popup placement, settings by topic, rain from the
   ground.
 - **Popup placement (0.4.20; verified: placement, compact Uncommon beside a Rare via Test pair, 0.4.21)**: user picked right of you mid-screen; Poor/Common compact,
   an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
@@ -36,7 +40,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
      SetCustomRace. 0.4.22 in game: every DressUpModel method exists, ModelScene too; SetAutoDress(false)
      gives a bare body; TryOn said success but nothing showed (IsGeoReady false at OnModelLoaded), so
      0.4.23 waits for IsGeoReady. SetPosition z: + lifts the body; the full view centers on the hips.
-     Next: user retests, then mockups (own body / bare / close-up).
+     **Stop point: 0.4.23 not yet run in game.** Next: user runs `/dl armortest legs` etc. on the
+     release client, then mockups (own body / bare / close-up).
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
 
@@ -91,12 +96,14 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Roadmap: name upcoming work, not version numbers (fixes keep taking the next patch number).
 - Kit updates: `claude plugin marketplace update bempis`, then `claude plugin update
   wow-addon-kit@bempis --scope user`. Kit source: `C:\dev\wow-addons\wow-addon-kit`.
-- Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
+- Game closed before editing `WTF`. Paths in CLAUDE.local.md (client `_forever_` since 2026-11-04). Baganator owns Alt+click.
 
 ## Open questions / waiting on the user
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-11-04: Forever released; moved to `_forever_` (docs, local paths, privacy patterns).
+- 2026-10-16 0.4.22-0.4.23: `/dl armortest` probe for armor on a mannequin.
 - 2026-10-16 0.4.21: hover error fixed (no MouseIsOver on Forever); compact and combat popup tests.
 - 2026-10-14 0.4.20: popup placement (right of you, compact low rarities, click-through).
 - 2026-10-14 0.4.15-0.4.19: settings rebuilt by topic, sound picker, Sounds page tidied.

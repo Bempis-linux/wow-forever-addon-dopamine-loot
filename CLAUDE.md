@@ -12,7 +12,7 @@ A World of Warcraft addon. General WoW addon knowledge, house style, and tooling
 | Addon folder | `DopamineLoot/` (linked into each client's `Interface\AddOns\` with a junction) |
 | Slash command | `/dl` (also `/dopamine`) |
 | Saved data | `DopamineLootDB` (account: settings), `DopamineLootCharDB` (per character: seen items, recent loot, stats) |
-| Client folder | `_classic_beta_` until launch on 2026-11-04 (release folder TBD; re-point the junction then) |
+| Client folder | `_forever_` (product `wowf`; released 2026-11-04, the beta was `_classic_beta_`) |
 
 Machine paths (WoW root, client folders, account folder) are in `CLAUDE.local.md` (gitignored).
 
