@@ -10,7 +10,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 ## Where things stand
 - **WoW: Forever released 2026-11-04**: client folder `_forever_` (Interface still 16001, build 1.60.1);
   the DopamineLoot junction is in place there. The release account has no DopamineLoot saved data yet
-  (beta settings, seen items, armorTest not carried over); BugGrabber/BugSack/Baganator are not
+  (user chose to start fresh: beta settings, seen items, armorTest not carried over); BugGrabber/BugSack/Baganator are not
   installed in `_forever_` yet. Paths in CLAUDE.local.md.
 - **0.4.23 pushed**, tree clean (stop point). 0.4 = popup polish, popup placement, settings by topic, rain from the
   ground.
