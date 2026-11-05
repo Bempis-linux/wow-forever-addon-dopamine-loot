@@ -18,3 +18,6 @@ desktop.ini
 
 # Crash dumps from Git Bash tools
 *.stackdump
+
+# Daily feedback reports (quote other people's usernames; never commit)
+reports/

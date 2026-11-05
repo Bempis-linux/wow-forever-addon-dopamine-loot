@@ -46,6 +46,7 @@ deprecated/asset-check/  the dev tools taken out for 1.0: /dl assets page and /d
 .pkgmeta, .github/       release packaging: BigWigs packager; a pushed v* tag builds the GitHub release zip
 CHANGELOG.md             player-facing release notes (the packager uses it as the release changelog)
 docs/curseforge.md       CurseForge listing copy (summary, description, categories) checked against its moderation rules
+reports/                 daily feedback reports from the scheduled task (gitignored: they quote player handles)
 ```
 
 ## Session continuity (read first)
