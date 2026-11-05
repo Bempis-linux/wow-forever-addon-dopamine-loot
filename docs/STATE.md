@@ -51,7 +51,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
      CurseForge: listing copy in docs/curseforge.md (checked against the moderation rules); avatar options in
      docs/mockups/avatar.html (A rain / B coin / C drop). **Project created 2026-11-05: ID 1784686** (in the .toc);
      v1.0.0-forever uploaded by hand 2026-11-05; avatar, summary, description, MIT, categories in place: **waiting on
-     CurseForge moderation**. CF_API_KEY secret not set yet (until then, upload each release by hand). Wago not set up.
+     CurseForge moderation**. CF_API_KEY secret **set 2026-11-05**: the next v* tag uploads to CurseForge too (first automatic upload untested). Wago not set up.
   1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
       less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
       (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles
