@@ -47,9 +47,10 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - **Next up**:
   1. Release: user checks 1.0.0 in game (`/dl` opens settings, no Advanced page, Test buttons work), then tag `v1.0.0`
      with the kit's new `wow-addon-release` skill (kit 0.7.0, written from this release; steps 5-6).
-  1b. **Rain looks** (mocked up 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
-      less), ground line, item frame (plain / game bag border / rounded soft glow), dull grays. Coin piles
-      **dropped** (user: "a little jarring"). Waiting on the user's picks, then build each as a Loot rain switch.
+  1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
+      less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
+      (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles
+      **dropped** (user: "a little jarring"). Not yet seen in game.
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
 

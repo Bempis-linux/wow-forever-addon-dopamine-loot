@@ -209,6 +209,9 @@ if not CreateFrame then return end
 
 local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local WHITE = "Interface\\Buttons\\WHITE8X8"
+local BORDER = "Interface\\COMMON\\WhiteIconFrame" -- the game's bag-slot border, tinted by quality
+local STAR = "Interface\\Cooldown\\star4"          -- the game's four-point sparkle (coin glints)
+local TWINKLE_T = 0.4
 -- the game's own coin icons (the money frame's), bigger for better metal
 local COIN = {
   gold = { file = "Interface\\MoneyFrame\\UI-GoldIcon", size = 24 },
@@ -237,6 +240,9 @@ ns.RAIN_FX = {
   { key = "Hitstop", word = "hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands." },
   { key = "Names", word = "names", label = "Name labels", tip = "Rare and better items show their name while they rest." },
   { key = "Escape", word = "escape", label = "Skip with Escape", tip = "Escape ends the rain at once; the good items still become popups." },
+  { key = "Twinkle", word = "twinkle", label = "Coins twinkle", tip = "Resting gold coins glint now and then; silver too, less often." },
+  { key = "Ground", word = "ground", label = "Ground line", tip = "A faint warm line along the ground where the loot lands, with a shimmer sliding along it." },
+  { key = "Poor", word = "poor", label = "Gray items look poor", tip = "Gray items come out dull and a little smaller, fly lower and barely bounce." },
 }
 -- The switches, read once per frame (RefreshFx) rather than per sprite
 local fxOn = {}
@@ -256,6 +262,14 @@ local bounds = {}
 local state -- nil | the running rain (see ns:Rain)
 local lastTick = 0
 local Skip
+
+local function Tex(parent, layerName, file, blend)
+  local t = parent:CreateTexture(nil, layerName)
+  t:SetTexture(file)
+  if blend then t:SetBlendMode(blend) end
+  t:Hide()
+  return t
+end
 
 local function Layer()
   if layer then return layer end
@@ -280,6 +294,12 @@ local function Layer()
   layer.bagGlow:SetVertexColor(1, 0.85, 0.4)
   layer.bagGlow:Hide()
   layer.flashTex = {} -- merge flashes, made as needed
+  -- the ground line (setting Ground), behind the sprites: a soft glow, the line, a sliding shimmer
+  layer.groundGlow = Tex(layer, "BACKGROUND", MEDIA .. "Glow", "ADD")
+  layer.groundLine = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
+  layer.groundShine = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
+  for _, t in ipairs({ layer.groundGlow, layer.groundLine, layer.groundShine }) do t:SetVertexColor(1, 0.84, 0.5) end
+  layer.groundShine:SetVertexColor(1, 0.96, 0.82)
   driver = CreateFrame("Frame")
   -- Escape: a named frame in UISpecialFrames, shown while it rains; Escape hides it, which skips
   escFrame = CreateFrame("Frame", "DopamineLootRainSkip", UIParent)
@@ -291,28 +311,28 @@ local function Layer()
   return layer
 end
 
-local function Tex(parent, layerName, file, blend)
-  local t = parent:CreateTexture(nil, layerName)
-  t:SetTexture(file)
-  if blend then t:SetBlendMode(blend) end
-  t:Hide()
-  return t
-end
-
 local function Sprite()
   local s = table.remove(pool)
   if s then return s end
   local f = CreateFrame("Frame", nil, Layer())
   f:SetFrameLevel(layer:GetFrameLevel() + 5)
-  -- all three layers hang off the frame's edges, so the squash stretches them together, and
-  -- each gets the same rotation (a plain color texture wouldn't rotate, so the edge is a file)
+  -- the layers hang off the frame's edges, so the squash stretches them together, and each gets
+  -- the same rotation (a plain color texture wouldn't rotate, so the rim is a file). An item is
+  -- its icon on a black rim under the game's bag-slot border, as in your bags.
   f.edge = f:CreateTexture(nil, "BACKGROUND")
   f.edge:SetTexture(WHITE)
   f.edge:SetAllPoints()
   f.icon = f:CreateTexture(nil, "ARTWORK")
-  f.icon:SetPoint("TOPLEFT", 2, -2)
-  f.icon:SetPoint("BOTTOMRIGHT", -2, 2)
+  f.icon:SetPoint("TOPLEFT", 1, -1)
+  f.icon:SetPoint("BOTTOMRIGHT", -1, 1)
   f.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+  f.border = f:CreateTexture(nil, "ARTWORK", nil, 2)
+  f.border:SetTexture(BORDER)
+  f.border:SetAllPoints()
+  f.star = f:CreateTexture(nil, "OVERLAY", nil, 2)
+  f.star:SetTexture(STAR)
+  f.star:SetBlendMode("ADD")
+  f.star:Hide()
   f.glow = f:CreateTexture(nil, "OVERLAY")
   f.glow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
   f.glow:SetBlendMode("ADD")
@@ -333,6 +353,7 @@ end
 
 local function Release(s)
   s.f:Hide()
+  s.f.star:Hide()
   s.shadow:Hide()
   s.beam:Hide()
   s.name:Hide()
@@ -378,6 +399,9 @@ local function Finish()
     layer.money:SetAlpha(0)
     layer.pulse:Hide()
     layer.bagGlow:Hide()
+    layer.groundGlow:Hide()
+    layer.groundLine:Hide()
+    layer.groundShine:Hide()
     for _, t in ipairs(layer.flashTex) do t:Hide() end
     layer:ClearAllPoints()
     layer:SetAllPoints(UIParent)
@@ -413,6 +437,9 @@ local function Launch(st, item, isBest, W, H, k)
   s.e = 0.45 + math.random() * 0.2
   s.spin = (math.random() - 0.5) * 8
   if s.coin then s.vy, s.e = math.random(500, 850) * k, 0.5 end
+  -- junk looks it: dull, smaller, a lower arc and a dead bounce (setting Poor)
+  s.dull = not s.coin and s.q == 0 and not isBest and On("Poor") -- the best keeps its moment
+  if s.dull then s.size, s.vy, s.e = SIZE * 0.8, s.vy * 0.78, 0.3 end
   if isBest then s.x, s.vx, s.vy, s.e, s.spin = W / 2, 0, Core.BEST_VY * k, 0.5, 0 end
   -- from lower down (setting rainFrom), faster, so everything peaks as high as from the middle
   local from = ns.settings.rainFrom or "ground"
@@ -427,21 +454,33 @@ local function Launch(st, item, isBest, W, H, k)
   s.joining, s.mx, s.my, s.delay = nil, nil, nil, nil
   local r, g, b = ns.QualityColor(s.q)
   s.r, s.g, s.b = r, g, b
-  s.f.edge:SetVertexColor(r, g, b, 1)
+  s.f.edge:SetVertexColor(0, 0, 0, 1)
   -- a coin is just the game's coin icon, round, no box; an item is its icon in a quality frame
   local icon = s.f.icon
   icon:ClearAllPoints()
+  icon:SetDesaturated(false)
+  icon:SetVertexColor(1, 1, 1)
+  s.f.star:Hide()
+  s.twAt, s.twNext = nil, nil
   if s.coin then
     s.f.edge:Hide()
+    s.f.border:Hide()
     icon:SetAllPoints()
     icon:SetTexCoord(0, 1, 0, 1)
     icon:SetTexture(COIN[item.coin].file)
   else
     s.f.edge:Show()
-    icon:SetPoint("TOPLEFT", 2, -2)
-    icon:SetPoint("BOTTOMRIGHT", -2, 2)
+    icon:SetPoint("TOPLEFT", 1, -1)
+    icon:SetPoint("BOTTOMRIGHT", -1, 1)
     icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
     icon:SetTexture(item.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+    -- the border: the quality color from Uncommon up, a faint gray below (as in bags)
+    if s.q >= 2 then s.f.border:SetVertexColor(r, g, b, 1) else s.f.border:SetVertexColor(0.45, 0.45, 0.45, 0.55) end
+    s.f.border:Show()
+    if s.dull then
+      icon:SetDesaturated(true)
+      icon:SetVertexColor(0.6, 0.6, 0.6)
+    end
   end
   s.f.glow:SetVertexColor(r, g, b)
   s.f.glow:SetShown(s.q >= 3)
@@ -487,6 +526,7 @@ local function OnLand(st, s)
   st.landed = st.landed + 1
   if s.best and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end
   if s.q >= 3 then Tick(s.q)
+  elseif s.dull then ns:PlayStepTick(1) -- the lowest tick, never climbing
   elseif On("Escalate") then ns:PlayStepTick(st.landed)
   else Tick(0) end
   if On("Dust") then Puff(s.x, bounds.floor) end
@@ -644,6 +684,15 @@ local function Update(_, dt)
           end
         end
         if s.tx then s.x = s.x + (s.tx - s.x) * math.min(1, dt * 8) end
+        -- a resting coin glints now and then: gold often, silver less, copper never
+        if s.coin and s.coin ~= "copper" and On("Twinkle") then
+          local gold = s.coin == "gold"
+          s.twNext = s.twNext or s.restAge + (gold and 0.1 + math.random() * 0.6 or 0.4 + math.random() * 1.6)
+          if s.restAge >= s.twNext then
+            s.twAt, s.twX, s.twY = s.restAge, (math.random() - 0.5) * 0.6, (math.random() - 0.5) * 0.6
+            s.twNext = s.restAge + (gold and 0.7 + math.random() * 1.1 or 2 + math.random() * 2.5)
+          end
+        end
       end
     end
     if s.squash > 0 then s.squash = s.squash - dt end
@@ -726,7 +775,20 @@ local function Update(_, dt)
       f:SetSize(w, h)
       f.edge:SetRotation(s.rot)
       f.icon:SetRotation(s.rot)
+      f.border:SetRotation(s.rot)
       f.glow:SetRotation(s.rot)
+      local tw = s.twAt and not s.leaving and not s.joining and (s.restAge - s.twAt) / TWINKLE_T
+      if tw and tw < 1 then -- the glint swells and fades, turning a little
+        local gs = s.size * (s.coin == "gold" and 0.8 or 0.55) * math.sin(math.pi * tw) * 2.2 -- star4 has room around the star
+        f.star:SetSize(gs, gs)
+        f.star:SetRotation(tw * 0.6)
+        f.star:SetVertexColor(1, s.coin == "gold" and 0.94 or 0.97, s.coin == "gold" and 0.7 or 1, 1)
+        f.star:ClearAllPoints()
+        f.star:SetPoint("CENTER", f, "CENTER", s.twX * s.size, s.twY * s.size)
+        f.star:Show()
+      elseif f.star:IsShown() then
+        f.star:Hide()
+      end
       f:SetAlpha(s.alpha)
       f:ClearAllPoints()
       f:SetPoint("BOTTOM", layer, "BOTTOMLEFT", s.x, s.y)
@@ -793,6 +855,33 @@ local function Update(_, dt)
         d:SetPoint("CENTER", layer, "BOTTOMLEFT", d.x, d.y)
       end
     end
+  end
+
+  -- the ground line: fades in at the first landing and out with the rain
+  if On("Ground") and (st.landed > 0 or st.coinsLanded > 0) then
+    st.lineA = math.min(1, (st.lineA or 0) + dt * 3)
+    local a = st.lineA * (st.fadeOut > 0 and math.max(0, 1 - st.fadeOut / FADE_T) or 1)
+    local lw = W * 0.8
+    layer.groundGlow:SetSize(lw, 70 * k)
+    layer.groundGlow:ClearAllPoints()
+    layer.groundGlow:SetPoint("CENTER", layer, "BOTTOMLEFT", W / 2, floor)
+    layer.groundGlow:SetAlpha(0.22 * a)
+    layer.groundLine:SetSize(lw, 4)
+    layer.groundLine:ClearAllPoints()
+    layer.groundLine:SetPoint("CENTER", layer, "BOTTOMLEFT", W / 2, floor)
+    layer.groundLine:SetAlpha(0.75 * a)
+    local u = (st.age * 0.3) % 1 -- the shimmer crosses in a bit over 3 s, brightest mid-way
+    layer.groundShine:SetSize(110, 10)
+    layer.groundShine:ClearAllPoints()
+    layer.groundShine:SetPoint("CENTER", layer, "BOTTOMLEFT", W * 0.1 + u * lw, floor)
+    layer.groundShine:SetAlpha(0.8 * a * math.sin(math.pi * u))
+    layer.groundGlow:Show()
+    layer.groundLine:Show()
+    layer.groundShine:Show()
+  elseif layer.groundLine:IsShown() then
+    layer.groundGlow:Hide()
+    layer.groundLine:Hide()
+    layer.groundShine:Hide()
   end
 
   -- the edge glow, the bag's flash, the counter and the money total

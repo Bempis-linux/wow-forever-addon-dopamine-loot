@@ -8,8 +8,8 @@ local sub
 -- The effect switches by group (keys from ns.RAIN_FX); Gather and Escape are under "Afterwards"
 local GROUPS = {
   { "Effects: motion", { "Best", "Escalate", "Hitstop", "Spacing" } },
-  { "Effects: light", { "Beam", "Trails", "Shadows", "Dust", "Pulse", "Names" } },
-  { "Effects: money", { "Coins", "Merge" } },
+  { "Effects: light", { "Beam", "Trails", "Shadows", "Ground", "Dust", "Pulse", "Names", "Poor" } },
+  { "Effects: money", { "Coins", "Merge", "Twinkle" } },
 }
 
 local function FxToggle(cat, key)
