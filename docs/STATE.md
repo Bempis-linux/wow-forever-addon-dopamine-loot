@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-04, 1.0.0 committed (first release; tag not pushed yet). Read this first in a new session (the kit's
+_Last checkpoint: 2026-11-04, **1.0.0 released** (tag v1.0.0, GitHub release with DopamineLoot-v1.0.0-forever.zip). Read this first in a new session (the kit's
 `session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap) and
 `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
@@ -19,7 +19,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   stays in the repo; distribution = GitHub release zip + CurseForge/Wago. Added `.pkgmeta` (WeakAuras
   layout: `package-as: DopamineLoot`, `move-folders: DopamineLoot/DopamineLoot: DopamineLoot`),
   `.github/workflows/release.yml` (BigWigs packager on a `v*` tag), CHANGELOG.md, MIT LICENSE, README for
-  players. **Not done yet**: user pushes/approves the tag `v1.0.0` (the first real packager run, unverified);
+  players. **Released 2026-11-04**: tag `v1.0.0` → the workflow passed in under a minute; the release has `DopamineLoot-v1.0.0-forever.zip` (the packager adds `-forever` from Interface 16001; one `DopamineLoot/` folder, 98 files, nothing from docs/tools/deprecated) and `release.json` (flavor forever). Not done:
   CurseForge/Wago projects (user creates them, then `## X-Curse-Project-ID` / `## X-Wago-ID` in the .toc and
   `CF_API_KEY` / `WAGO_API_TOKEN` repo secrets); check whether CurseForge lists a WoW Forever game version.
 - **Only `/dl`** (user, 2026-11-04: "we should only need /dl to open the settings page"): every other
@@ -45,8 +45,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - **Next up**:
-  1. Release: user checks 1.0.0 in game (`/dl` opens settings, no Advanced page, Test buttons work), then tag `v1.0.0`
-     with the kit's new `wow-addon-release` skill (kit 0.7.0, written from this release; steps 5-6).
+  1. Release done (v1.0.0). Optional: CurseForge/Wago (user creates the projects, then IDs in the .toc + repo secrets; next tag uploads).
   1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
       less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
       (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles
@@ -111,7 +110,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
-- 2026-11-04 1.0.0: first release prep (3D armor dropped, dev tools out, packaging, README, LICENSE).
+- 2026-11-04 1.0.0 released: 3D armor dropped, dev tools out, only /dl, rain looks (twinkles, ground line, dull grays, bag borders), packaging, README, LICENSE; kit 0.7.0 wow-addon-release skill.
 - 2026-11-04: Forever released; moved to `_forever_` (docs, local paths, privacy patterns).
 - 2026-10-16 0.4.22-0.4.23: `/dl armortest` probe for armor on a mannequin.
 - 2026-10-16 0.4.21: hover error fixed (no MouseIsOver on Forever); compact and combat popup tests.

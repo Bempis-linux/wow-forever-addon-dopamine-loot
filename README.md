@@ -16,7 +16,7 @@ the popups, and the rain waits until the fight is over.
 
 ## Install
 
-Download `DopamineLoot-<version>.zip` from the
+Download `DopamineLoot-v<version>-forever.zip` from the
 [releases](https://github.com/Bempis-linux/wow-forever-addon-dopamine-loot/releases) and unzip it into
 `World of Warcraft\_forever_\Interface\AddOns\`, so that you have `AddOns\DopamineLoot\DopamineLoot.toc`.
 Then restart the game (or `/reload` if it is already running).
