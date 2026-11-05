@@ -40,7 +40,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - **Next up**:
-  1. Release: user checks 1.0.0 in game (settings pages, no Blizzard assets row), then tag `v1.0.0`.
+  1. Release: user checks 1.0.0 in game (settings pages, no Blizzard assets row), then tag `v1.0.0`
+     with the kit's new `wow-addon-release` skill (kit 0.7.0, written from this release; steps 5-6).
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
 
