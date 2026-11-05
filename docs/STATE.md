@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-05, **1.0.1 released** (live on CurseForge, uploaded automatically). Read this first
+_Last checkpoint: 2026-11-05, **stop point after 1.0.1** (released, live on CurseForge, the game on release; tree clean). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -31,7 +31,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   `deprecated/asset-check/`. Rain looks: coin twinkles, ground line, dull grays (switches), the game's bag
   border on rain items; coin piles dropped ("a little jarring").
 - **Next up** (no rush):
-  1. (CurseForge approved.) Watch comments/issues from players.
+  1. Watch CurseForge comments and GitHub issues from players. With the next release, bump
+     `actions/checkout@v4` in `.github/workflows/release.yml` (Node 20 deprecation warning).
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
   A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK
@@ -43,12 +44,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - 0.4: popup placement right of you, compact Uncommon beside a Rare; settings pages by topic; sound
   picker; Escape skip; popup arrivals and sway; Banner long names OK.
 - 1.0.0: rain looks "look good" (2026-11-04); the CurseForge install loads (2026-11-05).
+- 1.0.1: the rebuilt settings pages "seem good"; no errors from any addon in three test sessions (opened via
+  Esc > Options and via `/dl`, then the game's Nameplates and Social settings). The CurseForge app updates
+  Dopamine Loot like other addons (after a refresh: it caches "latest version" for a while after an upload).
 
 ## Known bugs
 - **Settings fields empty after /reload** (user, old). 0.4.2 creates every panel hidden so OnShow refills
   them. **Fix unverified.**
-- Accepted game bug: after any addon's native settings page was shown, scrolling the game's Social page
-  blocks `IsUserOAuthed()` and blames that addon (reproduced with BugSack alone).
+- (Fixed in 1.0.1: the native settings pages' taint, which also caused the Social page's `IsUserOAuthed()`
+  message. Other addons with native pages, BugSack for one, can still cause that message themselves.)
 
 ## Not yet verified
 - A single green from a mob (popup), a vendor buy (must NOT pop), crafting, a real quest turn-in with
