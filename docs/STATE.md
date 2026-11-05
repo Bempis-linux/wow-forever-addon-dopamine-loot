@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-05, **stop point after 1.0.0** (released; CurseForge submitted). Read this first
+_Last checkpoint: 2026-11-05, **stop point after 1.0.0** (released; live on CurseForge). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -13,7 +13,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   personal strings incl. media metadata; no messages, dynamic code, CVars, item/gold actions or Blizzard
   hooks; saved data = settings + version). Working tree clean.
 - **CurseForge**: project **1784686** (in the .toc), 1.0.0 uploaded by hand 2026-11-05, page complete (avatar,
-  summary, description from `docs/curseforge.md`, MIT, categories): **waiting on moderation**. `CF_API_KEY`
+  summary, description from `docs/curseforge.md`, MIT, categories): **approved and live 2026-11-05**
+  (curseforge.com/wow/addons/dopamine-loot; file v1.0.0-forever, game version 1.60.1 Forever). `CF_API_KEY`
   repo secret set, so the next `v*` tag uploads there automatically (**first automatic upload untested**:
   check the workflow log). Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
@@ -27,7 +28,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   `deprecated/asset-check/`. Rain looks: coin twinkles, ground line, dull grays (switches), the game's bag
   border on rain items; coin piles dropped ("a little jarring").
 - **Next up** (no rush):
-  1. Answer CurseForge moderation if they ask for changes (paste their message).
+  1. (CurseForge approved.) Watch comments/issues from players.
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
   A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK
@@ -87,7 +88,6 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
 
 ## Open questions / waiting on the user
-- CurseForge moderation result.
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)

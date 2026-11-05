@@ -17,7 +17,10 @@ What to paste into the CurseForge project form, written against CurseForge's Mod
 
 ## Summary (one sentence, shown in search results)
 
-Turns every drop into a small celebration: items pop up turning in 3D, and big hauls burst from the
+(Live on CurseForge, as written there by the user:) A fun addon that uses visuals and sounds to spice up
+simple looting and quest rewards.
+
+(First draft:) Turns every drop into a small celebration: items pop up turning in 3D, and big hauls burst from the
 ground as a rain of loot and coins.
 
 ## Description
