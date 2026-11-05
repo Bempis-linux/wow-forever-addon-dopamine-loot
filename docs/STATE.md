@@ -45,7 +45,10 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - **Next up**:
-  1. Release done (v1.0.0). Optional: CurseForge/Wago (user creates the projects, then IDs in the .toc + repo secrets; next tag uploads).
+  1. Release done (v1.0.0). Safety audit of the released zip 2026-11-05: clean (no personal strings in any file incl.
+     media, no tags in OGG/TGA beyond the ffmpeg encoder name, no chat/addon messages, dynamic code, CVars,
+     item/gold actions or Blizzard hooks; saved data = settings + version; history all Bempis noreply).
+     Optional: CurseForge/Wago (user creates the projects, then IDs in the .toc + repo secrets; next tag uploads).
   1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
       less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
       (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles
