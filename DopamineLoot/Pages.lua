@@ -1,10 +1,9 @@
--- Dopamine Loot "Sounds" and "Advanced" settings pages (the game's native layout, ns.Native in
+-- Dopamine Loot "Sounds" settings page (the game's native layout, ns.Native in
 -- Settings.lua). Sounds: the switch, the volume they follow, the popup sound picker (a game sound per
 -- rarity, played as you pick it, plus our chime for Rare and up) and the rain's burst sound.
--- Advanced: the log and checks for bug reports.
 local _, ns = ...
 
-local sounds, advanced
+local sounds
 
 -- Picking a sound plays it; "Defaults" resets all four rows in one go, which must not play four
 -- sounds at once: only a frame with a single pick plays
@@ -36,7 +35,7 @@ local function CreateSounds()
   sounds = cat
 
   N.Header(layout, "General")
-  Settings.CreateCheckbox(cat, ns.soundSetting, "Every Dopamine Loot sound at once (the same switch as on the first page). /dl sound off")
+  Settings.CreateCheckbox(cat, ns.soundSetting, "Every Dopamine Loot sound at once (the same switch as on the first page).")
   N.Choice(cat, "soundChannel", "Volume follows", {
     { "SFX", "Sound effects (default)" }, { "Master", "Master volume (plays with effects muted)" },
   }, "SFX", "Which of the game's volume sliders the sounds follow.")
@@ -65,21 +64,9 @@ local function CreateSounds()
   N.Header(layout, "Loot rain")
   N.Choice(cat, "openSound", "As the loot bursts out", {
     { "size", "By haul size (default)" }, { "always", "Always the big sound" }, { "never", "Never" },
-  }, "size", "A few grays, whites or greens: no sound; 6 items or 1 gold: a soft pop; something Rare or better: a big burst. Also /dl opensound.")
-end
-
-local function CreateAdvanced()
-  local N = ns.Native
-  local cat, layout = N.Page("Advanced", ns.settingsCategory)
-  advanced = cat
-  N.Header(layout, "Log and checks")
-  N.Toggle(cat, "debug", "Debug logging", "Log every loot line as it's read (in the log window). Also /dl debug.")
-  N.Button(layout, "The log window", "Open log", function() ns:ShowLog() end, "Everything Dopamine Loot reports (/dl log).")
-  N.Button(layout, "Game features", "Check client", function() ns.RunCommand("check") end,
-    "Report which game features this client has, for bug reports (/dl check).")
+  }, "size", "A few grays, whites or greens: no sound; 6 items or 1 gold: a soft pop; something Rare or better: a big burst.")
 end
 
 ns.OnInit(function()
   if not sounds then CreateSounds() end
-  if not advanced then CreateAdvanced() end
 end)

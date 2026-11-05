@@ -1,14 +1,10 @@
--- Dopamine Loot core: namespace, saved data, event dispatch, slash commands
+-- Dopamine Loot core: namespace, saved data, event dispatch, /dl
 local ADDON, ns = ...
 _G.DopamineLoot = ns -- for /dump DopamineLoot.db while debugging
 
 ns.TITLE = "Dopamine Loot"
-ns.PREFIX = "|cffffd100Dopamine Loot|r "
 local DB_VERSION = 1
 
--- Replaced by the log window (Output.lua) once it loads; never prints to chat after that
-function ns.Print(...) print(ns.PREFIX .. string.join(" ", tostringall(...))) end
-function ns.Debug(...) if ns.settings and ns.settings.debug then ns.Print("|cff999999[debug]|r", ...) end end
 function ns.Esc(s) return (s:gsub("%p", "%%%0")) end -- literal text for use in a pattern
 
 -- Newer clients hide some unit values in combat and instances ("secret values"); passing one on
@@ -33,7 +29,8 @@ local function InitDB()
   DopamineLootCharDB = DopamineLootCharDB or {}
   DopamineLootDB.settings = DopamineLootDB.settings or {}
   DopamineLootCharDB.version = DopamineLootCharDB.version or DB_VERSION
-  DopamineLootDB.assetCheck, DopamineLootDB.armorTest = nil, nil -- the dev tools' results (before 1.0)
+  -- gone before 1.0: the dev tools' results and debug logging
+  DopamineLootDB.assetCheck, DopamineLootDB.armorTest, DopamineLootDB.settings.debug = nil, nil, nil
   ns.settings, ns.db = DopamineLootDB.settings, DopamineLootCharDB
 end
 
@@ -69,70 +66,20 @@ function ns:PLAYER_LOGIN()
 end
 
 ---------------------------------------------------------------------------
--- Slash commands. Feature files add their own:
---   ns.AddCommand("stats", "show counts", function(args) ... end)
---   ns.AddToggle("sound", "noSound", "popup sound")   -> /dl sound off | on
--- Results go to the log window; only /dl help prints to chat (yellow).
+-- Actions: the settings pages' Test buttons run them by name. Feature files add their own:
+--   ns.AddAction("rain", function(arg) ... end)    ns.RunAction("rain", "8")
+-- The only slash command is /dl, which opens the settings.
 ---------------------------------------------------------------------------
-local commands, order = {}, {}
-function ns.AddCommand(name, help, fn)
-  if not commands[name] then order[#order + 1] = name end
-  commands[name] = { help = help, fn = fn }
+local actions = {}
+function ns.AddAction(name, fn) actions[name] = fn end
+function ns.RunAction(name, arg)
+  local fn = actions[name]
+  if fn then fn(arg or "") end
 end
 
--- Run a command as if typed (the settings page's Test buttons use this)
-function ns.RunCommand(name, rest)
-  local c = commands[name]
-  if c and c.fn then c.fn(rest or "") end
-end
-
-local toggles = {}
-function ns.AddToggle(word, key, label)
-  toggles[word] = { key = key, label = label }
-  ns.AddCommand(word .. " off | on", "turn the " .. label .. " off or on", nil)
-end
-
-local function ChatHelp(unknown)
-  local Y = "|cffffff00"
-  if unknown then print(ns.PREFIX .. Y .. ("unknown command \"%s\"|r"):format(unknown)) end
-  print(ns.PREFIX .. Y .. "v" .. ns.Version() .. " commands:|r")
-  local function Line(cmd, help) print(("  |cffffffff/dl%s|r - %s%s|r"):format(cmd, Y, help)) end
-  if ns.ToggleUI then Line("", "open the settings") end
-  for _, name in ipairs(order) do Line(" " .. name, commands[name].help) end
-  Line(" log", "open or close the log window")
-  Line(" debug", "toggle debug logging")
-  Line(" help", "show this list")
-end
-
+local function OpenSettings() if ns.ToggleUI then ns:ToggleUI() end end
 SLASH_DOPAMINELOOT1 = "/dl"
-SLASH_DOPAMINELOOT2 = "/dopamine"
-SlashCmdList.DOPAMINELOOT = function(msg)
-  msg = strtrim((msg or ""):lower())
-  local word, rest = msg:match("^(%S*)%s*(.-)$")
-  if msg == "" then
-    if ns.ToggleUI then ns:ToggleUI() else ChatHelp() end
-  elseif msg == "help" then
-    ChatHelp()
-  elseif msg == "log" then
-    ns:ToggleLog()
-  elseif msg == "debug" then
-    ns.settings.debug = not ns.settings.debug or nil
-    if ns.SettingChanged then ns.SettingChanged("debug") end
-    ns.Print("debug " .. (ns.settings.debug and "on" or "off"))
-    ns:ShowLog()
-  elseif toggles[word] and (rest == "on" or rest == "off") then
-    ns.settings[toggles[word].key] = (rest == "off") or nil
-    if ns.SettingChanged then ns.SettingChanged(toggles[word].key) end
-    ns.Print(toggles[word].label .. " " .. rest)
-    ns:ShowLog()
-  elseif commands[word] and commands[word].fn then
-    commands[word].fn(rest)
-  else
-    ChatHelp(msg)
-  end
-end
+SlashCmdList.DOPAMINELOOT = OpenSettings
 
 -- Minimap addon-compartment entry (## AddonCompartmentFunc in the .toc)
-function DopamineLoot_OnCompartmentClick()
-  if ns.ToggleUI then ns:ToggleUI() else ns:ToggleLog() end
-end
+function DopamineLoot_OnCompartmentClick() OpenSettings() end

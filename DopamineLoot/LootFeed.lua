@@ -13,7 +13,6 @@ local QUALITY_WORDS = {
   poor = 0, gray = 0, grey = 0, junk = 0, common = 1, white = 1, uncommon = 2, green = 2,
   rare = 3, blue = 3, epic = 4, purple = 4, legendary = 5, orange = 5,
 }
-local QUALITY_NAMES = { [0] = "poor", "common", "uncommon", "rare", "epic", "legendary" }
 -- preview items for qualities you may not have in your bags (well-known Classic items)
 local TEST_IDS = { [2] = { 15211 }, [3] = { 5191, 7230 }, [4] = { 12784, 19364 }, [5] = { 19019, 17182 } }
 
@@ -45,8 +44,9 @@ function ns.ItemData(item, count, src, fn)
   local obj
   if Item and type(item) == "number" and Item.CreateFromItemID then obj = Item:CreateFromItemID(item)
   elseif Item and type(item) == "string" and Item.CreateFromItemLink then obj = Item:CreateFromItemLink(item) end
+  -- an item ID that doesn't exist makes ContinueOnItemLoad raise an error: then nothing shows
   if obj and obj.ContinueOnItemLoad then
-    obj:ContinueOnItemLoad(function() local d2 = Build(); if d2 then fn(d2) end end)
+    pcall(obj.ContinueOnItemLoad, obj, function() local d2 = Build(); if d2 then fn(d2) end end)
   else
     C_Timer.After(0.5, function() local d2 = Build(); if d2 then fn(d2) end end)
   end
@@ -61,14 +61,9 @@ function ns:MERCHANT_SHOW() merchantOpen = true end
 function ns:MERCHANT_CLOSED() merchantOpen = false end
 
 function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
-  if self.Secret(text) then self.Debug("loot line hidden (secret value)"); return end
+  if self.Secret(text) then return end -- hidden loot line (secret value)
   local isSelf = guid ~= nil and not self.Secret(guid) and guid == UnitGUID("player")
-  local link, count, src, key = M.Parse(text, patterns, isSelf)
-  if self.settings.debug then
-    -- the raw line only for your own loot: other players' lines name them
-    if link then self.Debug("loot:", text, "->", src, "x" .. count, "(" .. tostring(key) .. ")")
-    else self.Debug("loot line (not yours or not an item), from you:", tostring(isSelf)) end
-  end
+  local link, count, src = M.Parse(text, patterns, isSelf)
   if not link then return end
   if src == "pushed" and merchantOpen then src = "bought" end
   if self.settings.noPopup or self.settings.enabled == false or src == "bought" then return end
@@ -191,7 +186,7 @@ ns.OnInit(function()
 end)
 
 ---------------------------------------------------------------------------
--- Commands
+-- Test actions (the settings pages' Test buttons)
 ---------------------------------------------------------------------------
 -- Every item link in your bags and on you
 local function ForEachOwn(fn)
@@ -244,32 +239,23 @@ local function TestItem(q) -- an item of this quality: one of yours first, else 
   return ids and ids[math.random(#ids)]
 end
 
-ns.AddCommand("test", "preview a popup: /dl test [uncommon|rare|epic|legendary|itemID] [combat]", function(arg)
-  local word, extra = (arg or ""):match("^(%S*)%s*(%S*)")
-  local fight = word == "combat" or extra == "combat"
-  if word == "combat" then word = "" end
-  local opts = fight and { fight = true } or nil
-  local n = tonumber(word)
-  local id = (n and n > 5) and n or (word ~= "" and M.ItemID(word)) -- 0-5 are qualities, bigger numbers item IDs
-  if id then return Preview(id, nil, opts) end
-  local q = QUALITY_WORDS[word] or n or math.random(2, 5)
-  local it = TestItem(q)
-  if not it then
-    ns.Print(("no %s item in your bags or gear to preview"):format(QUALITY_NAMES[q] or tostring(q)))
-    return ns:ShowLog()
-  end
-  Preview(it, nil, opts)
+-- Test popup: "epic", or "epic combat" for how it looks in a fight
+ns.AddAction("test", function(arg)
+  local word, extra = arg:match("^(%S*)%s*(%S*)")
+  local opts = extra == "combat" and { fight = true } or nil
+  local it = TestItem(QUALITY_WORDS[word] or math.random(2, 5))
+  if it then Preview(it, nil, opts) end
 end)
 
 -- an Uncommon looted beside a Rare: the Rare comes full, the Uncommon compact (Popups page: Low rarities)
-ns.AddCommand("testpair", "preview an Uncommon looted beside a Rare", function()
+ns.AddAction("testpair", function()
   Preview(TestItem(3), nil, { best = 3 })
   Preview(TestItem(2), nil, { best = 3 })
 end)
 
--- /dl rain N: N items from your bags and gear (plus a blue, and a purple from 8 up, so you see the
--- good stuff stay) rain down as if you'd looted them all at once
-ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]", function(arg)
+-- Test rain of N items from your bags and gear (plus a blue, and a purple from 8 up, so you see the
+-- good stuff stay) as if you'd looted them all at once
+ns.AddAction("rain", function(arg)
   local n = math.min(math.max(math.floor(tonumber(arg) or 8), 1), 60)
   local own = {}
   ForEachOwn(function(link) own[#own + 1] = link end)
@@ -295,8 +281,7 @@ ns.AddCommand("rain", "preview loot rain: /dl rain [number of items, default 8]"
   C_Timer.After(1.5, Go) -- don't wait forever for an item the client won't load
 end)
 
--- Money in commands: "1g 20s 5c", "35s", or plain copper
-local function Money(arg) return ns.RainCore.ParseMoney(arg) end
+-- Money amounts: "1g 20s 5c", "35s", or plain copper
 local function MoneyName(copper)
   local g, s, c = math.floor(copper / 10000), math.floor(copper / 100) % 100, copper % 100
   local out = {}
@@ -307,24 +292,13 @@ local function MoneyName(copper)
 end
 ns.MoneyName = MoneyName
 
-ns.AddCommand("coinrain", "money alone rains from this much loot: /dl coinrain [1g | 50s | 20c]", function(arg)
-  local v = Money(arg)
-  if v then ns.settings.coinRainMin = math.max(0, v); if ns.SettingChanged then ns.SettingChanged("coinRainMin") end end
-  local min = ns.CoinRainMin()
-  ns.Print(("money from loot rains on its own from %s (quest money always rains)"):format(min > 0 and MoneyName(min) or "any amount"))
-  ns:ShowLog()
-end)
-
-ns.AddCommand("testcoins", "preview a coin rain: /dl testcoins [amount, default 2g 35s]", function(arg)
-  if ns.settings.noRainCoins then
-    ns.Print("coins are switched off (Loot rain page, or /dl rainfx coins on)")
-    return ns:ShowLog()
-  end
-  ns:Rain({}, Money(arg) or 23500)
+ns.AddAction("testcoins", function(arg)
+  if ns.settings.noRainCoins then return end -- coins are switched off (Loot rain page)
+  ns:Rain({}, ns.RainCore.ParseMoney(arg) or 23500)
 end)
 
 -- A quest reward: one of your green or blue items and some money, rained together
-ns.AddCommand("testquest", "preview a quest reward (an item and money)", function()
+ns.AddAction("testquest", function()
   local pick = OwnItems(3) or OwnItems(2) or TEST_IDS[3][math.random(#TEST_IDS[3])]
   ns.ItemData(pick, 1, "received", function(d)
     d.test = true
@@ -332,67 +306,12 @@ ns.AddCommand("testquest", "preview a quest reward (an item and money)", functio
   end)
 end)
 
--- How close the camera sits to item models in popups (smaller = bigger item)
-ns.AddCommand("zoom", "item model size in popups: /dl zoom [0.3-2, default 0.7]", function(arg)
-  local z = tonumber(arg)
-  if z and z >= 0.3 and z <= 2 then ns.settings.modelZoom = z end
-  ns.LookRefresh()
-  ns.Print("model zoom: " .. (ns.ModelZoom()) .. " (try /dl test epic to see it)")
-  ns:ShowLog()
-end)
-
--- Weapon tilt (also a slider on the Popup look page)
-ns.AddCommand("roll", "stand weapons up: /dl roll [0-355 degrees, default 90]", function(arg)
-  local d = tonumber(arg)
-  if d then ns.settings.weaponTilt = math.floor(d) % 360 end
-  ns.LookRefresh()
-  ns.Print("weapon tilt: " .. ns.WeaponTilt() .. " degrees (try /dl test epic)")
-  ns:ShowLog()
-end)
-
-ns.AddCommand("model", "check how an item shows: /dl model <itemID>", function(arg)
-  local id = tonumber(arg) or M.ItemID(arg)
-  if not id then ns.Print("usage: /dl model <itemID>"); ns:ShowLog(); return end
-  local answered = false
-  C_Timer.After(3, function()
-    if not answered then ns.Print("model check: no item info for " .. id .. " (unknown item?)"); ns:ShowLog() end
-  end)
+-- Popups page, "Check any item ID": that item as a real popup, its model forced
+ns.AddAction("model", function(arg)
+  local id = tonumber(arg)
+  if not id then return end
   ns.ItemData(id, 1, "loot", function(d)
-    answered = true
     d.test, d.forceModel, d.push = true, true, true
-    ns:ShowLoot(d, function(mode, fileID, why)
-      ns.Print(("model check %s (%s): %s%s [%s]"):format(d.name, tostring(d.equipLoc), mode,
-        fileID and (" file " .. fileID) or "", why))
-      ns:ShowLog()
-    end)
+    ns:ShowLoot(d)
   end)
-end)
-
-ns.AddCommand("quality", "lowest quality that pops up: /dl quality [poor|common|uncommon|rare|epic]", function(arg)
-  local q = QUALITY_WORDS[arg] or tonumber(arg)
-  if q and q >= 0 and q <= 5 then ns.settings.minQuality = q end
-  ns.Print("popups from quality: " .. (QUALITY_NAMES[ns.MinQuality()] or ns.MinQuality()))
-  ns:ShowLog()
-end)
-
--- One report of everything the plan marks "verify in game" (for the first test session)
-ns.AddCommand("check", "report which game features this client has", function()
-  local function Has(v) return v and "yes" or "NO" end
-  local _, build, _, iface = GetBuildInfo()
-  ns.Print(("client %s, interface %s"):format(tostring(build), tostring(iface)))
-  for _, t in ipairs(M.TEMPLATES) do
-    local s = _G[t[1]]
-    ns.Print(("%s: %s"):format(t[1], type(s) == "string" and ('"' .. s:gsub("|", "||") .. '"') or "MISSING"))
-  end
-  ns.probeModel = ns.probeModel or CreateFrame("PlayerModel")
-  local m = ns.probeModel
-  ns.Print("PlayerModel:SetItem: " .. Has(m.SetItem) .. ", GetModelFileID: " .. Has(m.GetModelFileID)
-    .. ", SetItemAppearance: " .. Has(m.SetItemAppearance))
-  ns.Print("C_TransmogCollection: " .. Has(C_TransmogCollection) .. ", C_PlayerInfo.CanUseItem: "
-    .. Has(C_PlayerInfo and C_PlayerInfo.CanUseItem) .. ", C_TooltipInfo: " .. Has(C_TooltipInfo))
-  ns.Print("HandleModifiedItemClick: " .. Has(_G.HandleModifiedItemClick) .. ", GetMouseButtonClicked: "
-    .. Has(GetMouseButtonClicked) .. ", Item mixin: " .. Has(Item and Item.CreateFromItemID)
-    .. ", ITEM_QUALITY_COLORS: " .. Has(ITEM_QUALITY_COLORS))
-  ns.Print("loot patterns built: " .. #patterns .. " of " .. #M.TEMPLATES)
-  ns:ShowLog()
 end)

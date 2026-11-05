@@ -1,7 +1,7 @@
 -- Dopamine Loot "Popups" settings page (Options > AddOns > Dopamine Loot > Popups; custom, not native:
 -- it has the live preview): when popups show, their look and the 3D item on the left, a live popup
 -- on the right that changes as you drag. Pick the preview's quality and kind under it; "Show as a
--- real popup" pops one on screen with the same look; "Check any item ID" is /dl model.
+-- real popup" pops one on screen with the same look; "Check any item ID" shows any item as a real popup.
 local _, ns = ...
 
 local PREVIEW_W, PREVIEW_H = 300, 250
@@ -107,7 +107,7 @@ local function Create()
   Header("When")
   Pick("Show popups for", ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
     function(v) ns.settings.minQuality = v end,
-    "The lowest quality that gets a popup; lower ones still count, just quietly. Also /dl quality.")
+    "The lowest quality that gets a popup; lower ones still count, just quietly.")
   Add("Time on screen", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
     function(v) ns.settings.popupHold = v end,
     "Seconds a popup stays, by rarity: half this up to Uncommon, x0.8 Rare, x1.2 Epic, x1.6 Legendary (default 5: 2.5 / 4 / 6 / 8 s). Hovering holds it.", "none")
@@ -153,9 +153,9 @@ local function Create()
 
   Header("The 3D item")
   Add("Zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
-    "Camera distance for item models: smaller is closer and bigger (0.3 to 2, default 0.7). Also /dl zoom.", "frame")
+    "Camera distance for item models: smaller is closer and bigger (0.3 to 2, default 0.7).", "frame")
   Add("Weapon tilt", 0, 355, 5, ns.WeaponTilt, function(v) ns.settings.weaponTilt = v end,
-    "Turns weapons so they stand up (0 = as the game draws them, 90 = upright, 270 if it stands on its head; default 90). Also /dl roll.",
+    "Turns weapons so they stand up (0 = as the game draws them, 90 = upright, 270 if it stands on its head; default 90).",
     "frame", function(v) return tostring(math.floor(v + 0.5)) end)
   Add("Sway speed", 0, 3, 0.1, ns.SpinSpeed, function(v) ns.settings.spinSpeed = v end,
     "How fast the item sways side to side (0 = still, default 0.9). Epic and better turn once to face you first.", "none")
@@ -221,16 +221,16 @@ local function Create()
   local real = UI.Button(panel, "Show as a real popup", 170, PopReal)
   real:SetPoint("TOPLEFT", kButtons[1], "BOTTOMLEFT", 0, -10)
 
-  -- /dl model on the page: any item ID, shown in the preview's style as a real popup, result logged
+  -- Any item ID, shown in the preview's style as a real popup
   local idLabel = UI.Label(panel, "GameFontHighlightSmall", "Check any item ID:")
   idLabel:SetPoint("TOPLEFT", real, "BOTTOMLEFT", 0, -12)
   local itemID = 19019
   local idBox = UI.NumberBox(panel, 60, function() return itemID end, function(v) itemID = math.floor(v) end,
-    1, 999999, "An item ID (from a database site) to see how it shows; the result goes to the log.")
+    1, 999999, "An item ID (from a database site) to see how it shows, as a real popup.")
   idBox:SetPoint("LEFT", idLabel, "RIGHT", 10, 0)
   local idGo = UI.Button(panel, "Check", 60, function()
     idBox:ClearFocus()
-    ns.RunCommand("model", tostring(itemID))
+    ns.RunAction("model", tostring(itemID))
   end)
   idGo:SetPoint("LEFT", idBox, "RIGHT", 6, 0)
   Mark(qButtons, pick.quality)
@@ -252,4 +252,3 @@ function ns:OpenLook()
 end
 
 ns.OnInit(function() if not panel then Create() end end)
-ns.AddCommand("look", "open the Popups settings page (live preview)", function() ns:OpenLook() end)

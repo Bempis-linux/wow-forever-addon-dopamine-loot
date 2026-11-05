@@ -23,7 +23,8 @@ Then restart the game (or `/reload` if it is already running).
 
 ## Use
 
-Everything is in **Options > AddOns > Dopamine Loot** (or type `/dl`):
+Type `/dl` (or go to **Options > AddOns > Dopamine Loot**). Everything is on the settings pages, each
+with Test buttons:
 
 | Page | What's there |
 |---|---|
@@ -31,19 +32,11 @@ Everything is in **Options > AddOns > Dopamine Loot** (or type `/dl`):
 | Popups | when they show, style, size, placement, the 3D item, with a live preview |
 | Loot rain | when it rains, where the loot flies from, every effect as its own switch, tests |
 | Sounds | the sound for each rarity (Play to hear it), our chime for Rare and up |
-| Advanced | the log window, debug logging, a client check for bug reports |
-
-Some commands (`/dl help` lists them all):
-
-- `/dl test [uncommon | rare | epic | legendary | itemID]`: show a test popup
-- `/dl rain [number]`: a test loot rain
-- `/dl popup off`, `/dl rain off`, `/dl sound off` (and `on`)
-- `/dl log`: the log window
 
 ## Bugs and ideas
 
-Open an issue on GitHub. `/dl check` (or Advanced > Check client) puts what the addon sees of your client
-in the log window, ready to copy.
+Open an issue on GitHub. Say what you looted and what you saw (a screenshot helps), and paste any Lua
+error (BugSack shows them).
 
 ## Development
 

@@ -10,7 +10,7 @@ A World of Warcraft addon. General WoW addon knowledge, house style, and tooling
 | Clients | WoW Forever |
 | `## Interface:` | `16001` (recompute with the kit's `clients.sh` after game patches) |
 | Addon folder | `DopamineLoot/` (linked into each client's `Interface\AddOns\` with a junction) |
-| Slash command | `/dl` (also `/dopamine`) |
+| Slash command | `/dl` only: opens the settings (1.0: every other command, the log window and debug logging were removed) |
 | Saved data | `DopamineLootDB` (account: settings), `DopamineLootCharDB` (per character: seen items, recent loot, stats) |
 | Client folder | `_forever_` (product `wowf`; released 2026-11-04, the beta was `_classic_beta_`) |
 
@@ -20,20 +20,19 @@ Machine paths (WoW root, client folders, account folder) are in `CLAUDE.local.md
 
 ```
 DopamineLoot/            the addon; load order in DopamineLoot.toc
-  Core.lua                 saved data, events, /dl commands (ns.AddCommand, ns.RunCommand)
-  Output.lua               log window (all output except /dl help)
+  Core.lua                 saved data, events, /dl, Test actions (ns.AddAction, ns.RunAction)
   LootMsg.lua              pure parser of "You receive loot" lines (tools/test_lootmsg.lua)
   Sounds.lua               popup sounds per rarity (settings sound2..5, game kits) + our chimes (noChime3..5), rain sets (OGG)
   View.lua                 the popup view: 3 styles, model or tilting card, flash, arrivals by rarity
   Popup.lua                popup stack, motion, waiting queue (uses View)
   Rain.lua                 loot rain: pure ns.RainCore (physics, timing, spacing, coins; tools/test_rain.lua)
-                           + sprites and every effect (ns.RAIN_FX switches, /dl rainfx)
+                           + sprites and every effect (ns.RAIN_FX switches)
   LootFeed.lua             CHAT_MSG_LOOT -> item data -> burst collector (+ looted money) -> popup or rain
   Settings.lua             first page (native) + helpers: ns.Native (native pages: Toggle, Slider, Choice, Button),
                            ns.UI (custom controls incl. Dropdown), ns.SettingChanged (a command updates open pages)
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check
   RainFx.lua               "Loot rain" page (native): when, where, afterwards, effects by group, tests
-  Pages.lua                "Sounds" (popup sound picker) and "Advanced" pages (native)
+  Pages.lua                "Sounds" page (native): popup sound picker
   Media/*.tga, *.ogg       original art (tools/gen_textures.lua, white, tinted in game) and sounds
                            (tools/gen_sounds.sh, ffmpeg-synthesized)
 docs/plan.md             design, data model, roadmap, rain ideas
@@ -79,11 +78,12 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   show (containers, shake, rarity tease) was set aside 2026-10-14: `deprecated/chest-show/`, not loaded.
 - Seen set and loot history per character; settings account-wide. No login toast.
 - **Settings layout** (0.4.15, from docs/mockups/settings.html): pages Dopamine Loot (3 main switches, quick
-  tests), Popups (custom), Loot rain, Sounds, Advanced (native), Blizzard assets (custom tool). One topic
+  tests), Popups (custom), Loot rain, Sounds (native); Advanced and Blizzard assets removed for 1.0. One topic
   per page: on/off, when, look, test. Native unless a page needs a live preview.
-- **Settings page parity** (kit house-style): every `/dl` command that changes a setting or runs a
-  test also has a control on the settings page (number field or drag slider, choice, Test button);
-  visual settings update a live preview on the page.
+- **Settings pages only** (user, 2026-11-04; overrides the kit's command/page parity): `/dl` opens the
+  settings and there are no other commands. Every setting and test is a control on a page (number field
+  or drag slider, choice, Test button); visual settings update a live preview on the page. Test buttons
+  run `ns.RunAction`. No log window: the addon prints nothing.
 - Popup styles Relic (default) / Beam / Banner (Halo lens dropped 0.4.7; the Toast style set aside 0.4.14:
   `deprecated/toast/`, README lists what needs work)
   are all options; weapons stand upright

@@ -15,4 +15,4 @@ The first release, for WoW: Forever.
 - **Sounds**: a sound per rarity from the game's own sounds, picked by ear on the Sounds page, with our
   own chime for Rare and up; coin, launch and merge sounds in the rain that climb in pitch.
 - **Settings** (Options > AddOns > Dopamine Loot, or `/dl`): the main switches and tests; Popups with a
-  live preview; Loot rain with every effect as a switch; Sounds; Advanced.
+  live preview; Loot rain with every effect as a switch; Sounds. `/dl` is the only command.

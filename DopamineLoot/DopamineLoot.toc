@@ -9,7 +9,6 @@
 ## AddonCompartmentFunc: DopamineLoot_OnCompartmentClick
 
 Core.lua
-Output.lua
 LootMsg.lua
 Sounds.lua
 View.lua

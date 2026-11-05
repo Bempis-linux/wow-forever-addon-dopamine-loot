@@ -15,7 +15,7 @@ local GROUPS = {
 local function FxToggle(cat, key)
   for _, fx in ipairs(ns.RAIN_FX) do
     if fx.key == key then
-      ns.Native.Toggle(cat, "noRain" .. key, fx.label, fx.tip .. " (/dl rainfx " .. fx.word .. " off)", true)
+      ns.Native.Toggle(cat, "noRain" .. key, fx.label, fx.tip, true)
     end
   end
 end
@@ -38,12 +38,12 @@ local function Create()
   N.Choice(cat, "coinRainMin", "Money alone rains from", function()
     local list = {}
     for _, c in ipairs(COIN_STEPS) do list[#list + 1] = { c, Money(c) .. (c == 10000 and " (default)" or "") } end
-    local cur = ns.CoinRainMin() -- a custom amount from /dl coinrain shows too
+    local cur = ns.CoinRainMin()
     local listed = false
     for _, c in ipairs(COIN_STEPS) do if c == cur then listed = true end end
     if not listed then list[#list + 1] = { cur, Money(cur) } end
     return list
-  end, 10000, "Money looted from a corpse rains as coins on its own (even with few items) from this much. Quest money always rains. Also /dl coinrain 1g.")
+  end, 10000, "Money looted from a corpse rains as coins on its own (even with few items) from this much. Quest money always rains.")
 
   N.Header(layout, "Where")
   local from = {}
@@ -51,7 +51,7 @@ local function Create()
     from[#from + 1] = { v, ns.FROM_NAMES[v]:gsub("^%l", string.upper) .. (v == "ground" and " (default)" or "") }
   end
   N.Choice(cat, "rainFrom", "Loot flies from", from, "ground",
-    "Where the loot shoots up from: the middle of the ground like a fountain, anywhere along the ground, from just under the bottom edge, or the middle of the screen. Also /dl rainfrom.")
+    "Where the loot shoots up from: the middle of the ground like a fountain, anywhere along the ground, from just under the bottom edge, or the middle of the screen.")
   N.Slider(cat, "rainFloor", "Landing height", 0, 30, 1, 0,
     "Where the loot lands, as a percent of the screen height up from the bottom (0 = the bottom edge; raise it to land above your action bars).",
     function(v) return math.floor(v + 0.5) .. "%" end)
@@ -72,15 +72,15 @@ local function Create()
   N.Slider(cat, "testRain", "Test rain size (items)", 1, 60, 1, 8,
     "How many items the test rain drops. From 4 one is blue, from 8 one is purple, from 12 one is orange; some money too.",
     function(v) return math.floor(v + 0.5) .. " items" end)
-  N.Button(layout, "Rain the test items", "Test rain", function() ns.RunCommand("rain", tostring(ns.settings.testRain or 8)) end,
-    "Rain that many test items (/dl rain 8).")
+  N.Button(layout, "Rain the test items", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
+    "Rain that many test items.")
   N.Choice(cat, "testMoney", "Test money amount", {
     { "54c", "54c" }, { "35s 20c", "35s 20c" }, { "2g 35s", "2g 35s (default)" }, { "25g", "25g" },
   }, "2g 35s", "How much money the Test money button rains.")
-  N.Button(layout, "Rain the test money", "Test money", function() ns.RunCommand("testcoins", ns.settings.testMoney or "2g 35s") end,
-    "Rain that amount as coins (/dl testcoins 2g 35s).")
-  N.Button(layout, "A quest reward", "Test reward", function() ns.RunCommand("testquest") end,
-    "An item and some money, rained together the way a quest turn-in plays (/dl testquest).")
+  N.Button(layout, "Rain the test money", "Test money", function() ns.RunAction("testcoins", ns.settings.testMoney or "2g 35s") end,
+    "Rain that amount as coins.")
+  N.Button(layout, "A quest reward", "Test reward", function() ns.RunAction("testquest") end,
+    "An item and some money, rained together the way a quest turn-in plays.")
 end
 
 function ns:OpenRainFx()

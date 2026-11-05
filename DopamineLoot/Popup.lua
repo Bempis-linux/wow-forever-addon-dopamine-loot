@@ -24,7 +24,6 @@ local function Position() return POS[ns.settings.popupPos or "midright"] or POS.
 function ns.PopupMax() return ns.settings.popupMax or 2 end
 local function ClickThrough() return (ns.settings.popupMouse or "through") == "through" end
 
-ns.AddToggle("popup", "noPopup", "loot popups")
 
 local pool, shown, waiting, afterCombat = {}, {}, {}, {}
 local ShowWaiting -- defined below ShowLoot; Update calls it
@@ -211,7 +210,7 @@ end
 
 -- item: { link, id, count, quality, name, icon, equipLoc, ilvl, typeText, src, test, push, forceModel,
 -- burstBest (the best quality looted with it) }
--- onModel(mode, fileID, why) is called once the display path is decided (/dl model uses it).
+-- onModel(mode, fileID, why) is called once the display path is decided (no caller since 1.0).
 -- With the most on screen, a better item (or a preview) pushes the oldest out; anything else
 -- waits for a free slot, so a rain's blues are all seen in turn. Setting popupCombat "defer" holds
 -- popups until the fight is over.

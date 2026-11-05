@@ -27,7 +27,6 @@ ns.SOUND_ROWS = { -- the rows on the Sounds page: rarity, label, default sound
 }
 local function Row(q) return math.min(math.max(q or 2, 2), 5) end
 
-ns.AddToggle("sound", "noSound", "loot sounds")
 
 local function Channel() return ns.settings.soundChannel or "SFX" end
 

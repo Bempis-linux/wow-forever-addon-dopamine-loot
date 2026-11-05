@@ -22,6 +22,11 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   players. **Not done yet**: user pushes/approves the tag `v1.0.0` (the first real packager run, unverified);
   CurseForge/Wago projects (user creates them, then `## X-Curse-Project-ID` / `## X-Wago-ID` in the .toc and
   `CF_API_KEY` / `WAGO_API_TOKEN` repo secrets); check whether CurseForge lists a WoW Forever game version.
+- **Only `/dl`** (user, 2026-11-04: "we should only need /dl to open the settings page"): every other
+  command, `/dopamine`, the log window (Output.lua), debug logging and the Advanced page are gone; the
+  addon prints nothing. Test buttons run `ns.RunAction` (LootFeed.lua: test, testpair, rain, testcoins,
+  testquest, model). The item ID check on the Popups page just shows the popup (no report).
+  Overrides the kit's command/page parity rule for this project (CLAUDE.md).
 - **Popup placement (0.4.20; verified: placement, compact Uncommon beside a Rare via Test pair, 0.4.21)**: user picked right of you mid-screen; Poor/Common compact,
   an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
   size 0.8 (the user's saved 1.05 kept), 2 at once, time by rarity 2.5/4/6/8 s, clicks pass through
@@ -29,7 +34,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   `ns.PopupCompact`; View "compact" layout (one line, icon, no model, no arrival).
 - **Settings (0.4.15-0.4.19)**: pages Dopamine Loot (native: 3 switches, tests), Popups (custom,
   Look.lua: rows When / Look / Placement / The 3D item + live preview + item ID check), Loot rain,
-  Sounds (per rarity: Sound dropdown, Our chime, Preview/Play; Play all), Advanced (all native,
+  Sounds (per rarity: Sound dropdown, Our chime, Preview/Play; Play all) (all native,
   Settings.lua `ns.Native`). **Known game bug, accepted**: after any addon's native
   page was shown, scrolling the game's Social page blocks `IsUserOAuthed()` and blames that addon
   (reproduced with BugSack alone). Custom rows on the pooled settings frames were removed (0.4.18).
@@ -40,7 +45,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
 - **Next up**:
-  1. Release: user checks 1.0.0 in game (settings pages, no Blizzard assets row), then tag `v1.0.0`
+  1. Release: user checks 1.0.0 in game (`/dl` opens settings, no Advanced page, Test buttons work), then tag `v1.0.0`
      with the kit's new `wow-addon-release` skill (kit 0.7.0, written from this release; steps 5-6).
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
@@ -59,14 +64,14 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 
 ## Not yet verified
 - A single green from a mob (popup), a vendor buy (must NOT pop), crafting, a real quest turn-in
-  with money, a dungeon (secret loot lines? `/dl debug`), combat deferral, big-rain performance.
+  with money, a dungeon (secret loot lines? no debug logging since 1.0), combat deferral, big-rain performance.
 - Arrival sounds by ear; gathering when Baganator hides the backpack button.
 
 ## User preferences (stated in chat; follow them)
 - **Privacy first**: the only public identity is **Bempis**; nothing else personal in tracked files
   or commits (BugSack dumps contain the character name: never copy it). Repo-local git identity;
   the pre-push guard enforces it; never `--no-verify` unless the user says so.
-- **Every `/dl` command also gets a settings control** (house-style parity). **Settings pages must stay tidy** (user, 2026-10-14; kit 0.6.2 rule): design each settings change (section, label, order) before adding it; no messy appended rows.
+- **Only `/dl`, everything on the settings pages** (user, 2026-11-04; replaces command/page parity). **Settings pages must stay tidy** (user, 2026-10-14; kit 0.6.2 rule): design each settings change (section, label, order) before adding it; no messy appended rows.
 - **Mockups before visual changes** (`docs/mockups/rain.html` for motion). **Never run bulk scripted
   tests in the browser pane without asking** (one froze the user's PC); read the console instead.
 - **The loot rain is the user's favorite part**; it may be busy. Popups stay calm: no new looping
@@ -77,7 +82,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - **Assets**: Blizzard assets (by path/fileID/atlas/SOUNDKIT) are welcome where they fit; offer
   custom vs. Blizzard per piece and let the user pick (kit 0.6.0 house style). Never ship
   extracted or borrowed files.
-- Only `/dl help` prints to chat.
+- The addon prints nothing (no chat, no log window; 1.0).
 - Process: preflight → reviewer agent for big changes → commit → push; then a short "to test" list
   saying `/reload` vs **full restart** (new media = restart; a newly linked addon folder loaded on `/reload`, 2026-11-04).
 - Answers: concise. **No rush, no deadlines.**

@@ -2,7 +2,7 @@
 -- bounces on an invisible trampoline. Items launch worst first; the best waits a beat, flies
 -- higher and lands in the middle. When it settles, the good stuff (Rare+ by default) becomes
 -- popups and the rest is pulled into your bag. Money rains as coins with a rolling total.
--- Every flourish is a switch on the "Loot rain effects" page (ns.RAIN_FX; /dl rainfx).
+-- Every flourish is a switch on the "Loot rain effects" page (ns.RAIN_FX).
 -- The physics, launch timing, spacing and order are pure functions (ns.RainCore) tested offline by
 -- tools/test_rain.lua; the drawing below drives plain textures from one OnUpdate.
 local _, ns = ...
@@ -245,47 +245,10 @@ local function RefreshFx()
 end
 local function On(key) return fxOn[key] end
 
-ns.AddToggle("rain", "noRain", "loot rain")
-local OPEN_NAMES = { size = "by haul size", always = "always the big sound", never = "never" }
-ns.AddCommand("opensound", "the sound as the loot bursts out: /dl opensound [size | always | never]", function(arg)
-  arg = (arg or ""):lower():match("%S+")
-  if OPEN_NAMES[arg] then
-    ns.settings.openSound = arg ~= "size" and arg or nil
-    if ns.SettingChanged then ns.SettingChanged("openSound") end
-  end
-  ns.Print("burst sound: " .. OPEN_NAMES[ns.settings.openSound or "size"])
-  ns:ShowLog()
-end)
 ns.FROM_NAMES = {
   ground = "the ground (a fountain from the middle)", spread = "the ground, spread out",
   below = "below the bottom edge", middle = "the middle of the screen",
 }
-ns.AddCommand("rainfrom", "where the loot flies from: /dl rainfrom [ground | spread | below | middle]", function(arg)
-  arg = (arg or ""):lower():match("%S+")
-  if ns.FROM_NAMES[arg] then
-    ns.settings.rainFrom = arg ~= "ground" and arg or nil
-    if ns.SettingChanged then ns.SettingChanged("rainFrom") end
-  end
-  ns.Print("loot flies from " .. ns.FROM_NAMES[ns.settings.rainFrom or "ground"])
-  ns:ShowLog()
-end)
-
-ns.AddCommand("rainfx", "loot rain effects: /dl rainfx [name off|on]", function(arg)
-  local word, value = (arg or ""):lower():match("^(%S+)%s+(%S+)$")
-  for _, fx in ipairs(ns.RAIN_FX) do
-    if word == fx.word and (value == "on" or value == "off") then
-      ns.settings["noRain" .. fx.key] = value == "off" or nil
-      if ns.SettingChanged then ns.SettingChanged("noRain" .. fx.key) end
-      ns.Print(("%s: %s"):format(fx.label, value))
-      return ns:ShowLog()
-    end
-  end
-  ns.Print("loot rain effects (/dl rainfx <name> off|on):")
-  for _, fx in ipairs(ns.RAIN_FX) do
-    ns.Print(("  %s (%s): %s"):format(fx.word, fx.label, ns.settings["noRain" .. fx.key] and "off" or "on"))
-  end
-  ns:ShowLog()
-end)
 
 local layer, top, driver, escFrame
 local sprites, pool, dust = {}, {}, {}

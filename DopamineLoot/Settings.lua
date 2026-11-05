@@ -1,6 +1,6 @@
--- Dopamine Loot settings (Options > AddOns > Dopamine Loot; also /dl and /dl settings). One topic
+-- Dopamine Loot settings (Options > AddOns > Dopamine Loot; also /dl). One topic
 -- per page (docs/mockups/settings.html): Dopamine Loot (the main switches, quick tests), Popups
--- (Look.lua, custom: it has the live preview), Loot rain (RainFx.lua), Sounds and Advanced
+-- (Look.lua, custom: it has the live preview), Loot rain (RainFx.lua), Sounds
 -- (Pages.lua). All but Popups use the game's native settings layout (ns.Native below); the custom
 -- page uses the controls in ns.UI.
 local _, ns = ...
@@ -199,13 +199,13 @@ ns.UI = {
 ---------------------------------------------------------------------------
 -- The native pages (Blizzard's own settings layout, as BugSack uses on Forever): the game's check
 -- boxes, sliders and dropdowns, laid out for us and found by the Options search box. Every setting
--- is a proxy that reads and writes ns.settings, so the /dl commands and these pages share one value.
+-- is a proxy that reads and writes ns.settings, so the Test actions and these pages share one value.
 ---------------------------------------------------------------------------
 local N = {}
 ns.Native = N
 local function Var(key) return "DOPAMINELOOT_" .. key:upper() end
 
--- A /dl command changed a setting: an open page (native or custom) shows the new value at once
+-- A setting changed elsewhere: an open page (native or custom) shows the new value at once
 function ns.SettingChanged(key)
   if Settings and Settings.NotifyUpdate then pcall(Settings.NotifyUpdate, Var(key)) end
   RefreshAll()
@@ -282,21 +282,21 @@ local function CreateGeneral()
   category = cat
   ns.settingsCategory = cat
   N.Header(layout, "Features")
-  N.Toggle(cat, "noPopup", "Loot popups", "A card beside your character for each item you loot, the item turning in 3D. (/dl popup off)", true)
-  N.Toggle(cat, "noRain", "Loot rain", "When you loot several things at once, they spray up and bounce down; the best lands last. In combat it waits until the fight is over. (/dl rain off)", true)
-  ns.soundSetting = N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once. (/dl sound off)", true)
+  N.Toggle(cat, "noPopup", "Loot popups", "A card beside your character for each item you loot, the item turning in 3D.", true)
+  N.Toggle(cat, "noRain", "Loot rain", "When you loot several things at once, they spray up and bounce down; the best lands last. In combat it waits until the fight is over.", true)
+  ns.soundSetting = N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once.", true)
   N.Header(layout, "Try it")
   N.Choice(cat, "testQuality", "Test popup quality", TESTS, 4, "Which quality the Test popup button shows.")
-  N.Button(layout, "A popup", "Test popup", function() ns.RunCommand("test", TEST_WORDS[ns.settings.testQuality or 4]) end,
-    "Show a test popup of the quality picked above (/dl test epic).")
-  N.Button(layout, "A popup in combat", "Test combat", function() ns.RunCommand("test", TEST_WORDS[ns.settings.testQuality or 4] .. " combat") end,
-    "The same popup as it looks in a fight (Popups page: In combat). /dl test epic combat")
-  N.Button(layout, "Two items at once", "Test pair", function() ns.RunCommand("testpair") end,
-    "An Uncommon looted beside a Rare: the Rare comes full, the Uncommon compact (/dl testpair).")
-  N.Button(layout, "A loot rain", "Test rain", function() ns.RunCommand("rain", tostring(ns.settings.testRain or 8)) end,
-    "Rain test loot (how many: on the Loot rain page). /dl rain 8")
-  N.Button(layout, "A quest reward", "Test reward", function() ns.RunCommand("testquest") end,
-    "An item and some money, rained together the way a quest turn-in plays (/dl testquest).")
+  N.Button(layout, "A popup", "Test popup", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4]) end,
+    "Show a test popup of the quality picked above.")
+  N.Button(layout, "A popup in combat", "Test combat", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4] .. " combat") end,
+    "The same popup as it looks in a fight (Popups page: In combat).")
+  N.Button(layout, "Two items at once", "Test pair", function() ns.RunAction("testpair") end,
+    "An Uncommon looted beside a Rare: the Rare comes full, the Uncommon compact.")
+  N.Button(layout, "A loot rain", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
+    "Rain test loot (how many: on the Loot rain page).")
+  N.Button(layout, "A quest reward", "Test reward", function() ns.RunAction("testquest") end,
+    "An item and some money, rained together the way a quest turn-in plays.")
 end
 
 function ns:OpenSettings()
@@ -305,7 +305,6 @@ function ns:OpenSettings()
 end
 
 ns.OnInit(function() if not category then CreateGeneral() end end)
-ns.AddCommand("settings", "open the settings page", function() ns:OpenSettings() end)
 
--- /dl (and the minimap compartment) opens the settings until the inspector exists
+-- /dl and the minimap compartment open the settings
 function ns:ToggleUI() self:OpenSettings() end
