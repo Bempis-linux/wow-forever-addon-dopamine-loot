@@ -21,8 +21,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Workflow note: `actions/checkout@v4` gets a Node 20 deprecation warning (harmless; bump it some time).
   Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
-  "switch to dev/release" = run it, then the user `/reload`s. **The game is on release** (2026-11-05: the
-  CurseForge app's 1.0.0; update it to 1.0.1 in the app while on release).
+  "switch to dev/release" = run it, then the user `/reload`s. **The game is on release** (2026-11-05: the CurseForge app's 1.0.1, updated in the app;
+  the app caches "latest version" for a while after an upload: refresh or restart it).
 - **Repo security** 2026-11-05: only Bempis-linux has access; rulesets "Protect main" (no force-push or
   delete) and "Protect release tags" (v* can't be deleted or moved), no bypass, even for the owner; wiki off.
   The user checks 2FA and installed apps themself.
