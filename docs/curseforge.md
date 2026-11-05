@@ -22,45 +22,50 @@ ground as a rain of loot and coins.
 
 ## Description
 
-Dopamine Loot makes looting feel good. Each item you pick up appears beside your character with its
-model turning in 3D, and a big haul bursts up from the ground as a rain of loot and coins.
+Paste with the editor in Markdown mode.
 
-### Loot popups
+```markdown
+# ✨ Loot that feels like loot ✨
 
-- A card beside your character for each item, with the item itself turning in 3D (weapons, shields,
-  helms, shoulders and more; other items show as a tilting card).
-- Three styles: Relic, Beam and Banner.
-- Rare items arrive with a burst of sparks, Epic adds glints, Legendary adds shockwaves and embers.
-- Common loot and loot in combat come as one compact line, so it never gets in the way.
-- Clicks pass through to the world; hover a card to keep it on screen.
+Every drop gets its moment. Items pop up beside you **turning in 3D**, and a big haul **bursts out of the ground** as a rain of loot and coins.
 
-### Loot rain
+---
 
-- Loot three or more things at once, a pile of money, or a quest reward, and it all bursts up from the
-  ground, bounces and settles, with the best item landing last.
-- Coins merge into silver and gold, and gold twinkles where it lies.
-- Rare and better items get a beam of light and their name; gray junk lands dull and heavy.
-- What doesn't stay as a popup gathers into your bag.
-- In combat it waits until the fight is over. Press Escape to skip it.
+## 🎁 Loot popups
 
-### Sounds
+- 🗡️ **The real item, in 3D:** weapons, shields, helms and shoulders turn beside your character; everything else shows as a tilting card.
+- 💎 **Arrivals by rarity:** Rare bursts into sparks, Epic adds glints, Legendary hits with shockwaves and embers.
+- 🎨 **Three styles:** Relic, Beam and Banner.
+- 🤫 **Out of your way:** common loot and loot in combat come as one compact line, and clicks pass straight through. Hover a card to keep it.
 
-- A sound per rarity, chosen from the game's own sounds by ear on the Sounds page, plus a chime for
-  Rare and up.
-- Coin, launch and landing sounds in the rain climb in pitch as the loot keeps coming.
+## 🌧️ Loot rain
 
-### Settings
+- 💥 **Big hauls explode:** loot three or more things, a pile of gold, or a quest reward, and it all flies up from the ground and bounces down.
+- 🏆 **Best for last:** the best item waits a beat, flies highest and lands in the middle.
+- 🪙 **Coins that shine:** silver merges into gold, and gold twinkles where it lies.
+- 🔦 **Beams and names** over Rare and better; gray junk lands dull and heavy.
+- 🎒 **Clean finish:** the good stuff stays as popups, the rest flies into your bag.
+- ⚔️ Waits until combat is over. **Escape** skips it.
 
-Type **/dl** or open Options > AddOns > Dopamine Loot. Every part can be switched on or off, and each
-page has Test buttons so you can see a popup or a rain without looting anything:
+## 🔊 Sounds
 
-- **Dopamine Loot**: popups, rain and sounds on or off; quick tests.
-- **Popups**: when they show, style, size, placement, with a live preview.
-- **Loot rain**: when it rains, where the loot flies from, every effect as its own switch.
-- **Sounds**: the sound for each rarity.
+- A sound per rarity, picked **by ear** from the game's own sounds.
+- Coins, launches and landings **climb in pitch** as the loot keeps coming.
 
-### Notes
+## ⚙️ Settings
 
-- Made for WoW: Forever.
-- Saves only your settings. It sends nothing anywhere and prints nothing to chat.
-- Bugs and ideas: open an issue on GitHub (link above).
+Type **`/dl`** (or Options › AddOns › Dopamine Loot). Every effect is its own switch, and every page has **Test buttons**, so you can see it all without looting a thing.
+
+| Page | What's there |
+|---|---|
+| **Dopamine Loot** | popups, rain and sounds on or off; quick tests |
+| **Popups** | style, size, placement, with a live preview |
+| **Loot rain** | when it rains, where it flies from, every effect |
+| **Sounds** | the sound for each rarity |
+
+---
+
+- 🎮 Made for **WoW: Forever**
+- 🔒 Saves only your settings. Sends nothing anywhere, prints nothing to chat.
+- 🐞 Bugs and ideas: [open an issue on GitHub](https://github.com/Bempis-linux/wow-forever-addon-dopamine-loot/issues)
+```
