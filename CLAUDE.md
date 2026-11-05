@@ -38,7 +38,8 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
 docs/plan.md             design, data model, roadmap, rain ideas
 docs/mockups/            HTML mockups (rain.html: the rain prototype, same physics, effect toggles)
 docs/STATE.md            session handoff
-tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight)
+tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight),
+                         addon-mode.ps1 (switch the game between the dev files and a released copy)
 deprecated/chest-show/   the set-aside chest show (Rain.lua as of 0.4.5, media, README); not loaded
 deprecated/toast/        the set-aside Toast popup style (View.lua as of 0.4.13, an unfinished diff, README)
 deprecated/asset-check/  the dev tools taken out for 1.0: /dl assets page and /dl armortest (Assets.lua, README)
@@ -101,3 +102,16 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   (custom vs. Blizzard asset for each piece) and let the user choose. Never ship files we didn't make
   (no extracted game files or other addons' media in `Media/`). Models driven by hand in `OnUpdate`,
   set after `Show()`, no AnimationGroups.
+
+## Dev files vs. the released copy (tools/addon-mode.ps1)
+
+The user plays either the dev files (a junction to this repo) or a released copy (the CurseForge app's
+install, or a release zip); "switch to dev" / "switch to release" means run the script (exact command
+with the client path in CLAUDE.local.md), then tell the user to `/reload`. `status` shows which is in use.
+The copy not in use is parked in `<client>\Interface\DopamineLoot.release` (outside AddOns). Both share
+the saved data.
+- **Only install or update through the CurseForge app while on release.** On dev, `AddOns\DopamineLoot`
+  is the junction, so an app update would write the released files into the repo (`git status` shows
+  it; `git checkout -- DopamineLoot` undoes it). Keep auto-update off for Dopamine Loot in the app.
+- Never remove the junction with `rm -rf` or `Remove-Item -Recurse` (that follows the link into the
+  repo); the script removes it as a link only.
