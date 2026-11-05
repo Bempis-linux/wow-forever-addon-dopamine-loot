@@ -52,11 +52,17 @@
   <label style="margin-top:4px">Small hauls come from
     <select id="small"><option value="pouch">a loot pouch</option><option value="portal">a portal</option><option value="none">nothing (as now)</option></select>
   </label>
+  <h2>New look (2026-11-04)</h2>
+  <label style="margin-bottom:4px">Item frame
+    <select id="frame"><option value="plain">plain edge (as now)</option><option value="game">the game's item border (as in bags)</option><option value="soft">rounded, soft inner glow (ours)</option></select>
+  </label>
+  <div id="looks"></div>
   <h2>Ideas</h2>
   <div id="toggles"></div>
   <h2>Watch</h2>
   <label>Speed <span id="spd">1.0x</span></label>
   <input id="speed" type="range" min="0.2" max="1" step="0.1" value="1">
+  <label><input type="checkbox" id="hold" checked> Hold the resting loot 5 s (to look closer; the addon waits 0.5 s)</label>
   <label><input type="checkbox" id="sound" checked> Sound (mockup tones)</label>
   <div id="hint">Esc skips (when "Skip with Escape" is on). Click a button to replay.</div>
 </div>
@@ -114,6 +120,23 @@ for (const [key, label, tip, mine, off] of IDEAS) {
   tg.appendChild(l);
 }
 tg.addEventListener("change", e => { on[e.target.dataset.k] = e.target.checked; });
+// the new looks (2026-11-04): each would be a switch on the addon's Loot rain page
+const LOOKS = [
+  ["twinkle", "Coins twinkle", "resting gold glints now and then; silver too, less often"],
+  ["groundLine", "Ground line", "a faint shimmer along the ground where the loot rests"],
+  ["poor", "Gray items look poor", "grays come out dull and smaller, fly lower and land with a thud"],
+  ["piles", "Coin piles", "resting coins heap up by kind instead of lying in a row"],
+];
+const lk = document.getElementById("looks");
+for (const [key, label, tip] of LOOKS) {
+  on[key] = true;
+  const l = document.createElement("label");
+  l.innerHTML = `<input type="checkbox" checked data-k="${key}"><span>${label}<small>${tip}</small></span>`;
+  lk.appendChild(l);
+}
+lk.addEventListener("change", e => { on[e.target.dataset.k] = e.target.checked; });
+let frameStyle = "plain";
+document.getElementById("frame").addEventListener("change", e => { frameStyle = e.target.value; });
 let speed = 1;
 document.getElementById("speed").addEventListener("input", e => { speed = +e.target.value; document.getElementById("spd").textContent = speed.toFixed(1) + "x"; });
 
@@ -274,6 +297,7 @@ function launch(it, isBest) {
   if (it.coin) { s.vy = 500 + Math.random() * 350; s.e = 0.5; }
   if (isBest) { s.x = VW / 2; s.vx = 0; s.vy = 1150; s.e = 0.5; s.spin = 0; } // peaks around 85% of the screen height
   if (it.coin) s.size = COIN[it.coin].size;
+  if (on.poor && s.q === 0) { s.size = SIZE * 0.8; s.vy *= 0.78; s.e = 0.3; } // junk: smaller, lower, a dead bounce
   if (launchFrom !== "middle" && !it.merged) { // from the ground (or below it): faster, so it peaks as high as from the middle
     const y0 = launchFrom === "below" ? -SIZE : B().floor;
     s.vy = Math.sqrt(s.vy * s.vy + 2 * -GRAVITY * (V_H * 0.38 - y0)); s.y = y0;
@@ -297,6 +321,29 @@ function landSlot(s) { // the nearest free spot along the floor
   return s.x;
 }
 
+// Coin piles: coins of one kind heap up on one spot, bottom row first, center out
+const PILE = (() => {
+  const out = [];
+  for (let r = 0; r < 6; r++) { const c = 6 - r; for (let i = 0; i < c; i++) out.push({ dx: i - (c - 1) / 2, r }); }
+  return out.sort((a, b) => (a.r + Math.abs(a.dx) * 0.7) - (b.r + Math.abs(b.dx) * 0.7));
+})();
+function pileSlot(s) { // a full pile (21 coins) starts another one beside it
+  R.piles = R.piles || {}; R.pileCount = R.pileCount || {};
+  if (s.pile === undefined) {
+    const kind = s.it.coin, n = R.pileCount[kind] = (R.pileCount[kind] || 0) + 1;
+    s.pile = kind + Math.floor((n - 1) / PILE.length); s.slot = (n - 1) % PILE.length;
+  }
+  // each kind has its own spot beside the middle (the best item's): copper and silver left, gold right
+  const PILE_X = { copper: -330, silver: -170, gold: 170 }, OUT = { copper: -1, silver: -1, gold: 1 };
+  let p = R.piles[s.pile];
+  if (!p) {
+    const extra = +s.pile.slice(s.it.coin.length); // 0 for the first pile, 1 for the next...
+    p = R.piles[s.pile] = { x: VW / 2 + PILE_X[s.it.coin] + OUT[s.it.coin] * extra * 330 };
+  }
+  const slot = PILE[s.slot];
+  s.tx = p.x + slot.dx * s.size * 0.72; s.ty = 30 + slot.r * s.size * 0.42;
+}
+
 function onLand(s) {
   s.squash = 0.09;
   if (s.bounces !== 1) return;
@@ -309,7 +356,8 @@ function onLand(s) {
     if (s.best) {
       chord([523, 659, 784, 1047], 0.8, 0.08);
       if (on.hitstop) { stopT = 0.22; shake = 0.3; }
-    } else tone(on.escalate ? 520 * Math.pow(2, Math.min(idx, 18) / 12) : 700, 0.09, 0.1);
+    } else if (on.poor && s.q === 0) tone(170, 0.09, 0.09, "triangle"); // a dull thud
+    else tone(on.escalate ? 520 * Math.pow(2, Math.min(idx, 18) / 12) : 700, 0.09, 0.1);
   }
   if (on.dust) for (let i = 0; i < 7; i++) fx.push({ kind: "dust", x: s.x + (Math.random() - 0.5) * s.size, y: 30,
     vx: (Math.random() - 0.5) * 140, vy: 20 + Math.random() * 50, age: 0, life: 0.45 });
@@ -409,9 +457,19 @@ function update(dt) {
       s.restAge += dt;
       if (s.best && s.tx === undefined) {
         s.tx = VW / 2; // the best owns the middle: whatever rests there makes room
-        if (on.spacing) for (const o of R.sprites) if (o !== s && o.tx !== undefined && Math.abs(o.tx - s.tx) < 150) o.tx = undefined;
-      } else if (on.spacing && s.tx === undefined) s.tx = landSlot(s);
+        if (on.spacing) for (const o of R.sprites) if (o !== s && o.tx !== undefined && o.pile === undefined && Math.abs(o.tx - s.tx) < 150) o.tx = undefined;
+      } else if (on.piles && s.it.coin && s.tx === undefined) pileSlot(s);
+      else if (on.spacing && s.tx === undefined) s.tx = landSlot(s);
       if (s.tx !== undefined) s.x += (s.tx - s.x) * Math.min(1, dt * 8);
+      if (s.ty !== undefined) s.y += (s.ty - s.y) * Math.min(1, dt * 10);
+      if (on.twinkle && s.it.coin && s.it.coin !== "copper") { // gold glints often, silver now and then
+        const gold = s.it.coin === "gold";
+        if (s.twNext === undefined) s.twNext = s.restAge + (gold ? 0.1 + Math.random() * 0.6 : 0.4 + Math.random() * 1.6);
+        if (s.restAge >= s.twNext) {
+          s.twAt = s.restAge; s.twX = (Math.random() - 0.5) * 0.6; s.twY = (Math.random() - 0.5) * 0.6;
+          s.twNext = s.restAge + (gold ? 0.7 + Math.random() * 1.1 : 2 + Math.random() * 2.5);
+        }
+      }
     }
     if (s.squash > 0) s.squash -= dt;
     // a ghost every 35 ms, so they spread out along the arc instead of hiding under the item
@@ -424,7 +482,8 @@ function update(dt) {
   }
   if (on.coins) R.shownCopper += (R.copper * (R.coins ? R.coinsLanded / R.coins : 1) - R.shownCopper) * Math.min(1, dt * 6);
   if ((allRest || R.age > 9) && R.settleAt === null) R.restHold = (R.restHold || 0) + dt;
-  if (R.restHold > 0.5 && R.settleAt === null) {
+  if (R.landed) R.lineA = Math.min(1, (R.lineA || 0) + dt * 3); // the ground line fades in at the first landing
+  if (R.restHold > (document.getElementById("hold").checked ? 5 : 0.5) && R.settleAt === null) {
     if (R.merges.length && !R.mergeStarted) startMerge(); else settle();
   }
   if (R.settleAt !== null) {
@@ -480,12 +539,27 @@ function drawSprite(s, alpha, x = s.x, y = s.y, rot = s.rot) {
     if (w > 12 && h > 12) { ctx.beginPath(); ctx.ellipse(0, 0, X(w / 2 - 4), X(h / 2 - 4), 0, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke(); }
     ctx.restore(); return;
   }
-  const c = QC[s.q];
+  const dull = on.poor && s.q === 0, c = dull ? "#4a4a4a" : QC[s.q], inner = hidden(s) ? "#2b2114" : "#1b1712";
   if (s.q >= 3) { ctx.shadowColor = c; ctx.shadowBlur = (s.best ? 28 : 16) * scale; }
-  ctx.fillStyle = c; ctx.fillRect(X(-w / 2), X(-h / 2), X(w), X(h));
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = hidden(s) ? "#2b2114" : "#1b1712"; ctx.fillRect(X(-w / 2 + 2), X(-h / 2 + 2), X(w - 4), X(h - 4));
+  if (frameStyle === "game") { // the game's bag-slot look: a black rim, a thin quality line from Uncommon up
+    if (s.q >= 3) ctx.shadowBlur = (s.best ? 22 : 10) * scale;
+    ctx.fillStyle = "#000"; ctx.fillRect(X(-w / 2), X(-h / 2), X(w), X(h));
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = inner; ctx.fillRect(X(-w / 2 + 1.5), X(-h / 2 + 1.5), X(w - 3), X(h - 3));
+  } else if (frameStyle === "soft") { // ours: rounded, the color glowing in from the edge
+    roundRect(X(-w / 2), X(-h / 2), X(w), X(h), X(8)); ctx.fillStyle = inner; ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.save(); roundRect(X(-w / 2), X(-h / 2), X(w), X(h), X(8)); ctx.clip();
+    ctx.shadowColor = c; ctx.shadowBlur = X(s.q >= 3 ? 12 : 7); ctx.strokeStyle = c; ctx.lineWidth = X(3);
+    roundRect(X(-w / 2 - 1), X(-h / 2 - 1), X(w + 2), X(h + 2), X(9)); ctx.stroke();
+    ctx.restore();
+  } else {
+    ctx.fillStyle = c; ctx.fillRect(X(-w / 2), X(-h / 2), X(w), X(h));
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = inner; ctx.fillRect(X(-w / 2 + 2), X(-h / 2 + 2), X(w - 4), X(h - 4));
+  }
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  if (dull) { ctx.filter = "grayscale(1) brightness(0.6)"; ctx.globalAlpha = alpha * 0.85; }
   if (hidden(s)) { // face down until its card is flipped: only the rarity's glow gives a hint
     ctx.font = `700 ${X(Math.min(w, h) * 0.6)}px Georgia, serif`; ctx.fillStyle = hexA(c, 0.9);
     ctx.fillText("?", 0, X(1));
@@ -493,6 +567,56 @@ function drawSprite(s, alpha, x = s.x, y = s.y, rot = s.rot) {
     ctx.font = `${X(Math.min(w, h) * 0.62)}px serif`;
     ctx.fillText(s.it.glyph, 0, X(2));
   }
+  ctx.filter = "none";
+  if (frameStyle === "game" && !hidden(s)) { // drawn over the icon, as the game's border is
+    const r = [X(-w / 2 + 2.5), X(-h / 2 + 2.5), X(w - 5), X(h - 5)];
+    if (s.q >= 2 && !dull) {
+      ctx.strokeStyle = c; ctx.lineWidth = X(2); ctx.strokeRect(...r);
+      const hl = ctx.createLinearGradient(0, X(-h / 2), 0, X(h / 2)); // a lighter top edge, like a bevel
+      hl.addColorStop(0, "rgba(255,255,255,0.45)"); hl.addColorStop(0.45, "rgba(255,255,255,0)");
+      ctx.strokeStyle = hl; ctx.lineWidth = X(1); ctx.strokeRect(...r);
+    } else { ctx.strokeStyle = "rgba(110,110,110,0.55)"; ctx.lineWidth = X(1); ctx.strokeRect(...r); }
+  }
+  ctx.restore();
+}
+// a four-point glint on a resting coin
+function drawTwinkle(s, a) {
+  if (s.twAt === undefined || s.leaving) return;
+  const u = (s.restAge - s.twAt) / 0.4;
+  if (u < 0 || u >= 1) return;
+  const gold = s.it.coin === "gold", r = X(s.size * (gold ? 0.8 : 0.55) * Math.sin(Math.PI * u));
+  const cx = X(s.x + s.twX * s.size), cy = Y(s.y + s.size / 2 + s.twY * s.size);
+  ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = "lighter";
+  ctx.fillStyle = gold ? "rgba(255,240,180,0.95)" : "rgba(230,238,255,0.75)";
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const ang = i * Math.PI / 4 + u * 0.6, rr = i % 2 ? r * 0.16 : r;
+    ctx.lineTo(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr);
+  }
+  ctx.closePath(); ctx.fill();
+  const rg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 0.45);
+  rg.addColorStop(0, "rgba(255,255,235,0.9)"); rg.addColorStop(1, "rgba(255,255,235,0)");
+  ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+// the ground line: a faint warm line with a soft glow above and a shimmer sliding along it
+function drawGroundLine(a) {
+  if (a <= 0) return;
+  const y = Y(30), x0 = X(VW * 0.1), x1 = X(VW * 0.9), mid = (x0 + x1) / 2, half = (x1 - x0) / 2;
+  ctx.save();
+  ctx.translate(mid, y); ctx.scale(half / X(40), 1); // the glow: a flattened half-ellipse
+  const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, X(40));
+  gg.addColorStop(0, `rgba(255,205,120,${0.16 * a})`); gg.addColorStop(1, "rgba(255,205,120,0)");
+  ctx.fillStyle = gg; ctx.fillRect(-X(40), -X(40), X(80), X(40));
+  ctx.restore();
+  const lg = ctx.createLinearGradient(x0, 0, x1, 0);
+  lg.addColorStop(0, "rgba(255,215,130,0)"); lg.addColorStop(0.5, `rgba(255,215,130,${0.5 * a})`); lg.addColorStop(1, "rgba(255,215,130,0)");
+  ctx.fillStyle = lg; ctx.fillRect(x0, y - X(1), x1 - x0, X(1.5));
+  const sx = x0 + ((R.age * 0.3) % 1) * (x1 - x0), env = Math.sin(Math.PI * ((R.age * 0.3) % 1));
+  const sg = ctx.createRadialGradient(sx, y, 0, sx, y, X(50));
+  sg.addColorStop(0, `rgba(255,245,210,${0.55 * a * env})`); sg.addColorStop(1, "rgba(255,245,210,0)");
+  ctx.save(); ctx.translate(sx, y); ctx.scale(1, 0.12); ctx.translate(-sx, -y);
+  ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(sx, y, X(50), 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 // with Card flip on, Rare+ stay a "?" from the chest until you flip them
@@ -516,6 +640,7 @@ function draw() {
   if (R && !R.done) {
     const floor = 30;
     if (R.box) drawBox(R.box);
+    if (on.groundLine) drawGroundLine((R.lineA || 0) * (R.fadeOut ? Math.max(0, 1 - R.fadeOut / 0.6) : 1));
     for (const s of R.sprites) { // shadows and beams first, under everything
       const a = s.alpha ?? 1;
       if (on.shadows && !s.leaving || on.shadows && s.leaving === "fade") {
@@ -554,6 +679,7 @@ function draw() {
       });
       if (s.leaving === "card") { drawCard(s); continue; }
       drawSprite(s, s.alpha ?? 1);
+      if (on.twinkle && s.it.coin) drawTwinkle(s, s.alpha ?? 1);
       if (on.names && s.resting && s.q >= 3 && !s.leaving && !hidden(s)) {
         ctx.globalAlpha = Math.min(1, s.restAge / 0.3);
         ctx.font = `600 ${X(13)}px Georgia, serif`; ctx.fillStyle = QC[s.q]; ctx.textAlign = "center";
