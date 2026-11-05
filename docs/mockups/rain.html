@@ -125,13 +125,13 @@ const LOOKS = [
   ["twinkle", "Coins twinkle", "resting gold glints now and then; silver too, less often"],
   ["groundLine", "Ground line", "a faint shimmer along the ground where the loot rests"],
   ["poor", "Gray items look poor", "grays come out dull and smaller, fly lower and land with a thud"],
-  ["piles", "Coin piles", "resting coins heap up by kind instead of lying in a row"],
+  ["piles", "Coin piles (dropped)", "resting coins heap up by kind; too jarring (2026-11-04)", true],
 ];
 const lk = document.getElementById("looks");
-for (const [key, label, tip] of LOOKS) {
-  on[key] = true;
+for (const [key, label, tip, off] of LOOKS) {
+  on[key] = !off;
   const l = document.createElement("label");
-  l.innerHTML = `<input type="checkbox" checked data-k="${key}"><span>${label}<small>${tip}</small></span>`;
+  l.innerHTML = `<input type="checkbox" ${off ? "" : "checked"} data-k="${key}"><span>${label}<small>${tip}</small></span>`;
   lk.appendChild(l);
 }
 lk.addEventListener("change", e => { on[e.target.dataset.k] = e.target.checked; });
