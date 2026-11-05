@@ -48,7 +48,9 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   1. Release done (v1.0.0). Safety audit of the released zip 2026-11-05: clean (no personal strings in any file incl.
      media, no tags in OGG/TGA beyond the ffmpeg encoder name, no chat/addon messages, dynamic code, CVars,
      item/gold actions or Blizzard hooks; saved data = settings + version; history all Bempis noreply).
-     Optional: CurseForge/Wago (user creates the projects, then IDs in the .toc + repo secrets; next tag uploads).
+     CurseForge: listing copy in docs/curseforge.md (checked against the moderation rules); avatar options in
+     docs/mockups/avatar.html (A rain / B coin / C drop), waiting on the user's pick. Then user creates the projects,
+     IDs in the .toc + repo secrets, and the next tag uploads.
   1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
       less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
       (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles

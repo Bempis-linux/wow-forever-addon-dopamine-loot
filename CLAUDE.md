@@ -44,6 +44,7 @@ deprecated/toast/        the set-aside Toast popup style (View.lua as of 0.4.13,
 deprecated/asset-check/  the dev tools taken out for 1.0: /dl assets page and /dl armortest (Assets.lua, README)
 .pkgmeta, .github/       release packaging: BigWigs packager; a pushed v* tag builds the GitHub release zip
 CHANGELOG.md             player-facing release notes (the packager uses it as the release changelog)
+docs/curseforge.md       CurseForge listing copy (summary, description, categories) checked against its moderation rules
 ```
 
 ## Session continuity (read first)
