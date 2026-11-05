@@ -1,0 +1,29 @@
+# Pushing a tag (git tag -a v1.0.0 -m "Dopamine Loot 1.0.0" && git push origin v1.0.0) packages the
+# addon with the BigWigs packager (.pkgmeta) and publishes DopamineLoot-<tag>.zip as a GitHub release.
+# CurseForge / Wago uploads start once the .toc has ## X-Curse-Project-ID / ## X-Wago-ID and the repo
+# has the CF_API_KEY / WAGO_API_TOKEN secrets; without them those uploads are skipped.
+name: Package and release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v2

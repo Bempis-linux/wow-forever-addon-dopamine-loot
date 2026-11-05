@@ -34,8 +34,6 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check
   RainFx.lua               "Loot rain" page (native): when, where, afterwards, effects by group, tests
   Pages.lua                "Sounds" (popup sound picker) and "Advanced" pages (native)
-  Assets.lua               "Blizzard assets" sub-page + /dl assets: checks and previews game models,
-                           textures, sounds, fonts (docs/design-review.md)
   Media/*.tga, *.ogg       original art (tools/gen_textures.lua, white, tinted in game) and sounds
                            (tools/gen_sounds.sh, ffmpeg-synthesized)
 docs/plan.md             design, data model, roadmap, rain ideas
@@ -44,6 +42,9 @@ docs/STATE.md            session handoff
 tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight)
 deprecated/chest-show/   the set-aside chest show (Rain.lua as of 0.4.5, media, README); not loaded
 deprecated/toast/        the set-aside Toast popup style (View.lua as of 0.4.13, an unfinished diff, README)
+deprecated/asset-check/  the dev tools taken out for 1.0: /dl assets page and /dl armortest (Assets.lua, README)
+.pkgmeta, .github/       release packaging: BigWigs packager; a pushed v* tag builds the GitHub release zip
+CHANGELOG.md             player-facing release notes (the packager uses it as the release changelog)
 ```
 
 ## Session continuity (read first)

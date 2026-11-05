@@ -1,8 +1,8 @@
 -- Dopamine Loot settings (Options > AddOns > Dopamine Loot; also /dl and /dl settings). One topic
 -- per page (docs/mockups/settings.html): Dopamine Loot (the main switches, quick tests), Popups
 -- (Look.lua, custom: it has the live preview), Loot rain (RainFx.lua), Sounds and Advanced
--- (Pages.lua), and the Blizzard assets tool (Assets.lua). All but Popups and the asset tool use the
--- game's native settings layout (ns.Native below); the custom pages share the controls in ns.UI.
+-- (Pages.lua). All but Popups use the game's native settings layout (ns.Native below); the custom
+-- page uses the controls in ns.UI.
 local _, ns = ...
 
 local category
@@ -190,7 +190,7 @@ end
 
 local function RefreshAll() for _, r in ipairs(refreshers) do r() end end
 
--- Shared by the custom pages ("Popups" in Look.lua, "Blizzard assets" in Assets.lua)
+-- Shared by the custom page ("Popups" in Look.lua)
 ns.UI = {
   Label = Label, Tip = Tip, Check = Check, Toggle = Toggle, Choice = Choice, Button = Button,
   NumberBox = NumberBox, Slider = Slider, Dropdown = Dropdown, Refresh = RefreshAll,
@@ -282,7 +282,7 @@ local function CreateGeneral()
   category = cat
   ns.settingsCategory = cat
   N.Header(layout, "Features")
-  N.Toggle(cat, "noPopup", "Loot popups", "A card at the top of the screen for each item you loot, the item turning in 3D. (/dl popup off)", true)
+  N.Toggle(cat, "noPopup", "Loot popups", "A card beside your character for each item you loot, the item turning in 3D. (/dl popup off)", true)
   N.Toggle(cat, "noRain", "Loot rain", "When you loot several things at once, they spray up and bounce down; the best lands last. In combat it waits until the fight is over. (/dl rain off)", true)
   ns.soundSetting = N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once. (/dl sound off)", true)
   N.Header(layout, "Try it")

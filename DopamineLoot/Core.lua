@@ -33,6 +33,7 @@ local function InitDB()
   DopamineLootCharDB = DopamineLootCharDB or {}
   DopamineLootDB.settings = DopamineLootDB.settings or {}
   DopamineLootCharDB.version = DopamineLootCharDB.version or DB_VERSION
+  DopamineLootDB.assetCheck, DopamineLootDB.armorTest = nil, nil -- the dev tools' results (before 1.0)
   ns.settings, ns.db = DopamineLootDB.settings, DopamineLootCharDB
 end
 

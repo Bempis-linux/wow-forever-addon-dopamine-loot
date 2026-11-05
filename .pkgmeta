@@ -1,0 +1,20 @@
+# BigWigs packager (https://github.com/BigWigsMods/packager). The addon lives in the DopamineLoot/
+# subfolder, so the checkout is packaged as "DopamineLoot" and that subfolder is moved up to become
+# the addon (the WeakAuras layout). Everything else in the repo is left out. Dotfiles are always left out.
+package-as: DopamineLoot
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+move-folders:
+  DopamineLoot/DopamineLoot: DopamineLoot
+
+ignore:
+  - README.md
+  - CHANGELOG.md
+  - LICENSE
+  - CLAUDE.md
+  - docs
+  - tools
+  - deprecated

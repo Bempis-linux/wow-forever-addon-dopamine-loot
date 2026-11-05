@@ -51,7 +51,7 @@ local LAYOUT = {
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
 
--- Items that have a model of their own; body armor is textures on a body (mannequin view later)
+-- Items that have a model of their own; body armor is textures on a body, so it shows as a card
 ns.MODEL_SLOTS = {
   INVTYPE_WEAPON = true, INVTYPE_2HWEAPON = true, INVTYPE_WEAPONMAINHAND = true, INVTYPE_WEAPONOFFHAND = true,
   INVTYPE_SHIELD = true, INVTYPE_HOLDABLE = true, INVTYPE_RANGED = true, INVTYPE_RANGEDRIGHT = true,

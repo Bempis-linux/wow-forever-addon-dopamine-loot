@@ -1,7 +1,7 @@
 -- Dopamine Loot "Sounds" and "Advanced" settings pages (the game's native layout, ns.Native in
 -- Settings.lua). Sounds: the switch, the volume they follow, the popup sound picker (a game sound per
 -- rarity, played as you pick it, plus our chime for Rare and up) and the rain's burst sound.
--- Advanced: the log, checks for bug reports, and the Blizzard assets tool.
+-- Advanced: the log and checks for bug reports.
 local _, ns = ...
 
 local sounds, advanced
@@ -77,9 +77,6 @@ local function CreateAdvanced()
   N.Button(layout, "The log window", "Open log", function() ns:ShowLog() end, "Everything Dopamine Loot reports (/dl log).")
   N.Button(layout, "Game features", "Check client", function() ns.RunCommand("check") end,
     "Report which game features this client has, for bug reports (/dl check).")
-  N.Header(layout, "Blizzard assets")
-  N.Button(layout, "The game's chests, glows, sounds, fonts", "Asset check", function() ns:OpenAssets() end,
-    "See and hear the game's own assets that could join the show, and check which exist on this client (/dl assets).")
 end
 
 ns.OnInit(function()

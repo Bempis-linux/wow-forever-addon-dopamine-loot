@@ -1,19 +1,27 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-04, stop point after 0.4.23 (moved to the released client). Read this first in a new session (the kit's
-`session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap; 0.4 row =
-popups + rain) and `docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
+_Last checkpoint: 2026-11-04, 1.0.0 committed (first release; tag not pushed yet). Read this first in a new session (the kit's
+`session-resume` skill does), then CLAUDE.md (layout, decisions), `docs/plan.md` (roadmap) and
+`docs/design-review.md` (custom vs. Blizzard asset per piece; picks at the top)._
 
 **Words the user uses:** the **treasure chest** = where the rain's items and coins come out (the spawn
 point, middle of the screen); the **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **WoW: Forever released 2026-11-04**: client folder `_forever_` (Interface still 16001, build 1.60.1);
-  the DopamineLoot junction is in place there. The release account has no DopamineLoot saved data yet
-  (user chose to start fresh: beta settings, seen items, armorTest not carried over); BugGrabber/BugSack/Baganator are not
-  installed in `_forever_` yet. Paths in CLAUDE.local.md.
-- **0.4.23 pushed**, tree clean (stop point). 0.4 = popup polish, popup placement, settings by topic, rain from the
-  ground.
+- **WoW: Forever released 2026-11-04**: client folder `_forever_` (Interface still 16001, build 1.60.1).
+  Junctions for DopamineLoot and Loredex were missing there and were recreated 2026-11-04 (an addon install
+  had dropped them). `/reload` picked up the newly linked addons (the "new addon = restart" rule was wrong;
+  new media files still need a restart). Release account started fresh (no beta saved data). Installed
+  there: BugGrabber, BugSack, Syndicator, EasyFishing (no Baganator yet). Paths in CLAUDE.local.md.
+- **1.0.0 = first release** (user, 2026-11-04: "scrap the 3D armor view, clean up for a full first
+  release"). Picks: version 1.0.0; the asset tool + armortest out of the addon (`deprecated/asset-check/`,
+  README keeps the DressUpModel findings; Core InitDB clears `assetCheck`/`armorTest`); `deprecated/`
+  stays in the repo; distribution = GitHub release zip + CurseForge/Wago. Added `.pkgmeta` (WeakAuras
+  layout: `package-as: DopamineLoot`, `move-folders: DopamineLoot/DopamineLoot: DopamineLoot`),
+  `.github/workflows/release.yml` (BigWigs packager on a `v*` tag), CHANGELOG.md, MIT LICENSE, README for
+  players. **Not done yet**: user pushes/approves the tag `v1.0.0` (the first real packager run, unverified);
+  CurseForge/Wago projects (user creates them, then `## X-Curse-Project-ID` / `## X-Wago-ID` in the .toc and
+  `CF_API_KEY` / `WAGO_API_TOKEN` repo secrets); check whether CurseForge lists a WoW Forever game version.
 - **Popup placement (0.4.20; verified: placement, compact Uncommon beside a Rare via Test pair, 0.4.21)**: user picked right of you mid-screen; Poor/Common compact,
   an Uncommon compact unless it's the best of its loot (`burstBest`). Mockup defaults for the rest:
   size 0.8 (the user's saved 1.05 kept), 2 at once, time by rarity 2.5/4/6/8 s, clicks pass through
@@ -22,28 +30,19 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - **Settings (0.4.15-0.4.19)**: pages Dopamine Loot (native: 3 switches, tests), Popups (custom,
   Look.lua: rows When / Look / Placement / The 3D item + live preview + item ID check), Loot rain,
   Sounds (per rarity: Sound dropdown, Our chime, Preview/Play; Play all), Advanced (all native,
-  Settings.lua `ns.Native`), Blizzard assets. **Known game bug, accepted**: after any addon's native
+  Settings.lua `ns.Native`). **Known game bug, accepted**: after any addon's native
   page was shown, scrolling the game's Social page blocks `IsUserOAuthed()` and blames that addon
   (reproduced with BugSack alone). Custom rows on the pooled settings frames were removed (0.4.18).
 - **Popups** (View.lua): arrival by rarity (`ARRIVAL`, star4 glints from Epic), sway (Epic+ turn once),
   weapons face you, long names shrink. Styles Relic (default), Beam, Banner; Toast set aside in
-  `deprecated/toast/` (README: what needs work).
+  `deprecated/toast/` (README: what needs work). Body armor stays a tilting card (3D armor dropped).
 - **Loot rain** flies from the ground (setting `rainFrom`: ground fountain default / spread / below /
   middle; all four kept; `Core.LaunchSpeed`). Loot beams stay. The chest show (0.4.0-0.4.5) is in
   `deprecated/chest-show/` (README; not loaded; generators write its media there).
-- `Assets.lua`: `/dl assets` + "Blizzard assets" page, kept as a tool.
 - **Next up**:
-  1. **Armor in 3D** (user asked): body armor on a mannequin in popups. 0.4.22 adds a throwaway probe,
-     `/dl armortest [chest|legs|...|itemID] [dressed]` (Assets.lua; left full body, right slot close-up;
-     `/dl armortest frame <toward> <down> [facing]` tunes the close-up; results in DopamineLootDB.armorTest).
-     Research: DressUpModel creates on Forever (ATT), methods only from retail annotations; no
-     SetCustomRace. 0.4.22 in game: every DressUpModel method exists, ModelScene too; SetAutoDress(false)
-     gives a bare body; TryOn said success but nothing showed (IsGeoReady false at OnModelLoaded), so
-     0.4.23 waits for IsGeoReady. SetPosition z: + lifts the body; the full view centers on the hips.
-     **Stop point: 0.4.23 not yet run in game.** Next: user runs `/dl armortest legs` etc. on the
-     release client, then mockups (own body / bare / close-up).
+  1. Release: user checks 1.0.0 in game (settings pages, no Blizzard assets row), then tag `v1.0.0`.
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
-  3. Reduced-motion and no-screen-flash switches. Then 0.5 inspector, 0.6 filters.
+  3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
 
 ## Verified in game (by the user)
 - 0.1-0.2: loads; `/dl help`; `PlayerModel:SetItem` works on Forever; rain physics; settings page.
@@ -79,7 +78,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   extracted or borrowed files.
 - Only `/dl help` prints to chat.
 - Process: preflight → reviewer agent for big changes → commit → push; then a short "to test" list
-  saying `/reload` vs **full restart** (new files, .toc = restart).
+  saying `/reload` vs **full restart** (new media = restart; a newly linked addon folder loaded on `/reload`, 2026-11-04).
 - Answers: concise. **No rush, no deadlines.**
 
 ## Gotchas and environment notes
@@ -102,6 +101,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-11-04 1.0.0: first release prep (3D armor dropped, dev tools out, packaging, README, LICENSE).
 - 2026-11-04: Forever released; moved to `_forever_` (docs, local paths, privacy patterns).
 - 2026-10-16 0.4.22-0.4.23: `/dl armortest` probe for armor on a mannequin.
 - 2026-10-16 0.4.21: hover error fixed (no MouseIsOver on Forever); compact and combat popup tests.
