@@ -6,6 +6,7 @@ What to paste into the CurseForge project form, written against CurseForge's Mod
 | Field | Value |
 |---|---|
 | Name | Dopamine Loot |
+| Project ID | 1784686 (`## X-Curse-Project-ID` in the .toc; uploads need the `CF_API_KEY` repo secret) |
 | Game / flavor | World of Warcraft, **Forever** (game version 1.60.1; the packager tags the file itself) |
 | Categories | Bags & Inventory (main); Audio & Video; Miscellaneous |
 | License | MIT |

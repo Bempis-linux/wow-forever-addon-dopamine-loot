@@ -7,6 +7,8 @@
 ## SavedVariablesPerCharacter: DopamineLootCharDB
 ## IconTexture: Interface\Icons\INV_Misc_Bag_10_Green
 ## AddonCompartmentFunc: DopamineLoot_OnCompartmentClick
+## X-Curse-Project-ID: 1784686
+## X-License: MIT
 
 Core.lua
 LootMsg.lua

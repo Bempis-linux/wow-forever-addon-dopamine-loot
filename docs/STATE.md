@@ -49,8 +49,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
      media, no tags in OGG/TGA beyond the ffmpeg encoder name, no chat/addon messages, dynamic code, CVars,
      item/gold actions or Blizzard hooks; saved data = settings + version; history all Bempis noreply).
      CurseForge: listing copy in docs/curseforge.md (checked against the moderation rules); avatar options in
-     docs/mockups/avatar.html (A rain / B coin / C drop), waiting on the user's pick. Then user creates the projects,
-     IDs in the .toc + repo secrets, and the next tag uploads.
+     docs/mockups/avatar.html (A rain / B coin / C drop). **Project created 2026-11-05: ID 1784686** (in the .toc);
+     the user uploads v1.0.0-forever by hand for review, and adds the CF_API_KEY secret. Wago not set up.
   1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
       less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
       (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles
