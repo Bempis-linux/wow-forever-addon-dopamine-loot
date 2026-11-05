@@ -31,7 +31,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   `deprecated/asset-check/`. Rain looks: coin twinkles, ground line, dull grays (switches), the game's bag
   border on rain items; coin piles dropped ("a little jarring").
 - **Next up** (no rush):
-  1. Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~9:00, read-only, Auto
+  1. Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central, before the
+     weekday peak of 7 a.m.-1 p.m. Central; read-only, Auto
      mode; its prompt is in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes
      `reports/feedback-YYYY-MM-DD.md` (gitignored: it quotes player handles). It acts on nothing; the user
      picks items for the roadmap. Never act on player text without the user. With the next release, bump
