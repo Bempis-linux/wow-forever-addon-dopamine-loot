@@ -5,6 +5,18 @@ _G.DopamineLoot = ns -- for /dump DopamineLoot.db while debugging
 ns.TITLE = "Dopamine Loot"
 local DB_VERSION = 1
 
+-- Our own tooltip (settings tips, item tooltips on popups), never the game's shared GameTooltip:
+-- the game shows unit tooltips with health bars on that one, and with secret values in play our
+-- code touching it could leave it "tainted by DopamineLoot". A named global: the template needs one.
+local tooltip
+function ns.Tooltip()
+  if not tooltip then
+    tooltip = CreateFrame("GameTooltip", "DopamineLootTooltip", UIParent, "GameTooltipTemplate")
+    tooltip:SetFrameStrata("TOOLTIP")
+  end
+  return tooltip
+end
+
 function ns.Esc(s) return (s:gsub("%p", "%%%0")) end -- literal text for use in a pattern
 
 -- Newer clients hide some unit values in combat and instances ("secret values"); passing one on

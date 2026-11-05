@@ -1,5 +1,5 @@
--- Dopamine Loot "Loot rain" settings page (Options > AddOns > Dopamine Loot > Loot rain; the game's
--- native layout, ns.Native in Settings.lua): when it rains, where the loot flies from and lands,
+-- Dopamine Loot "Loot rain" settings page (Options > AddOns > Dopamine Loot > Loot rain; a
+-- plain page built with ns.Native in Settings.lua): when it rains, where the loot flies from and lands,
 -- what happens afterwards, every effect switch from ns.RAIN_FX (Rain.lua) in groups, and tests.
 local _, ns = ...
 

@@ -31,9 +31,9 @@ local driver = CreateFrame("Frame")
 
 local function ShowTooltip(self)
   if self.item and self.item.link then
-    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM", 0, 4)
-    GameTooltip:SetHyperlink(self.item.link)
-    GameTooltip:Show()
+    ns.Tooltip():SetOwner(self, "ANCHOR_BOTTOM", 0, 4)
+    ns.Tooltip():SetHyperlink(self.item.link)
+    ns.Tooltip():Show()
   end
 end
 
@@ -47,7 +47,7 @@ local function Create()
   p:SetScript("OnEnter", function(self) self.hover = true; ShowTooltip(self) end)
   p:SetScript("OnLeave", function(self)
     self.hover = false
-    if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+    if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end
   end)
   p:SetScript("OnClick", function(self, button)
     if button == "LeftButton" and IsModifiedClick("CHATLINK") and self.item.link then
@@ -61,7 +61,7 @@ local function Create()
     if self.outAge then return end
     self.outAge, self.outFor, self.hover = 0, duration, false
     self:EnableMouse(false)
-    if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+    if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end
   end
   return p
 end
@@ -71,7 +71,7 @@ local function Release(p)
   p:Hide()
   p.model:ClearModel()
   p.item, p.onModel, p.hover = nil, nil, false
-  if GameTooltip:IsOwned(p) then GameTooltip:Hide() end
+  if ns.Tooltip():IsOwned(p) then ns.Tooltip():Hide() end
   pool[#pool + 1] = p
 end
 
@@ -119,7 +119,7 @@ local function Update(_, dt)
       if cx ~= p.cursorX or cy ~= p.cursorY then p.cursorMoved = true end
       local over = p.cursorMoved and not (IsMouselooking and IsMouselooking()) and OverHit(p, cx, cy)
       if over and not p.hover then p.hover = true; ShowTooltip(p)
-      elseif not over and p.hover then p.hover = false; if GameTooltip:IsOwned(p) then GameTooltip:Hide() end end
+      elseif not over and p.hover then p.hover = false; if ns.Tooltip():IsOwned(p) then ns.Tooltip():Hide() end end
     end
     if p.hover then p.held = (p.held or 0) + dt end
     if not p.outAge and (not p.hover or p.held > HOVER_MAX) then -- hovering holds it, up to HOVER_MAX

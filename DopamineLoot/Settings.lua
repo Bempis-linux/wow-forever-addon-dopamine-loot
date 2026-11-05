@@ -1,8 +1,8 @@
 -- Dopamine Loot settings (Options > AddOns > Dopamine Loot; also /dl). One topic
 -- per page (docs/mockups/settings.html): Dopamine Loot (the main switches, quick tests), Popups
 -- (Look.lua, custom: it has the live preview), Loot rain (RainFx.lua), Sounds
--- (Pages.lua). All but Popups use the game's native settings layout (ns.Native below); the custom
--- page uses the controls in ns.UI.
+-- (Pages.lua). All are custom (canvas) pages with our own frames: Popups (Look.lua) with ns.UI, the
+-- others laid out by ns.Native below (not the game's native layout: see there).
 local _, ns = ...
 
 local category
@@ -27,11 +27,11 @@ end
 local function Tip(frame, tip)
   if not tip then return end
   frame:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText(tip, 1, 1, 1, 1, true)
-    GameTooltip:Show()
+    ns.Tooltip():SetOwner(self, "ANCHOR_RIGHT")
+    ns.Tooltip():SetText(tip, 1, 1, 1, 1, true)
+    ns.Tooltip():Show()
   end)
-  frame:SetScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
+  frame:SetScript("OnLeave", function(self) if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end end)
 end
 
 local function Check(parent, label, tip)
@@ -157,10 +157,11 @@ end
 local function Dropdown(parent, width, options, get, set, tip)
   local d = CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
   d:SetWidth(width)
+  local function List() return type(options) == "function" and options() or options end -- a list, or a function making one
   local radio = true -- radio entries show the picked one themselves; plain buttons need SetText
   d:SetupMenu(function(_, root)
     radio = root.CreateRadio ~= nil
-    for _, o in ipairs(options) do
+    for _, o in ipairs(List()) do
       local value = o[1]
       if radio then
         root:CreateRadio(o[2], function() return get() == value end, function() set(value) end, value)
@@ -172,16 +173,16 @@ local function Dropdown(parent, width, options, get, set, tip)
   local function Show()
     if d.GenerateMenu then d:GenerateMenu() end
     if not radio then
-      for _, o in ipairs(options) do if o[1] == get() then d:SetText(o[2]) end end
+      for _, o in ipairs(List()) do if o[1] == get() then d:SetText(o[2]) end end
     end
   end
   if tip then -- hooked: the template has its own enter/leave behavior
     d:HookScript("OnEnter", function(self)
-      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-      GameTooltip:SetText(tip, 1, 1, 1, 1, true)
-      GameTooltip:Show()
+      ns.Tooltip():SetOwner(self, "ANCHOR_RIGHT")
+      ns.Tooltip():SetText(tip, 1, 1, 1, 1, true)
+      ns.Tooltip():Show()
     end)
-    d:HookScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
+    d:HookScript("OnLeave", function(self) if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end end)
   end
   refreshers[#refreshers + 1] = Show
   if ns.settings then Show() end
@@ -197,78 +198,139 @@ ns.UI = {
 }
 
 ---------------------------------------------------------------------------
--- The native pages (Blizzard's own settings layout, as BugSack uses on Forever): the game's check
--- boxes, sliders and dropdowns, laid out for us and found by the Options search box. Every setting
--- is a proxy that reads and writes ns.settings, so the Test actions and these pages share one value.
+-- The plain pages (Dopamine Loot, Loot rain, Sounds): our own frames on a custom ("canvas") page,
+-- laid out like the game's settings: a header per topic, then one row per setting, its label on the
+-- left and its control in one column on the right; the page scrolls when it's long.
+-- Not the game's native layout: native pages are drawn in the game's shared settings list, which
+-- reuses its row frames for every page, so after ours were shown, Blizzard's own settings (the
+-- nameplates, the Social page) ran "tainted by DopamineLoot" and broke (1.0.0, 2026-11-05).
+-- Same calls as before: N.Page, N.Header, N.Toggle, N.Slider, N.Choice, N.Button.
 ---------------------------------------------------------------------------
 local N = {}
 ns.Native = N
-local function Var(key) return "DOPAMINELOOT_" .. key:upper() end
+local LABEL_W, ROW_H, HEADER_GAP = 230, 30, 14
+local pages = {} -- category -> page { panel, content, y }
 
--- A setting changed elsewhere: an open page (native or custom) shows the new value at once
-function ns.SettingChanged(key)
-  if Settings and Settings.NotifyUpdate then pcall(Settings.NotifyUpdate, Var(key)) end
-  RefreshAll()
-end
+-- A setting changed elsewhere: an open page shows the new value at once
+function ns.SettingChanged() RefreshAll() end
 
+-- A page (parent: the main category, for a sub-page). Returns its category and its layout (the page).
 function N.Page(name, parent)
-  if parent then return Settings.RegisterVerticalLayoutSubcategory(parent, name) end
-  local cat, layout = Settings.RegisterVerticalLayoutCategory(name)
-  Settings.RegisterAddOnCategory(cat)
-  return cat, layout
+  local panel = CreateFrame("Frame")
+  panel:Hide() -- the Settings window shows it, so OnShow refills the controls on every open
+  panel.name = name
+  local title = Label(panel, "GameFontNormalLarge", name)
+  title:SetPoint("TOPLEFT", 16, -16)
+  local ok, scroll = pcall(CreateFrame, "ScrollFrame", nil, panel, "ScrollFrameTemplate")
+  if not ok then scroll = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate") end
+  scroll:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
+  scroll:SetPoint("BOTTOMRIGHT", -30, 10)
+  local content = CreateFrame("Frame", nil, scroll)
+  content:SetSize(560, 10)
+  scroll:SetScrollChild(content)
+  local page = { panel = panel, content = content, y = 0 }
+  panel:SetScript("OnShow", function()
+    content:SetWidth(math.max(400, scroll:GetWidth()))
+    RefreshAll()
+  end)
+  local cat
+  if parent then
+    cat = Settings.RegisterCanvasLayoutSubcategory(parent, panel, name)
+  else
+    cat = Settings.RegisterCanvasLayoutCategory(panel, name)
+    Settings.RegisterAddOnCategory(cat)
+  end
+  pages[cat] = page
+  return cat, page
 end
 
-function N.Header(layout, text, tip)
-  if CreateSettingsListSectionHeaderInitializer then
-    layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(text, tip))
+-- The next row's label on the left; returns it and the row's middle height for the control
+local function Row(page, label, tip, height)
+  height = height or ROW_H
+  local text = Label(page.content, "GameFontHighlight", label)
+  text:SetPoint("LEFT", page.content, "TOPLEFT", 4, page.y - height / 2)
+  text:SetWidth(LABEL_W - 12)
+  if text.SetWordWrap then text:SetWordWrap(false) end
+  if tip then -- the label shows the tip too (a FontString can't, so a frame over it)
+    local hit = CreateFrame("Frame", nil, page.content)
+    hit:SetAllPoints(text)
+    hit:EnableMouse(true)
+    Tip(hit, tip)
   end
+  page.y = page.y - height
+  page.content:SetHeight(-page.y + 16)
+  return text, page.y + height / 2
+end
+local function Place(page, control, middle, dx)
+  control:ClearAllPoints()
+  control:SetPoint("LEFT", page.content, "TOPLEFT", LABEL_W + (dx or 0), middle)
+end
+
+function N.Header(page, text)
+  page.y = page.y - (page.y < 0 and HEADER_GAP or 0)
+  local h = Label(page.content, "GameFontNormal", text)
+  h:SetPoint("TOPLEFT", page.content, "TOPLEFT", 0, page.y - 4)
+  local line = page.content:CreateTexture(nil, "ARTWORK")
+  line:SetColorTexture(1, 1, 1, 0.12)
+  line:SetHeight(1)
+  line:SetPoint("TOPLEFT", h, "BOTTOMLEFT", 0, -4)
+  line:SetPoint("RIGHT", page.content, "RIGHT", -8, 0)
+  page.y = page.y - 26
+  page.content:SetHeight(-page.y + 16)
 end
 
 -- A check box. off = the setting is a "no..." flag (checked means on), as most of ours are
 function N.Toggle(cat, key, label, tip, off)
-  local setting = Settings.RegisterProxySetting(cat, Var(key), Settings.VarType.Boolean, label, off and true or false,
-    function() if off then return not ns.settings[key] end return ns.settings[key] and true or false end,
-    function(v) if off then ns.settings[key] = (not v) or nil else ns.settings[key] = v or nil end end)
-  Settings.CreateCheckbox(cat, setting, tip)
-  return setting
+  local page = pages[cat]
+  local _, middle = Row(page, label, tip)
+  local cb = Check(page.content, "", tip)
+  cb:SetScript("OnClick", function(self)
+    if off then ns.settings[key] = (not self:GetChecked()) or nil else ns.settings[key] = self:GetChecked() or nil end
+  end)
+  refreshers[#refreshers + 1] = function()
+    if off then cb:SetChecked(not ns.settings[key]) else cb:SetChecked(ns.settings[key] and true or false) end
+  end
+  Place(page, cb, middle, -4)
 end
 
--- A slider with its value at the right; fmt(v) -> text (default: the number)
+-- A drag slider with its number field; fmt(v) -> text for the field (default: the number)
 function N.Slider(cat, key, label, min, max, step, default, tip, fmt)
-  local setting = Settings.RegisterProxySetting(cat, Var(key), Settings.VarType.Number, label, default,
-    function() return ns.settings[key] or default end,
-    function(v) ns.settings[key] = v end)
-  local options = Settings.CreateSliderOptions(min, max, step)
-  options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right,
-    fmt or function(v) return tostring(math.floor(v * 100 + 0.5) / 100) end)
-  Settings.CreateSlider(cat, setting, options, tip)
-  return setting
+  local page = pages[cat]
+  local _, middle = Row(page, label, tip)
+  -- the field takes the number only; the unit ("items", "%") from fmt stands after it
+  local number = fmt and function(v) return (tostring(fmt(v)):match("^%-?[%d%.]+") or tostring(v)) end
+  local s = Slider(page.content, "", 170, min, max, step, function() return ns.settings[key] or default end,
+    function(v) ns.settings[key] = v end, tip, number)
+  s.label:Hide()
+  s:EnableMouseWheel(false) -- the wheel scrolls the page
+  Place(page, s, middle)
+  local unit = fmt and tostring(fmt(max)):match("^%-?[%d%.]+%s*(.-)$")
+  if unit and unit ~= "" then
+    local u = Label(page.content, "GameFontHighlightSmall", unit)
+    u:SetPoint("LEFT", s, "RIGHT", 64, 0) -- past the number field (10 + 44 + a gap)
+  end
 end
 
 -- A dropdown: options = { { value, label, tip }, ... } or a function returning that; the default
 -- value is stored as nil (every reader falls back to it); onSet(v) runs after a pick
 function N.Choice(cat, key, label, options, default, tip, onSet)
-  local kind = type(default) == "number" and Settings.VarType.Number or Settings.VarType.String
-  local setting = Settings.RegisterProxySetting(cat, Var(key), kind, label, default,
+  local page = pages[cat]
+  local _, middle = Row(page, label, tip)
+  local d = Dropdown(page.content, 220, options,
     function() local v = ns.settings[key]; if v == nil then return default end return v end,
     function(v)
       if v == default then ns.settings[key] = nil else ns.settings[key] = v end
       if onSet then onSet(v) end
-    end)
-  local function Options()
-    local c = Settings.CreateControlTextContainer()
-    for _, o in ipairs(type(options) == "function" and options() or options) do c:Add(o[1], o[2], o[3]) end
-    return c:GetData()
-  end
-  Settings.CreateDropdown(cat, setting, Options, tip)
-  return setting
+    end, tip)
+  Place(page, d, middle)
 end
 
 -- A button on its own row (label on the left, the button on the right)
-function N.Button(layout, label, text, onClick, tip)
-  if CreateSettingsButtonInitializer then
-    layout:AddInitializer(CreateSettingsButtonInitializer(label, text, onClick, tip, true))
-  end
+function N.Button(page, label, text, onClick, tip)
+  local _, middle = Row(page, label, tip)
+  local b = Button(page.content, text, 120, onClick)
+  Tip(b, tip)
+  Place(page, b, middle)
 end
 
 ---------------------------------------------------------------------------
@@ -284,7 +346,7 @@ local function CreateGeneral()
   N.Header(layout, "Features")
   N.Toggle(cat, "noPopup", "Loot popups", "A card beside your character for each item you loot, the item turning in 3D.", true)
   N.Toggle(cat, "noRain", "Loot rain", "When you loot several things at once, they spray up and bounce down; the best lands last. In combat it waits until the fight is over.", true)
-  ns.soundSetting = N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once.", true)
+  N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once.", true)
   N.Header(layout, "Try it")
   N.Choice(cat, "testQuality", "Test popup quality", TESTS, 4, "Which quality the Test popup button shows.")
   N.Button(layout, "A popup", "Test popup", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4]) end,

@@ -1,11 +1,11 @@
--- Dopamine Loot "Sounds" settings page (the game's native layout, ns.Native in
+-- Dopamine Loot "Sounds" settings page (a plain page built with ns.Native in
 -- Settings.lua). Sounds: the switch, the volume they follow, the popup sound picker (a game sound per
 -- rarity, played as you pick it, plus our chime for Rare and up) and the rain's burst sound.
 local _, ns = ...
 
 local sounds
 
--- Picking a sound plays it; "Defaults" resets all four rows in one go, which must not play four
+-- Picking a sound plays it; a change that sets several rows in one go must not play several
 -- sounds at once: only a frame with a single pick plays
 local picks, pickQ = 0, nil
 local function PickPlayed(q) -- returns the setter for row q: a pick plays what that popup sounds like
@@ -35,7 +35,7 @@ local function CreateSounds()
   sounds = cat
 
   N.Header(layout, "General")
-  Settings.CreateCheckbox(cat, ns.soundSetting, "Every Dopamine Loot sound at once (the same switch as on the first page).")
+  N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once (the same switch as on the first page).", true)
   N.Choice(cat, "soundChannel", "Volume follows", {
     { "SFX", "Sound effects (default)" }, { "Master", "Master volume (plays with effects muted)" },
   }, "SFX", "Which of the game's volume sliders the sounds follow.")
@@ -45,8 +45,8 @@ local function CreateSounds()
     end
   end, "Uncommon, Rare, Epic and Legendary popup sounds one after another, as popups play them.")
 
-  -- One section per rarity, the same rows in the same order (only the game's own controls: see
-  -- the kit's note on the settings list's shared frames): Sound, Our chime (Rare and up), Preview
+  -- One section per rarity, the same rows in the same order:
+  -- Sound, Our chime (Rare and up), Preview
   local COLOR = { [2] = "|cff1eff00", [3] = "|cff0070dd", [4] = "|cffa335ee", [5] = "|cffff8000" }
   for _, row in ipairs(ns.SOUND_ROWS) do
     local name = row.label:lower()

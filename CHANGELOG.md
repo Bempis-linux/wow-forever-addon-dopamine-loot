@@ -1,5 +1,13 @@
 # Dopamine Loot
 
+## 1.0.1 (2026-11-05)
+
+- **Fixed:** errors from the game's own nameplates, health bars and settings that blamed Dopamine Loot
+  ("execution tainted by DopamineLoot"). They could start after opening Dopamine Loot's settings and
+  then using the game's settings, nameplates in particular. Dopamine Loot's settings pages are now built
+  entirely from its own frames and no longer touch the game's settings list.
+- The settings pages look and work as before. They no longer appear in the Options search box.
+
 ## 1.0.0 (2026-11-04)
 
 The first release, for WoW: Forever.
