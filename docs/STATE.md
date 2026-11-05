@@ -79,6 +79,8 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
 ## User preferences (stated in chat; follow them)
 - **Dev / release switch** (2026-11-05): `tools/addon-mode.ps1 status|dev|release` (command in CLAUDE.local.md);
   "switch to release/dev" means run it, then `/reload`. Install or update via the CurseForge app only on release.
+  **Now on release** (2026-11-05): the CurseForge app installed 1.0.0 over the dev link (replaced it; repo untouched;
+  identical to the audited zip). "switch to dev" parks it and restores the link.
 - **Repo security** (2026-11-05): only Bempis-linux has access (no collaborators, keys, webhooks, secrets).
   Rulesets: "Protect main" (no force-push, no deletion) and "Protect release tags" (v* can't be deleted
   or moved), no bypass, even for the owner. Wiki off. The user checks 2FA and installed apps themself.

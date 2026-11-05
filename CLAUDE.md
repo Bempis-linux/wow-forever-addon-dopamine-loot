@@ -111,7 +111,8 @@ with the client path in CLAUDE.local.md), then tell the user to `/reload`. `stat
 The copy not in use is parked in `<client>\Interface\DopamineLoot.release` (outside AddOns). Both share
 the saved data.
 - **Only install or update through the CurseForge app while on release.** On dev, `AddOns\DopamineLoot`
-  is the junction, so an app update would write the released files into the repo (`git status` shows
+  is the junction. Seen 2026-11-05: installing while on dev, the app replaced the junction with its own
+  folder (the repo was untouched), but an update might write through it instead (`git status` shows
   it; `git checkout -- DopamineLoot` undoes it). Keep auto-update off for Dopamine Loot in the app.
 - Never remove the junction with `rm -rf` or `Remove-Item -Recurse` (that follows the link into the
   repo); the script removes it as a link only.
