@@ -50,7 +50,7 @@ point, middle of the screen); the **ground** = where they land (setting rainFloo
   1b. **Rain looks built** (picked 2026-11-04 in rain.html, "New look"): coin twinkles (gold often, silver
       less; switch Twinkle), ground line (Ground), dull grays (Poor), and the game's bag border on every item
       (WhiteIconFrame on a black rim; replaced the plain edge, no setting). Coin piles
-      **dropped** (user: "a little jarring"). Not yet seen in game.
+      **dropped** (user: "a little jarring"). User in game 2026-11-04: "looks good".
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
 
