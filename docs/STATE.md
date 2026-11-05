@@ -18,8 +18,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   repo secret set, so the next `v*` tag uploads there automatically (**first automatic upload untested**:
   check the workflow log). Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
-  "switch to dev/release" = run it, then the user `/reload`s. **The game is on release now** (the
-  CurseForge app's 1.0.0, identical to the audited zip). Switch to dev before testing repo changes.
+  "switch to dev/release" = run it, then the user `/reload`s. **The game is on dev now** (2026-11-05, for testing 1.0.1; the
+  CurseForge 1.0.0 is parked and comes back with "switch to release").
 - **1.0.1 in progress** (2026-11-05; pushed, not tagged). 1.0.0's native settings pages tainted Blizzard's
   settings and nameplates (players saw "execution tainted by DopamineLoot": nameplate CompactUnitFrame x739,
   TextStatusBar, ScrollBox SetHeight, IsUserOAuthed). Fix: ns.Native rebuilt on canvas pages (own frames,
