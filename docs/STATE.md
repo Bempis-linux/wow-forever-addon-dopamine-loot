@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-05, **stop point after 1.0.0** (released; live on CurseForge). Read this first
+_Last checkpoint: 2026-11-05, **1.0.1 released** (live on CurseForge, uploaded automatically). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -8,24 +8,21 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 **ground** = where they land (setting rainFloor).
 
 ## Where things stand
-- **1.0.0 released** 2026-11-04 (tag `v1.0.0`, protected): GitHub release `DopamineLoot-v1.0.0-forever.zip`
-  (the packager adds `-forever` from Interface 16001). Safety audit of that zip 2026-11-05: clean (no
-  personal strings incl. media metadata; no messages, dynamic code, CVars, item/gold actions or Blizzard
-  hooks; saved data = settings + version). Working tree clean.
-- **CurseForge**: project **1784686** (in the .toc), 1.0.0 uploaded by hand 2026-11-05, page complete (avatar,
-  summary, description from `docs/curseforge.md`, MIT, categories): **approved and live 2026-11-05**
-  (curseforge.com/wow/addons/dopamine-loot; file v1.0.0-forever, game version 1.60.1 Forever). `CF_API_KEY`
-  repo secret set, so the next `v*` tag uploads there automatically (**first automatic upload untested**:
-  check the workflow log). Wago not set up.
+- **1.0.1 released** 2026-11-05 (tag `v1.0.1`): the fix for 1.0.0's taint. 1.0.0's native settings pages
+  ran Blizzard's settings and nameplates "tainted by DopamineLoot" (nameplate CompactUnitFrame x739,
+  TextStatusBar, ScrollBox SetHeight, IsUserOAuthed). Now ns.Native builds canvas pages from our own
+  frames (same calls), plus a private tooltip `DopamineLootTooltip`; the window's "Defaults" no longer
+  resets our pages (accepted). Tested on dev: BugGrabber sessions 20-22 had no errors at all.
+  1.0.0 (tag `v1.0.0`) passed the safety audit (no personal strings incl. media metadata; no messages,
+  dynamic code, CVars, item/gold actions or Blizzard hooks; saved data = settings + version).
+- **CurseForge**: project **1784686**, live since 2026-11-05 (curseforge.com/wow/addons/dopamine-loot).
+  1.0.0 was uploaded by hand; **1.0.1 uploaded automatically** by the release workflow ("Success!", game
+  version 1.60.1). A `v*` tag now builds, uploads to CurseForge and makes the GitHub release.
+  Workflow note: `actions/checkout@v4` gets a Node 20 deprecation warning (harmless; bump it some time).
+  Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
-  "switch to dev/release" = run it, then the user `/reload`s. **The game is on dev now** (2026-11-05, for testing 1.0.1; the
-  CurseForge 1.0.0 is parked and comes back with "switch to release").
-- **1.0.1 in progress** (2026-11-05; pushed, not tagged). 1.0.0's native settings pages tainted Blizzard's
-  settings and nameplates (players saw "execution tainted by DopamineLoot": nameplate CompactUnitFrame x739,
-  TextStatusBar, ScrollBox SetHeight, IsUserOAuthed). Fix: ns.Native rebuilt on canvas pages (own frames,
-  same calls), a private tooltip `DopamineLootTooltip`; the window's "Defaults" no longer resets our pages
-  (accepted). **Needs an in-game test on dev**: open via Esc > Options, then via `/dl`; hover tips; then the
-  game's Nameplates and Social pages and some nameplates. Then tag `v1.0.1` (first automatic CurseForge upload).
+  "switch to dev/release" = run it, then the user `/reload`s. **The game is on release** (2026-11-05: the
+  CurseForge app's 1.0.0; update it to 1.0.1 in the app while on release).
 - **Repo security** 2026-11-05: only Bempis-linux has access; rulesets "Protect main" (no force-push or
   delete) and "Protect release tags" (v* can't be deleted or moved), no bypass, even for the owner; wiki off.
   The user checks 2FA and installed apps themself.
@@ -97,6 +94,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-11-05 1.0.1: settings pages rebuilt on our own frames (fixes taint of nameplates and settings); first automatic CurseForge upload.
 - 2026-11-05: safety audit, CurseForge project + listing + API key, repo rulesets, dev/release switch.
 - 2026-11-04 1.0.0 released: 3D armor dropped, dev tools out, only /dl, rain looks, packaging, README,
   LICENSE; kit 0.7.0 `wow-addon-release` skill.
