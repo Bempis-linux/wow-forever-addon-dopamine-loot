@@ -20,6 +20,12 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
   "switch to dev/release" = run it, then the user `/reload`s. **The game is on release now** (the
   CurseForge app's 1.0.0, identical to the audited zip). Switch to dev before testing repo changes.
+- **1.0.1 in progress** (2026-11-05; pushed, not tagged). 1.0.0's native settings pages tainted Blizzard's
+  settings and nameplates (players saw "execution tainted by DopamineLoot": nameplate CompactUnitFrame x739,
+  TextStatusBar, ScrollBox SetHeight, IsUserOAuthed). Fix: ns.Native rebuilt on canvas pages (own frames,
+  same calls), a private tooltip `DopamineLootTooltip`; the window's "Defaults" no longer resets our pages
+  (accepted). **Needs an in-game test on dev**: open via Esc > Options, then via `/dl`; hover tips; then the
+  game's Nameplates and Social pages and some nameplates. Then tag `v1.0.1` (first automatic CurseForge upload).
 - **Repo security** 2026-11-05: only Bempis-linux has access; rulesets "Protect main" (no force-push or
   delete) and "Protect release tags" (v* can't be deleted or moved), no bypass, even for the owner; wiki off.
   The user checks 2FA and installed apps themself.
