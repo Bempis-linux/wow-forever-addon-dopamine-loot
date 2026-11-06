@@ -62,6 +62,8 @@ local function Create()
     { 2, "|cff1eff00Uncommon|r and up" }, { 3, "|cff0070ddRare|r and up (default)" }, { 4, "|cffa335eeEpic|r and up" },
   }, 3, "When the rain settles, items of this quality and better become popups; the rest go to your bag.")
   FxToggle(cat, "Gather")
+  N.Toggle(cat, "rainChord", "Chord at the end",
+    "The rain ends on a soft chord when the last item is in your bag (off by default).")
   FxToggle(cat, "Escape")
 
   for _, g in ipairs(GROUPS) do

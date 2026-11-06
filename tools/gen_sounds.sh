@@ -80,32 +80,72 @@ for n in $(seq 0 10); do
 done
 render Gather 0.45 0.3 "$(glide 0 350 900 0.3 3)"
 
-# Loot rain notes (Sounds.lua walks them with ns.RainCore.Melody: up the scale, then a phrase at
-# the top). A major pentatonic scale of 12 notes (0..11), each in two variants (A, B) picked at
-# random, so a repeat never sounds identical; the game has no pitch control, so each is a file.
-#   LandA00..11, LandB00..11   an item landing: a warm marimba-like knock (G4 up), with a tiny click
-#   BagA00..11, BagB00..11     an item into the bag: a bright kalimba-like pluck (C5 up)
-#   LandChord, BagChord        the rain resolving: everything down / the last item in the bag
-# marimba START FREQ DECAY VARIANT: a wooden bar (its overtone near 4x), B a bit woodier and drier
-marimba() {
-  local s=$1 f=$2 d=$3 v=$4 u="(t-$1)"
-  echo "gte(t,$s)*(min(1,$u*600)*(sin(2*PI*$f*$u)*exp(-$d*$u)+(0.32-0.12*$v)*sin(2*PI*$f*3.93*$u)*exp(-3.5*$d*$u)+(0.08+0.12*$v)*sin(2*PI*$f*(2+$v)*$u)*exp(-2*$d*$u)+0.05*sin(2*PI*$f*9.2*$u)*exp(-8*$d*$u))+0.1*(random(0)*2-1)*exp(-500*$u))"
+# Loot rain notes (picked by ear in docs/mockups/sounds.html, round 5, 2026-11-06; candidates in
+# tools/gen_sound_candidates.sh). Physical, barely musical (round 1's chimes were "lottery-like"):
+#   LandA/B00..05        an item landing: a soft low thud on the note and a light puff of dust
+#   LandRareA/B00..05    a Rare: the same, and a soft note two octaves up on the same pitch
+#   LandEpicA/B00..05    an Epic (and better): that note and its fifth above
+#   BagA/B00..05         an item into the bag: a soft pouch (a brush and a body) and a coin settling in
+# Sounds.lua walks notes 0..5 (ns.RainCore.Melody: up, then a gentle phrase up and down), A or B at
+# random. The dust and brush are their own noise source with a seed per file (random(0) would give
+# every file the same noise), pink, filtered, a little different in brightness and length each time.
+# render_mix NAME SECONDS TONE COLOR AMP HIGHPASS LOWPASS ATTACK DECAY SEED [FILTERS]
+render_mix() {
+  local fl fade; fl=$(awk "BEGIN{d = $2 / 3; print (d < 0.3 ? d : 0.3)}"); fade=$(awk "BEGIN{print $2 - $fl}")
+  "$FF" -y -loglevel error -f lavfi -i "aevalsrc=exprs='0.5*($3)':s=44100:d=$2" \
+    -f lavfi -i "anoisesrc=d=$2:c=$4:r=44100:a=$5:seed=${10}" \
+    -filter_complex "[1:a]highpass=f=$6,lowpass=f=$7,lowpass=f=$7,afade=t=in:d=$8,afade=t=out:st=$8:d=$9:curve=exp[n];[0:a][n]amix=inputs=2:normalize=0${11:+,${11}},afade=t=out:st=$fade:d=$fl,loudnorm=I=-27:TP=-7:LRA=11,alimiter=limit=0.55" \
+    -ar 44100 -c:a libvorbis -q:a 5 "$OUT/$1.ogg"
+  echo "wrote $OUT/$1.ogg"
 }
-# kalimba START FREQ DECAY VARIANT: a plucked tine (a bright inharmonic overtone), B a little brighter
-kalimba() {
-  local s=$1 f=$2 d=$3 v=$4 u="(t-$1)"
-  echo "gte(t,$s)*min(1,$u*500)*((sin(2*PI*$f*$u)+0.35*sin(2*PI*$f*1.003*$u))*exp(-$d*$u)+(0.28+0.1*$v)*sin(2*PI*$f*(5.4+0.6*$v)*$u)*exp(-4*$d*$u)+0.18*sin(2*PI*$f*2*$u)*exp(-2.2*$d*$u))"
+vary() { awk -v a="$1" -v b="$2" -v r="$RANDOM" 'BEGIN{print a + (b - a) * r / 32767}'; } # a number in [a, b]
+soft_drop() { # START FREQ DECAY: a soft note bending gently up into place
+  local s=$1 f=$2 d=$3 u="(t-$1)" f0
+  f0=$(awk "BEGIN{print $2 * 0.9}")
+  echo "gte(t,$s)*min(1,$u*150)*exp(-$d*$u)*(sin(2*PI*($f*$u+($f-$f0)*0.01*exp(-$u/0.01)))+0.05*sin(4*PI*$f*$u))"
 }
-for n in $(seq 0 11); do
-  st=$(semis "$n"); id=$(printf '%02d' "$n")
-  for v in 0 1; do
-    V=$([ "$v" = 0 ] && echo A || echo B)
-    render "Land$V$id" 0.5 0.65 "$(marimba 0 "$(hz 392 "$st")" $((11 + 3 * v)) "$v")" "$ROOM"
-    render "Bag$V$id" 0.6 0.55 "$(kalimba 0 "$(hz 523.25 "$st")" $((8 + 2 * v)) "$v")" "$ROOM"
+thud_body() { # START FREQ DECAY: a soft low thud on the note, bending down into it
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*0.8*min(1,$u*300)*sin(2*PI*($f*$u-0.3*$f*0.012*exp(-$u/0.012)))*exp(-$d*$u)"
+}
+rare_body() { echo "$(thud_body "$1" "$2" "$3")+0.3*$(soft_drop "$1" "$(awk "BEGIN{print $2 * 4}")" 11)"; }
+epic_body() {
+  echo "$(thud_body "$1" "$2" "$3")+0.3*$(soft_drop "$1" "$(awk "BEGIN{print $2 * 4}")" 9)+0.18*$(soft_drop "$(awk "BEGIN{print $1 + 0.03}")" "$(awk "BEGIN{print $2 * 6}")" 9)"
+}
+coin() { # START FREQ: a coin settling: a clink and a smaller one as it rocks (at 4x FREQ)
+  local s=$1 f=$2 u="(t-$1)" v="(t-$1-0.07)" c c2
+  c=$(awk "BEGIN{print $2 * 4}"); c2=$(awk "BEGIN{print $2 * 4 * 1.06}")
+  echo "gte(t,$s)*min(1,$u*900)*(sin(2*PI*$c*$u)+0.5*sin(2*PI*$c*2.76*$u))*exp(-34*$u)+gte(t,$s+0.07)*0.4*(sin(2*PI*$c2*$v)+0.5*sin(2*PI*$c2*2.76*$v))*exp(-45*$v)"
+}
+bag_body() { # START FREQ: the pouch's soft body and the coin, a touch under it (the brush is the noise)
+  local s=$1 f=$2 u="(t-$1)"
+  echo "gte(t,$s)*0.4*sin(2*PI*85*$u)*exp(-28*$u)+0.75*($(coin "$(awk "BEGIN{print $1 + 0.02}")" "$2"))"
+}
+for n in $(seq 0 5); do
+  id=$(printf '%02d' "$n")
+  f=$(hz 110 "$(semis "$n")")              # the thud's note: the major pentatonic scale from A2
+  b=$(hz 450 "$(awk "BEGIN{print $n / 2}")") # the coin: half a semitone a step, barely pitched
+  for V in A B; do
+    for kind in "" Rare Epic; do
+      RANDOM=$((n * 7 + ${#kind} * 31 + ${#V} * 101 + $(printf '%d' "'$V")))
+      case $kind in Rare) tone=$(rare_body 0 "$f" 20); fx="lowpass=f=3200,$ROOM" ;;
+                    Epic) tone=$(epic_body 0 "$f" 20); fx="lowpass=f=3600,$ROOM" ;;
+                    *) tone=$(thud_body 0 "$f" 20); fx="lowpass=f=3000" ;; esac
+      render_mix "Land$kind$V$id" 0.5 "$tone" pink 0.35 400 "$(vary 2000 2800)" 0.008 "$(vary 0.1 0.14)" $((RANDOM + 1)) "$fx"
+    done
+    RANDOM=$((n * 13 + $(printf '%d' "'$V")))
+    render_mix "Bag$V$id" 0.45 "$(bag_body 0 "$b")" pink 0.3 200 "$(vary 2500 3500)" 0.03 "$(vary 0.18 0.24)" $((RANDOM + 1)) "highpass=f=60"
   done
 done
-render LandChord 1.4 0.4 "$(marimba 0 392 4 0)+$(marimba 0.03 493.88 4 1)+$(marimba 0.06 587.33 4 0)+$(marimba 0.09 783.99 3.5 1)" "$ROOM"
-render BagChord 1.6 0.36 "$(kalimba 0 1046.5 3 0)+$(kalimba 0.04 1318.5 3 1)+$(kalimba 0.08 1568 3 0)+0.8*$(kalimba 0.12 2093 2.6 1)" "$ROOM"
+#   RainChord            the rain resolving (a switch on the Loot rain page, off by default): the
+#                        landing notes' soft voice rolled into a chord (A, C#, E, A) over a thud and a puff
+CHORD="$(thud_body 0 110 14)"
+for i in 0 1 2 3; do
+  st=$(echo "0 4 7 12" | cut -d' ' -f$((i + 1)))
+  CHORD="$CHORD+0.32*$(soft_drop "$(awk "BEGIN{print $i * 0.045}")" "$(hz 440 "$st")" 3.2)"
+done
+RANDOM=5
+render_mix RainChord 1.6 "$CHORD" pink 0.3 400 2400 0.01 0.16 77 "lowpass=f=3600,$ROOM"
 
 #   ChestPop           a medium haul's chest opening: a soft low lid "thock" and a little sparkle
 #                      (small hauls open silently, big ones with a game sound)

@@ -95,22 +95,38 @@ local function PlaySet(name, n, gap)
   PlaySoundFile(("%s%s%02d.ogg"):format(MEDIA, name, ns.RainCore.Melody(n, 10)), Channel())
 end
 
--- Loot rain notes: an item landing (Land, marimba-like) or going into the bag (Bag, kalimba-like),
--- 12 notes each in two variants (A, B) picked at random, so repeats never sound identical
-local NOTE_TOP = 11
-local function PlayNote(set, n)
+-- Loot rain notes (picked by ear in docs/mockups/sounds.html): an item landing (Land: a soft thud
+-- and a puff of dust; LandRare, LandEpic add a soft note on the same pitch) or going into the bag
+-- (Bag: a soft pouch and a coin). Notes 0..5, walked gently (up, then a phrase up and down), each
+-- in two variants (A, B) picked at random. A fast run plays a sound only every NOTE_GAP seconds
+-- (a Rare or Epic always), each nudged up to NOTE_JITTER late, so it never rattles like a machine gun.
+local NOTE_TOP, NOTE_JITTER = 5, 0.025
+local NOTE_GAP = { Land = 0.08, Bag = 0.125 }
+local walked = {} -- [set] = how many notes of this run played (the walk advances only on those)
+-- n = the item's place in its run (1 starts a new run); kind = "Rare" / "Epic" (always plays);
+-- low = the lowest note, outside the walk (a gray item)
+local function PlayNote(set, n, kind, low)
   if ns.settings.noSound then return end
+  if (n or 1) <= 1 then walked[set] = 0 end
   local now = GetTime()
-  if now - (lastSet[set] or 0) < 0.05 then return end -- a fast rattle skips notes; the melody goes on
+  if not kind and now - (lastSet[set] or 0) < NOTE_GAP[set] then return end
   lastSet[set] = now
-  local v = math.random(2) == 1 and "A" or "B"
-  PlaySoundFile(("%s%s%s%02d.ogg"):format(MEDIA, set, v, ns.RainCore.Melody(n, NOTE_TOP)), Channel())
+  local step = 0
+  if not low then
+    walked[set] = (walked[set] or 0) + 1
+    step = ns.RainCore.Melody(walked[set], NOTE_TOP)
+  end
+  local file = ("%s%s%s%s%02d.ogg"):format(MEDIA, set, kind or "", math.random(2) == 1 and "A" or "B", step)
+  C_Timer.After(math.random() * NOTE_JITTER, function() PlaySoundFile(file, Channel()) end)
 end
-function ns:PlayStepTick(n) PlayNote("Land", n) end -- the n-th item down (escalation)
-function ns:PlayBagNote(n) PlayNote("Bag", n) end   -- the n-th item into the bag
--- the rain resolves on a chord: when everything is down (no gathering) or the last item is in the bag
-function ns:PlayRainChord(bag)
-  if not self.settings.noSound then PlaySoundFile(MEDIA .. (bag and "BagChord" or "LandChord") .. ".ogg", Channel()) end
+-- the n-th item down; q its quality (Rare and Epic+ get their touch); low: a gray item's lowest thud
+function ns:PlayStepTick(n, q, low)
+  PlayNote("Land", n, q and (q >= 4 and "Epic" or q == 3 and "Rare") or nil, low)
+end
+function ns:PlayBagNote(n) PlayNote("Bag", n) end -- the n-th item into the bag
+-- the rain resolving on a soft chord (setting rainChord, off by default)
+function ns:PlayRainChord()
+  if not self.settings.noSound and self.settings.rainChord then PlaySoundFile(MEDIA .. "RainChord.ogg", Channel()) end
 end
 function ns:PlayLaunchSound(isCoin, n) PlaySet(isCoin and "LaunchCoin" or "LaunchItem", n) end -- launched
 function ns:PlayClink(n) PlaySet("Clink", n) end                                                -- a coin lands

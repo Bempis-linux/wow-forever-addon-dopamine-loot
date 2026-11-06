@@ -448,10 +448,14 @@ local function OnLand(st, s)
     st.shake = SHAKE_T * 1.4
     ns:PlaySlamSound()
   elseif s.best and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end
-  if s.q >= 3 then Tick(s.q)
-  elseif s.dull then ns:PlayStepTick(1) -- the lowest tick, never climbing
-  elseif not (st.calm >= 2 and st.landed % 2 == 0) then -- calmer repeats: every other tick
-    if On("Escalate") then ns:PlayStepTick(st.landed) else Tick(0) end
+  -- its sound: the slam has its own; Rare and better a thud with their touch (always); a gray the
+  -- lowest thud; the rest walk the notes (setting Escalate) or tick
+  if not s.slam then
+    if s.q >= 3 then ns:PlayStepTick(st.landed, s.q)
+    elseif s.dull then ns:PlayStepTick(st.landed, nil, true)
+    elseif not (st.calm >= 2 and st.landed % 2 == 0) then -- calmer repeats: every other tick
+      if On("Escalate") then ns:PlayStepTick(st.landed) else Tick(0) end
+    end
   end
   local x, y, k = s.x, bounds.floor, bounds.k
   local r, g, b = Light(s.r, s.g, s.b)
@@ -522,7 +526,7 @@ local function Settle(st)
     end
   end
   -- nothing gathers into the bag: the rain resolves on its chord now
-  if st.toGather == 0 and st.landed >= 3 and st.calm < 2 and On("Escalate") then ns:PlayRainChord(false) end
+  if st.toGather == 0 and st.landed >= 3 and st.calm < 2 and On("Escalate") then ns:PlayRainChord() end
 end
 
 local function Update(_, dt)
@@ -746,7 +750,7 @@ local function Update(_, dt)
             Spark(bx, by, r, g, b, 3, 140 * k, { up = true, grav = 400 * k })
             if On("Escalate") then ns:PlayBagNote(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
             -- the last one in: the rain resolves on a chord (not for calmer repeats)
-            if st.gathered == st.toGather and st.calm < 2 and st.toGather >= 3 then ns:PlayRainChord(true) end
+            if st.gathered == st.toGather and st.calm < 2 and st.toGather >= 3 then ns:PlayRainChord() end
           end
           if not s.inBag then busy = true end
         else
