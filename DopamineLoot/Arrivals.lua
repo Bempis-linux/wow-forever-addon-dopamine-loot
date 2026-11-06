@@ -486,41 +486,57 @@ local function ItemAlpha(view, a)
 end
 ns.ItemAlpha = ItemAlpha
 
--- Rare: reverse disintegration: the item is built from the bottom up behind a fine scanline, and
--- specks of light pour into that line from all around: each lands where the line is as it gets there
-local DIS_FROM, DIS_T, DIS_FLY = 0.2, 0.75, 0.42 -- the line sweeps up from DIS_FROM over DIS_T; a speck flies DIS_FLY
+-- Rare: reverse disintegration: specks of light pour in from all around and stay lit where they land,
+-- so a glowing shape of the item builds up from the bottom behind a fine scanline; the item itself is
+-- only a faint ghost until the line reaches the top, then it snaps in with a flash and the specks
+-- scatter away (a 3D model can't be revealed slice by slice, so the specks do the building)
+local DIS_FROM, DIS_T, DIS_FLY, DIS_GHOST = 0.2, 0.75, 0.42, 0.12
 function A.disint(view, x, y, s, r, g, b)
   local lr, lg, lb = Light(r, g, b)
   ItemAlpha(view, 0)
   local stage = view.stage
   local W, H = stage:GetWidth() * 0.5, stage:GetHeight() * 0.9
   local specks = {}
-  for i = 1, 70 do
-    local fy = (i - 1) / 69 -- spread evenly up the item, so the line is fed all the way
-    local an = math.random() * 6.28
-    specks[i] = { tx = (math.random() - 0.5) * W * 0.5, ty = (fy - 0.5) * H, an = an, d = Rnd(120, 240),
-      sw = Rnd(-1.6, 1.6), land = DIS_FROM + fy * DIS_T + Rnd(-0.03, 0.03) }
+  for i = 1, 80 do
+    local fy = (i - 1) / 79 -- spread evenly up the item, so the shape builds all the way
+    specks[i] = { tx = (math.random() - 0.5) * W * 0.55, ty = (fy - 0.5) * H, an = math.random() * 6.28, d = Rnd(120, 240),
+      sw = Rnd(-1.6, 1.6), land = DIS_FROM + fy * DIS_T + Rnd(-0.03, 0.03), out = math.random() * 6.28 }
   end
-  Effect(view, DIS_FROM + DIS_T + 0.45, function(e)
+  local snapAt = DIS_FROM + DIS_T
+  Effect(view, snapAt + 0.6, function(e)
     local ox, oy, sc = Origin(e)
+    local since = e.t - snapAt -- after the snap (< 0 before it)
     for i, p in ipairs(specks) do
-      local u = (e.t - (p.land - DIS_FLY)) / DIS_FLY
       local t = T(e, i, front, MEDIA .. "Mote", "ADD")
-      if u <= 0 or u >= 1 then t:SetAlpha(0) else
-        local k = (1 - u) ^ 2 -- distance left: they speed up into the line, curving as they come
+      local white = i % 4 == 0
+      local cr, cg, cb = white and 1 or lr, white and 1 or lg, white and 1 or lb
+      local u = (e.t - (p.land - DIS_FLY)) / DIS_FLY
+      if u <= 0 then
+        t:SetAlpha(0)
+      elseif u < 1 then -- flying in, speeding up and curving
+        local k = (1 - u) ^ 2
         local an = p.an + p.sw * k
-        local white = i % 4 == 0
         Place(t, ox + (p.tx + math.cos(an) * p.d * k) * sc, oy + (p.ty + math.sin(an) * p.d * k * 0.8) * sc, 4 * sc, 4 * sc,
-          math.min(1, u * 4) * (0.6 + 0.4 * u), white and 1 or lr, white and 1 or lg, white and 1 or lb)
+          math.min(1, u * 4), cr, cg, cb)
+      elseif since < 0 then -- landed: it stays lit, part of the glowing shape
+        Place(t, ox + p.tx * sc, oy + p.ty * sc, 4.5 * sc, 4.5 * sc, 0.8, cr, cg, cb)
+      else -- the snap: it scatters away and fades
+        local v = since / 0.4
+        Place(t, ox + (p.tx + math.cos(p.out) * 60 * v) * sc, oy + (p.ty + math.sin(p.out) * 60 * v) * sc, 4 * sc, 4 * sc,
+          math.max(0, 1 - v), cr, cg, cb)
       end
     end
     local rev = math.min(1, math.max(0, (e.t - DIS_FROM) / DIS_T))
-    if view.stage == stage then ItemAlpha(view, rev) end
     local line = rev > 0 and rev < 1
     local ly = oy + (rev - 0.5) * H * sc
     Place(T(e, "l1", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 1.3 * sc, 3 * sc, line and 1 or 0, 1, 1, 1)
     Place(T(e, "l2", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 1.1 * sc, 10 * sc, line and 0.6 or 0, lr, lg, lb)
-    if rev >= 1 and not e.done then -- built: a glint or two and a soft ring
+    if view.stage == stage then -- a faint ghost while it builds, then it snaps in
+      ItemAlpha(view, since < 0 and DIS_GHOST * rev or DIS_GHOST + (1 - DIS_GHOST) * math.min(1, since / 0.1))
+    end
+    local fl = since >= 0 and math.max(0, 1 - since / 0.3) or 0 -- the flash as it snaps in
+    Place(T(e, "f", front, MEDIA .. "Glow", "ADD"), ox, oy, (120 + 80 * (1 - fl)) * sc, (160 + 80 * (1 - fl)) * sc, fl * 0.8, 1, 1, 1)
+    if since >= 0 and not e.done then
       e.done = true
       Glints(ox, oy, 4, 50, sc)
       Ring(view, lr, lg, lb, 110, 0.5)
@@ -540,19 +556,19 @@ function A.pool(view, x, y, s, r, g, b)
     local py = oy - stage:GetHeight() * 0.5 * sc - 4 * sc -- the pool, at the item's foot
     local a = math.min(1, e.t / 0.2) * (1 - math.max(0, (e.t - 1.6) / 0.6))
     if view.stage == stage then ItemAlpha(view, 0.2 + 0.8 * math.min(1, e.t / 0.55)) end
-    Place(T(e, "p", back, MEDIA .. "Glow", "ADD"), ox, py, 240 * sc, 54 * sc, a * 0.9, lr, lg, lb)
-    Place(T(e, "pw", back, MEDIA .. "Glow", "ADD", 1), ox, py, 90 * sc, 20 * sc, a * 0.8, 1, 1, 1)
+    Place(T(e, "p", back, MEDIA .. "Glow", "ADD"), ox, py, 150 * sc, 30 * sc, a * 0.7, lr, lg, lb) -- (kept small: at the item's foot, clear of the text and the next popup)
+    Place(T(e, "pw", back, MEDIA .. "Glow", "ADD", 1), ox, py, 48 * sc, 10 * sc, a * 0.45, 1, 1, 1)
     for k = 1, 3 do -- ripples spreading over it, one after another
       local rt = ((e.t + (k - 1) * 0.45) % 1.35) / 1.35
-      local rr = (20 + 130 * rt) * sc
-      Place(T(e, "r" .. k, front, MEDIA .. "Wave", "ADD"), ox, py, rr * 2, rr * 0.44, a * (1 - rt) * 0.9, lr, lg, lb)
+      local rr = (14 + 66 * rt) * sc
+      Place(T(e, "r" .. k, front, MEDIA .. "Wave", "ADD"), ox, py, rr * 2, rr * 0.4, a * (1 - rt) * 0.7, lr, lg, lb)
     end
     local refl = T(e, "f", back, MEDIA .. "Pillar", "ADD", 2) -- the reflection: the pillar upside down
     refl:SetTexCoord(0, 1, 1, 0)
-    Place(refl, ox + math.sin(e.t * 6) * 2 * sc, py, 30 * sc, 70 * sc, a * 0.45 * (0.8 + 0.2 * math.sin(e.t * 9)), lr, lg, lb, "TOP")
+    Place(refl, ox + math.sin(e.t * 6) * 2 * sc, py, 20 * sc, 30 * sc, a * 0.3 * (0.8 + 0.2 * math.sin(e.t * 9)), lr, lg, lb, "TOP")
     if e.t >= e.life then ItemAlpha(view, 1) end
   end)
-  Burst(x, y - stage:GetHeight() * 0.5 * s, 22, 420, s, lr, lg, lb, { up = true, fan = 0.5, grav = 700, drag = 0.8, life = 1.3,
+  Burst(x, y - stage:GetHeight() * 0.5 * s, 14, 300, s, lr, lg, lb, { up = true, fan = 0.45, grav = 700, drag = 0.8, life = 1.2,
     colors = { { 1, 1, 1 }, { lr, lg, lb } } })
 end
 

@@ -155,16 +155,18 @@ function ns.CreateView(f)
   f.auraGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.wisps = {}
   for i = 1, 14 do f.wisps[i] = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD", 1) end
-  -- Achievement: a medallion (a glow, a dark disc, a ring in the quality color) and a name plate
-  f.medalGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
-  f.medalDisc = Tex(f, "BORDER", MEDIA .. "Disc", nil, 1)
-  f.medalRing = Tex(f, "BORDER", MEDIA .. "Wave", "ADD", 2)
-  f.achPlate = Tex(f, "BORDER", MEDIA .. "Glow", nil, 0) -- (a soft dark shadow behind the text, no box)
-  f.achLine = Tex(f, "BORDER", WHITE, nil, 2)
+  -- Achievement: a ribbon: the band (0) and its edge lines (1) start behind the medallion, whose dark
+  -- disc (2), ring in the quality color (3) and inner glow (4) sit on top of their left end
+  f.achPlate = Tex(f, "BORDER", WHITE, nil, 0)
+  f.achLine = Tex(f, "BORDER", WHITE, nil, 1)
+  f.achLine2 = Tex(f, "BORDER", WHITE, nil, 1)
+  f.medalDisc = Tex(f, "BORDER", MEDIA .. "Disc", nil, 2)
+  f.medalRing = Tex(f, "BORDER", MEDIA .. "Wave", "ADD", 3)
+  f.medalGlow = Tex(f, "BORDER", MEDIA .. "Glow", "ADD", 4)
   f.art = { f.glow, f.cone, f.bar, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
     f.shadow, f.emblem, f.emblemEdge, f.plateL, f.plateR, f.underL, f.underR,
     f.splashBand, f.splashBand2, f.splashEdge, f.splashTrim, f.tabBack, f.auraGlow,
-    f.medalGlow, f.medalDisc, f.medalRing, f.achPlate, f.achLine }
+    f.medalGlow, f.medalDisc, f.medalRing, f.achPlate, f.achLine, f.achLine2 }
   for _, t in ipairs(f.wisps) do f.art[#f.art + 1] = t end
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
@@ -336,21 +338,28 @@ function ns.CreateView(f)
       self.tag:Show()
       for _, w in ipairs(self.wisps) do w.age = nil end
     elseif style == "achievement" then
-      -- the medallion around the item on the left, the name plate fading out to the right from it
-      self.medalGlow:SetSize(150, 150)
+      -- one ribbon: the medallion (a dark disc with a ring in the item's color and a soft glow inside)
+      -- sits on the left end of a dark band edged top and bottom by lines in the item's color; band
+      -- and lines start behind the medallion and fade out to the right, the text between them
+      self.medalGlow:SetSize(96, 96)
       self.medalGlow:SetPoint("CENTER", self.stage, "CENTER")
-      self.medalDisc:SetSize(104, 104)
+      self.medalDisc:SetSize(112, 112)
       self.medalDisc:SetPoint("CENTER", self.stage, "CENTER")
-      self.medalRing:SetSize(122, 122)
+      self.medalRing:SetSize(124, 124)
       self.medalRing:SetPoint("CENTER", self.stage, "CENTER")
-      -- the text sits on a soft dark shadow (no box), a thin line in the item's color above it
-      self.achPlate:SetSize(330, 120)
-      self.achPlate:SetPoint("LEFT", self.stage, "CENTER", 30, 0)
-      self.achPlate:SetVertexColor(0, 0, 0, 0.85)
-      self.achLine:SetSize(220, 1.5)
-      self.achLine:SetPoint("BOTTOMLEFT", self.tag, "TOPLEFT", -6, 4)
-      for _, t in ipairs({ self.medalGlow, self.medalDisc, self.medalRing, self.achPlate, self.achLine }) do t:Show() end
-      self.tag:SetPoint("TOPLEFT", self.stage, "CENTER", 66, 28)
+      self.achPlate:SetSize(290, 70)
+      self.achPlate:SetPoint("LEFT", self.stage, "CENTER", 0, 0)
+      if self.achPlate.SetGradient and CreateColor then
+        self.achPlate:SetGradient("HORIZONTAL", CreateColor(0.03, 0.025, 0.02, 0.9), CreateColor(0.03, 0.025, 0.02, 0))
+      else
+        self.achPlate:SetVertexColor(0.03, 0.025, 0.02, 0.7)
+      end
+      self.achLine:SetSize(290, 1.5)
+      self.achLine:SetPoint("BOTTOMLEFT", self.achPlate, "TOPLEFT", 0, 0)
+      self.achLine2:SetSize(290, 1.5)
+      self.achLine2:SetPoint("TOPLEFT", self.achPlate, "BOTTOMLEFT", 0, 0)
+      for _, t in ipairs({ self.medalGlow, self.medalDisc, self.medalRing, self.achPlate, self.achLine, self.achLine2 }) do t:Show() end
+      self.tag:SetPoint("TOPLEFT", self.stage, "CENTER", 70, 26)
       self.name:SetPoint("TOPLEFT", self.tag, "BOTTOMLEFT", 0, -2)
       self.name:SetWidth(200)
       self.name:SetJustifyH("LEFT")
@@ -436,13 +445,15 @@ function ns.CreateView(f)
     -- Aura and Achievement
     self.auraGlow:SetVertexColor(qr, qg, qb, 1)
     for _, w in ipairs(self.wisps) do w:SetVertexColor(r, g, b, 1) end
-    self.medalGlow:SetVertexColor(r, g, b, 0.7)
+    self.medalGlow:SetVertexColor(r, g, b, 0.45)
     self.medalDisc:SetVertexColor(0.08, 0.06, 0.03, 0.95)
     self.medalRing:SetVertexColor(r, g, b, 1)
     if self.achLine.SetGradient and CreateColor then -- the line above the name, fading out to the right
       self.achLine:SetGradient("HORIZONTAL", CreateColor(r, g, b, 0.9), CreateColor(r, g, b, 0))
+      self.achLine2:SetGradient("HORIZONTAL", CreateColor(r, g, b, 0.6), CreateColor(r, g, b, 0))
     else
       self.achLine:SetVertexColor(r, g, b, 0.6)
+      self.achLine2:SetVertexColor(r, g, b, 0.4)
     end
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
