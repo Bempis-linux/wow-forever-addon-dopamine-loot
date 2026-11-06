@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popup Designs Round 4</title>
+<title>Popup Designs Round 5</title>
 <style>
   :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
@@ -58,15 +58,13 @@
   .E .ribbon { margin-top: -14px; padding: 6px 28px 7px; background: linear-gradient(var(--cd), #120d08);
     clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); box-shadow: inset 0 1px 0 var(--c); display: flex; flex-direction: column; align-items: center; }
   .E .ribbon .name { font-size: 18px; }
-  /* L. Achievement, polished: the medallion with a beveled rim and a slow light, the plate wipes in */
+  /* L. Achievement, as in round 3 (the polish of round 4 was a step back) */
   .L { flex-direction: row !important; align-items: center !important; top: 120px !important; justify-content: center; }
-  .L .med { width: 110px; height: 110px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle at 50% 40%, var(--cl) 0, var(--c) 32%, #140e07 72%); box-shadow: 0 0 0 2px #000, 0 0 0 4px #c9a24a, 0 0 0 5px #5a4418, 0 0 0 7px var(--c), 0 0 30px -2px var(--c); }
-  .L .med::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 80%, rgba(255,255,255,.35) 88%, transparent 96%); animation: spin 4s linear infinite; mix-blend-mode: screen; }
-  .L .med .item { height: 124px; width: 50px; }
-  .L .plate { margin-left: -28px; padding: 10px 26px 10px 40px; min-width: 210px; display: flex; flex-direction: column; gap: 3px; animation: platein .45s .15s cubic-bezier(.2,.9,.3,1) both;
-    background: linear-gradient(90deg, #1a140b, rgba(26,20,11,.9) 70%, rgba(26,20,11,0)); border-top: 1px solid var(--c); border-bottom: 1px solid rgba(255,255,255,.08); position: relative; }
-  .L .plate::before { content: ""; position: absolute; left: 30px; right: 30%; top: -1px; height: 1px; background: linear-gradient(90deg, var(--cl), transparent); box-shadow: 0 0 8px var(--c); }
+  .L .med { width: 104px; height: 104px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle, var(--cl) 0, var(--c) 30%, #140e07 70%); box-shadow: 0 0 0 3px #2a2014, 0 0 0 5px var(--c), 0 0 26px -4px var(--c); }
+  .L .med .item { height: 120px; width: 48px; }
+  .L .plate { margin-left: -24px; padding: 10px 22px 10px 36px; min-width: 190px; display: flex; flex-direction: column; gap: 3px;
+    background: linear-gradient(90deg, #16110a, rgba(22,17,10,.85) 70%, rgba(22,17,10,0)); border-top: 1px solid var(--c); border-bottom: 1px solid rgba(255,255,255,.06); }
   .L .name { font-size: 19px; }
   /* M. Aura: the flames are drawn on the canvas behind (see Aura in the script) */
   .M .name { font-size: 24px; text-shadow: 0 0 8px var(--c), 0 0 18px var(--c), 0 2px 4px #000; margin-top: 14px; }
@@ -75,7 +73,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Popup designs, round 4</h1>
+  <h1>Popup designs, round 5</h1>
   <small>Your picks so far, polished, plus new options per rarity (the plan: a few to choose from per rarity in the settings). R replays.</small>
 
   <h2>Style</h2>
@@ -85,7 +83,7 @@
   <small id="ddesc"></small>
 
   <h2>Show</h2>
-  <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button>
+  <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button><button data-q="5">Legendary</button>
 
   <h2>Uncommon (green)</h2>
   <label class="fx"><input type="radio" name="g" value="geyser" checked><b>Geyser+ <em>improved</em></b><small>A burst of mist at its base, three wobbling streams, droplets with little trails; the popup rides it up and settles.</small></label>
@@ -95,12 +93,18 @@
   <h2>Rare (blue)</h2>
   <label class="fx"><input type="checkbox" id="b0" checked><b>Ring wave</b><small>With either option.</small></label>
   <label class="fx"><input type="radio" name="b" value="flare" checked><b>Sapphire flare</b><small>Unchanged from round 3.</small></label>
-  <label class="fx"><input type="radio" name="b" value="starburst"><b>Starburst <em>new</em></b><small>Like a camera's star filter: long thin light streaks shoot out from the item, turning slowly, with glints at their tips.</small></label>
+  <label class="fx"><input type="radio" name="b" value="aurora"><b>Aurora <em>new</em></b><small>A ribbon of shimmering blue-green light ripples across behind the item like the northern lights, then fades upward. No rays.</small></label>
 
   <h2>Epic (purple)</h2>
   <label class="fx"><input type="radio" name="p" value="implode" checked><b>Implosion, scatter, galaxy</b><small>What you have now.</small></label>
   <label class="fx"><input type="radio" name="p" value="eclipse"><b>Eclipse <em>new</em></b><small>A dark disc slides in front of a purple corona; it flares across the screen, then bursts into sparkles and rings.</small></label>
-  <label class="fx"><input type="checkbox" id="p5" checked><b>Letter stamp</b><small>The name's letters slam in (with either).</small></label>
+  <label class="fx"><input type="radio" name="p" value="rift"><b>Void rift <em>new</em></b><small>A glowing tear rips open behind the item, light spilling out of it and its edges crackling, then it snaps shut with a burst.</small></label>
+  <label class="fx"><input type="checkbox" id="p5" checked><b>Letter stamp</b><small>The name's letters slam in (with any of them; for Legendary too).</small></label>
+
+  <h2>Legendary (orange): after the comet</h2>
+  <label class="fx"><input type="radio" name="l" value="nova" checked><b>Supernova <em>new</em></b><small>The comet hits: a white flash, a screen-wide golden flare, three shockwaves, a blast of gold sparks, then a golden halo that lingers with embers rising.</small></label>
+  <label class="fx"><input type="radio" name="l" value="crown"><b>Sun crown <em>new</em></b><small>The comet hits: a ring of golden flames erupts around the item like a crown, a shower of gold falls from above, and a halo turns over it.</small></label>
+  <small>The dim and the slow-motion landing stay; the comet stays as it is in game.</small>
 </div>
 <div id="screen">
   <div class="char"></div>
@@ -113,12 +117,12 @@
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const Q = { 2: ['#1eff00', '#9dff8a', '#0b3a05', 'Uncommon'], 3: ['#3a8cff', '#9cc8ff', '#0a2650', 'Rare'], 4: ['#a335ee', '#d9a8ff', '#2e0b48', 'Epic'] };
-const NAMECOLOR = { 2: '#1eff00', 3: '#5aa8ff', 4: '#b75cff' };
+const Q = { 2: ['#1eff00', '#9dff8a', '#0b3a05', 'Uncommon'], 3: ['#3a8cff', '#9cc8ff', '#0a2650', 'Rare'], 4: ['#a335ee', '#d9a8ff', '#2e0b48', 'Epic'], 5: ['#ff8000', '#ffd08a', '#4a2000', 'Legendary'] };
+const NAMECOLOR = { 2: '#1eff00', 3: '#5aa8ff', 4: '#b75cff', 5: '#ff9a2a' };
 const ITEM = { name: 'Arcanite Reaper', type: 'Two-Hand Axe', ilvl: 63 };
 const DESC = {
-  L: 'Achievement, polished: a beveled gold-rimmed medallion with a slow light sweeping its rim, the name plate wiping in from it with a bright top edge.',
-  M: 'Aura, rebuilt: real flame tongues of the item\'s color with a hot white core, flickering at their own pace, and embers rising from them. The name glows.',
+  L: 'Achievement, back to the round-3 look: a small medallion with the item beside a name plate that fades out to the right.',
+  M: 'Aura: flame tongues of the item\'s color rising from below the item, flickering slowly and smoothly, embers drifting up. The name glows.',
   E: 'Medallion from round 1.',
   R: 'Relic as it is in game now.',
 };
@@ -134,7 +138,7 @@ function axe(c) {
   <circle cx="32" cy="30" r="6" fill="${c}" opacity=".9"/><circle cx="32" cy="30" r="2.5" fill="#fff" opacity=".8"/></svg>`;
 }
 function nameHTML(q) {
-  const stamp = q === 4 && $('p5').checked;
+  const stamp = q >= 4 && $('p5').checked;
   const inner = stamp ? [...ITEM.name].map((ch, i) => `<span class="l" style="animation:letterstamp .26s ${(0.55 + i * .05).toFixed(2)}s both">${ch === ' ' ? '&nbsp;' : ch}</span>`).join('') : ITEM.name + '<span class="shine"></span>';
   return `<div class="name" style="color:${NAMECOLOR[q]}">${inner}</div>`;
 }
@@ -186,12 +190,14 @@ function streak(g, x, y, w, h, a, c) { // a horizontal light streak, bright in t
 // the Aura's flames: tongues of the item's color, each at its own pace, a white-hot core, embers
 function drawAura(t) {
   if (!aura || !$('stage').querySelector('.M')) return;
-  const [x, y] = center(.62), [c, cl] = Q[aura.q], g = bctx;
-  const fade = Math.min(1, t / .3);
+  // the flames rise from just below the item (its bottom), not from its middle
+  const [x, y0] = center(1), [c, cl] = Q[aura.q], g = bctx, y = y0 - 4;
+  const fade = Math.min(1, t / .4);
   for (let i = 0; i < 7; i++) {
-    const off = (i - 3) * 17, base = 1 - Math.abs(i - 3) / 4.5;
-    const h = (60 + 80 * base) * (0.75 + 0.3 * Math.sin(t * (4.5 + i * .8) + i * 1.7) + 0.12 * Math.sin(t * 13 + i * 2));
-    const sway = Math.sin(t * 2.6 + i * 1.3) * 7;
+    const off = (i - 3) * 15, base = 1 - Math.abs(i - 3) / 4.5;
+    // a slow, smooth flicker: two gentle waves per tongue instead of a fast jitter
+    const h = (90 + 110 * base) * (0.85 + 0.12 * Math.sin(t * (2.2 + i * .35) + i * 1.7) + 0.05 * Math.sin(t * 5.3 + i * 2));
+    const sway = Math.sin(t * 1.6 + i * 1.3) * 6;
     for (const [col, wid, al] of [[c, 14, .32], [cl, 8, .36], ['#fff', 3, .4 * base]]) {
       const top = y - h * (col === '#fff' ? .5 : col === cl ? .78 : 1), bx = x + off;
       // each tongue fades in from its base, is brightest a quarter of the way up and fades out at its tip
@@ -203,9 +209,9 @@ function drawAura(t) {
       g.closePath(); g.fill();
     }
   }
-  const gr = g.createRadialGradient(x, y, 4, x, y, 80); gr.addColorStop(0, cl); gr.addColorStop(1, 'transparent');
-  g.globalAlpha = .45 * fade; g.fillStyle = gr; g.beginPath(); g.arc(x, y, 80, 0, 7); g.fill();
-  if (Math.random() < .35) parts.push({ x: x + R(-50, 50), y: y + R(-10, 10), vx: R(-15, 15), vy: R(-90, -50), age: 0, life: R(1, 1.8), c: Math.random() < .3 ? '#fff' : cl, s: R(1.2, 2.2), g: -20, drag: .5, kind: 'ember', ph: R(0, 6) });
+  const gr = g.createRadialGradient(x, y - 50, 4, x, y - 50, 90); gr.addColorStop(0, cl); gr.addColorStop(1, 'transparent');
+  g.globalAlpha = .35 * fade; g.fillStyle = gr; g.beginPath(); g.arc(x, y - 50, 90, 0, 7); g.fill();
+  if (Math.random() < .3) parts.push({ x: x + R(-45, 45), y: y - R(0, 30), vx: R(-12, 12), vy: R(-80, -45), age: 0, life: R(1.2, 2), c: Math.random() < .3 ? '#fff' : cl, s: R(1.2, 2.2), g: -20, drag: .5, kind: 'ember', ph: R(0, 6) });
 }
 let lastT = performance.now();
 function frame(now) {
@@ -265,7 +271,6 @@ function shakePop() { const p = popEl(); if (p) { p.classList.remove('shake', 'i
 function green(x, y, c, cl) {
   const g = pick('g');
   if (g === 'geyser') {
-    const p = popEl(); setTimeout(() => { p.style.transform = 'translateY(-14px)'; }, 30); setTimeout(() => { p.style.transform = ''; }, 420);
     // mist at its base
     for (let i = 0; i < 16; i++) parts.push({ x: x + R(-20, 20), y: y + 90, vx: R(-120, 120), vy: R(-40, 10), age: 0, life: R(.6, 1), c: cl, s: R(6, 11), g: -30, drag: 3, kind: 'mist' });
     special.push({ t: 0, life: 1.1, draw(s) { // three wobbling streams around a white core
@@ -309,26 +314,27 @@ function blue(x, y, c, cl) {
     } });
     glints(x, y, 4, 60);
   } else {
-    special.push({ t: 0, life: 1.2, draw(s) { // 8 long thin streaks from the item, turning slowly, glints at the tips
-      const u = s.t / 1.2, a = u < .1 ? u / .1 : Math.pow(1 - (u - .1) / .9, 1.3), len = 60 + 260 * (1 - Math.pow(1 - Math.min(1, s.t / .35), 3));
-      ctx.save(); ctx.translate(x, y); ctx.rotate(s.t * .5);
-      for (let i = 0; i < 8; i++) {
-        const an = i / 8 * Math.PI * 2, L = len * (i % 2 ? .62 : 1);
-        ctx.save(); ctx.rotate(an);
-        const gr = ctx.createLinearGradient(0, 0, L, 0); gr.addColorStop(0, '#fff'); gr.addColorStop(.35, cl); gr.addColorStop(1, 'transparent');
-        ctx.globalAlpha = a; ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(L, 0); ctx.lineTo(0, 3); ctx.fill();
-        if (s.t > .25 && s.t < .9) star(ctx, L * .92, 0, 8 * Math.sin(Math.PI * (s.t - .25) / .65), a, '#fff');
-        ctx.restore();
+    special.push({ t: 0, life: 1.8, draw(s) { // a ribbon of northern lights rippling behind the item, then rising away
+      const u = s.t / 1.8, a = u < .15 ? u / .15 : Math.pow(1 - (u - .15) / .85, 1.2), rise = Math.max(0, u - .4) * 90;
+      for (let band = 0; band < 3; band++) {
+        const amp = 18 + band * 8, off = band * 1.7, hgt = 50 + band * 18, col = ['#7fffd4', cl, '#c8a8ff'][band];
+        for (let i = 0; i <= 40; i++) {
+          const px = x - 230 + i * 11.5, w = Math.sin(Math.PI * i / 40);
+          const py = y - 20 - rise + Math.sin(i * .28 + s.t * 3.2 + off) * amp * w;
+          const gr = bctx.createLinearGradient(0, py + 6, 0, py - hgt * w);
+          gr.addColorStop(0, col); gr.addColorStop(1, 'transparent');
+          bctx.globalAlpha = a * w * (.22 - band * .04) * (0.75 + 0.25 * Math.sin(i * .9 + s.t * 6));
+          bctx.fillStyle = gr; bctx.fillRect(px, py - hgt * w, 12, hgt * w + 6);
+        }
       }
-      ctx.restore();
-      const gr = ctx.createRadialGradient(x, y, 2, x, y, 60); gr.addColorStop(0, '#fff'); gr.addColorStop(.3, cl); gr.addColorStop(1, 'transparent');
-      ctx.globalAlpha = a; ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, 60, 0, 7); ctx.fill();
     } });
+    for (let i = 0; i < 18; i++) parts.push({ x: x + R(-200, 200), y: y + R(-40, 10), vx: R(-10, 10), vy: R(-50, -20), age: -R(0, .6), life: R(1.2, 1.8), c: i % 2 ? '#7fffd4' : cl, s: R(1.2, 2), g: -10, drag: .6, kind: 'ember', ph: R(0, 6) });
   }
 }
 // ---------------------------------------------------------------- epic
 function epic(x, y, c, cl) {
-  if (pick('p') === 'implode') {
+  const p = pick('p');
+  if (p === 'implode') {
     const blast = () => {
       burst(x, y, cl, 34, 520, { g: 60, drag: 2.4, life: 1.1, size: 1.3 });
       ring(x, y, '#fff', 70, 0, .3, 5); ring(x, y, cl, 140, 0, .7, 4); ring(x, y, '#fff', 190, .2, .8, 2);
@@ -336,7 +342,7 @@ function epic(x, y, c, cl) {
       setTimeout(() => { galaxy = { t: 0, x, y: y + 20, s: Array.from({ length: 80 }, (_, i) => ({ a: R(0, 6.28), r: R(20, 140), z: R(1, 2.6), c: i % 4 ? cl : '#fff' })) }; }, 250);
     };
     implode = { t: 0, x, y, c: cl, onBlast: blast, m: Array.from({ length: 26 }, () => { const a = R(0, 6.28), d = R(150, 240); return { x0: x + Math.cos(a) * d, y0: y + Math.sin(a) * d * .8 }; }) };
-  } else {
+  } else if (p === 'eclipse') {
     special.push({ t: 0, life: 1.0, draw(s) { // a corona of light; a dark disc slides over it; it flares
       const grow = Math.min(1, s.t / .3), cov = Math.min(1, Math.max(0, (s.t - .15) / .4)), r = 54 * grow;
       const flare = Math.max(0, Math.min(1, (s.t - .45) / .15)) * (1 - Math.max(0, (s.t - .7) / .3));
@@ -347,10 +353,85 @@ function epic(x, y, c, cl) {
       bctx.globalCompositeOperation = 'lighter';
       if (flare > 0) { streak(ctx, x, y, 640, 5, flare, '#fff'); streak(ctx, x, y, 560, 30, flare * .9, cl); star(ctx, x, y, 60 * flare, flare, '#fff'); }
     } });
-    setTimeout(() => { // the corona bursts
+    setTimeout(() => {
       burst(x, y, cl, 40, 540, { g: 60, drag: 2.4, life: 1.2, size: 1.3 }); glints(x, y, 12, 110);
       ring(x, y, cl, 150, 0, .7, 4); ring(x, y, '#fff', 210, .15, .8, 2); shakePop();
     }, 720);
+  } else {
+    // a jagged tear opens behind the item, light pours out of it and its edges crackle; it snaps shut
+    const pts = Array.from({ length: 9 }, (_, i) => [R(-10, 10), -130 + i * 32]);
+    special.push({ t: 0, life: 1.15, draw(s) {
+      const open = s.t < .25 ? s.t / .25 : s.t < .8 ? 1 : Math.max(0, 1 - (s.t - .8) / .1), wid = 26 * open;
+      const g = bctx;
+      const glow = g.createRadialGradient(x, y, 4, x, y, 150); glow.addColorStop(0, cl); glow.addColorStop(1, 'transparent');
+      g.globalAlpha = .5 * open; g.fillStyle = glow; g.beginPath(); g.arc(x, y, 150, 0, 7); g.fill();
+      g.globalAlpha = Math.min(1, open * 1.4); g.beginPath();
+      pts.forEach(([dx, dy], i) => { const w = wid * Math.sin(Math.PI * i / (pts.length - 1)); i ? g.lineTo(x + dx - w, y + dy) : g.moveTo(x + dx, y + dy); });
+      [...pts].reverse().forEach(([dx, dy], i) => { const w = wid * Math.sin(Math.PI * (pts.length - 1 - i) / (pts.length - 1)); g.lineTo(x + dx + w, y + dy); });
+      g.closePath();
+      const fill = g.createLinearGradient(x - 30, 0, x + 30, 0); fill.addColorStop(0, c); fill.addColorStop(.5, '#fff'); fill.addColorStop(1, c);
+      g.fillStyle = fill; g.fill();
+      if (open > .3 && Math.random() < .6) { // the edges crackle
+        const i = 1 + Math.floor(Math.random() * (pts.length - 2)), side = Math.random() < .5 ? -1 : 1, [dx, dy] = pts[i];
+        ctx.globalAlpha = .9; ctx.strokeStyle = cl; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x + dx + side * wid, y + dy);
+        let px = x + dx + side * wid, py = y + dy; for (let k = 0; k < 4; k++) { px += side * R(8, 18); py += R(-10, 10); ctx.lineTo(px, py); } ctx.stroke();
+      }
+      if (s.t > .2 && s.t < .8 && Math.random() < .5) parts.push({ x: x + R(-wid, wid), y: y + R(-110, 110), vx: R(-180, 180), vy: R(-60, 60), age: 0, life: R(.4, .8), c: cl, s: R(1.4, 2.4), g: 0, drag: 2, kind: 'dot' });
+    } });
+    setTimeout(() => { // it snaps shut
+      ring(x, y, '#fff', 90, 0, .3, 5); ring(x, y, cl, 170, .05, .7, 4); burst(x, y, cl, 36, 480, { g: 60, drag: 2.4, life: 1.1, size: 1.2 }); glints(x, y, 10, 100); shakePop();
+    }, 930);
+  }
+}
+// ---------------------------------------------------------------- legendary: the comet, then the arrival
+function comet(x, y, then) {
+  special.push({ t: 0, life: .62, draw(s) {
+    const u = Math.min(1, s.t / .55), e = Math.pow(u, 2.2), hy = -60 + (y + 60) * e, len = 80 + 420 * e, a = s.t < .55 ? 1 : 0;
+    const gr = ctx.createLinearGradient(0, hy, 0, hy - len); gr.addColorStop(0, '#fff3c0'); gr.addColorStop(.3, '#ffb040'); gr.addColorStop(1, 'transparent');
+    ctx.globalAlpha = a; ctx.fillStyle = gr; ctx.fillRect(x - 13, hy - len, 26, len);
+    const hd = ctx.createRadialGradient(x, hy, 2, x, hy, 40); hd.addColorStop(0, '#fff'); hd.addColorStop(.4, '#ffc060'); hd.addColorStop(1, 'transparent');
+    ctx.fillStyle = hd; ctx.beginPath(); ctx.arc(x, hy, 40, 0, 7); ctx.fill(); star(ctx, x, hy, 30, a, '#fff');
+  } });
+  setTimeout(then, 550);
+}
+function dim(on) { const e = $('edge'); e.style.transition = 'opacity .25s'; e.style.boxShadow = 'none'; e.style.background = 'rgba(4,3,8,.55)'; e.style.opacity = on ? 1 : 0; }
+function flash() {
+  const f = document.createElement('div'); f.style.cssText = 'position:absolute;inset:0;background:#fff;opacity:.5;z-index:7;pointer-events:none;transition:opacity .35s ease-out';
+  $('screen').appendChild(f); requestAnimationFrame(() => requestAnimationFrame(() => f.style.opacity = 0)); setTimeout(() => f.remove(), 400);
+}
+function legendary(x, y, c, cl) {
+  const gold = ['#ffd100', '#ffb040', '#fff3c0'];
+  if (pick('l') === 'nova') {
+    flash(); shakePop();
+    special.push({ t: 0, life: 1.4, draw(s) { // a screen-wide golden flare
+      const u = s.t / 1.4, a = u < .08 ? u / .08 : Math.pow(1 - (u - .08) / .92, 1.4);
+      streak(ctx, x, y, 1100, 7, a, '#fff'); streak(ctx, x, y, 900, 40, a * .8, '#ffc060'); streak(ctx, x, y, 500, 110, a * .3, c);
+      star(ctx, x, y, 80 * a, a, '#fff');
+    } });
+    ring(x, y, '#fff', 120, 0, .35, 6); ring(x, y, '#ffd100', 220, .08, .8, 5); ring(x, y, c, 320, .2, 1, 3);
+    burst(x, y, '#ffd100', 70, 640, { g: 120, drag: 2, life: 1.4, size: 1.4, colors: gold });
+    glints(x, y, 14, 130);
+    special.push({ t: -.4, life: 3.2, draw(s) { // the halo that lingers
+      const a = Math.min(1, s.t / .4) * (1 - Math.max(0, (s.t - 2.4) / .8)), r = 92 + 6 * Math.sin(s.t * 2);
+      bctx.globalAlpha = a * .7; bctx.strokeStyle = '#ffd100'; bctx.lineWidth = 3; bctx.shadowColor = '#ffb040'; bctx.shadowBlur = 16;
+      bctx.beginPath(); bctx.arc(x, y, r, 0, 7); bctx.stroke(); bctx.shadowBlur = 0;
+      if (Math.random() < .4) parts.push({ x: x + R(-80, 80), y: y + R(20, 60), vx: R(-10, 10), vy: R(-80, -40), age: 0, life: R(1.2, 2), c: gold[Math.floor(R(0, 3))], s: R(1.4, 2.4), g: -15, drag: .5, kind: 'ember', ph: R(0, 6) });
+    } });
+  } else {
+    shakePop();
+    special.push({ t: 0, life: 2.4, draw(s) { // a crown of golden flames around the item
+      const rise = Math.min(1, s.t / .3), a = (1 - Math.max(0, (s.t - 1.8) / .6));
+      for (let i = 0; i < 14; i++) {
+        const an = i / 14 * Math.PI * 2, cx = x + Math.cos(an) * 78, cy = y + 30 + Math.sin(an) * 22, back = Math.sin(an) < 0;
+        const h = (50 + 40 * Math.abs(Math.sin(s.t * 2.4 + i * 1.3))) * rise, g = back ? bctx : ctx;
+        const gr = g.createLinearGradient(0, cy, 0, cy - h); gr.addColorStop(0, '#fff3c0'); gr.addColorStop(.35, '#ffb040'); gr.addColorStop(1, 'transparent');
+        g.globalAlpha = a * .7; g.fillStyle = gr; g.beginPath(); g.moveTo(cx - 9, cy); g.quadraticCurveTo(cx - 6, cy - h * .6, cx + Math.sin(s.t * 3 + i) * 5, cy - h); g.quadraticCurveTo(cx + 6, cy - h * .6, cx + 9, cy); g.fill();
+      }
+      bctx.globalAlpha = a * .6; bctx.strokeStyle = '#ffd100'; bctx.lineWidth = 2; bctx.save(); bctx.translate(x, y - 95); bctx.scale(1, .3); bctx.rotate(s.t);
+      bctx.setLineDash([10, 8]); bctx.beginPath(); bctx.arc(0, 0, 46, 0, 7); bctx.stroke(); bctx.restore(); bctx.setLineDash([]);
+      if (s.t < 1.6 && Math.random() < .9) parts.push({ x: x + R(-160, 160), y: y - 220, vx: R(-20, 20), vy: R(120, 260), age: 0, life: R(.9, 1.4), c: gold[Math.floor(R(0, 3))], s: R(1.4, 2.6), g: 200, drag: .4, kind: 'dot' });
+    } });
+    ring(x, y + 30, '#ffd100', 160, 0, .6, 4); burst(x, y, '#ffd100', 40, 420, { up: true, g: 400, life: 1.2, colors: gold }); glints(x, y, 10, 110);
   }
 }
 
@@ -359,13 +440,24 @@ function show(q) {
   last = q; clearTimeout(hideT); clearTimeout(arriveT); implode = null; galaxy = null; special = [];
   aura = design === 'M' ? { t: 0, q } : null;
   const st = $('stage'); st.innerHTML = build(q);
-  const p = st.firstElementChild; p.classList.add('impact');
-  arriveT = setTimeout(() => { p.classList.remove('impact'); const [x, y] = center(), [c, cl] = Q[q]; (q === 2 ? green : q === 3 ? blue : epic)(x, y, c, cl); }, 340);
-  hideT = setTimeout(() => { p.classList.add('out'); setTimeout(() => { aura = null; }, 700); }, 5000);
+  const p = st.firstElementChild;
+  dim(false);
+  if (q === 5) { // the moment: dim, the comet, then the popup lands in its arrival
+    p.style.opacity = 0; dim(true);
+    setTimeout(() => {
+      const [x, y] = center();
+      comet(x, y, () => { p.style.opacity = ''; p.classList.add('impact'); setTimeout(() => { p.classList.remove('impact'); const [x2, y2] = center(); legendary(x2, y2, ...Q[5]); }, 60); });
+    }, 200);
+    setTimeout(() => dim(false), 2600);
+  } else {
+    p.classList.add('impact');
+    arriveT = setTimeout(() => { p.classList.remove('impact'); const [x, y] = center(), [c, cl] = Q[q]; (q === 2 ? green : q === 3 ? blue : epic)(x, y, c, cl); }, 340);
+  }
+  hideT = setTimeout(() => { p.classList.add('out'); setTimeout(() => { aura = null; }, 700); }, q === 5 ? 6500 : 5000);
   $('note').textContent = `${Q[q][3]} in ${document.querySelector('[data-d].on').textContent}.`;
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => show(+b.dataset.q));
-for (const [n, q] of [['g', 2], ['b', 3], ['p', 4]]) document.querySelectorAll(`input[name=${n}]`).forEach(r => r.onchange = () => show(q));
+for (const [n, q] of [['g', 2], ['b', 3], ['p', 4], ['l', 5]]) document.querySelectorAll(`input[name=${n}]`).forEach(r => r.onchange = () => show(q));
 document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-d]').forEach(x => x.classList.remove('on')); b.classList.add('on');
   design = b.dataset.d; $('ddesc').textContent = DESC[design]; show(last);
