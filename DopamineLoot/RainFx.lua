@@ -77,8 +77,11 @@ local function Create()
 
   N.Header(layout, "Test")
   N.Slider(cat, "testRain", "Test rain size", 1, 60, 1, 8,
-    "How many items the test rain drops, taken from your bags. From 4 items one is a Rare, from 8 one is an Epic, from 12 one is a Legendary; some money comes with them.",
+    "How many items the test rain drops: the best one (picked below) and lower items from your bags, with some money.",
     function(v) return math.floor(v + 0.5) .. " items" end)
+  N.Choice(cat, "testRainBest", "Test rain's best item", {
+    { 2, "|cff1eff00Uncommon|r" }, { 3, "|cff0070ddRare|r" }, { 4, "|cffa335eeEpic|r (default)" }, { 5, "|cffff8000Legendary|r" },
+  }, 4, "The rarity of the best item in the test rain, so you can see each one's hang, fall and landing. The other items are always lower.")
   N.Button(layout, "Rain test items", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
     "Rains the number of test items set above.")
   N.Choice(cat, "testMoney", "Test money amount", {

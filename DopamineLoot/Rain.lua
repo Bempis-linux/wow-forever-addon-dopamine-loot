@@ -29,10 +29,10 @@ local WIND_T = 0.38 -- the wind-up before the burst
 -- it falls (a comet trail from Rare, longer for Epic and Legendary) and the bigger its landing.
 -- Gray and white items land like everything else.
 local DROP = {
-  [2] = { hang = 0.25, vy = 1000, dome = 0.6, sparks = 10, shake = 0.7, trail = 0 },
-  [3] = { hang = 0.4, vy = 1400, dome = 1, sparks = 22, shake = 1.2, trail = 0.6 },
-  [4] = { hang = 0.45, vy = 1800, dome = 1.3, sparks = 32, shake = 1.6, trail = 1 },
-  [5] = { hang = 0.55, vy = 2300, dome = 1.7, sparks = 46, shake = 2.2, trail = 1.5 },
+  [2] = { hang = 0.25, pull = 0, dome = 0.6, sparks = 10, shake = 0.7, trail = 0 },
+  [3] = { hang = 0.4, pull = 900, dome = 1, sparks = 22, shake = 1.2, trail = 0.6 },
+  [4] = { hang = 0.45, pull = 1900, dome = 1.3, sparks = 32, shake = 1.6, trail = 1 },
+  [5] = { hang = 0.55, pull = 3200, dome = 1.7, sparks = 46, shake = 2.2, trail = 1.5 },
 }
 local function Drop(q) return DROP[math.max(2, math.min(q or 2, 5))] end
 local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, one step each
@@ -714,8 +714,11 @@ local function Update(_, dt)
       local sdt = dt
       if s.hang then
         s.hang, sdt = s.hang - dt, dt * 0.1
-        if s.hang <= 0 then s.hang, s.vy, s.e, s.slam = nil, -Drop(s.q).vy * k, 0.18, true end
+        if s.hang <= 0 then s.hang, s.e, s.slam = nil, 0.18, true end
       end
+      -- the slam: it falls on from the top of its hang under gravity and an extra pull (stronger the
+      -- rarer), speeding up smoothly into the ground instead of jumping to full speed
+      if s.slam and s.bounces == 0 then s.vy = s.vy - Drop(s.q).pull * k * sdt end
       if Core.Advance(s, sdt, bounds) then
         s.squash = SQUASH_T
         if s.bounces == 1 then OnLand(st, s) elseif s.bounces == 2 and not s.coin then Tick(0) end

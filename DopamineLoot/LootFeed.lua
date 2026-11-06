@@ -275,12 +275,16 @@ end)
 -- good stuff stay) as if you'd looted them all at once
 ns.AddAction("rain", function(arg)
   local n = math.min(math.max(math.floor(tonumber(arg) or 8), 1), 60)
+  -- the best item is the rarity picked on the Loot rain page (setting testRainBest, default Epic):
+  -- one of your own of that rarity if you have one (always loaded), else a well-known one; the rest
+  -- are your own items of lower rarity only, so the best really is the best
+  local best = ns.settings.testRainBest or 4
   local own = {}
-  ForEachOwn(function(link) own[#own + 1] = link end)
-  local picks = {}
-  if n >= 4 then picks[#picks + 1] = TEST_IDS[3][math.random(#TEST_IDS[3])] end
-  if n >= 8 then picks[#picks + 1] = TEST_IDS[4][math.random(#TEST_IDS[4])] end
-  if n >= 12 then picks[#picks + 1] = TEST_IDS[5][math.random(#TEST_IDS[5])] end -- a Legendary
+  ForEachOwn(function(link)
+    local q = select(3, GetInfo(link))
+    if q and q < best then own[#own + 1] = link end
+  end)
+  local picks = { OwnItems(best) or TEST_IDS[best][math.random(#TEST_IDS[best])] }
   while #picks < n do picks[#picks + 1] = #own > 0 and own[math.random(#own)] or 2589 end -- Linen Cloth
   local items, waiting, started = {}, #picks, false
   local function Go()
@@ -296,7 +300,7 @@ ns.AddAction("rain", function(arg)
       if waiting == 0 then Go() end
     end)
   end
-  C_Timer.After(1.5, Go) -- don't wait forever for an item the client won't load
+  C_Timer.After(3, Go) -- don't wait forever for an item the client won't load
 end)
 
 -- Money amounts: "1g 20s 5c", "35s", or plain copper
