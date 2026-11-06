@@ -35,10 +35,10 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   `deprecated/asset-check/`. Rain looks: coin twinkles, ground line, dull grays (switches), the game's bag
   border on rain items; coin piles dropped ("a little jarring").
 - **Next up** (no rush). **Immediate list for the next session (the user, 2026-11-06):**
-  1. **A release skill:** update wow-addon-kit to 0.7.0+ (it has `wow-addon-release`; this machine still has
-     0.6.3: `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis --scope user`)
-     and use it for releases. 1.1.0 was released by hand (version, CHANGELOG, README, preflight, push, tag).
-  2. Check that the 1.1.0 upload reached CurseForge and the app shows it; then the user tests the release.
+  1. **Release skill: done** 2026-11-06: kit updated 0.6.3 → 0.7.1 (has `wow-addon-release`; active after a
+     Claude restart). Use it for the next release. 1.1.0 was released by hand.
+  2. **1.1.0 reached CurseForge** (workflow log: "Uploading DopamineLoot-v1.1.0-forever.zip (1.60.1 release)
+     ... Success!"). Left: the user updates in the CurseForge app (on release), fully restarts, tests 1.1.0.
   3. **Set aside in 1.1.0, to rework:** the **Achievement** style ("still awkward", not a coherent design; the
      ribbon version is in View.lua but unlisted) and **Reverse disintegration** (Rare arrival; the user: "the
      first iteration seemed better, add the fade" = commit 3a59dc9's specks + the model fade of 42791b9;
@@ -112,7 +112,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - Never delete a junction with `rm -rf`/`Remove-Item -Recurse` (follows into the repo); the switch script
   removes it as a link. Addon installs (CurseForge app) once dropped the junctions; check with `status`.
 - Kit updates: `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis
-  --scope user` (kit 0.7.0 has `wow-addon-release`; the installed cache may still be 0.6.3). Kit source:
+  --scope user`, run with the desktop app's CLI (not on PATH; newest
+  `%LOCALAPPDATA%\Claude-Data\claude_*\claude-code\<ver>\<hash>\claude.exe`). Installed: 0.7.1. Kit source:
   `C:\dev\wow-addons\wow-addon-kit`.
 - Game closed before editing `WTF`. Paths in CLAUDE.local.md. Baganator owns Alt+click.
 
