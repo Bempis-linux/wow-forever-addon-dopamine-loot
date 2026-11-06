@@ -111,6 +111,10 @@ render BagChord 1.6 0.36 "$(kalimba 0 1046.5 3 0)+$(kalimba 0.04 1318.5 3 1)+$(k
 #                      (small hauls open silently, big ones with a game sound)
 render ChestPop 0.6 0.4 "0.9*$(boom 0 85 170 16)+0.25*(random(0)*2-1)*exp(-70*t)+0.3*$(bell 0.05 1568 7)+0.2*$(bell 0.09 2093 8)" "lowpass=f=6000"
 
+#   Slam               the best item slamming down after its hang: a deep boom, a dusty crack and a bright
+#                      ring on top (played with its rarity sound)
+render Slam 1.4 0.55 "1.2*$(boom 0 34 150 3.2)+0.6*$(boom 0 60 240 10)+0.5*(random(0)*2-1)*exp(-32*t)+0.32*($(bell 0.02 1046.5 4.5)+$(bell 0.02 1567.98 4.5)+0.7*$(bell 0.05 2093 5))" "lowpass=f=8000,$ROOM"
+
 # Chest show: deprecated (set aside 2026-10-14), written to deprecated/chest-show/Media/, not the addon
 OUT=deprecated/chest-show/Media
 #   ChestRattle1..3    the chest knocking about as it shakes (short wooden knocks, three to vary)

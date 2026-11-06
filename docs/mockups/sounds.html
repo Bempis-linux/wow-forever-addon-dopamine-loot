@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rain Sound Picker</title>
+<style>
+  :root { --bg: #0b0b10; --panel: #15131a; --line: #3a3426; --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; --pick: #2c4a22; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 18px; color: var(--gold); margin: 4px 0 6px; font-weight: 600; }
+  h2 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin: 22px 0 8px; font-weight: 600; }
+  p.lead { color: var(--muted); margin: 0 0 8px; }
+  .row { display: grid; grid-template-columns: 26px 150px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px; margin-bottom: 6px; }
+  .row.picked { background: var(--pick); border-color: #5c8a3a; }
+  .row b { font-weight: 600; }
+  .row small { color: var(--muted); }
+  .now { color: var(--gold); font-size: 11px; margin-left: 6px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; font-size: 13px; }
+  button:hover { background: #3a3020; }
+  button.big { padding: 8px 16px; font-weight: 600; }
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .whole { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .whole label { color: var(--muted); }
+  #status { color: var(--muted); margin-top: 8px; min-height: 20px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 26px 1fr; } .row .desc, .row .btns { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Loot rain sounds: pick by ear</h1>
+  <p class="lead">Each candidate plays the way the rain does: up the scale, then a little phrase at the top. They're brought to the same loudness so only the sound differs. Tick the one you like in each list, then hear them together under <b>Whole rain</b>.</p>
+  <label>Volume <input type="range" id="vol" min="0" max="100" value="60"></label>
+
+  <h2>Items landing</h2>
+  <div id="land"></div>
+  <h2>Items going into the bag</h2>
+  <div id="bag"></div>
+
+  <h2>Whole rain</h2>
+  <div class="whole">
+    <button class="big" id="rain12">Play a rain (12 items)</button>
+    <button id="rain30">A big one (30 items)</button>
+    <label><input type="checkbox" id="slam" checked> Best item's slam</label>
+  </div>
+  <div id="status"></div>
+</main>
+<script>
+'use strict';
+const LAND = [
+  ['LandNow', 'What ships now', 'Marimba-like bar with a little click at the start.', true],
+  ['LandSoft', 'Soft marimba', 'The same bar, rounder: no click, gentler attack, the bright overtone tamed.'],
+  ['LandBloop', 'Water drop', 'Very round; each note bends up into place, like a drop.'],
+  ['LandGlass', 'Glass bell', 'Clear and a little shimmery, rings a touch longer (an octave lower than the bag).'],
+  ['LandFelt', 'Felt piano', 'A felted piano key: soft attack, warm, no edges.'],
+];
+const BAG = [
+  ['BagNow', 'What ships now', 'Kalimba-like tine, bright overtone.', true],
+  ['BagMusicBox', 'Music box', 'High, tiny and sparkly.'],
+  ['BagChime', 'Wind chime', 'A warm bell with a slightly detuned twin.'],
+  ['BagHarp', 'Harp', 'A plucked string: round, with a little body.'],
+];
+const pick = { land: 'LandNow', bag: 'BagNow' };
+const $ = id => document.getElementById(id);
+const status = t => $('status').textContent = t;
+
+// the same walk as RainCore.Melody: up the scale, then a phrase over the top notes
+const PHRASE = [-4, -2, 0, -3, -1, -5, -2, 0];
+function melody(n, top) {
+  if (n <= top + 1) return n - 1;
+  return Math.max(0, top + PHRASE[(n - top - 2) % PHRASE.length]);
+}
+// the launch rhythm (RainCore.Interval with escalation): slow, then rattling faster
+function interval(i, n) {
+  const start = Math.min(0.17, 2.4 / n), t = n > 1 ? (i - 1) / (n - 1) : 1;
+  return start - start * 0.7 * (1 - (1 - t) * (1 - t));
+}
+let timers = [];
+function stopAll() { timers.forEach(clearTimeout); timers = []; }
+function play(src) {
+  const a = new Audio(src); a.volume = $('vol').value / 100;
+  a.play().catch(() => status('The browser blocked sound: click any button once more.'));
+}
+// the sounds: embedded in sounds-embedded.html (the browser pane can't load files beside a page), else from sounds/
+const src = key => window.SOUNDS ? window.SOUNDS[key] : (key === 'Slam' ? '../../DopamineLoot/Media/Slam.ogg' : `sounds/${key}.ogg`);
+const note = (name, i) => play(src(name + String(i).padStart(2, '0')));
+function at(sec, fn) { timers.push(setTimeout(fn, sec * 1000)); }
+
+// a run of n notes of one candidate, at the landing or the gathering rhythm
+function run(name, n, kind, t0 = 0) {
+  let t = t0;
+  for (let i = 1; i <= n; i++) {
+    at(t, () => note(name, melody(i, 11)));
+    t += kind === 'land' ? interval(i, n) + 0.12 : Math.min(0.06, 1.6 / n) + 0.0;
+  }
+  return t;
+}
+function row(list, kind) {
+  const box = $(kind);
+  for (const [name, label, desc, now] of list) {
+    const r = document.createElement('div');
+    r.className = 'row' + (pick[kind] === name ? ' picked' : '');
+    r.innerHTML = `<input type="radio" name="${kind}" ${pick[kind] === name ? 'checked' : ''}>
+      <div><b>${label}</b>${now ? '<span class="now">now</span>' : ''}</div>
+      <small class="desc">${desc}</small>
+      <div class="btns"><button data-a="one">One note</button><button data-a="8">Run of 8</button><button data-a="24">Run of 24</button><button data-a="chord">Chord</button></div>`;
+    r.querySelector('input').onchange = () => {
+      pick[kind] = name;
+      box.querySelectorAll('.row').forEach(x => x.classList.remove('picked'));
+      r.classList.add('picked');
+      status(`Picked for ${kind === 'land' ? 'landing' : 'the bag'}: ${label}.`);
+    };
+    r.querySelectorAll('button').forEach(b => b.onclick = () => {
+      stopAll();
+      const a = b.dataset.a;
+      if (a === 'one') note(name, 5);
+      else if (a === 'chord') play(src(name + 'Chord'));
+      else run(name, +a, kind);
+      status(`${label}: ${b.textContent.toLowerCase()}.`);
+    });
+    box.appendChild(r);
+  }
+}
+row(LAND, 'land'); row(BAG, 'bag');
+
+// a whole rain with the picked pair: everything lands, the best slams, it all goes into the bag, the chord
+function rain(n) {
+  stopAll();
+  let t = run(pick.land, n - 1, 'land');
+  if ($('slam').checked) { t += 0.55 + 0.45; at(t, () => play(src('Slam'))); }
+  t += 0.7 + 0.35;
+  const end = run(pick.bag, n - 1, 'bag', t);
+  at(end + 0.42, () => play(src(pick.bag + 'Chord')));
+  status(`A rain of ${n}: ${LAND.find(x => x[0] === pick.land)[1]} landing, ${BAG.find(x => x[0] === pick.bag)[1]} into the bag.`);
+}
+$('rain12').onclick = () => rain(12);
+$('rain30').onclick = () => rain(30);
+</script>
+</body>
+</html>

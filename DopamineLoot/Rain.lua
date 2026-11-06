@@ -104,6 +104,10 @@ local function Layer()
   -- the wind-up (setting Windup): a glow swelling where the loot comes out, a short column of light
   layer.windGlow = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
   layer.windCol = Tex(layer, "BORDER", MEDIA .. "Pillar", "ADD")
+  -- shockwaves rise from the ground line as half circles: drawn in a frame clipped to above it
+  layer.domeClip = CreateFrame("Frame", nil, layer)
+  if layer.domeClip.SetClipsChildren then layer.domeClip:SetClipsChildren(true) end
+  layer.domeClip:SetFrameLevel(layer:GetFrameLevel() + 3) -- behind the sprites
   -- the ground line (setting Ground), behind the sprites: a soft glow, the line, a sliding shimmer
   layer.groundGlow = Tex(layer, "BACKGROUND", MEDIA .. "Glow", "ADD")
   layer.groundLine = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
@@ -189,27 +193,33 @@ local function Spark(x, y, r, g, b, n, speed, o)
       grav = o.grav or 500, drag = o.drag or 3 }
   end
 end
--- a ring that ripples out to radius; o.flat squashes it (0.3: lying on the ground, 1: round)
+-- a ring that ripples out to radius; o.flat squashes it (1: round); o.dome draws it in the dome
+-- clip (only above the ground line shows: a half circle rising from it), o.glow as a soft filled
+-- glow instead of a thin ring, o.a its brightness
+local domeRingPool, domeGlowPool = {}, {}
 local function Ring(x, y, r, g, b, radius, o)
   o = o or {}
-  local t = table.remove(ringPool) or Tex(layer, "BORDER", MEDIA .. "Wave", "ADD")
+  local pool = o.dome and (o.glow and domeGlowPool or domeRingPool) or ringPool
+  local t = table.remove(pool) or Tex(o.dome and layer.domeClip or layer, "BORDER", MEDIA .. (o.glow and "Glow" or "Wave"), "ADD")
   t:SetVertexColor(r, g, b, 1)
-  live[#live + 1] = { t = t, x = x, y = y, radius = radius, age = -(o.delay or 0), life = o.life or 0.45, flat = o.flat or 0.3 }
+  live[#live + 1] = { t = t, pool = pool, x = x, y = y, radius = radius, age = -(o.delay or 0), life = o.life or 0.45,
+    flat = o.flat or 1, a = o.a or 0.9 }
 end
--- a shockwave along the ground: a soft band of light shooting out left and right from x (the game
--- is seen from the side, so it stays flat on the ground line instead of a ring lying on it);
--- h: its height, a: its brightness. Each wave is a colored band with a thinner, whiter core.
+-- a shockwave as a half circle rising from the ground line at x: a bright ring and a soft glow inside it
+local function Dome(x, y, r, g, b, radius, o)
+  o = o or {}
+  Ring(x, y, r, g, b, radius, { dome = true, life = o.life, delay = o.delay, a = 1 })
+  Ring(x, y, r, g, b, radius * 0.85, { dome = true, glow = true, life = o.life, delay = o.delay, a = o.glowA or 0.4 })
+end
+-- a line of light along the ground: a soft band shooting out left and right from x (under the slam
+-- and the burst, with their half circles);
+-- h: its height, a: its brightness
 local streakPool = {}
 local function Streak(x, y, r, g, b, reach, h, a, o)
   o = o or {}
   local t = table.remove(streakPool) or Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
   t:SetVertexColor(r, g, b, 1)
   live[#live + 1] = { t = t, streak = true, x = x, y = y, radius = reach, h = h, a = a, age = -(o.delay or 0), life = o.life or 0.45 }
-end
-local function Wave(x, y, r, g, b, reach, k, o)
-  o = o or {}
-  Streak(x, y, r, g, b, reach, (o.h or 14) * k, 0.9, o)
-  Streak(x, y, math.min(1, r + 0.4), math.min(1, g + 0.4), math.min(1, b + 0.4), reach * 0.85, (o.h or 14) * 0.3 * k, 1, o)
 end
 local function UpdateLive(dt)
   for i = #live, 1, -1 do
@@ -218,7 +228,7 @@ local function UpdateLive(dt)
     if p.age >= p.life then
       p.t:Hide()
       table.remove(live, i)
-      local into = p.spark and sparkPool or p.streak and streakPool or ringPool
+      local into = p.pool or (p.spark and sparkPool or p.streak and streakPool or ringPool)
       into[#into + 1] = p.t
     elseif p.age >= 0 then
       local u = p.age / p.life
@@ -235,7 +245,7 @@ local function UpdateLive(dt)
       else
         local rad = 8 + (p.radius - 8) * (1 - (1 - u) ^ 3) -- fast, then slowing
         p.t:SetSize(rad * 2, rad * 2 * p.flat)
-        p.t:SetAlpha((1 - u) * 0.9)
+        p.t:SetAlpha((1 - u) * p.a)
       end
       p.t:ClearAllPoints()
       p.t:SetPoint("CENTER", layer, "BOTTOMLEFT", p.x, p.y)
@@ -247,7 +257,7 @@ local function ClearLive()
   for i = #live, 1, -1 do
     local p = live[i]
     p.t:Hide()
-    local into = p.spark and sparkPool or p.streak and streakPool or ringPool
+    local into = p.pool or (p.spark and sparkPool or p.streak and streakPool or ringPool)
     into[#into + 1] = p.t
     live[i] = nil
   end
@@ -434,7 +444,9 @@ local function OnLand(st, s)
     return
   end
   st.landed = st.landed + 1
-  if s.slam then st.shake = SHAKE_T * 1.4 -- the hang was its slow motion; the slam shakes harder
+  if s.slam then -- the hang was its slow motion; the slam shakes harder, with its own boom
+    st.shake = SHAKE_T * 1.4
+    ns:PlaySlamSound()
   elseif s.best and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end
   if s.q >= 3 then Tick(s.q)
   elseif s.dull then ns:PlayStepTick(1) -- the lowest tick, never climbing
@@ -444,13 +456,14 @@ local function OnLand(st, s)
   local x, y, k = s.x, bounds.floor, bounds.k
   local r, g, b = Light(s.r, s.g, s.b)
   if s.slam then -- a shockwave along the ground, a white flash in it and a fountain of sparks
-    Wave(x, y, r, g, b, 280 * k, k, { life = 0.65, h = 20 })
-    Wave(x, y, 1, 1, 1, 170 * k, k, { life = 0.35, h = 10 })
+    Dome(x, y, r, g, b, 170 * k, { life = 0.6, glowA = 0.5 })
+    Dome(x, y, 1, 1, 1, 105 * k, { life = 0.4, delay = 0.06, glowA = 0.25 })
+    Streak(x, y, r, g, b, 300 * k, 6 * k, 1, { life = 0.55 }) -- and a bright line along the ground
     Spark(x, y, r, g, b, 22, 520 * k, { up = true, grav = 900 * k, size = 7 })
     if On("Dust") then Puff(x, y) end
   elseif On("Landings") then -- by rarity: Rare+ a shockwave and sparks, the rest a little dust or none
     if s.q >= 3 then
-      Wave(x, y, r, g, b, (80 + 30 * (s.q - 3)) * k, k, { h = 10 + 2 * (s.q - 3) })
+      Dome(x, y, r, g, b, (42 + 14 * (s.q - 3)) * k, { life = 0.45 })
       Spark(x, y, r, g, b, 5 + 4 * (s.q - 3), 300 * k, { up = true, grav = 800 * k })
       if On("Dust") then Puff(x, y, 4) end
     elseif On("Dust") then
@@ -536,6 +549,13 @@ local function Update(_, dt)
   local k = H / 768 -- physics constants are tuned for a 768-unit-tall UI
   bounds.left, bounds.right, bounds.k = SIZE, W - SIZE, k
   bounds.floor = 2 + H * (ns.settings.rainFloor or 0) / 100
+  -- the dome clip: everything above the ground line, so shockwaves rise from it as half circles
+  if layer.domeFloor ~= bounds.floor then
+    layer.domeFloor = bounds.floor
+    layer.domeClip:ClearAllPoints()
+    layer.domeClip:SetPoint("BOTTOMLEFT", layer, "BOTTOMLEFT", 0, bounds.floor)
+    layer.domeClip:SetPoint("TOPRIGHT", layer, "TOPRIGHT", 0, 0)
+  end
 
   -- the wind-up (setting Windup): a glow swells where the loot comes out, then it bursts
   if st.wind and not st.burst then
@@ -547,7 +567,8 @@ local function Update(_, dt)
       st.burst = true
       layer.windGlow:Hide()
       layer.windCol:Hide()
-      Wave(x, y, r, g, b, 220 * k, k, { life = 0.5, h = 16 })
+      Dome(x, y, r, g, b, 120 * k, { life = 0.5 })
+      Streak(x, y, r, g, b, 200 * k, 5 * k, 0.9, { life = 0.45 })
       Spark(x, y, r, g, b, 14, 420 * k, { up = true, grav = 700 * k, size = 7 })
       if st.openSize == "big" then ns:PlayBurstSound() elseif st.openSize == "medium" then ns:PlayChestPop() end
     else

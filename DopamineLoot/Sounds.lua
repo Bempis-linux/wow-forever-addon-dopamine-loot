@@ -118,6 +118,9 @@ function ns:PlayMergeSound(metal, k) PlaySet(metal == "gold" and "MergeGold" or 
 function ns:PlayChestPop() -- a medium haul's burst: a soft pop (big hauls get a game sound)
   if not self.settings.noSound then PlaySoundFile(MEDIA .. "ChestPop.ogg", Channel()) end
 end
+function ns:PlaySlamSound() -- the best item slamming down after its hang
+  if not self.settings.noSound then PlaySoundFile(MEDIA .. "Slam.ogg", Channel()) end
+end
 function ns:PlayGatherSound()
   if not self.settings.noSound then PlaySoundFile(MEDIA .. "Gather.ogg", Channel()) end
 end
