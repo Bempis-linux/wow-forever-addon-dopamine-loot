@@ -17,6 +17,9 @@
 - **Popups and the rain filter separately**: "Show popups for" (Popups page) now only affects popups; the new
   "Rain includes" (Loot rain page, default everything) decides what rains, so gray and white loot rains
   again. Turning popups off no longer stops the rain. The 3D "Item size" slider now grows to the right.
+- **Money tally**: the rain's money total and item count sit right above your bag and count up as things go
+  in, popping with each coin as a glint zips into it; at the end the total punches up and a shimmer runs
+  across it, with a gold glow from 1 gold and a burst of sparks from 10 gold.
 - **Calm when repeated**: a few rains with nothing Rare or better within two minutes get quicker and use fewer
   sounds (a switch under When). Rare and better always get the full show.
 - **Settings reworded**: every label and tooltip says plainly what it does; the Popups page labels show their

@@ -26,6 +26,7 @@ local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
 local GATHER_T, JOIN_T, FLASH_T = 0.65, 0.32, 0.4 -- (the gather: each item's flight into the bag)
 local WIND_T, HANG_T, SLAM_VY = 0.38, 0.45, 1500 -- wind-up before the burst; the best's hang; its drop speed
 local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, one step each
+local TALLY_HOLD = 1.6 -- seconds the tally holds its final total before the rain fades
 
 -- The effects, each a switch (setting "noRain" .. key; all on by default)
 ns.RAIN_FX = {
@@ -88,9 +89,32 @@ local function Layer()
   top = CreateFrame("Frame", nil, layer)
   top:SetAllPoints()
   top:SetFrameLevel(layer:GetFrameLevel() + 20)
-  layer.count = top:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
-  layer.money = top:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-  layer.money:SetPoint("TOP", layer.count, "BOTTOM", 0, -4)
+  -- the tally (picked in docs/mockups/money-counter.html): the money and "+N" items right above the
+  -- bag, counting as things go in; it pops on each one and ends with a punch, a shimmer across it,
+  -- a gold glow from 1 gold and a burst of sparks from 10 gold
+  local tally = CreateFrame("Frame", nil, top)
+  tally:SetSize(1, 1)
+  layer.tally = tally
+  layer.count = tally:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+  layer.count:SetPoint("BOTTOMRIGHT", tally, "BOTTOMRIGHT", 0, 0)
+  layer.money = tally:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+  layer.money:SetTextColor(1, 0.93, 0.72)
+  layer.money:SetPoint("BOTTOMRIGHT", layer.count, "BOTTOMLEFT", -8, 0)
+  layer.tallyGlow = tally:CreateTexture(nil, "BACKGROUND")
+  layer.tallyGlow:SetTexture(MEDIA .. "Glow")
+  layer.tallyGlow:SetBlendMode("ADD")
+  layer.tallyGlow:SetVertexColor(1, 0.8, 0.3)
+  layer.tallyGlow:SetPoint("CENTER", layer.money, "CENTER", 0, 0)
+  layer.tallyGlow:Hide()
+  layer.tallyClip = CreateFrame("Frame", nil, tally) -- the shimmer, clipped to the text
+  if layer.tallyClip.SetClipsChildren then layer.tallyClip:SetClipsChildren(true) end
+  layer.tallyClip:SetPoint("TOPLEFT", layer.money, "TOPLEFT", -4, 4)
+  layer.tallyClip:SetPoint("BOTTOMRIGHT", layer.count, "BOTTOMRIGHT", 4, -4)
+  layer.tallyShine = layer.tallyClip:CreateTexture(nil, "OVERLAY")
+  layer.tallyShine:SetTexture(MEDIA .. "Shine")
+  layer.tallyShine:SetBlendMode("ADD")
+  layer.tallyShine:SetVertexColor(1, 0.95, 0.75, 0.9)
+  layer.tallyShine:Hide()
   layer.pulse = top:CreateTexture(nil, "BACKGROUND")
   layer.pulse:SetTexture(MEDIA .. "Vignette")
   layer.pulse:SetAllPoints()
@@ -193,6 +217,12 @@ local function Spark(x, y, r, g, b, n, speed, o)
       grav = o.grav or 500, drag = o.drag or 3 }
   end
 end
+-- a spark that zips from (x0, y0) to (x1, y1) in a small hop (a coin's glint from the bag into the tally)
+local function Zip(x0, y0, x1, y1, r, g, b)
+  local t = table.remove(sparkPool) or Tex(top, "ARTWORK", MEDIA .. "Mote", "ADD")
+  t:SetVertexColor(r, g, b, 1)
+  live[#live + 1] = { t = t, spark = true, zip = true, x = x0, y = y0, x0 = x0, y0 = y0, x1 = x1, y1 = y1, age = 0, life = 0.25, size = 8 }
+end
 -- a ring that ripples out to radius; o.flat squashes it (1: round); o.dome draws it in the dome
 -- clip (only above the ground line shows: a half circle rising from it), o.glow as a soft filled
 -- glow instead of a thin ring, o.a its brightness
@@ -236,6 +266,11 @@ local function UpdateLive(dt)
         local rad = 10 + (p.radius - 10) * (1 - (1 - u) ^ 3)
         p.t:SetSize(rad * 2, p.h * (1 - 0.5 * u))
         p.t:SetAlpha((1 - u) * p.a)
+      elseif p.zip then
+        p.x = p.x0 + (p.x1 - p.x0) * u
+        p.y = p.y0 + (p.y1 - p.y0) * u + math.sin(math.pi * u) * 16
+        p.t:SetSize(p.size, p.size)
+        p.t:SetAlpha(1 - 0.3 * u)
       elseif p.spark then
         local d = math.exp(-p.drag * dt)
         p.vx, p.vy = p.vx * d, p.vy * d - p.grav * dt
@@ -313,6 +348,9 @@ local function Finish()
     layer.windCol:Hide()
     layer.count:SetAlpha(0)
     layer.money:SetAlpha(0)
+    layer.tallyGlow:Hide()
+    layer.tallyShine:Hide()
+    layer.tally:SetScale(1)
     layer.pulse:Hide()
     layer.bagGlow:Hide()
     layer.groundGlow:Hide()
@@ -521,8 +559,13 @@ local function Settle(st)
       s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.11, 2.8 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
       s.sx, s.sy = s.x, s.y
       st.toGather = st.toGather + 1
+      if s.coin then st.coinsToBag = st.coinsToBag + 1 end
     else
       s.leaving, s.leaveAt = "fade", st.age + 0.35
+      -- (Gather switched off during a rain that counts at the bag: it counts as it fades)
+      if st.countBag then
+        if s.coin then st.coinsToBag, st.coinsIn = st.coinsToBag + 1, st.coinsIn + 1 else st.itemsIn = st.itemsIn + 1 end
+      end
     end
   end
   -- nothing gathers into the bag: the rain resolves on its chord now
@@ -726,6 +769,7 @@ local function Update(_, dt)
         if s.leaving == "popup" then
           if not s.handed then
             s.handed, st.handedOff[s.item] = true, true
+            st.itemsIn = st.itemsIn + 1 -- it counts in the tally as it becomes a popup
             local item = s.item
             item.burstBest = st.bestQ
             ns:ShowLoot(item)
@@ -748,6 +792,13 @@ local function Update(_, dt)
             local r, g, b = Light(s.r, s.g, s.b)
             Ring(bx, by, r, g, b, 34 * k, { flat = 1, life = 0.3 })
             Spark(bx, by, r, g, b, 3, 140 * k, { up = true, grav = 400 * k })
+            -- the tally counts it; a coin's glint zips up from the bag into the money
+            if s.coin then
+              st.coinsIn = st.coinsIn + 1
+              Zip(bx, by + 6, bx - 40, by + 36, 1, 0.85, 0.4)
+            else
+              st.itemsIn = st.itemsIn + 1
+            end
             if On("Escalate") then ns:PlayBagNote(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
             -- the last one in: the rain resolves on a chord (not for calmer repeats)
             if st.gathered == st.toGather and st.calm < 2 and st.toGather >= 3 then ns:PlayRainChord() end
@@ -760,8 +811,20 @@ local function Update(_, dt)
       end
     end
     if not busy then
-      st.fadeOut = st.fadeOut + dt
-      if st.fadeOut >= FADE_T then return Finish() end
+      -- everything is in: the tally's final flourish, held a moment before the rain fades
+      local total = st.baseCopper + st.copper
+      if not st.flourishAt and (total > 0 or st.itemsIn + st.landed > 0) then
+        st.flourishAt, st.richTally = st.age, total >= 10000
+        if total >= 100000 then -- 10 gold and up: a burst of sparks from the counter
+          if not bx then bx, by = BagPoint() end
+          Spark(bx - 40, by + 40, 1, 0.82, 0.3, 30, 320 * k, { up = true, grav = 500 * k, size = 6 })
+          Spark(bx - 40, by + 40, 1, 1, 0.9, 10, 260 * k, { up = true, grav = 500 * k, size = 5 })
+        end
+      end
+      if not st.flourishAt or st.age - st.flourishAt >= (st.calm >= 2 and 0.8 or TALLY_HOLD) then
+        st.fadeOut = st.fadeOut + dt
+        if st.fadeOut >= FADE_T then return Finish() end
+      end
     end
   end
 
@@ -946,20 +1009,67 @@ local function Update(_, dt)
   elseif layer.bagGlow:IsShown() then
     layer.bagGlow:Hide()
   end
+  -- the tally, right above the bag: what has gone in so far (with Gather off: what has landed);
+  -- once everything is in (the flourish) it shows the full amount
   local textAlpha = st.fadeOut > 0 and math.max(0, 1 - st.fadeOut / FADE_T) or 1
-  layer.count:SetText(st.landed + st.extra > 0 and ("+%d"):format(st.landed + st.extra) or "")
-  layer.count:SetAlpha(textAlpha)
-  layer.count:ClearAllPoints()
-  layer.count:SetPoint("CENTER", layer, "BOTTOM", 0, H * 0.5)
-  if st.coins > 0 or st.baseCopper > 0 then
-    if st.coins > 0 then
-      local target = st.copper * st.coinsLanded / st.coins
-      st.shownCopper = st.shownCopper + (target - st.shownCopper) * math.min(1, dt * 6)
-      if st.coinsLanded == st.coins and st.copper - st.shownCopper < 1 then st.shownCopper = st.copper end
+  if not bx then bx, by = BagPoint() end
+  local items, coinFrac
+  if st.countBag then
+    items = st.itemsIn
+    coinFrac = st.coinsToBag > 0 and st.coinsIn / st.coinsToBag or (st.flourishAt and 1 or 0)
+  else
+    items = st.landed
+    coinFrac = st.flourishAt and 1 or (st.coins > 0 and st.coinsLanded / st.coins or 0)
+  end
+  st.shownCopper = math.floor(st.copper * math.min(1, coinFrac) + 0.5) -- (a rain joining this one carries it on)
+  local copperShown = st.baseCopper + st.shownCopper
+  local itemsShown = items > 0 and items + st.extra or 0
+  -- the text changes only when a number goes up, and then it pops
+  local key = copperShown * 1000 + itemsShown
+  if key ~= st.tallyKey then
+    if st.tallyKey then st.tallyPop = 1 end
+    st.tallyKey = key
+    layer.count:SetText(itemsShown > 0 and ("+%d"):format(itemsShown) or "")
+    layer.money:SetText(copperShown > 0 and MoneyText(copperShown) or "")
+    -- the shimmer's clip covers what's showing: the money and the count, or just the count
+    layer.tallyClip:ClearAllPoints()
+    layer.tallyClip:SetPoint("TOPLEFT", copperShown > 0 and layer.money or layer.count, "TOPLEFT", -4, 4)
+    layer.tallyClip:SetPoint("BOTTOMRIGHT", layer.count, "BOTTOMRIGHT", 4, -4)
+    if copperShown > 0 and itemsShown == 0 then
+      layer.tallyClip:SetPoint("BOTTOMRIGHT", layer.money, "BOTTOMRIGHT", 4, -4)
     end
-    layer.money:SetText((st.coinsLanded > 0 or st.baseCopper > 0)
-      and MoneyText(st.baseCopper + math.floor(st.shownCopper + 0.5)) or "")
-    layer.money:SetAlpha(textAlpha)
+  end
+  layer.count:SetAlpha(textAlpha)
+  layer.money:SetAlpha(textAlpha)
+  st.tallyPop = math.max(0, st.tallyPop - dt * 6)
+  local scale = 1 + 0.28 * st.tallyPop * st.tallyPop
+  -- the final flourish: a punch, a shimmer across it, a gold glow from 1 gold
+  local f = st.flourishAt and st.age - st.flourishAt
+  if f and f < 0.45 then scale = scale + 0.4 * math.sin(math.pi * f / 0.45) end
+  local su = f and (f - 0.1) / 0.6
+  if su and su >= 0 and su < 1 then
+    local cw, ch = layer.tallyClip:GetWidth(), layer.tallyClip:GetHeight()
+    layer.tallyShine:SetSize(40, ch * 2.5)
+    layer.tallyShine:ClearAllPoints()
+    layer.tallyShine:SetPoint("CENTER", layer.tallyClip, "LEFT", -20 + (cw + 40) * su, 0)
+    layer.tallyShine:Show()
+  elseif layer.tallyShine:IsShown() then
+    layer.tallyShine:Hide()
+  end
+  if f and st.richTally then
+    if not layer.tallyGlow:IsShown() then layer.tallyGlow:SetSize(layer.money:GetStringWidth() + 90, 64) end
+    layer.tallyGlow:SetAlpha(math.min(1, f / 0.3) * 0.7 * textAlpha)
+    layer.tallyGlow:Show()
+  end
+  -- above the bag, kept on screen (a bar addon may move the bag button to an edge)
+  local tw = layer.money:GetStringWidth() + layer.count:GetStringWidth() + 16
+  local tx = math.min(math.max(bx + 24, tw * scale + 12), W - 8)
+  local ty = math.min(by + 26, H - 40 * scale)
+  if scale ~= st.tallyScale or tx ~= st.tallyX or ty ~= st.tallyY then
+    st.tallyScale, st.tallyX, st.tallyY = scale, tx, ty
+    layer.tally:SetScale(scale)
+    layer.tally:ClearAllPoints()
+    layer.tally:SetPoint("BOTTOMRIGHT", layer, "BOTTOMLEFT", tx / scale, ty / scale)
   end
 end
 
@@ -1024,6 +1134,7 @@ function ns:Rain(items, copper, test)
     hold = 0, fadeOut = 0, gathered = 0, bagBump = 0, stopT = 0, shake = 0,
     merges = merges, mergesDone = 0, flashes = {}, coinsOut = 0, itemsOut = 0, bestQ = bestQ,
     calm = calm, wind = wind, burst = false,
+    coinsIn = 0, itemsIn = 0, coinsToBag = 0, tallyPop = 0, countBag = On("Gather"),
   }
   if wind then state.nextLaunch = WIND_T end -- the loot comes out with the burst
   layer.count:SetText("")
