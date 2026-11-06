@@ -20,10 +20,10 @@ local COIN = {
   copper = { file = "Interface\\MoneyFrame\\UI-CopperIcon", size = 19 },
 }
 local SIZE, MAX_SPRITES = 40, 40
-local FADE_T, SQUASH_T, SETTLE_HOLD = 0.6, 0.09, 0.7
+local FADE_T, SQUASH_T, SETTLE_HOLD = 0.6, 0.18, 0.7 -- (the squash: squashed on landing, a little stretch back, settled)
 local GHOSTS, GHOST_EVERY, DUST = 6, 0.035, 7
 local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
-local GATHER_T, JOIN_T, FLASH_T = 0.45, 0.32, 0.4
+local GATHER_T, JOIN_T, FLASH_T = 0.65, 0.32, 0.4 -- (the gather: each item's flight into the bag)
 local WIND_T, HANG_T, SLAM_VY = 0.38, 0.45, 1500 -- wind-up before the burst; the best's hang; its drop speed
 local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, one step each
 
@@ -518,7 +518,7 @@ local function Settle(st)
     if not s.coin and Core.Stays(s.item, st.stayQuality) then
       s.leaving, s.leaveAt, pd = "popup", st.age + pd, pd + 0.15
     elseif On("Gather") then
-      s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.06, 1.6 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
+      s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.11, 2.8 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
       s.sx, s.sy = s.x, s.y
       st.toGather = st.toGather + 1
     else
@@ -775,7 +775,11 @@ local function Update(_, dt)
     else
       local size = s.size * s.shrink
       local w, h = size, size
-      if s.squash > 0 then w, h = size * 1.3, size * 0.7 end
+      if s.squash > 0 then -- squashed flat as it hits, springing back a little tall, then settled
+        local p = 1 - s.squash / SQUASH_T
+        local k2 = math.cos(p * math.pi * 1.5) * (1 - p)
+        w, h = size * (1 + 0.35 * k2), size * (1 - 0.3 * k2)
+      end
       f:SetSize(w, h)
       f.edge:SetRotation(s.rot)
       f.icon:SetRotation(s.rot)

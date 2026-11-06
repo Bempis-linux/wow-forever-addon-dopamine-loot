@@ -22,6 +22,10 @@ local TITLE_FONT = (LOCALE == "ruRU" and "Fonts\\MORPHEUS_CYR.TTF")
   or ((LOCALE == "koKR" or LOCALE == "zhCN" or LOCALE == "zhTW") and nil)
   or "Fonts\\MORPHEUS.TTF"
 local CARD = 56
+-- The 3D model's frame is this much bigger than its stage, and the camera this much farther away,
+-- so items look the same size but long ones (Thunderfury) reach out past the popup instead of being
+-- cut off at the stage's edges; the text stays in front of it
+local MODEL_ROOM = 1.8
 local STAR = "Interface\\Cooldown\\star4" -- the game's four-point sparkle
 local RISE, SPARKS, GLINTS, EMBERS = 5, 22, 7, 6 -- beam's rising motes; burst sparks; star glints; embers
 local FLASH_T, WAVE_T, GLINT_T = 0.45, 0.9, 0.42
@@ -141,7 +145,7 @@ function ns.CreateView(f)
 
   f.stage = CreateFrame("Frame", nil, f)
   f.model = CreateFrame("PlayerModel", nil, f.stage)
-  f.model:SetAllPoints()
+  f.model:SetPoint("CENTER") -- sized in Layout: bigger than the stage, so long weapons are not cut off
   f.card = CreateFrame("Frame", nil, f.stage)
   f.card:SetSize(CARD, CARD)
   f.card:SetPoint("CENTER")
@@ -209,6 +213,7 @@ function ns.CreateView(f)
     local sx, sy, sw, sh = L.stage[1], L.stage[2], L.stage[3], L.stage[4]
     self.stage:ClearAllPoints()
     self.stage:SetSize(sw, sh)
+    self.model:SetSize(sw * MODEL_ROOM, sh * MODEL_ROOM) -- more room than its stage (see MODEL_ROOM)
     if L.text == "below" then
       self.stage:SetPoint("TOP", self, "TOP", sx, sy)
     else
@@ -471,7 +476,7 @@ function ns.CreateView(f)
   function f:Frame() -- framing settings, applied whenever the model (re)loads or settings change
     local m = self.model
     m:SetPosition(0, 0, 0)
-    if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom() * ((self.L and self.L.zoom) or 1)) end
+    if m.SetCamDistanceScale then m:SetCamDistanceScale(ns.ModelZoom() * ((self.L and self.L.zoom) or 1) * MODEL_ROOM) end
     if m.SetPitch then -- pitch tips the long axis up (roll spun it around its own length)
       local upright = self.item and UPRIGHT[self.item.equipLoc or ""]
       m:SetPitch(upright and math.rad(ns.WeaponTilt()) or 0)

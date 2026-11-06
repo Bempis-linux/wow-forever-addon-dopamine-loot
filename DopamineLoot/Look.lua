@@ -135,7 +135,7 @@ local function Create()
   Add("Size", 0.5, 1.6, 0.05, ns.PopupScale, function(v) ns.settings.popupScale = v end,
     "How big popups are on screen, from 0.5 to 1.6 (default 0.8).", "size")
   Pick("Legendary", {
-    { "on", "Legendary moment (default)", "The screen dims, a pillar of light drops onto the popup and it lands in slow motion. Never in combat." },
+    { "on", "Legendary moment (default)", "The screen dims, a comet streaks down from the top of the screen onto the popup and it lands in slow motion. Never in combat." },
     { "off", "Like the others", "A Legendary pops up like any other popup, with its shockwaves and embers." },
   }, function() return ns.settings.noLegendMoment and "off" or "on" end,
     function(v) ns.settings.noLegendMoment = v == "off" or nil end,

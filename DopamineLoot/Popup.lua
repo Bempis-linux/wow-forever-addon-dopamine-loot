@@ -11,7 +11,7 @@ local OUT_T, FAST_OUT_T, HOVER_MAX = 0.8, 0.25, 10
 -- the entrance: it punches in a bit big, overshoots a touch small and settles (a compact line less)
 local IMPACT_T, IMPACT, IMPACT_COMPACT = 0.32, 0.28, 0.1
 local function EaseOutBack(t) local c = 2.2; return 1 + (c + 1) * (t - 1) ^ 3 + c * (t - 1) ^ 2 end
--- the Legendary moment (setting noLegendMoment): the screen dims, a pillar of light drops onto the
+-- the Legendary moment (setting noLegendMoment): the screen dims, a comet falls onto the
 -- popup, which lands at MOMENT_HIT and plays in slow motion for SLOW_T
 local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local MOMENT_HIT, MOMENT_T, SLOW_T, SLOW = 0.55, 2.2, 0.75, 0.4
@@ -67,7 +67,7 @@ local function Create()
   function p:Leave(duration)
     if self.outAge then return end
     self.outAge, self.outFor, self.hover = 0, duration, false
-    if self.delay then self.outFor = 0.01 end -- a Legendary still waiting for its pillar just goes (and its moment ends)
+    if self.delay then self.outFor = 0.01 end -- a Legendary still waiting for its comet just goes (and its moment ends)
     self:EnableMouse(false)
     if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end
   end
@@ -75,7 +75,7 @@ local function Create()
 end
 
 -- The Legendary moment: a dim over the screen, under the popups (a strata below theirs), and a
--- pillar of light dropping from the top of the screen onto the popup
+-- comet falling from above the screen onto the popup
 local moment
 local LOWER = { HIGH = "MEDIUM", DIALOG = "HIGH" }
 local function StartMoment(p)
@@ -87,26 +87,41 @@ local function StartMoment(p)
     moment.dim:SetTexture("Interface\\Buttons\\WHITE8X8")
     moment.dim:SetVertexColor(0.02, 0.012, 0.04, 1)
     moment.dim:SetAllPoints()
-    moment.pillar = moment:CreateTexture(nil, "ARTWORK")
-    moment.core = moment:CreateTexture(nil, "ARTWORK", nil, 1)
-    for _, t in ipairs({ moment.pillar, moment.core }) do
-      t:SetTexture(MEDIA .. "Pillar")
+    -- the comet: on the popup's own strata, above everything there (the settings window too), so
+    -- nothing cuts it off: a fading trail, a glowing head with a white core and a turning star
+    local c = CreateFrame("Frame", nil, UIParent)
+    c:SetAllPoints(UIParent)
+    c:EnableMouse(false)
+    local function Tex(file, layer, sub, r, g, b)
+      local t = c:CreateTexture(nil, layer, nil, sub)
+      t:SetTexture(file)
       t:SetBlendMode("ADD")
+      t:SetVertexColor(r, g, b, 1)
+      return t
     end
-    moment.pillar:SetVertexColor(1, 0.72, 0.3, 1)
-    moment.core:SetVertexColor(1, 0.95, 0.8, 1)
+    c.trail = Tex(MEDIA .. "Pillar", "ARTWORK", 0, 1, 0.72, 0.3)
+    c.trailCore = Tex(MEDIA .. "Pillar", "ARTWORK", 1, 1, 0.95, 0.8)
+    c.head = Tex(MEDIA .. "Glow", "ARTWORK", 2, 1, 0.75, 0.35)
+    c.core = Tex(MEDIA .. "Glow", "ARTWORK", 3, 1, 1, 0.9)
+    c.star = Tex("Interface\\Cooldown\\star4", "ARTWORK", 4, 1, 0.95, 0.75)
+    c.motes = {}
+    for i = 1, 6 do c.motes[i] = Tex(MEDIA .. "Mote", "ARTWORK", 2, 1, 0.8, 0.45) end
+    moment.comet = c
   end
   moment:SetFrameStrata(LOWER[p:GetFrameStrata()] or "MEDIUM")
-  moment:SetFrameLevel(5000) -- over everything on its strata (bags, the quest log; the settings for a test)
+  moment:SetFrameLevel(5000) -- over everything on its strata (bags, the quest log)
+  moment.comet:SetFrameStrata(p:GetFrameStrata())
+  moment.comet:SetFrameLevel(5000)
   moment.p, moment.t = p, 0
   moment.dim:SetAlpha(0)
-  moment.pillar:Hide()
-  moment.core:Hide()
+  moment.comet:SetAlpha(0)
   moment:Show()
+  moment.comet:Show()
 end
 local function EndMoment()
-  if moment then moment.p = nil; moment:Hide() end
+  if moment then moment.p = nil; moment:Hide(); moment.comet:Hide() end
 end
+local COMET_FROM = 0.08 -- the comet sets off a moment after the dim starts and lands at MOMENT_HIT
 local function UpdateMoment(dt)
   local m = moment
   m.t = m.t + dt
@@ -114,22 +129,47 @@ local function UpdateMoment(dt)
   if t >= MOMENT_T or not m.p:IsShown() then return EndMoment() end
   -- the dim: in quickly, held while the popup lands, then out
   m.dim:SetAlpha(0.55 * (t < 0.25 and t / 0.25 or t < 1.5 and 1 or math.max(0, 1 - (t - 1.5) / 0.6)))
-  -- the pillar: its bright foot falls from the top onto the popup's item, then it narrows and fades
+  -- the comet falls from above the screen onto the popup's item, speeding up, its trail growing
+  -- with its speed; on landing its head bursts and the trail draws up and fades
+  local c = m.comet
   local x, y = m.p.stage:GetCenter()
   if not x then return end
-  local s = m.p.stage:GetEffectiveScale() / m:GetEffectiveScale()
+  local s = m.p.stage:GetEffectiveScale() / c:GetEffectiveScale()
   x, y = x * s, y * s
-  local H = m:GetHeight()
-  local u = math.min(1, t / MOMENT_HIT)
-  local foot = H - (H - y) * u * u
-  local fade = t < MOMENT_HIT and 1 or math.max(0, 1 - (t - MOMENT_HIT) / 1.4)
-  local w = 90 * (t < MOMENT_HIT and 1 or 0.45 + 0.55 * fade)
-  for i, tex in ipairs({ m.pillar, m.core }) do
+  local H = c:GetHeight()
+  local u = math.max(0, math.min(1, (t - COMET_FROM) / (MOMENT_HIT - COMET_FROM)))
+  local e = u ^ 2.2
+  local hy = (H + 60) - (H + 60 - y) * e -- the head's height
+  local after = t - MOMENT_HIT              -- seconds since it landed (< 0 while falling)
+  local fade = after < 0 and 1 or math.max(0, 1 - after / 0.4)
+  c:SetAlpha(u > 0 and 1 or 0)
+  local len = after < 0 and (80 + 420 * e) or (500 * fade)
+  c.trail:ClearAllPoints()
+  c.trail:SetPoint("BOTTOM", c, "BOTTOMLEFT", x, hy)
+  c.trail:SetSize(30, math.max(1, len))
+  c.trail:SetAlpha(0.85 * fade)
+  c.trailCore:ClearAllPoints()
+  c.trailCore:SetPoint("BOTTOM", c, "BOTTOMLEFT", x, hy)
+  c.trailCore:SetSize(10, math.max(1, len * 0.8))
+  c.trailCore:SetAlpha(fade)
+  -- the head: steady while it falls, a burst as it lands
+  local burst = after < 0 and 1 or 1 + 2.2 * math.min(1, after / 0.3)
+  c.head:SetSize(80 * burst, 80 * burst)
+  c.core:SetSize(30 * burst, 30 * burst)
+  c.star:SetSize(70 * burst, 70 * burst)
+  c.star:SetRotation(t * 3)
+  for _, tex in ipairs({ c.head, c.core, c.star }) do
     tex:ClearAllPoints()
-    tex:SetPoint("BOTTOM", m, "BOTTOMLEFT", x, foot)
-    tex:SetSize(i == 1 and w or w * 0.35, math.max(1, H - foot + 4))
-    tex:SetAlpha((i == 1 and 0.85 or 1) * fade)
-    if fade > 0 then tex:Show() else tex:Hide() end
+    tex:SetPoint("CENTER", c, "BOTTOMLEFT", x, hy)
+    tex:SetAlpha(fade)
+  end
+  -- sparks shed along the trail, drifting a little to the sides
+  for i, mo in ipairs(c.motes) do
+    local k = ((t * 2.5 + i / #c.motes) % 1)
+    mo:ClearAllPoints()
+    mo:SetPoint("CENTER", c, "BOTTOMLEFT", x + math.sin(i * 2.3 + t * 6) * 10 * k, hy + len * k * 0.9)
+    mo:SetSize(5, 5)
+    mo:SetAlpha((1 - k) * fade)
   end
 end
 
@@ -171,7 +211,7 @@ local function Update(_, dt)
   if moment and moment.p then UpdateMoment(dt) end
   for i = #shown, 1, -1 do
     local p = shown[i]
-    -- its own clock: stopped while a Legendary waits for its pillar, slowed as it lands
+    -- its own clock: stopped while a Legendary waits for its comet, slowed as it lands
     local pdt = dt
     if p.delay then
       p.delay = p.delay - dt
@@ -196,7 +236,7 @@ local function Update(_, dt)
       local big = p.compactIn and IMPACT_COMPACT or IMPACT
       pop = 1 + big - big * EaseOutBack(p.life / IMPACT_T)
     end
-    -- (the Mouse setting may change while it's up; a Legendary waiting for its pillar is not there yet)
+    -- (the Mouse setting may change while it's up; a Legendary waiting for its comet is not there yet)
     local wantMouse = not through and not p.outAge and not p.delay
     if p:IsMouseEnabled() ~= wantMouse then p:EnableMouse(wantMouse) end
     if through and not p.outAge and not p.delay then
