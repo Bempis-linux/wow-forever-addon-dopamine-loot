@@ -111,16 +111,44 @@ pouch_coin_soft() { # the liked pouch and coin, with the pouch a quiet brush (sl
 # name  timbre  base Hz  decay  seconds  steps  filters ({F} = the note's Hz x 2, for the noise ones)
 # steps: pent = a major pentatonic scale (12 notes over 2+ octaves); narrow = 12 small steps over 6
 # semitones (barely pitched, so a run doesn't sing)
+# Round 4 (the user: the soft pouch and coin is liked, but the coin overpowers the pouch; items
+# landing should be a soft thud and a dusty poof, the dust puff's sound, with Rare and Epic a little
+# more special but in tune with the gentle arpeggio, not random)
+# thud_poof START FREQ DECAY: a soft low body at the note (bending down into it) and a dusty poof
+thud_poof() {
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*(0.8*min(1,$u*300)*sin(2*PI*($f*$u-0.3*$f*0.012*exp(-$u/0.012)))*exp(-$d*$u)+0.32*min(1,$u*70)*(random(0)*2-1)*exp(-16*$u))"
+}
+# the same with more dust and less body
+thud_poof_dusty() {
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*(0.55*min(1,$u*300)*sin(2*PI*($f*$u-0.3*$f*0.012*exp(-$u/0.012)))*exp(-$d*$u)+0.5*min(1,$u*50)*(random(0)*2-1)*exp(-13*$u))"
+}
+# Rare: the thud and poof, and a soft note two octaves up on the same pitch (so it sits in the run)
+thud_rare() {
+  echo "$(thud_poof "$1" "$2" "$3")+0.3*$(soft_drop "$1" "$(awk "BEGIN{print $2 * 4}")" 11)"
+}
+# Epic: the same note and its fifth above, a touch longer
+thud_epic() {
+  echo "$(thud_poof "$1" "$2" "$3")+0.3*$(soft_drop "$1" "$(awk "BEGIN{print $2 * 4}")" 9)+0.18*$(soft_drop "$(awk "BEGIN{print $1 + 0.03}")" "$(awk "BEGIN{print $2 * 6}")" 9)"
+}
+# the liked soft pouch and coin, rebalanced: CG = the coin's level, PG = the pouch's
+pouch_coin_mix() {
+  local s=$1 f=$2 d=$3 cg=$4 pg=$5 u="(t-$1)"
+  echo "gte(t,$s)*$pg*(0.3*min(1,$u*40)*(random(0)*2-1)*exp(-$d*$u)+0.6*sin(2*PI*85*$u)*exp(-26*$u))+$cg*($(coin "$(awk "BEGIN{print $1 + 0.025}")" "$2"))"
+}
+bag_bal() { pouch_coin_mix "$1" "$2" "$3" 0.55 1.2; }  # the coin a step under the pouch
+bag_low() { pouch_coin_mix "$1" "$2" "$3" 0.38 1.3; }  # the coin just a glint in the pouch
+
 CANDIDATES="
-LandBloop land_bloop 392 12 0.4 pent $ROOM
-LandWoodDrop wood_drop 330 15 0.4 pent lowpass=f=5000,$ROOM
 LandDropSoft soft_drop 294 14 0.4 pent lowpass=f=2200,$ROOM
-LandDropDark soft_drop 220 13 0.45 pent lowpass=f=1500,$ROOM
-LandDropThud soft_drop_thud 262 15 0.4 pent lowpass=f=1800
-BagPouchCoin pouch_coin 450 26 0.35 narrow lowpass=f={F},highpass=f=120
+LandThud thud_poof 110 20 0.35 pent lowpass=f=2400
+LandThudDusty thud_poof_dusty 110 20 0.35 pent lowpass=f=2000
+LandThudRare thud_rare 110 20 0.45 pent lowpass=f=3000,$ROOM
+LandThudEpic thud_epic 110 20 0.55 pent lowpass=f=3500,$ROOM
 BagPouchCoinSoft pouch_coin_soft 450 30 0.4 narrow lowpass=f=6500,highpass=f=60
-BagCoin coin 450 0 0.35 narrow highpass=f=300
-BagCoinThud coin_thud 450 0 0.35 narrow lowpass=f=8000
+BagPouchCoinBal bag_bal 450 26 0.4 narrow lowpass=f=6000,highpass=f=60
+BagPouchCoinLow bag_low 450 24 0.4 narrow lowpass=f=5500,highpass=f=60
 "
 while read -r name timbre base decay secs steps filters; do
   [ -n "$name" ] || continue
