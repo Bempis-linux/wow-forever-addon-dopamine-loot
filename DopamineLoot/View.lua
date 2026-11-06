@@ -58,7 +58,7 @@ local LAYOUT = {
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
   splash = { w = 380, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 24 },
   aura = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 20 },
-  achievement = { w = 360, h = 140, stage = { -116, 0, 104, 130 }, text = "right", hit = { 0, 26, 30, 30 }, zoom = 1, font = 18 },
+  achievement = { w = 360, h = 140, stage = { -116, 0, 104, 130 }, text = "right", hit = { 0, 26, 30, 30 }, zoom = 1.9, font = 18 }, -- (zoom: the camera farther back, so the item fits in its medallion)
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
@@ -147,7 +147,7 @@ function ns.CreateView(f)
   -- Splash: the slanted banner (and a crossing one for Epic, gold trim for Legendary), its edge lines,
   -- an info tab, speed lines and the rarity stamp (picked in docs/mockups/popup-designs.html)
   f.splashBand = Tex(f, "BORDER", MEDIA .. "SplashBand", nil, 1)
-  f.splashBand2 = Tex(f, "BORDER", MEDIA .. "SplashBand", "ADD", 2)
+  f.splashBand2 = Tex(f, "BORDER", MEDIA .. "SplashBand", nil, 2) -- (solid, not additive: over the main band it must not blow out to white)
   f.splashEdge = Tex(f, "BORDER", MEDIA .. "SplashEdge", "ADD", 3)
   f.splashTrim = Tex(f, "BORDER", MEDIA .. "SplashEdge", "ADD", 4)
   f.tabBack = Tex(f, "BORDER", WHITE, nil, 5)
@@ -304,7 +304,7 @@ function ns.CreateView(f)
       self.splashBand:SetPoint("LEFT", self.stage, "BOTTOM", -SPLASH_W / 2, -26)
       self.splashEdge:SetPoint("LEFT", self.stage, "BOTTOM", -SPLASH_W / 2, -26)
       self.splashTrim:SetPoint("LEFT", self.stage, "BOTTOM", -SPLASH_W / 2 - 6, -26)
-      self.splashBand2:SetPoint("RIGHT", self.stage, "BOTTOM", SPLASH_W / 2 - 30, -24)
+      self.splashBand2:SetPoint("RIGHT", self.stage, "BOTTOM", SPLASH_W / 2 - 30, -30)
       self.name:SetPoint("CENTER", self.stage, "BOTTOM", 0, -24)
       self.name:SetWidth(L.w - 30)
       self.name:SetJustifyH("CENTER")
@@ -427,7 +427,7 @@ function ns.CreateView(f)
     -- (Legendary); Tick reveals them
     self.splashBand:SetVertexColor(r * 0.85, g * 0.85, b * 0.85, 0.95)
     self.splashEdge:SetVertexColor(1, 1, 1, 0.9)
-    self.splashBand2:SetVertexColor(qr, qg, qb, 0.75)
+    self.splashBand2:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, 0.9) -- a darker stripe of the same color, crossing it
     self.splashTrim:SetVertexColor(1, 0.82, 0.4, 1)
     -- the rarity word (the stamp in Splash; the tag in Aura and Achievement)
     local word = (_G["ITEM_QUALITY" .. q .. "_DESC"] or ({ "Common", "Uncommon", "Rare", "Epic", "Legendary" })[q] or ""):upper()
@@ -695,7 +695,7 @@ function ns.CreateView(f)
     if q >= 4 then
       local e2 = 1 - (1 - Clamp01((fx - 0.2) / 0.28)) ^ 3
       if e2 <= 0 then self.splashBand2:Hide() else
-        self.splashBand2:SetSize(math.max(1, 340 * e2), h * 0.7)
+        self.splashBand2:SetSize(math.max(1, 340 * e2), h * 0.42)
         self.splashBand2:SetTexCoord(1 - e2, 1, 1, 0) -- flipped top to bottom: slants the other way
         self.splashBand2:Show()
       end
