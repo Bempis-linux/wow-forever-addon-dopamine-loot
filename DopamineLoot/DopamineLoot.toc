@@ -20,5 +20,6 @@ Rain.lua
 LootFeed.lua
 Settings.lua
 Look.lua
+Arrivals.lua
 RainFx.lua
 Pages.lua

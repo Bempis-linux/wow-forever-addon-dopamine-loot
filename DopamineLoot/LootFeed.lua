@@ -268,6 +268,27 @@ local function TestItem(q) -- an item of this quality: one of yours first, else 
 end
 
 -- Test popup: "epic", or "epic combat" for how it looks in a fight
+-- A full popup of this rarity for the Arrivals page's Test buttons: the first item that loads (yours
+-- of that rarity, else well-known ones), shown at that rarity
+ns.AddAction("arrivaltest", function(arg)
+  local q = math.min(math.max(tonumber(arg) or 4, 2), 5)
+  local cands = {}
+  local own = OwnItems(q)
+  if own then cands[1] = own end
+  for _, id in ipairs(TEST_IDS[q] or {}) do
+    if not GetInfoInstant or GetInfoInstant(id) then cands[#cands + 1] = id end
+  end
+  local done = false
+  for _, it in ipairs(cands) do
+    ns.ItemData(it, 1, "loot", function(d)
+      if done then return end
+      done = true
+      d.quality, d.test, d.push = q, true, true
+      ns:ShowLoot(d)
+    end)
+  end
+end)
+
 ns.AddAction("test", function(arg)
   local word, extra = arg:match("^(%S*)%s*(%S*)")
   local opts = extra == "combat" and { fight = true } or nil

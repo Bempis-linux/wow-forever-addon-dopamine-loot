@@ -50,6 +50,9 @@ local function Create()
   p:SetClampedToScreen(true)
   p:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   ns.CreateView(p)
+  p.isPopup = true -- (the settings preview uses the same view, without the arrival engine)
+  -- a short shake (an arrival's blast): Update offsets the popup while it lasts
+  function p:Shake(t) self.shakeT = math.max(self.shakeT or 0, t) end
 
   p:SetScript("OnEnter", function(self) self.hover = true; ShowTooltip(self) end)
   p:SetScript("OnLeave", function(self)
@@ -266,6 +269,11 @@ local function Update(_, dt)
     local hx = point:find("LEFT") and 1 or point:find("RIGHT") and -1 or 0
     local vy = point:find("TOP") and -1 or point:find("BOTTOM") and 1 or 0
     local ox, oy = -e * hx * p:GetWidth() / 2, -e * vy * p:GetHeight() / 2
+    if (p.shakeT or 0) > 0 then -- an arrival's blast shakes it for a moment
+      p.shakeT = p.shakeT - dt
+      local amp = 5 * math.max(0, p.shakeT) / 0.3
+      ox, oy = ox + (math.random() * 2 - 1) * amp, oy + (math.random() * 2 - 1) * amp
+    end
     p:SetPoint(point, UIParent, point, (bx + ox) / scale, (by - pos.dir * p.d + oy) / scale)
     p:SetAlpha(alpha)
     if pdt > 0 then p:Tick(pdt) end

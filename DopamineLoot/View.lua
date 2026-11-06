@@ -329,7 +329,7 @@ function ns.CreateView(f)
     -- this arrival: a burst of uneven sparks thrown mostly up and out, slowing as they go, and star
     -- glints popping around the item; more, bigger and farther the rarer it is
     self.tier = self.style ~= "compact" and Tier(q) or nil -- a compact popup has no arrival
-    self.arrived = false
+    self.arrived, self.bigArrival = false, nil
     local A = ARRIVAL[self.tier or ""]
     self.sparkCount, self.glintCount = A and A.sparks or 0, A and A.glints or 0
     if A then
@@ -592,9 +592,15 @@ function ns.CreateView(f)
   -- The arrival by rarity; fx = seconds since the popup finished fading in
   function f:Arrival(fx)
     local tier, sparks, glints = self.tier, self.sparks, self.glints
+    if self.bigArrival then return end -- the arrival engine (Arrivals.lua) is playing it
     if not self.arrived then -- first frame: show what this tier uses
       self.arrived = true
       ns:PlayArrivalSound(tier)
+      -- a real popup plays the arrival picked for its rarity (Arrivals page), unless it's "Simple"
+      if self.isPopup and ns.PlayArrival and ns.PlayArrival(self, self.q) then
+        self.bigArrival = true
+        return
+      end
       self.fxDone = false
       self.waves[1]:SetShown(tier == "legendary")
       self.waves[2]:SetShown(tier == "legendary")
