@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popup Designs Round 3</title>
+<title>Popup Designs Round 4</title>
 <style>
   :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
@@ -23,23 +23,21 @@
     background: radial-gradient(ellipse at 40% 70%, #3d4a36, #1b2219 60%, #0f130e); }
   canvas { position: absolute; inset: 0; pointer-events: none; }
   #back { z-index: 5; } #fx { z-index: 8; }
-  .char { position: absolute; left: 34%; top: 46%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .char { position: absolute; left: 30%; top: 46%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
   #edge { position: absolute; inset: 0; pointer-events: none; z-index: 4; opacity: 0; }
-  #stage { position: absolute; left: min(48%, calc(100% - 360px)); top: 13%; width: 340px; height: 420px; z-index: 6; }
-  .pop { position: absolute; left: 0; top: 0; width: 340px; display: flex; flex-direction: column; align-items: center; }
+  #stage { position: absolute; left: min(46%, calc(100% - 380px)); top: 13%; width: 360px; height: 420px; z-index: 6; }
+  .pop { position: absolute; left: 0; top: 0; width: 360px; display: flex; flex-direction: column; align-items: center; transition: transform .5s cubic-bezier(.3,1.5,.5,1); }
   .pop.impact { animation: impact .34s cubic-bezier(.3,1.6,.5,1) both; }
   .pop.out { animation: fadeout .7s ease-in forwards !important; }
   .pop.shake { animation: shake .25s; }
-  .pop.beat { animation: beat .7s; }
   @keyframes impact { 0% { transform: scale(1.28); opacity: 0 } 12% { opacity: 1 } 60% { transform: scale(.96) } 100% { transform: scale(1) } }
   @keyframes fadeout { to { opacity: 0; transform: translateY(-14px) } }
   @keyframes shake { 0%, 100% { transform: none } 25% { transform: translate(-4px, 2px) } 50% { transform: translate(4px, -2px) } 75% { transform: translate(-2px, -1px) } }
-  @keyframes beat { 0%, 100% { transform: none } 12% { transform: scale(1.12) } 26% { transform: scale(.98) } 40% { transform: scale(1.08) } 60% { transform: none } }
   @keyframes sway { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
   @keyframes spin { to { transform: rotate(360deg) } }
   @keyframes sweep { from { left: -40% } to { left: 120% } }
   @keyframes letterstamp { 0% { transform: scale(2.6); opacity: 0; filter: blur(2px) } 70% { transform: scale(.92); opacity: 1; filter: none } 100% { transform: none; opacity: 1 } }
-  @keyframes flick { 0%, 100% { transform: scaleY(1) translateY(0); opacity: .75 } 50% { transform: scaleY(1.25) translateY(-6px); opacity: 1 } }
+  @keyframes platein { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
   .item { width: 64px; height: 150px; position: relative; animation: sway 3.6s ease-in-out infinite; transform-origin: 50% 70%; z-index: 3; }
   .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
   .name { font: 600 21px Georgia, serif; letter-spacing: .5px; text-shadow: 0 2px 6px #000, 0 0 2px #000; white-space: nowrap; position: relative; display: inline-block; overflow: hidden; }
@@ -60,72 +58,49 @@
   .E .ribbon { margin-top: -14px; padding: 6px 28px 7px; background: linear-gradient(var(--cd), #120d08);
     clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); box-shadow: inset 0 1px 0 var(--c); display: flex; flex-direction: column; align-items: center; }
   .E .ribbon .name { font-size: 18px; }
-  /* J. Glass header: a dark frosted panel, a glowing rarity edge on top, the item breaking out above it */
-  .J .glass { margin-top: -46px; width: 270px; padding: 50px 0 12px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative;
-    background: linear-gradient(rgba(20,22,30,.78), rgba(8,8,12,.88)); box-shadow: 0 12px 30px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.07); backdrop-filter: blur(2px); }
-  .J .glass::before { content: ""; position: absolute; left: 10%; right: 10%; top: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--cl), transparent); box-shadow: 0 0 14px 2px var(--c); }
-  .J .glass::after { content: ""; position: absolute; inset: 0; border-radius: 10px; background: radial-gradient(ellipse at 50% 0, var(--c), transparent 60%); opacity: .28; pointer-events: none; }
-  .J .item { margin-top: 10px; }
-  .J .chip { font: 700 9px system-ui; letter-spacing: 2px; text-transform: uppercase; padding: 2px 8px; border-radius: 9px; color: #fff; background: var(--cd); box-shadow: inset 0 0 0 1px var(--c); margin-bottom: 2px; }
-  /* K. Ornate frame: a gilded fantasy frame with corner flourishes */
-  .K .frame { margin-top: 6px; width: 250px; padding: 12px 16px 12px; position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    background: radial-gradient(ellipse at 50% 30%, var(--cd), #0c0906 75%); border: 2px solid #b08a3a; box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #4a3a18, inset 0 0 0 4px #1a1209, inset 0 0 0 5px #6a5222, 0 10px 26px rgba(0,0,0,.65); }
-  .K .frame .corner { position: absolute; width: 22px; height: 22px; border: 2px solid #ffd36a; }
-  .K .tl { left: -6px; top: -6px; border-right: 0; border-bottom: 0; border-radius: 8px 0 0 0; } .K .tr { right: -6px; top: -6px; border-left: 0; border-bottom: 0; border-radius: 0 8px 0 0; }
-  .K .bl { left: -6px; bottom: -6px; border-right: 0; border-top: 0; border-radius: 0 0 0 8px; } .K .bc { right: -6px; bottom: -6px; border-left: 0; border-top: 0; border-radius: 0 0 8px 0; }
-  .K .gemtop { position: absolute; top: -9px; width: 14px; height: 14px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--c)); box-shadow: 0 0 10px var(--c), 0 0 0 2px #b08a3a; }
-  .K .item { height: 130px; width: 56px; }
-  /* L. Achievement plaque: a small medallion beside a name plate, side by side */
-  .L { flex-direction: row !important; align-items: center !important; top: 120px !important; }
-  .L .med { width: 104px; height: 104px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle, var(--cl) 0, var(--c) 30%, #140e07 70%); box-shadow: 0 0 0 3px #2a2014, 0 0 0 5px var(--c), 0 0 26px -4px var(--c); }
-  .L .med .item { height: 120px; width: 48px; }
-  .L .plate { margin-left: -24px; padding: 10px 22px 10px 36px; min-width: 190px; display: flex; flex-direction: column; gap: 3px;
-    background: linear-gradient(90deg, #16110a, rgba(22,17,10,.85) 70%, rgba(22,17,10,0)); border-top: 1px solid var(--c); border-bottom: 1px solid rgba(255,255,255,.06); }
+  /* L. Achievement, polished: the medallion with a beveled rim and a slow light, the plate wipes in */
+  .L { flex-direction: row !important; align-items: center !important; top: 120px !important; justify-content: center; }
+  .L .med { width: 110px; height: 110px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 40%, var(--cl) 0, var(--c) 32%, #140e07 72%); box-shadow: 0 0 0 2px #000, 0 0 0 4px #c9a24a, 0 0 0 5px #5a4418, 0 0 0 7px var(--c), 0 0 30px -2px var(--c); }
+  .L .med::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 80%, rgba(255,255,255,.35) 88%, transparent 96%); animation: spin 4s linear infinite; mix-blend-mode: screen; }
+  .L .med .item { height: 124px; width: 50px; }
+  .L .plate { margin-left: -28px; padding: 10px 26px 10px 40px; min-width: 210px; display: flex; flex-direction: column; gap: 3px; animation: platein .45s .15s cubic-bezier(.2,.9,.3,1) both;
+    background: linear-gradient(90deg, #1a140b, rgba(26,20,11,.9) 70%, rgba(26,20,11,0)); border-top: 1px solid var(--c); border-bottom: 1px solid rgba(255,255,255,.08); position: relative; }
+  .L .plate::before { content: ""; position: absolute; left: 30px; right: 30%; top: -1px; height: 1px; background: linear-gradient(90deg, var(--cl), transparent); box-shadow: 0 0 8px var(--c); }
   .L .name { font-size: 19px; }
-  /* M. Aura: no frame; the item wreathed in flickering flames of its color, the name with a glow */
-  .M .flames { position: absolute; top: 10px; width: 160px; height: 180px; }
-  .M .flames i { position: absolute; bottom: 20px; width: 34px; height: 90px; border-radius: 50% 50% 40% 40% / 70% 70% 30% 30%; background: radial-gradient(ellipse at 50% 80%, var(--cl), var(--c) 45%, transparent 72%);
-    filter: blur(3px); mix-blend-mode: screen; transform-origin: 50% 100%; animation: flick .7s ease-in-out infinite; }
-  .M .name { font-size: 24px; text-shadow: 0 0 10px var(--c), 0 0 20px var(--c), 0 2px 4px #000; }
-  .M .tag { margin-top: 10px; letter-spacing: 6px; }
+  /* M. Aura: the flames are drawn on the canvas behind (see Aura in the script) */
+  .M .name { font-size: 24px; text-shadow: 0 0 8px var(--c), 0 0 18px var(--c), 0 2px 4px #000; margin-top: 14px; }
+  .M .tag { margin-top: 4px; letter-spacing: 6px; }
 </style>
 </head>
 <body>
 <div id="panel">
-  <h1>Popup designs, round 3</h1>
-  <small>Four new styles unlike the last rounds, louder green and blue, and the purple sequence you asked for. Relic and Medallion stay to compare. R replays.</small>
+  <h1>Popup designs, round 4</h1>
+  <small>Your picks so far, polished, plus new options per rarity (the plan: a few to choose from per rarity in the settings). R replays.</small>
 
   <h2>Style</h2>
   <div id="designs">
-    <button data-d="R">Relic (now)</button><button data-d="E">Medallion</button><br>
-    <button data-d="J" class="on">J. Glass header</button><button data-d="K">K. Ornate frame</button><button data-d="L">L. Achievement</button><button data-d="M">M. Aura</button>
+    <button data-d="L" class="on">Achievement</button><button data-d="M">Aura</button><button data-d="E">Medallion</button><button data-d="R">Relic (now)</button>
   </div>
   <small id="ddesc"></small>
 
   <h2>Show</h2>
   <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button>
 
-  <h2>Uncommon (green): pick one or two</h2>
-  <label class="fx"><input type="radio" name="g" value="bloom" checked><b>Bloom <em>new</em></b><small>A flower of green light opens behind the item, then its petals break off and drift away.</small></label>
-  <label class="fx"><input type="radio" name="g" value="geyser"><b>Geyser <em>new</em></b><small>A fountain of green light shoots up through the item; sparks rain back down around it.</small></label>
-  <label class="fx"><input type="radio" name="g" value="heart"><b>Heartbeat <em>new</em></b><small>Thump-thump: the popup pulses twice, each beat throwing a green ring.</small></label>
-  <label class="fx"><input type="radio" name="g" value="fireflies"><b>Fireflies <em>new</em></b><small>A swarm of glowing fireflies bursts out and wanders around the item, blinking.</small></label>
+  <h2>Uncommon (green)</h2>
+  <label class="fx"><input type="radio" name="g" value="geyser" checked><b>Geyser+ <em>improved</em></b><small>A burst of mist at its base, three wobbling streams, droplets with little trails; the popup rides it up and settles.</small></label>
+  <label class="fx"><input type="radio" name="g" value="fireflies"><b>Fireflies+ <em>improved</em></b><small>They burst out with trails, gather into a ring around the item, then drift up and away, blinking.</small></label>
+  <label class="fx"><input type="radio" name="g" value="emerald"><b>Emerald flare <em>new</em></b><small>The flare idea in green, softer: a light streak and a star, with pollen drifting out.</small></label>
 
   <h2>Rare (blue)</h2>
-  <label class="fx"><input type="checkbox" id="b0" checked><b>Ring wave</b><small>The one you liked, with any of the ideas below.</small></label>
-  <label class="fx"><input type="radio" name="b" value="nova" checked><b>Frost nova <em>new</em></b><small>A ring of ice spikes bursts outward from the item and shatters into glitter.</small></label>
-  <label class="fx"><input type="radio" name="b" value="flare"><b>Sapphire flare <em>new</em></b><small>A big horizontal lens flare across the item with a bright star and small ghost flares.</small></label>
-  <label class="fx"><input type="radio" name="b" value="splash"><b>Crown splash <em>new</em></b><small>Droplets arc up in a crown around the item and fall back, catching the light.</small></label>
-  <label class="fx"><input type="radio" name="b" value="rune"><b>Rune stamp <em>new</em></b><small>A glowing rune circle slams down behind the item, holds, then breaks into shards.</small></label>
+  <label class="fx"><input type="checkbox" id="b0" checked><b>Ring wave</b><small>With either option.</small></label>
+  <label class="fx"><input type="radio" name="b" value="flare" checked><b>Sapphire flare</b><small>Unchanged from round 3.</small></label>
+  <label class="fx"><input type="radio" name="b" value="starburst"><b>Starburst <em>new</em></b><small>Like a camera's star filter: long thin light streaks shoot out from the item, turning slowly, with glints at their tips.</small></label>
 
-  <h2>Epic (purple): the sequence</h2>
-  <label class="fx"><input type="checkbox" id="p3" checked><b>Implosion, scatter, then galaxy</b><small>Motes rush in, blast out with a little shake, then the galaxy swirls up behind the item.</small></label>
-  <label class="fx"><input type="checkbox" id="p1" checked><b>Double wave</b><small>The two rings, with the blast.</small></label>
-  <label class="fx"><input type="checkbox" id="p2" checked><b>Sparkles</b><small>Star glints, with the blast.</small></label>
-  <label class="fx"><input type="checkbox" id="p5" checked><b>Letter stamp</b><small>The name's letters slam in.</small></label>
-
-  <small style="margin-top:10px">All of it is buildable in game: rings, petals, spikes, runes and sparks are square textures (they can turn), flares and glass are stretched glows, flames are stretched glows that flicker, letters are their own text.</small>
+  <h2>Epic (purple)</h2>
+  <label class="fx"><input type="radio" name="p" value="implode" checked><b>Implosion, scatter, galaxy</b><small>What you have now.</small></label>
+  <label class="fx"><input type="radio" name="p" value="eclipse"><b>Eclipse <em>new</em></b><small>A dark disc slides in front of a purple corona; it flares across the screen, then bursts into sparkles and rings.</small></label>
+  <label class="fx"><input type="checkbox" id="p5" checked><b>Letter stamp</b><small>The name's letters slam in (with either).</small></label>
 </div>
 <div id="screen">
   <div class="char"></div>
@@ -142,16 +117,13 @@ const Q = { 2: ['#1eff00', '#9dff8a', '#0b3a05', 'Uncommon'], 3: ['#3a8cff', '#9
 const NAMECOLOR = { 2: '#1eff00', 3: '#5aa8ff', 4: '#b75cff' };
 const ITEM = { name: 'Arcanite Reaper', type: 'Two-Hand Axe', ilvl: 63 };
 const DESC = {
-  R: 'Relic as it is in game now.',
+  L: 'Achievement, polished: a beveled gold-rimmed medallion with a slow light sweeping its rim, the name plate wiping in from it with a bright top edge.',
+  M: 'Aura, rebuilt: real flame tongues of the item\'s color with a hot white core, flickering at their own pace, and embers rising from them. The name glows.',
   E: 'Medallion from round 1.',
-  J: 'Glass header: a dark frosted panel with a glowing edge in the item\'s color, a soft color wash from the top, the item breaking out above it and a rarity chip. Modern and clean.',
-  K: 'Ornate frame: a gilded fantasy frame with corner flourishes and a gem on top, the item and its name inside. Classic, "this belongs in a museum".',
-  L: 'Achievement: a small medallion with the item beside a name plate that fades out to the right, like an achievement toast. Compact and rich.',
-  M: 'Aura: no frame at all. The item wreathed in flickering flames of its color, the name glowing, the rarity word spread wide.',
+  R: 'Relic as it is in game now.',
 };
-let design = 'J', last = 3;
-const pickG = () => document.querySelector('input[name=g]:checked').value;
-const pickB = () => document.querySelector('input[name=b]:checked').value;
+let design = 'L', last = 2, aura = null;
+const pick = n => document.querySelector(`input[name=${n}]:checked`).value;
 
 function axe(c) {
   return `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#5a4a3a"/><stop offset=".5" stop-color="#8a7358"/><stop offset="1" stop-color="#4a3c2e"/></linearGradient>
@@ -173,17 +145,12 @@ function build(q) {
   switch (design) {
     case 'R': return `<div class="pop R" style="${vars}"><div class="glow"></div>${item}<div class="plate">${nameHTML(q)}<div class="rule"></div>${info()}</div></div>`;
     case 'E': return `<div class="pop E" style="${vars}"><div class="medal">${item}</div><div class="ribbon">${nameHTML(q)}${info()}</div></div>`;
-    case 'J': return `<div class="pop J" style="${vars}">${item}<div class="glass"><div class="chip">${Q[q][3]}</div>${nameHTML(q)}${info()}</div></div>`;
-    case 'K': return `<div class="pop K" style="${vars}"><div class="frame"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner bc"></i><i class="gemtop"></i>${item}${tag(q)}${nameHTML(q)}${info()}</div></div>`;
     case 'L': return `<div class="pop L" style="${vars}"><div class="med">${item}</div><div class="plate">${tag(q)}${nameHTML(q)}${info()}</div></div>`;
-    case 'M': {
-      const fl = [-46, -22, 0, 22, 46].map((x, i) => `<i style="left:${63 + x}px;height:${[70, 100, 120, 100, 70][i]}px;animation-delay:${i * -.17}s;animation-duration:${.55 + i * .07}s"></i>`).join('');
-      return `<div class="pop M" style="${vars}"><div class="flames">${fl}</div>${item}${tag(q)}${nameHTML(q)}${info()}</div>`;
-    }
+    case 'M': return `<div class="pop M" style="${vars}">${item}${nameHTML(q)}${tag(q)}${info()}</div>`;
   }
 }
 
-// ---------------------------------------------------------------- particles
+// ---------------------------------------------------------------- canvas
 const cv = $('fx'), ctx = cv.getContext('2d'), bv = $('back'), bctx = bv.getContext('2d');
 let W, H, parts = [], rings = [], shards = [], galaxy = null, implode = null, special = [];
 function resize() {
@@ -192,58 +159,76 @@ function resize() {
 }
 addEventListener('resize', resize); resize();
 const R = (a, b) => a + Math.random() * (b - a);
-function center() {
+function center(f = .32) {
   const sc = $('screen').getBoundingClientRect(), it = $('stage').querySelector('.item');
   if (!it) return [W / 2, H / 3];
   const r = it.getBoundingClientRect();
-  return [r.left - sc.left + r.width / 2, r.top - sc.top + r.height * 0.32];
+  return [r.left - sc.left + r.width / 2, r.top - sc.top + r.height * f];
 }
 function burst(x, y, c, n, speed, o = {}) {
   for (let i = 0; i < n; i++) {
     const a = o.up ? -Math.PI / 2 + R(-(o.fan || 1.4), o.fan || 1.4) : R(0, Math.PI * 2), v = R(.45, 1) * speed;
     parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: -R(0, o.delay || 0), life: R(.5, .9) * (o.life || 1), c: o.colors ? o.colors[i % o.colors.length] : c,
-      s: R(1.6, 3.2) * (o.size || 1), g: o.g ?? 160, drag: o.drag ?? 2.6, kind: o.kind || 'dot', ph: R(0, 6) });
+      s: R(1.6, 3.2) * (o.size || 1), g: o.g ?? 160, drag: o.drag ?? 2.6, kind: o.kind || 'dot', ph: R(0, 6), trail: o.trail ? [] : null });
   }
 }
-function glints(x, y, n, spread) { for (let i = 0; i < n; i++) parts.push({ x: x + R(-spread, spread), y: y + R(-spread * .8, spread * .9), vx: 0, vy: 0, age: -i * .075, life: .45, c: '#fff', s: R(9, 16), g: 0, drag: 0, kind: 'star' }); }
-function ring(x, y, c, r1, delay = 0, life = .6, w = 3, g = ctx) { rings.push({ x, y, c, r1, age: -delay, life, w, g }); }
+function glints(x, y, n, spread, delay = 0) { for (let i = 0; i < n; i++) parts.push({ x: x + R(-spread, spread), y: y + R(-spread * .8, spread * .9), vx: 0, vy: 0, age: -delay - i * .075, life: .45, c: '#fff', s: R(9, 16), g: 0, drag: 0, kind: 'star' }); }
+function ring(x, y, c, r1, delay = 0, life = .6, w = 3) { rings.push({ x, y, c, r1, age: -delay, life, w }); }
 function star(g, x, y, s, a, c) {
   g.save(); g.translate(x, y); g.globalAlpha = a; g.fillStyle = c; g.beginPath();
   for (let i = 0; i < 8; i++) { const r = i % 2 ? s * .16 : s, an = i * Math.PI / 4; g.lineTo(Math.cos(an) * r, Math.sin(an) * r); }
   g.fill(); g.restore();
 }
-function petal(g, x, y, ang, len, wid, a, c) {
-  g.save(); g.translate(x, y); g.rotate(ang); g.globalAlpha = a;
-  const gr = g.createLinearGradient(0, 0, 0, -len); gr.addColorStop(0, '#fff'); gr.addColorStop(.3, c); gr.addColorStop(1, 'transparent');
-  g.fillStyle = gr; g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(wid, -len * .5, 0, -len); g.quadraticCurveTo(-wid, -len * .5, 0, 0); g.fill(); g.restore();
+function streak(g, x, y, w, h, a, c) { // a horizontal light streak, bright in the middle
+  const gr = g.createLinearGradient(x - w / 2, 0, x + w / 2, 0); gr.addColorStop(0, 'transparent'); gr.addColorStop(.5, c); gr.addColorStop(1, 'transparent');
+  g.globalAlpha = a; g.fillStyle = gr; g.fillRect(x - w / 2, y - h / 2, w, h);
+}
+// the Aura's flames: tongues of the item's color, each at its own pace, a white-hot core, embers
+function drawAura(t) {
+  if (!aura || !$('stage').querySelector('.M')) return;
+  const [x, y] = center(.62), [c, cl] = Q[aura.q], g = bctx;
+  const fade = Math.min(1, t / .3);
+  for (let i = 0; i < 7; i++) {
+    const off = (i - 3) * 17, base = 1 - Math.abs(i - 3) / 4.5;
+    const h = (60 + 80 * base) * (0.75 + 0.3 * Math.sin(t * (4.5 + i * .8) + i * 1.7) + 0.12 * Math.sin(t * 13 + i * 2));
+    const sway = Math.sin(t * 2.6 + i * 1.3) * 7;
+    for (const [col, wid, al] of [[c, 14, .32], [cl, 8, .36], ['#fff', 3, .4 * base]]) {
+      const top = y - h * (col === '#fff' ? .5 : col === cl ? .78 : 1), bx = x + off;
+      // each tongue fades in from its base, is brightest a quarter of the way up and fades out at its tip
+      const gr = g.createLinearGradient(0, y + 12, 0, top); gr.addColorStop(0, 'transparent'); gr.addColorStop(.25, col); gr.addColorStop(1, 'transparent');
+      g.globalAlpha = al * fade; g.fillStyle = gr; g.beginPath();
+      g.moveTo(bx - wid, y + 12);
+      g.bezierCurveTo(bx - wid * 1.1, y - h * .3, bx + sway - wid * .3, top + h * .25, bx + sway * 1.6, top);
+      g.bezierCurveTo(bx + sway + wid * .3, top + h * .25, bx + wid * 1.1, y - h * .3, bx + wid, y + 12);
+      g.closePath(); g.fill();
+    }
+  }
+  const gr = g.createRadialGradient(x, y, 4, x, y, 80); gr.addColorStop(0, cl); gr.addColorStop(1, 'transparent');
+  g.globalAlpha = .45 * fade; g.fillStyle = gr; g.beginPath(); g.arc(x, y, 80, 0, 7); g.fill();
+  if (Math.random() < .35) parts.push({ x: x + R(-50, 50), y: y + R(-10, 10), vx: R(-15, 15), vy: R(-90, -50), age: 0, life: R(1, 1.8), c: Math.random() < .3 ? '#fff' : cl, s: R(1.2, 2.2), g: -20, drag: .5, kind: 'ember', ph: R(0, 6) });
 }
 let lastT = performance.now();
 function frame(now) {
   const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
   ctx.clearRect(0, 0, W, H); bctx.clearRect(0, 0, W, H);
   ctx.globalCompositeOperation = bctx.globalCompositeOperation = 'lighter';
-  for (const s of special) { s.t += dt; s.draw(s, dt); }
+  if (aura) { aura.t += dt; drawAura(aura.t); }
+  for (const s of special) { s.t += dt; if (s.t >= 0) s.draw(s, dt); }
   special = special.filter(s => s.t < s.life);
   if (galaxy) {
     galaxy.t += dt; const u = galaxy.t / 2.2;
     if (u >= 1) galaxy = null; else for (const s of galaxy.s) {
       s.a += dt * (2.6 / (s.r / 40 + .4)); const grow = Math.min(1, galaxy.t / .5);
-      const x = galaxy.x + Math.cos(s.a) * s.r * grow, y = galaxy.y + Math.sin(s.a) * s.r * .45 * grow;
-      bctx.globalAlpha = Math.min(1, galaxy.t * 3) * (1 - u) * .95; bctx.fillStyle = s.c; bctx.beginPath(); bctx.arc(x, y, s.z, 0, 7); bctx.fill();
+      bctx.globalAlpha = Math.min(1, galaxy.t * 3) * (1 - u) * .95; bctx.fillStyle = s.c; bctx.beginPath();
+      bctx.arc(galaxy.x + Math.cos(s.a) * s.r * grow, galaxy.y + Math.sin(s.a) * s.r * .45 * grow, s.z, 0, 7); bctx.fill();
     }
   }
   for (const r of rings) {
     r.age += dt; if (r.age < 0) continue;
     const u = r.age / r.life, rad = 10 + (r.r1 - 10) * (1 - Math.pow(1 - u, 3));
-    r.g.globalAlpha = (1 - u) * .9; r.g.strokeStyle = r.c; r.g.lineWidth = r.w * (1 - u * .6); r.g.beginPath(); r.g.arc(r.x, r.y, rad, 0, 7); r.g.stroke();
+    ctx.globalAlpha = (1 - u) * .9; ctx.strokeStyle = r.c; ctx.lineWidth = r.w * (1 - u * .6); ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, 7); ctx.stroke();
   }
   rings = rings.filter(r => r.age < r.life);
-  for (const s of shards) {
-    s.age += dt; const d = Math.exp(-2.2 * dt); s.vx *= d; s.vy = s.vy * d + (s.g ?? 260) * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.r += s.vr * dt;
-    const u = s.age / s.life; ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.r); ctx.globalAlpha = (1 - u) * (.6 + .4 * Math.abs(Math.sin(s.r * 2)));
-    ctx.fillStyle = s.c; ctx.beginPath(); ctx.moveTo(0, -s.z); ctx.lineTo(s.z * .4, s.z * .6); ctx.lineTo(-s.z * .4, s.z * .6); ctx.closePath(); ctx.fill(); ctx.restore();
-  }
-  shards = shards.filter(s => s.age < s.life);
   if (implode) {
     implode.t += dt; const u = Math.min(1, implode.t / .45), e = u * u * u;
     for (const m of implode.m) { ctx.globalAlpha = Math.min(1, implode.t * 4); ctx.fillStyle = implode.c; ctx.beginPath(); ctx.arc(m.x0 + (implode.x - m.x0) * e, m.y0 + (implode.y - m.y0) * e, 2.4 + 1.5 * e, 0, 7); ctx.fill(); }
@@ -251,128 +236,142 @@ function frame(now) {
   }
   for (const p of parts) {
     p.age += dt; if (p.age < 0) continue;
-    const d = Math.exp(-p.drag * dt); p.vx *= d; p.vy = p.vy * d + p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.home) { // fireflies: burst, then gather into a ring around the item, then rise away
+      const [hx, hy] = p.home, ph = p.age;
+      if (ph > .5 && ph < 1.4) { const an = p.ph + ph * 1.8, tx = hx + Math.cos(an) * 70, ty = hy + Math.sin(an) * 34; p.vx += (tx - p.x) * 14 * dt; p.vy += (ty - p.y) * 14 * dt; p.vx *= Math.exp(-4 * dt); p.vy *= Math.exp(-4 * dt); }
+      else if (ph >= 1.4) { p.vy -= 260 * dt; p.vx += R(-200, 200) * dt; }
+      else { p.vx *= Math.exp(-2.2 * dt); p.vy *= Math.exp(-2.2 * dt); }
+    } else { const d = Math.exp(-p.drag * dt); p.vx *= d; p.vy = p.vy * d + p.g * dt; }
+    if (p.kind === 'ember') p.vx += Math.sin(p.age * 4 + p.ph) * 30 * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.trail) { p.trail.unshift([p.x, p.y]); if (p.trail.length > 7) p.trail.pop(); }
     const u = p.age / p.life;
-    if (p.kind === 'star') star(ctx, p.x, p.y, p.s * Math.sin(Math.PI * u), .95, p.c);
-    else if (p.kind === 'fly') { // fireflies wander and blink
-      p.vx += R(-400, 400) * dt; p.vy += R(-400, 400) * dt;
-      ctx.globalAlpha = (1 - u) * (.35 + .65 * Math.max(0, Math.sin(p.age * 9 + p.ph))); ctx.fillStyle = p.c;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 7); ctx.fill(); ctx.globalAlpha *= .35; ctx.beginPath(); ctx.arc(p.x, p.y, p.s * 3, 0, 7); ctx.fill();
-    } else if (p.kind === 'petal') { petal(ctx, p.x, p.y, p.ph + p.age * 3, 14, 6, 1 - u, p.c); }
-    else { ctx.globalAlpha = (1 - u) * (.7 + .3 * Math.sin(p.age * 30)); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 7); ctx.fill(); }
+    if (p.kind === 'star') { star(ctx, p.x, p.y, p.s * Math.sin(Math.PI * u), .95, p.c); continue; }
+    const blink = p.kind === 'fly' ? .35 + .65 * Math.max(0, Math.sin(p.age * 8 + p.ph)) : 1;
+    const a = (p.kind === 'ember' ? Math.sin(Math.PI * u) : 1 - u) * blink;
+    if (p.trail) { ctx.strokeStyle = p.c; ctx.lineWidth = p.s; ctx.lineCap = 'round'; ctx.globalAlpha = a * .35; ctx.beginPath(); p.trail.forEach(([tx, ty], i) => i ? ctx.lineTo(tx, ty) : ctx.moveTo(tx, ty)); ctx.stroke(); }
+    ctx.globalAlpha = a; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 7); ctx.fill();
+    if (p.kind === 'fly') { ctx.globalAlpha = a * .3; ctx.beginPath(); ctx.arc(p.x, p.y, p.s * 3.2, 0, 7); ctx.fill(); }
   }
   parts = parts.filter(p => p.age < p.life);
   ctx.globalAlpha = bctx.globalAlpha = 1; ctx.globalCompositeOperation = bctx.globalCompositeOperation = 'source-over';
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-function shakePop() { const p = $('stage').firstElementChild; if (p) { p.classList.remove('shake', 'impact'); void p.offsetWidth; p.classList.add('shake'); } }
+const popEl = () => $('stage').firstElementChild;
+function shakePop() { const p = popEl(); if (p) { p.classList.remove('shake', 'impact'); void p.offsetWidth; p.classList.add('shake'); } }
 
 // ---------------------------------------------------------------- green
 function green(x, y, c, cl) {
-  const g = pickG();
-  if (g === 'bloom') {
-    special.push({ t: 0, life: 1.1, draw(s) { // 10 petals open behind the item, then break off
-      const u = Math.min(1, s.t / .4), len = 30 + 70 * (1 - Math.pow(1 - u, 3)), a = s.t < .6 ? 1 : Math.max(0, 1 - (s.t - .6) / .5);
-      for (let i = 0; i < 10; i++) petal(bctx, x, y, i / 10 * Math.PI * 2 + s.t * .6, len, 18, a * .9, i % 2 ? c : cl);
-      bctx.globalAlpha = a; const gr = bctx.createRadialGradient(x, y, 0, x, y, 40); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'transparent'); bctx.fillStyle = gr; bctx.beginPath(); bctx.arc(x, y, 40, 0, 7); bctx.fill();
+  const g = pick('g');
+  if (g === 'geyser') {
+    const p = popEl(); setTimeout(() => { p.style.transform = 'translateY(-14px)'; }, 30); setTimeout(() => { p.style.transform = ''; }, 420);
+    // mist at its base
+    for (let i = 0; i < 16; i++) parts.push({ x: x + R(-20, 20), y: y + 90, vx: R(-120, 120), vy: R(-40, 10), age: 0, life: R(.6, 1), c: cl, s: R(6, 11), g: -30, drag: 3, kind: 'mist' });
+    special.push({ t: 0, life: 1.1, draw(s) { // three wobbling streams around a white core
+      const u = Math.min(1, s.t / .22), a = s.t < .5 ? 1 : Math.max(0, 1 - (s.t - .5) / .6);
+      for (const [dx, w, col, al] of [[-12, 22, c, .5], [12, 22, c, .5], [0, 34, cl, .55], [0, 8, '#fff', .8]]) {
+        const top = y + 90 - 430 * u * (col === '#fff' ? .9 : 1);
+        const wob = Math.sin(s.t * 18 + dx) * 4;
+        const gr = bctx.createLinearGradient(0, y + 90, 0, top); gr.addColorStop(0, col); gr.addColorStop(.6, col); gr.addColorStop(1, 'transparent');
+        bctx.globalAlpha = a * al; bctx.fillStyle = gr; bctx.beginPath();
+        bctx.moveTo(x + dx - w / 2, y + 90); bctx.quadraticCurveTo(x + dx + wob - w / 3, (y + 90 + top) / 2, x + dx + wob * 2, top);
+        bctx.quadraticCurveTo(x + dx + wob + w / 3, (y + 90 + top) / 2, x + dx + w / 2, y + 90); bctx.fill();
+      }
     } });
-    setTimeout(() => { for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; parts.push({ x: x + Math.cos(a) * 70, y: y + Math.sin(a) * 70, vx: Math.cos(a) * R(40, 90), vy: Math.sin(a) * R(40, 90) - 30, age: 0, life: R(1, 1.6), c: i % 2 ? c : cl, s: 3, g: 60, drag: 1.5, kind: 'petal', ph: a }); } }, 550);
-    ring(x, y, cl, 120, .05, .6, 3);
-  } else if (g === 'geyser') {
-    special.push({ t: 0, life: 1.0, draw(s) { // a column of light shooting up through the item
-      const u = Math.min(1, s.t / .25), a = s.t < .45 ? 1 : Math.max(0, 1 - (s.t - .45) / .55), top = y + 90 - 420 * u, w = 46 * (1 - .4 * (1 - a));
-      const gr = bctx.createLinearGradient(0, y + 90, 0, top); gr.addColorStop(0, cl); gr.addColorStop(.5, c); gr.addColorStop(1, 'transparent');
-      bctx.globalAlpha = a * .85; bctx.fillStyle = gr; bctx.fillRect(x - w / 2, top, w, y + 90 - top);
-      bctx.globalAlpha = a; bctx.fillStyle = '#fff'; bctx.fillRect(x - 4, top + 20, 8, y + 70 - top);
-    } });
-    burst(x, y + 60, cl, 40, 620, { up: true, fan: .35, g: 900, drag: 1.2, life: 1.4, size: 1.2 });
-    burst(x, y + 80, '#fff', 12, 520, { up: true, fan: .25, g: 900, drag: 1.2, life: 1.2 });
-    ring(x, y + 80, cl, 110, 0, .5, 4);
-  } else if (g === 'heart') {
-    const p = $('stage').firstElementChild; p.classList.remove('impact'); void p.offsetWidth; p.classList.add('beat');
-    ring(x, y, cl, 130, .06, .55, 5); ring(x, y, cl, 170, .3, .65, 4);
-    burst(x, y, cl, 14, 260, { delay: .3, g: 80 }); glints(x, y, 3, 50);
+    burst(x, y + 70, cl, 36, 680, { up: true, fan: .3, g: 1000, drag: 1, life: 1.5, size: 1.1, trail: true });
+    burst(x, y + 80, '#fff', 12, 560, { up: true, fan: .22, g: 1000, drag: 1, life: 1.3, trail: true });
+    ring(x, y + 88, cl, 110, 0, .5, 4);
+  } else if (g === 'fireflies') {
+    for (let i = 0; i < 28; i++) { const a = R(0, 6.28), v = R(180, 320);
+      parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: -R(0, .1), life: R(2.4, 3), c: [cl, '#e8ff9a', c, '#fff6a0'][i % 4], s: R(1.6, 2.6), g: 0, drag: 0, kind: 'fly', ph: i / 28 * 6.28, home: [x, y + 20], trail: [] }); }
+    ring(x, y, cl, 100, 0, .5, 3); glints(x, y, 2, 30);
   } else {
-    burst(x, y, cl, 30, 300, { g: 0, drag: 1.4, life: 2.2, kind: 'fly', size: 1.1, colors: [cl, '#e8ff9a', c] });
-    ring(x, y, cl, 100, 0, .5, 3);
+    special.push({ t: 0, life: 1.2, draw(s) { // the flare in green, softer
+      const u = s.t / 1.2, a = u < .15 ? u / .15 : 1 - (u - .15) / .85, w = 420 * (0.6 + .4 * Math.min(1, s.t / .25));
+      streak(ctx, x, y, w, 4, a * .9, '#f4ffe8'); streak(ctx, x, y, w * .8, 22, a * .55, cl);
+      streak(ctx, x, y, w * .35, 60, a * .25, c);
+      star(ctx, x, y, 34 * a, a, '#fff');
+    } });
+    for (let i = 0; i < 26; i++) parts.push({ x: x + R(-20, 20), y: y + R(-10, 10), vx: R(-160, 160), vy: R(-60, 40), age: -R(0, .3), life: R(1.4, 2.2), c: i % 3 ? cl : '#fffbd0', s: R(1.2, 2.4), g: -15, drag: 1.4, kind: 'ember', ph: R(0, 6) });
+    ring(x, y, cl, 110, .05, .6, 2.5);
   }
 }
 // ---------------------------------------------------------------- blue
 function blue(x, y, c, cl) {
   if ($('b0').checked) ring(x, y, cl, 130, 0, .65, 3.5);
-  const b = pickB();
-  if (b === 'nova') {
-    special.push({ t: 0, life: .6, draw(s) { // a ring of ice spikes pointing out, racing outward
-      const u = s.t / .6, r = 30 + 120 * (1 - Math.pow(1 - u, 2)), a = 1 - u * u;
-      for (let i = 0; i < 16; i++) {
-        const an = i / 16 * Math.PI * 2; ctx.save(); ctx.translate(x + Math.cos(an) * r, y + Math.sin(an) * r * .8); ctx.rotate(an + Math.PI / 2);
-        ctx.globalAlpha = a; const gr = ctx.createLinearGradient(0, 8, 0, -22); gr.addColorStop(0, c); gr.addColorStop(1, '#fff'); ctx.fillStyle = gr;
-        ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(6, 8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill(); ctx.restore();
-      }
-    } });
-    setTimeout(() => { for (let i = 0; i < 30; i++) { const an = R(0, 6.28); shards.push({ x: x + Math.cos(an) * 150, y: y + Math.sin(an) * 120, vx: Math.cos(an) * R(60, 180), vy: Math.sin(an) * R(60, 180), r: R(0, 6), vr: R(-10, 10), z: R(3, 6), age: 0, life: R(.5, .9), c: i % 3 ? cl : '#fff', g: 120 }); } }, 560);
-  } else if (b === 'flare') {
-    special.push({ t: 0, life: 1.1, draw(s) { // a lens flare streak, a star, ghosts
+  if (pick('b') === 'flare') {
+    special.push({ t: 0, life: 1.1, draw(s) {
       const u = s.t / 1.1, a = u < .15 ? u / .15 : 1 - (u - .15) / .85, w = 520 * (0.6 + .4 * Math.min(1, s.t / .2));
-      const gr = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0); gr.addColorStop(0, 'transparent'); gr.addColorStop(.5, '#fff'); gr.addColorStop(1, 'transparent');
-      ctx.globalAlpha = a; ctx.fillStyle = gr; ctx.fillRect(x - w / 2, y - 3, w, 6);
-      const gr2 = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0); gr2.addColorStop(0, 'transparent'); gr2.addColorStop(.5, cl); gr2.addColorStop(1, 'transparent');
-      ctx.fillStyle = gr2; ctx.fillRect(x - w / 2, y - 14, w, 28);
+      streak(ctx, x, y, w, 6, a, '#fff'); streak(ctx, x, y, w, 28, a, cl);
       star(ctx, x, y, 46 * (1 + .2 * Math.sin(s.t * 20)) * a, a, '#fff');
       for (const [dx, rr, al] of [[60, 10, .5], [110, 18, .3], [-80, 7, .4]]) { ctx.globalAlpha = a * al; ctx.strokeStyle = cl; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x + dx, y + dx * .15, rr, 0, 7); ctx.stroke(); }
     } });
     glints(x, y, 4, 60);
-  } else if (b === 'splash') {
-    for (let i = 0; i < 26; i++) { const side = i % 2 ? 1 : -1, an = -Math.PI / 2 + side * R(.35, 1.2), v = R(260, 460); shards.push({ x: x + side * R(10, 30), y: y + 60, vx: Math.cos(an) * v, vy: Math.sin(an) * v, r: 0, vr: 0, z: R(3, 6), age: 0, life: R(1, 1.4), c: i % 4 ? cl : '#fff', g: 900 }); }
-    ring(x, y + 62, cl, 90, 0, .5, 3);
-    special.push({ t: 0, life: .5, draw(s) { const a = 1 - s.t / .5; ctx.globalAlpha = a * .8; ctx.strokeStyle = cl; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y + 62, 30 + 90 * s.t / .5, 10 + 20 * s.t / .5, 0, 0, 7); ctx.stroke(); } });
   } else {
-    special.push({ t: 0, life: 1.1, draw(s) { // a rune circle slams down behind, holds, breaks
-      const slam = Math.min(1, s.t / .16), sc = 2.4 - 1.4 * slam, a = s.t < .7 ? Math.min(1, s.t / .1) : Math.max(0, 1 - (s.t - .7) / .4), rr = 90 * sc;
-      bctx.globalAlpha = a; bctx.strokeStyle = cl; bctx.lineWidth = 3; bctx.shadowColor = c; bctx.shadowBlur = 14;
-      bctx.beginPath(); bctx.arc(x, y, rr, 0, 7); bctx.stroke(); bctx.beginPath(); bctx.arc(x, y, rr * .78, 0, 7); bctx.stroke();
-      bctx.save(); bctx.translate(x, y); bctx.rotate(s.t * 1.5); bctx.font = `${16 * sc}px serif`; bctx.fillStyle = cl; bctx.textAlign = 'center'; bctx.textBaseline = 'middle';
-      const runes = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃ'; for (let i = 0; i < 12; i++) { const an = i / 12 * Math.PI * 2; bctx.fillText(runes[i], Math.cos(an) * rr * .89, Math.sin(an) * rr * .89); }
-      bctx.beginPath(); for (let i = 0; i < 6; i++) { const an = i / 6 * Math.PI * 2 + Math.PI / 2; bctx[i ? 'lineTo' : 'moveTo'](Math.cos(an) * rr * .78, Math.sin(an) * rr * .78); } bctx.closePath(); bctx.stroke();
-      bctx.restore(); bctx.shadowBlur = 0;
+    special.push({ t: 0, life: 1.2, draw(s) { // 8 long thin streaks from the item, turning slowly, glints at the tips
+      const u = s.t / 1.2, a = u < .1 ? u / .1 : Math.pow(1 - (u - .1) / .9, 1.3), len = 60 + 260 * (1 - Math.pow(1 - Math.min(1, s.t / .35), 3));
+      ctx.save(); ctx.translate(x, y); ctx.rotate(s.t * .5);
+      for (let i = 0; i < 8; i++) {
+        const an = i / 8 * Math.PI * 2, L = len * (i % 2 ? .62 : 1);
+        ctx.save(); ctx.rotate(an);
+        const gr = ctx.createLinearGradient(0, 0, L, 0); gr.addColorStop(0, '#fff'); gr.addColorStop(.35, cl); gr.addColorStop(1, 'transparent');
+        ctx.globalAlpha = a; ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(L, 0); ctx.lineTo(0, 3); ctx.fill();
+        if (s.t > .25 && s.t < .9) star(ctx, L * .92, 0, 8 * Math.sin(Math.PI * (s.t - .25) / .65), a, '#fff');
+        ctx.restore();
+      }
+      ctx.restore();
+      const gr = ctx.createRadialGradient(x, y, 2, x, y, 60); gr.addColorStop(0, '#fff'); gr.addColorStop(.3, cl); gr.addColorStop(1, 'transparent');
+      ctx.globalAlpha = a; ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, 60, 0, 7); ctx.fill();
     } });
-    setTimeout(shakePop, 160);
-    setTimeout(() => { for (let i = 0; i < 24; i++) { const an = R(0, 6.28); shards.push({ x: x + Math.cos(an) * 85, y: y + Math.sin(an) * 85, vx: Math.cos(an) * R(80, 220), vy: Math.sin(an) * R(80, 220), r: R(0, 6), vr: R(-12, 12), z: R(5, 10), age: 0, life: R(.6, 1), c: cl, g: 200 }); } }, 720);
   }
 }
-// ---------------------------------------------------------------- epic: implosion, the blast with waves and sparkles, then the galaxy
+// ---------------------------------------------------------------- epic
 function epic(x, y, c, cl) {
-  const blast = () => {
-    burst(x, y, cl, 34, 520, { g: 60, drag: 2.4, life: 1.1, size: 1.3 });
-    ring(x, y, '#fff', 70, 0, .3, 5);
-    if ($('p1').checked) { ring(x, y, cl, 140, 0, .7, 4); ring(x, y, '#fff', 190, .2, .8, 2); }
-    if ($('p2').checked) glints(x, y, 12, 105);
-    shakePop();
-    if ($('p3').checked) setTimeout(() => { galaxy = { t: 0, x, y: y + 20, s: Array.from({ length: 80 }, (_, i) => ({ a: R(0, 6.28), r: R(20, 140), z: R(1, 2.6), c: i % 4 ? cl : '#fff' })) }; }, 250);
-  };
-  if ($('p3').checked) implode = { t: 0, x, y, c: cl, onBlast: blast, m: Array.from({ length: 26 }, () => { const a = R(0, 6.28), d = R(150, 240); return { x0: x + Math.cos(a) * d, y0: y + Math.sin(a) * d * .8 }; }) };
-  else blast();
+  if (pick('p') === 'implode') {
+    const blast = () => {
+      burst(x, y, cl, 34, 520, { g: 60, drag: 2.4, life: 1.1, size: 1.3 });
+      ring(x, y, '#fff', 70, 0, .3, 5); ring(x, y, cl, 140, 0, .7, 4); ring(x, y, '#fff', 190, .2, .8, 2);
+      glints(x, y, 12, 105); shakePop();
+      setTimeout(() => { galaxy = { t: 0, x, y: y + 20, s: Array.from({ length: 80 }, (_, i) => ({ a: R(0, 6.28), r: R(20, 140), z: R(1, 2.6), c: i % 4 ? cl : '#fff' })) }; }, 250);
+    };
+    implode = { t: 0, x, y, c: cl, onBlast: blast, m: Array.from({ length: 26 }, () => { const a = R(0, 6.28), d = R(150, 240); return { x0: x + Math.cos(a) * d, y0: y + Math.sin(a) * d * .8 }; }) };
+  } else {
+    special.push({ t: 0, life: 1.0, draw(s) { // a corona of light; a dark disc slides over it; it flares
+      const grow = Math.min(1, s.t / .3), cov = Math.min(1, Math.max(0, (s.t - .15) / .4)), r = 54 * grow;
+      const flare = Math.max(0, Math.min(1, (s.t - .45) / .15)) * (1 - Math.max(0, (s.t - .7) / .3));
+      const gr = bctx.createRadialGradient(x, y, r * .6, x, y, r * 1.9); gr.addColorStop(0, '#fff'); gr.addColorStop(.25, cl); gr.addColorStop(.6, c); gr.addColorStop(1, 'transparent');
+      bctx.globalAlpha = .95 * (1 - Math.max(0, (s.t - .8) / .2)); bctx.fillStyle = gr; bctx.beginPath(); bctx.arc(x, y, r * 1.9, 0, 7); bctx.fill();
+      bctx.globalCompositeOperation = 'source-over'; bctx.globalAlpha = .92 * (1 - Math.max(0, (s.t - .75) / .25));
+      bctx.fillStyle = '#0a0410'; bctx.beginPath(); bctx.arc(x + (1 - cov) * 70, y, r * .95, 0, 7); bctx.fill();
+      bctx.globalCompositeOperation = 'lighter';
+      if (flare > 0) { streak(ctx, x, y, 640, 5, flare, '#fff'); streak(ctx, x, y, 560, 30, flare * .9, cl); star(ctx, x, y, 60 * flare, flare, '#fff'); }
+    } });
+    setTimeout(() => { // the corona bursts
+      burst(x, y, cl, 40, 540, { g: 60, drag: 2.4, life: 1.2, size: 1.3 }); glints(x, y, 12, 110);
+      ring(x, y, cl, 150, 0, .7, 4); ring(x, y, '#fff', 210, .15, .8, 2); shakePop();
+    }, 720);
+  }
 }
 
 let hideT, arriveT;
 function show(q) {
   last = q; clearTimeout(hideT); clearTimeout(arriveT); implode = null; galaxy = null; special = [];
+  aura = design === 'M' ? { t: 0, q } : null;
   const st = $('stage'); st.innerHTML = build(q);
   const p = st.firstElementChild; p.classList.add('impact');
-  arriveT = setTimeout(() => { const [x, y] = center(), [c, cl] = Q[q]; (q === 2 ? green : q === 3 ? blue : epic)(x, y, c, cl); }, 60);
-  hideT = setTimeout(() => p.classList.add('out'), 4800);
+  arriveT = setTimeout(() => { p.classList.remove('impact'); const [x, y] = center(), [c, cl] = Q[q]; (q === 2 ? green : q === 3 ? blue : epic)(x, y, c, cl); }, 340);
+  hideT = setTimeout(() => { p.classList.add('out'); setTimeout(() => { aura = null; }, 700); }, 5000);
   $('note').textContent = `${Q[q][3]} in ${document.querySelector('[data-d].on').textContent}.`;
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => show(+b.dataset.q));
-document.querySelectorAll('input[name=g]').forEach(r => r.onchange = () => show(2));
-document.querySelectorAll('input[name=b]').forEach(r => r.onchange = () => show(3));
+for (const [n, q] of [['g', 2], ['b', 3], ['p', 4]]) document.querySelectorAll(`input[name=${n}]`).forEach(r => r.onchange = () => show(q));
 document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-d]').forEach(x => x.classList.remove('on')); b.classList.add('on');
   design = b.dataset.d; $('ddesc').textContent = DESC[design]; show(last);
 });
 addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') show(last); });
-$('ddesc').textContent = DESC.J;
+$('ddesc').textContent = DESC.L;
 show(2);
 </script>
 </body>
