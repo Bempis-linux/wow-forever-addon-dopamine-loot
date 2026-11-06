@@ -29,8 +29,8 @@
 </head>
 <body>
 <main>
-  <h1>Loot rain sounds: pick by ear (round 2)</h1>
-  <p class="lead">Round 1 sounded "lottery-like", so these are more physical: wood, pouches, soft pops, barely pitched. The pouch and pop ideas are in both lists (lower and heavier for landing). They're brought to the same loudness so only the sound differs. Tick one in each list, then hear them together under <b>Whole rain</b>.</p>
+  <h1>Loot rain sounds: pick by ear (round 3)</h1>
+  <p class="lead">Round 3: softer drops for landing, and the liked coin with a gentler pouch (or none) for the bag. Each round's favorite is there to compare. They're brought to the same loudness so only the sound differs. Tick one in each list, then hear them together under <b>Whole rain</b>.</p>
   <div class="whole">
     <label>Volume <input type="range" id="vol" min="0" max="100" value="60"></label>
     <label>Pitch
@@ -40,6 +40,7 @@
         <option value="steady">Steady: nearby notes at random, no climb</option>
       </select></label>
     <label><input type="checkbox" id="chord"> Chord at the end</label>
+    <label><input type="checkbox" id="cap" checked> No machine gun (at most ~8 bag / 12 landing sounds a second, loosely timed)</label>
   </div>
 
   <h2>Items landing</h2>
@@ -58,21 +59,19 @@
 <script>
 'use strict';
 const LAND = [
-  ['LandNow', 'What ships now', 'Marimba-like bar with a little click at the start.', true],
-  ['LandBloop', 'Water drop', 'Round round-1 drop, for comparison.'],
-  ['LandWoodDrop', 'Wood drop', 'The marimba crossed with the drop: bends up into its note, short, with a soft thump under it.'],
-  ['LandWoodDropLow', 'Wood drop, low', 'The same, lower and a bit heavier.'],
-  ['LandThock', 'Thock', 'An earthy knock, barely a note: a low body and a dull tap.'],
-  ['LandPouch', 'Pouch drop', 'A pouch hitting the ground: a soft fwump on a thud (the bag idea, heavier).'],
-  ['LandPop', 'Soft pop, low', 'A low cork-like pop, mostly air (the bag idea, lower).'],
+  ['LandBloop', 'Water drop (round 1)', 'For comparison: liked, but too blaring over and over.'],
+  ['LandWoodDrop', 'Wood drop (round 2)', 'For comparison: liked, but a little headachy.'],
+  ['LandDropSoft', 'Soft drop', 'The drop softened: slower attack, a smaller bend, just the note, the high edge filtered off.'],
+  ['LandDropDark', 'Soft drop, dark', 'The same, lower and darker still.'],
+  ['LandDropThud', 'Drop on grass', 'The soft drop on a soft low thud, as if it landed on grass.'],
 ];
 const BAG = [
-  ['BagNow', 'What ships now', 'Kalimba-like tine, bright overtone.', true],
-  ['BagPouch', 'Pouch', 'Into a leather pouch: a soft fwump on a low thud. No note to speak of.'],
-  ['BagPouchCoin', 'Pouch and coin', 'The pouch, and a faint coin settling inside.'],
-  ['BagPop', 'Soft pop', 'A quick soft pop, like a cork, mostly air.'],
+  ['BagPouchCoin', 'Pouch and coin (round 2)', 'For comparison: the coin is liked, the pouch part is jarring.'],
+  ['BagPouchCoinSoft', 'Soft pouch and coin', 'The same coin; the pouch is now a quiet brush with a soft body.'],
+  ['BagCoin', 'Just the coin', 'A coin settling in: a clink and a smaller one as it rocks. No pouch.'],
+  ['BagCoinThud', 'Coin on a soft thud', 'The coin with a soft low body under it instead of the pouch noise.'],
 ];
-const pick = { land: 'LandNow', bag: 'BagNow' };
+const pick = { land: 'LandDropSoft', bag: 'BagPouchCoinSoft' };
 const $ = id => document.getElementById(id);
 const status = t => $('status').textContent = t;
 
@@ -108,12 +107,18 @@ function pitch(i) {
   if (mode === 'gentle') return melody(i, 5);
   let n; do { n = Math.floor(Math.random() * 5); } while (n === last); last = n; return n;
 }
-// a run of n notes of one candidate, at the landing or the gathering rhythm
+// a run of n notes of one candidate, at the landing or the gathering rhythm. Like the game will:
+// items still arrive as fast as they do, but a sound plays only if enough time has passed since the
+// last one (Gap below), and each is nudged a few ms, so a fast run never rattles like a machine gun
 function run(name, n, kind, t0 = 0) {
-  let t = t0;
+  let t = t0, lastSound = -1, played = 0;
+  const gap = $('cap').checked ? (kind === 'land' ? 0.08 : 0.125) : 0.05;
   for (let i = 1; i <= n; i++) {
-    const p = pitch(i);
-    at(t, () => note(name, p));
+    if (t - lastSound >= gap) {
+      lastSound = t;
+      const p = pitch(++played), jitter = $('cap').checked ? Math.random() * 0.025 : 0;
+      at(t + jitter, () => note(name, p));
+    }
     t += kind === 'land' ? interval(i, n) + 0.12 : Math.min(0.06, 1.6 / n) + 0.0;
   }
   return t;
