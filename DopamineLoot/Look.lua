@@ -158,8 +158,11 @@ local function Create()
     "Whether popups block mouse clicks or let them through to the world behind.")
 
   Header("The 3D item")
-  Add("Model zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
-    "How close the camera is to 3D items: a smaller number shows the item bigger. From 0.3 to 2 (default 0.7).", "frame")
+  -- shown as a size in percent (right = bigger); stored as the camera distance (modelZoom, 0.7 = 100%)
+  Add("Item size (%)", 35, 230, 5, function() return math.floor(70 / ns.ModelZoom() + 0.5) end,
+    function(v) ns.settings.modelZoom = 70 / math.max(v, 1) end,
+    "How big 3D items show in popups, in percent: drag right for bigger, left for smaller. From 35 to 230 (default 100).",
+    "frame", function(v) return tostring(math.floor(v + 0.5)) end)
   Add("Weapon tilt", 0, 355, 5, ns.WeaponTilt, function(v) ns.settings.weaponTilt = v end,
     "Turns weapons so they stand upright: 90 stands them up (default), 0 shows them the way the game draws them (lying down). If a weapon shows upside down, try 270.",
     "frame", function(v) return tostring(math.floor(v + 0.5)) end)

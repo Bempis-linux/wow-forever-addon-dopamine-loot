@@ -101,7 +101,8 @@ end
 -- in two variants (A, B) picked at random. A fast run plays a sound only every NOTE_GAP seconds
 -- (a Rare or Epic always), each nudged up to NOTE_JITTER late, so it never rattles like a machine gun.
 local NOTE_TOP, NOTE_JITTER = 5, 0.025
-local NOTE_GAP = { Land = 0.08, Bag = 0.125 }
+local NOTE_GAP = { Land = 0.08, Bag = 0.06 } -- (items reach the bag 0.07 to 0.11 s apart: each one is heard)
+local NOTE_NUDGE = { Land = NOTE_JITTER, Bag = 0 } -- the bag sound lands exactly as the item hits the bag
 local walked = {} -- [set] = how many notes of this run played (the walk advances only on those)
 -- n = the item's place in its run (1 starts a new run); kind = "Rare" / "Epic" (always plays);
 -- low = the lowest note, outside the walk (a gray item)
@@ -117,7 +118,8 @@ local function PlayNote(set, n, kind, low)
     step = ns.RainCore.Melody(walked[set], NOTE_TOP)
   end
   local file = ("%s%s%s%s%02d.ogg"):format(MEDIA, set, kind or "", math.random(2) == 1 and "A" or "B", step)
-  C_Timer.After(math.random() * NOTE_JITTER, function() PlaySoundFile(file, Channel()) end)
+  local nudge = math.random() * NOTE_NUDGE[set]
+  if nudge > 0 then C_Timer.After(nudge, function() PlaySoundFile(file, Channel()) end) else PlaySoundFile(file, Channel()) end
 end
 -- the n-th item down; q its quality (Rare and Epic+ get their touch); low: a gray item's lowest thud
 function ns:PlayStepTick(n, q, low)
