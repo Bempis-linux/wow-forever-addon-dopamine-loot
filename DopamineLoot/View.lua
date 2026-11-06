@@ -46,7 +46,7 @@ ns.STYLES = {
   { key = "beam", label = "Beam", tip = "A cone of light rising from a glowing disc under the item; for Rare and better, sparks drift up through it." },
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color with its name on it, the item on a diamond emblem, a shine sweeping across." },
   { key = "splash", label = "Splash", tip = "A slanted banner slashes in behind a big name, with speed lines and a shine; the rarity is stamped on. Thicker the rarer: a crossing second banner for Epic, gold trim for Legendary." },
-  { key = "aura", label = "Aura", tip = "The item in an aura of its color: soft wisps of light rise behind it and its glow breathes. The name glows." },
+  { key = "aura", label = "Aura", tip = "The item in an aura of its color: soft wisps of light rise behind it and its glow breathes; the rarity under the name." },
   { key = "achievement", label = "Achievement", tip = "A small medallion with the item beside a name plate, like an achievement toast." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
@@ -58,7 +58,7 @@ local LAYOUT = {
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
   splash = { w = 380, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 24 },
   aura = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 20 },
-  achievement = { w = 360, h = 140, stage = { -116, 0, 104, 130 }, text = "right", hit = { 0, 0, 0, 0 }, zoom = 1, font = 18 },
+  achievement = { w = 360, h = 140, stage = { -116, 0, 104, 130 }, text = "right", hit = { 0, 26, 30, 30 }, zoom = 1, font = 18 },
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
@@ -268,6 +268,7 @@ function ns.CreateView(f)
     for _, fs in ipairs({ self.name, self.info, self.badges, self.tag, self.stamp }) do fs:ClearAllPoints() end
     self.info:SetTextColor(0.8, 0.76, 0.68)
     self.tag:Hide()
+    self.info:SetWidth(0) -- (no limit, unless a style sets one)
     self.stamp:Hide()
     self.name:SetAlpha(1)
     for _, l in ipairs(self.letters) do l:Hide() end
@@ -356,6 +357,7 @@ function ns.CreateView(f)
       self.name:SetJustifyH("LEFT")
       self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
       self.info:SetJustifyH("LEFT")
+      self.info:SetWidth(200) -- (stays on the plate)
       self.badges:SetPoint("LEFT", self.info, "RIGHT", 10, 0)
       self.badges:SetJustifyH("LEFT")
       self.tag:Show()
@@ -427,10 +429,7 @@ function ns.CreateView(f)
     self.splashEdge:SetVertexColor(1, 1, 1, 0.9)
     self.splashBand2:SetVertexColor(qr, qg, qb, 0.75)
     self.splashTrim:SetVertexColor(1, 0.82, 0.4, 1)
-    for _, t in ipairs(self.speed) do t:SetVertexColor(1, 1, 1, 1) end
-    self.stampBack:SetVertexColor(r, g, b, 1)
-    self.stampEdge:SetVertexColor(1, 1, 1, 1)
-    -- the rarity word (the stamp in Splash; the spaced-out tag in Aura and Achievement)
+    -- the rarity word (the stamp in Splash; the tag in Aura and Achievement)
     local word = (_G["ITEM_QUALITY" .. q .. "_DESC"] or ({ "Common", "Uncommon", "Rare", "Epic", "Legendary" })[q] or ""):upper()
     self.stamp:SetText(word .. "!")
     self.tag:SetText(word)
@@ -455,6 +454,11 @@ function ns.CreateView(f)
     for _, t in ipairs(self.fxAll) do
       if t ~= self.flash then t:SetVertexColor(lr, lg, lb, 1) end
     end
+    -- (after the tint above: Splash's speed lines are white, its stamp a plate in the item's color
+    -- with a white edge, so the white word reads on it)
+    for _, t in ipairs(self.speed) do t:SetVertexColor(1, 1, 1, 1) end
+    self.stampBack:SetVertexColor(r, g, b, 1)
+    self.stampEdge:SetVertexColor(1, 1, 1, 1)
     self.waves[1]:SetVertexColor(r, g, b, 1)
     -- this arrival: a burst of uneven sparks thrown mostly up and out, slowing as they go, and star
     -- glints popping around the item; more, bigger and farther the rarer it is
@@ -527,7 +531,18 @@ function ns.CreateView(f)
       end
     end
     if self.style == "relic" or self.style == "beam" then self:Plate(iw) end
+    -- Splash: the info tab only when there's info; the stamp's width at its normal size (it's
+    -- scaled up by hand as it slams in)
+    self.tabBack:SetShown(self.style == "splash" and (self.info:GetText() or "") ~= "")
+    if self.stamp.SetTextScale then self.stamp:SetTextScale(1) else self.stamp:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE") end
+    self.stampW = self.stamp:GetStringWidth()
+    self.splashDone, self.wispT = nil, 0
     self:PrepareLetters()
+    -- the name's shine waits until its letters have landed (Relic and Beam)
+    if self.lettersOn and self.shineTimes then
+      local wait = 0.15 + (self.letterCount or 0) * 0.05 + 0.26
+      for k, t0 in ipairs(self.shineTimes) do self.shineTimes[k] = t0 + wait end
+    end
     self.arrivalGen = (self.arrivalGen or 0) + 1 -- (an arrival still running from the last item stops)
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
@@ -609,10 +624,12 @@ function ns.CreateView(f)
       l:SetTextColor(r, g, b)
       l:SetShadowColor(0, 0, 0, 1)
       l:SetShadowOffset(1, -1)
-      self.measure:SetText(prefix)
-      local x0 = prefix == "" and 0 or mw(self.measure)
+      -- its middle, from the anchor: the right edge of the text up to and including it, less half of
+      -- it (measuring the text so far would drop a trailing space and bunch the words together)
+      self.measure:SetText(prefix .. ch)
+      local right = mw(self.measure)
       self.measure:SetText(ch)
-      l.cx = left + x0 + mw(self.measure) / 2 -- the letter's middle, from the anchor
+      l.cx = left + right - mw(self.measure) / 2
       l.anchor, l.size, l.face, l.flags = anchor, size, face, flags or ""
       l:Hide()
       prefix = prefix .. ch
@@ -639,7 +656,11 @@ function ns.CreateView(f)
         local u = math.min(1, t / LETTER_T)
         -- slams in big, a touch small, settled
         local sc = u < 0.7 and 2.6 - 1.68 * (u / 0.7) or 0.92 + 0.08 * ((u - 0.7) / 0.3)
-        if l.SetTextScale then l:SetTextScale(sc) else l:SetFont(l.face, l.size * sc, l.flags) end
+        if l.SetTextScale then l:SetTextScale(sc)
+        else -- (no text scale on this client: a font size, whole sizes only, set when it changes)
+          local px = math.floor(l.size * sc + 0.5)
+          if px ~= l.px then l.px = px; l:SetFont(l.face, px, l.flags) end
+        end
         l:ClearAllPoints()
         l:SetPoint("CENTER", self.name, l.anchor, l.cx, 0)
         l:SetAlpha(math.min(1, u / 0.3))
@@ -650,12 +671,15 @@ function ns.CreateView(f)
 
   local function Clamp01(x) return x < 0 and 0 or x > 1 and 1 or x end
   local function TextScale(fs, sc, face, size, flags)
-    if fs.SetTextScale then fs:SetTextScale(sc) else fs:SetFont(face, size * sc, flags) end
+    if fs.SetTextScale then fs:SetTextScale(sc); return end
+    local px = math.floor(size * sc + 0.5) -- (whole sizes, set only when it changes)
+    if px ~= fs.px then fs.px = px; fs:SetFont(face, px, flags) end
   end
   -- Splash: the banner slashes in from the left (the crossing one from the right, Epic+), speed lines
   -- streak across, a shine runs along it, the name zips in (Epic+: its letters stamp in instead), and
   -- the rarity stamp lands; the banner is thicker the rarer
   function f:SplashTick(fx)
+    if self.splashDone then return end -- (everything has settled: nothing left to move)
     local q = self.q
     local h = SPLASH_H * (0.8 + 0.1 * (math.min(q, 5) - 2))
     local e = 1 - (1 - Clamp01(fx / 0.3)) ^ 3
@@ -707,7 +731,7 @@ function ns.CreateView(f)
       local u = Clamp01(st / 0.26)
       local sc = 2.6 - 1.6 * (1 - (1 - u) ^ 3)
       TextScale(self.stamp, sc, "Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-      local w, ht = (self.stamp:GetStringWidth() + 12), 18 * sc
+      local w, ht = (self.stampW or 40) * sc + 12, 18 * sc -- (its width at normal size, scaled by hand)
       self.stampBack:ClearAllPoints(); self.stampBack:SetPoint("CENTER", self.stamp, "CENTER")
       self.stampBack:SetSize(w, ht)
       self.stampEdge:ClearAllPoints(); self.stampEdge:SetPoint("CENTER", self.stamp, "CENTER")
@@ -715,6 +739,7 @@ function ns.CreateView(f)
       local a = Clamp01(st / 0.08)
       for _, t in ipairs({ self.stamp, self.stampBack, self.stampEdge }) do t:SetAlpha(a); t:Show() end
     end
+    if fx > 1.3 then self.splashDone = true end -- (this frame drew the settled state; the shine ended at 1.15)
   end
   -- Aura: the glow breathes, and soft wisps of light rise behind the item, drifting
   function f:AuraTick(dt, age)
