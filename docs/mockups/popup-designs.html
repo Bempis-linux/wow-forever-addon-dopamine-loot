@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popup Designs Mockup</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100;
+    --q2: #1eff00; --q3: #0070dd; --q4: #a335ee; --q5: #ff8000; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 300px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 2px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  #design small.desc { margin-top: 4px; min-height: 48px; }
+  #screen { position: fixed; left: 320px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 40% 70%, #3d4a36, #1b2219 60%, #0f130e); }
+  #fx { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+  .char { position: absolute; left: 38%; top: 46%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  #edge { position: absolute; inset: 0; pointer-events: none; z-index: 4; opacity: 0; }
+  #stage { position: absolute; left: 50%; top: 18%; width: 320px; height: 360px; z-index: 6; }
+  .pop { position: absolute; left: 0; top: 0; width: 320px; display: flex; flex-direction: column; align-items: center; }
+  @keyframes impact { 0% { transform: scale(1.28); opacity: 0 } 12% { opacity: 1 } 60% { transform: scale(.96) } 100% { transform: scale(1) } }
+  @keyframes fadeout { to { opacity: 0; transform: translateY(-14px) } }
+  @keyframes sway { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes sweep { from { left: -40% } to { left: 120% } }
+  @keyframes draw { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+  @keyframes breathe { 0%, 100% { opacity: .55 } 50% { opacity: .9 } }
+  .pop.in { animation: impact .34s cubic-bezier(.3,1.6,.5,1) both; }
+  .pop.out { animation: fadeout .7s ease-in forwards; }
+  .item { width: 64px; height: 150px; position: relative; animation: sway 3.6s ease-in-out infinite; transform-origin: 50% 70%; z-index: 2; }
+  .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
+  .name { font: 600 21px Georgia, serif; letter-spacing: .5px; text-shadow: 0 2px 6px #000, 0 0 2px #000; white-space: nowrap; position: relative; }
+  .info { font: 600 9.5px system-ui; letter-spacing: 1.6px; text-transform: uppercase; color: #b9b09a; text-shadow: 0 1px 3px #000; }
+  .tag { font: 700 9px system-ui; letter-spacing: 3px; text-transform: uppercase; }
+  .shine { position: absolute; top: 0; bottom: 0; width: 30%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent); mix-blend-mode: overlay; animation: sweep .7s .3s ease-in-out both; }
+  .note { position: absolute; left: 12px; bottom: 10px; right: 12px; color: rgba(255,255,255,.55); font-size: 12px; z-index: 7; }
+
+  /* ---------- A. Reliquary: the Relic grown up: rays behind, a crest nameplate ---------- */
+  .A .rays { position: absolute; top: -10px; width: 260px; height: 260px; border-radius: 50%; opacity: .5;
+    background: repeating-conic-gradient(from 0deg, var(--c) 0deg 4deg, transparent 4deg 18deg); mask: radial-gradient(circle, #000 0 30%, transparent 68%);
+    -webkit-mask: radial-gradient(circle, #000 0 30%, transparent 68%); animation: spin 40s linear infinite; }
+  .A .halo { position: absolute; top: 20px; width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle, var(--cl) 0, var(--c) 25%, transparent 66%); opacity: .55; }
+  .A .crest { margin-top: -6px; display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; padding: 6px 40px 8px;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.62), transparent 72%); }
+  .A .rule { display: flex; align-items: center; gap: 6px; width: 100%; }
+  .A .rule i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--c)); transform-origin: right; animation: draw .5s .25s both; }
+  .A .rule i:last-child { background: linear-gradient(90deg, var(--c), transparent); transform-origin: left; }
+  .A .rule b { width: 7px; height: 7px; transform: rotate(45deg); background: var(--c); box-shadow: 0 0 8px var(--c); }
+
+  /* ---------- B. Trading card: a foil card with the item in a window ---------- */
+  .B .card { width: 168px; height: 236px; border-radius: 10px; position: relative; overflow: hidden;
+    background: linear-gradient(160deg, #2a2418, #120e09); box-shadow: 0 0 0 2px var(--c), 0 0 24px -4px var(--c), 0 10px 30px rgba(0,0,0,.7); }
+  .B .win { position: absolute; left: 10px; right: 10px; top: 26px; height: 140px; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(circle at 50% 45%, var(--cl), var(--c) 30%, #0d0a06 75%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+  .B .win .item { position: absolute; left: 52px; top: -6px; }
+  .B .gem { position: absolute; top: 7px; left: 50%; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg); background: var(--c); box-shadow: 0 0 10px var(--c); }
+  .B .label { position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; }
+  .B .label .name { font-size: 15px; white-space: normal; padding: 0 8px; line-height: 1.1; }
+  .B .foil { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.28) 45%, rgba(170,220,255,.18) 50%, transparent 62%);
+    background-size: 250% 100%; animation: foil 2.4s .3s ease-in-out both; mix-blend-mode: screen; }
+  @keyframes foil { from { background-position: 120% 0 } to { background-position: -60% 0 } }
+
+  /* ---------- C. Spotlight: the item on a lit pedestal, a cone from above ---------- */
+  .C .cone { position: absolute; top: -40px; width: 200px; height: 240px; background: linear-gradient(var(--c), transparent 85%);
+    clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); opacity: .35; }
+  .C .pedestal { width: 130px; height: 22px; border-radius: 50%; margin-top: -18px; background: radial-gradient(ellipse, var(--cl), var(--c) 35%, transparent 70%); opacity: .85; }
+  .C .plate { margin-top: 8px; padding: 5px 18px 7px; border-top: 1px solid var(--c); border-bottom: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.35)); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+  /* ---------- D. Nameplate: no box; type does the work ---------- */
+  .D .glowbar { position: absolute; top: 140px; width: 300px; height: 70px; background: radial-gradient(ellipse, var(--c), transparent 70%); opacity: .45; }
+  .D .name { font-size: 26px; }
+  .D .under { width: 220px; height: 2px; margin: 4px 0; background: linear-gradient(90deg, transparent, var(--cl), transparent); transform-origin: center; animation: draw .45s .2s both; }
+  .D .row { display: flex; gap: 8px; align-items: center; }
+  .D .pill { font: 700 9px system-ui; letter-spacing: 1px; padding: 2px 6px; border-radius: 9px; border: 1px solid var(--c); color: var(--cl); }
+
+  /* ---------- E. Medallion: a rim around the item, ribbon under it ---------- */
+  .E .medal { width: 168px; height: 168px; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle, rgba(0,0,0,.2) 0 55%, rgba(0,0,0,.6) 70%), radial-gradient(circle, var(--c), transparent 72%);
+    box-shadow: 0 0 0 3px #3a2f1c, 0 0 0 5px var(--c), 0 0 30px -6px var(--c); }
+  .E .medal::after { content: ""; position: absolute; inset: 8px; border-radius: 50%; border: 1px dashed rgba(255,255,255,.18); animation: spin 30s linear infinite; }
+  .E .medal .item { height: 140px; }
+  .E .ribbon { margin-top: -14px; position: relative; padding: 6px 28px 7px; background: linear-gradient(var(--cd), #120d08);
+    clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); box-shadow: inset 0 1px 0 var(--c); display: flex; flex-direction: column; align-items: center; }
+  .E .ribbon .name { font-size: 18px; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Popup designs mockup</h1>
+  <small>Five directions for the popup itself, and arrival ideas per rarity. Pick a design, a rarity, then Show. The comet stays Legendary-only; these are for green, blue and purple.</small>
+
+  <h2>Design</h2>
+  <div id="design">
+    <button data-d="A" class="on">A. Reliquary</button><button data-d="B">B. Trading card</button><button data-d="C">C. Spotlight</button>
+    <button data-d="D">D. Nameplate</button><button data-d="E">E. Medallion</button><button data-d="R">Relic (now)</button>
+    <small class="desc" id="ddesc"></small>
+  </div>
+
+  <h2>Show</h2>
+  <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button>
+  <div><small>R replays the last one.</small></div>
+
+  <h2>Text area</h2>
+  <label class="fx"><input type="checkbox" id="tTag" checked><b>Rarity word</b><small>"RARE", "EPIC" in letter-spaced small caps above the name.</small></label>
+  <label class="fx"><input type="checkbox" id="tPill" checked><b>Item level as a badge</b><small>A small pill instead of plain text in the info line.</small></label>
+  <label class="fx"><input type="checkbox" id="tShine" checked><b>Name shine</b><small>The light sweep across the name (in game now).</small></label>
+
+  <h2>Uncommon (green)</h2>
+  <label class="fx"><input type="checkbox" id="g1" checked><b>Leaf burst</b><small>A small ring of soft green sparks thrown out and drifting down.</small></label>
+  <label class="fx"><input type="checkbox" id="g2" checked><b>Glint on the item</b><small>A quick star glint on the item as it lands.</small></label>
+
+  <h2>Rare (blue)</h2>
+  <label class="fx"><input type="checkbox" id="b1" checked><b>Ring wave</b><small>A round shockwave from the item, like a drop in water.</small></label>
+  <label class="fx"><input type="checkbox" id="b2" checked><b>Spark burst</b><small>The spark burst that's in game now, a bit bigger.</small></label>
+  <label class="fx"><input type="checkbox" id="b3" checked><b>Light rays flash</b><small>Rays flare behind the item for a moment and fade.</small></label>
+
+  <h2>Epic (purple)</h2>
+  <label class="fx"><input type="checkbox" id="p1" checked><b>Sparkles</b><small>The star glints you like, more of them, spread wider.</small></label>
+  <label class="fx"><input type="checkbox" id="p2" checked><b>Orbit</b><small>Motes circle the item once, then scatter.</small></label>
+  <label class="fx"><input type="checkbox" id="p3" checked><b>Screen-edge glow</b><small>The screen's edges glow purple for a moment.</small></label>
+  <label class="fx"><input type="checkbox" id="p4" checked><b>Double wave</b><small>Two ring waves, the second a beat later.</small></label>
+
+  <small style="margin-top:10px">In game each piece can be our own generated art or a Blizzard texture (frames, rays, rings); the picked ones get offered both ways.</small>
+</div>
+<div id="screen">
+  <div class="char"></div>
+  <div id="edge"></div>
+  <div id="stage"></div>
+  <canvas id="fx"></canvas>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const Q = { 2: ['#1eff00', '#9dff8a', '#0b3a05', 'Uncommon'], 3: ['#3a8cff', '#9cc8ff', '#0a2650', 'Rare'], 4: ['#a335ee', '#d9a8ff', '#2e0b48', 'Epic'] };
+const ITEM = { name: 'Arcanite Reaper', type: 'Two-Hand Axe', ilvl: 63 };
+const DESC = {
+  A: 'Reliquary: the Relic grown up. Slow light rays turn behind the item, a halo, and a crest under it: a rule with a diamond that draws out from the middle, the rarity word, the name and the info.',
+  B: 'Trading card: a foil card in the item\'s color with the item in a lit window, a rarity gem on top and a foil shine across it as it lands. The most "collectible" feel.',
+  C: 'Spotlight: a cone of light from above onto a lit pedestal, the item floating on it, the name on a dark plate with a colored top edge.',
+  D: 'Nameplate: no frame at all. The item, and big type: rarity word, a large name, an underline that draws out, and badges. Clean and modern.',
+  E: 'Medallion: the item inside a round rim in its color (a slow turning inner ring), the name on a ribbon with notched ends below.',
+  R: 'Relic as it is now, for comparison: a soft glow, the name and info below on a soft plate.',
+};
+let design = 'A', last = 3;
+
+// the item: a two-handed axe, colored a little by its rarity
+function axe(c) {
+  return `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#5a4a3a"/><stop offset=".5" stop-color="#8a7358"/><stop offset="1" stop-color="#4a3c2e"/></linearGradient>
+  <linearGradient id="bl" x1="0" x2="1"><stop offset="0" stop-color="#8b95a3"/><stop offset=".5" stop-color="#eef2f8"/><stop offset="1" stop-color="#6b7480"/></linearGradient></defs>
+  <rect x="29" y="20" width="6" height="125" rx="3" fill="url(#h)"/>
+  <path d="M32 14 C 10 10, 2 30, 4 52 C 14 44, 24 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
+  <path d="M32 14 C 54 10, 62 30, 60 52 C 50 44, 40 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
+  <circle cx="32" cy="30" r="6" fill="${c}" opacity=".9"/><circle cx="32" cy="30" r="2.5" fill="#fff" opacity=".8"/></svg>`;
+}
+function textBits(q) {
+  const [c, cl] = Q[q];
+  const tag = $('tTag').checked ? `<div class="tag" style="color:${cl}">${Q[q][3]}</div>` : '';
+  const shine = $('tShine').checked ? '<span class="shine"></span>' : '';
+  const name = `<div class="name" style="color:${c === '#3a8cff' ? '#5aa8ff' : c}"><span style="position:relative;display:inline-block;overflow:hidden">${ITEM.name}${shine}</span></div>`;
+  const info = $('tPill').checked
+    ? `<div class="info" style="display:flex;gap:6px;align-items:center">${ITEM.type}<span class="pill" style="font:700 9px system-ui;letter-spacing:1px;padding:1px 6px;border-radius:9px;border:1px solid ${c};color:${cl}">iLvl ${ITEM.ilvl}</span></div>`
+    : `<div class="info">${ITEM.type} · Item level ${ITEM.ilvl}</div>`;
+  return { tag, name, info };
+}
+function build(q) {
+  const [c, cl, cd] = Q[q];
+  const { tag, name, info } = textBits(q);
+  const vars = `--c:${c};--cl:${cl};--cd:${cd}`;
+  const item = `<div class="item">${axe(c)}</div>`;
+  switch (design) {
+    case 'A': return `<div class="pop A" style="${vars}"><div class="rays"></div><div class="halo"></div>${item}
+      <div class="crest"><div class="rule"><i></i><b></b><i></i></div>${tag}${name}${info}</div></div>`;
+    case 'B': return `<div class="pop B" style="${vars}"><div class="card"><div class="gem"></div><div class="win">${item}</div>
+      <div class="label">${tag}${name.replace('class="name"', 'class="name" ')}${info}</div><div class="foil"></div></div></div>`;
+    case 'C': return `<div class="pop C" style="${vars}"><div class="cone"></div>${item}<div class="pedestal"></div><div class="plate">${tag}${name}${info}</div></div>`;
+    case 'D': return `<div class="pop D" style="${vars}"><div class="glowbar"></div>${item}${tag}${name}<div class="under"></div><div class="row">${info}</div></div>`;
+    case 'E': return `<div class="pop E" style="${vars}"><div class="medal">${item}</div><div class="ribbon">${tag}${name}${info}</div></div>`;
+    default: return `<div class="pop R" style="${vars}"><div style="position:absolute;top:10px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,${cl} 0,${c} 25%,transparent 66%);opacity:.5"></div>${item}
+      <div style="margin-top:-4px;padding:4px 40px 6px;background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 72%);display:flex;flex-direction:column;align-items:center;gap:2px">${name.replace('26px', '21px')}<div style="width:160px;height:1.5px;background:linear-gradient(90deg,transparent,${c},transparent)"></div>${info}</div></div>`;
+  }
+}
+
+// ---------------------------------------------------------------- particles (canvas)
+const cv = $('fx'), ctx = cv.getContext('2d');
+let W, H, parts = [], rings = [], orbit = null;
+function resize() { const r = $('screen').getBoundingClientRect(), d = devicePixelRatio || 1; W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(d, 0, 0, d, 0, 0); }
+addEventListener('resize', resize); resize();
+const R = (a, b) => a + Math.random() * (b - a);
+function center() {
+  const s = $('stage').getBoundingClientRect(), sc = $('screen').getBoundingClientRect();
+  const it = $('stage').querySelector('.item');
+  if (!it) return [s.left - sc.left + 160, s.top - sc.top + 90];
+  const r = it.getBoundingClientRect();
+  return [r.left - sc.left + r.width / 2, r.top - sc.top + r.height * 0.32];
+}
+function burst(x, y, color, n, speed, o = {}) {
+  for (let i = 0; i < n; i++) {
+    const a = o.up ? -Math.PI / 2 + R(-1.4, 1.4) : R(0, Math.PI * 2), v = R(.45, 1) * speed;
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: -R(0, o.delay || 0), life: R(.5, .9) * (o.life || 1), c: color, s: R(1.6, 3.2) * (o.size || 1), g: o.g ?? 160, drag: o.drag ?? 2.6, kind: o.kind || 'dot' });
+  }
+}
+function glints(x, y, n, spread, color) {
+  for (let i = 0; i < n; i++) parts.push({ x: x + R(-spread, spread), y: y + R(-spread * .8, spread * .9), vx: 0, vy: 0, age: -i * .085 - R(0, .04), life: .45, c: color, s: R(9, 15), g: 0, drag: 0, kind: 'star' });
+}
+function ring(x, y, color, r1, delay = 0, life = .6, w = 3) { rings.push({ x, y, c: color, r1, age: -delay, life, w }); }
+function star(x, y, s, a, c) {
+  ctx.save(); ctx.translate(x, y); ctx.globalAlpha = a; ctx.fillStyle = c; ctx.beginPath();
+  for (let i = 0; i < 8; i++) { const r = i % 2 ? s * .16 : s, an = i * Math.PI / 4; ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); }
+  ctx.fill(); ctx.restore();
+}
+let lastT = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'lighter';
+  for (const r of rings) {
+    r.age += dt; if (r.age < 0) continue;
+    const u = r.age / r.life, rad = 10 + (r.r1 - 10) * (1 - Math.pow(1 - u, 3));
+    ctx.globalAlpha = (1 - u) * .9; ctx.strokeStyle = r.c; ctx.lineWidth = r.w * (1 - u * .6);
+    ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, 7); ctx.stroke();
+  }
+  rings = rings.filter(r => r.age < r.life);
+  if (orbit) {
+    orbit.t += dt; const u = orbit.t / 1.1;
+    if (u >= 1) { for (const m of orbit.m) burst(m.x, m.y, orbit.c, 2, 120, { g: 40 }); orbit = null; }
+    else for (let i = 0; i < orbit.m.length; i++) {
+      const a = i / orbit.m.length * Math.PI * 2 + u * Math.PI * 2.2, rr = 62 - 10 * Math.sin(u * Math.PI);
+      const m = orbit.m[i]; m.x = orbit.x + Math.cos(a) * rr; m.y = orbit.y + Math.sin(a) * rr * .55;
+      ctx.globalAlpha = Math.min(1, u * 4) * (1 - u * .3); ctx.fillStyle = orbit.c; ctx.beginPath(); ctx.arc(m.x, m.y, 2.6, 0, 7); ctx.fill();
+    }
+  }
+  for (const p of parts) {
+    p.age += dt; if (p.age < 0) continue;
+    const d = Math.exp(-p.drag * dt); p.vx *= d; p.vy = p.vy * d + p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    const u = p.age / p.life;
+    if (p.kind === 'star') star(p.x, p.y, p.s * Math.sin(Math.PI * u), .95, p.c);
+    else { ctx.globalAlpha = (1 - u) * (.7 + .3 * Math.sin(p.age * 30)); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 7); ctx.fill(); }
+  }
+  parts = parts.filter(p => p.age < p.life);
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---------------------------------------------------------------- arrivals by rarity
+function arrive(q) {
+  const [x, y] = center(), [c, cl] = Q[q];
+  if (q === 2) {
+    if ($('g1').checked) burst(x, y, cl, 12, 170, { g: 60, drag: 2.2, life: 1.3, size: 1.2 });
+    if ($('g2').checked) glints(x + 6, y - 18, 1, 4, '#fff');
+  } else if (q === 3) {
+    if ($('b1').checked) ring(x, y, cl, 120, 0, .65, 3.5);
+    if ($('b2').checked) burst(x, y, cl, 18, 330, { up: true, g: 240 });
+    if ($('b3').checked) rays(c);
+  } else if (q === 4) {
+    if ($('p1').checked) glints(x, y, 11, 95, '#fff');
+    if ($('p2').checked) orbit = { t: 0, x, y, c: cl, m: Array.from({ length: 10 }, () => ({ x, y })) };
+    if ($('p3').checked) edge(c);
+    if ($('p4').checked) { ring(x, y, cl, 140, 0, .7, 4); ring(x, y, '#fff', 190, .2, .8, 2); }
+    burst(x, y, cl, 14, 360, { up: true, g: 240 });
+  }
+}
+function rays(c) {
+  const el = document.createElement('div'), [x, y] = center();
+  el.style.cssText = `position:absolute;left:${x - 160}px;top:${y - 160}px;width:320px;height:320px;border-radius:50%;pointer-events:none;z-index:5;
+    background:repeating-conic-gradient(${c}cc 0deg 3deg, transparent 3deg 15deg);-webkit-mask:radial-gradient(circle,#000 10%,transparent 65%);mask:radial-gradient(circle,#000 10%,transparent 65%);
+    transition:opacity .7s ease-out, transform .9s ease-out;opacity:.9;mix-blend-mode:screen`;
+  $('screen').appendChild(el);
+  requestAnimationFrame(() => { el.style.opacity = 0; el.style.transform = 'rotate(20deg) scale(1.2)'; });
+  setTimeout(() => el.remove(), 1000);
+}
+function edge(c) {
+  const e = $('edge'); e.style.transition = 'none'; e.style.boxShadow = `inset 0 0 120px 30px ${c}`; e.style.opacity = .85;
+  requestAnimationFrame(() => requestAnimationFrame(() => { e.style.transition = 'opacity .9s ease-out'; e.style.opacity = 0; }));
+}
+
+let hideT;
+function show(q) {
+  last = q; clearTimeout(hideT);
+  const st = $('stage'); st.innerHTML = build(q);
+  const p = st.firstElementChild; p.classList.add('in');
+  setTimeout(() => arrive(q), 60);
+  hideT = setTimeout(() => p.classList.add('out'), 4200);
+  $('note').textContent = `${Q[q][3]} in "${$('design').querySelector('.on').textContent}". Items sway; the turn-in for Epic is left out here.`;
+}
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => show(+b.dataset.q));
+document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-d]').forEach(x => x.classList.remove('on')); b.classList.add('on');
+  design = b.dataset.d; $('ddesc').textContent = DESC[design]; show(last);
+});
+addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') show(last); });
+$('ddesc').textContent = DESC.A;
+show(3);
+</script>
+</body>
+</html>

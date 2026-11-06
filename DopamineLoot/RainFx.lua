@@ -44,6 +44,10 @@ local function Create()
     if not listed then list[#list + 1] = { cur, Money(cur) } end
     return list
   end, 10000, "Money you loot rains as coins on its own (even without enough items for a rain) when it's at least this much. Quest reward money always rains.")
+  N.Choice(cat, "rainMinQuality", "Rain includes", {
+    { 0, "Everything (default)" }, { 1, "|cffffffffCommon|r and up" }, { 2, "|cff1eff00Uncommon|r and up" },
+    { 3, "|cff0070ddRare|r and up" },
+  }, 0, "The lowest rarity that counts for the loot rain and flies in it. Everything (default) rains your gray and white loot too. Popups have their own setting: Show popups for, on the Popups page.")
   FxToggle(cat, "Calm")
 
   N.Header(layout, "Where")

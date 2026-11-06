@@ -16,7 +16,12 @@ local QUALITY_WORDS = {
 -- preview items for qualities you may not have in your bags (well-known Classic items)
 local TEST_IDS = { [2] = { 15211 }, [3] = { 5191, 7230 }, [4] = { 12784, 19364 }, [5] = { 19019, 17182 } }
 
+-- Two filters: the lowest rarity that gets a popup (setting minQuality, default Uncommon, Popups
+-- page) and the lowest that rains (rainMinQuality, default Poor: everything, Loot rain page)
 function ns.MinQuality() return ns.settings.minQuality or 2 end
+function ns.RainMinQuality() return ns.settings.rainMinQuality or 0 end
+local function WantsPopup(q) return not ns.settings.noPopup and q >= ns.MinQuality() end
+local function WantsRain(q) return not ns.settings.noRain and q >= ns.RainMinQuality() end
 
 local function TypeText(equipLoc, itemType, subType, classID)
   local slot = equipLoc and equipLoc ~= "" and _G[equipLoc] or nil
@@ -66,9 +71,10 @@ function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
   local link, count, src = M.Parse(text, patterns, isSelf)
   if not link then return end
   if src == "pushed" and merchantOpen then src = "bought" end
-  if self.settings.noPopup or self.settings.enabled == false or src == "bought" then return end
+  if (self.settings.noPopup and self.settings.noRain) or self.settings.enabled == false or src == "bought" then return end
   ns.ItemData(link, count, src, function(d)
-    if (d.quality or 0) >= ns.MinQuality() then ns.Collect(d) end
+    local q = d.quality or 0
+    if WantsPopup(q) or WantsRain(q) then ns.Collect(d) end -- the burst sorts out which below
   end)
 end
 
@@ -95,13 +101,25 @@ local function Rains(items)
   return items.quest or copper >= ns.CoinRainMin()
 end
 
+-- The part of a burst that rains: the items at or above the rain's rarity (and its money)
+local function RainPart(items)
+  local part = { copper = items.copper, quest = items.quest }
+  for _, d in ipairs(items) do if WantsRain(d.quality or 0) then part[#part + 1] = d end end
+  return part
+end
+
+-- It rains (the rain's items; what stays after it becomes popups, Loot rain page), or each item at
+-- or above the popups' rarity gets a popup. Items that don't rain (below the rain's rarity) still
+-- get their popup when it rains.
 local function Play(items)
-  if Rains(items) then
-    ns:Rain(items, items.copper)
-  else
-    local best = 0 -- each popup knows the best it was looted with (an Uncommon beside a Rare goes compact)
-    for _, d in ipairs(items) do best = math.max(best, d.quality or 0) end
-    for _, d in ipairs(items) do d.burstBest = best; ns:ShowLoot(d) end
+  local part = RainPart(items)
+  local rained = Rains(part)
+  if rained then ns:Rain(part, items.copper) end
+  local best = 0 -- each popup knows the best it was looted with (an Uncommon beside a Rare goes compact)
+  for _, d in ipairs(items) do best = math.max(best, d.quality or 0) end
+  for _, d in ipairs(items) do
+    local q = d.quality or 0
+    if WantsPopup(q) and not (rained and WantsRain(q)) then d.burstBest = best; ns:ShowLoot(d) end
   end
 end
 
@@ -109,7 +127,7 @@ local function FlushBurst()
   local items = burst
   burst = nil
   if not items then return end
-  if InCombatLockdown() and Rains(items) then
+  if InCombatLockdown() and Rains(RainPart(items)) then
     for _, d in ipairs(items) do afterCombat[#afterCombat + 1] = d end
     afterCombat.copper = (afterCombat.copper or 0) + (items.copper or 0)
     afterCombat.quest = afterCombat.quest or items.quest

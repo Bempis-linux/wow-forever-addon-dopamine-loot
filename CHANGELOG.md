@@ -14,11 +14,13 @@
   Legendary); Relic and Beam names sit on a soft dark plate with a thin underline in the item's color. A
   **Legendary moment**: the screen dims, a comet streaks down onto the popup and it lands in slow motion
   (Popups page: Legendary; never in combat).
+- **Popups and the rain filter separately**: "Show popups for" (Popups page) now only affects popups; the new
+  "Rain includes" (Loot rain page, default everything) decides what rains, so gray and white loot rains
+  again. Turning popups off no longer stops the rain. The 3D "Item size" slider now grows to the right.
 - **Calm when repeated**: a few rains with nothing Rare or better within two minutes get quicker and use fewer
   sounds (a switch under When). Rare and better always get the full show.
 - **Settings reworded**: every label and tooltip says plainly what it does; the Popups page labels show their
-  tooltip too, and the preview buttons have one. "Show popups for" is now "Show loot from" (it always applied
-  to the loot rain as well).
+  tooltip too, and the preview buttons have one.
 - Test popups no longer show a gray "preview" tag.
 - Internal cleanup: code left over from the old chat commands removed. Nothing changes in game.
 

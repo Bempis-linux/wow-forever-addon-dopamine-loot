@@ -355,6 +355,7 @@ end
 -- waits for a free slot, so a rain's blues are all seen in turn. Setting popupCombat "defer" holds
 -- popups until the fight is over.
 function ns:ShowLoot(item, onModel)
+  if ns.settings.noPopup and not item.test then return end -- popups off (the rain still plays)
   if ns.settings.popupCombat == "defer" and InCombatLockdown() and not item.test then
     afterCombat[#afterCombat + 1] = { item = item, onModel = onModel }
     return

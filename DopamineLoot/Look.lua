@@ -105,9 +105,9 @@ local function Create()
   end
 
   Header("When")
-  Pick("Show loot from", ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
-    function(v) ns.settings.minQuality = v end,
-    "The lowest rarity Dopamine Loot shows, as a popup or in the loot rain. Items below it are left out completely.")
+  Pick("Show popups for", ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
+    function(v) ns.settings.minQuality = v ~= 2 and v or nil end,
+    "The lowest rarity that gets a popup. Lower items get no popup (the loot rain has its own setting: Rain includes, on the Loot rain page).")
   Add("Time on screen", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
     function(v) ns.settings.popupHold = v end,
     "How long popups stay, in seconds. Rarer items stay longer: at the default 5, Uncommon and lower stay 2.5 s, Rare 4 s, Epic 6 s and Legendary 8 s. Hovering over a popup keeps it up (for up to 10 s more).", "none")
