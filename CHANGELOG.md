@@ -10,6 +10,13 @@
   in pitch, every sound has two variants, and a fast rain thins its sounds out instead of rattling. The best
   item's slam has its own boom. A soft chord at the end is a switch (off by default). Shockwaves rise from
   the ground as half circles.
+- **Popup arrivals by rarity** (new Arrivals page, a choice per rarity with a Test button): Uncommon
+  Fireflies, Emerald flare or Geyser; Rare Sapphire flare or Aurora arch; Epic Implosion and galaxy, Eclipse
+  or Starfall; Legendary Supernova after the comet; or Simple sparks. Epic and Legendary names stamp in
+  letter by letter.
+- **New popup styles**: Splash (a slanted banner slashes in behind a big name with speed lines, a shine and
+  a rarity stamp; a crossing banner for Epic, gold trim for Legendary), Aura (wisps of light rise behind the
+  item) and Achievement (a medallion beside a name plate).
 - **Popup flair**: popups punch in with a little overshoot; a light sweeps once across the name (twice for a
   Legendary); Relic and Beam names sit on a soft dark plate with a thin underline in the item's color. A
   **Legendary moment**: the screen dims, a comet streaks down onto the popup and it lands in slow motion

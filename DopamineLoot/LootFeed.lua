@@ -278,6 +278,7 @@ ns.AddAction("arrivaltest", function(arg)
   for _, id in ipairs(TEST_IDS[q] or {}) do
     if not GetInfoInstant or GetInfoInstant(id) then cands[#cands + 1] = id end
   end
+  if not cands[1] then cands[1] = TestItem(q) or 2589 end -- (anything: it's shown at that rarity)
   local done = false
   for _, it in ipairs(cands) do
     ns.ItemData(it, 1, "loot", function(d)

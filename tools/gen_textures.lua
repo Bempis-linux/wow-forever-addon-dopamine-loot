@@ -110,6 +110,25 @@ Write("Pillar", Fill(Canvas(64, 256), function(u, v)
 end))
 
 -- Loot rain: the screen-edge pulse when an Epic+ lands (clear middle, soft glow at the edges)
+-- Splash style: a slanted band rising to the right (the banner behind the name), soft at both ends,
+-- with faint diagonal stripes; SplashEdge is only its two bright edge lines (tinted white or gold).
+-- Flipped top to bottom (SetTexCoord) it slants the other way: the crossing banner.
+local SLOPE, HALF = 0.2, 0.26 -- the band's center rises SLOPE across the width; its half-height
+local function BandAt(u, v) -- distance from the band's center line, in half-heights (0 center, 1 edge)
+  return math.abs(v - (0.5 + SLOPE * (u - 0.5))) / HALF
+end
+local function Ends(u) return math.min(1, u / 0.1, (1 - u) / 0.1) end
+Write("SplashBand", Fill(Canvas(512, 128), function(u, v)
+  local d = BandAt(u, v)
+  if d >= 1 then return 0 end
+  local stripe = 0.88 + 0.12 * (((u * 512 + v * 128 * 0.9) % 22) < 4 and 1 or 0)
+  return (0.9 - 0.25 * d * d) * stripe * Ends(u) * math.min(1, (1 - d) / 0.06)
+end))
+Write("SplashEdge", Fill(Canvas(512, 128), function(u, v)
+  local d = BandAt(u, v)
+  return (Bump(d, 1, 0.045) + 0.5 * Bump(d, 1, 0.12)) * Ends(u)
+end))
+
 Write("Vignette", Fill(Canvas(256, 256), function(u, v)
   local t = math.max(0, math.min(1, (R(u, v) - 0.55) / 0.75))
   return t * t * (3 - 2 * t)

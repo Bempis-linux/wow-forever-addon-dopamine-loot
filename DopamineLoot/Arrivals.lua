@@ -41,6 +41,9 @@ local function Layers(strata)
     for _, f in ipairs({ front, back }) do f:SetAllPoints(UIParent); f:EnableMouse(false) end
     driver = CreateFrame("Frame")
   end
+  -- (shared by every arrival: re-strata only while nothing plays, or a test popup's effects would
+  -- jump behind a real one's and back)
+  if effects[1] or parts[1] then return end
   front:SetFrameStrata(strata)
   front:SetFrameLevel(5000)
   back:SetFrameStrata(LOWER[strata] or "MEDIUM")
@@ -155,7 +158,7 @@ end
 -- Effects: { t, life, view, run(e, dt) } own their textures (e.tex[name]) and drop them at the end
 ---------------------------------------------------------------------------
 local function Effect(view, life, run, delay)
-  local e = { t = -(delay or 0), life = life, view = view, run = run, tex = {} }
+  local e = { t = -(delay or 0), life = life, view = view, run = run, tex = {}, gen = view and view.arrivalGen }
   Origin(e)
   effects[#effects + 1] = e
   return e
@@ -196,7 +199,7 @@ local A = {}
 function A.fireflies(view, x, y, s, r, g, b)
   local lr, lg, lb = Light(r, g, b)
   local cols = { { lr, lg, lb }, { 0.91, 1, 0.6 }, { r, g, b }, { 1, 0.96, 0.63 } }
-  local home = Effect(view, 3, function() end) -- tracks the item for the ring they gather into
+  local home = Effect(view, 3, function(e) Origin(e) end) -- follows the item, for the ring they gather into
   for i = 1, 28 do
     local an, v = math.random() * 6.28, Rnd(180, 320) * s
     local c = cols[(i % 4) + 1]
@@ -359,7 +362,7 @@ function A.implode(view, x, y, s, r, g, b)
       local sz = (5 + 3 * (1 - k)) * sc
       Place(T(e, i, front, MEDIA .. "Mote", "ADD"), ox + m[1] * k * sc, oy + m[2] * k * sc, sz, sz, math.min(1, e.t * 4), lr, lg, lb)
     end
-    if e.t + 0.02 >= e.life and not e.blasted then
+    if e.t >= e.life and not e.blasted then -- (its last frame runs at exactly life)
       e.blasted = true
       EpicBlast(view, ox, oy, sc, r, g, b)
       Galaxy(view, r, g, b, 0.25)
@@ -416,7 +419,7 @@ function A.starfall(view, x, y, s, r, g, b)
         local sz = ((last and 9 or 6) - j * 0.8) * sc
         Place(T(e, "t" .. j, front, MEDIA .. "Mote", "ADD"), ox + dx * kj * sc, oy + dy * kj * sc, sz, sz, 1 - j / 7, lr, lg, lb)
       end
-      if e.t + 0.02 >= dur and not e.hit then
+      if e.t >= dur and not e.hit then -- (its last frame runs at exactly dur)
         e.hit = true
         if last then
           Burst(ox, oy, 40, 540, sc, lr, lg, lb, { grav = 60, drag = 2.4, life = 1.2, size = 1.3 })
@@ -460,12 +463,12 @@ function A.supernova(view, x, y, s, r, g, b)
   Ring(view, r, g, b, 320, 1, 0.2, 0.7)
   for _ = 1, 3 do Burst(x, y, 24, 640, s, 1, 0.82, 0, { grav = 120, drag = 2, life = 1.4, size = 1.4, colors = GOLD }) end
   Glints(x, y, 14, 130, s)
-  Effect(view, 3.2, function(e) -- the halo that lingers, embers rising off it
+  Effect(view, 3.2, function(e, dt) -- the halo that lingers, embers rising off it
     local ox, oy, sc = Origin(e)
     local a = math.min(1, e.t / 0.4) * (1 - math.max(0, (e.t - 2.4) / 0.8))
     local rad = (92 + 6 * math.sin(e.t * 2)) * sc
     Place(T(e, "h", back, MEDIA .. "Wave", "ADD"), ox, oy, rad * 2, rad * 2, a, 1, 0.82, 0.3)
-    e.ember = (e.ember or 0) - 1 / 60
+    e.ember = (e.ember or 0) - dt
     if e.ember <= 0 and a > 0.2 then
       e.ember = 0.06
       local c = GOLD[math.random(3)]
@@ -483,7 +486,10 @@ local function Update(_, dt)
   for i = #effects, 1, -1 do
     local e = effects[i]
     e.t = e.t + dt
-    if e.t >= e.life or (e.view and not e.view:IsShown()) then
+    local gone = e.view and (not e.view:IsShown() or e.view.arrivalGen ~= e.gen) -- closed, or a new item
+    if e.t >= e.life or gone then
+      -- its last frame still runs (a blast at the very end must not be skipped at a low frame rate)
+      if not gone and e.t - dt < e.life then e.t = e.life; e.run(e, dt) end
       EndEffect(e)
       table.remove(effects, i)
     elseif e.t >= 0 then

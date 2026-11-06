@@ -26,14 +26,16 @@ local CARD = 56
 -- so items look the same size but long ones (Thunderfury) reach out past the popup instead of being
 -- cut off at the stage's edges; the text stays in front of it
 local MODEL_ROOM = 1.8
+local SPLASH_W, SPLASH_H = 400, 100 -- the Splash banner (SplashBand.tga is 512x128)
 local STAR = "Interface\\Cooldown\\star4" -- the game's four-point sparkle
 local RISE, SPARKS, GLINTS, EMBERS = 5, 22, 7, 6 -- beam's rising motes; burst sparks; star glints; embers
 local FLASH_T, WAVE_T, GLINT_T = 0.45, 0.9, 0.42
 
 -- Arrival by rarity (every style): how many burst sparks, how far and long they fly (k), how many
 -- glints; Legendary also gets two shockwaves and embers drifting up
-local function Tier(q) return q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or nil end
+local function Tier(q) return q >= 5 and "legendary" or q == 4 and "epic" or q == 3 and "rare" or q == 2 and "uncommon" or nil end
 local ARRIVAL = {
+  uncommon = { sparks = 6, k = 0.8, glints = 0 }, -- (a full Uncommon popup: its arrival, or these few sparks)
   rare = { sparks = 10, k = 1, glints = 0 },
   epic = { sparks = 14, k = 1.15, glints = 5 },
   legendary = { sparks = 22, k = 1.3, glints = 7 },
@@ -43,6 +45,9 @@ ns.STYLES = {
   { key = "relic", label = "Relic (default)", tip = "The item floating in a soft glow, its name below. No box around it." },
   { key = "beam", label = "Beam", tip = "A cone of light rising from a glowing disc under the item; for Rare and better, sparks drift up through it." },
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color with its name on it, the item on a diamond emblem, a shine sweeping across." },
+  { key = "splash", label = "Splash", tip = "A slanted banner slashes in behind a big name, with speed lines and a shine; the rarity is stamped on. Thicker the rarer: a crossing second banner for Epic, gold trim for Legendary." },
+  { key = "aura", label = "Aura", tip = "The item in an aura of its color: soft wisps of light rise behind it and its glow breathes. The name glows." },
+  { key = "achievement", label = "Achievement", tip = "A small medallion with the item beside a name plate, like an achievement toast." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);
@@ -51,6 +56,9 @@ local LAYOUT = {
   relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
+  splash = { w = 380, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 24 },
+  aura = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 20 },
+  achievement = { w = 360, h = 140, stage = { -116, 0, 104, 130 }, text = "right", hit = { 0, 0, 0, 0 }, zoom = 1, font = 18 },
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
@@ -136,8 +144,27 @@ function ns.CreateView(f)
   local WHITE = "Interface\\Buttons\\WHITE8X8"
   f.plateL, f.plateR = Tex(f, "BORDER", WHITE, nil, -1), Tex(f, "BORDER", WHITE, nil, -1) -- under the disc and shadow
   f.underL, f.underR = Tex(f, "BORDER", WHITE, nil, 2), Tex(f, "BORDER", WHITE, nil, 2)
+  -- Splash: the slanted banner (and a crossing one for Epic, gold trim for Legendary), its edge lines,
+  -- an info tab, speed lines and the rarity stamp (picked in docs/mockups/popup-designs.html)
+  f.splashBand = Tex(f, "BORDER", MEDIA .. "SplashBand", nil, 1)
+  f.splashBand2 = Tex(f, "BORDER", MEDIA .. "SplashBand", "ADD", 2)
+  f.splashEdge = Tex(f, "BORDER", MEDIA .. "SplashEdge", "ADD", 3)
+  f.splashTrim = Tex(f, "BORDER", MEDIA .. "SplashEdge", "ADD", 4)
+  f.tabBack = Tex(f, "BORDER", WHITE, nil, 5)
+  -- Aura: a breathing glow and soft wisps of light rising behind the item
+  f.auraGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
+  f.wisps = {}
+  for i = 1, 14 do f.wisps[i] = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD", 1) end
+  -- Achievement: a medallion (a glow, a dark disc, a ring in the quality color) and a name plate
+  f.medalGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
+  f.medalDisc = Tex(f, "BORDER", MEDIA .. "Disc", nil, 1)
+  f.medalRing = Tex(f, "BORDER", MEDIA .. "Wave", "ADD", 2)
+  f.achPlate = Tex(f, "BORDER", WHITE, nil, 0)
   f.art = { f.glow, f.cone, f.bar, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
-    f.shadow, f.emblem, f.emblemEdge, f.plateL, f.plateR, f.underL, f.underR }
+    f.shadow, f.emblem, f.emblemEdge, f.plateL, f.plateR, f.underL, f.underR,
+    f.splashBand, f.splashBand2, f.splashEdge, f.splashTrim, f.tabBack, f.auraGlow,
+    f.medalGlow, f.medalDisc, f.medalRing, f.achPlate }
+  for _, t in ipairs(f.wisps) do f.art[#f.art + 1] = t end
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
   if f.shineClip.SetClipsChildren then f.shineClip:SetClipsChildren(true) end
@@ -184,6 +211,21 @@ function ns.CreateView(f)
   f.nameShine = Tex(f.nameClip, "OVERLAY", MEDIA .. "Shine", "ADD")
   f.nameShine:Hide()
 
+  -- Splash: speed lines streaking across, and the rarity stamp (a plate with a white edge and a word)
+  f.speed = {}
+  for i = 1, 3 do f.speed[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Glow", "ADD"); f.fxAll[#f.fxAll + 1] = f.speed[i] end
+  f.stampEdge = Tex(f.fx, "ARTWORK", WHITE, nil, 3)
+  f.stampBack = Tex(f.fx, "ARTWORK", WHITE, nil, 4)
+  f.fxAll[#f.fxAll + 1] = f.stampEdge
+  f.fxAll[#f.fxAll + 1] = f.stampBack
+  f.stamp = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  f.stamp:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+  -- the rarity word (Aura, Achievement), spaced out
+  f.tag = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  -- Epic and better: the name's letters stamp in one after another (one text each; see Letters)
+  f.letters, f.measure = {}, f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  f.measure:Hide()
+
   f.name = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   f.info = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   f.info:SetTextColor(0.8, 0.76, 0.68)
@@ -223,8 +265,13 @@ function ns.CreateView(f)
     if TITLE_FONT then self.name:SetFont(TITLE_FONT, L.font, "") end
     local face = self.name:GetFont()
     if not (TITLE_FONT and face and face:lower():find("morpheus")) then self.name:SetFontObject("GameFontNormalLarge") end
-    for _, fs in ipairs({ self.name, self.info, self.badges }) do fs:ClearAllPoints() end
+    for _, fs in ipairs({ self.name, self.info, self.badges, self.tag, self.stamp }) do fs:ClearAllPoints() end
     self.info:SetTextColor(0.8, 0.76, 0.68)
+    self.tag:Hide()
+    self.stamp:Hide()
+    self.name:SetAlpha(1)
+    for _, l in ipairs(self.letters) do l:Hide() end
+    self.lettersOn = nil
 
     if style == "relic" or style == "beam" then
       if style == "relic" then
@@ -250,6 +297,68 @@ function ns.CreateView(f)
       self.info:SetJustifyH("CENTER")
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
       self.badges:SetJustifyH("CENTER")
+    elseif style == "splash" then
+      -- the banner runs across under the item's foot; the name sits on it, the info on a dark tab
+      -- below; the bands are anchored by their left (right for the crossing one) and revealed by Tick
+      self.splashBand:SetPoint("LEFT", self.stage, "BOTTOM", -SPLASH_W / 2, -26)
+      self.splashEdge:SetPoint("LEFT", self.stage, "BOTTOM", -SPLASH_W / 2, -26)
+      self.splashTrim:SetPoint("LEFT", self.stage, "BOTTOM", -SPLASH_W / 2 - 6, -26)
+      self.splashBand2:SetPoint("RIGHT", self.stage, "BOTTOM", SPLASH_W / 2 - 30, -24)
+      self.name:SetPoint("CENTER", self.stage, "BOTTOM", 0, -24)
+      self.name:SetWidth(L.w - 30)
+      self.name:SetJustifyH("CENTER")
+      self.info:SetPoint("TOP", self.name, "BOTTOM", 0, -12)
+      self.info:SetJustifyH("CENTER")
+      self.tabBack:SetPoint("TOPLEFT", self.info, "TOPLEFT", -12, 4)
+      self.tabBack:SetPoint("BOTTOMRIGHT", self.info, "BOTTOMRIGHT", 12, -4)
+      self.tabBack:SetVertexColor(0, 0, 0, 0.7)
+      self.tabBack:Show()
+      self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -8)
+      self.badges:SetJustifyH("CENTER")
+      self.stamp:SetPoint("CENTER", self.stage, "BOTTOMRIGHT", 34, 10)
+      self.shineClip:SetAllPoints(self.splashBand)
+      self.shineClip:Show()
+      self.shine:SetSize(90, 120)
+      self.shine:Hide()
+    elseif style == "aura" then
+      -- like the Relic, without the plate: the name, the rarity word spaced out, the info
+      self.auraGlow:SetPoint("CENTER", self.stage, "CENTER", 0, -10)
+      self.auraGlow:Show()
+      self.name:SetPoint("TOP", self.stage, "BOTTOM", 0, -6)
+      self.name:SetWidth(L.w - 20)
+      self.name:SetJustifyH("CENTER")
+      self.tag:SetPoint("TOP", self.name, "BOTTOM", 0, -3)
+      self.info:SetPoint("TOP", self.tag, "BOTTOM", 0, -3)
+      self.info:SetJustifyH("CENTER")
+      self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -3)
+      self.badges:SetJustifyH("CENTER")
+      self.tag:Show()
+      for _, w in ipairs(self.wisps) do w.age = nil end
+    elseif style == "achievement" then
+      -- the medallion around the item on the left, the name plate fading out to the right from it
+      self.medalGlow:SetSize(150, 150)
+      self.medalGlow:SetPoint("CENTER", self.stage, "CENTER")
+      self.medalDisc:SetSize(104, 104)
+      self.medalDisc:SetPoint("CENTER", self.stage, "CENTER")
+      self.medalRing:SetSize(122, 122)
+      self.medalRing:SetPoint("CENTER", self.stage, "CENTER")
+      self.achPlate:SetSize(240, 70)
+      self.achPlate:SetPoint("LEFT", self.stage, "CENTER", 30, 0)
+      if self.achPlate.SetGradient and CreateColor then
+        self.achPlate:SetGradient("HORIZONTAL", CreateColor(0.09, 0.07, 0.04, 0.95), CreateColor(0.09, 0.07, 0.04, 0))
+      else
+        self.achPlate:SetVertexColor(0.09, 0.07, 0.04, 0.8)
+      end
+      for _, t in ipairs({ self.medalGlow, self.medalDisc, self.medalRing, self.achPlate }) do t:Show() end
+      self.tag:SetPoint("TOPLEFT", self.achPlate, "TOPLEFT", 36, -8)
+      self.name:SetPoint("TOPLEFT", self.tag, "BOTTOMLEFT", 0, -2)
+      self.name:SetWidth(200)
+      self.name:SetJustifyH("LEFT")
+      self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
+      self.info:SetJustifyH("LEFT")
+      self.badges:SetPoint("LEFT", self.info, "RIGHT", 10, 0)
+      self.badges:SetJustifyH("LEFT")
+      self.tag:Show()
     elseif style == "compact" then
       -- one line: the icon, then the name on a dark strip that fades out to the right
       self.bar:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
@@ -294,7 +403,7 @@ function ns.CreateView(f)
       self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0) -- on the info line, inside the band
       self.badges:SetJustifyH("LEFT")
     end
-    if style ~= "banner" then self.shineClip:Hide() end
+    if style ~= "banner" and style ~= "splash" then self.shineClip:Hide() end
   end
 
   -- Fill in an item. Call after the frame is shown (the model needs a visible frame).
@@ -311,6 +420,27 @@ function ns.CreateView(f)
     self.emblemEdge:SetVertexColor(math.min(1, r + 0.2), math.min(1, g + 0.2), math.min(1, b + 0.2), 1)
     self.shine:SetVertexColor(math.min(1, r + 0.6), math.min(1, g + 0.6), math.min(1, b + 0.6), 0.55)
     self.cone:SetVertexColor(r, g, b, 0.85)
+    local qr, qg, qb = math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35) -- lighter tint
+    -- Splash: the banner in the item's color, white edges, a lighter crossing band (Epic+), gold trim
+    -- (Legendary); Tick reveals them
+    self.splashBand:SetVertexColor(r * 0.85, g * 0.85, b * 0.85, 0.95)
+    self.splashEdge:SetVertexColor(1, 1, 1, 0.9)
+    self.splashBand2:SetVertexColor(qr, qg, qb, 0.75)
+    self.splashTrim:SetVertexColor(1, 0.82, 0.4, 1)
+    for _, t in ipairs(self.speed) do t:SetVertexColor(1, 1, 1, 1) end
+    self.stampBack:SetVertexColor(r, g, b, 1)
+    self.stampEdge:SetVertexColor(1, 1, 1, 1)
+    -- the rarity word (the stamp in Splash; the spaced-out tag in Aura and Achievement)
+    local word = (_G["ITEM_QUALITY" .. q .. "_DESC"] or ({ "Common", "Uncommon", "Rare", "Epic", "Legendary" })[q] or ""):upper()
+    self.stamp:SetText(word .. "!")
+    self.tag:SetText(word)
+    self.tag:SetTextColor(qr, qg, qb)
+    -- Aura and Achievement
+    self.auraGlow:SetVertexColor(qr, qg, qb, 1)
+    for _, w in ipairs(self.wisps) do w:SetVertexColor(r, g, b, 1) end
+    self.medalGlow:SetVertexColor(r, g, b, 0.7)
+    self.medalDisc:SetVertexColor(0.08, 0.06, 0.03, 0.95)
+    self.medalRing:SetVertexColor(r, g, b, 1)
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
@@ -397,6 +527,8 @@ function ns.CreateView(f)
       end
     end
     if self.style == "relic" or self.style == "beam" then self:Plate(iw) end
+    self:PrepareLetters()
+    self.arrivalGen = (self.arrivalGen or 0) + 1 -- (an arrival still running from the last item stops)
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
     -- weapons stood upright show their edge at facing 0: a quarter turn shows the flat side
@@ -447,6 +579,170 @@ function ns.CreateView(f)
     local a = self.q >= 4 and 0.9 or 0.5
     self.nameShine:SetVertexColor(math.min(1, r + 0.6), math.min(1, g + 0.6), math.min(1, b + 0.6), a)
     self.shineTimes = self.q >= 5 and { 0.25, 1.5 } or self.q >= 2 and { 0.25 } or nil
+  end
+
+  -- Epic and better: the name is laid out letter by letter (one text each, at the place the whole
+  -- name puts it) so Tick can stamp them in one after another; the name itself shows again once they
+  -- have all landed. Only for a name on one line (a wrapped one just shows).
+  function f:PrepareLetters()
+    self.lettersOn = nil
+    for _, l in ipairs(self.letters) do l:Hide() end
+    if self.q < 4 or self.style == "compact" then return end
+    local text = self.name:GetText() or ""
+    local face, size, flags = self.name:GetFont()
+    if not face or text == "" then return end
+    local measure = self.name.GetUnboundedStringWidth or self.name.GetStringWidth
+    local total = measure(self.name)
+    if total <= 0 or total > self.name:GetWidth() then return end
+    self.measure:SetFont(face, size, flags or "")
+    local mw = self.measure.GetUnboundedStringWidth or self.measure.GetStringWidth
+    local left = self.name:GetJustifyH() == "LEFT" and 0 or -total / 2 -- from the name's left or middle
+    local anchor = self.name:GetJustifyH() == "LEFT" and "LEFT" or "CENTER"
+    local r, g, b = self.name:GetTextColor()
+    local prefix, i = "", 0
+    for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+      i = i + 1
+      local l = self.letters[i]
+      if not l then l = self.fx:CreateFontString(nil, "OVERLAY"); self.letters[i] = l end
+      l:SetFont(face, size, flags or "")
+      l:SetText(ch)
+      l:SetTextColor(r, g, b)
+      l:SetShadowColor(0, 0, 0, 1)
+      l:SetShadowOffset(1, -1)
+      self.measure:SetText(prefix)
+      local x0 = prefix == "" and 0 or mw(self.measure)
+      self.measure:SetText(ch)
+      l.cx = left + x0 + mw(self.measure) / 2 -- the letter's middle, from the anchor
+      l.anchor, l.size, l.face, l.flags = anchor, size, face, flags or ""
+      l:Hide()
+      prefix = prefix .. ch
+    end
+    self.letterCount = i
+    self.lettersOn = i > 0
+  end
+  local LETTER_AT, LETTER_STEP, LETTER_T = 0.15, 0.05, 0.26
+  function f:Letters(fx)
+    local n = self.letterCount
+    if fx >= LETTER_AT + n * LETTER_STEP + LETTER_T then -- all down: the name itself again, crisp
+      for k = 1, n do self.letters[k]:Hide() end
+      self.name:SetAlpha(1)
+      self.lettersOn = nil
+      return
+    end
+    self.name:SetAlpha(0)
+    for k = 1, n do
+      local l = self.letters[k]
+      local t = fx - LETTER_AT - (k - 1) * LETTER_STEP
+      if t < 0 then
+        l:Hide()
+      else
+        local u = math.min(1, t / LETTER_T)
+        -- slams in big, a touch small, settled
+        local sc = u < 0.7 and 2.6 - 1.68 * (u / 0.7) or 0.92 + 0.08 * ((u - 0.7) / 0.3)
+        if l.SetTextScale then l:SetTextScale(sc) else l:SetFont(l.face, l.size * sc, l.flags) end
+        l:ClearAllPoints()
+        l:SetPoint("CENTER", self.name, l.anchor, l.cx, 0)
+        l:SetAlpha(math.min(1, u / 0.3))
+        l:Show()
+      end
+    end
+  end
+
+  local function Clamp01(x) return x < 0 and 0 or x > 1 and 1 or x end
+  local function TextScale(fs, sc, face, size, flags)
+    if fs.SetTextScale then fs:SetTextScale(sc) else fs:SetFont(face, size * sc, flags) end
+  end
+  -- Splash: the banner slashes in from the left (the crossing one from the right, Epic+), speed lines
+  -- streak across, a shine runs along it, the name zips in (Epic+: its letters stamp in instead), and
+  -- the rarity stamp lands; the banner is thicker the rarer
+  function f:SplashTick(fx)
+    local q = self.q
+    local h = SPLASH_H * (0.8 + 0.1 * (math.min(q, 5) - 2))
+    local e = 1 - (1 - Clamp01(fx / 0.3)) ^ 3
+    for _, t in ipairs({ self.splashBand, self.splashEdge, q >= 5 and self.splashTrim or nil }) do
+      if e <= 0 then t:Hide() else
+        local extra = t == self.splashTrim and 12 or 0
+        t:SetSize(math.max(1, (SPLASH_W + extra) * e), h + extra * 0.6)
+        t:SetTexCoord(0, e, 0, 1)
+        t:Show()
+      end
+    end
+    if q >= 4 then
+      local e2 = 1 - (1 - Clamp01((fx - 0.2) / 0.28)) ^ 3
+      if e2 <= 0 then self.splashBand2:Hide() else
+        self.splashBand2:SetSize(math.max(1, 340 * e2), h * 0.7)
+        self.splashBand2:SetTexCoord(1 - e2, 1, 1, 0) -- flipped top to bottom: slants the other way
+        self.splashBand2:Show()
+      end
+    end
+    for i, s in ipairs(self.speed) do
+      local p = (fx - (0.04 + (i - 1) * 0.05)) / 0.35
+      if p >= 0 and p < 1 then
+        s:ClearAllPoints()
+        s:SetPoint("CENTER", self.stage, "BOTTOM", -200 + 420 * p, -10 - (i - 1) * 14)
+        s:SetSize(120, 4)
+        s:SetAlpha(math.sin(math.pi * p) * 0.9)
+        s:Show()
+      elseif s:IsShown() then s:Hide() end
+    end
+    local sp = (fx - 0.45) / 0.7
+    if sp >= 0 and sp < 1 then
+      self.shine:ClearAllPoints()
+      self.shine:SetPoint("CENTER", self.shineClip, "LEFT", -45 + (self.shineClip:GetWidth() + 90) * sp, 0)
+      self.shine:Show()
+    elseif self.shine:IsShown() then self.shine:Hide() end
+    -- the name zips in from the left (below Epic)
+    if q < 4 then
+      local zt = Clamp01((fx - 0.12) / 0.3)
+      local ze = 1 - (1 - zt) ^ 3
+      self.name:ClearAllPoints()
+      self.name:SetPoint("CENTER", self.stage, "BOTTOM", -160 * (1 - ze), -24)
+      self.name:SetAlpha(zt)
+    end
+    -- the stamp lands: big, then punched down to size
+    local st = fx - 0.38
+    if st < 0 then
+      self.stamp:Hide(); self.stampBack:Hide(); self.stampEdge:Hide()
+    else
+      local u = Clamp01(st / 0.26)
+      local sc = 2.6 - 1.6 * (1 - (1 - u) ^ 3)
+      TextScale(self.stamp, sc, "Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+      local w, ht = (self.stamp:GetStringWidth() + 12), 18 * sc
+      self.stampBack:ClearAllPoints(); self.stampBack:SetPoint("CENTER", self.stamp, "CENTER")
+      self.stampBack:SetSize(w, ht)
+      self.stampEdge:ClearAllPoints(); self.stampEdge:SetPoint("CENTER", self.stamp, "CENTER")
+      self.stampEdge:SetSize(w + 4, ht + 4)
+      local a = Clamp01(st / 0.08)
+      for _, t in ipairs({ self.stamp, self.stampBack, self.stampEdge }) do t:SetAlpha(a); t:Show() end
+    end
+  end
+  -- Aura: the glow breathes, and soft wisps of light rise behind the item, drifting
+  function f:AuraTick(dt, age)
+    local fade = math.min(1, age / 0.5)
+    self.auraGlow:SetSize(210, 210)
+    self.auraGlow:SetAlpha((0.45 + 0.15 * math.sin(age * 2)) * fade)
+    self.wispT = (self.wispT or 0) - dt
+    for _, w in ipairs(self.wisps) do
+      if not w.age and self.wispT <= 0 then -- a new wisp from just under the item
+        self.wispT = 0.12
+        w.age, w.life, w.x0, w.r, w.ph = 0, 1.6 + math.random() * 0.8, (math.random() * 2 - 1) * 34, 28 + math.random() * 24, math.random() * 6.28
+      end
+      if w.age then
+        w.age = w.age + dt
+        local u = w.age / w.life
+        if u >= 1 then
+          w.age = nil
+          w:Hide()
+        else
+          w:ClearAllPoints()
+          w:SetPoint("CENTER", self.stage, "BOTTOM", w.x0 + math.sin(w.age * 1.6 + w.ph) * 12 * u, 10 + u * 170)
+          local size = w.r * (1 + u * 1.4) * 2
+          w:SetSize(size, size)
+          w:SetAlpha(math.sin(math.pi * u) * 0.38 * fade)
+          w:Show()
+        end
+      end
+    end
   end
 
   -- The model path: SetItem, then OnModelLoaded (or a 1 s timeout) decides model or card
@@ -544,6 +840,10 @@ function ns.CreateView(f)
     elseif self.flash:IsShown() then
       self.flash:Hide()
     end
+
+    if self.style == "splash" then self:SplashTick(fx) end
+    if self.style == "aura" then self:AuraTick(dt, age) end
+    if self.lettersOn then self:Letters(fx) end
 
     -- beam style, Rare and up: a few motes rise slowly through the light
     if self.style == "beam" and self.q >= 3 then
