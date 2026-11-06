@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money Counter Mockup</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 290px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  #vdesc { margin-top: 4px; min-height: 46px; }
+  #screen { position: fixed; left: 310px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 45% 70%, #3d4a36, #1b2219 60%, #0f130e); }
+  canvas { position: absolute; inset: 0; }
+  .bar { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); display: flex; gap: 3px; }
+  .bar i { width: 30px; height: 30px; background: rgba(20, 16, 10, .8); border: 1px solid #5a4a28; border-radius: 3px; }
+  .bag { position: absolute; right: 26px; bottom: 10px; width: 40px; height: 40px; border-radius: 6px; background: linear-gradient(#8a6236, #5b3d1e); border: 1px solid #2a1a0c; box-shadow: inset 0 0 0 2px #a07a40; transition: transform .08s; }
+  .bag::after { content: ""; position: absolute; left: 12px; top: 6px; width: 16px; height: 8px; border-radius: 4px 4px 0 0; border: 2px solid #d9b25a; border-bottom: 0; }
+  .ctr { position: absolute; pointer-events: none; display: flex; align-items: center; gap: 8px; transform-origin: 100% 100%; font: 700 18px Georgia, serif; text-shadow: 0 2px 4px #000; }
+  .coin { display: inline-flex; align-items: center; gap: 3px; }
+  .coin b { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: inset -2px -2px 0 rgba(0,0,0,.25), 0 0 4px rgba(0,0,0,.6); }
+  .g b { background: radial-gradient(circle at 35% 35%, #fff6b0, #ffd100 45%, #b08000); } .g { color: #ffd84a; }
+  .s b { background: radial-gradient(circle at 35% 35%, #fff, #c8d0d8 45%, #7d8690); } .s { color: #e2e8ee; }
+  .c b { background: radial-gradient(circle at 35% 35%, #ffd2a8, #c87533 45%, #7a3e14); } .c { color: #e6a06a; }
+  .items { color: #fff; font-size: 15px; opacity: .9; }
+  /* V0 now: mid-screen */
+  .V0 { left: 50%; top: 42%; transform: translateX(-50%); flex-direction: column; gap: 2px; }
+  .V0 .items { font: 32px Georgia, serif; color: #ffd100; }
+  /* V1 tally above the bag */
+  .V1 { right: 18px; bottom: 60px; }
+  .pop { animation: pop .18s ease-out; }
+  @keyframes pop { 0% { transform: scale(1.35) } 100% { transform: scale(1) } }
+  /* V2 odometer */
+  .V2 { right: 18px; bottom: 60px; background: linear-gradient(#1b150c, #0c0905); padding: 4px 10px; border-radius: 6px; border: 1px solid #6a5222; box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,220,140,.15); }
+  .odo { display: inline-flex; overflow: hidden; height: 22px; line-height: 22px; }
+  .odo .d { display: inline-block; width: 11px; text-align: center; position: relative; height: 22px; overflow: hidden; }
+  .odo .d i { position: absolute; left: 0; right: 0; font-style: normal; transition: transform .16s cubic-bezier(.3,1.4,.5,1); }
+  /* V3 treasure plaque */
+  .V3 { right: 14px; bottom: 60px; padding: 6px 14px 6px 12px; border-radius: 8px; background: linear-gradient(#2a2014, #120d07);
+    box-shadow: 0 0 0 1px #000, 0 0 0 2px #8a6a2a, 0 4px 14px rgba(0,0,0,.6); overflow: hidden; transition: box-shadow .4s; }
+  .V3.rich { box-shadow: 0 0 0 1px #000, 0 0 0 2px #ffd100, 0 0 22px 2px rgba(255,200,60,.55), 0 4px 14px rgba(0,0,0,.6); }
+  .V3 .sh { position: absolute; top: 0; bottom: 0; width: 40%; left: -50%; background: linear-gradient(90deg, transparent, rgba(255,240,180,.55), transparent); }
+  .V3 .sh.go { animation: sw .6s ease-in-out; }
+  @keyframes sw { from { left: -50% } to { left: 120% } }
+  .punch { animation: punch .45s cubic-bezier(.3,1.8,.5,1); }
+  @keyframes punch { 0% { transform: scale(1) } 35% { transform: scale(1.4) } 100% { transform: scale(1) } }
+  .note { position: absolute; left: 12px; top: 10px; right: 12px; color: rgba(255,255,255,.55); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Money counter mockup</h1>
+  <small>Where the rain's money total sits and how it counts. Pick a version and an amount, then Rain.</small>
+
+  <h2>Version</h2>
+  <button data-v="V0">Now (mid-screen)</button><button data-v="V1" class="on">Tally</button><button data-v="V2">Odometer</button><button data-v="V3">Treasure plaque</button>
+  <small id="vdesc"></small>
+
+  <h2>Amount</h2>
+  <button data-m="54">54c</button><button data-m="3520">35s 20c</button><button data-m="23500" class="on">2g 35s</button><button data-m="250000">25g</button><button data-m="1204500">120g 45s</button>
+
+  <h2>Options</h2>
+  <label class="fx"><input type="checkbox" id="oBag" checked><b>Counts as it goes into the bag</b><small>Off: counts as the coins land, like now.</small></label>
+  <label class="fx"><input type="checkbox" id="oItems" checked><b>Item count too</b><small>"+12" items next to the money (now it's in the middle of the screen).</small></label>
+  <label class="fx"><input type="checkbox" id="oFly" checked><b>Coins fly into the counter</b><small>A small spark jumps from the bag into the number on each coin.</small></label>
+  <label class="fx"><input type="checkbox" id="oEnd" checked><b>Final flourish</b><small>When the last coin is in: the total punches up and a glint runs across; from 1 gold the counter glows gold; from 10 gold a little fireworks burst.</small></label>
+  <h2>Run</h2>
+  <button id="go">Rain</button>
+  <small style="margin-top:10px">A drag-to-move position for the counter can come with the drag-to-move popups (roadmap).</small>
+</div>
+<div id="screen">
+  <canvas id="cv"></canvas>
+  <div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="bag" id="bag"></div>
+  <div id="ctrBox"></div>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const DESC = {
+  V0: 'As it is now: "+N" items and the money total in the middle of the screen, counting as the coins land.',
+  V1: 'Tally: right above the bag, coin icons with gold, silver and copper; each coin that goes in bumps the number with a pop.',
+  V2: 'Odometer: a little dark counter above the bag whose digits roll up like a slot reel as the coins go in.',
+  V3: 'Treasure plaque: a framed plaque above the bag; coins fly into it, and at the end the total punches up with a glint; gold rim from 1g, fireworks from 10g.',
+};
+let ver = 'V1', amount = 23500;
+const cv = $('cv'), ctx = cv.getContext('2d');
+let W, H;
+function resize() { const r = $('screen').getBoundingClientRect(), d = devicePixelRatio || 1; W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(d, 0, 0, d, 0, 0); }
+addEventListener('resize', resize); resize();
+const R = (a, b) => a + Math.random() * (b - a);
+const floorY = () => H - 60;
+const bagXY = () => [W - 46, H - 30];
+
+// the coins this money rains as (like RainCore.CoinPlan: more money, more coins, 30 at most)
+function plan(copper) {
+  const n = Math.min(30, Math.max(1, Math.round(Math.log(copper + 1) * 2.6)));
+  const g = Math.floor(copper / 10000), s = Math.floor(copper / 100) % 100, c = copper % 100;
+  const out = [];
+  const gold = g > 0 ? Math.max(1, Math.min(g, Math.floor(n / 2))) : 0, cop = c > 0 ? Math.min(4, c) : 0;
+  for (let i = 0; i < gold; i++) out.push('g');
+  for (let i = 0; i < cop; i++) out.push('c');
+  while (out.length < n) out.push(s > 0 || g > 0 ? 's' : 'c');
+  return out.sort(() => Math.random() - .5);
+}
+const COL = { g: ['#fff6b0', '#ffd100', '#b08000'], s: ['#fff', '#c8d0d8', '#7d8690'], c: ['#ffd2a8', '#c87533', '#7a3e14'] };
+let sprites = [], sparks = [], fly = [], state = null;
+
+function startRain() {
+  sprites = []; sparks = []; fly = [];
+  const kinds = plan(amount), items = 12;
+  const launches = [];
+  for (let i = 0; i < items; i++) launches.push({ item: true, q: i > 9 ? 3 : i > 6 ? 2 : 1 });
+  kinds.forEach(k => launches.splice(Math.floor(Math.random() * Math.min(launches.length, 8)), 0, { coin: k }));
+  state = { t: 0, next: 0, queue: launches, coins: kinds.length, items, landedCoins: 0, bagCoins: 0, bagItems: 0, landedItems: 0, settle: 0, gathering: false, done: false, shown: 0, flourished: false };
+  renderCounter(true);
+}
+function launch(l) {
+  const x = W * .45 + R(-10, 10);
+  sprites.push({ ...l, x, y: floorY(), vx: R(-300, 300), vy: -R(700, 980) * (l.coin ? .85 : 1), rest: false, landed: false, s: l.coin ? 12 : 30, g: null });
+}
+function step(dt) {
+  const st = state; if (!st) return;
+  st.t += dt;
+  while (st.queue.length && st.t >= st.next) { launch(st.queue.shift()); st.next += .07; }
+  for (const s of sprites) {
+    if (s.g) {
+      s.g.t += dt; const u = Math.min(1, Math.max(0, s.g.t / .65)), e = u * u, [bx, by] = bagXY();
+      s.x = (1 - e) * (1 - e) * s.g.x0 + 2 * (1 - e) * e * s.g.cx + e * e * bx; s.y = (1 - e) * (1 - e) * s.g.y0 + 2 * (1 - e) * e * s.g.cy + e * e * by; s.sc = 1 - .6 * e;
+      if (u >= 1 && !s.in) { s.in = true; arrive(s); }
+      continue;
+    }
+    if (s.rest) continue;
+    s.vy += 1800 * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+    if (s.x < 20) { s.x = 20; s.vx = Math.abs(s.vx); } if (s.x > W - 20) { s.x = W - 20; s.vx = -Math.abs(s.vx); }
+    if (s.y >= floorY() && s.vy > 0) {
+      s.y = floorY();
+      if (!s.landed) { s.landed = true; if (s.coin) { st.landedCoins++; if (!$('oBag').checked) bump(); } else { st.landedItems++; if (!$('oBag').checked) bump(); } }
+      if (s.vy > 170) { s.vy = -s.vy * .5; s.vx *= .8; } else { s.vy = 0; s.rest = true; }
+    }
+  }
+  if (!st.queue.length && !st.gathering && sprites.every(s => s.rest)) {
+    st.settle += dt;
+    if (st.settle > .6) {
+      st.gathering = true;
+      sprites.sort((a, b) => b.x - a.x).forEach((s, i) => { const [bx, by] = bagXY(); s.g = { t: -i * Math.min(.11, 2.8 / sprites.length), x0: s.x, y0: s.y, cx: (s.x + bx) / 2, cy: Math.min(s.y, by) - R(160, 240) }; });
+    }
+  }
+}
+function arrive(s) {
+  const st = state, b = $('bag');
+  b.style.transform = 'scale(1.18)'; setTimeout(() => b.style.transform = '', 80);
+  if (s.coin) st.bagCoins++; else st.bagItems++;
+  const [bx, by] = bagXY();
+  for (let i = 0; i < 3; i++) sparks.push({ x: bx, y: by - 10, vx: R(-60, 60), vy: R(-160, -90), age: 0, life: .5, c: s.coin ? COL[s.coin][1] : '#fff' });
+  if ($('oBag').checked) bump(s.coin);
+  if (s.coin && $('oFly').checked && ver !== 'V0') fly.push({ t: 0, c: COL[s.coin][1] });
+  if (st.bagCoins === st.coins && st.bagItems === st.items && !st.flourished) { st.flourished = true; setTimeout(flourish, 120); }
+}
+// the counter's numbers: money in by now (all coins of the same plan share the total evenly)
+function counts() {
+  const st = state, viaBag = $('oBag').checked;
+  const coinsDone = viaBag ? st.bagCoins : st.landedCoins, itemsDone = viaBag ? st.bagItems : st.landedItems;
+  return { copper: Math.round(amount * coinsDone / st.coins), items: itemsDone };
+}
+function parts(copper) { return { g: Math.floor(copper / 10000), s: Math.floor(copper / 100) % 100, c: copper % 100 }; }
+function money(copper, odo) {
+  const p = parts(copper), out = [];
+  const cell = (k, v) => odo ? `<span class="coin ${k}"><span class="odo">${String(v).split('').map(d => `<span class="d"><i style="transform:translateY(0)">${d}</i></span>`).join('')}</span><b></b></span>` : `<span class="coin ${k}">${v}<b></b></span>`;
+  if (p.g) out.push(cell('g', p.g));
+  if (p.g || p.s) out.push(cell('s', p.s));
+  if (!p.g) out.push(cell('c', p.c));
+  else if (p.c) out.push(cell('c', p.c));
+  return out.join(' ');
+}
+let ctrEl;
+function renderCounter(reset) {
+  const box = $('ctrBox');
+  if (reset) { box.innerHTML = `<div class="ctr ${ver}">${ver === 'V3' ? '<span class="sh"></span>' : ''}<span class="m"></span><span class="items"></span></div>`; ctrEl = box.firstElementChild; ctrEl.style.opacity = 0; }
+  const { copper, items } = counts();
+  ctrEl.querySelector('.m').innerHTML = copper > 0 ? money(copper, ver === 'V2') : '';
+  ctrEl.querySelector('.items').textContent = $('oItems').checked && items > 0 ? `+${items}` : (ver === 'V0' && items > 0 ? `+${items}` : '');
+  if (copper > 0 || items > 0) ctrEl.style.opacity = 1;
+  if (ver === 'V0') { ctrEl.insertBefore(ctrEl.querySelector('.items'), ctrEl.firstChild); }
+}
+function bump() {
+  renderCounter();
+  if (ver === 'V1' || ver === 'V3') { ctrEl.classList.remove('pop'); void ctrEl.offsetWidth; ctrEl.classList.add('pop'); }
+  if (ver === 'V2') ctrEl.querySelectorAll('.odo .d i').forEach(i => { i.style.transition = 'none'; i.style.transform = 'translateY(-100%)'; void i.offsetWidth; i.style.transition = ''; i.style.transform = 'translateY(0)'; });
+}
+function flourish() {
+  if (!$('oEnd').checked || !ctrEl) return;
+  ctrEl.classList.remove('pop', 'punch'); void ctrEl.offsetWidth; ctrEl.classList.add('punch');
+  const sh = ctrEl.querySelector('.sh'); if (sh) { sh.classList.remove('go'); void sh.offsetWidth; sh.classList.add('go'); }
+  if (amount >= 10000 && ver === 'V3') ctrEl.classList.add('rich');
+  if (amount >= 100000) {
+    const r = ctrEl.getBoundingClientRect(), sc = $('screen').getBoundingClientRect(), x = r.left - sc.left + r.width / 2, y = r.top - sc.top;
+    for (let i = 0; i < 40; i++) { const a = R(-Math.PI, 0), v = R(120, 340); sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: -R(0, .15), life: R(.6, 1.1), c: i % 3 ? '#ffd100' : '#fff' }); }
+  }
+  setTimeout(() => { if (ctrEl) { ctrEl.style.transition = 'opacity .8s'; ctrEl.style.opacity = 0; } }, 2200);
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  step(dt);
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,210,140,.18)'; ctx.fillRect(W * .1, floorY() + 1, W * .8, 1.5);
+  for (const s of sprites) {
+    if (s.in) continue;
+    const sc = s.sc || 1;
+    ctx.save(); ctx.translate(s.x, s.y - s.s * sc / 2); ctx.scale(sc, sc);
+    if (s.coin) {
+      const [a, b, c] = COL[s.coin], g = ctx.createRadialGradient(-3, -3, 1, 0, 0, s.s / 2 + 2);
+      g.addColorStop(0, a); g.addColorStop(.5, b); g.addColorStop(1, c); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, s.s / 2 + 2, 0, 7); ctx.fill();
+    } else {
+      ctx.fillStyle = '#2a2318'; ctx.fillRect(-15, -15, 30, 30);
+      ctx.strokeStyle = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd'][s.q]; ctx.lineWidth = 2; ctx.strokeRect(-15, -15, 30, 30);
+    }
+    ctx.restore();
+  }
+  // a spark from the bag up into the counter for each coin
+  if (ctrEl) {
+    const r = ctrEl.getBoundingClientRect(), scr = $('screen').getBoundingClientRect(), tx = r.left - scr.left + r.width * .3, ty = r.top - scr.top + r.height / 2, [bx, by] = bagXY();
+    for (const f of fly) {
+      f.t += dt; const u = Math.min(1, f.t / .25);
+      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - u * .3; ctx.fillStyle = f.c;
+      ctx.beginPath(); ctx.arc(bx + (tx - bx) * u, by - 8 + (ty - by + 8) * u - Math.sin(Math.PI * u) * 14, 3, 0, 7); ctx.fill();
+    }
+    fly = fly.filter(f => f.t < .25);
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  for (const p of sparks) {
+    p.age += dt; if (p.age < 0) continue; p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    ctx.globalAlpha = 1 - p.age / p.life; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, 7); ctx.fill();
+  }
+  sparks = sparks.filter(p => p.age < p.life);
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-v]').forEach(x => x.classList.remove('on')); b.classList.add('on');
+  ver = b.dataset.v; $('vdesc').textContent = DESC[ver]; startRain();
+});
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-m]').forEach(x => x.classList.remove('on')); b.classList.add('on');
+  amount = +b.dataset.m; startRain();
+});
+$('go').onclick = startRain;
+$('vdesc').textContent = DESC[ver];
+$('note').textContent = 'The bag is at the bottom right, like the backpack button; the counter sits right above it.';
+startRain();
+</script>
+</body>
+</html>
