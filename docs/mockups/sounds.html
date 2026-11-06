@@ -29,8 +29,8 @@
 </head>
 <body>
 <main>
-  <h1>Loot rain sounds: pick by ear (round 4)</h1>
-  <p class="lead">Round 4: items land with a soft thud and a dusty poof, pitched along the gentle arpeggio; Rare and Epic add a soft note on the same pitch. The bag is the liked pouch and coin with the coin pulled back. Each round's favorite is there to compare. They're brought to the same loudness so only the sound differs. Tick one in each list, then hear them together under <b>Whole rain</b>.</p>
+  <h1>Loot rain sounds: pick by ear (round 5)</h1>
+  <p class="lead">Round 5: the dust and the pouch brush were the same noise in every file; now each one is fresh, softer (pink or brown noise) and varies a little. Three poof flavors for landing, the round-3 bag rebuilt the same way. Each round's favorite is there to compare. They're brought to the same loudness so only the sound differs. Tick one in each list, then hear them together under <b>Whole rain</b>.</p>
   <div class="whole">
     <label>Volume <input type="range" id="vol" min="0" max="100" value="60"></label>
     <label>Pitch
@@ -59,20 +59,21 @@
 <script>
 'use strict';
 const LAND = [
-  ['LandDropSoft', 'Soft drop (round 3)', 'For comparison.'],
-  ['LandThud', 'Thud and poof', 'A soft low thud on the note and a dusty poof, like the dust puff. In a whole rain, Rare and Epic items get their touch below.'],
-  ['LandThudDusty', 'Thud and poof, dustier', 'More poof, less thud. Rare and Epic get their touch too.'],
-  ['LandThudRare', 'Rare touch', 'What a Rare sounds like landing: the thud and poof, and a soft note two octaves up on the same pitch.'],
-  ['LandThudEpic', 'Epic touch', 'An Epic: the same note and its fifth above, a touch longer.'],
+  ['LandThud', 'Thud and poof (round 4)', 'For comparison: the same dust under every note.'],
+  ['LandPoofDusty', 'Thud, dusty poof', 'Soft pink-noise dust, a little different every time. In a whole rain, Rare and Epic items get their touch.'],
+  ['LandPoofDeep', 'Thud, deep soft poof', 'Deeper, softer dust (brown noise), a bit longer, like landing in sand.'],
+  ['LandPoofLight', 'Thud, light pff', 'A light, short puff of air over the thud.'],
+  ['LandPoofDustyRare', 'Rare touch (dusty)', 'A Rare: the thud and poof and a soft note two octaves up on the same pitch. Each poof family has its own.'],
+  ['LandPoofDustyEpic', 'Epic touch (dusty)', 'An Epic: the same note and its fifth above.'],
 ];
 const BAG = [
-  ['BagPouchCoinSoft', 'Soft pouch and coin (round 3)', 'For comparison: liked, but the coin overpowers the pouch.'],
-  ['BagPouchCoinBal', 'Coin a step under', 'The same, with the coin a step under the pouch.'],
-  ['BagPouchCoinLow', 'Coin just a glint', 'The pouch leads; the coin is just a glint inside.'],
+  ['BagPouchCoinSoft', 'Soft pouch and coin (round 3)', 'For comparison: liked, the same brush every time.'],
+  ['BagPouchCoinFresh', 'Round 3, fresh brush', 'The same pouch and coin, the brush now soft pink noise and different every time.'],
+  ['BagPouchCoinFreshLess', 'Fresh brush, coin a touch lower', 'The same, with the coin a touch lower.'],
 ];
-const pick = { land: 'LandThud', bag: 'BagPouchCoinBal' };
-// in a whole rain, the thud family plays its Rare / Epic touch for those items (on the same note)
-const TOUCH = { LandThud: true, LandThudDusty: true };
+const pick = { land: 'LandPoofDusty', bag: 'BagPouchCoinFresh' };
+// in a whole rain, a poof family plays its own Rare / Epic touch for those items (on the same note)
+const TOUCH = { LandPoofDusty: true, LandPoofDeep: true, LandPoofLight: true };
 const $ = id => document.getElementById(id);
 const status = t => $('status').textContent = t;
 
@@ -128,8 +129,8 @@ function run(name, n, kind, t0 = 0, nameFor = null) {
 }
 // which items in a rain are Rare or Epic: launched worst first, so they come last (before the best)
 function rarityName(i, n) {
-  if (i === n) return 'LandThudEpic';
-  if (i >= n - Math.max(1, Math.round(n / 6))) return 'LandThudRare';
+  if (i === n) return pick.land + 'Epic';
+  if (i >= n - Math.max(1, Math.round(n / 6))) return pick.land + 'Rare';
   return pick.land;
 }
 function row(list, kind) {

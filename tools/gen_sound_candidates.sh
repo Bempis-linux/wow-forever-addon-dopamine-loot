@@ -141,14 +141,8 @@ bag_bal() { pouch_coin_mix "$1" "$2" "$3" 0.55 1.2; }  # the coin a step under t
 bag_low() { pouch_coin_mix "$1" "$2" "$3" 0.38 1.3; }  # the coin just a glint in the pouch
 
 CANDIDATES="
-LandDropSoft soft_drop 294 14 0.4 pent lowpass=f=2200,$ROOM
 LandThud thud_poof 110 20 0.35 pent lowpass=f=2400
-LandThudDusty thud_poof_dusty 110 20 0.35 pent lowpass=f=2000
-LandThudRare thud_rare 110 20 0.45 pent lowpass=f=3000,$ROOM
-LandThudEpic thud_epic 110 20 0.55 pent lowpass=f=3500,$ROOM
 BagPouchCoinSoft pouch_coin_soft 450 30 0.4 narrow lowpass=f=6500,highpass=f=60
-BagPouchCoinBal bag_bal 450 26 0.4 narrow lowpass=f=6000,highpass=f=60
-BagPouchCoinLow bag_low 450 24 0.4 narrow lowpass=f=5500,highpass=f=60
 "
 while read -r name timbre base decay secs steps filters; do
   [ -n "$name" ] || continue
@@ -166,3 +160,61 @@ while read -r name timbre base decay secs steps filters; do
   render "${name}Chord" 1.6 "$chord" "${filters//\{F\}/$cf}"
   echo "wrote $name"
 done <<< "$CANDIDATES"
+
+# Round 5 (the user: the dust under the thud sounds off, "maybe because it's not changing"; the same
+# for the pouch). It wasn't changing: random(0) starts from the same seed in every file, so every
+# note had the identical noise. Now the noise is its own source (anoisesrc) with a seed per file,
+# pink or brown (softer than white), shaped by its own filters, a soft attack and an exponential
+# tail, and each file varies its brightness and length a little. The tone is mixed on top.
+# render_mix NAME SECONDS TONE COLOR AMP HIGHPASS LOWPASS ATTACK DECAY DELAY SEED [FILTERS]
+render_mix() {
+  local fl fade; fl=$(awk "BEGIN{d = $2 / 3; print (d < 0.3 ? d : 0.3)}"); fade=$(awk "BEGIN{print $2 - $fl}")
+  "$FF" -y -loglevel error -f lavfi -i "aevalsrc=exprs='0.5*($3)':s=44100:d=$2" \
+    -f lavfi -i "anoisesrc=d=$2:c=$4:r=44100:a=$5:seed=${11}" \
+    -filter_complex "[1:a]highpass=f=$6,lowpass=f=$7,lowpass=f=$7,afade=t=in:d=$8,afade=t=out:st=$8:d=$9:curve=exp,adelay=${10}[n];[0:a][n]amix=inputs=2:normalize=0${12:+,${12}},afade=t=out:st=$fade:d=$fl,loudnorm=I=-20:TP=-4:LRA=11,alimiter=limit=0.7" \
+    -ar 44100 -c:a libvorbis -q:a 5 "$OUT/$1.ogg"
+}
+vary() { awk -v a="$1" -v b="$2" -v r="$RANDOM" 'BEGIN{print a + (b - a) * r / 32767}'; } # a number in [a, b]
+thud_body() { # the thud alone (the poof is the noise source now)
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*0.8*min(1,$u*300)*sin(2*PI*($f*$u-0.3*$f*0.012*exp(-$u/0.012)))*exp(-$d*$u)"
+}
+rare_body() { echo "$(thud_body "$1" "$2" "$3")+0.3*$(soft_drop "$1" "$(awk "BEGIN{print $2 * 4}")" 11)"; }
+epic_body() {
+  echo "$(thud_body "$1" "$2" "$3")+0.3*$(soft_drop "$1" "$(awk "BEGIN{print $2 * 4}")" 9)+0.18*$(soft_drop "$(awk "BEGIN{print $1 + 0.03}")" "$(awk "BEGIN{print $2 * 6}")" 9)"
+}
+bag_body() { # the round-3 pouch's soft body and its coin (CG = the coin's level); the brush is the noise
+  local s=$1 f=$2 cg=$3 u="(t-$1)"
+  echo "gte(t,$s)*0.4*sin(2*PI*85*$u)*exp(-28*$u)+$cg*($(coin "$(awk "BEGIN{print $1 + 0.02}")" "$2"))"
+}
+
+# family  color amp  highpass  lowpass range  attack  decay range   (the poof under every thud)
+POOFS="
+LandPoofDusty pink 0.5 150 900 1400 0.012 0.16 0.22
+LandPoofDeep brown 0.75 80 550 850 0.016 0.2 0.26
+LandPoofLight pink 0.35 400 2000 2800 0.008 0.1 0.14
+"
+while read -r fam color amp hp lo hi at d0 d1; do
+  [ -n "$fam" ] || continue
+  for kind in "" Rare Epic; do
+    for n in $(seq 0 11); do
+      RANDOM=$((n * 7 + ${#kind} * 31 + ${#fam}))
+      f=$(hz 110 "$(semis "$n")")
+      case $kind in Rare) tone=$(rare_body 0 "$f" 20); fx="lowpass=f=3200,$ROOM" ;;
+                    Epic) tone=$(epic_body 0 "$f" 20); fx="lowpass=f=3600,$ROOM" ;;
+                    *) tone=$(thud_body 0 "$f" 20); fx="lowpass=f=3000" ;; esac
+      render_mix "$fam$kind$(printf '%02d' "$n")" 0.5 "$tone" "$color" "$amp" "$hp" "$(vary "$lo" "$hi")" "$at" "$(vary "$d0" "$d1")" 0 $((RANDOM + 1)) "$fx"
+    done
+    echo "wrote $fam$kind"
+  done
+done <<< "$POOFS"
+
+# the bag: the round-3 soft pouch and coin with a fresh brush each time (pink, soft, varied)
+for v in Fresh:1 FreshLess:0.75; do
+  for n in $(seq 0 11); do
+    RANDOM=$((n * 13 + ${#v}))
+    f=$(hz 450 "$(awk "BEGIN{print $n / 2}")")
+    render_mix "BagPouchCoin${v%%:*}$(printf '%02d' "$n")" 0.45 "$(bag_body 0 "$f" "${v#*:}")" pink 0.3 200 "$(vary 2500 3500)" 0.03 "$(vary 0.18 0.24)" 0 $((RANDOM + 1)) "highpass=f=60"
+  done
+  echo "wrote BagPouchCoin${v%%:*}"
+done
