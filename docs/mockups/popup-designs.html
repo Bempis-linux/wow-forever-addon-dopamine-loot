@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popup Designs Round 6</title>
+<title>Popup Designs Round 7</title>
 <style>
   :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
@@ -89,31 +89,49 @@
   @keyframes unfold { from { transform: scaleX(0) rotate(-20deg); opacity: 0 } to { transform: none; opacity: 1 } }
   .W .gem { position: absolute; top: 36px; width: 26px; height: 26px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--cl) 30%, var(--c) 70%, var(--cd)); box-shadow: 0 0 18px var(--c); }
   .W .band { margin-top: 6px; padding: 5px 30px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.7) 20%, rgba(0,0,0,.7) 80%, transparent); border-top: 1px solid var(--c); }
-  /* X. Splash: a diagonal banner slashes in behind a big name; the rarity word is stamped on */
+  /* X. Splash, toward a final build: the banner slashes in with speed lines and a shine runs along it;
+     green one thin banner, blue thicker, purple a second crossing banner, legendary gold trim with sparks */
   .X { top: 40px !important; }
-  .X .slash { position: absolute; top: 150px; left: -10px; width: 380px; height: calc(52px + 6px * var(--lv)); transform: skewY(-6deg); transform-origin: 0 0;
-    background: linear-gradient(90deg, transparent, var(--cd) 12%, var(--c) 50%, var(--cd) 88%, transparent); box-shadow: 0 -2px 0 rgba(255,255,255,.5), 0 2px 0 rgba(0,0,0,.6); animation: slashin .32s .05s cubic-bezier(.2,.9,.2,1) both; }
+  .X .slash { position: absolute; top: 148px; left: -10px; width: 380px; height: calc(40px + 9px * var(--lv)); transform: skewY(-6deg); transform-origin: 0 0; overflow: hidden;
+    background: linear-gradient(90deg, transparent, var(--cd) 10%, var(--c) 50%, var(--cd) 90%, transparent);
+    box-shadow: 0 -2px 0 rgba(255,255,255,.55), 0 2px 0 rgba(0,0,0,.6); animation: slashin .3s .05s cubic-bezier(.2,.9,.2,1) both; }
+  .X .slash::before { content: ""; position: absolute; top: 0; bottom: 0; width: 70px; left: -90px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.7), transparent); animation: bshine .7s .45s ease-in-out both; }
+  @keyframes bshine { to { left: 120% } }
   .X .slash::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 18px, rgba(255,255,255,.08) 18px 22px); }
+  .X .slash2 { position: absolute; top: 160px; left: 20px; width: 320px; height: calc(10px + 6px * var(--lv)); transform: skewY(7deg); transform-origin: 100% 0;
+    background: linear-gradient(90deg, transparent, var(--cl), transparent); opacity: .85; animation: slashinr .28s .2s cubic-bezier(.2,.9,.2,1) both; }
   @keyframes slashin { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
-  .X .item { height: 150px; z-index: 3; }
-  .X .name { font: italic 900 28px Georgia, serif; letter-spacing: 1px; margin-top: 2px; text-shadow: 3px 3px 0 #000, 0 0 12px rgba(0,0,0,.8); z-index: 4; }
-  .X .stamp { position: absolute; top: 116px; right: 40px; z-index: 5; font: 900 13px system-ui; letter-spacing: 3px; color: #fff; padding: 3px 8px; border: 2px solid #fff;
-    transform: rotate(-12deg); background: var(--c); box-shadow: 0 0 14px var(--c); animation: stampin .28s .3s cubic-bezier(.3,1.8,.5,1) both; }
-  @keyframes stampin { from { transform: rotate(-12deg) scale(2.4); opacity: 0 } to { transform: rotate(-12deg); opacity: 1 } }
-  .X .info { z-index: 4; margin-top: 4px; }
+  @keyframes slashinr { from { clip-path: inset(0 0 0 100%) } to { clip-path: inset(0 0 0 0) } }
+  .X .trim { position: absolute; top: 146px; left: -10px; width: 380px; height: calc(44px + 9px * var(--lv)); transform: skewY(-6deg); transform-origin: 0 0;
+    border-top: 2px solid #ffd36a; border-bottom: 2px solid #ffd36a; box-shadow: 0 0 12px #ffb040; animation: slashin .3s .1s cubic-bezier(.2,.9,.2,1) both; }
+  .X .speed { position: absolute; left: -40px; height: 2px; width: 120px; background: linear-gradient(90deg, transparent, #fff); opacity: 0; animation: speed .35s ease-out both; }
+  @keyframes speed { 0% { transform: translateX(0); opacity: 0 } 20% { opacity: .9 } 100% { transform: translateX(420px); opacity: 0 } }
+  .X .item { height: 150px; z-index: 3; filter: drop-shadow(0 0 10px var(--c)); }
+  .X .name { font: italic 900 30px Georgia, serif; letter-spacing: 1px; margin-top: 0; z-index: 4; -webkit-text-stroke: 1px rgba(0,0,0,.65);
+    text-shadow: 3px 3px 0 #000, 0 0 14px rgba(0,0,0,.8); }
+  .X .name.zip { animation: zip .3s .12s cubic-bezier(.2,.9,.2,1) both; }
+  @keyframes zip { from { transform: translateX(-160px) skewX(-25deg); opacity: 0; filter: blur(3px) } to { transform: none; opacity: 1; filter: none } }
+  .X .stamp { position: absolute; top: 112px; right: 34px; z-index: 5; font: 900 13px system-ui; letter-spacing: 3px; color: #fff; padding: 3px 8px; border: 2px solid #fff;
+    transform: rotate(-12deg); background: var(--c); box-shadow: 0 0 14px var(--c), 0 3px 0 #000; animation: stampin .26s .38s cubic-bezier(.3,1.8,.5,1) both; }
+  @keyframes stampin { from { transform: rotate(-12deg) scale(2.6); opacity: 0 } to { transform: rotate(-12deg); opacity: 1 } }
+  .X .tab { z-index: 4; margin-top: 4px; padding: 2px 12px; background: rgba(0,0,0,.7); transform: skewX(-12deg); border-left: 3px solid var(--c); }
+  .X .tab .info { transform: skewX(12deg); }
+  .X.out .slash, .X.out .trim, .X.out .slash2 { animation: slashout .35s ease-in forwards; }
+  @keyframes slashout { to { clip-path: inset(0 0 0 100%) } }
 </style>
 </head>
 <body>
 <div id="panel">
-  <h1>Popup designs, round 6</h1>
-  <small>New styles where the frame itself levels up with rarity (try each rarity), and the arrivals that still needed work. Keepers are marked. R replays.</small>
+  <h1>Popup designs, round 7</h1>
+  <small>Splash toward a final build (try each rarity), Aura with wisps, the Aurora arch, and new blue and orange options. Keepers are marked. R replays.</small>
 
   <h2>Style</h2>
   <div id="designs">
-    <button data-d="S" class="on">Showcase</button><button data-d="W">Winged crest</button><button data-d="X">Splash</button><br>
-    <button data-d="L">Achievement</button><button data-d="M">Aura</button><button data-d="E">Medallion</button><button data-d="R">Relic (now)</button>
+    <button data-d="X" class="on">Splash (final build)</button><button data-d="M">Aura</button><button data-d="L">Achievement</button><button data-d="R">Relic (now)</button>
   </div>
   <small id="ddesc"></small>
+  <label class="fx"><input type="radio" name="au" value="wisps" checked><b>Aura: wisps <em>new</em></b><small>For the Aura style: soft smoky light instead of flames.</small></label>
+  <label class="fx"><input type="radio" name="au" value="flames"><b>Aura: flames</b><small>Round 6's flames, to compare.</small></label>
 
   <h2>Show</h2>
   <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4">Epic</button><button data-q="5">Legendary</button>
@@ -126,17 +144,19 @@
   <h2>Rare (blue)</h2>
   <label class="fx"><input type="checkbox" id="b0" checked><b>Ring wave</b><small>With either option.</small></label>
   <label class="fx"><input type="radio" name="b" value="flare"><b>Sapphire flare <em>keeper</em></b><small>Unchanged.</small></label>
-  <label class="fx"><input type="radio" name="b" value="aurora" checked><b>Aurora, vertical <em>reworked</em></b><small>Curtains of northern lights hang in an arc behind the item, swaying and shimmering, rising up and away. Tall, not wide.</small></label>
+  <label class="fx"><input type="radio" name="b" value="aurora" checked><b>Aurora arch <em>reworked</em></b><small>The round-5 ribbon of northern lights you liked, bent into an arch over the item instead of lying flat.</small></label>
+  <label class="fx"><input type="radio" name="b" value="constellation"><b>Constellation <em>new</em></b><small>Stars pop out around the item, lines draw between them into a constellation, then it all flashes and twinkles out.</small></label>
 
   <h2>Epic (purple)</h2>
   <label class="fx"><input type="radio" name="p" value="implode"><b>Implosion, scatter, galaxy <em>keeper</em></b><small>Unchanged.</small></label>
   <label class="fx"><input type="radio" name="p" value="eclipse"><b>Eclipse <em>keeper</em></b><small>Unchanged.</small></label>
-  <label class="fx"><input type="radio" name="p" value="starfall" checked><b>Starfall <em>new</em></b><small>Purple stars streak down at angles onto the item one after another, each bursting as it hits, the last one in a big burst.</small></label>
+  <label class="fx"><input type="radio" name="p" value="starfall" checked><b>Starfall <em>keeper</em></b><small>Purple stars streak down at angles onto the item one after another, each bursting as it hits, the last one in a big burst.</small></label>
   <label class="fx"><input type="checkbox" id="p5" checked><b>Letter stamp</b><small>The name's letters slam in (with any of them; for Legendary too).</small></label>
 
   <h2>Legendary (orange): after the comet</h2>
   <label class="fx"><input type="radio" name="l" value="nova"><b>Supernova <em>keeper</em></b><small>Unchanged.</small></label>
-  <label class="fx"><input type="radio" name="l" value="crown" checked><b>Sun crown v2 <em>reworked</em></b><small>A steady crown of smooth golden light spikes rises around the item, a halo turns slowly above it, and a gentle fall of gold. No jitter.</small></label>
+  <label class="fx"><input type="radio" name="l" value="crown"><b>Sun crown v2</b><small>Round 6's, to compare.</small></label>
+  <label class="fx"><input type="radio" name="l" value="phoenix" checked><b>Phoenix <em>new</em></b><small>The comet hits: fiery wings sweep open behind the item, flap once and throw a burst of embers, then fold away into sparks.</small></label>
   <small>The dim and the slow-motion landing stay; the comet stays as it is in game.</small>
 </div>
 <div id="screen">
@@ -156,13 +176,13 @@ const ITEM = { name: 'Arcanite Reaper', type: 'Two-Hand Axe', ilvl: 63 };
 const DESC = {
   S: 'Showcase: a spotlight from above and a reflective floor under the item, the name engraved in capitals over a divider with a gem; the divider grows and gains side gems with rarity.',
   W: 'Winged crest: wings unfold from a gem behind the item; small for green, wider and more feathered up to Legendary. The name on a dark band.',
-  X: 'Splash: a diagonal banner slashes in behind a big italic name and the rarity word is stamped on at an angle, like a fighting game. Thicker banner the rarer.',
+  X: 'Splash, toward a final build: the banner slashes in with speed lines and a shine runs along it; the name zips in (Epic+: its letters stamp in), the rarity stamp lands, the banner slashes out at the end. Green: one thin banner; blue: thicker; purple: a second crossing banner; legendary: gold trim.',
   L:'Achievement, back to the round-3 look: a small medallion with the item beside a name plate that fades out to the right.',
-  M: 'Aura: flame tongues of the item\'s color rising from below the item, flickering slowly and smoothly, embers drifting up. The name glows.',
+  M: 'Aura: the item in an aura of its color. Wisps (new): soft smoky light rising behind it, a breathing inner glow, sparkles; or the flames from round 6 (switch below).',
   E: 'Medallion from round 1.',
   R: 'Relic as it is in game now.',
 };
-let design = 'S', last = 2, aura = null;
+let design = 'X', last = 2, aura = null;
 // a wing: feathers fanning out, more of them the rarer (lv 0..3)
 function wing(c, cl, lv) {
   const n = 3 + lv * 2;
@@ -197,7 +217,12 @@ function build(q) {
       ${tag(q)}${nameHTML(q)}<div class="div">${lv >= 2 ? '<s></s>' : ''}<i></i><b></b><i></i>${lv >= 2 ? '<s></s>' : ''}</div>${info()}</div>`;
     case 'W': return `<div class="pop W" style="${vars}"><div class="crest"><div class="wing l">${wing(c, cl, lv)}</div><div class="wing r">${wing(c, cl, lv)}</div></div>
       <div class="gem"></div>${item}<div class="band">${tag(q)}${nameHTML(q)}${info()}</div></div>`;
-    case 'X': return `<div class="pop X" style="${vars}"><div class="slash"></div>${item}<div class="stamp">${Q[q][3]}!</div>${nameHTML(q)}${info()}</div>`;
+    case 'X': {
+      const speed = [158, 176, 192].map((t, i) => `<i class="speed" style="top:${t + lv * 4}px;animation-delay:${(.04 + i * .05).toFixed(2)}s"></i>`).join('');
+      const nm = q < 4 ? nameHTML(q).replace('class="name"', 'class="name zip"') : nameHTML(q); // zips in; Epic+ letters stamp in
+      return `<div class="pop X" style="${vars}"><div class="slash"></div>${lv >= 2 ? '<div class="slash2"></div>' : ''}${lv >= 3 ? '<div class="trim"></div>' : ''}${speed}
+        ${item}<div class="stamp">${Q[q][3]}!</div>${nm}<div class="tab">${info()}</div></div>`;
+    }
     case 'R': return `<div class="pop R" style="${vars}"><div class="glow"></div>${item}<div class="plate">${nameHTML(q)}<div class="rule"></div>${info()}</div></div>`;
     case 'E': return `<div class="pop E" style="${vars}"><div class="medal">${item}</div><div class="ribbon">${nameHTML(q)}${info()}</div></div>`;
     case 'L': return `<div class="pop L" style="${vars}"><div class="med">${item}</div><div class="plate">${tag(q)}${nameHTML(q)}${info()}</div></div>`;
@@ -239,8 +264,26 @@ function streak(g, x, y, w, h, a, c) { // a horizontal light streak, bright in t
   g.globalAlpha = a; g.fillStyle = gr; g.fillRect(x - w / 2, y - h / 2, w, h);
 }
 // the Aura's flames: tongues of the item's color, each at its own pace, a white-hot core, embers
+// the Aura's wisps: soft blobs of light rising behind the item in slow, drifting columns, a breathing
+// glow behind it, a few sparkles; the blobs are radial glows (in game: the soft Glow texture)
+let wisps = [];
+function drawWisps(t) {
+  const [x, y0] = center(1), [c, cl] = Q[aura.q], g = bctx, y = y0 - 10, fade = Math.min(1, t / .5);
+  if (Math.random() < .5) wisps.push({ x: x + R(-34, 34), y: y + R(-6, 6), r: R(14, 26), age: 0, life: R(1.6, 2.4), ph: R(0, 6), col: Math.random() < .25 ? cl : c });
+  for (const w of wisps) {
+    w.age += 1 / 60; const u = w.age / w.life;
+    const wx = w.x + Math.sin(w.age * 1.6 + w.ph) * 12 * u, wy = w.y - u * 170, r = w.r * (1 + u * 1.4);
+    const gr = g.createRadialGradient(wx, wy, 0, wx, wy, r); gr.addColorStop(0, w.col); gr.addColorStop(1, 'transparent');
+    g.globalAlpha = Math.sin(Math.PI * u) * .38 * fade; g.fillStyle = gr; g.beginPath(); g.arc(wx, wy, r, 0, 7); g.fill();
+  }
+  wisps = wisps.filter(w => w.age < w.life);
+  const br = .5 + .15 * Math.sin(t * 2), gl = g.createRadialGradient(x, y - 60, 6, x, y - 60, 100); gl.addColorStop(0, cl); gl.addColorStop(1, 'transparent');
+  g.globalAlpha = br * fade; g.fillStyle = gl; g.beginPath(); g.arc(x, y - 60, 100, 0, 7); g.fill();
+  if (Math.random() < .12) parts.push({ x: x + R(-50, 50), y: y - R(20, 130), vx: 0, vy: -R(10, 25), age: 0, life: .6, c: '#fff', s: R(5, 8), g: 0, drag: 0, kind: 'star' });
+}
 function drawAura(t) {
   if (!aura || !$('stage').querySelector('.M')) return;
+  if (pick('au') === 'wisps') return drawWisps(t);
   // the flames rise from just below the item (its bottom), not from its middle
   const [x, y0] = center(1), [c, cl] = Q[aura.q], g = bctx, y = y0 - 4;
   const fade = Math.min(1, t / .4);
@@ -368,23 +411,47 @@ function blue(x, y, c, cl) {
     } });
     glints(x, y, 4, 60);
   } else {
-    // curtains of northern lights hanging in an arc behind the item: tall vertical bands, each
-    // swaying and shimmering at its own pace, rising up and away as they fade
-    const curtains = Array.from({ length: 13 }, (_, i) => ({ k: i / 12, ph: R(0, 6), sp: R(1.4, 2.4), col: ['#7fffd4', cl, '#c8a8ff', cl][i % 4] }));
-    special.push({ t: 0, life: 2.0, draw(s) {
-      const u = s.t / 2.0, a = u < .2 ? u / .2 : Math.pow(1 - (u - .2) / .8, 1.3), rise = Math.max(0, u - .35) * 120;
-      for (const cu of curtains) {
-        const an = Math.PI * (1.08 + .84 * cu.k), arcX = x + Math.cos(an) * 120, arcY = y + 40 + Math.sin(an) * 50; // the arc behind
-        const sway = Math.sin(s.t * cu.sp + cu.ph) * 10, hgt = (150 + 70 * Math.sin(Math.PI * cu.k)) * Math.min(1, s.t / .4);
-        const bottom = arcY - rise, top = bottom - hgt;
-        for (let j = 0; j < 4; j++) { // each curtain: a few thin folds side by side
-          const fx = arcX + sway + (j - 1.5) * 5 + Math.sin(s.t * 3 + j + cu.ph) * 3;
-          const gr = bctx.createLinearGradient(0, bottom, 0, top); gr.addColorStop(0, 'transparent'); gr.addColorStop(.15, cu.col); gr.addColorStop(1, 'transparent');
-          bctx.globalAlpha = a * .16 * (.7 + .3 * Math.sin(s.t * 5 + j * 2 + cu.ph)); bctx.fillStyle = gr; bctx.fillRect(fx - 3, top, 6, hgt);
+    if (pick('b') === 'aurora') {
+      // the round-5 ribbon (three rippling bands of light, rising off each point), laid along an arch
+      // over the item instead of a flat line: same animation, an arch shape
+      special.push({ t: 0, life: 1.8, draw(s) {
+        const u = s.t / 1.8, a = u < .15 ? u / .15 : Math.pow(1 - (u - .15) / .85, 1.2), rise = Math.max(0, u - .4) * 70;
+        for (let band = 0; band < 3; band++) {
+          const amp = 12 + band * 6, off = band * 1.7, hgt = 46 + band * 16, col = ['#7fffd4', cl, '#c8a8ff'][band], R0 = 150 + band * 14;
+          for (let i = 0; i <= 40; i++) {
+            const k = i / 40, w = Math.sin(Math.PI * k), an = Math.PI * (1.05 + .9 * k); // left to right, over the top
+            const px = x + Math.cos(an) * R0, py = y + 30 + Math.sin(an) * R0 * .75 - rise + Math.sin(i * .28 + s.t * 3.2 + off) * amp * w;
+            const gr = bctx.createLinearGradient(0, py + 6, 0, py - hgt * w);
+            gr.addColorStop(0, col); gr.addColorStop(1, 'transparent');
+            bctx.globalAlpha = a * w * (.22 - band * .04) * (0.75 + 0.25 * Math.sin(i * .9 + s.t * 6));
+            bctx.fillStyle = gr; bctx.fillRect(px - 6, py - hgt * w, 12, hgt * w + 6);
+          }
         }
-      }
-    } });
-    for (let i = 0; i < 16; i++) parts.push({ x: x + R(-130, 130), y: y + R(-20, 40), vx: R(-8, 8), vy: R(-60, -30), age: -R(0, .7), life: R(1.2, 1.8), c: i % 2 ? '#7fffd4' : cl, s: R(1.2, 2), g: -10, drag: .6, kind: 'ember', ph: R(0, 6) });
+      } });
+      for (let i = 0; i < 16; i++) { const an = Math.PI * R(1.05, 1.95); parts.push({ x: x + Math.cos(an) * 150, y: y + 30 + Math.sin(an) * 110, vx: R(-8, 8), vy: R(-50, -20), age: -R(0, .6), life: R(1.2, 1.8), c: i % 2 ? '#7fffd4' : cl, s: R(1.2, 2), g: -10, drag: .6, kind: 'ember', ph: R(0, 6) }); }
+    } else {
+      // Constellation: stars pop out around the item one by one, lines draw between them, it all
+      // flashes, then the stars twinkle out
+      const stars = Array.from({ length: 8 }, (_, i) => { const an = i / 8 * Math.PI * 2 + R(-.3, .3), r = R(80, 140); return [x + Math.cos(an) * r, y + Math.sin(an) * r * .75]; });
+      special.push({ t: 0, life: 2.0, draw(s) {
+        const shown = Math.min(stars.length, Math.floor(s.t / .09) + 1), flash = Math.max(0, 1 - Math.abs(s.t - .95) / .15), out = Math.max(0, (s.t - 1.2) / .8);
+        ctx.lineCap = 'round';
+        for (let i = 0; i < shown; i++) { // the line to the next star draws out once both are there
+          const [ax, ay] = stars[i], [bx, by] = stars[(i + 1) % stars.length];
+          const lu = Math.min(1, Math.max(0, (s.t - (i + 1) * .09) / .12));
+          if (i + 1 < shown || (i === stars.length - 1 && s.t > .8)) {
+            ctx.globalAlpha = (.55 + .45 * flash) * (1 - out); ctx.strokeStyle = cl; ctx.lineWidth = 1.4 + 2 * flash;
+            ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + (bx - ax) * lu, ay + (by - ay) * lu); ctx.stroke();
+          }
+        }
+        for (let i = 0; i < shown; i++) {
+          const pop = Math.min(1, (s.t - i * .09) / .1), tw = .7 + .3 * Math.sin(s.t * 14 + i);
+          star(ctx, stars[i][0], stars[i][1], (8 + 10 * flash) * pop * tw * (1 - out * .5), 1 - out, '#fff');
+        }
+        if (flash > 0) { const g = ctx.createRadialGradient(x, y, 4, x, y, 150); g.addColorStop(0, cl); g.addColorStop(1, 'transparent'); ctx.globalAlpha = flash * .5; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 150, 0, 7); ctx.fill(); }
+      } });
+      setTimeout(() => glints(x, y, 6, 120), 950);
+    }
   }
 }
 // ---------------------------------------------------------------- epic
@@ -472,6 +539,31 @@ function legendary(x, y, c, cl) {
       bctx.beginPath(); bctx.arc(x, y, r, 0, 7); bctx.stroke(); bctx.shadowBlur = 0;
       if (Math.random() < .4) parts.push({ x: x + R(-80, 80), y: y + R(20, 60), vx: R(-10, 10), vy: R(-80, -40), age: 0, life: R(1.2, 2), c: gold[Math.floor(R(0, 3))], s: R(1.4, 2.4), g: -15, drag: .5, kind: 'ember', ph: R(0, 6) });
     } });
+  } else if (pick('l') === 'phoenix') {
+    // Phoenix: fiery wings sweep open behind the item, beat once, throw embers, then fold into sparks
+    flash(); shakePop();
+    const fire = ['#fff3c0', '#ffd36a', '#ff9a2a', '#ff5a1a'];
+    special.push({ t: 0, life: 2.4, draw(s) {
+      // open (0..0.35 s), one beat (0.6..1.0 s), hold, fold away and fade (1.7..2.4 s)
+      const open = 1 - Math.pow(1 - Math.min(1, s.t / .35), 3);
+      const beat = s.t > .6 && s.t < 1.0 ? Math.sin(Math.PI * (s.t - .6) / .4) : 0;
+      const fold = Math.max(0, (s.t - 1.7) / .7), a = 1 - fold;
+      for (const side of [-1, 1]) {
+        for (let f = 0; f < 9; f++) { // feathers fanning out from the item's shoulder
+          const k = f / 8, spread = (.15 + .85 * open) * (1 - fold * .6) - beat * .25;
+          const an = -Math.PI / 2 + side * (.35 + k * 1.5) * spread, len = (90 + 70 * Math.sin(Math.PI * (.2 + .7 * k))) * (1 - fold * .3);
+          const bx = x + side * 8, by = y + 10, tx = bx + Math.cos(an) * len, ty = by + Math.sin(an) * len + beat * 14;
+          const g = bctx.createLinearGradient(bx, by, tx, ty); g.addColorStop(0, fire[0]); g.addColorStop(.4, fire[1]); g.addColorStop(.8, fire[2]); g.addColorStop(1, 'rgba(255,90,26,0)');
+          const nx = -Math.sin(an) * 9, ny = Math.cos(an) * 9;
+          bctx.globalAlpha = a * (.5 + .3 * (f % 2)); bctx.fillStyle = g; bctx.beginPath();
+          bctx.moveTo(bx, by); bctx.quadraticCurveTo((bx + tx) / 2 + nx, (by + ty) / 2 + ny, tx, ty); bctx.quadraticCurveTo((bx + tx) / 2 - nx, (by + ty) / 2 - ny, bx, by); bctx.fill();
+          if (Math.random() < .12 * a) parts.push({ x: tx, y: ty, vx: R(-30, 30), vy: R(-80, -30), age: 0, life: R(.6, 1.1), c: fire[Math.floor(R(1, 4))], s: R(1.4, 2.4), g: -30, drag: .8, kind: 'ember', ph: R(0, 6) });
+        }
+      }
+      if (s.t > .6 && s.t < .65) burst(x, y, '#ffd36a', 50, 520, { g: 120, drag: 2, life: 1.3, size: 1.3, colors: fire }); // the beat throws embers
+      if (fold > 0 && Math.random() < .5) parts.push({ x: x + R(-120, 120), y: y + R(-80, 20), vx: R(-20, 20), vy: R(-40, 0), age: 0, life: .6, c: '#fff3c0', s: R(5, 9), g: 0, drag: 0, kind: 'star' });
+    } });
+    ring(x, y, '#fff', 120, 0, .35, 6); ring(x, y, '#ffb040', 230, .06, .8, 4);
   } else {
     shakePop();
     // v2: a steady crown of smooth golden light spikes rises around the item (no flicker: they grow
@@ -521,12 +613,13 @@ function show(q) {
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => show(+b.dataset.q));
 for (const [n, q] of [['g', 2], ['b', 3], ['p', 4], ['l', 5]]) document.querySelectorAll(`input[name=${n}]`).forEach(r => r.onchange = () => show(q));
+document.querySelectorAll('input[name=au]').forEach(r => r.onchange = () => show(last));
 document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-d]').forEach(x => x.classList.remove('on')); b.classList.add('on');
   design = b.dataset.d; $('ddesc').textContent = DESC[design]; show(last);
 });
 addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') show(last); });
-$('ddesc').textContent = DESC.S;
+$('ddesc').textContent = DESC.X;
 show(2);
 </script>
 </body>

@@ -57,7 +57,11 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      **Styles: not settled** ("none stand out as a final product"); round 6 tries styles that level up with
      rarity (Showcase, Winged crest, Splash). Rejected: Sigil, Shrine, Portal, Breakout, Glass, Ornate,
      the round-4 Achievement polish; lightning, ice shards, rays, crossing beams, starburst, orbit, geyser jump.
-     Next: the user picks from round 6, then build the arrivals (and the style) in game.
+     Round 6-7 picks: styles **Splash = the final build** (built on in round 7), Relic and Achievement kept as
+     simple bases, Aura to be fully built (round 7: wisps instead of flames), Medallion/Showcase/Winged out.
+     Purple **Starfall** a keeper. Blue: Aurora liked in its round-5 animation, not flat (round 7: an arch);
+     a 3rd blue (round 7: Constellation). Orange: Sun crown not quite; round 7: Phoenix. Epic letter stamp loved.
+     Next: the user picks from round 7, then build the arrivals and styles in game.
      Not yet: step 3 popup layered hit sounds.
   3. **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip.
      The other "after 1.0" items (inspector, filters beyond the NEW badge, stats) are pushed back.
