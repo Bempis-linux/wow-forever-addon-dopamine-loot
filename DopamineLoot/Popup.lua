@@ -7,7 +7,14 @@
 local _, ns = ...
 
 local GAP, MAX_WAITING = 4, 12
-local IN_T, OUT_T, FAST_OUT_T, HOVER_MAX = 0.3, 0.8, 0.25, 10
+local OUT_T, FAST_OUT_T, HOVER_MAX = 0.8, 0.25, 10
+-- the entrance: it punches in a bit big, overshoots a touch small and settles (a compact line less)
+local IMPACT_T, IMPACT, IMPACT_COMPACT = 0.32, 0.28, 0.1
+local function EaseOutBack(t) local c = 2.2; return 1 + (c + 1) * (t - 1) ^ 3 + c * (t - 1) ^ 2 end
+-- the Legendary moment (setting noLegendMoment): the screen dims, a pillar of light drops onto the
+-- popup, which lands at MOMENT_HIT and plays in slow motion for SLOW_T
+local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
+local MOMENT_HIT, MOMENT_T, SLOW_T, SLOW = 0.55, 2.2, 0.75, 0.4
 
 -- Where the stack starts, as fractions of the screen from the anchor point, and which way it grows
 -- (1 = down, -1 = up). The popup is anchored by the same point.
@@ -60,13 +67,74 @@ local function Create()
   function p:Leave(duration)
     if self.outAge then return end
     self.outAge, self.outFor, self.hover = 0, duration, false
+    if self.delay then self.outFor = 0.01 end -- a Legendary still waiting for its pillar just goes (and its moment ends)
     self:EnableMouse(false)
     if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end
   end
   return p
 end
 
+-- The Legendary moment: a dim over the screen, under the popups (a strata below theirs), and a
+-- pillar of light dropping from the top of the screen onto the popup
+local moment
+local LOWER = { HIGH = "MEDIUM", DIALOG = "HIGH" }
+local function StartMoment(p)
+  if not moment then
+    moment = CreateFrame("Frame", nil, UIParent)
+    moment:SetAllPoints(UIParent)
+    moment:EnableMouse(false)
+    moment.dim = moment:CreateTexture(nil, "BACKGROUND")
+    moment.dim:SetTexture("Interface\\Buttons\\WHITE8X8")
+    moment.dim:SetVertexColor(0.02, 0.012, 0.04, 1)
+    moment.dim:SetAllPoints()
+    moment.pillar = moment:CreateTexture(nil, "ARTWORK")
+    moment.core = moment:CreateTexture(nil, "ARTWORK", nil, 1)
+    for _, t in ipairs({ moment.pillar, moment.core }) do
+      t:SetTexture(MEDIA .. "Pillar")
+      t:SetBlendMode("ADD")
+    end
+    moment.pillar:SetVertexColor(1, 0.72, 0.3, 1)
+    moment.core:SetVertexColor(1, 0.95, 0.8, 1)
+  end
+  moment:SetFrameStrata(LOWER[p:GetFrameStrata()] or "MEDIUM")
+  moment:SetFrameLevel(5000) -- over everything on its strata (bags, the quest log; the settings for a test)
+  moment.p, moment.t = p, 0
+  moment.dim:SetAlpha(0)
+  moment.pillar:Hide()
+  moment.core:Hide()
+  moment:Show()
+end
+local function EndMoment()
+  if moment then moment.p = nil; moment:Hide() end
+end
+local function UpdateMoment(dt)
+  local m = moment
+  m.t = m.t + dt
+  local t = m.t
+  if t >= MOMENT_T or not m.p:IsShown() then return EndMoment() end
+  -- the dim: in quickly, held while the popup lands, then out
+  m.dim:SetAlpha(0.55 * (t < 0.25 and t / 0.25 or t < 1.5 and 1 or math.max(0, 1 - (t - 1.5) / 0.6)))
+  -- the pillar: its bright foot falls from the top onto the popup's item, then it narrows and fades
+  local x, y = m.p.stage:GetCenter()
+  if not x then return end
+  local s = m.p.stage:GetEffectiveScale() / m:GetEffectiveScale()
+  x, y = x * s, y * s
+  local H = m:GetHeight()
+  local u = math.min(1, t / MOMENT_HIT)
+  local foot = H - (H - y) * u * u
+  local fade = t < MOMENT_HIT and 1 or math.max(0, 1 - (t - MOMENT_HIT) / 1.4)
+  local w = 90 * (t < MOMENT_HIT and 1 or 0.45 + 0.55 * fade)
+  for i, tex in ipairs({ m.pillar, m.core }) do
+    tex:ClearAllPoints()
+    tex:SetPoint("BOTTOM", m, "BOTTOMLEFT", x, foot)
+    tex:SetSize(i == 1 and w or w * 0.35, math.max(1, H - foot + 4))
+    tex:SetAlpha((i == 1 and 0.85 or 1) * fade)
+    if fade > 0 then tex:Show() else tex:Hide() end
+  end
+end
+
 local function Release(p)
+  if moment and moment.p == p then EndMoment() end
   if p.onModel then p.onModel("dismissed", nil, "closed before the model decided") end
   p:Hide()
   p.model:ClearModel()
@@ -100,19 +168,38 @@ local function Update(_, dt)
     d = d + p:GetHeight() * size + GAP
   end
   local through = ClickThrough()
+  if moment and moment.p then UpdateMoment(dt) end
   for i = #shown, 1, -1 do
     local p = shown[i]
-    p.life = p.life + dt
+    -- its own clock: stopped while a Legendary waits for its pillar, slowed as it lands
+    local pdt = dt
+    if p.delay then
+      p.delay = p.delay - dt
+      if p.delay > 0 then
+        pdt = 0
+      else
+        p.delay, p.slow = nil, SLOW_T
+        ns:PlayTierSound(p.item and p.item.quality or 5)
+      end
+    end
+    if p.slow then
+      p.slow = p.slow - dt
+      if p.slow > 0 then pdt = pdt * SLOW else p.slow = nil end
+    end
+    p.life = p.life + pdt
     p.d = p.d + (slot[i] - p.d) * math.min(1, dt * 12)
     local alpha, pop = 1, 1
-    if p.life < IN_T then
-      local a = p.life / IN_T
-      alpha = a
-      pop = 1 + 0.15 * (1 - a) * (1 - a) -- pops in slightly big and settles
+    if p.delay then
+      alpha = 0
+    elseif p.life < IMPACT_T then -- punches in: a bit big, a touch small, settled
+      alpha = math.min(1, p.life / 0.05)
+      local big = p.compactIn and IMPACT_COMPACT or IMPACT
+      pop = 1 + big - big * EaseOutBack(p.life / IMPACT_T)
     end
-    local wantMouse = not through and not p.outAge -- the Mouse setting may change while it's up
+    -- (the Mouse setting may change while it's up; a Legendary waiting for its pillar is not there yet)
+    local wantMouse = not through and not p.outAge and not p.delay
     if p:IsMouseEnabled() ~= wantMouse then p:EnableMouse(wantMouse) end
-    if through and not p.outAge then
+    if through and not p.outAge and not p.delay then
       -- the mouse passes through: hovering is checked by hand, and only counts once the cursor has
       -- moved since the popup appeared and not while turning the camera (the cursor sits still then)
       local cx, cy = GetCursorPosition()
@@ -123,20 +210,25 @@ local function Update(_, dt)
     end
     if p.hover then p.held = (p.held or 0) + dt end
     if not p.outAge and (not p.hover or p.held > HOVER_MAX) then -- hovering holds it, up to HOVER_MAX
-      p.hold = p.hold - dt
+      p.hold = p.hold - pdt
       if p.hold <= 0 then p:Leave(OUT_T) end
     end
     if p.outAge then
       p.outAge = p.outAge + dt
-      alpha = math.max(0, 1 - p.outAge / p.outFor)
+      alpha = p.delay and 0 or math.max(0, 1 - p.outAge / p.outFor) -- (pushed out before it landed: stays unseen)
       p.d = p.d - dt * 20 -- drifts back toward where it came from as it fades
     end
     local scale = size * pop
     p:SetScale(scale)
     p:ClearAllPoints()
-    p:SetPoint(pos.point, UIParent, pos.point, bx / scale, (by - pos.dir * p.d) / scale)
+    -- the punch grows from the popup's middle, not its anchor corner: move the anchor by half the growth
+    local e, point = (pop - 1) * size, pos.point
+    local hx = point:find("LEFT") and 1 or point:find("RIGHT") and -1 or 0
+    local vy = point:find("TOP") and -1 or point:find("BOTTOM") and 1 or 0
+    local ox, oy = -e * hx * p:GetWidth() / 2, -e * vy * p:GetHeight() / 2
+    p:SetPoint(point, UIParent, point, (bx + ox) / scale, (by - pos.dir * p.d + oy) / scale)
     p:SetAlpha(alpha)
-    p:Tick(dt)
+    if pdt > 0 then p:Tick(pdt) end
     if p.outAge and p.outAge >= p.outFor then
       table.remove(shown, i)
       Release(p)
@@ -170,15 +262,23 @@ local function Pop(item, onModel)
   p.life, p.hold, p.outAge, p.hover, p.held = 0, ns.HoldTime(item.compact and 1 or item.quality), nil, false, 0
   p.cursorX, p.cursorY = GetCursorPosition()
   p.cursorMoved = false
-  p.d = -40 -- slides in from just before its slot
+  p.d = 0 -- it punches in at its slot (the others make room)
+  p.compactIn, p.delay, p.slow = item.compact, nil, nil
   p:SetAlpha(0)
   table.insert(shown, 1, p)
   p:EnableMouse(not ClickThrough())
   p:SetFrameStrata(item.test and "DIALOG" or "HIGH") -- previews show above the settings window
   p:Show()
-  p.fxDelay = IN_T -- the flash and sparks wait for the fade-in
+  p.fxDelay = 0.02 -- the flash and sparks go off with the impact
   p:SetItem(item) -- after Show: the model needs a visible frame
-  ns:PlayTierSound(item.quality or 1)
+  -- a Legendary (full popup, out of combat, one at a time): the moment first, its sound on landing
+  if (item.quality or 0) >= 5 and not item.compact and not ns.settings.noLegendMoment
+    and not InCombatLockdown() and not (moment and moment.p) then
+    p.delay = MOMENT_HIT
+    StartMoment(p)
+  else
+    ns:PlayTierSound(item.quality or 1)
+  end
   driver:SetScript("OnUpdate", Update)
   return p
 end

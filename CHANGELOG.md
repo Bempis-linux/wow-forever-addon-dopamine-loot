@@ -10,6 +10,10 @@
   in pitch, every sound has two variants, and a fast rain thins its sounds out instead of rattling. The best
   item's slam has its own boom. A soft chord at the end is a switch (off by default). Shockwaves rise from
   the ground as half circles.
+- **Popup flair**: popups punch in with a little overshoot; a light sweeps once across the name (twice for a
+  Legendary); Relic and Beam names sit on a soft dark plate with a thin underline in the item's color. A
+  **Legendary moment**: the screen dims, a pillar of light drops onto the popup and it lands in slow motion
+  (Popups page: Legendary; never in combat).
 - **Calm when repeated**: a few rains with nothing Rare or better within two minutes get quicker and use fewer
   sounds (a switch under When). Rare and better always get the full show.
 - Test popups no longer show a gray "preview" tag.

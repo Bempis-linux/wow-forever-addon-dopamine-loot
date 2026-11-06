@@ -40,7 +40,12 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      (b) drag-to-move popups, the NEW badge (seen set), the bag sparkle on new items; (c) a **flair pass
      on the rain and popups** (mockups first): the Legendary moment plus new ideas for visual flair,
      explosiveness, cleaner visual design and sound, so it's a marvel every time and never gets tiring.
-  2b. **Flair pass picked 2026-11-06** (docs/mockups/flair.html): all 12 ideas kept, tuned once in game. Built in
+  2b. **Flair pass picked 2026-11-06** (docs/mockups/flair.html): all 12 ideas kept, tuned once in game.
+     Status 2026-11-06: rain step built and iterated (half-circle shockwaves, slam boom, sounds picked by ear
+     in docs/mockups/sounds.html round 5: thud + light pff, Rare/Epic touches, pouch + coin; rate cap;
+     rainChord switch off); popup step built (impact, name shine, plate/underline, Legendary moment);
+     both pushed, untested in game together. Next: the user tests both; then step 3 (popup layered hits).
+     Built in
      3 steps: rain ideas (code), popup ideas, new sounds (OGG, full restart). Sounds: our own OGGs done better,
      mixable with game kits per layer on the Sounds page. Settings: few new switches (Wind-up, Hang time,
      Rarity landings in the rain groups; Calm when repeated under When; Legendary moment on Popups); impact

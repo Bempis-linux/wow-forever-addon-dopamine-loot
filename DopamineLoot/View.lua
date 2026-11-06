@@ -127,8 +127,13 @@ function ns.CreateView(f)
   -- banner v2: a diamond emblem behind the item, breaking the band's edges
   f.emblem = Tex(f, "BORDER", MEDIA .. "Diamond", nil, 2)
   f.emblemEdge = Tex(f, "BORDER", MEDIA .. "DiamondEdge", "ADD", 3)
+  -- relic and beam: a soft dark plate behind the name and info (fading out at both ends, so it's
+  -- no box) and a thin underline in the quality color that fades out to both sides
+  local WHITE = "Interface\\Buttons\\WHITE8X8"
+  f.plateL, f.plateR = Tex(f, "BORDER", WHITE, nil, -1), Tex(f, "BORDER", WHITE, nil, -1) -- under the disc and shadow
+  f.underL, f.underR = Tex(f, "BORDER", WHITE, nil, 2), Tex(f, "BORDER", WHITE, nil, 2)
   f.art = { f.glow, f.cone, f.bar, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
-    f.shadow, f.emblem, f.emblemEdge }
+    f.shadow, f.emblem, f.emblemEdge, f.plateL, f.plateR, f.underL, f.underR }
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
   if f.shineClip.SetClipsChildren then f.shineClip:SetClipsChildren(true) end
@@ -167,6 +172,14 @@ function ns.CreateView(f)
     for _, m in ipairs(list) do f.fxAll[#f.fxAll + 1] = m end
   end
 
+  -- relic and beam: a streak of light sweeping across the name as it lands (twice for a Legendary);
+  -- clipped to the name, above it
+  f.nameClip = CreateFrame("Frame", nil, f.fx)
+  if f.nameClip.SetClipsChildren then f.nameClip:SetClipsChildren(true) end
+  f.nameClip:SetFrameLevel(f.fx:GetFrameLevel() + 2)
+  f.nameShine = Tex(f.nameClip, "OVERLAY", MEDIA .. "Shine", "ADD")
+  f.nameShine:Hide()
+
   f.name = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   f.info = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   f.info:SetTextColor(0.8, 0.76, 0.68)
@@ -189,7 +202,10 @@ function ns.CreateView(f)
     local cs = L.icon and L.stage[3] or CARD
     self.card:SetSize(cs, cs)
     self.shine:Hide()
+    self.nameShine:Hide()
+    self.shineTimes = nil
     self.fx:SetFrameLevel(self.stage:GetFrameLevel() + 5)
+    self.nameClip:SetFrameLevel(self.fx:GetFrameLevel() + 2)
     local sx, sy, sw, sh = L.stage[1], L.stage[2], L.stage[3], L.stage[4]
     self.stage:ClearAllPoints()
     self.stage:SetSize(sw, sh)
@@ -356,7 +372,7 @@ function ns.CreateView(f)
     local info = {}
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
     if ShowsItemLevel(item) then info[#info + 1] = "item level " .. item.ilvl end
-    self.info:SetText(self.style == "compact" and "" or table.concat(info, "  -  "))
+    self.info:SetText(self.style == "compact" and "" or table.concat(info, "  ·  "))
     self.badges:SetText(Badges(item))
     if self.style == "compact" then -- the name only as wide as it is, so the badges follow it on the strip
       local bw = self.badges:GetText() ~= "" and self.badges:GetStringWidth() + 6 or 0
@@ -375,6 +391,7 @@ function ns.CreateView(f)
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
       end
     end
+    if self.style == "relic" or self.style == "beam" then self:Plate(iw) end
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
     -- weapons stood upright show their edge at facing 0: a quarter turn shows the flat side
@@ -383,6 +400,48 @@ function ns.CreateView(f)
     self.card.icon:SetDesaturated(false)
     self.card.icon:SetVertexColor(1, 1, 1)
     self:SetModel()
+  end
+
+  -- Relic and beam: the plate behind the text, the underline under the name and the name's shine,
+  -- sized to the text as it is now (iw = the info line's width, 0 if there is none)
+  function f:Plate(iw)
+    local measure = self.name.GetUnboundedStringWidth or self.name.GetStringWidth
+    local nw = math.min(measure(self.name), self.name:GetWidth())
+    local nh = self.name:GetStringHeight() or 20
+    local half = math.max(nw, iw) / 2 + 36
+    local h = nh + (iw > 0 and (self.info:GetStringHeight() or 12) + 4 or 0) + 12
+    local r, g, b = self.r, self.g, self.b
+    local gradient = self.plateL.SetGradient and CreateColor
+    for i, t in ipairs({ self.plateL, self.plateR }) do
+      t:SetSize(half, h)
+      t:SetPoint(i == 1 and "TOPRIGHT" or "TOPLEFT", self.name, "TOP", 0, 6)
+      if gradient then -- dark in the middle, clear at the ends
+        local clear, dark = CreateColor(0, 0, 0, 0), CreateColor(0, 0, 0, 0.55)
+        t:SetGradient("HORIZONTAL", i == 1 and clear or dark, i == 1 and dark or clear)
+      else
+        t:SetVertexColor(0, 0, 0, 0.35)
+      end
+      t:Show()
+    end
+    for i, t in ipairs({ self.underL, self.underR }) do
+      t:SetSize(nw / 2 + 10, 1)
+      t:SetPoint(i == 1 and "TOPRIGHT" or "TOPLEFT", self.name, "BOTTOM", 0, -1)
+      if gradient then
+        local clear, full = CreateColor(r, g, b, 0), CreateColor(r, g, b, 0.9)
+        t:SetGradient("HORIZONTAL", i == 1 and clear or full, i == 1 and full or clear)
+      else
+        t:SetVertexColor(r, g, b, 0.6)
+      end
+      t:Show()
+    end
+    -- the shine: Uncommon and up, brighter from Epic, twice for a Legendary
+    self.nameClip:ClearAllPoints()
+    self.nameClip:SetPoint("CENTER", self.name, "CENTER")
+    self.nameClip:SetSize(nw + 16, nh + 8)
+    self.nameShine:SetSize(40, (nh + 8) * 2)
+    local a = self.q >= 4 and 0.9 or 0.5
+    self.nameShine:SetVertexColor(math.min(1, r + 0.6), math.min(1, g + 0.6), math.min(1, b + 0.6), a)
+    self.shineTimes = self.q >= 5 and { 0.25, 1.5 } or self.q >= 2 and { 0.25 } or nil
   end
 
   -- The model path: SetItem, then OnModelLoaded (or a 1 s timeout) decides model or card
@@ -499,6 +558,22 @@ function ns.CreateView(f)
         if not self.shine:IsShown() then self.shine:Show() end
       elseif self.shine:IsShown() then
         self.shine:Hide()
+      end
+    end
+    -- the name's shine: one sweep across it (two for a Legendary)
+    if self.shineTimes then
+      local at
+      for _, t0 in ipairs(self.shineTimes) do
+        local u = (fx - t0) / 0.6
+        if u >= 0 and u < 1 then at = u end
+      end
+      if at then
+        local cw = self.nameClip:GetWidth()
+        self.nameShine:ClearAllPoints()
+        self.nameShine:SetPoint("CENTER", self.nameClip, "LEFT", -24 + (cw + 48) * at, 0)
+        if not self.nameShine:IsShown() then self.nameShine:Show() end
+      elseif self.nameShine:IsShown() then
+        self.nameShine:Hide()
       end
     end
     if self.tier and fx >= 0 then self:Arrival(fx) end
