@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flair Pass Mockup</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.92); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 290px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 2px 4px; padding: 4px 0; cursor: pointer; }
+  label.fx b { font-weight: 600; }
+  label.fx small { grid-column: 2; }
+  input[type=range] { width: 100%; }
+  #status { color: #cfc6ad; min-height: 34px; font-size: 12px; }
+  #screen { position: fixed; left: 310px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  canvas { display: block; }
+  @media (max-width: 700px) { #panel { width: calc(100% - 20px); max-height: 45%; } #screen { left: 10px; top: 48%; } }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Flair pass mockup</h1>
+  <small>A stand-in game screen. Every idea is a switch: <b>off = how it is now</b>, on = the idea. Play a scene, flip one switch, play it again. R replays.</small>
+
+  <h2>Scenes</h2>
+  <button data-scene="mix">Rain: 8 items, best Epic</button>
+  <button data-scene="junk">Rain: junk only</button>
+  <button data-scene="leg">Rain: best Legendary</button><br>
+  <button data-scene="p3">Popup: Rare</button>
+  <button data-scene="p4">Popup: Epic</button>
+  <button data-scene="p5">Popup: Legendary</button>
+  <div style="margin-top:6px"><button id="allOn">All ideas on</button><button id="allOff">All off (now)</button></div>
+
+  <h2>Sound</h2>
+  <label class="fx"><input type="checkbox" id="snd"><span><b>Sound</b> (off by default)</span></label>
+  <input type="range" id="vol" min="0" max="100" value="45">
+
+  <h2>Loot rain</h2>
+  <label class="fx"><input type="checkbox" id="fxWind" checked><b>Wind-up + burst</b><small>The ground glow swells with a low hum, then the fountain pops with a ring in the best item's color.</small></label>
+  <label class="fx"><input type="checkbox" id="fxHang" checked><b>Hang time for the best</b><small>The best item hangs at the top with a glint, then slams down: ripple, sparks, thump. (Off: today's hit-stop shake.)</small></label>
+  <label class="fx"><input type="checkbox" id="fxLand" checked><b>Rarity landings</b><small>Rare+ land with a colored ring and a spark kick; grays and whites stay quiet; items spin a little in flight. (Off: a dust puff for all.)</small></label>
+  <label class="fx"><input type="checkbox" id="fxGather" checked><b>Juicier gather</b><small>Items arc into the bag one by one on rising notes; the bag bounces and counts up. (Off: all slide in at once.)</small></label>
+
+  <h2>Popups</h2>
+  <label class="fx"><input type="checkbox" id="fxImpact" checked><b>Impact pop entrance</b><small>Punches in (overshoot, settle) on a crisp hit. (Off: fade and slide.)</small></label>
+  <label class="fx"><input type="checkbox" id="fxShine" checked><b>Name shine sweep</b><small>One light sweep across the name; brighter for Epic+, twice for Legendary.</small></label>
+  <label class="fx"><input type="checkbox" id="fxLegend" checked><b>Legendary moment</b><small>The screen dims, a golden pillar drops onto the popup, slow motion, a deep hit.</small></label>
+  <label class="fx"><input type="checkbox" id="fxClean" checked><b>Cleaner design</b><small>One glow, a soft plate behind the name, tighter type, a quality underline.</small></label>
+
+  <h2>Sound and freshness</h2>
+  <label class="fx"><input type="checkbox" id="fxMusic" checked><b>Musical landings</b><small>Landing ticks walk up a pentatonic scale and the rain ends on a chord. (Off: a straight pitch climb.)</small></label>
+  <label class="fx"><input type="checkbox" id="fxVary" checked><b>Variation pools</b><small>Small random changes in pitch, arcs and sparks. (Off: every replay is identical; try replaying twice.)</small></label>
+  <label class="fx"><input type="checkbox" id="fxLayer" checked><b>Layered hits by rarity</b><small>Popup sound = hit + shimmer (Rare) + choir pad (Epic) + bass (Legendary). (Off: one chime.)</small></label>
+  <label class="fx"><input type="checkbox" id="fxCalm" checked><b>Calm when repeated</b><small>Junk-only rains within 2 minutes get shorter and quieter (play "junk only" a few times). Rare+ always get the full show.</small></label>
+  <button id="calmReset">Reset the calm counter</button>
+
+  <h2>What's happening</h2>
+  <div id="status">Pick a scene.</div>
+  <small style="margin-top:8px">Stand-ins: items are plain icons here; the game uses the real icons and 3D models. Popup style shown is close to Relic.</small>
+</div>
+<div id="screen"><canvas id="cv"></canvas></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+let W = 0, H = 0, k = 1, floorY = 0;
+function resize() {
+  const r = $('screen').getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  k = H / 768; floorY = H * 0.8;
+}
+addEventListener('resize', resize); resize();
+
+const on = id => $(id).checked;
+const FX = ['fxWind', 'fxHang', 'fxLand', 'fxGather', 'fxImpact', 'fxShine', 'fxLegend', 'fxClean', 'fxMusic', 'fxVary', 'fxLayer', 'fxCalm'];
+$('allOn').onclick = () => FX.forEach(id => $(id).checked = true);
+$('allOff').onclick = () => FX.forEach(id => $(id).checked = false);
+const QC = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'];
+const QL = ['#b0b0b0', '#ffffff', '#7dff6a', '#5aa8ff', '#d08bff', '#ffb050']; // lighter, for light effects
+const NAMES = {
+  3: ['Tidecaller\'s Spear', 'Item Level 38 · Polearm'],
+  4: ['Mantle of the Violet Hour', 'Item Level 52 · Cloth Shoulders'],
+  5: ['Sunforged Greatblade', 'Item Level 70 · Two-Hand Sword'],
+};
+const status = t => $('status').textContent = t;
+
+// ---------------------------------------------------------------- randomness: variation pools off = the same every replay
+let seed = 1;
+function srand() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+const rnd = () => on('fxVary') ? Math.random() : srand();
+const R = (a, b) => a + (b - a) * rnd();
+const vp = () => on('fxVary') ? 1 + (Math.random() * 2 - 1) * 0.03 : 1;
+
+// ---------------------------------------------------------------- sound (Web Audio, synthesized live)
+let AC = null, master = null, nbuf = null, sceneGain = 1;
+function audio() {
+  if (!on('snd')) return null;
+  if (!AC) {
+    AC = new AudioContext(); master = AC.createGain(); master.connect(AC.destination);
+    nbuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+    const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  master.gain.value = $('vol').value / 100;
+  return AC;
+}
+$('vol').oninput = () => { if (master) master.gain.value = $('vol').value / 100; };
+function env(a, g, t, attack, dur, peak) {
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak * sceneGain), t + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+}
+function tone(freq, t0, dur, o = {}) {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime + t0, osc = a.createOscillator(), g = a.createGain();
+  osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(freq, t);
+  if (o.freqEnd) osc.frequency.exponentialRampToValueAtTime(o.freqEnd, t + dur);
+  if (o.detune) osc.detune.value = o.detune;
+  env(a, g, t, o.attack || 0.005, dur, o.gain || 0.15);
+  let node = osc;
+  if (o.lp) { const f = a.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; osc.connect(f); node = f; }
+  node.connect(g); g.connect(master); osc.start(t); osc.stop(t + dur + 0.05);
+}
+function noise(t0, dur, o = {}) {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime + t0, src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  src.buffer = nbuf; f.type = o.type || 'bandpass'; f.Q.value = o.q || 0.8;
+  f.frequency.setValueAtTime(o.freq || 1500, t);
+  if (o.freqEnd) f.frequency.exponentialRampToValueAtTime(o.freqEnd, t + dur);
+  env(a, g, t, o.attack || 0.005, dur, o.gain || 0.2);
+  src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t + dur + 0.05);
+}
+const PENT = [0, 2, 4, 7, 9];
+const note = (base, step) => base * Math.pow(2, (PENT[step % 5] + 12 * Math.floor(step / 5)) / 12);
+const S = {
+  hum(d) { tone(65, 0, d + 0.05, { type: 'sawtooth', freqEnd: 130, gain: 0.05, attack: d * 0.9, lp: 500 }); tone(130, 0, d + 0.05, { freqEnd: 260, gain: 0.05, attack: d * 0.9 }); },
+  burst() { noise(0, 0.22, { freq: 1100, freqEnd: 300, gain: 0.3 }); tone(200 * vp(), 0, 0.3, { freqEnd: 90, gain: 0.25 }); },
+  land(i) {
+    if (on('fxMusic')) { const f = note(523.25, Math.min(i, 9)) * vp(); tone(f, 0, 0.22, { type: 'triangle', gain: 0.1 }); tone(f * 2, 0, 0.12, { gain: 0.025 }); }
+    else tone((600 + i * 45) * vp(), 0, 0.09, { gain: 0.08 });
+  },
+  chord() { [523.25, 659.25, 783.99, 1174.66].forEach((f, i) => tone(f * vp(), i * 0.035, 0.9, { type: 'triangle', gain: 0.055 })); },
+  hang() { tone(1200, 0, 0.42, { freqEnd: 2400, gain: 0.035 }); },
+  slam() { tone(95, 0, 0.4, { freqEnd: 42, gain: 0.45 }); noise(0, 0.25, { type: 'lowpass', freq: 500, gain: 0.35 }); },
+  thud() { noise(0, 0.12, { type: 'lowpass', freq: 700, gain: 0.2 }); },
+  gatherNote(i) { const f = note(659.25, i) * vp(); tone(f, 0, 0.16, { type: 'triangle', gain: 0.07 }); },
+  whoosh() { noise(0, 0.45, { freq: 400, freqEnd: 2500, gain: 0.12, attack: 0.2 }); },
+  rise() { noise(0, 0.55, { freq: 300, freqEnd: 4000, gain: 0.18, attack: 0.5 }); tone(110, 0, 0.55, { freqEnd: 220, gain: 0.08, attack: 0.5, type: 'sawtooth', lp: 800 }); },
+  popup(q) {
+    const v = vp();
+    if (!on('fxLayer')) { tone(880 * v, 0, 0.8, { gain: 0.12 }); tone(1320 * v, 0.02, 0.5, { gain: 0.04 }); return; }
+    noise(0, 0.06, { freq: 3200, gain: 0.22 }); tone(180 * v, 0, 0.14, { freqEnd: 85, gain: 0.3 });               // the hit
+    if (q >= 3) [1, 1.25, 1.5, 2].forEach((m, i) => tone(1567.98 * m * v, 0.03 + i * 0.045, 0.9, { gain: 0.04 })); // shimmer
+    if (q >= 4) [-9, 0, 8].forEach(d => [261.63, 329.63, 392].forEach(f => tone(f * v, 0.05, 1.7, { type: 'sawtooth', gain: 0.018, attack: 0.35, detune: d, lp: 1400 }))); // pad
+    if (q >= 5) { tone(65, 0, 1.5, { freqEnd: 38, gain: 0.5 }); tone(130, 0, 0.8, { freqEnd: 76, gain: 0.15 }); } // bass
+  },
+};
+
+// ---------------------------------------------------------------- effects: particles and rings
+let parts = [], rings = [], shake = 0;
+function spark(x, y, color, n, speed, o = {}) {
+  for (let i = 0; i < n; i++) {
+    const ang = o.up ? -Math.PI / 2 + R(-1.1, 1.1) : R(0, Math.PI * 2), sp = R(0.4, 1) * speed * k;
+    parts.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, age: -(o.delay ? R(0, o.delay) : 0), life: R(0.35, 0.7) * (o.life || 1),
+      color, size: R(1.5, 3) * k * (o.size || 1), grav: (o.grav ?? 500) * k, drag: o.drag ?? 3, kind: o.kind || 'spark' });
+  }
+}
+function ring(x, y, color, r1, o = {}) {
+  rings.push({ x, y, color, r0: (o.r0 || 4) * k, r1: r1 * k, age: -(o.delay || 0), life: o.life || 0.45, flat: o.flat ?? 0.3, w: (o.w || 3) * k });
+}
+function updateFx(dt) {
+  for (const p of parts) {
+    p.age += dt; if (p.age < 0) continue;
+    const d = Math.exp(-p.drag * dt); p.vx *= d; p.vy = p.vy * d + p.grav * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+  }
+  parts = parts.filter(p => p.age < p.life);
+  for (const r of rings) r.age += dt;
+  rings = rings.filter(r => r.age < r.life);
+  shake = Math.max(0, shake - dt);
+}
+function star(x, y, s, a, color) {
+  ctx.save(); ctx.translate(x, y); ctx.globalAlpha = a; ctx.fillStyle = color;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) { const r = i % 2 ? s * 0.16 : s; const an = i * Math.PI / 4; ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); }
+  ctx.fill(); ctx.restore();
+}
+function drawFx() {
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (const r of rings) {
+    if (r.age < 0) continue;
+    const u = r.age / r.life, rad = r.r0 + (r.r1 - r.r0) * (1 - Math.pow(1 - u, 3));
+    ctx.globalAlpha = (1 - u) * 0.9; ctx.strokeStyle = r.color; ctx.lineWidth = r.w * (1 - u * 0.6);
+    ctx.beginPath(); ctx.ellipse(r.x, r.y, rad, rad * r.flat, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  for (const p of parts) {
+    if (p.age < 0) continue;
+    const u = p.age / p.life, a = 1 - u;
+    if (p.kind === 'dust') { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a * 0.35; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + u * 2), 0, 7); ctx.fill(); ctx.globalCompositeOperation = 'lighter'; }
+    else if (p.kind === 'star') star(p.x, p.y, p.size * 4 * Math.sin(Math.PI * u), 0.9, p.color);
+    else { ctx.globalAlpha = a; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (p.kind === 'ember' ? 1.3 : 1), 0, 7); ctx.fill(); }
+  }
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- the bag
+const bag = { bounce: 0, count: 0, pop: 0, show: 0 };
+const bagPos = () => ({ x: W - 70 * k, y: H - 52 * k });
+function drawBag() {
+  const { x, y } = bagPos(), s = (1 + 0.28 * Math.max(0, bag.bounce)) * k;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  if (bag.bounce > 0) { const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 46); g.addColorStop(0, `rgba(255,210,90,${0.5 * bag.bounce})`); g.addColorStop(1, 'rgba(255,210,90,0)'); ctx.fillStyle = g; ctx.fillRect(-50, -50, 100, 100); }
+  ctx.fillStyle = '#6b4a28'; ctx.strokeStyle = '#2a1a0c'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(-20, -14, 40, 32, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#8a6236'; ctx.beginPath(); ctx.roundRect(-14, -22, 28, 12, 5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d9b25a'; ctx.fillRect(-4, -2, 8, 6);
+  ctx.restore();
+  if (bag.show > 0 && bag.count > 0) {
+    const ps = 1 + 0.45 * bag.pop;
+    ctx.save(); ctx.translate(x - 4 * k, y - 46 * k); ctx.scale(ps, ps); ctx.globalAlpha = Math.min(1, bag.show);
+    ctx.font = `700 ${18 * k}px Georgia`; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe28a';
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText('+' + bag.count, 0, 0); ctx.restore();
+  }
+}
+
+// ---------------------------------------------------------------- the rain
+let rain = null, sprites = [], junkTimes = [];
+const G = () => 1800 * k;
+function startRain(qs) {
+  const best = Math.max(...qs), now = performance.now() / 1000;
+  junkTimes = junkTimes.filter(t => now - t < 120);
+  let calm = 0;
+  if (best < 3) { if (on('fxCalm')) calm = Math.min(3, junkTimes.length); junkTimes.push(now); }
+  sceneGain = 1 - 0.22 * calm;
+  const items = qs.map((q, i) => ({ q, i })).sort((a, b) => a.q - b.q || a.i - b.i);
+  const wind = on('fxWind') && calm === 0;
+  rain = { t: 0, items, n: items.length, launched: 0, nextAt: wind ? 0.38 : 0, best, calm, wind, burst: false, landIdx: 0, hold: 0, gather: null };
+  if (wind) S.hum(0.38);
+  bag.count = 0; bag.show = 0;
+  status(calm ? `Calm level ${calm}: junk rain number ${calm + 1} within 2 minutes, so it's shorter and quieter.` :
+    best >= 3 ? 'Rain with a ' + ['', '', '', 'Rare', 'Epic', 'Legendary'][best] + ' as the best item: it comes out last.' : 'Junk rain.');
+}
+function launch(it, isBest) {
+  const sp = rain.calm ? 0.85 : 1;
+  sprites.push({ x: W / 2 + R(-6, 6) * k, y: floorY, vx: (isBest ? R(-25, 25) : R(-340, 340)) * k, vy: -(isBest ? 1440 : R(950, 1250) * sp) * k,
+    e: isBest ? 0.4 : R(0.45, 0.6), q: it.q, rot: 0, spin: on('fxLand') ? R(-7, 7) * (it.q >= 3 ? 1 : 0.6) : 0, best: isBest,
+    hang: 0, hangDone: !(isBest && on('fxHang')), gmul: 1, landed: false, rest: false, tx: 0, alpha: 1, size: (it.q >= 3 ? 40 : 36) * k });
+}
+function slot(s) {
+  const gap = 46 * k, taken = sprites.filter(o => o !== s && o.rest).map(o => o.tx);
+  for (let i = 0; i < 400; i++) for (const sign of [1, -1]) {
+    const px = s.x + sign * i * 6 * k;
+    if (px > 40 * k && px < W - 40 * k && taken.every(t => Math.abs(t - px) >= gap)) return px;
+  }
+  return s.x;
+}
+function firstLanding(s) {
+  S.land(rain.landIdx++);
+  const c = QL[s.q];
+  if (s.best && s.gmul > 1) { // the slam
+    shake = 0.28; S.slam();
+    ring(s.x, floorY, c, 150, { life: 0.6, w: 5 }); ring(s.x, floorY, '#fff', 90, { life: 0.35, w: 2 });
+    spark(s.x, floorY, c, 22, 520, { up: true, grav: 900 }); spark(s.x, floorY, '#ccb894', 10, 160, { kind: 'dust', grav: -40, drag: 4, size: 3 });
+    return;
+  }
+  if (s.best) { shake = 0.18; S.thud(); }
+  if (on('fxLand')) {
+    if (s.q >= 3) { ring(s.x, floorY, c, 46 + 14 * (s.q - 3), { life: 0.45 }); spark(s.x, floorY, c, 5 + 4 * (s.q - 3), 300, { up: true, grav: 800 }); }
+    else if (s.q === 2) spark(s.x, floorY, '#bfb08a', 4, 90, { kind: 'dust', grav: -30, drag: 4, size: 2.5 });
+    else spark(s.x, floorY, '#8a8270', 2, 60, { kind: 'dust', grav: -20, drag: 4, size: 2 });
+  } else spark(s.x, floorY, '#bfb08a', 7, 110, { kind: 'dust', grav: -30, drag: 4, size: 2.8 });
+}
+function stepSprite(s, dt) {
+  let sdt = dt;
+  if (s.hang > 0) {
+    s.hang -= dt; sdt = dt * 0.1;
+    if (s.hang <= 0) { s.vy = 300 * k; s.gmul = 2.6; }
+  }
+  const n = Math.ceil(sdt * 120), h = sdt / n;
+  for (let i = 0; i < n && !s.rest; i++) {
+    s.vy += G() * s.gmul * h; s.x += s.vx * h; s.y += s.vy * h; s.rot += s.spin * h;
+    if (!s.hangDone && s.vy >= 0) {
+      s.hangDone = true; s.hang = 0.45; S.hang();
+      parts.push({ x: s.x, y: s.y - s.size / 2, vx: 0, vy: 0, age: 0, life: 0.5, color: '#fff', size: 9 * k, grav: 0, drag: 0, kind: 'star' });
+      spark(s.x, s.y - s.size / 2, QL[s.q], 8, 120, { grav: 0, drag: 2, life: 1.2 });
+    }
+    if (s.x < 40 * k) { s.x = 40 * k; s.vx = Math.abs(s.vx); }
+    if (s.x > W - 40 * k) { s.x = W - 40 * k; s.vx = -Math.abs(s.vx); }
+    if (s.y >= floorY && s.vy > 0) {
+      s.y = floorY;
+      if (!s.landed) { s.landed = true; firstLanding(s); }
+      if (s.gmul > 1) { s.gmul = 1; s.vy = -s.vy * 0.18; s.vx *= 0.5; continue; }
+      if (s.vy > 170 * k) { s.vy = -s.vy * s.e; s.vx *= 0.82; s.spin *= 0.5; }
+      else { s.vy = 0; s.rest = true; s.tx = slot(s); }
+    }
+  }
+}
+function updateRain(dt) {
+  if (!rain) return;
+  rain.t += dt;
+  if (rain.wind && !rain.burst && rain.t >= 0.38) {
+    rain.burst = true; S.burst();
+    ring(W / 2, floorY, QL[rain.best], 120, { life: 0.5, w: 4 });
+    spark(W / 2, floorY, QL[rain.best], 14, 420, { up: true, grav: 700 });
+  }
+  while (rain.launched < rain.n && rain.t >= rain.nextAt) {
+    const i = rain.launched, it = rain.items[i], isBest = i === rain.n - 1 && it.q >= 3;
+    launch(it, isBest); rain.launched++;
+    const nextBest = rain.launched === rain.n - 1 && rain.items[rain.n - 1].q >= 3;
+    const iv = (0.15 - 0.09 * i / Math.max(1, rain.n - 2)) * (1 - 0.15 * rain.calm);
+    rain.nextAt += nextBest ? 0.55 : iv;
+  }
+  for (const s of sprites) {
+    if (s.g) continue;
+    if (!s.rest) stepSprite(s, dt);
+    else { s.x += (s.tx - s.x) * Math.min(1, dt * 10); s.rot *= Math.exp(-dt * 10); }
+  }
+  if (rain.launched === rain.n && !rain.gather && sprites.every(s => s.rest)) {
+    rain.hold += dt;
+    if (rain.hold > 0.7) startGather();
+  }
+  if (rain.gather) updateGather(dt);
+}
+function startGather() {
+  const stays = sprites.filter(s => s.best), others = sprites.filter(s => !s.best).sort((a, b) => b.x - a.x);
+  const juicy = on('fxGather'), b = bagPos();
+  if (on('fxMusic')) S.chord();
+  rain.gather = { t: 0, n: others.length, done: 0 };
+  others.forEach((s, i) => {
+    s.g = { start: juicy ? i * 0.07 * (rain.calm ? 0.7 : 1) : 0, dur: juicy ? 0.42 : 0.45, x0: s.x, y0: s.y - s.size / 2,
+      cx: (s.x + b.x) / 2, cy: Math.min(s.y, b.y) - R(160, 240) * k, idx: i, arrived: false };
+  });
+  if (!juicy && others.length) S.whoosh();
+  for (const s of stays) { s.fadeOut = true; showPopup(s.q, s.x, floorY - s.size / 2); }
+}
+function updateGather(dt) {
+  const g = rain.gather, juicy = on('fxGather'), b = bagPos();
+  g.t += dt;
+  for (const s of sprites) {
+    if (s.fadeOut) s.alpha = Math.max(0, s.alpha - dt * 5);
+    if (!s.g) continue;
+    const u = Math.min(1, Math.max(0, (g.t - s.g.start) / s.g.dur));
+    if (u <= 0) continue;
+    if (juicy) {
+      const e = u * u, m = 1 - e; // ease in: picks up speed toward the bag
+      s.gx = m * m * s.g.x0 + 2 * m * e * s.g.cx + e * e * b.x;
+      s.gy = m * m * s.g.y0 + 2 * m * e * s.g.cy + e * e * b.y;
+      s.gs = 1 - 0.6 * e;
+    } else { s.gx = s.g.x0 + (b.x - s.g.x0) * u; s.gy = s.g.y0 + (b.y - s.g.y0) * u; s.gs = 1 - 0.5 * u; s.alpha = 1 - u; }
+    if (u >= 1 && !s.g.arrived) {
+      s.g.arrived = true; s.alpha = 0; g.done++;
+      if (juicy) { bag.count++; bag.bounce = 1; bag.pop = 1; bag.show = 2.2; S.gatherNote(s.g.idx); spark(b.x, b.y - 10 * k, QL[s.q], 3, 140, { up: true, grav: 400 }); }
+    }
+  }
+  if (g.done === g.n && sprites.every(s => s.alpha <= 0)) { sprites = []; rain = null; }
+}
+function drawItem(x, y, size, q, rot, alpha, scale = 1) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(scale, scale); ctx.globalAlpha = alpha;
+  const h = size / 2;
+  const gr = ctx.createLinearGradient(0, -h, 0, h); gr.addColorStop(0, '#3b3328'); gr.addColorStop(1, '#16120c');
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.roundRect(-h, -h, size, size, size * 0.12); ctx.fill();
+  ctx.strokeStyle = q === 0 ? '#6f6f6f' : QC[q]; ctx.lineWidth = Math.max(1.5, size * 0.06); ctx.stroke();
+  ctx.fillStyle = q === 0 ? '#77736a' : QC[q];
+  ctx.beginPath(); ctx.moveTo(0, -h * 0.55); ctx.lineTo(h * 0.42, 0); ctx.lineTo(0, h * 0.55); ctx.lineTo(-h * 0.42, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.moveTo(0, -h * 0.55); ctx.lineTo(h * 0.42, 0); ctx.lineTo(0, -h * 0.1); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawRain() {
+  for (const s of sprites) {
+    if (s.alpha <= 0) continue;
+    if (s.g && s.gx !== undefined) { drawItem(s.gx, s.gy, s.size, s.q, 0, s.alpha, s.gs); continue; }
+    const hgt = floorY - s.y, sh = Math.max(0.25, 1 - hgt / (H * 0.6)); // floor shadow
+    ctx.save(); ctx.globalAlpha = 0.35 * sh * s.alpha; ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.ellipse(s.x, floorY + 2 * k, s.size * 0.5 * sh, s.size * 0.12 * sh, 0, 0, 7); ctx.fill(); ctx.restore();
+    if (s.q >= 3 && s.rest && !s.fadeOut) { // today's loot beam over resting Rare+
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const bh = (s.best ? 180 : 110) * k;
+      const g = ctx.createLinearGradient(0, floorY - bh, 0, floorY); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, QC[s.q]);
+      ctx.globalAlpha = 0.35; ctx.fillStyle = g; ctx.fillRect(s.x - 9 * k, floorY - bh, 18 * k, bh); ctx.restore();
+    }
+    drawItem(s.x, s.y - s.size / 2, s.size, s.q, s.rot, s.alpha);
+  }
+}
+
+// ---------------------------------------------------------------- popups
+let popups = [], legend = null, dim = 0;
+function showPopup(q, fromX, fromY) {
+  const x = W * 0.66, y = H * 0.38;
+  if (q === 5 && on('fxLegend')) { legend = { t: 0, x, y, spawned: false }; S.rise(); status('Legendary moment: dim, the pillar drops, slow motion, the hit.'); return; }
+  popups.push(makePopup(q, x, y, false));
+}
+function makePopup(q, x, y, slow) {
+  const [name, sub] = NAMES[q];
+  return { q, name, sub, x, y, t: 0, life: q >= 5 ? 6 : q >= 4 ? 5 : 4.5, slow: slow ? 0.75 : 0, fxAt: on('fxImpact') ? 0.01 : 0.3, fxDone: false, ember: 0, oc: null, clean: on('fxClean') };
+}
+function arrival(p) {
+  S.popup(p.q);
+  const c = QL[p.q], x = p.x, y = p.y;
+  if (on('fxImpact')) { spark(x, y, '#fff6dc', 10, 260, { grav: 0, drag: 6, life: 0.6 }); if (p.q >= 4) shake = Math.max(shake, 0.1); }
+  const A = { 3: [10, 0, 1], 4: [14, 5, 1.15], 5: [22, 7, 1.3] }[p.q];
+  spark(x, y, c, A[0], 330 * A[2], { up: true, grav: 260, drag: 2.5, delay: 0.12 });
+  for (let i = 0; i < A[1]; i++) parts.push({ x: x + R(-70, 70) * k, y: y + R(-60, 50) * k, vx: 0, vy: 0, age: -i * 0.09, life: 0.42, color: '#fff', size: R(5, 8) * k, grav: 0, drag: 0, kind: 'star' });
+  if (p.q === 5) { ring(x, y, c, 190, { flat: 1, life: 0.9, w: 4 }); ring(x, y, '#ffe9b0', 260, { flat: 1, life: 0.9, w: 3, delay: 0.2 }); }
+}
+const easeOutBack = t => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+function updatePopups(dt) {
+  if (legend) {
+    legend.t += dt;
+    if (!legend.spawned && legend.t >= 0.55) {
+      legend.spawned = true; shake = 0.35;
+      popups.push(makePopup(5, legend.x, legend.y, true));
+    }
+    if (legend.t > 2.6) legend = null;
+  }
+  const dimTarget = legend ? (legend.t < 1.5 ? 1 : 0) : 0;
+  dim += (dimTarget - dim) * Math.min(1, dt * (dimTarget ? 7 : 2.2));
+  for (const p of popups) {
+    const rate = p.slow > 0 ? 0.4 : 1; p.slow -= dt; p.t += dt * rate;
+    if (!p.fxDone && p.t >= p.fxAt) { p.fxDone = true; arrival(p); }
+    if (p.q === 5 && p.t < p.life) { p.ember -= dt; if (p.ember <= 0) { p.ember = 0.18; parts.push({ x: p.x + R(-50, 50) * k, y: p.y + R(0, 40) * k, vx: R(-10, 10) * k, vy: -R(30, 60) * k, age: 0, life: 1.6, color: '#ffb050', size: 2 * k, grav: 0, drag: 0, kind: 'ember' }); } }
+  }
+  popups = popups.filter(p => p.t < p.life + 0.8);
+}
+function nameCanvas(p, font) {
+  if (!p.oc) {
+    p.oc = document.createElement('canvas'); const o = p.oc.getContext('2d');
+    o.font = font; if (p.clean) o.letterSpacing = '0.5px';
+    p.tw = o.measureText(p.name).width; p.oc.width = Math.ceil(p.tw + 8); p.oc.height = 40;
+  }
+  const o = p.oc.getContext('2d');
+  o.clearRect(0, 0, p.oc.width, p.oc.height); o.globalCompositeOperation = 'source-over';
+  o.font = font; if (p.clean) o.letterSpacing = '0.5px'; o.textBaseline = 'middle'; o.fillStyle = QC[p.q]; o.fillText(p.name, 4, 20);
+  const shines = p.q >= 5 ? [0.3, 1.5] : [0.3];
+  if (on('fxShine')) for (const st of shines) {
+    const u = (p.t - st) / 0.6; if (u < 0 || u > 1) continue;
+    const bw = p.q >= 4 ? 60 : 40, bx = -bw + (p.oc.width + 2 * bw) * u;
+    const g = o.createLinearGradient(bx - bw / 2, 0, bx + bw / 2, 0);
+    const a = p.q >= 4 ? 0.95 : 0.7;
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, `rgba(255,255,255,${a})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+    o.globalCompositeOperation = 'source-atop'; o.fillStyle = g; o.fillRect(0, 0, p.oc.width, p.oc.height);
+  }
+  return p.oc;
+}
+function drawPopup(p) {
+  const T = p.t; let a = 1, sc = 1, dx = 0;
+  if (on('fxImpact')) { a = Math.min(1, T / 0.05); sc = 1.28 - 0.28 * easeOutBack(Math.min(1, T / 0.32)); }
+  else { const u = Math.min(1, T / 0.3); a = u; dx = -40 * (1 - u); }
+  if (T > p.life) { const u = (T - p.life) / 0.8; a *= Math.max(0, 1 - u); dx -= 20 * u; }
+  if (a <= 0) return;
+  ctx.save(); ctx.translate(p.x + dx * k, p.y); ctx.scale(sc * k, sc * k); ctx.globalAlpha = a;
+  const c = QC[p.q], cl = QL[p.q], clean = p.clean;
+  // glow
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const gr = ctx.createRadialGradient(0, 0, 4, 0, 0, clean ? 72 : 88);
+  gr.addColorStop(0, cl + (clean ? '88' : 'aa')); gr.addColorStop(clean ? 0.55 : 0.4, c + (clean ? '33' : '55')); gr.addColorStop(1, c + '00');
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, clean ? 72 : 88, 0, 7); ctx.fill();
+  if (clean) { ctx.strokeStyle = cl + '55'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(0, 0, 46, 0, 7); ctx.stroke(); }
+  const fu = (T - p.fxAt) / 0.45; // arrival flash
+  if (fu >= 0 && fu < 1) { const f = ctx.createRadialGradient(0, 0, 0, 0, 0, 60 + 70 * fu); f.addColorStop(0, `rgba(255,250,235,${(1 - fu) * 0.9})`); f.addColorStop(1, 'rgba(255,250,235,0)'); ctx.fillStyle = f; ctx.beginPath(); ctx.arc(0, 0, 60 + 70 * fu, 0, 7); ctx.fill(); }
+  ctx.restore();
+  // the item (sways)
+  drawItem(0, 0, 64, p.q, Math.sin(T * 1.7) * 0.07, 1);
+  if (clean) { ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(-30, -30, 60, 60, 6); ctx.stroke(); }
+  // name and line under it
+  const font = clean ? '600 21px Georgia' : '17px Georgia';
+  const oc = nameCanvas(p, font), tw = p.tw;
+  if (clean) {
+    const pw = tw + 70, g = ctx.createLinearGradient(-pw / 2, 0, pw / 2, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.18, 'rgba(0,0,0,.6)'); g.addColorStop(0.82, 'rgba(0,0,0,.6)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(-pw / 2, 50, pw, 50);
+    const ug = ctx.createLinearGradient(-tw / 2, 0, tw / 2, 0); ug.addColorStop(0, c + '00'); ug.addColorStop(0.5, c); ug.addColorStop(1, c + '00');
+    ctx.fillStyle = ug; ctx.fillRect(-tw / 2, 80, tw, 1.5);
+  }
+  ctx.save(); ctx.shadowColor = '#000'; ctx.shadowBlur = clean ? 6 : 0; ctx.shadowOffsetX = clean ? 0 : 1; ctx.shadowOffsetY = clean ? 2 : 1;
+  ctx.drawImage(oc, -oc.width / 2, (clean ? 66 : 58) - 20); ctx.restore();
+  ctx.textAlign = 'center';
+  if (clean) { ctx.font = '600 9.5px system-ui'; ctx.letterSpacing = '1.6px'; ctx.fillStyle = '#b9b09a'; ctx.fillText(p.sub.toUpperCase(), 0, 94); ctx.letterSpacing = '0px'; }
+  else { ctx.font = '11px system-ui'; ctx.fillStyle = '#ccc2ad'; ctx.shadowColor = '#000'; ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1; ctx.fillText(p.sub.replace(' · ', '   '), 0, 76); }
+  ctx.restore();
+}
+function drawLegend() {
+  if (dim > 0.01) { ctx.fillStyle = `rgba(4,3,8,${dim * 0.62})`; ctx.fillRect(0, 0, W, H); }
+  if (!legend) return;
+  const t = legend.t, u = Math.min(1, t / 0.55), bottom = legend.y * u * u;
+  const fade = t < 0.55 ? 1 : Math.max(0, 1 - (t - 0.55) / 1.4), w = (t < 0.55 ? 60 : 60 * (1 - 0.6 * (1 - fade))) * k;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = fade;
+  const g = ctx.createLinearGradient(legend.x - w, 0, legend.x + w, 0);
+  g.addColorStop(0, 'rgba(255,170,60,0)'); g.addColorStop(0.5, 'rgba(255,220,140,.85)'); g.addColorStop(1, 'rgba(255,170,60,0)');
+  ctx.fillStyle = g; ctx.fillRect(legend.x - w, 0, 2 * w, bottom);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- the scene
+function drawWorld() {
+  const bg = ctx.createRadialGradient(W / 2, H * 0.65, 10, W / 2, H * 0.65, Math.max(W, H) * 0.75);
+  bg.addColorStop(0, '#3d4a36'); bg.addColorStop(0.6, '#1b2219'); bg.addColorStop(1, '#0f130e');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // the character
+  const cx = W * 0.44;
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(cx, floorY - 40 * k, 34 * k, 8 * k, 0, 0, 7); ctx.fill();
+  const cg = ctx.createLinearGradient(0, floorY - 160 * k, 0, floorY - 40 * k); cg.addColorStop(0, '#6d5a44'); cg.addColorStop(1, '#3b2f22');
+  ctx.fillStyle = cg; ctx.beginPath(); ctx.roundRect(cx - 28 * k, floorY - 160 * k, 56 * k, 120 * k, [28 * k, 28 * k, 8 * k, 8 * k]); ctx.fill();
+  // the ground line (today's "Ground line" effect)
+  const lg = ctx.createLinearGradient(W * 0.1, 0, W * 0.9, 0);
+  lg.addColorStop(0, 'rgba(255,210,140,0)'); lg.addColorStop(0.5, 'rgba(255,210,140,.22)'); lg.addColorStop(1, 'rgba(255,210,140,0)');
+  ctx.fillStyle = lg; ctx.fillRect(W * 0.1, floorY, W * 0.8, 1.5 * k);
+  // the wind-up glow at the fountain
+  if (rain && rain.wind && !rain.burst) {
+    const u = Math.min(1, rain.t / 0.38), r = (20 + 70 * u) * k;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(W / 2, floorY, 2, W / 2, floorY, r);
+    g.addColorStop(0, QL[rain.best] + 'cc'); g.addColorStop(1, QL[rain.best] + '00');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(W / 2, floorY, r, r * 0.35, 0, 0, 7); ctx.fill();
+    ctx.globalAlpha = u * 0.6; ctx.fillRect(W / 2 - 2 * k, floorY - 70 * k * u, 4 * k, 70 * k * u);
+    ctx.restore();
+  }
+}
+let lastScene = null;
+function clearScene() { sprites = []; parts = []; rings = []; popups = []; rain = null; legend = null; dim = 0; shake = 0; bag.count = 0; bag.show = 0; sceneGain = 1; }
+function play(sc) {
+  lastScene = sc; clearScene(); seed = 12345;
+  if (sc === 'mix') startRain([0, 0, 1, 1, 2, 2, 3, 4]);
+  else if (sc === 'junk') startRain([0, 0, 0, 1, 1, 1, 2, 0]);
+  else if (sc === 'leg') startRain([0, 1, 1, 2, 2, 3, 4, 5]);
+  else { const q = +sc[1]; showPopup(q); if (!(q === 5 && on('fxLegend'))) status(['', '', '', 'Rare', 'Epic', 'Legendary'][q] + ' popup.'); }
+}
+document.querySelectorAll('[data-scene]').forEach(b => b.onclick = () => play(b.dataset.scene));
+$('calmReset').onclick = () => { junkTimes = []; status('Calm counter reset.'); };
+addEventListener('keydown', e => { if ((e.key === 'r' || e.key === 'R') && lastScene) play(lastScene); });
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  updateRain(dt); updatePopups(dt); updateFx(dt);
+  bag.bounce = Math.max(0, bag.bounce - dt * 4); bag.pop = Math.max(0, bag.pop - dt * 5); bag.show = Math.max(0, bag.show - dt);
+  ctx.save();
+  if (shake > 0) ctx.translate((Math.random() * 2 - 1) * 10 * k * shake, (Math.random() * 2 - 1) * 10 * k * shake);
+  drawWorld(); drawRain(); drawBag(); drawLegend(); drawFx();
+  for (const p of popups) drawPopup(p);
+  ctx.restore();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

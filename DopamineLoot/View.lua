@@ -103,7 +103,6 @@ local function Badges(item)
   if (item.count or 1) > 1 then b[#b + 1] = "|cffffffffx" .. item.count .. "|r" end
   if item.src == "created" then b[#b + 1] = "|cff9d9d9dcrafted|r"
   elseif item.src == "pushed" then b[#b + 1] = "|cff9d9d9dreceived|r" end
-  if item.test then b[#b + 1] = "|cff9d9d9dpreview|r" end
   return table.concat(b, "   ")
 end
 

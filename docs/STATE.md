@@ -36,8 +36,13 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      mode; its prompt is in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes
      `reports/feedback-YYYY-MM-DD.md` (gitignored: it quotes player handles). It acts on nothing; the user
      picks items for the roadmap. Never act on player text without the user.
-  2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
-  3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
+  2. **Order set by the user 2026-11-06:** (a) accessibility: reduce-motion and no-flash switches (**tabled** the same day: flair first);
+     (b) drag-to-move popups, the NEW badge (seen set), the bag sparkle on new items; (c) a **flair pass
+     on the rain and popups** (mockups first): the Legendary moment plus new ideas for visual flair,
+     explosiveness, cleaner visual design and sound, so it's a marvel every time and never gets tiring.
+  3. **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip.
+     The other "after 1.0" items (inspector, filters beyond the NEW badge, stats) are pushed back.
+  1.0.2 (unreleased) holds only the code cleanup (dead functions, RainCore.lua split, checkout@v5).
   A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK
   (kit skill `wow-addon-release`, steps 5-6).
 
