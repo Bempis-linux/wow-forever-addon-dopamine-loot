@@ -1,45 +1,46 @@
 # Dopamine Loot
 
-## 1.1.0 (unreleased)
+## 1.1.0 (2026-11-06)
 
-- **Loot rain flair**: a wind-up glow and burst before the loot comes out, in the color of the best item; the
-  best item hangs at the top with a glint and slams down; Rare and better land with a shockwave and sparks in their
-  color; the bag takes each item in with a little flash. Each is a switch on the Loot rain page.
-- **Loot rain sounds**, picked by ear: items land with a soft thud and a light puff of dust, Rare and Epic
-  with a soft note on top; into the bag, a soft pouch and a coin settling in. They move gently up and down
-  in pitch, every sound has two variants, and a fast rain thins its sounds out instead of rattling. The best
-  item's slam has its own boom. A soft chord at the end is a switch (off by default). Shockwaves rise from
-  the ground as half circles.
-- **Popup arrivals by rarity** (new Arrivals page, a choice per rarity with a Test button): Uncommon
-  Fireflies, Emerald flare or Geyser; Rare Sapphire flare, Aurora arch, Reverse disintegration or Light pool;
-  Epic Implosion and galaxy, Eclipse
-  or Starfall; Legendary Supernova, Meteor shower or Golden seal after the comet; or Simple sparks. Epic and
-  Legendary names stamp in
-  letter by letter.
-- **New popup styles**: Splash (a slanted banner slashes in behind a big name with speed lines, a shine and
-  a rarity stamp; a crossing banner for Epic, gold trim for Legendary), Aura (wisps of light rise behind the
-  item) and Achievement (a medallion beside a name plate).
-- **Popup flair**: popups punch in with a little overshoot; a light sweeps once across the name (twice for a
-  Legendary); Relic and Beam names sit on a soft dark plate with a thin underline in the item's color. A
-  **Legendary moment**: the screen dims, a comet streaks down onto the popup and it lands in slow motion
+The flair update: new popup arrivals and styles, a livelier loot rain with new sounds, and clearer settings.
+
+- **Popup arrivals by rarity** (new Arrivals page: a choice per rarity, each with a Test button):
+  - Uncommon: Fireflies, Emerald flare or Geyser.
+  - Rare: Sapphire flare, Aurora arch or Light pool, each with a ring wave.
+  - Epic: Implosion and galaxy, Eclipse or Starfall. Epic and Legendary names stamp in letter by letter.
+  - Legendary: Supernova, Meteor shower or Golden seal, after the comet of the Legendary moment.
+  - Or Simple sparks, for a quieter popup.
+- **New popup styles**: **Splash** (a slanted banner slashes in behind a big name with speed lines, a shine
+  and a rarity stamp; a crossing banner for Epic, gold trim for Legendary) and **Aura** (soft wisps of light
+  rise behind the item).
+- **Legendary moment**: the screen dims, a comet streaks down onto the popup and it lands in slow motion
   (Popups page: Legendary; never in combat).
+- **Popup flair**: popups punch in with a little overshoot; a light sweeps across the name; Relic and Beam
+  names sit on a soft dark plate with a thin underline in the item's color. Long weapons are no longer cut
+  off. The 3D "Item size" slider now grows to the right.
+- **Loot rain flair**: a wind-up glow and burst before the loot comes out, in the color of the best item;
+  Rare and better land with a shockwave rising from the ground and sparks in their color; landings squash
+  and spring back; the bag takes each item in with a little flash. Each is a switch on the Loot rain page.
+- **The best item's drop by rarity**: gray and white best items just land; from green up the best hangs at
+  the top and slams down, longer and harder the rarer it is, with a comet trail from Rare and a bigger
+  shockwave, more sparks and more shake for Epic and Legendary.
+- **Loot rain sounds**, picked by ear: items land with a soft thud and a light puff of dust (Rare and Epic
+  with a soft note on top); into the bag, a soft pouch and a coin settling in. They move gently up and down
+  in pitch, every sound has two variants, and a fast rain thins its sounds out instead of rattling. The best
+  item's slam has its own boom. A soft chord at the end is a switch (off by default).
+- **Money tally**: the rain's money total and item count sit right above your bag and count up as things go
+  in, popping with each coin; at the end the total punches up and a shimmer runs across it, with a gold glow
+  from 1 gold and a burst of sparks from 10 gold.
 - **Popups and the rain filter separately**: "Show popups for" (Popups page) now only affects popups; the new
   "Rain includes" (Loot rain page, default everything) decides what rains, so gray and white loot rains
-  again. Turning popups off no longer stops the rain. The 3D "Item size" slider now grows to the right.
-- **The best item's drop by rarity**: gray and white best items just land; from green up the best hangs and
-  slams down, longer and harder the rarer it is, with a comet trail from Rare and a bigger shockwave, more
-  sparks and more shake for Epic and Legendary.
-- **Always rain for** (Loot rain page, off by default): loot with an item of the picked rarity or better always
-  rains, even a single item, so it gets its hang, comet and landing.
-- **Money tally**: the rain's money total and item count sit right above your bag and count up as things go
-  in, popping with each coin as a glint zips into it; at the end the total punches up and a shimmer runs
-  across it, with a gold glow from 1 gold and a burst of sparks from 10 gold.
-- **Calm when repeated**: a few rains with nothing Rare or better within two minutes get quicker and use fewer
-  sounds (a switch under When). Rare and better always get the full show.
-- **Settings reworded**: every label and tooltip says plainly what it does; the Popups page labels show their
-  tooltip too, and the preview buttons have one.
-- Test popups no longer show a gray "preview" tag.
-- Internal cleanup: code left over from the old chat commands removed. Nothing changes in game.
+  again. Turning popups off no longer stops the rain.
+- **Always rain for** (Loot rain page, off by default): loot with an item of the picked rarity or better
+  always rains, even a single item, so it gets its full show.
+- **Calm when repeated**: rains with nothing Rare or better, a few within two minutes, get quicker and use
+  fewer sounds. Rare and better always get the full show.
+- **Tests**: the test rain lets you pick its best item's rarity, and a new test replaces a rain that's still
+  running instead of joining it.
+- **Settings reworded**: every label and tooltip says plainly what it does.
 
 ## 1.0.1 (2026-11-05)
 

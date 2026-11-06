@@ -3,13 +3,16 @@
 Loot that feels like loot. A World of Warcraft addon for **WoW: Forever** (Interface `16001`).
 
 - **Loot popups**: each item you loot shows up beside your character as a card, with the item turning in
-  3D. Rare, Epic and Legendary items arrive with sparks, glints and shockwaves. Three styles: Relic,
-  Beam and Banner.
-- **Loot rain**: loot three or more things at once, a pile of money or a quest reward, and it all bursts
-  up from the ground, bounces and settles, with the best item landing last. Coins merge into silver and
-  gold, Rare+ items get a light beam, and everything gathers into your bag.
-- **Sounds**: a sound per rarity (the game's own, picked by ear) plus coin and launch sounds that climb in
-  pitch as the loot keeps coming.
+  3D. Each rarity arrives with its own show, picked on the Arrivals page: fireflies or an emerald flare for
+  green, a sapphire flare or an aurora for blue, an implosion, eclipse or starfall for purple, and for a
+  Legendary the screen dims and a comet streaks down before a supernova. Styles: Relic, Beam, Banner,
+  Splash and Aura.
+- **Loot rain**: loot several things at once, a pile of money or a quest reward, and it all bursts up from
+  the ground, bounces and settles; the best item hangs at the top and slams down, harder the rarer it is.
+  Coins merge into silver and gold, Rare+ items get a light beam, everything gathers into your bag and a
+  money tally counts it up above the bag.
+- **Sounds**: a sound per rarity (the game's own, picked by ear) plus soft thuds, a pouch and coins for the
+  rain, moving gently in pitch as the loot keeps coming.
 
 It stays out of the way: common loot and loot in combat come as one compact line, clicks pass through
 the popups, and the rain waits until the fight is over.
@@ -29,8 +32,9 @@ with Test buttons:
 | Page | What's there |
 |---|---|
 | Dopamine Loot | switch popups, the rain and sounds on or off; quick tests |
-| Popups | when they show, style, size, placement, the 3D item, with a live preview |
-| Loot rain | when it rains, where the loot flies from, every effect as its own switch, tests |
+| Popups | when they show, style, size, placement, the 3D item, the Legendary moment, with a live preview |
+| Arrivals | how each rarity arrives, with a Test button for each |
+| Loot rain | when it rains and what rains, where the loot flies from, every effect as its own switch, tests |
 | Sounds | the sound for each rarity (Play to hear it), our chime for Rare and up |
 
 ## Bugs and ideas

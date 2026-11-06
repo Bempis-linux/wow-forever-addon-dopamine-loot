@@ -19,7 +19,8 @@ local LOWER = { HIGH = "MEDIUM", DIALOG = "HIGH" }
 -- The choices per rarity (setting "arrival" .. q); the first is the default
 ns.ARRIVALS = {
   [2] = { { "fireflies", "Fireflies" }, { "emerald", "Emerald flare" }, { "geyser", "Geyser" }, { "simple", "Simple sparks" } },
-  [3] = { { "sapphire", "Sapphire flare" }, { "aurora", "Aurora arch" }, { "disint", "Reverse disintegration" }, { "pool", "Light pool" }, { "simple", "Simple sparks" } },
+  -- ("disint", Reverse disintegration, set aside for 1.1.0: back to its first version plus the fade, later)
+  [3] = { { "sapphire", "Sapphire flare" }, { "aurora", "Aurora arch" }, { "pool", "Light pool" }, { "simple", "Simple sparks" } },
   [4] = { { "implode", "Implosion and galaxy" }, { "eclipse", "Eclipse" }, { "starfall", "Starfall" }, { "simple", "Simple sparks" } },
   [5] = { { "supernova", "Supernova" }, { "meteors", "Meteor shower" }, { "seal", "Golden seal" }, { "simple", "Simple sparks" } },
 }

@@ -47,7 +47,7 @@ ns.STYLES = {
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color with its name on it, the item on a diamond emblem, a shine sweeping across." },
   { key = "splash", label = "Splash", tip = "A slanted banner slashes in behind a big name, with speed lines and a shine; the rarity is stamped on. Thicker the rarer: a crossing second banner for Epic, gold trim for Legendary." },
   { key = "aura", label = "Aura", tip = "The item in an aura of its color: soft wisps of light rise behind it and its glow breathes; the rarity under the name." },
-  { key = "achievement", label = "Achievement", tip = "A small medallion with the item beside a name plate, like an achievement toast." },
+  -- set aside for 1.1.0 (the user: "still awkward"; the layout code stays): { key = "achievement", label = "Achievement", tip = "A small medallion with the item beside a name plate, like an achievement toast." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);
@@ -90,6 +90,7 @@ end
 function ns.PopupStyle()
   local s = ns.settings.popupStyle
   if s == "halo" or s == "toast" then s = "relic"; ns.settings.popupStyle = s end -- both set aside (0.4.7, 0.4.14)
+  if s == "achievement" then return "relic" end -- set aside for 1.1.0 (not listed; the setting is kept)
   return LAYOUT[s or ""] and s or "relic"
 end
 function ns.PopupScale() return ns.settings.popupScale or 0.8 end
