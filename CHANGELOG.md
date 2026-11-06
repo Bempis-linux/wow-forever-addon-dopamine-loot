@@ -11,8 +11,10 @@
   item's slam has its own boom. A soft chord at the end is a switch (off by default). Shockwaves rise from
   the ground as half circles.
 - **Popup arrivals by rarity** (new Arrivals page, a choice per rarity with a Test button): Uncommon
-  Fireflies, Emerald flare or Geyser; Rare Sapphire flare or Aurora arch; Epic Implosion and galaxy, Eclipse
-  or Starfall; Legendary Supernova after the comet; or Simple sparks. Epic and Legendary names stamp in
+  Fireflies, Emerald flare or Geyser; Rare Sapphire flare, Aurora arch, Reverse disintegration or Light pool;
+  Epic Implosion and galaxy, Eclipse
+  or Starfall; Legendary Supernova, Meteor shower or Golden seal after the comet; or Simple sparks. Epic and
+  Legendary names stamp in
   letter by letter.
 - **New popup styles**: Splash (a slanted banner slashes in behind a big name with speed lines, a shine and
   a rarity stamp; a crossing banner for Epic, gold trim for Legendary), Aura (wisps of light rise behind the

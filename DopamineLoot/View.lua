@@ -544,6 +544,7 @@ function ns.CreateView(f)
       for k, t0 in ipairs(self.shineTimes) do self.shineTimes[k] = t0 + wait end
     end
     self.arrivalGen = (self.arrivalGen or 0) + 1 -- (an arrival still running from the last item stops)
+    self.stage:SetAlpha(1) -- (an arrival may fade the item in; one cut short must not leave it faded)
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
     -- weapons stood upright show their edge at facing 0: a quarter turn shows the flat side

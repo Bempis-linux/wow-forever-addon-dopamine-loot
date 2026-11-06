@@ -1,9 +1,9 @@
 -- Dopamine Loot popup arrivals: the show a popup makes as it lands, picked per rarity on the
 -- Arrivals settings page (designed in docs/mockups/popup-designs.html, rounds 1-8).
 --   Uncommon  Fireflies, Emerald flare, Geyser
---   Rare      Sapphire flare, Aurora arch (both with a ring wave)
+--   Rare      Sapphire flare, Aurora arch, Reverse disintegration, Light pool (all with a ring wave)
 --   Epic      Implosion (then the galaxy), Eclipse, Starfall
---   Legendary Supernova (after the comet of the Legendary moment, Popup.lua)
+--   Legendary Supernova, Meteor shower, Golden seal (after the comet of the Legendary moment, Popup.lua)
 -- "Simple" keeps the old arrival (View.lua: a spark burst, glints, shockwaves by rarity).
 -- Everything is drawn on two full-screen layers of pooled textures around the popup's item: one in
 -- front of the popups, one just behind them (a strata lower). Effects are scripts that run each frame
@@ -19,9 +19,9 @@ local LOWER = { HIGH = "MEDIUM", DIALOG = "HIGH" }
 -- The choices per rarity (setting "arrival" .. q); the first is the default
 ns.ARRIVALS = {
   [2] = { { "fireflies", "Fireflies" }, { "emerald", "Emerald flare" }, { "geyser", "Geyser" }, { "simple", "Simple sparks" } },
-  [3] = { { "sapphire", "Sapphire flare" }, { "aurora", "Aurora arch" }, { "simple", "Simple sparks" } },
+  [3] = { { "sapphire", "Sapphire flare" }, { "aurora", "Aurora arch" }, { "disint", "Reverse disintegration" }, { "pool", "Light pool" }, { "simple", "Simple sparks" } },
   [4] = { { "implode", "Implosion and galaxy" }, { "eclipse", "Eclipse" }, { "starfall", "Starfall" }, { "simple", "Simple sparks" } },
-  [5] = { { "supernova", "Supernova" }, { "simple", "Simple sparks" } },
+  [5] = { { "supernova", "Supernova" }, { "meteors", "Meteor shower" }, { "seal", "Golden seal" }, { "simple", "Simple sparks" } },
 }
 function ns.ArrivalFor(q)
   local list = ns.ARRIVALS[math.min(q or 0, 5)]
@@ -478,6 +478,158 @@ function A.supernova(view, x, y, s, r, g, b)
   end, 0.4)
 end
 
+-- Rare: reverse disintegration: specks of light swirl in from all around onto the item, the low
+-- parts first; the item fades in as a glowing scanline sweeps up it (a 3D model can't be cut by a
+-- moving mask, so it fades in behind the line instead)
+function A.disint(view, x, y, s, r, g, b)
+  local lr, lg, lb = Light(r, g, b)
+  local stage = view.stage
+  stage:SetAlpha(0)
+  local W, H = stage:GetWidth() * 0.5, stage:GetHeight()
+  local specks = {}
+  for i = 1, 60 do
+    local fy = math.random() -- where on the item it lands: 0 bottom, 1 top
+    local an, d = math.random() * 6.28, Rnd(140, 300)
+    specks[i] = { tx = (math.random() - 0.5) * W, ty = (fy - 0.5) * H, an = an, d = d, sw = Rnd(-2, 2), delay = fy * 0.35 + Rnd(0, 0.15) }
+  end
+  Effect(view, 1.4, function(e)
+    local ox, oy, sc = Origin(e)
+    for i, p in ipairs(specks) do
+      local u = math.min(1, math.max(0, (e.t - p.delay) / 0.5))
+      local t = T(e, i, front, MEDIA .. "Mote", "ADD")
+      if u <= 0 or u >= 1 then t:SetAlpha(0) else
+        local k = 1 - (1 - (1 - u) ^ 3) -- distance left, spiralling as it closes in
+        local an = p.an + p.sw * k
+        local white = i % 5 == 0
+        Place(t, ox + (p.tx + math.cos(an) * p.d * k) * sc, oy + (p.ty + math.sin(an) * p.d * k) * sc, 5 * sc, 5 * sc,
+          math.min(1, u * 3), white and 1 or lr, white and 1 or lg, white and 1 or lb)
+      end
+    end
+    local rev = math.min(1, math.max(0, (e.t - 0.25) / 0.7)) -- the item appears, bottom to top
+    if view.stage == stage then stage:SetAlpha(rev) end
+    local ly = oy + (rev - 0.5) * H * sc
+    local line = rev > 0 and rev < 1
+    Place(T(e, "l1", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 2.4 * sc, 6 * sc, line and 1 or 0, 1, 1, 1)
+    Place(T(e, "l2", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 2 * sc, 20 * sc, line and 0.7 or 0, lr, lg, lb)
+    if rev >= 1 and not e.done then
+      e.done = true
+      Glints(ox, oy, 5, 70, sc)
+      Ring(view, lr, lg, lb, 120, 0.5)
+    end
+    if e.t >= e.life then stage:SetAlpha(1) end
+  end)
+end
+
+-- Rare: the item rises out of a glowing pool of light: ripples spread across it, the item's
+-- reflection shimmers in it, droplets fall back in
+function A.pool(view, x, y, s, r, g, b)
+  local lr, lg, lb = Light(r, g, b)
+  local stage = view.stage
+  stage:SetAlpha(0.2)
+  Effect(view, 2.2, function(e)
+    local ox, oy, sc = Origin(e)
+    local py = oy - stage:GetHeight() * 0.5 * sc - 4 * sc -- the pool, at the item's foot
+    local a = math.min(1, e.t / 0.2) * (1 - math.max(0, (e.t - 1.6) / 0.6))
+    if view.stage == stage then stage:SetAlpha(0.2 + 0.8 * math.min(1, e.t / 0.55)) end
+    Place(T(e, "p", back, MEDIA .. "Glow", "ADD"), ox, py, 240 * sc, 54 * sc, a * 0.9, lr, lg, lb)
+    Place(T(e, "pw", back, MEDIA .. "Glow", "ADD", 1), ox, py, 90 * sc, 20 * sc, a * 0.8, 1, 1, 1)
+    for k = 1, 3 do -- ripples spreading over it, one after another
+      local rt = ((e.t + (k - 1) * 0.45) % 1.35) / 1.35
+      local rr = (20 + 130 * rt) * sc
+      Place(T(e, "r" .. k, front, MEDIA .. "Wave", "ADD"), ox, py, rr * 2, rr * 0.44, a * (1 - rt) * 0.9, lr, lg, lb)
+    end
+    local refl = T(e, "f", back, MEDIA .. "Pillar", "ADD", 2) -- the reflection: the pillar upside down
+    refl:SetTexCoord(0, 1, 1, 0)
+    Place(refl, ox + math.sin(e.t * 6) * 2 * sc, py, 30 * sc, 70 * sc, a * 0.45 * (0.8 + 0.2 * math.sin(e.t * 9)), lr, lg, lb, "TOP")
+    if e.t >= e.life then stage:SetAlpha(1) end
+  end)
+  Burst(x, y - stage:GetHeight() * 0.5 * s, 22, 420, s, lr, lg, lb, { up = true, fan = 0.5, grav = 700, drag = 0.8, life = 1.3,
+    colors = { { 1, 1, 1 }, { lr, lg, lb } } })
+end
+
+-- Legendary (after the comet): golden meteors keep raining down around the item, each landing with a
+-- small burst and ring; the last lands on the item with a flash
+function A.meteors(view, x, y, s, r, g, b)
+  Shake(view, 0.25)
+  Ring(view, 1, 0.82, 0, 200, 0.7)
+  Burst(x, y, 30, 480, s, 1, 0.82, 0, { grav = 120, drag = 2, life = 1.1, colors = GOLD })
+  local N = 8
+  for i = 1, N do
+    local last = i == N
+    local dx, dy = last and 0 or Rnd(-200, 200), last and 0 or Rnd(-80, 60) -- where it lands, from the item
+    local fx, fy, dur = Rnd(80, 160), Rnd(380, 460), 0.42                     -- where it falls from, from there
+    Effect(view, dur, function(e)
+      local ox, oy, sc = Origin(e)
+      local u = math.min(1, e.t / dur)
+      local k = 1 - u * u
+      local tx, ty = ox + dx * sc, oy + dy * sc
+      local hx, hy = tx + fx * k * sc, ty + fy * k * sc
+      local hs = (last and 52 or 28) * sc
+      Place(T(e, "h", front, MEDIA .. "Glow", "ADD"), hx, hy, hs, hs, 1, 1, 0.92, 0.7)
+      StarAt(e, "s", hx, hy, hs * 0.9, 1, e.t * 4)
+      for j = 1, 7 do -- its trail
+        local kj = math.min(1, k + j * 0.05)
+        local sz = ((last and 10 or 7) - j * 0.8) * sc
+        Place(T(e, "t" .. j, front, MEDIA .. "Mote", "ADD"), tx + fx * kj * sc, ty + fy * kj * sc, sz, sz, 1 - j / 8, 1, 0.69 + j * 0.03, 0.25)
+      end
+      if e.t >= dur and not e.hit then
+        e.hit = true
+        Ring(view, 1, 0.82, 0, last and 220 or 70, last and 0.8 or 0.45)
+        Burst(tx, ty, last and 40 or 12, last and 520 or 260, sc, 1, 0.82, 0, { up = true, grav = 500, life = 1, colors = GOLD })
+        if last then
+          Shake(view, 0.3)
+          Glints(ox, oy, 12, 120, sc)
+          Effect(view, 0.35, function(f) -- a flash as the last one hits
+            local t = T(f, "w", front, WHITE, nil, -8)
+            t:ClearAllPoints(); t:SetAllPoints(UIParent); t:SetVertexColor(1, 1, 1, 1)
+            t:SetAlpha(0.4 * (1 - f.t / f.life))
+          end)
+        end
+      end
+    end, 0.25 + (i - 1) * 0.14)
+  end
+end
+
+-- Legendary (after the comet): a huge ring of golden light stamps down behind the item (marks around
+-- it, gems at the quarters), spins as it settles, then bursts into gold dust
+function A.seal(view, x, y, s, r, g, b)
+  Shake(view, 0.25)
+  Ring(view, 1, 1, 1, 160, 0.35, 0.18)
+  Burst(x, y, 30, 420, s, 1, 0.82, 0, { grav = 60, drag = 2.2, life = 1, colors = GOLD, delay = 0.18 })
+  Effect(view, 1.9, function(e)
+    local ox, oy, sc = Origin(e)
+    local slam = math.min(1, e.t / 0.18)
+    local scale = 2.6 - 1.6 * (1 - (1 - slam) ^ 3)
+    local a = e.t < 1.3 and math.min(1, e.t / 0.08) or math.max(0, 1 - (e.t - 1.3) / 0.25)
+    local rr = 110 * scale * sc
+    local spin = e.t * (1.6 - math.min(1, e.t) * 1.2)
+    Place(T(e, "g", back, MEDIA .. "Glow", "ADD"), ox, oy, rr * 2.6, rr * 2.6, a * 0.45, 1, 0.75, 0.3)
+    Place(T(e, "r1", back, MEDIA .. "Wave", "ADD", 1), ox, oy, rr * 2, rr * 2, a, 1, 0.83, 0.42)
+    Place(T(e, "r2", back, MEDIA .. "Wave", "ADD", 1), ox, oy, rr * 1.68, rr * 1.68, a * 0.8, 1, 0.83, 0.42)
+    for i = 1, 24 do -- marks between the two rings; gems (stars) at the quarters
+      local an = i / 24 * 6.28 + spin
+      if i % 6 == 0 then
+        local t = T(e, "m" .. i, back, STAR, "ADD", 2)
+        Place(t, ox + math.cos(an) * rr, oy + math.sin(an) * rr, 30 * sc, 30 * sc, a, 1, 0.95, 0.75)
+        t:SetRotation(an)
+      else
+        Place(T(e, "m" .. i, back, MEDIA .. "Mote", "ADD", 2), ox + math.cos(an) * rr * 0.92, oy + math.sin(an) * rr * 0.92, 5 * sc, 5 * sc, a, 1, 0.83, 0.42)
+      end
+    end
+    if e.t >= 1.3 and not e.dust then -- it bursts into gold dust
+      e.dust = true
+      for _ = 1, 60 do
+        local an = math.random() * 6.28
+        local c = GOLD[math.random(3)]
+        Particle(front, MEDIA .. "Mote", ox + math.cos(an) * 110 * sc, oy + math.sin(an) * 110 * sc, math.cos(an) * Rnd(60, 200) * sc,
+          math.sin(an) * Rnd(60, 200) * sc + 40 * sc, Rnd(0.8, 1.4), Rnd(3, 5) * sc, c[1], c[2], c[3], { grav = 80 * sc, drag = 1.6 })
+      end
+      Ring(view, 1, 0.82, 0, 200, 0.6)
+      Glints(ox, oy, 8, 120, sc)
+    end
+  end)
+end
+
 ---------------------------------------------------------------------------
 -- Driving it
 ---------------------------------------------------------------------------
@@ -535,6 +687,10 @@ local TIPS = {
   eclipse = "A dark disc slides in front of a corona of light; it flares across the screen, then bursts.",
   starfall = "Stars streak down at angles onto the item one after another, each bursting as it hits.",
   supernova = "After the comet: a flash, a screen-wide golden flare, three shockwaves, a blast of gold and a lingering halo.",
+  disint = "Specks of light swirl in from all around onto the item, which appears as a glowing scanline sweeps up it.",
+  pool = "The item rises out of a glowing pool of light: ripples spread, its reflection shimmers, droplets fall back in.",
+  meteors = "After the comet: golden meteors rain down around the item, each with a small burst; the last hits the item with a flash.",
+  seal = "After the comet: a huge ring of golden light stamps down behind the item, spins as it settles, then bursts into gold dust.",
   simple = "The quieter arrival: a burst of sparks, with star glints from Epic and shockwaves for Legendary.",
 }
 local function Create()
