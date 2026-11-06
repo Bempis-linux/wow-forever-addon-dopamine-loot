@@ -17,6 +17,9 @@
 - **Popups and the rain filter separately**: "Show popups for" (Popups page) now only affects popups; the new
   "Rain includes" (Loot rain page, default everything) decides what rains, so gray and white loot rains
   again. Turning popups off no longer stops the rain. The 3D "Item size" slider now grows to the right.
+- **The best item's drop by rarity**: gray and white best items just land; from green up the best hangs and
+  slams down, longer and harder the rarer it is, with a comet trail from Rare and a bigger shockwave, more
+  sparks and more shake for Epic and Legendary.
 - **Money tally**: the rain's money total and item count sit right above your bag and count up as things go
   in, popping with each coin as a glint zips into it; at the end the total punches up and a shimmer runs
   across it, with a gold glow from 1 gold and a burst of sparks from 10 gold.

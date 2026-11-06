@@ -24,7 +24,17 @@ local FADE_T, SQUASH_T, SETTLE_HOLD = 0.6, 0.18, 0.7 -- (the squash: squashed on
 local GHOSTS, GHOST_EVERY, DUST = 6, 0.035, 7
 local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
 local GATHER_T, JOIN_T, FLASH_T = 0.65, 0.32, 0.4 -- (the gather: each item's flight into the bag)
-local WIND_T, HANG_T, SLAM_VY = 0.38, 0.45, 1500 -- wind-up before the burst; the best's hang; its drop speed
+local WIND_T = 0.38 -- the wind-up before the burst
+-- The best item's drop by rarity (setting Hang): the rarer, the longer it hangs at the top, the harder
+-- it falls (a comet trail from Rare, longer for Epic and Legendary) and the bigger its landing.
+-- Gray and white items land like everything else.
+local DROP = {
+  [2] = { hang = 0.25, vy = 1000, dome = 0.6, sparks = 10, shake = 0.7, trail = 0 },
+  [3] = { hang = 0.4, vy = 1400, dome = 1, sparks = 22, shake = 1.2, trail = 0.6 },
+  [4] = { hang = 0.45, vy = 1800, dome = 1.3, sparks = 32, shake = 1.6, trail = 1 },
+  [5] = { hang = 0.55, vy = 2300, dome = 1.7, sparks = 46, shake = 2.2, trail = 1.5 },
+}
+local function Drop(q) return DROP[math.max(2, math.min(q or 2, 5))] end
 local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, one step each
 local TALLY_HOLD = 1.6 -- seconds the tally holds its final total before the rain fades
 
@@ -32,7 +42,7 @@ local TALLY_HOLD = 1.6 -- seconds the tally holds its final total before the rai
 ns.RAIN_FX = {
   { key = "Best", label = "Best item last", tip = "The best item waits a beat, flies higher and lands in the middle, then becomes its popup." },
   { key = "Windup", label = "Wind-up and burst", tip = "Before the loot comes out, a glow swells where it starts, then it bursts out with a shockwave in the color of the best item." },
-  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs in the air at the top of its flight with a glint, then slams down with a shockwave, sparks, a boom and a little screen shake." },
+  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs in the air at the top of its flight with a glint, then slams down. The rarer it is, the longer it hangs, the harder it falls (with a comet trail from Rare) and the bigger the shockwave, sparks and shake. Gray and white items just land." },
   { key = "Landings", label = "Landings by rarity", tip = "Rare and better items land with a shockwave and sparks in their color; grays and whites land quietly." },
   { key = "Calm", label = "Calm when repeated", tip = "When you loot rain after rain with nothing Rare or better in it, each one within two minutes of the last comes out quicker and with fewer sounds, so grinding doesn't get noisy. Anything Rare or better always gets the full show." },
   { key = "Escalate", label = "Build-up", tip = "Items start coming out slowly and then faster and faster, and their landing sounds move along a gentle tune instead of one repeated tick." },
@@ -181,6 +191,7 @@ local function Sprite()
   s.shadow = Tex(layer, "BACKGROUND", MEDIA .. "Disc")
   s.shadow:SetVertexColor(0, 0, 0, 1)
   s.beam = Tex(layer, "BORDER", MEDIA .. "Pillar", "ADD")
+  s.comet = Tex(layer, "BORDER", MEDIA .. "Pillar", "ADD") -- the trail of a best item slamming down
   for i = 1, GHOSTS do s.ghosts[i] = Tex(layer, "ARTWORK", WHITE, "ADD") end
   s.name = top:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   s.name:SetShadowColor(0, 0, 0, 1)
@@ -194,6 +205,7 @@ local function Release(s)
   s.f.star:Hide()
   s.shadow:Hide()
   s.beam:Hide()
+  s.comet:Hide()
   s.name:Hide()
   for _, g in ipairs(s.ghosts) do g:Hide() end
   s.ghostsShown = false
@@ -394,7 +406,9 @@ local function Launch(st, item, isBest, W, H, k)
   -- junk looks it: dull, smaller, a lower arc and a dead bounce (setting Poor)
   s.dull = not s.coin and s.q == 0 and not isBest and On("Poor") -- the best keeps its moment
   if s.dull then s.size, s.vy, s.e = SIZE * 0.8, s.vy * 0.78, 0.3 end
-  if isBest then s.x, s.vx, s.vy, s.e, s.spin = W / 2, 0, Core.BEST_VY * k, 0.5, 0 end
+  if isBest then -- (a gray or white best flies like the rest, only from the middle)
+    s.x, s.vx, s.vy, s.e, s.spin = W / 2, 0, s.q >= 2 and Core.BEST_VY * k or s.vy, 0.5, 0
+  end
   -- from lower down (setting rainFrom), faster, so everything peaks as high as from the middle
   local from = ns.settings.rainFrom or "ground"
   if from ~= "middle" then
@@ -407,7 +421,7 @@ local function Launch(st, item, isBest, W, H, k)
   s.restAge, s.trailT, s.trail = 0, 0, {}
   s.joining, s.mx, s.my, s.delay = nil, nil, nil, nil
   -- the best hangs at the top of its flight, then slams down (setting Hang)
-  s.hangPending, s.hang, s.slam, s.glintAt = isBest and not item.coin and On("Hang") or nil, nil, nil, nil
+  s.hangPending, s.hang, s.slam, s.glintAt = isBest and not item.coin and s.q >= 2 and On("Hang") or nil, nil, nil, nil
   local r, g, b = ns.QualityColor(s.q)
   s.r, s.g, s.b = r, g, b
   s.f.edge:SetVertexColor(0, 0, 0, 1)
@@ -442,6 +456,7 @@ local function Launch(st, item, isBest, W, H, k)
   s.f.glow:SetShown(s.q >= 3)
   s.shadow:SetShown(On("Shadows"))
   s.beam:SetVertexColor(r, g, b, 1)
+  s.comet:SetVertexColor(math.min(1, r + 0.2), math.min(1, g + 0.2), math.min(1, b + 0.2), 1)
   for _, gh in ipairs(s.ghosts) do gh:SetVertexColor(r, g, b, 1) end
   s.name:SetText(not s.coin and item.name or "")
   s.name:SetTextColor(r, g, b)
@@ -482,13 +497,14 @@ local function OnLand(st, s)
     return
   end
   st.landed = st.landed + 1
-  if s.slam then -- the hang was its slow motion; the slam shakes harder, with its own boom
-    st.shake = SHAKE_T * 1.4
-    ns:PlaySlamSound()
-  elseif s.best and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end
-  -- its sound: the slam has its own; Rare and better a thud with their touch (always); a gray the
-  -- lowest thud; the rest walk the notes (setting Escalate) or tick
-  if not s.slam then
+  local D = s.slam and Drop(s.q)
+  if s.slam then -- the hang was its slow motion; the slam shakes by rarity, with its own boom from Rare
+    st.shake = SHAKE_T * D.shake
+    if s.q >= 3 then ns:PlaySlamSound() end
+  elseif s.best and s.q >= 2 and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end -- (not for a gray or white best)
+  -- its sound: a Rare+ slam has its own; Rare and better a thud with their touch (always); a gray
+  -- the lowest thud; the rest walk the notes (setting Escalate) or tick
+  if not (s.slam and s.q >= 3) then
     if s.q >= 3 then ns:PlayStepTick(st.landed, s.q)
     elseif s.dull then ns:PlayStepTick(st.landed, nil, true)
     elseif not (st.calm >= 2 and st.landed % 2 == 0) then -- calmer repeats: every other tick
@@ -497,11 +513,20 @@ local function OnLand(st, s)
   end
   local x, y, k = s.x, bounds.floor, bounds.k
   local r, g, b = Light(s.r, s.g, s.b)
-  if s.slam then -- a shockwave along the ground, a white flash in it and a fountain of sparks
-    Dome(x, y, r, g, b, 170 * k, { life = 0.6, glowA = 0.5 })
-    Dome(x, y, 1, 1, 1, 105 * k, { life = 0.4, delay = 0.06, glowA = 0.25 })
-    Streak(x, y, r, g, b, 300 * k, 6 * k, 1, { life = 0.55 }) -- and a bright line along the ground
-    Spark(x, y, r, g, b, 22, 520 * k, { up = true, grav = 900 * k, size = 7 })
+  if s.slam then -- by rarity: a shockwave, a white flash in it, a bright line along the ground, sparks
+    local m = D.dome
+    Dome(x, y, r, g, b, 170 * m * k, { life = 0.5 + 0.1 * m, glowA = 0.5 })
+    Dome(x, y, 1, 1, 1, 105 * m * k, { life = 0.4, delay = 0.06, glowA = 0.25 })
+    Streak(x, y, r, g, b, 300 * m * k, 6 * k, 1, { life = 0.55 })
+    Spark(x, y, r, g, b, D.sparks, 520 * math.sqrt(m) * k, { up = true, grav = 900 * k, size = 7 })
+    if s.q >= 4 then -- Epic and up: a second, wider wave a beat later and white sparks
+      Dome(x, y, r, g, b, 260 * m * k, { life = 0.8, delay = 0.12, glowA = 0.3 })
+      Spark(x, y, 1, 1, 1, math.floor(D.sparks / 3), 640 * k, { up = true, grav = 900 * k, size = 6 })
+    end
+    if s.q >= 5 then -- Legendary: a third wave and a long line of light across the ground
+      Dome(x, y, 1, 0.9, 0.6, 360 * k, { life = 1, delay = 0.24, glowA = 0.2 })
+      Streak(x, y, 1, 0.95, 0.8, 700 * k, 10 * k, 1, { life = 0.9 })
+    end
     if On("Dust") then Puff(x, y) end
   elseif On("Landings") then -- by rarity: Rare+ a shockwave and sparks, the rest a little dust or none
     if s.q >= 3 then
@@ -689,14 +714,14 @@ local function Update(_, dt)
       local sdt = dt
       if s.hang then
         s.hang, sdt = s.hang - dt, dt * 0.1
-        if s.hang <= 0 then s.hang, s.vy, s.e, s.slam = nil, -SLAM_VY * k, 0.18, true end
+        if s.hang <= 0 then s.hang, s.vy, s.e, s.slam = nil, -Drop(s.q).vy * k, 0.18, true end
       end
       if Core.Advance(s, sdt, bounds) then
         s.squash = SQUASH_T
         if s.bounces == 1 then OnLand(st, s) elseif s.bounces == 2 and not s.coin then Tick(0) end
       end
       if s.hangPending and s.vy <= 0 and not s.resting then -- just past the top of its flight
-        s.hangPending, s.hang, s.glintAt = nil, HANG_T, st.age
+        s.hangPending, s.hang, s.glintAt = nil, Drop(s.q).hang, st.age
         local r, g, b = Light(s.r, s.g, s.b)
         Spark(s.x, s.y + s.size / 2, r, g, b, 8, 120 * k, { grav = 0, drag = 2, life = 1.2 })
       end
@@ -879,6 +904,17 @@ local function Update(_, dt)
         s.shadow:ClearAllPoints()
         s.shadow:SetPoint("CENTER", layer, "BOTTOMLEFT", s.x, floor - 2)
       end
+    end
+    -- the comet trail behind a Rare+ best item slamming down (longer the rarer), until it lands
+    local D = s.slam and s.q >= 3 and Drop(s.q)
+    if D and s.bounces == 0 and not s.resting then
+      s.comet:SetSize(s.size * 0.9, math.min(560 * k, -s.vy * 0.22 * D.trail))
+      s.comet:ClearAllPoints()
+      s.comet:SetPoint("BOTTOM", layer, "BOTTOMLEFT", s.x, s.y + s.size * 0.4)
+      s.comet:SetAlpha(0.95)
+      s.comet:Show()
+    elseif s.comet:IsShown() then
+      s.comet:Hide()
     end
     -- the beam and the name: Rare+ at rest, until it leaves
     local good = s.q >= 3 and not s.coin and s.resting and (not s.leaving or s.leaving == "popup")
