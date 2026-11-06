@@ -5,7 +5,7 @@
 #   ArrivalRare       two soft bell notes with the spark ring
 #   ArrivalEpic       a soft thump, a rising bell arpeggio, then a warm chord that blooms and rings out
 #   ArrivalLegendary  a deep, long boom with the shockwave, then a bright bell chord and a high sparkle
-#   Tick00..Tick14    loot rain: a short tick per landed item, climbing a semitone each
+#   Land*, Bag*       loot rain notes: an item landing, an item into the bag (two variants each)
 #   (and the money / treasure chest sets at the end: LaunchItem, LaunchCoin, Clink, Merge*, Gather)
 # Run: bash tools/gen_sounds.sh   (needs ffmpeg; set FFMPEG or have it on PATH or in WinGet's folder)
 set -euo pipefail
@@ -52,13 +52,6 @@ CHORD="$(bell 0.18 523.25 2.2)+$(bell 0.18 659.25 2.2)+$(bell 0.18 783.99 2.2)+0
 SPARK="0.6*$(bell 0.55 2093 3)+0.5*$(bell 0.68 2637 3)"
 render ArrivalLegendary 3.2 0.3 "$BOOM+0.6*($CHORD)+$SPARK" "lowpass=f=9000,$ROOM"
 
-# Loot rain escalation: a short soft tick per landed item, one semitone higher each time
-# (Tick00 = A5 ... Tick14 = B6); the game has no pitch control, so each step is its own file
-for i in $(seq 0 14); do
-  f=$(awk "BEGIN{print 880 * 2 ^ ($i / 12)}")
-  render "$(printf 'Tick%02d' "$i")" 0.35 0.3 "$(bell 0 "$f" 14)"
-done
-
 # Loot rain, money and the treasure chest. Each set climbs a major pentatonic scale (n = 0..10:
 # 0 2 4 7 9 12 14 16 19 21 24 semitones), so a long run of them never sounds like one note.
 #   LaunchItem00..10   leaving the chest: a soft upward "fwip" (an item)
@@ -86,6 +79,33 @@ for n in $(seq 0 10); do
   done
 done
 render Gather 0.45 0.3 "$(glide 0 350 900 0.3 3)"
+
+# Loot rain notes (Sounds.lua walks them with ns.RainCore.Melody: up the scale, then a phrase at
+# the top). A major pentatonic scale of 12 notes (0..11), each in two variants (A, B) picked at
+# random, so a repeat never sounds identical; the game has no pitch control, so each is a file.
+#   LandA00..11, LandB00..11   an item landing: a warm marimba-like knock (G4 up), with a tiny click
+#   BagA00..11, BagB00..11     an item into the bag: a bright kalimba-like pluck (C5 up)
+#   LandChord, BagChord        the rain resolving: everything down / the last item in the bag
+# marimba START FREQ DECAY VARIANT: a wooden bar (its overtone near 4x), B a bit woodier and drier
+marimba() {
+  local s=$1 f=$2 d=$3 v=$4 u="(t-$1)"
+  echo "gte(t,$s)*(min(1,$u*600)*(sin(2*PI*$f*$u)*exp(-$d*$u)+(0.32-0.12*$v)*sin(2*PI*$f*3.93*$u)*exp(-3.5*$d*$u)+(0.08+0.12*$v)*sin(2*PI*$f*(2+$v)*$u)*exp(-2*$d*$u)+0.05*sin(2*PI*$f*9.2*$u)*exp(-8*$d*$u))+0.1*(random(0)*2-1)*exp(-500*$u))"
+}
+# kalimba START FREQ DECAY VARIANT: a plucked tine (a bright inharmonic overtone), B a little brighter
+kalimba() {
+  local s=$1 f=$2 d=$3 v=$4 u="(t-$1)"
+  echo "gte(t,$s)*min(1,$u*500)*((sin(2*PI*$f*$u)+0.35*sin(2*PI*$f*1.003*$u))*exp(-$d*$u)+(0.28+0.1*$v)*sin(2*PI*$f*(5.4+0.6*$v)*$u)*exp(-4*$d*$u)+0.18*sin(2*PI*$f*2*$u)*exp(-2.2*$d*$u))"
+}
+for n in $(seq 0 11); do
+  st=$(semis "$n"); id=$(printf '%02d' "$n")
+  for v in 0 1; do
+    V=$([ "$v" = 0 ] && echo A || echo B)
+    render "Land$V$id" 0.5 0.65 "$(marimba 0 "$(hz 392 "$st")" $((11 + 3 * v)) "$v")" "$ROOM"
+    render "Bag$V$id" 0.6 0.55 "$(kalimba 0 "$(hz 523.25 "$st")" $((8 + 2 * v)) "$v")" "$ROOM"
+  done
+done
+render LandChord 1.4 0.4 "$(marimba 0 392 4 0)+$(marimba 0.03 493.88 4 1)+$(marimba 0.06 587.33 4 0)+$(marimba 0.09 783.99 3.5 1)" "$ROOM"
+render BagChord 1.6 0.36 "$(kalimba 0 1046.5 3 0)+$(kalimba 0.04 1318.5 3 1)+$(kalimba 0.08 1568 3 0)+0.8*$(kalimba 0.12 2093 2.6 1)" "$ROOM"
 
 #   ChestPop           a medium haul's chest opening: a soft low lid "thock" and a little sparkle
 #                      (small hauls open silently, big ones with a game sound)

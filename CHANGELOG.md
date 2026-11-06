@@ -3,8 +3,11 @@
 ## 1.1.0 (unreleased)
 
 - **Loot rain flair**: a wind-up glow and burst before the loot comes out, in the color of the best item; the
-  best item hangs at the top with a glint and slams down; Rare and better land with a ring and sparks in their
+  best item hangs at the top with a glint and slams down; Rare and better land with a shockwave and sparks in their
   color; the bag takes each item in with a little flash. Each is a switch on the Loot rain page.
+- **Loot rain sounds**: landings sound like a soft marimba and the bag like a kalimba, climbing a scale and then
+  playing a little phrase at the top instead of repeating one note; each note has two variants, so repeats
+  differ; the rain ends on a chord. Shockwaves run flat along the ground.
 - **Calm when repeated**: a few rains with nothing Rare or better within two minutes get quicker and use fewer
   sounds (a switch under When). Rare and better always get the full show.
 - Test popups no longer show a gray "preview" tag.

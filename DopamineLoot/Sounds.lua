@@ -82,19 +82,9 @@ function ns:PreviewPopupSound(q)
   if tier and not self.settings["noChime" .. q] then self:PlayArrivalSound(tier, true) end
 end
 
--- Loot rain escalation: tick n (1 = the first item down) climbs a semitone per item, up to 15 steps
-local STEP_FILE = "Interface\\AddOns\\DopamineLoot\\Media\\Tick%02d.ogg"
-local lastStep = 0
-function ns:PlayStepTick(n)
-  if self.settings.noSound then return end
-  local now = GetTime()
-  if now - lastStep < 0.05 then return end -- a fast rattle skips ticks; the pitch still climbs
-  lastStep = now
-  PlaySoundFile(STEP_FILE:format(math.min(math.max((n or 1) - 1, 0), 14)), Channel())
-end
-
--- The rain and money (tools/gen_sounds.sh): each set climbs a pentatonic step per call,
--- n = 1 for the first; a set never plays twice within its gap, so a fast burst can't buzz
+-- The rain and money (tools/gen_sounds.sh): each set walks a pentatonic scale, n = 1 for the
+-- first: up the scale, then a phrase over its top notes (ns.RainCore.Melody), so a long run never
+-- sits on one note; a set never plays twice within its gap, so a fast burst can't buzz
 local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local lastSet = {}
 local function PlaySet(name, n, gap)
@@ -102,7 +92,25 @@ local function PlaySet(name, n, gap)
   local now = GetTime()
   if now - (lastSet[name] or 0) < (gap or 0.04) then return end
   lastSet[name] = now
-  PlaySoundFile(("%s%s%02d.ogg"):format(MEDIA, name, math.min(math.max((n or 1) - 1, 0), 10)), Channel())
+  PlaySoundFile(("%s%s%02d.ogg"):format(MEDIA, name, ns.RainCore.Melody(n, 10)), Channel())
+end
+
+-- Loot rain notes: an item landing (Land, marimba-like) or going into the bag (Bag, kalimba-like),
+-- 12 notes each in two variants (A, B) picked at random, so repeats never sound identical
+local NOTE_TOP = 11
+local function PlayNote(set, n)
+  if ns.settings.noSound then return end
+  local now = GetTime()
+  if now - (lastSet[set] or 0) < 0.05 then return end -- a fast rattle skips notes; the melody goes on
+  lastSet[set] = now
+  local v = math.random(2) == 1 and "A" or "B"
+  PlaySoundFile(("%s%s%s%02d.ogg"):format(MEDIA, set, v, ns.RainCore.Melody(n, NOTE_TOP)), Channel())
+end
+function ns:PlayStepTick(n) PlayNote("Land", n) end -- the n-th item down (escalation)
+function ns:PlayBagNote(n) PlayNote("Bag", n) end   -- the n-th item into the bag
+-- the rain resolves on a chord: when everything is down (no gathering) or the last item is in the bag
+function ns:PlayRainChord(bag)
+  if not self.settings.noSound then PlaySoundFile(MEDIA .. (bag and "BagChord" or "LandChord") .. ".ogg", Channel()) end
 end
 function ns:PlayLaunchSound(isCoin, n) PlaySet(isCoin and "LaunchCoin" or "LaunchItem", n) end -- launched
 function ns:PlayClink(n) PlaySet("Clink", n) end                                                -- a coin lands

@@ -73,6 +73,15 @@ end
 
 function Core.Stays(item, stayQuality) return (item.quality or 0) >= stayQuality end
 
+-- Which note (0..top) the n-th sound of a run plays (n = 1 for the first): it climbs the scale,
+-- then keeps moving in a little phrase over the top notes instead of repeating the highest one
+local PHRASE = { -4, -2, 0, -3, -1, -5, -2, 0 }
+function Core.Melody(n, top)
+  n = math.max(1, math.floor(n or 1))
+  if n <= top + 1 then return n - 1 end
+  return math.max(0, top + PHRASE[(n - top - 2) % #PHRASE + 1])
+end
+
 -- Seconds between launch i and i+1 of n. Escalation starts slow and rattles out faster
 -- (the whole burst takes about as long either way).
 function Core.Interval(i, n, escalate)

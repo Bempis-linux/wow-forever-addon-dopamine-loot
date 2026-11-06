@@ -30,9 +30,9 @@ local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, 
 -- The effects, each a switch (setting "noRain" .. key; all on by default)
 ns.RAIN_FX = {
   { key = "Best", label = "Best item last", tip = "The best item waits a beat, flies higher and lands in the middle, then becomes its popup." },
-  { key = "Windup", label = "Wind-up and burst", tip = "A glow swells where the loot comes out, then it bursts with a ring in the color of the best item." },
-  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs at the top with a glint, then slams down with a ripple, sparks and a shake." },
-  { key = "Landings", label = "Landings by rarity", tip = "Rare and better items land with a ring and sparks in their color; grays and whites land quietly." },
+  { key = "Windup", label = "Wind-up and burst", tip = "A glow swells where the loot comes out, then it bursts with a shockwave in the color of the best item." },
+  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs at the top with a glint, then slams down with a shockwave, sparks and a shake." },
+  { key = "Landings", label = "Landings by rarity", tip = "Rare and better items land with a shockwave along the ground and sparks in their color; grays and whites land quietly." },
   { key = "Calm", label = "Calm when repeated", tip = "Rains with nothing Rare or better, a few within two minutes, get quicker and use fewer sounds. Anything Rare or better always gets the full show." },
   { key = "Escalate", label = "Escalation", tip = "Launches start slow and speed up; each landing tick is a little higher in pitch." },
   { key = "Pulse", label = "Epic edge glow", tip = "The edges of the screen glow in the item's color when an Epic or better lands." },
@@ -196,6 +196,21 @@ local function Ring(x, y, r, g, b, radius, o)
   t:SetVertexColor(r, g, b, 1)
   live[#live + 1] = { t = t, x = x, y = y, radius = radius, age = -(o.delay or 0), life = o.life or 0.45, flat = o.flat or 0.3 }
 end
+-- a shockwave along the ground: a soft band of light shooting out left and right from x (the game
+-- is seen from the side, so it stays flat on the ground line instead of a ring lying on it);
+-- h: its height, a: its brightness. Each wave is a colored band with a thinner, whiter core.
+local streakPool = {}
+local function Streak(x, y, r, g, b, reach, h, a, o)
+  o = o or {}
+  local t = table.remove(streakPool) or Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
+  t:SetVertexColor(r, g, b, 1)
+  live[#live + 1] = { t = t, streak = true, x = x, y = y, radius = reach, h = h, a = a, age = -(o.delay or 0), life = o.life or 0.45 }
+end
+local function Wave(x, y, r, g, b, reach, k, o)
+  o = o or {}
+  Streak(x, y, r, g, b, reach, (o.h or 14) * k, 0.9, o)
+  Streak(x, y, math.min(1, r + 0.4), math.min(1, g + 0.4), math.min(1, b + 0.4), reach * 0.85, (o.h or 14) * 0.3 * k, 1, o)
+end
 local function UpdateLive(dt)
   for i = #live, 1, -1 do
     local p = live[i]
@@ -203,11 +218,15 @@ local function UpdateLive(dt)
     if p.age >= p.life then
       p.t:Hide()
       table.remove(live, i)
-      local into = p.spark and sparkPool or ringPool
+      local into = p.spark and sparkPool or p.streak and streakPool or ringPool
       into[#into + 1] = p.t
     elseif p.age >= 0 then
       local u = p.age / p.life
-      if p.spark then
+      if p.streak then
+        local rad = 10 + (p.radius - 10) * (1 - (1 - u) ^ 3)
+        p.t:SetSize(rad * 2, p.h * (1 - 0.5 * u))
+        p.t:SetAlpha((1 - u) * p.a)
+      elseif p.spark then
         local d = math.exp(-p.drag * dt)
         p.vx, p.vy = p.vx * d, p.vy * d - p.grav * dt
         p.x, p.y = p.x + p.vx * dt, p.y + p.vy * dt
@@ -228,7 +247,7 @@ local function ClearLive()
   for i = #live, 1, -1 do
     local p = live[i]
     p.t:Hide()
-    local into = p.spark and sparkPool or ringPool
+    local into = p.spark and sparkPool or p.streak and streakPool or ringPool
     into[#into + 1] = p.t
     live[i] = nil
   end
@@ -424,14 +443,14 @@ local function OnLand(st, s)
   end
   local x, y, k = s.x, bounds.floor, bounds.k
   local r, g, b = Light(s.r, s.g, s.b)
-  if s.slam then -- a ripple, a white flash ring and a fountain of sparks
-    Ring(x, y, r, g, b, 170 * k, { life = 0.6 })
-    Ring(x, y, 1, 1, 1, 100 * k, { life = 0.35 })
+  if s.slam then -- a shockwave along the ground, a white flash in it and a fountain of sparks
+    Wave(x, y, r, g, b, 280 * k, k, { life = 0.65, h = 20 })
+    Wave(x, y, 1, 1, 1, 170 * k, k, { life = 0.35, h = 10 })
     Spark(x, y, r, g, b, 22, 520 * k, { up = true, grav = 900 * k, size = 7 })
     if On("Dust") then Puff(x, y) end
-  elseif On("Landings") then -- by rarity: Rare+ a ring and sparks, the rest a little dust or none
+  elseif On("Landings") then -- by rarity: Rare+ a shockwave and sparks, the rest a little dust or none
     if s.q >= 3 then
-      Ring(x, y, r, g, b, (50 + 16 * (s.q - 3)) * k)
+      Wave(x, y, r, g, b, (80 + 30 * (s.q - 3)) * k, k, { h = 10 + 2 * (s.q - 3) })
       Spark(x, y, r, g, b, 5 + 4 * (s.q - 3), 300 * k, { up = true, grav = 800 * k })
       if On("Dust") then Puff(x, y, 4) end
     elseif On("Dust") then
@@ -477,16 +496,20 @@ local function Settle(st)
   for _, s in ipairs(sprites) do order[#order + 1] = s end
   table.sort(order, function(a, b) return a.x < b.x end)
   local pd, gd = 0, 0
+  st.toGather = 0
   for _, s in ipairs(order) do
     if not s.coin and Core.Stays(s.item, st.stayQuality) then
       s.leaving, s.leaveAt, pd = "popup", st.age + pd, pd + 0.15
     elseif On("Gather") then
       s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.06, 1.6 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
       s.sx, s.sy = s.x, s.y
+      st.toGather = st.toGather + 1
     else
       s.leaving, s.leaveAt = "fade", st.age + 0.35
     end
   end
+  -- nothing gathers into the bag: the rain resolves on its chord now
+  if st.toGather == 0 and st.landed >= 3 and st.calm < 2 and On("Escalate") then ns:PlayRainChord(false) end
 end
 
 local function Update(_, dt)
@@ -524,7 +547,7 @@ local function Update(_, dt)
       st.burst = true
       layer.windGlow:Hide()
       layer.windCol:Hide()
-      Ring(x, y, r, g, b, 130 * k, { life = 0.5 })
+      Wave(x, y, r, g, b, 220 * k, k, { life = 0.5, h = 16 })
       Spark(x, y, r, g, b, 14, 420 * k, { up = true, grav = 700 * k, size = 7 })
       if st.openSize == "big" then ns:PlayBurstSound() elseif st.openSize == "medium" then ns:PlayChestPop() end
     else
@@ -700,7 +723,9 @@ local function Update(_, dt)
             local r, g, b = Light(s.r, s.g, s.b)
             Ring(bx, by, r, g, b, 34 * k, { flat = 1, life = 0.3 })
             Spark(bx, by, r, g, b, 3, 140 * k, { up = true, grav = 400 * k })
-            if On("Escalate") then ns:PlayStepTick(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
+            if On("Escalate") then ns:PlayBagNote(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
+            -- the last one in: the rain resolves on a chord (not for calmer repeats)
+            if st.gathered == st.toGather and st.calm < 2 and st.toGather >= 3 then ns:PlayRainChord(true) end
           end
           if not s.inBag then busy = true end
         else

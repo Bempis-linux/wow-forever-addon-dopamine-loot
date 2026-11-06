@@ -178,4 +178,20 @@ local vyK = C.LaunchSpeed(800 * 1.4, 2, 292 * 1.4, 1.4)
 Check("the same at another screen scale", math.abs(Peak(2, vyK, 1.4) - Peak(292 * 1.4, 800 * 1.4, 1.4)) < 0.5)
 Check("from the middle the speed is unchanged", C.LaunchSpeed(800, 292, 292, 1) == 800)
 
+-- 12. The melody: climbs, then never repeats a note twice in a row and stays in range
+local climbs, repeats, outside = true, 0, 0
+for n = 1, 12 do if C.Melody(n, 11) ~= n - 1 then climbs = false end end
+for _, top in ipairs({ 10, 11 }) do
+  local prev
+  for n = 1, 120 do
+    local m = C.Melody(n, top)
+    if m == prev then repeats = repeats + 1 end
+    if m < 0 or m > top then outside = outside + 1 end
+    prev = m
+  end
+end
+Check("the melody climbs the scale first", climbs)
+Check("past the top it keeps moving (no note twice in a row)", repeats == 0, repeats .. " repeats")
+Check("every note is in the scale", outside == 0)
+
 print(fails == 0 and "all passed" or (fails .. " failed"))
