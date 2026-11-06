@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popup Designs Round 8</title>
+<title>Popup Designs Round 9</title>
 <style>
   :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
@@ -122,7 +122,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Popup designs, round 8</h1>
+  <h1>Popup designs, round 9</h1>
   <small>Splash toward a final build (try each rarity), Aura with wisps, the Aurora arch, and new blue and orange options. Keepers are marked. R replays.</small>
 
   <h2>Style</h2>
@@ -145,7 +145,8 @@
   <label class="fx"><input type="checkbox" id="b0" checked><b>Ring wave</b><small>With either option.</small></label>
   <label class="fx"><input type="radio" name="b" value="flare"><b>Sapphire flare <em>keeper</em></b><small>Unchanged.</small></label>
   <label class="fx"><input type="radio" name="b" value="aurora" checked><b>Aurora arch <em>reworked</em></b><small>The round-5 ribbon of northern lights you liked, bent into an arch over the item instead of lying flat.</small></label>
-  <label class="fx"><input type="radio" name="b" value="frost"><b>Frost bloom <em>new</em></b><small>A six-armed ice crystal grows behind the item and glints, then shatters into glitter while soft snow drifts down.</small></label>
+  <label class="fx"><input type="radio" name="b" value="disint"><b>Reverse disintegration <em>new</em></b><small>Specks of light swirl in from all around and settle onto the item, which materializes from the bottom up behind a glowing scanline.</small></label>
+  <label class="fx"><input type="radio" name="b" value="pool"><b>Light pool <em>new</em></b><small>The item rises out of a glowing pool of light: ripples spread across it, the reflection shimmers, droplets fall back in.</small></label>
 
   <h2>Epic (purple)</h2>
   <label class="fx"><input type="radio" name="p" value="implode"><b>Implosion, scatter, galaxy <em>keeper</em></b><small>Unchanged.</small></label>
@@ -155,8 +156,8 @@
 
   <h2>Legendary (orange): after the comet</h2>
   <label class="fx"><input type="radio" name="l" value="nova"><b>Supernova <em>keeper</em></b><small>Unchanged.</small></label>
-  <label class="fx"><input type="radio" name="l" value="eruption" checked><b>Treasure eruption <em>new</em></b><small>A fountain of spinning gold coins and gems bursts up from below the item with a golden flare, arcing out and falling.</small></label>
-  <label class="fx"><input type="radio" name="l" value="sunrise"><b>Sunrise <em>new</em></b><small>A sun disc rises behind the item, the screen edges glow gold, and it flares with a shower of embers.</small></label>
+  <label class="fx"><input type="radio" name="l" value="meteors" checked><b>Meteor shower <em>new</em></b><small>After the comet, golden meteors keep raining down around the item, each landing with a small burst; the last one lands on the item with a flash.</small></label>
+  <label class="fx"><input type="radio" name="l" value="seal"><b>Golden seal <em>new</em></b><small>A huge ornate ring of gold stamps down behind the item, spins as it settles, then bursts into gold dust.</small></label>
   <small>The dim and the slow-motion landing stay; the comet stays as it is in game.</small>
 </div>
 <div id="screen">
@@ -429,33 +430,46 @@ function blue(x, y, c, cl) {
         }
       } });
       for (let i = 0; i < 16; i++) { const an = Math.PI * R(1.05, 1.95); parts.push({ x: x + Math.cos(an) * 150, y: y + 30 + Math.sin(an) * 110, vx: R(-8, 8), vy: R(-50, -20), age: -R(0, .6), life: R(1.2, 1.8), c: i % 2 ? '#7fffd4' : cl, s: R(1.2, 2), g: -10, drag: .6, kind: 'ember', ph: R(0, 6) }); }
-    } else {
-      // Frost bloom: a six-armed ice crystal grows behind the item, glints, then shatters into glitter
-      // while soft snow drifts down
-      special.push({ t: 0, life: 1.3, draw(s) {
-        const grow = 1 - Math.pow(1 - Math.min(1, s.t / .45), 3), a = s.t < .85 ? 1 : Math.max(0, 1 - (s.t - .85) / .2), L = 110 * grow;
-        const g = bctx; g.save(); g.translate(x, y); g.rotate(s.t * .3);
-        g.globalAlpha = a; g.strokeStyle = cl; g.lineCap = 'round'; g.shadowColor = c; g.shadowBlur = 10;
-        for (let i = 0; i < 6; i++) {
-          g.save(); g.rotate(i * Math.PI / 3);
-          g.lineWidth = 3; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -L); g.stroke();
-          g.lineWidth = 2;
-          for (const f of [.35, .6, .82]) { // little branches along each arm, growing with it
-            const b = L * f, bl = L * .22 * (1 - f * .5);
-            g.beginPath(); g.moveTo(0, -b); g.lineTo(-bl, -b - bl); g.moveTo(0, -b); g.lineTo(bl, -b - bl); g.stroke();
-          }
-          g.restore();
+    } else if (pick('b') === 'disint') {
+      // Reverse disintegration: specks of light swirl in from all around and settle onto the item, which
+      // materializes from the bottom up behind a glowing scanline
+      const it = $('stage').querySelector('.item'), ir = it.getBoundingClientRect(), sr = $('screen').getBoundingClientRect();
+      const top = ir.top - sr.top, bot = ir.bottom - sr.top, left = ir.left - sr.left, wid = ir.width;
+      const specks = Array.from({ length: 70 }, () => {
+        const an = R(0, 6.28), d = R(140, 300), tx = left + R(.2, .8) * wid, ty = top + R(0, 1) * (bot - top);
+        return { x0: tx + Math.cos(an) * d, y0: ty + Math.sin(an) * d, tx, ty, sw: R(-2, 2), delay: (1 - (ty - top) / (bot - top)) * .35 + R(0, .15) };
+      });
+      special.push({ t: 0, life: 1.4, draw(s) {
+        for (const p of specks) { // they spiral in and land where that part of the item appears
+          const u = Math.min(1, Math.max(0, (s.t - p.delay) / .5)), e = 1 - Math.pow(1 - u, 3), k = 1 - e;
+          if (u >= 1) continue;
+          const sx = p.tx + (p.x0 - p.tx) * k * Math.cos(p.sw * k) - (p.y0 - p.ty) * k * Math.sin(p.sw * k) * .3;
+          const sy = p.ty + (p.y0 - p.ty) * k;
+          ctx.globalAlpha = Math.min(1, u * 3); ctx.fillStyle = Math.random() < .2 ? '#fff' : cl; ctx.fillRect(sx - 1.5, sy - 1.5, 3, 3);
         }
-        g.restore(); g.shadowBlur = 0;
-        const core = bctx.createRadialGradient(x, y, 2, x, y, 40); core.addColorStop(0, '#fff'); core.addColorStop(1, 'transparent');
-        bctx.globalAlpha = a * .8; bctx.fillStyle = core; bctx.beginPath(); bctx.arc(x, y, 40, 0, 7); bctx.fill();
+        const rev = Math.min(1, Math.max(0, (s.t - .25) / .7)); // the item materializes bottom to top
+        it.style.clipPath = `inset(${((1 - rev) * 100).toFixed(1)}% -40% 0 -40%)`;
+        if (rev > 0 && rev < 1) { const ly = bot - (bot - top) * rev; streak(ctx, left + wid / 2, ly, wid * 2.4, 4, 1, '#fff'); streak(ctx, left + wid / 2, ly, wid * 2, 14, .7, cl); }
+        if (rev >= 1 && !s.done) { s.done = true; glints(x, y, 5, 70); ring(x, y, cl, 120, 0, .5, 3); }
       } });
-      setTimeout(() => glints(x, y, 5, 90), 350);
-      setTimeout(() => { // it shatters into glitter, and snow drifts down
-        burst(x, y, '#e8f6ff', 46, 380, { g: 80, drag: 2.2, life: 1.2, size: 1.1, colors: ['#ffffff', cl, '#cfeaff'] });
-        ring(x, y, '#fff', 120, 0, .4, 3); shakePop();
-        for (let i = 0; i < 26; i++) parts.push({ x: x + R(-170, 170), y: y - R(150, 230), vx: R(-10, 10), vy: R(25, 55), age: -R(0, .8), life: R(1.6, 2.4), c: '#ffffff', s: R(1.2, 2.2), g: 0, drag: 0, kind: 'ember', ph: R(0, 6) });
-      }, 1000);
+    } else {
+      // Light pool: the item rises out of a glowing pool of light: rings ripple out across it, the item's
+      // reflection shimmers in it, droplets fall back into it
+      const it = $('stage').querySelector('.item'), ir = it.getBoundingClientRect(), sr = $('screen').getBoundingClientRect();
+      const px = ir.left - sr.left + ir.width / 2, py = ir.bottom - sr.top + 6;
+      it.animate([{ transform: 'translateY(60px)', opacity: .2 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 550, easing: 'cubic-bezier(.2,1.3,.4,1)' });
+      special.push({ t: 0, life: 2.2, draw(s) {
+        const a = Math.min(1, s.t / .2) * (1 - Math.max(0, (s.t - 1.6) / .6));
+        const g = bctx.createRadialGradient(px, py, 4, px, py, 120); g.addColorStop(0, '#fff'); g.addColorStop(.25, cl); g.addColorStop(1, 'transparent');
+        bctx.save(); bctx.translate(px, py); bctx.scale(1, .22); bctx.translate(-px, -py); bctx.globalAlpha = a * .9; bctx.fillStyle = g; bctx.beginPath(); bctx.arc(px, py, 120, 0, 7); bctx.fill(); bctx.restore();
+        for (let k = 0; k < 3; k++) { // ripples spreading over the pool, one after another
+          const rt = ((s.t + k * .45) % 1.35) / 1.35, rr = 20 + 130 * rt;
+          ctx.globalAlpha = a * (1 - rt) * .8; ctx.strokeStyle = cl; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(px, py, rr, rr * .22, 0, 0, 7); ctx.stroke();
+        }
+        const rg = bctx.createLinearGradient(0, py, 0, py + 70); rg.addColorStop(0, cl); rg.addColorStop(1, 'transparent'); // the reflection
+        bctx.globalAlpha = a * .35 * (.8 + .2 * Math.sin(s.t * 9)); bctx.fillStyle = rg; bctx.fillRect(px - 14 + Math.sin(s.t * 6) * 2, py, 28, 70);
+      } });
+      burst(px, py, cl, 22, 420, { up: true, fan: .5, g: 700, drag: .8, life: 1.3, colors: ['#ffffff', cl] });
     }
   }
 }
@@ -544,42 +558,52 @@ function legendary(x, y, c, cl) {
       bctx.beginPath(); bctx.arc(x, y, r, 0, 7); bctx.stroke(); bctx.shadowBlur = 0;
       if (Math.random() < .4) parts.push({ x: x + R(-80, 80), y: y + R(20, 60), vx: R(-10, 10), vy: R(-80, -40), age: 0, life: R(1.2, 2), c: gold[Math.floor(R(0, 3))], s: R(1.4, 2.4), g: -15, drag: .5, kind: 'ember', ph: R(0, 6) });
     } });
-  } else if (pick('l') === 'eruption') {
-    // Treasure eruption: a fountain of spinning gold coins and gems bursts up from below the item with
-    // a golden flare; they arc out and fall, glinting
-    shakePop();
-    special.push({ t: 0, life: 1.1, draw(s) {
-      const u = s.t / 1.1, a = u < .1 ? u / .1 : Math.pow(1 - (u - .1) / .9, 1.3);
-      streak(ctx, x, y + 40, 700, 5, a, '#fff'); streak(ctx, x, y + 40, 600, 34, a * .7, '#ffc060'); star(ctx, x, y + 40, 50 * a, a, '#fff');
-    } });
-    const gems = ['#ff4a6a', '#4ad0ff', '#7dff6a', '#d07dff'];
-    for (let i = 0; i < 46; i++) {
-      const an = -Math.PI / 2 + R(-.75, .75), v = R(420, 780), gem = i % 7 === 0;
-      shards.length; // coins and gems: drawn as spinning discs (coins) or diamonds (gems)
-      special.push({ t: -R(0, .35), life: 2.2, x0: x + R(-10, 10), y0: y + 60, vx: Math.cos(an) * v, vy: Math.sin(an) * v, gem, col: gem ? gems[i % 4] : '#ffd100', spin: R(6, 12), draw(s) {
-        const px = s.x0 + s.vx * s.t, py = s.y0 + s.vy * s.t + 900 * s.t * s.t, a = Math.min(1, (2.2 - s.t) / .4);
-        const w = Math.abs(Math.cos(s.t * s.spin)) * (s.gem ? 7 : 8) + 1.5;
-        ctx.save(); ctx.translate(px, py); ctx.globalAlpha = a;
-        if (s.gem) { ctx.rotate(Math.PI / 4); ctx.fillStyle = s.col; ctx.fillRect(-w / 2, -w / 2, w, w); }
-        else { const g = ctx.createLinearGradient(-w, 0, w, 0); g.addColorStop(0, '#b08000'); g.addColorStop(.5, '#fff6b0'); g.addColorStop(1, '#b08000'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, w, 8, 0, 0, 7); ctx.fill(); }
-        ctx.restore();
-        if (Math.random() < .03) star(ctx, px, py, 8, a, '#fff');
+  } else if (pick('l') === 'meteors') {
+    // Meteor shower: after the comet, golden meteors keep raining down around the item, each landing
+    // with a small burst and ring; the last lands on the item itself
+    shakePop(); ring(x, y, '#ffd100', 200, 0, .7, 4); burst(x, y, '#ffd100', 30, 480, { g: 120, drag: 2, life: 1.1, colors: [['#ffd100'], ['#ffb040'], ['#fff3c0']].flat() });
+    const N = 8;
+    for (let i = 0; i < N; i++) {
+      const last = i === N - 1, tx = last ? x : x + R(-200, 200), ty = last ? y : y + R(-60, 80), sx = tx + R(80, 160), sy = ty - R(380, 460), dur = .42;
+      special.push({ t: -(.25 + i * .14), life: dur + .05, draw(s) {
+        const u = Math.min(1, s.t / dur), e = u * u, hx = sx + (tx - sx) * e, hy = sy + (ty - sy) * e;
+        const tx2 = sx + (tx - sx) * Math.max(0, e - .3), ty2 = sy + (ty - sy) * Math.max(0, e - .3);
+        const gr = ctx.createLinearGradient(hx, hy, tx2, ty2); gr.addColorStop(0, '#fff3c0'); gr.addColorStop(.3, '#ffb040'); gr.addColorStop(1, 'transparent');
+        ctx.globalAlpha = 1; ctx.strokeStyle = gr; ctx.lineWidth = last ? 7 : 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(tx2, ty2); ctx.lineTo(hx, hy); ctx.stroke();
+        const hd = ctx.createRadialGradient(hx, hy, 1, hx, hy, last ? 26 : 14); hd.addColorStop(0, '#fff'); hd.addColorStop(1, 'transparent'); ctx.fillStyle = hd; ctx.beginPath(); ctx.arc(hx, hy, last ? 26 : 14, 0, 7); ctx.fill();
       } });
+      setTimeout(() => {
+        ring(tx, ty, '#ffd100', last ? 220 : 70, 0, last ? .8 : .45, last ? 5 : 3);
+        burst(tx, ty, '#ffd100', last ? 40 : 12, last ? 520 : 260, { up: true, g: 500, life: 1, colors: ['#ffd100', '#ffb040', '#fff3c0'] });
+        if (last) { shakePop(); glints(x, y, 12, 120); flash(); }
+      }, (.25 + i * .14 + dur) * 1000);
     }
-    ring(x, y + 60, '#ffd100', 180, 0, .6, 4); glints(x, y, 8, 120);
   } else {
-    // Sunrise: a sun disc rises behind the item, the edges of the screen glow gold, and it flares
-    const e = $('edge'); e.style.transition = 'opacity .5s'; e.style.background = 'none'; e.style.boxShadow = 'inset 0 0 140px 40px rgba(255,170,40,.7)'; e.style.opacity = 1;
-    setTimeout(() => { e.style.transition = 'opacity 1.2s'; e.style.opacity = 0; }, 1300);
-    special.push({ t: 0, life: 2.4, draw(s) {
-      const up = 1 - Math.pow(1 - Math.min(1, s.t / .6), 3), a = 1 - Math.max(0, (s.t - 1.8) / .6), sy = y + 80 - 120 * up;
-      const g = bctx.createRadialGradient(x, sy, 10, x, sy, 120); g.addColorStop(0, '#fff8d8'); g.addColorStop(.25, '#ffd36a'); g.addColorStop(.6, '#ff9a2a'); g.addColorStop(1, 'transparent');
-      bctx.globalAlpha = a * .95; bctx.fillStyle = g; bctx.beginPath(); bctx.arc(x, sy, 120, 0, 7); bctx.fill();
-      const flare = Math.max(0, Math.min(1, (s.t - .55) / .15)) * (1 - Math.max(0, (s.t - .8) / .6));
-      if (flare > 0) { streak(ctx, x, sy, 900, 6, flare, '#fff'); streak(ctx, x, sy, 760, 40, flare * .8, '#ffc060'); star(ctx, x, sy, 70 * flare, flare, '#fff'); }
-      if (s.t > .6 && s.t < 1.8 && Math.random() < .5) parts.push({ x: x + R(-100, 100), y: sy + R(-20, 40), vx: R(-10, 10), vy: R(-70, -35), age: 0, life: R(1.2, 1.8), c: Math.random() < .3 ? '#fff' : '#ffd36a', s: R(1.4, 2.4), g: -15, drag: .5, kind: 'ember', ph: R(0, 6) });
+    // Golden seal: a huge ornate ring of gold with marks around it stamps down behind the item, spins as
+    // it settles, then bursts into gold dust
+    shakePop();
+    special.push({ t: 0, life: 1.9, draw(s) {
+      const slam = Math.min(1, s.t / .18), sc = 2.6 - 1.6 * (1 - Math.pow(1 - slam, 3)), a = s.t < 1.3 ? Math.min(1, s.t / .08) : Math.max(0, 1 - (s.t - 1.3) / .25);
+      const g = bctx, rr = 110 * sc;
+      g.save(); g.translate(x, y); g.rotate(s.t * (1.6 - Math.min(1, s.t) * 1.2));
+      g.globalAlpha = a; g.shadowColor = '#ffb040'; g.shadowBlur = 16; g.strokeStyle = '#ffd36a';
+      g.lineWidth = 4; g.beginPath(); g.arc(0, 0, rr, 0, 7); g.stroke();
+      g.lineWidth = 2; g.beginPath(); g.arc(0, 0, rr * .84, 0, 7); g.stroke();
+      for (let i = 0; i < 24; i++) { // marks between the two rings, and gems at the quarters
+        const an = i / 24 * Math.PI * 2; g.save(); g.rotate(an);
+        if (i % 6 === 0) { g.fillStyle = '#fff3c0'; g.beginPath(); g.moveTo(0, -rr - 9); g.lineTo(6, -rr); g.lineTo(0, -rr + 9); g.lineTo(-6, -rr); g.fill(); }
+        else { g.beginPath(); g.moveTo(0, -rr * .86); g.lineTo(0, -rr * .98); g.stroke(); }
+        g.restore();
+      }
+      g.restore(); g.shadowBlur = 0;
+      const glow = bctx.createRadialGradient(x, y, rr * .5, x, y, rr * 1.2); glow.addColorStop(0, 'transparent'); glow.addColorStop(.8, 'rgba(255,190,80,.35)'); glow.addColorStop(1, 'transparent');
+      bctx.globalAlpha = a; bctx.fillStyle = glow; bctx.beginPath(); bctx.arc(x, y, rr * 1.2, 0, 7); bctx.fill();
+      if (s.t >= 1.3 && !s.dust) { s.dust = true; // it bursts into gold dust
+        for (let i = 0; i < 60; i++) { const an = R(0, 6.28); parts.push({ x: x + Math.cos(an) * 110, y: y + Math.sin(an) * 110, vx: Math.cos(an) * R(60, 200), vy: Math.sin(an) * R(60, 200) - 40, age: 0, life: R(.8, 1.4), c: ['#ffd100', '#ffb040', '#fff3c0'][i % 3], s: R(1.4, 2.6), g: 80, drag: 1.6, kind: 'dot' }); }
+        ring(x, y, '#ffd100', 200, 0, .6, 4); glints(x, y, 8, 120);
+      }
     } });
-    setTimeout(() => { shakePop(); ring(x, y, '#ffd100', 220, 0, .8, 4); ring(x, y, '#fff', 140, .05, .4, 5); burst(x, y, '#ffd100', 40, 460, { g: 80, drag: 2.2, life: 1.2, colors: ['#ffd100', '#ffb040', '#fff3c0'] }); }, 600);
+    setTimeout(() => { ring(x, y, '#fff', 160, 0, .35, 6); burst(x, y, '#ffd100', 30, 420, { g: 60, drag: 2.2, life: 1, colors: ['#ffd100', '#ffb040', '#fff3c0'] }); }, 180);
   }
 }
 
@@ -589,6 +613,7 @@ function show(q) {
   aura = design === 'M' ? { t: 0, q } : null;
   const st = $('stage'); st.innerHTML = build(q);
   const p = st.firstElementChild;
+  if (q === 3 && pick('b') === 'disint') st.querySelector('.item').style.clipPath = 'inset(100% -40% 0 -40%)'; // it materializes
   dim(false);
   if (q === 5) { // the moment: dim, the comet, then the popup lands in its arrival
     p.style.opacity = 0; dim(true);

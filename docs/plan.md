@@ -509,6 +509,10 @@ Hearthstone; `/dl debug on` in a dungeon to see whether loot text is secret.
 
 ## Ideas / later
 
+- **Class-themed popup animations and styles** (the user, 2026-11-06, after Frost bloom felt "like it belongs
+  to a mage"): arrivals and styles themed by class (frost and arcane for mages, holy light for paladins,
+  nature for druids...), as an option next to the rarity arrivals; maybe the player's own class by default.
+
 - Per-zone "best drop here" memory; a small trophy shelf of your all-time top 10 in the inspector.
 - "Loot goblin" whimsical one-liners on rare moments (original lines, rotating, never the same twice in a row).
 - An account-wide collection log ("first time any of your characters saw this").

@@ -62,7 +62,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      Purple **Starfall** a keeper. Blue: Aurora liked in its round-5 animation, not flat (round 7: an arch);
      a 3rd blue (round 7: Constellation). Orange: Sun crown not quite; round 7: Phoenix. Epic letter stamp loved.
      Next: the user picks from round 7, then build the arrivals and styles in game.
-     Not yet: step 3 popup layered hit sounds.
+     Not yet: step 3 popup layered hit sounds. Roadmap (plan.md, Ideas): class-themed popup animations/styles.
   3. **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip.
      The other "after 1.0" items (inspector, filters beyond the NEW badge, stats) are pushed back.
   1.1.0 (unreleased, CHANGELOG has the full list): not released yet; release when the popup redesign is in.
