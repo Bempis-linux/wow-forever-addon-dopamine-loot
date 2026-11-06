@@ -29,9 +29,18 @@
 </head>
 <body>
 <main>
-  <h1>Loot rain sounds: pick by ear</h1>
-  <p class="lead">Each candidate plays the way the rain does: up the scale, then a little phrase at the top. They're brought to the same loudness so only the sound differs. Tick the one you like in each list, then hear them together under <b>Whole rain</b>.</p>
-  <label>Volume <input type="range" id="vol" min="0" max="100" value="60"></label>
+  <h1>Loot rain sounds: pick by ear (round 2)</h1>
+  <p class="lead">Round 1 sounded "lottery-like", so these are more physical: wood, pouches, soft pops, barely pitched. The pouch and pop ideas are in both lists (lower and heavier for landing). They're brought to the same loudness so only the sound differs. Tick one in each list, then hear them together under <b>Whole rain</b>.</p>
+  <div class="whole">
+    <label>Volume <input type="range" id="vol" min="0" max="100" value="60"></label>
+    <label>Pitch
+      <select id="mode">
+        <option value="climb">Climb the scale (now)</option>
+        <option value="gentle" selected>Gentle: within an octave, up and down</option>
+        <option value="steady">Steady: nearby notes at random, no climb</option>
+      </select></label>
+    <label><input type="checkbox" id="chord"> Chord at the end</label>
+  </div>
 
   <h2>Items landing</h2>
   <div id="land"></div>
@@ -50,16 +59,18 @@
 'use strict';
 const LAND = [
   ['LandNow', 'What ships now', 'Marimba-like bar with a little click at the start.', true],
-  ['LandSoft', 'Soft marimba', 'The same bar, rounder: no click, gentler attack, the bright overtone tamed.'],
-  ['LandBloop', 'Water drop', 'Very round; each note bends up into place, like a drop.'],
-  ['LandGlass', 'Glass bell', 'Clear and a little shimmery, rings a touch longer (an octave lower than the bag).'],
-  ['LandFelt', 'Felt piano', 'A felted piano key: soft attack, warm, no edges.'],
+  ['LandBloop', 'Water drop', 'Round round-1 drop, for comparison.'],
+  ['LandWoodDrop', 'Wood drop', 'The marimba crossed with the drop: bends up into its note, short, with a soft thump under it.'],
+  ['LandWoodDropLow', 'Wood drop, low', 'The same, lower and a bit heavier.'],
+  ['LandThock', 'Thock', 'An earthy knock, barely a note: a low body and a dull tap.'],
+  ['LandPouch', 'Pouch drop', 'A pouch hitting the ground: a soft fwump on a thud (the bag idea, heavier).'],
+  ['LandPop', 'Soft pop, low', 'A low cork-like pop, mostly air (the bag idea, lower).'],
 ];
 const BAG = [
   ['BagNow', 'What ships now', 'Kalimba-like tine, bright overtone.', true],
-  ['BagMusicBox', 'Music box', 'High, tiny and sparkly.'],
-  ['BagChime', 'Wind chime', 'A warm bell with a slightly detuned twin.'],
-  ['BagHarp', 'Harp', 'A plucked string: round, with a little body.'],
+  ['BagPouch', 'Pouch', 'Into a leather pouch: a soft fwump on a low thud. No note to speak of.'],
+  ['BagPouchCoin', 'Pouch and coin', 'The pouch, and a faint coin settling inside.'],
+  ['BagPop', 'Soft pop', 'A quick soft pop, like a cork, mostly air.'],
 ];
 const pick = { land: 'LandNow', bag: 'BagNow' };
 const $ = id => document.getElementById(id);
@@ -87,11 +98,22 @@ const src = key => window.SOUNDS ? window.SOUNDS[key] : (key === 'Slam' ? '../..
 const note = (name, i) => play(src(name + String(i).padStart(2, '0')));
 function at(sec, fn) { timers.push(setTimeout(fn, sec * 1000)); }
 
+// which note the i-th sound plays, by the Pitch setting: climb the whole scale (now), gentle (the walk
+// over the first 6 notes: up, then a phrase up and down), or steady (one of the lowest 5 at random,
+// never the same twice in a row)
+let last = -1;
+function pitch(i) {
+  const mode = $('mode').value;
+  if (mode === 'climb') return melody(i, 11);
+  if (mode === 'gentle') return melody(i, 5);
+  let n; do { n = Math.floor(Math.random() * 5); } while (n === last); last = n; return n;
+}
 // a run of n notes of one candidate, at the landing or the gathering rhythm
 function run(name, n, kind, t0 = 0) {
   let t = t0;
   for (let i = 1; i <= n; i++) {
-    at(t, () => note(name, melody(i, 11)));
+    const p = pitch(i);
+    at(t, () => note(name, p));
     t += kind === 'land' ? interval(i, n) + 0.12 : Math.min(0.06, 1.6 / n) + 0.0;
   }
   return t;
@@ -131,7 +153,7 @@ function rain(n) {
   if ($('slam').checked) { t += 0.55 + 0.45; at(t, () => play(src('Slam'))); }
   t += 0.7 + 0.35;
   const end = run(pick.bag, n - 1, 'bag', t);
-  at(end + 0.42, () => play(src(pick.bag + 'Chord')));
+  if ($('chord').checked) at(end + 0.42, () => play(src(pick.bag + 'Chord')));
   status(`A rain of ${n}: ${LAND.find(x => x[0] === pick.land)[1]} landing, ${BAG.find(x => x[0] === pick.bag)[1]} into the bag.`);
 }
 $('rain12').onclick = () => rain(12);

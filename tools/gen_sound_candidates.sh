@@ -59,28 +59,59 @@ bag_harp() {   # a harp string: plucked, round, a little body
   echo "gte(t,$s)*min(1,$u*250)*(sin(2*PI*$f*$u)*exp(-$d*$u)+0.4*sin(2*PI*$f*2*$u)*exp(-1.8*$d*$u)+0.18*sin(2*PI*$f*3*$u)*exp(-2.6*$d*$u)+0.06*sin(2*PI*$f*4*$u)*exp(-3.5*$d*$u))"
 }
 
-# name  timbre  base Hz  decay  seconds  filters
+# Round 2 (the user: round 1 sounded "lottery-like"): physical, less ringing. Landing: the
+# marimba crossed with the water drop, and earthier knocks; the bag: pouch and cloth, barely pitched.
+wood_drop() {  # the marimba bar crossed with the drop: it bends up into the note, short, a soft thump under it
+  local s=$1 f=$2 d=$3 u="(t-$1)" f0
+  f0=$(awk "BEGIN{print $2 * 0.82}")
+  echo "gte(t,$s)*(min(1,$u*400)*(sin(2*PI*($f*$u+($f-$f0)*0.012*exp(-$u/0.012)))*exp(-$d*$u)+0.14*sin(2*PI*$f*3.93*$u)*exp(-4*$d*$u)+0.08*sin(4*PI*$f*$u)*exp(-2*$d*$u))+0.25*sin(2*PI*90*$u)*exp(-40*$u))"
+}
+thock() {      # an earthy knock: a low body falling into place and a dull tap, barely a note
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*(min(1,$u*500)*sin(2*PI*($f*$u-0.5*$f*0.015*exp(-$u/0.015)))*exp(-$d*$u)+0.18*(random(0)*2-1)*exp(-120*$u))"
+}
+pouch() {      # into a leather pouch: a soft "fwump" (filtered noise, see {F}) on a low thud
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*(min(1,$u*120)*(random(0)*2-1)*exp(-$d*$u)+0.7*sin(2*PI*($f*0.12)*$u)*exp(-30*$u))"
+}
+pouch_coin() { # the pouch, and a faint coin settling inside
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "$(pouch "$1" "$2" "$3")+gte(t,$s+0.03)*0.16*(sin(2*PI*$f*4*($u-0.03))+0.5*sin(2*PI*$f*4*2.76*($u-0.03)))*exp(-38*($u-0.03))"
+}
+soft_pop() {   # a soft pop, like a cork: a quick rising blip, mostly air
+  local s=$1 f=$2 d=$3 u="(t-$1)"
+  echo "gte(t,$s)*(min(1,$u*800)*sin(2*PI*($f*$u+$f*0.5*0.02*(1-exp(-$u/0.02))))*exp(-$d*$u)+0.12*(random(0)*2-1)*exp(-90*$u))"
+}
+
+# name  timbre  base Hz  decay  seconds  steps  filters ({F} = the note's Hz x 2, for the noise ones)
+# steps: pent = a major pentatonic scale (12 notes over 2+ octaves); narrow = 12 small steps over 6
+# semitones (barely pitched, so a run doesn't sing)
 CANDIDATES="
-LandNow land_now 392 11 0.5 $ROOM
-LandSoft land_soft 392 10 0.5 lowpass=f=4500,$ROOM
-LandBloop land_bloop 392 12 0.4 $ROOM
-LandGlass land_glass 523.25 8 0.7 $ROOM
-LandFelt land_felt 392 8 0.6 lowpass=f=3000,$ROOM
-BagNow bag_now 523.25 8 0.6 $ROOM
-BagMusicBox bag_musicbox 784 7 0.7 $ROOM
-BagChime bag_chime 659.25 6 0.8 $ROOM
-BagHarp bag_harp 523.25 6 0.7 lowpass=f=6000,$ROOM
+LandNow land_now 392 11 0.5 pent $ROOM
+LandBloop land_bloop 392 12 0.4 pent $ROOM
+LandWoodDrop wood_drop 330 15 0.4 pent lowpass=f=5000,$ROOM
+LandWoodDropLow wood_drop 220 14 0.45 pent lowpass=f=4000,$ROOM
+LandThock thock 180 24 0.3 narrow lowpass=f=3000
+LandPouch pouch 300 22 0.35 narrow lowpass=f={F},highpass=f=80
+LandPop soft_pop 220 26 0.28 narrow lowpass=f=3500
+BagNow bag_now 523.25 8 0.6 pent $ROOM
+BagPouch pouch 450 26 0.3 narrow lowpass=f={F},highpass=f=120
+BagPouchCoin pouch_coin 450 26 0.35 narrow lowpass=f={F},highpass=f=120
+BagPop soft_pop 300 30 0.25 narrow lowpass=f=4000
 "
-while read -r name timbre base decay secs filters; do
+while read -r name timbre base decay secs steps filters; do
   [ -n "$name" ] || continue
   for n in $(seq 0 11); do
-    render "$name$(printf '%02d' "$n")" "$secs" "$($timbre 0 "$(hz "$base" "$(semis "$n")")" "$decay")" "$filters"
+    if [ "$steps" = pent ]; then st=$(semis "$n"); else st=$(awk "BEGIN{print $n / 2}"); fi
+    f=$(hz "$base" "$st")
+    render "$name$(printf '%02d' "$n")" "$secs" "$($timbre 0 "$f" "$decay")" "${filters//\{F\}/$(awk "BEGIN{print int($f * 2)}")}"
   done
   # its chord, for the end of the rain: the scale's 1, 3, 5, 8 rolled
   chord="$($timbre 0 "$base" "$(awk "BEGIN{print $decay * 0.35}")")"
   for st in 4 7 12; do
     chord="$chord+$($timbre "$(awk "BEGIN{print $st * 0.006}")" "$(hz "$base" "$st")" "$(awk "BEGIN{print $decay * 0.35}")")"
   done
-  render "${name}Chord" 1.6 "$chord" "$filters"
+  cf=$(awk "BEGIN{print int($base * 2)}")
+  render "${name}Chord" 1.6 "$chord" "${filters//\{F\}/$cf}"
   echo "wrote $name"
 done <<< "$CANDIDATES"
