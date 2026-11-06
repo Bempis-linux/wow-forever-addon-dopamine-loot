@@ -313,26 +313,35 @@ ns.AddAction("rain", function(arg)
       end
     end
   end
+  -- the first candidate that loads is the best, shown at the picked rarity (it's a test: what counts
+  -- is that the rarity shows); if none has loaded in time, a filler item stands in for it
   local gotBest = false
-  for _, it in ipairs(candidates) do
-    ns.ItemData(it, 1, "loot", function(d)
-      if gotBest or d.quality ~= best then return end -- (an item of another rarity isn't the test's best)
-      gotBest = true
-      d.test = true
-      items[#items + 1] = d
-      waiting = waiting - 1
-      if waiting == 0 then Go() end
-    end)
+  local function TakeBest(d)
+    if gotBest then return end
+    gotBest = true
+    d.test, d.quality = true, best
+    items[#items + 1] = d
+    waiting = waiting - 1
+    if waiting == 0 then Go() end
   end
-  if #candidates == 0 then waiting = waiting - 1 end
+  for _, it in ipairs(candidates) do ns.ItemData(it, 1, "loot", TakeBest) end
+  local fillers = {}
   for _, it in ipairs(picks) do
     ns.ItemData(it, 1, "loot", function(d)
       d.test = true
       items[#items + 1] = d
+      fillers[#fillers + 1] = d
       waiting = waiting - 1
       if waiting == 0 then Go() end
     end)
   end
+  C_Timer.After(1.5, function()
+    if not gotBest and fillers[1] then
+      local copy = {}
+      for k, v in pairs(fillers[1]) do copy[k] = v end
+      TakeBest(copy)
+    end
+  end)
   C_Timer.After(3, Go) -- don't wait forever for an item the client won't load
 end)
 

@@ -1118,6 +1118,9 @@ function ns:Rain(items, copper, test)
   copper = copper or 0
   RefreshFx()
   local carried, baseCopper = 0, 0
+  -- a test (the settings' Test buttons) replaces a rain that's still running instead of joining it,
+  -- so each test shows only its own items
+  if state and test then Finish() end
   -- a new burst while one is still in the air joins it: same calm, no second wind-up
   local merging, mergedCalm = state and not state.settleAt, state and state.calm or 0
   if state then
