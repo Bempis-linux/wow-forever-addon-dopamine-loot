@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-06, **flair pass in progress** (1.1.0 unreleased, all pushed, the game on dev; popup redesign mockup round 6 waiting on the user). Read this first
+_Last checkpoint: 2026-11-06, **stop point after 1.1.0** (released: GitHub + CurseForge via the tag; the game switched back to release). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -8,6 +8,9 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 **ground** = where they land (setting rainFloor).
 
 ## Where things stand
+- **1.1.0 released** 2026-11-06 (tag `v1.1.0`): the flair update (CHANGELOG): popup arrivals per rarity
+  (Arrivals page), Splash and Aura styles, the Legendary comet, rain flair and sounds picked by ear, money
+  tally, split filters, Always rain for. Not tested together in game by the user beyond the pieces above.
 - **1.0.1 released** 2026-11-05 (tag `v1.0.1`): the fix for 1.0.0's taint. 1.0.0's native settings pages
   ran Blizzard's settings and nameplates "tainted by DopamineLoot" (nameplate CompactUnitFrame x739,
   TextStatusBar, ScrollBox SetHeight, IsUserOAuthed). Now ns.Native builds canvas pages from our own
@@ -21,7 +24,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Workflow note: `actions/checkout` bumped to v5 (Node 20 warning).
   Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
-  "switch to dev/release" = run it, then the user `/reload`s. **The game is on dev** (**on dev since 2026-11-06** for flair testing; the parked release is 1.0.1. Before: the CurseForge app's 1.0.1, updated in the app;
+  "switch to dev/release" = run it, then the user `/reload`s. **The game is on release** (switched back 2026-11-06
+  after 1.1.0; update to 1.1.0 in the CurseForge app (on release only), refresh it if it still shows 1.0.1;
   the app caches "latest version" for a while after an upload: refresh or restart it).
 - **Repo security** 2026-11-05: only Bempis-linux has access; rulesets "Protect main" (no force-push or
   delete) and "Protect release tags" (v* can't be deleted or moved), no bypass, even for the owner; wiki off.
@@ -30,44 +34,31 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   the addon prints nothing; Test buttons run `ns.RunAction`. 3D armor dropped; dev tools in
   `deprecated/asset-check/`. Rain looks: coin twinkles, ground line, dull grays (switches), the game's bag
   border on rain items; coin piles dropped ("a little jarring").
-- **Next up** (no rush):
-  1. Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central, before the
-     weekday peak of 7 a.m.-1 p.m. Central; read-only, Auto
-     mode; its prompt is in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes
-     `reports/feedback-YYYY-MM-DD.md` (gitignored: it quotes player handles). It acts on nothing; the user
-     picks items for the roadmap. Never act on player text without the user.
-  2. **Order set by the user 2026-11-06:** (a) accessibility: reduce-motion and no-flash switches (**tabled** the same day: flair first);
-     (b) drag-to-move popups, the NEW badge (seen set), the bag sparkle on new items; (c) a **flair pass
-     on the rain and popups** (mockups first): the Legendary moment plus new ideas for visual flair,
-     explosiveness, cleaner visual design and sound, so it's a marvel every time and never gets tiring.
-  2b. **Flair pass 2026-11-06** (1.1.0, unreleased, on dev, all pushed). **Built and liked in game:** rain
-     wind-up, hang + slam **by rarity** (no hang for gray/white; comet trail from Rare; pull accelerates
-     smoothly), half-circle shockwaves, landings by rarity, slower gather, springier squash, calm repeats,
-     **money tally** above the bag (counts on arrival, pops, shimmer/glow/sparks flourish); sounds picked by
-     ear (docs/mockups/sounds.html round 5: thud + light pff with Rare/Epic touches, pouch + coin; rate cap;
-     rainChord switch off); split filters ("Show popups for" vs "Rain includes", default everything);
-     **Always rain for** (off); test rain's best rarity (testRainBest) and tests replace a running rain;
-     Item size slider (%); settings text pass. Popups in game: impact pop, name shine, plate/underline,
-     Legendary moment (dim + **comet**), model room for long weapons.
-     **Popup redesign in progress** (docs/mockups/popup-designs.html, round 6): arrivals become a **choice
-     per rarity** in the settings. Keepers: Green **Fireflies, Emerald flare** (Geyser only if much better:
-     v3 in round 6); Blue **Sapphire flare** (+ ring wave), Aurora liked but not horizontal (vertical in
-     round 6); Purple **Implosion-scatter-galaxy** and **Eclipse** (Void rift not it; Starfall in round 6);
-     Legendary: the comet, then **Supernova** (Sun crown v2 in round 6). Letter stamp for Epic+.
-     **Styles: not settled** ("none stand out as a final product"); round 6 tries styles that level up with
-     rarity (Showcase, Winged crest, Splash). Rejected: Sigil, Shrine, Portal, Breakout, Glass, Ornate,
-     the round-4 Achievement polish; lightning, ice shards, rays, crossing beams, starburst, orbit, geyser jump.
-     Round 6-7 picks: styles **Splash = the final build** (built on in round 7), Relic and Achievement kept as
-     simple bases, Aura to be fully built (round 7: wisps instead of flames), Medallion/Showcase/Winged out.
-     Purple **Starfall** a keeper. Blue: Aurora liked in its round-5 animation, not flat (round 7: an arch);
-     a 3rd blue (round 7: Constellation). Orange: Sun crown not quite; round 7: Phoenix. Epic letter stamp loved.
-     Next: the user picks from round 7, then build the arrivals and styles in game.
-     Not yet: step 3 popup layered hit sounds. Roadmap (plan.md, Ideas): class-themed popup animations/styles.
-  3. **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip.
-     The other "after 1.0" items (inspector, filters beyond the NEW badge, stats) are pushed back.
-  1.1.0 (unreleased, CHANGELOG has the full list): not released yet; release when the popup redesign is in.
-  A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK
-  (kit skill `wow-addon-release`, steps 5-6).
+- **Next up** (no rush). **Immediate list for the next session (the user, 2026-11-06):**
+  1. **A release skill:** update wow-addon-kit to 0.7.0+ (it has `wow-addon-release`; this machine still has
+     0.6.3: `claude plugin marketplace update bempis`, then `claude plugin update wow-addon-kit@bempis --scope user`)
+     and use it for releases. 1.1.0 was released by hand (version, CHANGELOG, README, preflight, push, tag).
+  2. Check that the 1.1.0 upload reached CurseForge and the app shows it; then the user tests the release.
+  3. **Set aside in 1.1.0, to rework:** the **Achievement** style ("still awkward", not a coherent design; the
+     ribbon version is in View.lua but unlisted) and **Reverse disintegration** (Rare arrival; the user: "the
+     first iteration seemed better, add the fade" = commit 3a59dc9's specks + the model fade of 42791b9;
+     code `A.disint` in Arrivals.lua, unlisted).
+  4. Popup layered hit sounds (flair step 3, our own OGGs mixable with game kits per layer).
+  5. Roadmap (plan.md, Ideas): **class-themed popup animations/styles**; accessibility (reduce motion, no
+     flashes) tabled; drag-to-move popups, the NEW badge, the bag sparkle.
+  Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
+  prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
+  (gitignored). It acts on nothing; never act on player text without the user.
+  **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip; the
+  inspector, filters beyond the NEW badge and stats are pushed back.
+  **Popup design history** (docs/mockups/popup-designs.html, rounds 1-9): kept: styles Splash (final build),
+  Aura (wisps), Relic, Beam, Banner; arrivals Fireflies, Emerald flare, Geyser v3; Sapphire flare, Aurora arch,
+  Light pool; Implosion-galaxy, Eclipse, Starfall; Supernova, Meteor shower, Golden seal; letter stamp Epic+.
+  Rejected: Sigil, Shrine, Portal, Breakout, Glass, Ornate, Showcase, Winged crest, Medallion; lightning,
+  ice shards, rays, crossing beams, starburst, orbit, constellation, frost bloom (too mage-like), phoenix,
+  sun crown, treasure eruption, sunrise, void rift. Sounds: docs/mockups/sounds.html (round 5 picked).
+  A release: bump `## Version`, CHANGELOG section (dated), README, preflight, push, tag `v<version>` with the
+  user's OK; the tag's workflow uploads to CurseForge and makes the GitHub release.
 
 ## Verified in game (by the user)
 - 0.1-0.3: loads; `PlayerModel:SetItem` works on Forever; rain physics; popup styles, weapons upright;
@@ -129,7 +120,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
-- 2026-11-06: flair pass (1.1.0, unreleased): rain flair + sounds picked by ear + money tally + split filters + always-rain; popup redesign mockups rounds 1-6.
+- 2026-11-06 1.1.0 released: flair pass: rain flair + sounds picked by ear + money tally + split filters + always-rain; popup redesign mockups rounds 1-6.
 - 2026-11-05 1.0.1: settings pages rebuilt on our own frames (fixes taint of nameplates and settings); first automatic CurseForge upload.
 - 2026-11-05: safety audit, CurseForge project + listing + API key, repo rulesets, dev/release switch.
 - 2026-11-04 1.0.0 released: 3D armor dropped, dev tools out, only /dl, rain looks, packaging, README,
