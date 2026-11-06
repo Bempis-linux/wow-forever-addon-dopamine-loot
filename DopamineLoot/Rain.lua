@@ -1157,7 +1157,8 @@ function ns:Rain(items, copper, test)
   end
   local coins = #plan
   -- the best flies last; a lone item (a quest reward) does too when coins rain with it
-  if On("Best") and (#list > 1 or (#list == 1 and coins > 0)) then best = table.remove(list) end
+  -- (a lone green or better also does: it rains alone through Always rain for, and gets its show)
+  if On("Best") and (#list > 1 or (#list == 1 and (coins > 0 or (list[1].quality or 0) >= 2))) then best = table.remove(list) end
   if not list[1] and not best and coins == 0 then return end
   local queue = Core.Mix(list, plan)
   local bestQ = 0

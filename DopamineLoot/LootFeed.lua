@@ -14,7 +14,12 @@ local QUALITY_WORDS = {
   rare = 3, blue = 3, epic = 4, purple = 4, legendary = 5, orange = 5,
 }
 -- preview items for qualities you may not have in your bags (well-known Classic items)
-local TEST_IDS = { [2] = { 15211 }, [3] = { 5191, 7230 }, [4] = { 12784, 19364 }, [5] = { 19019, 17182 } }
+local TEST_IDS = { -- well-known Classic items by rarity (tests check each one's rarity and that it exists)
+  [2] = { 15211, 1219, 2011 },          -- Militant Shortsword, Redridge Machete, Twisted Sabre
+  [3] = { 5191, 7230, 2205 },           -- Cruel Barb, Smite's Mighty Hammer, Duskbringer
+  [4] = { 12784, 811, 2244, 1728 },     -- Arcanite Reaper, Axe of the Deep Woods, Krol Blade, Teebu's Blazing Longsword
+  [5] = { 19019, 17182 },               -- Thunderfury, Sulfuras
+}
 
 -- Two filters: the lowest rarity that gets a popup (setting minQuality, default Uncommon, Popups
 -- page) and the lowest that rains (rainMinQuality, default Poor: everything, Loot rain page)
@@ -96,6 +101,11 @@ function ns.CoinRainMin() return ns.settings.coinRainMin or COIN_RAIN_MIN end
 local function Rains(items)
   if ns.settings.noRain then return false end
   if #items >= ns.RainMin() then return true end
+  -- an item of this rarity or better always rains, even alone (setting rainAlways; off by default)
+  local always = ns.settings.rainAlways
+  if always then
+    for _, d in ipairs(items) do if (d.quality or 0) >= always then return true end end
+  end
   local copper = items.copper or 0
   if copper <= 0 or ns.settings.noRainCoins then return false end
   return items.quest or copper >= ns.CoinRainMin()
@@ -284,14 +294,37 @@ ns.AddAction("rain", function(arg)
     local q = select(3, GetInfo(link))
     if q and q < best then own[#own + 1] = link end
   end)
-  local picks = { OwnItems(best) or TEST_IDS[best][math.random(#TEST_IDS[best])] }
-  while #picks < n do picks[#picks + 1] = #own > 0 and own[math.random(#own)] or 2589 end -- Linen Cloth
-  local items, waiting, started = {}, #picks, false
+  local picks = {}
+  while #picks < n - 1 do picks[#picks + 1] = #own > 0 and own[math.random(#own)] or 2589 end -- Linen Cloth
+  local items, waiting, started = {}, #picks + 1, false
   local function Go()
     if started then return end
     started = true
     if #items > 0 then ns:Rain(items, n * math.random(150, 1800), true) end -- some test money too
   end
+  -- the best: yours if you have one, else the first well-known one of that rarity this client has
+  -- and loads (some classic items don't exist on every client yet: they'd never load)
+  local mine = OwnItems(best)
+  local candidates = mine and { mine } or {}
+  if not mine then
+    for _, id in ipairs(TEST_IDS[best]) do
+      if not GetInfoInstant or GetInfoInstant(id) then
+        if GetInfo(id) then table.insert(candidates, 1, id) else candidates[#candidates + 1] = id end -- loaded ones first
+      end
+    end
+  end
+  local gotBest = false
+  for _, it in ipairs(candidates) do
+    ns.ItemData(it, 1, "loot", function(d)
+      if gotBest or d.quality ~= best then return end -- (an item of another rarity isn't the test's best)
+      gotBest = true
+      d.test = true
+      items[#items + 1] = d
+      waiting = waiting - 1
+      if waiting == 0 then Go() end
+    end)
+  end
+  if #candidates == 0 then waiting = waiting - 1 end
   for _, it in ipairs(picks) do
     ns.ItemData(it, 1, "loot", function(d)
       d.test = true

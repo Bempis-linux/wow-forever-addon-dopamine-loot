@@ -20,6 +20,8 @@
 - **The best item's drop by rarity**: gray and white best items just land; from green up the best hangs and
   slams down, longer and harder the rarer it is, with a comet trail from Rare and a bigger shockwave, more
   sparks and more shake for Epic and Legendary.
+- **Always rain for** (Loot rain page, off by default): loot with an item of the picked rarity or better always
+  rains, even a single item, so it gets its hang, comet and landing.
 - **Money tally**: the rain's money total and item count sit right above your bag and count up as things go
   in, popping with each coin as a glint zips into it; at the end the total punches up and a shimmer runs
   across it, with a gold glow from 1 gold and a burst of sparks from 10 gold.

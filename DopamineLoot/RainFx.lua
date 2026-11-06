@@ -44,6 +44,10 @@ local function Create()
     if not listed then list[#list + 1] = { cur, Money(cur) } end
     return list
   end, 10000, "Money you loot rains as coins on its own (even without enough items for a rain) when it's at least this much. Quest reward money always rains.")
+  N.Choice(cat, "rainAlways", "Always rain for", {
+    { false, "Off (default)" }, { 2, "|cff1eff00Uncommon|r and up" }, { 3, "|cff0070ddRare|r and up" },
+    { 4, "|cffa335eeEpic|r and up" }, { 5, "|cffff8000Legendary|r" },
+  }, false, "Loot with an item of this rarity or better always rains, even a single item, so it gets the full show (its hang, comet and landing). Off: only enough items or money make it rain.")
   N.Choice(cat, "rainMinQuality", "Rain includes", {
     { 0, "Everything (default)" }, { 1, "|cffffffffCommon|r and up" }, { 2, "|cff1eff00Uncommon|r and up" },
     { 3, "|cff0070ddRare|r and up" },
