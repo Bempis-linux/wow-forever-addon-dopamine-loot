@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popup Designs Round 7</title>
+<title>Popup Designs Round 8</title>
 <style>
   :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
@@ -122,7 +122,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Popup designs, round 7</h1>
+  <h1>Popup designs, round 8</h1>
   <small>Splash toward a final build (try each rarity), Aura with wisps, the Aurora arch, and new blue and orange options. Keepers are marked. R replays.</small>
 
   <h2>Style</h2>
@@ -145,7 +145,7 @@
   <label class="fx"><input type="checkbox" id="b0" checked><b>Ring wave</b><small>With either option.</small></label>
   <label class="fx"><input type="radio" name="b" value="flare"><b>Sapphire flare <em>keeper</em></b><small>Unchanged.</small></label>
   <label class="fx"><input type="radio" name="b" value="aurora" checked><b>Aurora arch <em>reworked</em></b><small>The round-5 ribbon of northern lights you liked, bent into an arch over the item instead of lying flat.</small></label>
-  <label class="fx"><input type="radio" name="b" value="constellation"><b>Constellation <em>new</em></b><small>Stars pop out around the item, lines draw between them into a constellation, then it all flashes and twinkles out.</small></label>
+  <label class="fx"><input type="radio" name="b" value="frost"><b>Frost bloom <em>new</em></b><small>A six-armed ice crystal grows behind the item and glints, then shatters into glitter while soft snow drifts down.</small></label>
 
   <h2>Epic (purple)</h2>
   <label class="fx"><input type="radio" name="p" value="implode"><b>Implosion, scatter, galaxy <em>keeper</em></b><small>Unchanged.</small></label>
@@ -155,8 +155,8 @@
 
   <h2>Legendary (orange): after the comet</h2>
   <label class="fx"><input type="radio" name="l" value="nova"><b>Supernova <em>keeper</em></b><small>Unchanged.</small></label>
-  <label class="fx"><input type="radio" name="l" value="crown"><b>Sun crown v2</b><small>Round 6's, to compare.</small></label>
-  <label class="fx"><input type="radio" name="l" value="phoenix" checked><b>Phoenix <em>new</em></b><small>The comet hits: fiery wings sweep open behind the item, flap once and throw a burst of embers, then fold away into sparks.</small></label>
+  <label class="fx"><input type="radio" name="l" value="eruption" checked><b>Treasure eruption <em>new</em></b><small>A fountain of spinning gold coins and gems bursts up from below the item with a golden flare, arcing out and falling.</small></label>
+  <label class="fx"><input type="radio" name="l" value="sunrise"><b>Sunrise <em>new</em></b><small>A sun disc rises behind the item, the screen edges glow gold, and it flares with a shower of embers.</small></label>
   <small>The dim and the slow-motion landing stay; the comet stays as it is in game.</small>
 </div>
 <div id="screen">
@@ -430,27 +430,32 @@ function blue(x, y, c, cl) {
       } });
       for (let i = 0; i < 16; i++) { const an = Math.PI * R(1.05, 1.95); parts.push({ x: x + Math.cos(an) * 150, y: y + 30 + Math.sin(an) * 110, vx: R(-8, 8), vy: R(-50, -20), age: -R(0, .6), life: R(1.2, 1.8), c: i % 2 ? '#7fffd4' : cl, s: R(1.2, 2), g: -10, drag: .6, kind: 'ember', ph: R(0, 6) }); }
     } else {
-      // Constellation: stars pop out around the item one by one, lines draw between them, it all
-      // flashes, then the stars twinkle out
-      const stars = Array.from({ length: 8 }, (_, i) => { const an = i / 8 * Math.PI * 2 + R(-.3, .3), r = R(80, 140); return [x + Math.cos(an) * r, y + Math.sin(an) * r * .75]; });
-      special.push({ t: 0, life: 2.0, draw(s) {
-        const shown = Math.min(stars.length, Math.floor(s.t / .09) + 1), flash = Math.max(0, 1 - Math.abs(s.t - .95) / .15), out = Math.max(0, (s.t - 1.2) / .8);
-        ctx.lineCap = 'round';
-        for (let i = 0; i < shown; i++) { // the line to the next star draws out once both are there
-          const [ax, ay] = stars[i], [bx, by] = stars[(i + 1) % stars.length];
-          const lu = Math.min(1, Math.max(0, (s.t - (i + 1) * .09) / .12));
-          if (i + 1 < shown || (i === stars.length - 1 && s.t > .8)) {
-            ctx.globalAlpha = (.55 + .45 * flash) * (1 - out); ctx.strokeStyle = cl; ctx.lineWidth = 1.4 + 2 * flash;
-            ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + (bx - ax) * lu, ay + (by - ay) * lu); ctx.stroke();
+      // Frost bloom: a six-armed ice crystal grows behind the item, glints, then shatters into glitter
+      // while soft snow drifts down
+      special.push({ t: 0, life: 1.3, draw(s) {
+        const grow = 1 - Math.pow(1 - Math.min(1, s.t / .45), 3), a = s.t < .85 ? 1 : Math.max(0, 1 - (s.t - .85) / .2), L = 110 * grow;
+        const g = bctx; g.save(); g.translate(x, y); g.rotate(s.t * .3);
+        g.globalAlpha = a; g.strokeStyle = cl; g.lineCap = 'round'; g.shadowColor = c; g.shadowBlur = 10;
+        for (let i = 0; i < 6; i++) {
+          g.save(); g.rotate(i * Math.PI / 3);
+          g.lineWidth = 3; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -L); g.stroke();
+          g.lineWidth = 2;
+          for (const f of [.35, .6, .82]) { // little branches along each arm, growing with it
+            const b = L * f, bl = L * .22 * (1 - f * .5);
+            g.beginPath(); g.moveTo(0, -b); g.lineTo(-bl, -b - bl); g.moveTo(0, -b); g.lineTo(bl, -b - bl); g.stroke();
           }
+          g.restore();
         }
-        for (let i = 0; i < shown; i++) {
-          const pop = Math.min(1, (s.t - i * .09) / .1), tw = .7 + .3 * Math.sin(s.t * 14 + i);
-          star(ctx, stars[i][0], stars[i][1], (8 + 10 * flash) * pop * tw * (1 - out * .5), 1 - out, '#fff');
-        }
-        if (flash > 0) { const g = ctx.createRadialGradient(x, y, 4, x, y, 150); g.addColorStop(0, cl); g.addColorStop(1, 'transparent'); ctx.globalAlpha = flash * .5; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 150, 0, 7); ctx.fill(); }
+        g.restore(); g.shadowBlur = 0;
+        const core = bctx.createRadialGradient(x, y, 2, x, y, 40); core.addColorStop(0, '#fff'); core.addColorStop(1, 'transparent');
+        bctx.globalAlpha = a * .8; bctx.fillStyle = core; bctx.beginPath(); bctx.arc(x, y, 40, 0, 7); bctx.fill();
       } });
-      setTimeout(() => glints(x, y, 6, 120), 950);
+      setTimeout(() => glints(x, y, 5, 90), 350);
+      setTimeout(() => { // it shatters into glitter, and snow drifts down
+        burst(x, y, '#e8f6ff', 46, 380, { g: 80, drag: 2.2, life: 1.2, size: 1.1, colors: ['#ffffff', cl, '#cfeaff'] });
+        ring(x, y, '#fff', 120, 0, .4, 3); shakePop();
+        for (let i = 0; i < 26; i++) parts.push({ x: x + R(-170, 170), y: y - R(150, 230), vx: R(-10, 10), vy: R(25, 55), age: -R(0, .8), life: R(1.6, 2.4), c: '#ffffff', s: R(1.2, 2.2), g: 0, drag: 0, kind: 'ember', ph: R(0, 6) });
+      }, 1000);
     }
   }
 }
@@ -539,54 +544,42 @@ function legendary(x, y, c, cl) {
       bctx.beginPath(); bctx.arc(x, y, r, 0, 7); bctx.stroke(); bctx.shadowBlur = 0;
       if (Math.random() < .4) parts.push({ x: x + R(-80, 80), y: y + R(20, 60), vx: R(-10, 10), vy: R(-80, -40), age: 0, life: R(1.2, 2), c: gold[Math.floor(R(0, 3))], s: R(1.4, 2.4), g: -15, drag: .5, kind: 'ember', ph: R(0, 6) });
     } });
-  } else if (pick('l') === 'phoenix') {
-    // Phoenix: fiery wings sweep open behind the item, beat once, throw embers, then fold into sparks
-    flash(); shakePop();
-    const fire = ['#fff3c0', '#ffd36a', '#ff9a2a', '#ff5a1a'];
-    special.push({ t: 0, life: 2.4, draw(s) {
-      // open (0..0.35 s), one beat (0.6..1.0 s), hold, fold away and fade (1.7..2.4 s)
-      const open = 1 - Math.pow(1 - Math.min(1, s.t / .35), 3);
-      const beat = s.t > .6 && s.t < 1.0 ? Math.sin(Math.PI * (s.t - .6) / .4) : 0;
-      const fold = Math.max(0, (s.t - 1.7) / .7), a = 1 - fold;
-      for (const side of [-1, 1]) {
-        for (let f = 0; f < 9; f++) { // feathers fanning out from the item's shoulder
-          const k = f / 8, spread = (.15 + .85 * open) * (1 - fold * .6) - beat * .25;
-          const an = -Math.PI / 2 + side * (.35 + k * 1.5) * spread, len = (90 + 70 * Math.sin(Math.PI * (.2 + .7 * k))) * (1 - fold * .3);
-          const bx = x + side * 8, by = y + 10, tx = bx + Math.cos(an) * len, ty = by + Math.sin(an) * len + beat * 14;
-          const g = bctx.createLinearGradient(bx, by, tx, ty); g.addColorStop(0, fire[0]); g.addColorStop(.4, fire[1]); g.addColorStop(.8, fire[2]); g.addColorStop(1, 'rgba(255,90,26,0)');
-          const nx = -Math.sin(an) * 9, ny = Math.cos(an) * 9;
-          bctx.globalAlpha = a * (.5 + .3 * (f % 2)); bctx.fillStyle = g; bctx.beginPath();
-          bctx.moveTo(bx, by); bctx.quadraticCurveTo((bx + tx) / 2 + nx, (by + ty) / 2 + ny, tx, ty); bctx.quadraticCurveTo((bx + tx) / 2 - nx, (by + ty) / 2 - ny, bx, by); bctx.fill();
-          if (Math.random() < .12 * a) parts.push({ x: tx, y: ty, vx: R(-30, 30), vy: R(-80, -30), age: 0, life: R(.6, 1.1), c: fire[Math.floor(R(1, 4))], s: R(1.4, 2.4), g: -30, drag: .8, kind: 'ember', ph: R(0, 6) });
-        }
-      }
-      if (s.t > .6 && s.t < .65) burst(x, y, '#ffd36a', 50, 520, { g: 120, drag: 2, life: 1.3, size: 1.3, colors: fire }); // the beat throws embers
-      if (fold > 0 && Math.random() < .5) parts.push({ x: x + R(-120, 120), y: y + R(-80, 20), vx: R(-20, 20), vy: R(-40, 0), age: 0, life: .6, c: '#fff3c0', s: R(5, 9), g: 0, drag: 0, kind: 'star' });
-    } });
-    ring(x, y, '#fff', 120, 0, .35, 6); ring(x, y, '#ffb040', 230, .06, .8, 4);
-  } else {
+  } else if (pick('l') === 'eruption') {
+    // Treasure eruption: a fountain of spinning gold coins and gems bursts up from below the item with
+    // a golden flare; they arc out and fall, glinting
     shakePop();
-    // v2: a steady crown of smooth golden light spikes rises around the item (no flicker: they grow
-    // once, then breathe together slowly); a halo of light turns above; a gentle fall of gold
-    special.push({ t: 0, life: 2.6, draw(s) {
-      const rise = 1 - Math.pow(1 - Math.min(1, s.t / .45), 3), a = 1 - Math.max(0, (s.t - 2) / .6), breathe = 1 + .06 * Math.sin(s.t * 2.2);
-      for (let i = 0; i < 12; i++) {
-        const an = i / 12 * Math.PI * 2 + .13, cx = x + Math.cos(an) * 80, cy = y + 34 + Math.sin(an) * 20, back = Math.sin(an) < 0;
-        const h = (i % 2 ? 46 : 74) * rise * breathe, g = back ? bctx : ctx;
-        const gr = g.createLinearGradient(0, cy, 0, cy - h); gr.addColorStop(0, '#fff3c0'); gr.addColorStop(.45, '#ffc050'); gr.addColorStop(1, 'rgba(255,170,60,0)');
-        g.globalAlpha = a * (back ? .45 : .8); g.fillStyle = gr; g.beginPath(); g.moveTo(cx - 7, cy); g.lineTo(cx, cy - h); g.lineTo(cx + 7, cy); g.closePath(); g.fill();
-      }
-      const ring1 = bctx.createRadialGradient(x, y + 34, 60, x, y + 34, 100); ring1.addColorStop(0, 'transparent'); ring1.addColorStop(.5, 'rgba(255,200,80,.6)'); ring1.addColorStop(1, 'transparent');
-      bctx.save(); bctx.translate(x, y + 34); bctx.scale(1, .25); bctx.translate(-x, -(y + 34)); bctx.globalAlpha = a * rise; bctx.fillStyle = ring1; bctx.beginPath(); bctx.arc(x, y + 34, 100, 0, 7); bctx.fill(); bctx.restore();
-      // the halo above: a soft ring of light with one bright glint travelling round it
-      const hy = y - 100, ha = a * Math.min(1, s.t / .6);
-      bctx.save(); bctx.translate(x, hy); bctx.scale(1, .3);
-      bctx.globalAlpha = ha * .55; bctx.strokeStyle = '#ffd36a'; bctx.lineWidth = 4; bctx.shadowColor = '#ffb040'; bctx.shadowBlur = 14;
-      bctx.beginPath(); bctx.arc(0, 0, 48, 0, 7); bctx.stroke(); bctx.restore(); bctx.shadowBlur = 0;
-      const ga = s.t * 2.2; star(ctx, x + Math.cos(ga) * 48, hy + Math.sin(ga) * 14, 9, ha, '#fff');
-      if (s.t < 1.8 && Math.random() < .35) parts.push({ x: x + R(-120, 120), y: y - 200, vx: R(-8, 8), vy: R(60, 120), age: 0, life: R(1.4, 2), c: gold[Math.floor(R(0, 3))], s: R(1.2, 2.2), g: 40, drag: .6, kind: 'ember', ph: R(0, 6) });
+    special.push({ t: 0, life: 1.1, draw(s) {
+      const u = s.t / 1.1, a = u < .1 ? u / .1 : Math.pow(1 - (u - .1) / .9, 1.3);
+      streak(ctx, x, y + 40, 700, 5, a, '#fff'); streak(ctx, x, y + 40, 600, 34, a * .7, '#ffc060'); star(ctx, x, y + 40, 50 * a, a, '#fff');
     } });
-    ring(x, y + 30, '#ffd100', 160, 0, .6, 4); burst(x, y, '#ffd100', 40, 420, { up: true, g: 400, life: 1.2, colors: gold }); glints(x, y, 10, 110);
+    const gems = ['#ff4a6a', '#4ad0ff', '#7dff6a', '#d07dff'];
+    for (let i = 0; i < 46; i++) {
+      const an = -Math.PI / 2 + R(-.75, .75), v = R(420, 780), gem = i % 7 === 0;
+      shards.length; // coins and gems: drawn as spinning discs (coins) or diamonds (gems)
+      special.push({ t: -R(0, .35), life: 2.2, x0: x + R(-10, 10), y0: y + 60, vx: Math.cos(an) * v, vy: Math.sin(an) * v, gem, col: gem ? gems[i % 4] : '#ffd100', spin: R(6, 12), draw(s) {
+        const px = s.x0 + s.vx * s.t, py = s.y0 + s.vy * s.t + 900 * s.t * s.t, a = Math.min(1, (2.2 - s.t) / .4);
+        const w = Math.abs(Math.cos(s.t * s.spin)) * (s.gem ? 7 : 8) + 1.5;
+        ctx.save(); ctx.translate(px, py); ctx.globalAlpha = a;
+        if (s.gem) { ctx.rotate(Math.PI / 4); ctx.fillStyle = s.col; ctx.fillRect(-w / 2, -w / 2, w, w); }
+        else { const g = ctx.createLinearGradient(-w, 0, w, 0); g.addColorStop(0, '#b08000'); g.addColorStop(.5, '#fff6b0'); g.addColorStop(1, '#b08000'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, w, 8, 0, 0, 7); ctx.fill(); }
+        ctx.restore();
+        if (Math.random() < .03) star(ctx, px, py, 8, a, '#fff');
+      } });
+    }
+    ring(x, y + 60, '#ffd100', 180, 0, .6, 4); glints(x, y, 8, 120);
+  } else {
+    // Sunrise: a sun disc rises behind the item, the edges of the screen glow gold, and it flares
+    const e = $('edge'); e.style.transition = 'opacity .5s'; e.style.background = 'none'; e.style.boxShadow = 'inset 0 0 140px 40px rgba(255,170,40,.7)'; e.style.opacity = 1;
+    setTimeout(() => { e.style.transition = 'opacity 1.2s'; e.style.opacity = 0; }, 1300);
+    special.push({ t: 0, life: 2.4, draw(s) {
+      const up = 1 - Math.pow(1 - Math.min(1, s.t / .6), 3), a = 1 - Math.max(0, (s.t - 1.8) / .6), sy = y + 80 - 120 * up;
+      const g = bctx.createRadialGradient(x, sy, 10, x, sy, 120); g.addColorStop(0, '#fff8d8'); g.addColorStop(.25, '#ffd36a'); g.addColorStop(.6, '#ff9a2a'); g.addColorStop(1, 'transparent');
+      bctx.globalAlpha = a * .95; bctx.fillStyle = g; bctx.beginPath(); bctx.arc(x, sy, 120, 0, 7); bctx.fill();
+      const flare = Math.max(0, Math.min(1, (s.t - .55) / .15)) * (1 - Math.max(0, (s.t - .8) / .6));
+      if (flare > 0) { streak(ctx, x, sy, 900, 6, flare, '#fff'); streak(ctx, x, sy, 760, 40, flare * .8, '#ffc060'); star(ctx, x, sy, 70 * flare, flare, '#fff'); }
+      if (s.t > .6 && s.t < 1.8 && Math.random() < .5) parts.push({ x: x + R(-100, 100), y: sy + R(-20, 40), vx: R(-10, 10), vy: R(-70, -35), age: 0, life: R(1.2, 1.8), c: Math.random() < .3 ? '#fff' : '#ffd36a', s: R(1.4, 2.4), g: -15, drag: .5, kind: 'ember', ph: R(0, 6) });
+    } });
+    setTimeout(() => { shakePop(); ring(x, y, '#ffd100', 220, 0, .8, 4); ring(x, y, '#fff', 140, .05, .4, 5); burst(x, y, '#ffd100', 40, 460, { g: 80, drag: 2.2, life: 1.2, colors: ['#ffd100', '#ffb040', '#fff3c0'] }); }, 600);
   }
 }
 
