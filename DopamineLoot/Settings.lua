@@ -211,9 +211,6 @@ ns.Native = N
 local LABEL_W, ROW_H, HEADER_GAP = 230, 30, 14
 local pages = {} -- category -> page { panel, content, y }
 
--- A setting changed elsewhere: an open page shows the new value at once
-function ns.SettingChanged() RefreshAll() end
-
 -- A page (parent: the main category, for a sub-page). Returns its category and its layout (the page).
 function N.Page(name, parent)
   local panel = CreateFrame("Frame")

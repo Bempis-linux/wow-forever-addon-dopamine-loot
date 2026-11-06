@@ -52,13 +52,6 @@ local function Changed(what)
     view:SetScale(math.min(BASE * ns.PopupScale(), (PREVIEW_W - 12) / view:GetWidth(), (PREVIEW_H - 12) / view:GetHeight()))
   end
 end
-ns.LookChanged = Changed
-
--- After a chat command changed a look setting: sliders and preview follow
-function ns.LookRefresh()
-  if ns.UI then ns.UI.Refresh() end
-  Changed("frame")
-end
 
 local function Create()
   local UI = ns.UI

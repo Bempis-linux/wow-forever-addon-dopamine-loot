@@ -1,5 +1,9 @@
 # Dopamine Loot
 
+
+## 1.0.2 (unreleased)
+
+- Internal cleanup: code left over from the old chat commands removed. Nothing changes in game.
 ## 1.0.1 (2026-11-05)
 
 - **Fixed:** errors from the game's own nameplates, health bars and settings that blamed Dopamine Loot

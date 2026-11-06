@@ -3,7 +3,7 @@
 --   lua-language-server.exe tools/test_rain.lua
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local ns = {}
-loadfile(root .. "DopamineLoot/Rain.lua")("DopamineLoot", ns)
+loadfile(root .. "DopamineLoot/RainCore.lua")("DopamineLoot", ns)
 local C = ns.RainCore
 
 local fails = 0

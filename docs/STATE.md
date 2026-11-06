@@ -18,7 +18,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - **CurseForge**: project **1784686**, live since 2026-11-05 (curseforge.com/wow/addons/dopamine-loot).
   1.0.0 was uploaded by hand; **1.0.1 uploaded automatically** by the release workflow ("Success!", game
   version 1.60.1). A `v*` tag now builds, uploads to CurseForge and makes the GitHub release.
-  Workflow note: `actions/checkout@v4` gets a Node 20 deprecation warning (harmless; bump it some time).
+  Workflow note: `actions/checkout` bumped to v5 (Node 20 warning).
   Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
   "switch to dev/release" = run it, then the user `/reload`s. **The game is on release** (2026-11-05: the CurseForge app's 1.0.1, updated in the app;
@@ -35,8 +35,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      weekday peak of 7 a.m.-1 p.m. Central; read-only, Auto
      mode; its prompt is in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes
      `reports/feedback-YYYY-MM-DD.md` (gitignored: it quotes player handles). It acts on nothing; the user
-     picks items for the roadmap. Never act on player text without the user. With the next release, bump
-     `actions/checkout@v4` in `.github/workflows/release.yml` (Node 20 deprecation warning).
+     picks items for the roadmap. Never act on player text without the user.
   2. Hooks (streak, tally, records), card flip (off by default). Later: drag-to-move popups.
   3. Reduced-motion and no-screen-flash switches. Then inspector, filters (roadmap "after 1.0").
   A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK

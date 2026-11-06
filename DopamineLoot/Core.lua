@@ -17,16 +17,9 @@ function ns.Tooltip()
   return tooltip
 end
 
-function ns.Esc(s) return (s:gsub("%p", "%%%0")) end -- literal text for use in a pattern
-
 -- Newer clients hide some unit values in combat and instances ("secret values"); passing one on
 -- to another API is an error, so check anything read from a unit first
 function ns.Secret(v) return issecretvalue ~= nil and issecretvalue(v) or false end
-
-function ns.Version()
-  local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
-  return get and get(ADDON, "Version") or "?"
-end
 
 ---------------------------------------------------------------------------
 -- Saved data: settings are account-wide (DopamineLootDB.settings); game progress is per character
@@ -65,16 +58,10 @@ function ns:ADDON_LOADED(name)
   if name ~= ADDON then return end
   ev:UnregisterEvent("ADDON_LOADED")
   InitDB()
-  self:RegisterEvents("PLAYER_LOGIN")
   for _, fn in ipairs(inits) do -- one broken feature must not stop the ones after it
     local ok, err = pcall(fn)
     if not ok then geterrorhandler()(err) end
   end
-end
-
-function ns:PLAYER_LOGIN()
-  local name = UnitName("player")
-  if not self.Secret(name) then self.playerName = name end
 end
 
 ---------------------------------------------------------------------------

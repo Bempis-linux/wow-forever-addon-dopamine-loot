@@ -25,11 +25,11 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Sounds.lua               popup sounds per rarity (settings sound2..5, game kits) + our chimes (noChime3..5), rain sets (OGG)
   View.lua                 the popup view: 3 styles, model or tilting card, flash, arrivals by rarity
   Popup.lua                popup stack, motion, waiting queue (uses View)
-  Rain.lua                 loot rain: pure ns.RainCore (physics, timing, spacing, coins; tools/test_rain.lua)
-                           + sprites and every effect (ns.RAIN_FX switches)
+  RainCore.lua             loot rain, the pure part: ns.RainCore (physics, timing, spacing, coins; tools/test_rain.lua)
+  Rain.lua                 loot rain drawing: sprites and every effect (ns.RAIN_FX switches)
   LootFeed.lua             CHAT_MSG_LOOT -> item data -> burst collector (+ looted money) -> popup or rain
-  Settings.lua             first page (native) + helpers: ns.Native (native pages: Toggle, Slider, Choice, Button),
-                           ns.UI (custom controls incl. Dropdown), ns.SettingChanged (a command updates open pages)
+  Settings.lua             first page + helpers: ns.Native (plain pages on our own frames: Toggle, Slider, Choice, Button),
+                           ns.UI (custom controls incl. Dropdown)
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check
   RainFx.lua               "Loot rain" page (native): when, where, afterwards, effects by group, tests
   Pages.lua                "Sounds" page (native): popup sound picker
