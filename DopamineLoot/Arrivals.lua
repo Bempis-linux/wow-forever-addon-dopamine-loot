@@ -478,45 +478,54 @@ function A.supernova(view, x, y, s, r, g, b)
   end, 0.4)
 end
 
--- Rare: reverse disintegration: specks of light swirl in from all around onto the item, the low
--- parts first; the item fades in as a glowing scanline sweeps up it (a 3D model can't be cut by a
--- moving mask, so it fades in behind the line instead)
+-- How see-through the popup's item is (an arrival can fade it in): the model fades by itself (3D
+-- models don't follow their frame's alpha), the icon card with the stage
+local function ItemAlpha(view, a)
+  view.stage:SetAlpha(a)
+  if view.model and view.model.SetModelAlpha then view.model:SetModelAlpha(a) end
+end
+ns.ItemAlpha = ItemAlpha
+
+-- Rare: reverse disintegration: the item is built from the bottom up behind a fine scanline, and
+-- specks of light pour into that line from all around: each lands where the line is as it gets there
+local DIS_FROM, DIS_T, DIS_FLY = 0.2, 0.75, 0.42 -- the line sweeps up from DIS_FROM over DIS_T; a speck flies DIS_FLY
 function A.disint(view, x, y, s, r, g, b)
   local lr, lg, lb = Light(r, g, b)
+  ItemAlpha(view, 0)
   local stage = view.stage
-  stage:SetAlpha(0)
-  local W, H = stage:GetWidth() * 0.5, stage:GetHeight()
+  local W, H = stage:GetWidth() * 0.5, stage:GetHeight() * 0.9
   local specks = {}
-  for i = 1, 60 do
-    local fy = math.random() -- where on the item it lands: 0 bottom, 1 top
-    local an, d = math.random() * 6.28, Rnd(140, 300)
-    specks[i] = { tx = (math.random() - 0.5) * W, ty = (fy - 0.5) * H, an = an, d = d, sw = Rnd(-2, 2), delay = fy * 0.35 + Rnd(0, 0.15) }
+  for i = 1, 70 do
+    local fy = (i - 1) / 69 -- spread evenly up the item, so the line is fed all the way
+    local an = math.random() * 6.28
+    specks[i] = { tx = (math.random() - 0.5) * W * 0.5, ty = (fy - 0.5) * H, an = an, d = Rnd(120, 240),
+      sw = Rnd(-1.6, 1.6), land = DIS_FROM + fy * DIS_T + Rnd(-0.03, 0.03) }
   end
-  Effect(view, 1.4, function(e)
+  Effect(view, DIS_FROM + DIS_T + 0.45, function(e)
     local ox, oy, sc = Origin(e)
     for i, p in ipairs(specks) do
-      local u = math.min(1, math.max(0, (e.t - p.delay) / 0.5))
+      local u = (e.t - (p.land - DIS_FLY)) / DIS_FLY
       local t = T(e, i, front, MEDIA .. "Mote", "ADD")
       if u <= 0 or u >= 1 then t:SetAlpha(0) else
-        local k = 1 - (1 - (1 - u) ^ 3) -- distance left, spiralling as it closes in
+        local k = (1 - u) ^ 2 -- distance left: they speed up into the line, curving as they come
         local an = p.an + p.sw * k
-        local white = i % 5 == 0
-        Place(t, ox + (p.tx + math.cos(an) * p.d * k) * sc, oy + (p.ty + math.sin(an) * p.d * k) * sc, 5 * sc, 5 * sc,
-          math.min(1, u * 3), white and 1 or lr, white and 1 or lg, white and 1 or lb)
+        local white = i % 4 == 0
+        Place(t, ox + (p.tx + math.cos(an) * p.d * k) * sc, oy + (p.ty + math.sin(an) * p.d * k * 0.8) * sc, 4 * sc, 4 * sc,
+          math.min(1, u * 4) * (0.6 + 0.4 * u), white and 1 or lr, white and 1 or lg, white and 1 or lb)
       end
     end
-    local rev = math.min(1, math.max(0, (e.t - 0.25) / 0.7)) -- the item appears, bottom to top
-    if view.stage == stage then stage:SetAlpha(rev) end
-    local ly = oy + (rev - 0.5) * H * sc
+    local rev = math.min(1, math.max(0, (e.t - DIS_FROM) / DIS_T))
+    if view.stage == stage then ItemAlpha(view, rev) end
     local line = rev > 0 and rev < 1
-    Place(T(e, "l1", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 2.4 * sc, 6 * sc, line and 1 or 0, 1, 1, 1)
-    Place(T(e, "l2", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 2 * sc, 20 * sc, line and 0.7 or 0, lr, lg, lb)
-    if rev >= 1 and not e.done then
+    local ly = oy + (rev - 0.5) * H * sc
+    Place(T(e, "l1", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 1.3 * sc, 3 * sc, line and 1 or 0, 1, 1, 1)
+    Place(T(e, "l2", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 1.1 * sc, 10 * sc, line and 0.6 or 0, lr, lg, lb)
+    if rev >= 1 and not e.done then -- built: a glint or two and a soft ring
       e.done = true
-      Glints(ox, oy, 5, 70, sc)
-      Ring(view, lr, lg, lb, 120, 0.5)
+      Glints(ox, oy, 4, 50, sc)
+      Ring(view, lr, lg, lb, 110, 0.5)
     end
-    if e.t >= e.life then stage:SetAlpha(1) end
+    if e.t >= e.life then ItemAlpha(view, 1) end
   end)
 end
 
@@ -525,12 +534,12 @@ end
 function A.pool(view, x, y, s, r, g, b)
   local lr, lg, lb = Light(r, g, b)
   local stage = view.stage
-  stage:SetAlpha(0.2)
+  ItemAlpha(view, 0.2)
   Effect(view, 2.2, function(e)
     local ox, oy, sc = Origin(e)
     local py = oy - stage:GetHeight() * 0.5 * sc - 4 * sc -- the pool, at the item's foot
     local a = math.min(1, e.t / 0.2) * (1 - math.max(0, (e.t - 1.6) / 0.6))
-    if view.stage == stage then stage:SetAlpha(0.2 + 0.8 * math.min(1, e.t / 0.55)) end
+    if view.stage == stage then ItemAlpha(view, 0.2 + 0.8 * math.min(1, e.t / 0.55)) end
     Place(T(e, "p", back, MEDIA .. "Glow", "ADD"), ox, py, 240 * sc, 54 * sc, a * 0.9, lr, lg, lb)
     Place(T(e, "pw", back, MEDIA .. "Glow", "ADD", 1), ox, py, 90 * sc, 20 * sc, a * 0.8, 1, 1, 1)
     for k = 1, 3 do -- ripples spreading over it, one after another
@@ -541,7 +550,7 @@ function A.pool(view, x, y, s, r, g, b)
     local refl = T(e, "f", back, MEDIA .. "Pillar", "ADD", 2) -- the reflection: the pillar upside down
     refl:SetTexCoord(0, 1, 1, 0)
     Place(refl, ox + math.sin(e.t * 6) * 2 * sc, py, 30 * sc, 70 * sc, a * 0.45 * (0.8 + 0.2 * math.sin(e.t * 9)), lr, lg, lb, "TOP")
-    if e.t >= e.life then stage:SetAlpha(1) end
+    if e.t >= e.life then ItemAlpha(view, 1) end
   end)
   Burst(x, y - stage:GetHeight() * 0.5 * s, 22, 420, s, lr, lg, lb, { up = true, fan = 0.5, grav = 700, drag = 0.8, life = 1.3,
     colors = { { 1, 1, 1 }, { lr, lg, lb } } })

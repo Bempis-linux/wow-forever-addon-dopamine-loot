@@ -150,7 +150,7 @@ function ns.CreateView(f)
   f.splashBand2 = Tex(f, "BORDER", MEDIA .. "SplashBand", nil, 2) -- (solid, not additive: over the main band it must not blow out to white)
   f.splashEdge = Tex(f, "BORDER", MEDIA .. "SplashEdge", "ADD", 3)
   f.splashTrim = Tex(f, "BORDER", MEDIA .. "SplashEdge", "ADD", 4)
-  f.tabBack = Tex(f, "BORDER", WHITE, nil, 5)
+  f.tabBack = Tex(f, "BORDER", MEDIA .. "Glow", nil, 5) -- (a soft dark shadow under the info, no box)
   -- Aura: a breathing glow and soft wisps of light rising behind the item
   f.auraGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.wisps = {}
@@ -159,11 +159,12 @@ function ns.CreateView(f)
   f.medalGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.medalDisc = Tex(f, "BORDER", MEDIA .. "Disc", nil, 1)
   f.medalRing = Tex(f, "BORDER", MEDIA .. "Wave", "ADD", 2)
-  f.achPlate = Tex(f, "BORDER", WHITE, nil, 0)
+  f.achPlate = Tex(f, "BORDER", MEDIA .. "Glow", nil, 0) -- (a soft dark shadow behind the text, no box)
+  f.achLine = Tex(f, "BORDER", WHITE, nil, 2)
   f.art = { f.glow, f.cone, f.bar, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
     f.shadow, f.emblem, f.emblemEdge, f.plateL, f.plateR, f.underL, f.underR,
     f.splashBand, f.splashBand2, f.splashEdge, f.splashTrim, f.tabBack, f.auraGlow,
-    f.medalGlow, f.medalDisc, f.medalRing, f.achPlate }
+    f.medalGlow, f.medalDisc, f.medalRing, f.achPlate, f.achLine }
   for _, t in ipairs(f.wisps) do f.art[#f.art + 1] = t end
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
@@ -310,9 +311,8 @@ function ns.CreateView(f)
       self.name:SetJustifyH("CENTER")
       self.info:SetPoint("TOP", self.name, "BOTTOM", 0, -12)
       self.info:SetJustifyH("CENTER")
-      self.tabBack:SetPoint("TOPLEFT", self.info, "TOPLEFT", -12, 4)
-      self.tabBack:SetPoint("BOTTOMRIGHT", self.info, "BOTTOMRIGHT", 12, -4)
-      self.tabBack:SetVertexColor(0, 0, 0, 0.7)
+      self.tabBack:SetPoint("CENTER", self.info, "CENTER", 0, 0)
+      self.tabBack:SetVertexColor(0, 0, 0, 0.8)
       self.tabBack:Show()
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -8)
       self.badges:SetJustifyH("CENTER")
@@ -343,15 +343,14 @@ function ns.CreateView(f)
       self.medalDisc:SetPoint("CENTER", self.stage, "CENTER")
       self.medalRing:SetSize(122, 122)
       self.medalRing:SetPoint("CENTER", self.stage, "CENTER")
-      self.achPlate:SetSize(240, 70)
+      -- the text sits on a soft dark shadow (no box), a thin line in the item's color above it
+      self.achPlate:SetSize(330, 120)
       self.achPlate:SetPoint("LEFT", self.stage, "CENTER", 30, 0)
-      if self.achPlate.SetGradient and CreateColor then
-        self.achPlate:SetGradient("HORIZONTAL", CreateColor(0.09, 0.07, 0.04, 0.95), CreateColor(0.09, 0.07, 0.04, 0))
-      else
-        self.achPlate:SetVertexColor(0.09, 0.07, 0.04, 0.8)
-      end
-      for _, t in ipairs({ self.medalGlow, self.medalDisc, self.medalRing, self.achPlate }) do t:Show() end
-      self.tag:SetPoint("TOPLEFT", self.achPlate, "TOPLEFT", 36, -8)
+      self.achPlate:SetVertexColor(0, 0, 0, 0.85)
+      self.achLine:SetSize(220, 1.5)
+      self.achLine:SetPoint("BOTTOMLEFT", self.tag, "TOPLEFT", -6, 4)
+      for _, t in ipairs({ self.medalGlow, self.medalDisc, self.medalRing, self.achPlate, self.achLine }) do t:Show() end
+      self.tag:SetPoint("TOPLEFT", self.stage, "CENTER", 66, 28)
       self.name:SetPoint("TOPLEFT", self.tag, "BOTTOMLEFT", 0, -2)
       self.name:SetWidth(200)
       self.name:SetJustifyH("LEFT")
@@ -440,6 +439,11 @@ function ns.CreateView(f)
     self.medalGlow:SetVertexColor(r, g, b, 0.7)
     self.medalDisc:SetVertexColor(0.08, 0.06, 0.03, 0.95)
     self.medalRing:SetVertexColor(r, g, b, 1)
+    if self.achLine.SetGradient and CreateColor then -- the line above the name, fading out to the right
+      self.achLine:SetGradient("HORIZONTAL", CreateColor(r, g, b, 0.9), CreateColor(r, g, b, 0))
+    else
+      self.achLine:SetVertexColor(r, g, b, 0.6)
+    end
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
@@ -534,6 +538,7 @@ function ns.CreateView(f)
     -- Splash: the info tab only when there's info; the stamp's width at its normal size (it's
     -- scaled up by hand as it slams in)
     self.tabBack:SetShown(self.style == "splash" and (self.info:GetText() or "") ~= "")
+    self.tabBack:SetSize(self.info:GetStringWidth() + 90, 36)
     if self.stamp.SetTextScale then self.stamp:SetTextScale(1) else self.stamp:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE") end
     self.stampW = self.stamp:GetStringWidth()
     self.splashDone, self.wispT = nil, 0
@@ -544,7 +549,7 @@ function ns.CreateView(f)
       for k, t0 in ipairs(self.shineTimes) do self.shineTimes[k] = t0 + wait end
     end
     self.arrivalGen = (self.arrivalGen or 0) + 1 -- (an arrival still running from the last item stops)
-    self.stage:SetAlpha(1) -- (an arrival may fade the item in; one cut short must not leave it faded)
+    if ns.ItemAlpha then ns.ItemAlpha(self, 1) else self.stage:SetAlpha(1) end -- (an arrival may fade the item in; one cut short must not leave it faded)
     self.age = 0
     self.cardW = self.L.icon and self.L.stage[3] or CARD
     -- weapons stood upright show their edge at facing 0: a quarter turn shows the flat side
