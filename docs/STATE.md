@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-05, **stop point after 1.0.1** (released, live on CurseForge, the game on release; tree clean). Read this first
+_Last checkpoint: 2026-11-06, **flair pass in progress** (1.1.0 unreleased, all pushed, the game on dev; popup redesign mockup round 6 waiting on the user). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -40,20 +40,28 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      (b) drag-to-move popups, the NEW badge (seen set), the bag sparkle on new items; (c) a **flair pass
      on the rain and popups** (mockups first): the Legendary moment plus new ideas for visual flair,
      explosiveness, cleaner visual design and sound, so it's a marvel every time and never gets tiring.
-  2b. **Flair pass picked 2026-11-06** (docs/mockups/flair.html): all 12 ideas kept, tuned once in game.
-     Status 2026-11-06: rain step built and iterated (half-circle shockwaves, slam boom, sounds picked by ear
-     in docs/mockups/sounds.html round 5: thud + light pff, Rare/Epic touches, pouch + coin; rate cap;
-     rainChord switch off); popup step built (impact, name shine, plate/underline, Legendary moment);
-     both pushed, untested in game together. Next: the user tests both; then step 3 (popup layered hits).
-     Built in
-     3 steps: rain ideas (code), popup ideas, new sounds (OGG, full restart). Sounds: our own OGGs done better,
-     mixable with game kits per layer on the Sounds page. Settings: few new switches (Wind-up, Hang time,
-     Rarity landings in the rain groups; Calm when repeated under When; Legendary moment on Popups); impact
-     pop, name shine, cleaner design, juicier gather, musical ticks, variation become the look. The game
-     cannot change pitch or volume: notes and variants are separate files; calm = fewer, shorter sounds.
+  2b. **Flair pass 2026-11-06** (1.1.0, unreleased, on dev, all pushed). **Built and liked in game:** rain
+     wind-up, hang + slam **by rarity** (no hang for gray/white; comet trail from Rare; pull accelerates
+     smoothly), half-circle shockwaves, landings by rarity, slower gather, springier squash, calm repeats,
+     **money tally** above the bag (counts on arrival, pops, shimmer/glow/sparks flourish); sounds picked by
+     ear (docs/mockups/sounds.html round 5: thud + light pff with Rare/Epic touches, pouch + coin; rate cap;
+     rainChord switch off); split filters ("Show popups for" vs "Rain includes", default everything);
+     **Always rain for** (off); test rain's best rarity (testRainBest) and tests replace a running rain;
+     Item size slider (%); settings text pass. Popups in game: impact pop, name shine, plate/underline,
+     Legendary moment (dim + **comet**), model room for long weapons.
+     **Popup redesign in progress** (docs/mockups/popup-designs.html, round 6): arrivals become a **choice
+     per rarity** in the settings. Keepers: Green **Fireflies, Emerald flare** (Geyser only if much better:
+     v3 in round 6); Blue **Sapphire flare** (+ ring wave), Aurora liked but not horizontal (vertical in
+     round 6); Purple **Implosion-scatter-galaxy** and **Eclipse** (Void rift not it; Starfall in round 6);
+     Legendary: the comet, then **Supernova** (Sun crown v2 in round 6). Letter stamp for Epic+.
+     **Styles: not settled** ("none stand out as a final product"); round 6 tries styles that level up with
+     rarity (Showcase, Winged crest, Splash). Rejected: Sigil, Shrine, Portal, Breakout, Glass, Ornate,
+     the round-4 Achievement polish; lightning, ice shards, rays, crossing beams, starburst, orbit, geyser jump.
+     Next: the user picks from round 6, then build the arrivals (and the style) in game.
+     Not yet: step 3 popup layered hit sounds.
   3. **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip.
      The other "after 1.0" items (inspector, filters beyond the NEW badge, stats) are pushed back.
-  1.1.0 (unreleased): the code cleanup, then flair step 1 (rain: wind-up, hang, landings, bag, calm) pushed for testing.
+  1.1.0 (unreleased, CHANGELOG has the full list): not released yet; release when the popup redesign is in.
   A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK
   (kit skill `wow-addon-release`, steps 5-6).
 
@@ -84,7 +92,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   guard enforces it; never `--no-verify` unless the user says so.
 - **Only `/dl`, everything on the settings pages** (replaces the kit's command/page parity).
   **Settings pages stay tidy**: design each change (section, label, order) before adding it.
-- **Mockups before visual changes** (`docs/mockups/rain.html` for motion). **No bulk scripted tests in the
+- **Mockups before visual changes** (`docs/mockups/rain.html` for motion; popups: popup-designs.html). The user wants bold, dramatic arrivals ("you've been playing it a little safe"), never janky; no radial light rays. **No bulk scripted tests in the
   browser pane without asking** (one froze the user's PC); mute sound, one scene.
 - **The loot rain is the favorite part**; it may be busy. Popups stay calm: no new looping popup
   animations without asking.
@@ -117,6 +125,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 - Are the settings fields filled after /reload?
 
 ## Recent history (newest first; details in plan.md and git log)
+- 2026-11-06: flair pass (1.1.0, unreleased): rain flair + sounds picked by ear + money tally + split filters + always-rain; popup redesign mockups rounds 1-6.
 - 2026-11-05 1.0.1: settings pages rebuilt on our own frames (fixes taint of nameplates and settings); first automatic CurseForge upload.
 - 2026-11-05: safety audit, CurseForge project + listing + API key, repo rulesets, dev/release switch.
 - 2026-11-04 1.0.0 released: 3D armor dropped, dev tools out, only /dl, rain looks, packaging, README,
