@@ -24,10 +24,16 @@ local FADE_T, SQUASH_T, SETTLE_HOLD = 0.6, 0.09, 0.7
 local GHOSTS, GHOST_EVERY, DUST = 6, 0.035, 7
 local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
 local GATHER_T, JOIN_T, FLASH_T = 0.45, 0.32, 0.4
+local WIND_T, HANG_T, SLAM_VY = 0.38, 0.45, 1500 -- wind-up before the burst; the best's hang; its drop speed
+local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, one step each
 
 -- The effects, each a switch (setting "noRain" .. key; all on by default)
 ns.RAIN_FX = {
   { key = "Best", label = "Best item last", tip = "The best item waits a beat, flies higher and lands in the middle, then becomes its popup." },
+  { key = "Windup", label = "Wind-up and burst", tip = "A glow swells where the loot comes out, then it bursts with a ring in the color of the best item." },
+  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs at the top with a glint, then slams down with a ripple, sparks and a shake." },
+  { key = "Landings", label = "Landings by rarity", tip = "Rare and better items land with a ring and sparks in their color; grays and whites land quietly." },
+  { key = "Calm", label = "Calm when repeated", tip = "Rains with nothing Rare or better, a few within two minutes, get quicker and use fewer sounds. Anything Rare or better always gets the full show." },
   { key = "Escalate", label = "Escalation", tip = "Launches start slow and speed up; each landing tick is a little higher in pitch." },
   { key = "Pulse", label = "Epic edge glow", tip = "The edges of the screen glow in the item's color when an Epic or better lands." },
   { key = "Spacing", label = "Spacing", tip = "Resting items spread out side by side instead of piling up." },
@@ -38,7 +44,7 @@ ns.RAIN_FX = {
   { key = "Merge", label = "Coins merge up", tip = "Gold arrives as a pile of silver (silver as copper) that joins up into it once it lands; the change stays as it is." },
   { key = "Shadows", label = "Floor shadows", tip = "A soft shadow under each item, smaller the higher it flies." },
   { key = "Beam", label = "Loot beam", tip = "A pillar of light over resting Rare and better items, taller for the best one." },
-  { key = "Hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands." },
+  { key = "Hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands (with Hang time on, its slam does this)." },
   { key = "Names", label = "Name labels", tip = "Rare and better items show their name while they rest." },
   { key = "Escape", label = "Skip with Escape", tip = "Escape ends the rain at once; the good items still become popups." },
   { key = "Twinkle", label = "Coins twinkle", tip = "Resting gold coins glint now and then; silver too, less often." },
@@ -95,6 +101,9 @@ local function Layer()
   layer.bagGlow:SetVertexColor(1, 0.85, 0.4)
   layer.bagGlow:Hide()
   layer.flashTex = {} -- merge flashes, made as needed
+  -- the wind-up (setting Windup): a glow swelling where the loot comes out, a short column of light
+  layer.windGlow = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
+  layer.windCol = Tex(layer, "BORDER", MEDIA .. "Pillar", "ADD")
   -- the ground line (setting Ground), behind the sprites: a soft glow, the line, a sliding shimmer
   layer.groundGlow = Tex(layer, "BACKGROUND", MEDIA .. "Glow", "ADD")
   layer.groundLine = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
@@ -163,6 +172,80 @@ local function Release(s)
   pool[#pool + 1] = s
 end
 
+-- Sparks and rings (the burst, landings by rarity, the slam, the bag): pooled textures that live
+-- a moment. Positions in the layer's coordinates (from its bottom left, y up); speeds per second.
+local sparkPool, ringPool, live = {}, {}, {}
+local function Light(r, g, b) return math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, b + 0.3) end
+-- n sparks from x, y; o.up throws them upward in a fan; o.grav, o.drag, o.size, o.life adjust them
+local function Spark(x, y, r, g, b, n, speed, o)
+  o = o or {}
+  for _ = 1, n do
+    local t = table.remove(sparkPool) or Tex(top, "ARTWORK", MEDIA .. "Mote", "ADD")
+    t:SetVertexColor(r, g, b, 1)
+    local ang = o.up and (math.pi / 2 + (math.random() - 0.5) * 2.2) or math.random() * 2 * math.pi
+    local sp = (0.4 + 0.6 * math.random()) * speed
+    live[#live + 1] = { t = t, spark = true, x = x, y = y, vx = math.cos(ang) * sp, vy = math.sin(ang) * sp, age = 0,
+      life = (0.35 + math.random() * 0.35) * (o.life or 1), size = (o.size or 6) * (0.7 + math.random() * 0.6),
+      grav = o.grav or 500, drag = o.drag or 3 }
+  end
+end
+-- a ring that ripples out to radius; o.flat squashes it (0.3: lying on the ground, 1: round)
+local function Ring(x, y, r, g, b, radius, o)
+  o = o or {}
+  local t = table.remove(ringPool) or Tex(layer, "BORDER", MEDIA .. "Wave", "ADD")
+  t:SetVertexColor(r, g, b, 1)
+  live[#live + 1] = { t = t, x = x, y = y, radius = radius, age = -(o.delay or 0), life = o.life or 0.45, flat = o.flat or 0.3 }
+end
+local function UpdateLive(dt)
+  for i = #live, 1, -1 do
+    local p = live[i]
+    p.age = p.age + dt
+    if p.age >= p.life then
+      p.t:Hide()
+      table.remove(live, i)
+      local into = p.spark and sparkPool or ringPool
+      into[#into + 1] = p.t
+    elseif p.age >= 0 then
+      local u = p.age / p.life
+      if p.spark then
+        local d = math.exp(-p.drag * dt)
+        p.vx, p.vy = p.vx * d, p.vy * d - p.grav * dt
+        p.x, p.y = p.x + p.vx * dt, p.y + p.vy * dt
+        p.t:SetSize(p.size, p.size)
+        p.t:SetAlpha(1 - u)
+      else
+        local rad = 8 + (p.radius - 8) * (1 - (1 - u) ^ 3) -- fast, then slowing
+        p.t:SetSize(rad * 2, rad * 2 * p.flat)
+        p.t:SetAlpha((1 - u) * 0.9)
+      end
+      p.t:ClearAllPoints()
+      p.t:SetPoint("CENTER", layer, "BOTTOMLEFT", p.x, p.y)
+      p.t:Show()
+    end
+  end
+end
+local function ClearLive()
+  for i = #live, 1, -1 do
+    local p = live[i]
+    p.t:Hide()
+    local into = p.spark and sparkPool or ringPool
+    into[#into + 1] = p.t
+    live[i] = nil
+  end
+end
+
+-- Calm when repeated: how many rains with nothing Rare+ (and under 1g) came in the last two
+-- minutes, 0-3; this one counts toward the next
+local junkTimes = {}
+local function CalmLevel(bestQ, copper)
+  local now = GetTime()
+  for i = #junkTimes, 1, -1 do if now - junkTimes[i] > CALM_WINDOW then table.remove(junkTimes, i) end end
+  if bestQ >= 3 or copper >= 10000 then return 0 end
+  local level = On("Calm") and math.min(3, #junkTimes) or 0
+  junkTimes[#junkTimes + 1] = now
+  return level
+end
+
 local function Tick(quality)
   local now = GetTime()
   if now - lastTick < 0.07 then return end -- many bounces at once would be a buzz
@@ -195,7 +278,10 @@ local function Finish()
   for _, s in ipairs(sprites) do Release(s) end
   wipe(sprites)
   for _, d in ipairs(dust) do d:Hide() end
+  ClearLive()
   if layer then
+    layer.windGlow:Hide()
+    layer.windCol:Hide()
     layer.count:SetAlpha(0)
     layer.money:SetAlpha(0)
     layer.pulse:Hide()
@@ -253,6 +339,8 @@ local function Launch(st, item, isBest, W, H, k)
   s.tx, s.leaving, s.leaveAt, s.handed, s.inBag, s.alpha, s.shrink = nil, nil, nil, nil, nil, 1, 1
   s.restAge, s.trailT, s.trail = 0, 0, {}
   s.joining, s.mx, s.my, s.delay = nil, nil, nil, nil
+  -- the best hangs at the top of its flight, then slams down (setting Hang)
+  s.hangPending, s.hang, s.slam, s.glintAt = isBest and not item.coin and On("Hang") or nil, nil, nil, nil
   local r, g, b = ns.QualityColor(s.q)
   s.r, s.g, s.b = r, g, b
   s.f.edge:SetVertexColor(0, 0, 0, 1)
@@ -297,13 +385,15 @@ local function Launch(st, item, isBest, W, H, k)
   -- on landing; a coin made by a merge has its chime)
   if not isBest and not item.merged then
     if s.coin then st.coinsOut = st.coinsOut + 1 else st.itemsOut = st.itemsOut + 1 end
-    ns:PlayLaunchSound(s.coin, s.coin and st.coinsOut or st.itemsOut)
+    local n = s.coin and st.coinsOut or st.itemsOut
+    -- calmer repeats (setting Calm): from the second step only every other launch makes a sound
+    if st.calm < 2 or n % 2 == 1 then ns:PlayLaunchSound(s.coin, n) end
   end
   return s
 end
 
-local function Puff(x, y)
-  for _ = 1, DUST do
+local function Puff(x, y, n)
+  for _ = 1, n or DUST do
     local d
     for _, c in ipairs(dust) do if not c:IsShown() then d = c; break end end
     if not d then
@@ -325,12 +415,31 @@ local function OnLand(st, s)
     return
   end
   st.landed = st.landed + 1
-  if s.best and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end
+  if s.slam then st.shake = SHAKE_T * 1.4 -- the hang was its slow motion; the slam shakes harder
+  elseif s.best and On("Hitstop") then st.stopT, st.shake = STOP_T, SHAKE_T end
   if s.q >= 3 then Tick(s.q)
   elseif s.dull then ns:PlayStepTick(1) -- the lowest tick, never climbing
-  elseif On("Escalate") then ns:PlayStepTick(st.landed)
-  else Tick(0) end
-  if On("Dust") then Puff(s.x, bounds.floor) end
+  elseif not (st.calm >= 2 and st.landed % 2 == 0) then -- calmer repeats: every other tick
+    if On("Escalate") then ns:PlayStepTick(st.landed) else Tick(0) end
+  end
+  local x, y, k = s.x, bounds.floor, bounds.k
+  local r, g, b = Light(s.r, s.g, s.b)
+  if s.slam then -- a ripple, a white flash ring and a fountain of sparks
+    Ring(x, y, r, g, b, 170 * k, { life = 0.6 })
+    Ring(x, y, 1, 1, 1, 100 * k, { life = 0.35 })
+    Spark(x, y, r, g, b, 22, 520 * k, { up = true, grav = 900 * k, size = 7 })
+    if On("Dust") then Puff(x, y) end
+  elseif On("Landings") then -- by rarity: Rare+ a ring and sparks, the rest a little dust or none
+    if s.q >= 3 then
+      Ring(x, y, r, g, b, (50 + 16 * (s.q - 3)) * k)
+      Spark(x, y, r, g, b, 5 + 4 * (s.q - 3), 300 * k, { up = true, grav = 800 * k })
+      if On("Dust") then Puff(x, y, 4) end
+    elseif On("Dust") then
+      Puff(x, y, s.q == 2 and 4 or 2)
+    end
+  elseif On("Dust") then
+    Puff(x, y)
+  end
   if On("Pulse") and s.q >= 4 then
     st.pulseAge = 0
     layer.pulse:SetVertexColor(s.r, s.g, s.b, 1)
@@ -372,7 +481,7 @@ local function Settle(st)
     if not s.coin and Core.Stays(s.item, st.stayQuality) then
       s.leaving, s.leaveAt, pd = "popup", st.age + pd, pd + 0.15
     elseif On("Gather") then
-      s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + 0.045
+      s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.06, 1.6 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
       s.sx, s.sy = s.x, s.y
     else
       s.leaving, s.leaveAt = "fade", st.age + 0.35
@@ -405,11 +514,40 @@ local function Update(_, dt)
   bounds.left, bounds.right, bounds.k = SIZE, W - SIZE, k
   bounds.floor = 2 + H * (ns.settings.rainFloor or 0) / 100
 
-  -- the sprites launch on schedule (the best a beat after the rest)
+  -- the wind-up (setting Windup): a glow swells where the loot comes out, then it bursts
+  if st.wind and not st.burst then
+    local from = ns.settings.rainFrom or "ground"
+    local x = W / 2
+    local y = from == "below" and 12 * k or from == "middle" and math.max(H * 0.38, bounds.floor + H * 0.13) or bounds.floor
+    local r, g, b = Light(ns.QualityColor(st.bestQ))
+    if st.age >= WIND_T then
+      st.burst = true
+      layer.windGlow:Hide()
+      layer.windCol:Hide()
+      Ring(x, y, r, g, b, 130 * k, { life = 0.5 })
+      Spark(x, y, r, g, b, 14, 420 * k, { up = true, grav = 700 * k, size = 7 })
+      if st.openSize == "big" then ns:PlayBurstSound() elseif st.openSize == "medium" then ns:PlayChestPop() end
+    else
+      local u = st.age / WIND_T
+      for _, t in ipairs({ layer.windGlow, layer.windCol }) do t:SetVertexColor(r, g, b, 1) end
+      layer.windGlow:SetSize((40 + 140 * u) * k, (14 + 50 * u) * k)
+      layer.windGlow:ClearAllPoints()
+      layer.windGlow:SetPoint("CENTER", layer, "BOTTOMLEFT", x, y)
+      layer.windGlow:SetAlpha(0.85 * u)
+      layer.windGlow:Show()
+      layer.windCol:SetSize(16, 90 * k * u)
+      layer.windCol:ClearAllPoints()
+      layer.windCol:SetPoint("BOTTOM", layer, "BOTTOMLEFT", x, y)
+      layer.windCol:SetAlpha(0.6 * u)
+      layer.windCol:Show()
+    end
+  end
+
+  -- the sprites launch on schedule (the best a beat after the rest); calmer repeats go quicker
   while st.queue[1] and st.age >= st.nextLaunch do
     Launch(st, table.remove(st.queue, 1), false, W, H, k)
     st.launched = st.launched + 1
-    st.nextLaunch = st.nextLaunch + Core.Interval(st.launched, st.total, On("Escalate"))
+    st.nextLaunch = st.nextLaunch + Core.Interval(st.launched, st.total, On("Escalate")) * (1 - 0.15 * st.calm)
     if not st.queue[1] then st.lastLaunch = st.age end
   end
   if st.best and not st.queue[1] then
@@ -456,13 +594,24 @@ local function Update(_, dt)
   local taken
   for _, s in ipairs(sprites) do
     if not s.leaving and not s.joining then
-      if Core.Advance(s, dt, bounds) then
+      -- the best's hang: time nearly stops for it at the top, then it drops fast and low-bouncing
+      local sdt = dt
+      if s.hang then
+        s.hang, sdt = s.hang - dt, dt * 0.1
+        if s.hang <= 0 then s.hang, s.vy, s.e, s.slam = nil, -SLAM_VY * k, 0.18, true end
+      end
+      if Core.Advance(s, sdt, bounds) then
         s.squash = SQUASH_T
         if s.bounces == 1 then OnLand(st, s) elseif s.bounces == 2 and not s.coin then Tick(0) end
       end
+      if s.hangPending and s.vy <= 0 and not s.resting then -- just past the top of its flight
+        s.hangPending, s.hang, s.glintAt = nil, HANG_T, st.age
+        local r, g, b = Light(s.r, s.g, s.b)
+        Spark(s.x, s.y + s.size / 2, r, g, b, 8, 120 * k, { grav = 0, drag = 2, life = 1.2 })
+      end
       if not s.resting then
         allResting = false
-        s.rot = s.rot + s.spin * dt
+        s.rot = s.rot + s.spin * sdt
       else
         s.rot = s.rot * (1 - math.min(1, dt * 10)) -- settle upright
         s.restAge = s.restAge + dt
@@ -513,7 +662,7 @@ local function Update(_, dt)
   -- settle once everything rests (or it's been going long enough), after a moment to look
   if st.lastLaunch and not st.settleAt and (allResting or (not merging and st.age > st.lastLaunch + 4.5)) then
     st.hold = st.hold + dt
-    if st.hold >= SETTLE_HOLD then
+    if st.hold >= SETTLE_HOLD * (1 - 0.25 * st.calm) then
       if st.merges[1] and not st.mergeStarted then StartMerge(st) else Settle(st) end
     end
   end
@@ -547,6 +696,10 @@ local function Update(_, dt)
           if u >= 1 and not s.inBag then
             s.inBag = true
             st.gathered, st.bagBump = st.gathered + 1, 1
+            -- the bag takes it in: a small ring and a few sparks in its color
+            local r, g, b = Light(s.r, s.g, s.b)
+            Ring(bx, by, r, g, b, 34 * k, { flat = 1, life = 0.3 })
+            Spark(bx, by, r, g, b, 3, 140 * k, { up = true, grav = 400 * k })
             if On("Escalate") then ns:PlayStepTick(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
           end
           if not s.inBag then busy = true end
@@ -579,7 +732,16 @@ local function Update(_, dt)
       f.border:SetRotation(s.rot)
       f.glow:SetRotation(s.rot)
       local tw = s.twAt and not s.leaving and not s.joining and (s.restAge - s.twAt) / TWINKLE_T
-      if tw and tw < 1 then -- the glint swells and fades, turning a little
+      local gl = s.glintAt and (st.age - s.glintAt) / 0.5
+      if gl and gl < 1 then -- the best's glint at the top of its hang
+        local gs = s.size * 2.6 * math.sin(math.pi * gl)
+        f.star:SetSize(gs, gs)
+        f.star:SetRotation(gl * 0.8)
+        f.star:SetVertexColor(1, 1, 1, 1)
+        f.star:ClearAllPoints()
+        f.star:SetPoint("CENTER", f, "CENTER", 0, 0)
+        f.star:Show()
+      elseif tw and tw < 1 then -- the glint swells and fades, turning a little
         local gs = s.size * (s.coin == "gold" and 0.8 or 0.55) * math.sin(math.pi * tw) * 2.2 -- star4 has room around the star
         f.star:SetSize(gs, gs)
         f.star:SetRotation(tw * 0.6)
@@ -685,6 +847,8 @@ local function Update(_, dt)
     layer.groundShine:Hide()
   end
 
+  UpdateLive(dt)
+
   -- the edge glow, the bag's flash, the counter and the money total
   if st.pulseAge then
     st.pulseAge = st.pulseAge + dt
@@ -720,7 +884,7 @@ local function Update(_, dt)
   if st.bagBump > 0 then
     if not bx then bx, by = BagPoint() end
     st.bagBump = math.max(0, st.bagBump - dt * 4)
-    layer.bagGlow:SetSize(70 + 30 * st.bagBump, 70 + 30 * st.bagBump)
+    layer.bagGlow:SetSize(70 + 50 * st.bagBump, 70 + 50 * st.bagBump)
     layer.bagGlow:ClearAllPoints()
     layer.bagGlow:SetPoint("CENTER", layer, "BOTTOMLEFT", bx, by)
     layer.bagGlow:SetAlpha(st.bagBump)
@@ -747,10 +911,12 @@ end
 
 -- items: list of item data (ns.ItemData); copper: money looted with them (optional).
 -- Plays the rain; Rare+ (setting) end as popups.
-function ns:Rain(items, copper)
+function ns:Rain(items, copper, test)
   copper = copper or 0
   RefreshFx()
   local carried, baseCopper = 0, 0
+  -- a new burst while one is still in the air joins it: same calm, no second wind-up
+  local merging, mergedCalm = state and not state.settleAt, state and state.calm or 0
   if state then
     if not state.settleAt then
       -- a new burst while one is still in the air: everything not yet handed off joins the new one,
@@ -793,6 +959,9 @@ function ns:Rain(items, copper)
   local queue = Core.Mix(list, plan)
   local bestQ = 0
   for _, it in ipairs(all) do bestQ = math.max(bestQ, it.quality or 0) end
+  -- test rains (the settings' Test buttons) neither count toward the calm nor get calmed
+  local calm = merging and mergedCalm or test and 0 or CalmLevel(bestQ, copper)
+  local wind = On("Windup") and calm == 0 and not merging
   state = {
     age = 0, nextLaunch = 0, queue = queue, launched = 0, total = #queue, best = best, extra = extra,
     all = all, handedOff = {}, stayQuality = ns.settings.stayQuality or 3,
@@ -800,14 +969,21 @@ function ns:Rain(items, copper)
     baseCopper = On("Coins") and baseCopper or 0,
     hold = 0, fadeOut = 0, gathered = 0, bagBump = 0, stopT = 0, shake = 0,
     merges = merges, mergesDone = 0, flashes = {}, coinsOut = 0, itemsOut = 0, bestQ = bestQ,
+    calm = calm, wind = wind, burst = false,
   }
+  if wind then state.nextLaunch = WIND_T end -- the loot comes out with the burst
   layer.count:SetText("")
   layer.money:SetText("")
   layer.money:SetAlpha(1)
   if On("Escape") then escFrame:Show() end
-  -- the burst's sound, as big as the haul (setting openSound)
+  -- the burst's sound, as big as the haul (setting openSound); with the wind-up it plays at the
+  -- burst; calmer repeats skip it
   local open = ns.settings.openSound or "size"
   local size = open == "always" and "big" or open == "never" and "small" or Core.HaulSize(all, copper)
-  if size == "big" then ns:PlayBurstSound() elseif size == "medium" then ns:PlayChestPop() end
+  if calm > 0 then size = "small" end
+  state.openSize = size
+  if not wind then
+    if size == "big" then ns:PlayBurstSound() elseif size == "medium" then ns:PlayChestPop() end
+  end
   driver:SetScript("OnUpdate", Update)
 end

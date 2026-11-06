@@ -268,7 +268,7 @@ ns.AddAction("rain", function(arg)
   local function Go()
     if started then return end
     started = true
-    if #items > 0 then ns:Rain(items, n * math.random(150, 1800)) end -- some test money too
+    if #items > 0 then ns:Rain(items, n * math.random(150, 1800), true) end -- some test money too
   end
   for _, it in ipairs(picks) do
     ns.ItemData(it, 1, "loot", function(d)
@@ -294,7 +294,7 @@ ns.MoneyName = MoneyName
 
 ns.AddAction("testcoins", function(arg)
   if ns.settings.noRainCoins then return end -- coins are switched off (Loot rain page)
-  ns:Rain({}, ns.RainCore.ParseMoney(arg) or 23500)
+  ns:Rain({}, ns.RainCore.ParseMoney(arg) or 23500, true)
 end)
 
 -- A quest reward: one of your green or blue items and some money, rained together
@@ -302,7 +302,7 @@ ns.AddAction("testquest", function()
   local pick = OwnItems(3) or OwnItems(2) or TEST_IDS[3][math.random(#TEST_IDS[3])]
   ns.ItemData(pick, 1, "received", function(d)
     d.test = true
-    ns:Rain({ d }, math.random(3, 25) * 1000)
+    ns:Rain({ d }, math.random(3, 25) * 1000, true)
   end)
 end)
 

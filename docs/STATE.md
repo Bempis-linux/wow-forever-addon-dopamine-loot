@@ -40,9 +40,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      (b) drag-to-move popups, the NEW badge (seen set), the bag sparkle on new items; (c) a **flair pass
      on the rain and popups** (mockups first): the Legendary moment plus new ideas for visual flair,
      explosiveness, cleaner visual design and sound, so it's a marvel every time and never gets tiring.
+  2b. **Flair pass picked 2026-11-06** (docs/mockups/flair.html): all 12 ideas kept, tuned once in game. Built in
+     3 steps: rain ideas (code), popup ideas, new sounds (OGG, full restart). Sounds: our own OGGs done better,
+     mixable with game kits per layer on the Sounds page. Settings: few new switches (Wind-up, Hang time,
+     Rarity landings in the rain groups; Calm when repeated under When; Legendary moment on Popups); impact
+     pop, name shine, cleaner design, juicier gather, musical ticks, variation become the look. The game
+     cannot change pitch or volume: notes and variants are separate files; calm = fewer, shorter sounds.
   3. **Shelved by the user 2026-11-06:** hooks (streak, tally, records), the streak jackpot, card flip.
      The other "after 1.0" items (inspector, filters beyond the NEW badge, stats) are pushed back.
-  1.0.2 (unreleased) holds only the code cleanup (dead functions, RainCore.lua split, checkout@v5).
+  1.1.0 (unreleased): the code cleanup, then flair step 1 (rain: wind-up, hang, landings, bag, calm) pushed for testing.
   A release: bump `## Version`, CHANGELOG section, preflight, push, tag `v<version>` with the user's OK
   (kit skill `wow-addon-release`, steps 5-6).
 

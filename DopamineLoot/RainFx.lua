@@ -7,8 +7,8 @@ local sub
 
 -- The effect switches by group (keys from ns.RAIN_FX); Gather and Escape are under "Afterwards"
 local GROUPS = {
-  { "Effects: motion", { "Best", "Escalate", "Hitstop", "Spacing" } },
-  { "Effects: light", { "Beam", "Trails", "Shadows", "Ground", "Dust", "Pulse", "Names", "Poor" } },
+  { "Effects: motion", { "Best", "Windup", "Hang", "Escalate", "Hitstop", "Spacing" } },
+  { "Effects: light", { "Beam", "Landings", "Trails", "Shadows", "Ground", "Dust", "Pulse", "Names", "Poor" } },
   { "Effects: money", { "Coins", "Merge", "Twinkle" } },
 }
 
@@ -44,6 +44,7 @@ local function Create()
     if not listed then list[#list + 1] = { cur, Money(cur) } end
     return list
   end, 10000, "Money looted from a corpse rains as coins on its own (even with few items) from this much. Quest money always rains.")
+  FxToggle(cat, "Calm")
 
   N.Header(layout, "Where")
   local from = {}
