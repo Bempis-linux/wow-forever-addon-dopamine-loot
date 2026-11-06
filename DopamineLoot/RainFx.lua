@@ -7,8 +7,8 @@ local sub
 
 -- The effect switches by group (keys from ns.RAIN_FX); Gather and Escape are under "Afterwards"
 local GROUPS = {
-  { "Effects: motion", { "Best", "Windup", "Hang", "Escalate", "Hitstop", "Spacing" } },
-  { "Effects: light", { "Beam", "Landings", "Trails", "Shadows", "Ground", "Dust", "Pulse", "Names", "Poor" } },
+  { "Effects: movement", { "Best", "Windup", "Hang", "Escalate", "Hitstop", "Spacing" } },
+  { "Effects: light and dust", { "Beam", "Landings", "Trails", "Shadows", "Ground", "Dust", "Pulse", "Names", "Poor" } },
   { "Effects: money", { "Coins", "Merge", "Twinkle" } },
 }
 
@@ -32,10 +32,10 @@ local function Create()
   sub = cat
 
   N.Header(layout, "When")
-  N.Slider(cat, "rainMin", "Rain from (items)", 2, 20, 1, 3,
-    "How many items looted together make it rain (default 3). Fewer get popups.",
+  N.Slider(cat, "rainMin", "Rain from", 2, 20, 1, 3,
+    "How many items looted at once start a loot rain (default 3). Fewer items show as popups instead.",
     function(v) return math.floor(v + 0.5) .. " items" end)
-  N.Choice(cat, "coinRainMin", "Money alone rains from", function()
+  N.Choice(cat, "coinRainMin", "Money rain from", function()
     local list = {}
     for _, c in ipairs(COIN_STEPS) do list[#list + 1] = { c, Money(c) .. (c == 10000 and " (default)" or "") } end
     local cur = ns.CoinRainMin()
@@ -43,7 +43,7 @@ local function Create()
     for _, c in ipairs(COIN_STEPS) do if c == cur then listed = true end end
     if not listed then list[#list + 1] = { cur, Money(cur) } end
     return list
-  end, 10000, "Money looted from a corpse rains as coins on its own (even with few items) from this much. Quest money always rains.")
+  end, 10000, "Money you loot rains as coins on its own (even without enough items for a rain) when it's at least this much. Quest reward money always rains.")
   FxToggle(cat, "Calm")
 
   N.Header(layout, "Where")
@@ -51,19 +51,19 @@ local function Create()
   for _, v in ipairs(ns.RainCore.FROM) do
     from[#from + 1] = { v, ns.FROM_NAMES[v]:gsub("^%l", string.upper) .. (v == "ground" and " (default)" or "") }
   end
-  N.Choice(cat, "rainFrom", "Loot flies from", from, "ground",
-    "Where the loot shoots up from: the middle of the ground like a fountain, anywhere along the ground, from just under the bottom edge, or the middle of the screen.")
+  N.Choice(cat, "rainFrom", "Loot comes from", from, "ground",
+    "Where the loot shoots up from: the middle of the ground like a fountain, anywhere along the ground, from below the bottom of the screen, or the middle of the screen.")
   N.Slider(cat, "rainFloor", "Landing height", 0, 30, 1, 0,
-    "Where the loot lands, as a percent of the screen height up from the bottom (0 = the bottom edge; raise it to land above your action bars).",
+    "Where the loot lands, in percent of the screen height up from the bottom (0 = the bottom edge, the default). Raise it to have the loot land above your action bars.",
     function(v) return math.floor(v + 0.5) .. "%" end)
 
   N.Header(layout, "Afterwards")
-  N.Choice(cat, "stayQuality", "Stay as popups", {
+  N.Choice(cat, "stayQuality", "Become popups", {
     { 2, "|cff1eff00Uncommon|r and up" }, { 3, "|cff0070ddRare|r and up (default)" }, { 4, "|cffa335eeEpic|r and up" },
-  }, 3, "When the rain settles, items of this quality and better become popups; the rest go to your bag.")
+  }, 3, "When the rain is over, items of this rarity and better become popups; the rest go into your bag.")
   FxToggle(cat, "Gather")
   N.Toggle(cat, "rainChord", "Chord at the end",
-    "The rain ends on a soft chord when the last item is in your bag (off by default).")
+    "The rain ends on a soft chord once the last item is in your bag (off by default).")
   FxToggle(cat, "Escape")
 
   for _, g in ipairs(GROUPS) do
@@ -72,18 +72,18 @@ local function Create()
   end
 
   N.Header(layout, "Test")
-  N.Slider(cat, "testRain", "Test rain size (items)", 1, 60, 1, 8,
-    "How many items the test rain drops. From 4 one is blue, from 8 one is purple, from 12 one is orange; some money too.",
+  N.Slider(cat, "testRain", "Test rain size", 1, 60, 1, 8,
+    "How many items the test rain drops, taken from your bags. From 4 items one is a Rare, from 8 one is an Epic, from 12 one is a Legendary; some money comes with them.",
     function(v) return math.floor(v + 0.5) .. " items" end)
-  N.Button(layout, "Rain the test items", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
-    "Rain that many test items.")
+  N.Button(layout, "Rain test items", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
+    "Rains the number of test items set above.")
   N.Choice(cat, "testMoney", "Test money amount", {
     { "54c", "54c" }, { "35s 20c", "35s 20c" }, { "2g 35s", "2g 35s (default)" }, { "25g", "25g" },
   }, "2g 35s", "How much money the Test money button rains.")
-  N.Button(layout, "Rain the test money", "Test money", function() ns.RunAction("testcoins", ns.settings.testMoney or "2g 35s") end,
-    "Rain that amount as coins.")
-  N.Button(layout, "A quest reward", "Test reward", function() ns.RunAction("testquest") end,
-    "An item and some money, rained together the way a quest turn-in plays.")
+  N.Button(layout, "Rain test money", "Test money", function() ns.RunAction("testcoins", ns.settings.testMoney or "2g 35s") end,
+    "Rains the amount set above as coins.")
+  N.Button(layout, "Simulate a quest reward", "Test reward", function() ns.RunAction("testquest") end,
+    "An item and some money rained together, the way finishing a quest plays.")
 end
 
 function ns:OpenRainFx()

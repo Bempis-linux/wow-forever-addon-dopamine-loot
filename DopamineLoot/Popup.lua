@@ -22,7 +22,7 @@ ns.POPUP_POSITIONS = {
   { key = "midright", label = "Right of you (default)", point = "TOPLEFT", x = 0.63, y = -0.25, dir = 1 },
   { key = "upleft", label = "Upper left", point = "TOPLEFT", x = 0.14, y = -0.18, dir = 1 },
   { key = "upper", label = "Upper middle", point = "TOP", x = 0, y = -0.2, dir = 1 },
-  { key = "top", label = "Top middle", point = "TOP", x = 0, y = -0.11, dir = 1 },
+  { key = "top", label = "Top of the screen", point = "TOP", x = 0, y = -0.11, dir = 1 },
   { key = "bottom", label = "Above the action bars", point = "BOTTOM", x = -0.12, y = 0.12, dir = -1 },
 }
 local POS = {}

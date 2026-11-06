@@ -30,26 +30,26 @@ local CALM_WINDOW = 120 -- junk-only rains within this many seconds get calmer, 
 -- The effects, each a switch (setting "noRain" .. key; all on by default)
 ns.RAIN_FX = {
   { key = "Best", label = "Best item last", tip = "The best item waits a beat, flies higher and lands in the middle, then becomes its popup." },
-  { key = "Windup", label = "Wind-up and burst", tip = "A glow swells where the loot comes out, then it bursts with a shockwave in the color of the best item." },
-  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs at the top with a glint, then slams down with a shockwave, sparks and a shake." },
-  { key = "Landings", label = "Landings by rarity", tip = "Rare and better items land with a shockwave along the ground and sparks in their color; grays and whites land quietly." },
-  { key = "Calm", label = "Calm when repeated", tip = "Rains with nothing Rare or better, a few within two minutes, get quicker and use fewer sounds. Anything Rare or better always gets the full show." },
-  { key = "Escalate", label = "Escalation", tip = "Launches start slow and speed up; each landing tick is a little higher in pitch." },
-  { key = "Pulse", label = "Epic edge glow", tip = "The edges of the screen glow in the item's color when an Epic or better lands." },
-  { key = "Spacing", label = "Spacing", tip = "Resting items spread out side by side instead of piling up." },
+  { key = "Windup", label = "Wind-up and burst", tip = "Before the loot comes out, a glow swells where it starts, then it bursts out with a shockwave in the color of the best item." },
+  { key = "Hang", label = "Hang time for the best", tip = "The best item hangs in the air at the top of its flight with a glint, then slams down with a shockwave, sparks, a boom and a little screen shake." },
+  { key = "Landings", label = "Landings by rarity", tip = "Rare and better items land with a shockwave and sparks in their color; grays and whites land quietly." },
+  { key = "Calm", label = "Calm when repeated", tip = "When you loot rain after rain with nothing Rare or better in it, each one within two minutes of the last comes out quicker and with fewer sounds, so grinding doesn't get noisy. Anything Rare or better always gets the full show." },
+  { key = "Escalate", label = "Build-up", tip = "Items start coming out slowly and then faster and faster, and their landing sounds move along a gentle tune instead of one repeated tick." },
+  { key = "Pulse", label = "Screen-edge glow", tip = "The edges of the screen glow in the item's color when an Epic or better item lands." },
+  { key = "Spacing", label = "Spread out", tip = "Items that have landed slide apart side by side instead of piling up on each other." },
   { key = "Dust", label = "Dust puff", tip = "A small puff of dust where an item first hits the ground." },
-  { key = "Gather", label = "Gather into the bag", tip = "When it settles, what doesn't stay as a popup flies into your backpack." },
-  { key = "Trails", label = "Trails", tip = "Rare and better items leave a fading trail in their color." },
-  { key = "Coins", label = "Coins", tip = "Money you loot rains as coins, with a total that counts up." },
-  { key = "Merge", label = "Coins merge up", tip = "Gold arrives as a pile of silver (silver as copper) that joins up into it once it lands; the change stays as it is." },
-  { key = "Shadows", label = "Floor shadows", tip = "A soft shadow under each item, smaller the higher it flies." },
-  { key = "Beam", label = "Loot beam", tip = "A pillar of light over resting Rare and better items, taller for the best one." },
-  { key = "Hitstop", label = "Hit-stop", tip = "A split second of slow motion and a small shake when the best item lands (with Hang time on, its slam does this)." },
-  { key = "Names", label = "Name labels", tip = "Rare and better items show their name while they rest." },
-  { key = "Escape", label = "Skip with Escape", tip = "Escape ends the rain at once; the good items still become popups." },
-  { key = "Twinkle", label = "Coins twinkle", tip = "Resting gold coins glint now and then; silver too, less often." },
+  { key = "Gather", label = "Gather into the bag", tip = "When the rain is over, the items that don't become popups fly into your backpack." },
+  { key = "Trails", label = "Trails", tip = "Rare and better items leave a fading trail in their color as they fly." },
+  { key = "Coins", label = "Coins", tip = "Money you loot rains as gold, silver and copper coins, with a total that counts up as they land." },
+  { key = "Merge", label = "Coins merge up", tip = "Gold first rains as a pile of silver coins (and silver as copper) that then joins up into the bigger coin with a chime. Change that can't make a whole coin stays as it is." },
+  { key = "Shadows", label = "Shadows", tip = "A soft shadow on the ground under each item, smaller the higher it flies." },
+  { key = "Beam", label = "Loot beam", tip = "A pillar of light rises over Rare and better items once they land, taller for the best one." },
+  { key = "Hitstop", label = "Slow-motion hit", tip = "A split second of slow motion and a small screen shake when the best item lands. (With Hang time on, the slam does this instead.)" },
+  { key = "Names", label = "Item names", tip = "Rare and better items show their name above them once they land." },
+  { key = "Escape", label = "Skip with Escape", tip = "Pressing Escape ends the rain at once; the good items still become popups." },
+  { key = "Twinkle", label = "Coins twinkle", tip = "Gold coins on the ground glint now and then; silver ones too, less often." },
   { key = "Ground", label = "Ground line", tip = "A faint warm line along the ground where the loot lands, with a shimmer sliding along it." },
-  { key = "Poor", label = "Gray items look poor", tip = "Gray items come out dull and a little smaller, fly lower and barely bounce." },
+  { key = "Poor", label = "Dull gray items", tip = "Gray (Poor) items come out dull and a little smaller, fly lower and barely bounce, so the good stuff stands out." },
 }
 -- The switches, read once per frame (RefreshFx) rather than per sprite
 local fxOn = {}
@@ -59,8 +59,8 @@ end
 local function On(key) return fxOn[key] end
 
 ns.FROM_NAMES = {
-  ground = "the ground (a fountain from the middle)", spread = "the ground, spread out",
-  below = "below the bottom edge", middle = "the middle of the screen",
+  ground = "the middle of the ground, like a fountain", spread = "anywhere along the ground",
+  below = "below the bottom of the screen", middle = "the middle of the screen",
 }
 
 local layer, top, driver, escFrame

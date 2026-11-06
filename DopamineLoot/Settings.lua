@@ -341,21 +341,25 @@ local function CreateGeneral()
   category = cat
   ns.settingsCategory = cat
   N.Header(layout, "Features")
-  N.Toggle(cat, "noPopup", "Loot popups", "A card beside your character for each item you loot, the item turning in 3D.", true)
-  N.Toggle(cat, "noRain", "Loot rain", "When you loot several things at once, they spray up and bounce down; the best lands last. In combat it waits until the fight is over.", true)
-  N.Toggle(cat, "noSound", "Sounds", "Every Dopamine Loot sound at once.", true)
+  N.Toggle(cat, "noPopup", "Loot popups",
+    "Shows a card beside your character for each item you loot, with the item turning in 3D. More settings on the Popups page.", true)
+  N.Toggle(cat, "noRain", "Loot rain",
+    "When you loot several items at once (or a lot of money), they spray up and bounce down at the bottom of the screen; the best item lands last and becomes a popup. In combat it waits until the fight is over. More settings on the Loot rain page.", true)
+  N.Toggle(cat, "noSound", "Sounds",
+    "Turns every Dopamine Loot sound on or off at once. The game's own sounds are not affected. More settings on the Sounds page.", true)
   N.Header(layout, "Try it")
-  N.Choice(cat, "testQuality", "Test popup quality", TESTS, 4, "Which quality the Test popup button shows.")
-  N.Button(layout, "A popup", "Test popup", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4]) end,
-    "Show a test popup of the quality picked above.")
-  N.Button(layout, "A popup in combat", "Test combat", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4] .. " combat") end,
-    "The same popup as it looks in a fight (Popups page: In combat).")
-  N.Button(layout, "Two items at once", "Test pair", function() ns.RunAction("testpair") end,
-    "An Uncommon looted beside a Rare: the Rare comes full, the Uncommon compact.")
-  N.Button(layout, "A loot rain", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
-    "Rain test loot (how many: on the Loot rain page).")
-  N.Button(layout, "A quest reward", "Test reward", function() ns.RunAction("testquest") end,
-    "An item and some money, rained together the way a quest turn-in plays.")
+  N.Choice(cat, "testQuality", "Test popup rarity", TESTS, 4,
+    "The rarity of the item the two test popup buttons below show.")
+  N.Button(layout, "Show a popup", "Test popup", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4]) end,
+    "Shows a test popup of the rarity picked above, using one of your own items when you have one.")
+  N.Button(layout, "Show a popup in combat", "Test combat", function() ns.RunAction("test", TEST_WORDS[ns.settings.testQuality or 4] .. " combat") end,
+    "The same test popup as it looks during a fight. What popups do in combat is set on the Popups page, under In combat.")
+  N.Button(layout, "Show two popups", "Test pair", function() ns.RunAction("testpair") end,
+    "An Uncommon looted together with a Rare: the Rare shows as a full popup and the Uncommon as a compact one-line popup.")
+  N.Button(layout, "Start a loot rain", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
+    "Rains test loot taken from your bags, with better items mixed in. How many items: Test rain size, on the Loot rain page.")
+  N.Button(layout, "Simulate a quest reward", "Test reward", function() ns.RunAction("testquest") end,
+    "An item and some money rained together, the way finishing a quest plays.")
 end
 
 function ns:OpenSettings()

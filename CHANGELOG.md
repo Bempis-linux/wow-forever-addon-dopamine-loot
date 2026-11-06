@@ -16,6 +16,9 @@
   (Popups page: Legendary; never in combat).
 - **Calm when repeated**: a few rains with nothing Rare or better within two minutes get quicker and use fewer
   sounds (a switch under When). Rare and better always get the full show.
+- **Settings reworded**: every label and tooltip says plainly what it does; the Popups page labels show their
+  tooltip too, and the preview buttons have one. "Show popups for" is now "Show loot from" (it always applied
+  to the loot rain as well).
 - Test popups no longer show a gray "preview" tag.
 - Internal cleanup: code left over from the old chat commands removed. Nothing changes in game.
 

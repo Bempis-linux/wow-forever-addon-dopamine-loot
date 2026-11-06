@@ -36,9 +36,9 @@ local ARRIVAL = {
 }
 
 ns.STYLES = {
-  { key = "relic", label = "Relic", tip = "Just the item floating in a soft glow, the name below. No box." },
-  { key = "beam", label = "Beam", tip = "A cone of light rises from a glowing disc under the item; sparks drift up through it for Rare and better." },
-  { key = "banner", label = "Banner", tip = "A ribbon in the item's color, the item on a diamond emblem, a shine sweeping across." },
+  { key = "relic", label = "Relic (default)", tip = "The item floating in a soft glow, its name below. No box around it." },
+  { key = "beam", label = "Beam", tip = "A cone of light rising from a glowing disc under the item; for Rare and better, sparks drift up through it." },
+  { key = "banner", label = "Banner", tip = "A ribbon in the item's color with its name on it, the item on a diamond emblem, a shine sweeping across." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);

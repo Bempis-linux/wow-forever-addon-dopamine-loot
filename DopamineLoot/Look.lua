@@ -7,11 +7,12 @@ local _, ns = ...
 local PREVIEW_W, PREVIEW_H = 300, 250
 local BASE = 0.68 -- the preview draws popups at this fraction of their real size, so they fit
 local KINDS = {
-  { key = "weapon", label = "Weapon", id = 12784 }, -- Arcanite Reaper
-  { key = "helm", label = "Helm", id = 12640 },     -- Lionheart Helm
-  { key = "other", label = "No model", id = 13446 }, -- Major Healing Potion
+  { key = "weapon", label = "Weapon", id = 12784, tip = "Preview a weapon: its 3D model, stood upright." }, -- Arcanite Reaper
+  { key = "helm", label = "Helm", id = 12640, tip = "Preview a helm: its 3D model." },     -- Lionheart Helm
+  { key = "other", label = "Potion", id = 13446, tip = "Preview an item with no 3D model (a potion): it shows as its icon on a card." }, -- Major Healing Potion
 }
 local QUALITY_NAMES = { [0] = "Poor", "Common", "Uncommon", "Rare", "Epic", "Legendary" }
+local QUALITY_SHORT = { [0] = "Gray", "White", "Green", "Blue", "Purple", "Orange" } -- the buttons (their color)
 
 local panel, sub, box, view
 local pick = { quality = 4, kind = "weapon" }
@@ -62,7 +63,7 @@ local function Create()
   local title = UI.Label(panel, "GameFontNormalLarge", "Popups")
   title:SetPoint("TOPLEFT", 16, -16)
   local intro = UI.Label(panel, "GameFontHighlightSmall",
-    "A card for each item you loot. Changes show in the preview at once.")
+    "A card for each item you loot. Every change shows in the preview on the right at once.")
   intro:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 
   ---------------------------------------------------------------- left: when, look, placement, the 3D item
@@ -75,22 +76,28 @@ local function Create()
     h:SetPoint("TOPLEFT", last or intro, "BOTTOMLEFT", 0, -16)
     last = h
   end
-  local function RowLabel(label)
+  local function RowLabel(label, tip)
     local text = UI.Label(panel, "GameFontHighlight", label)
     text:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -16)
     text:SetWidth(LABEL_W - 6)
     if text.SetWordWrap then text:SetWordWrap(false) end
+    if tip then -- the label shows the tip too (a FontString can't, so a frame over it)
+      local hit = CreateFrame("Frame", nil, panel)
+      hit:SetAllPoints(text)
+      hit:EnableMouse(true)
+      UI.Tip(hit, tip)
+    end
     return text
   end
   local function Pick(label, options, get, set, tip)
-    local text = RowLabel(label)
+    local text = RowLabel(label, tip)
     local d = UI.Dropdown(panel, 164, options, get, set, tip)
     d:SetPoint("LEFT", text, "LEFT", LABEL_W, 0)
     last = text
   end
   local function Add(label, min, max, step, get, set, tip, what, fmt)
     local s, text = UI.Slider(panel, "", 96, min, max, step, get, set, tip, fmt, function() Changed(what) end)
-    local row = RowLabel(label)
+    local row = RowLabel(label, tip)
     text:Hide()
     s:ClearAllPoints()
     s:SetPoint("LEFT", row, "LEFT", LABEL_W, 0)
@@ -98,66 +105,66 @@ local function Create()
   end
 
   Header("When")
-  Pick("Show popups for", ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
+  Pick("Show loot from", ns.QUALITY_CHOICES, function() return ns.MinQuality() end,
     function(v) ns.settings.minQuality = v end,
-    "The lowest quality that gets a popup; lower ones still count, just quietly.")
+    "The lowest rarity Dopamine Loot shows, as a popup or in the loot rain. Items below it are left out completely.")
   Add("Time on screen", 2, 15, 0.5, function() return ns.settings.popupHold or 5 end,
     function(v) ns.settings.popupHold = v end,
-    "Seconds a popup stays, by rarity: half this up to Uncommon, x0.8 Rare, x1.2 Epic, x1.6 Legendary (default 5: 2.5 / 4 / 6 / 8 s). Hovering holds it.", "none")
-  Pick("Uncommon and lower", {
-    { "smart", "Smart (default)", "Poor and Common come as one line; an Uncommon too, unless it's the best of what you looted." },
-    { "always", "Always compact", "Poor, Common and Uncommon always come as one line." },
-    { "never", "Full popups", "Every popup is a full one." },
+    "How long popups stay, in seconds. Rarer items stay longer: at the default 5, Uncommon and lower stay 2.5 s, Rare 4 s, Epic 6 s and Legendary 8 s. Hovering over a popup keeps it up (for up to 10 s more).", "none")
+  Pick("Compact popups", {
+    { "smart", "Smart (default)", "Poor and Common items always come as one line; an Uncommon too, unless it's the best item of what you looted." },
+    { "always", "Uncommon and lower", "Poor, Common and Uncommon items always come as one line." },
+    { "never", "Never", "Every item gets a full popup." },
   }, function() return ns.settings.popupLow or "smart" end,
     function(v) ns.settings.popupLow = v ~= "smart" and v or nil end,
-    "Compact = one line, the icon and the name. Poor and Common, and an Uncommon looted beside something better.")
+    "A compact popup is a single line, the item's icon and name, instead of the full card. Which low-rarity items come that way.")
   Pick("In combat", {
-    { "compact", "Compact (default)", "Every popup comes as one line until the fight is over." },
-    { "same", "Same as always", "Combat changes nothing." },
+    { "compact", "Compact (default)", "Every popup comes as a single line until the fight is over." },
+    { "same", "Same as always", "Popups show as usual in combat." },
     { "defer", "Wait until after", "Popups wait and show one after another when the fight ends." },
   }, function() return ns.settings.popupCombat or "compact" end,
     function(v) ns.settings.popupCombat = v ~= "compact" and v or nil end,
-    "What popups do while you're fighting.")
+    "What popups do while you're in combat.")
 
   Header("Look")
   local styles = {}
   for _, s in ipairs(ns.STYLES) do styles[#styles + 1] = { s.key, s.label, s.tip } end
   Pick("Style", styles, function() return ns.PopupStyle() end,
     function(v) ns.settings.popupStyle = v; Changed("item") end,
-    "Relic: the item in a soft glow. Beam: a cone of light rises under it. Banner: a ribbon in its color.")
+    "How popups look. Relic: the item floating in a soft glow, its name below. Beam: a cone of light rising under the item. Banner: a ribbon in the item's color with its name on it.")
   Add("Size", 0.5, 1.6, 0.05, ns.PopupScale, function(v) ns.settings.popupScale = v end,
-    "How big popups are on screen (0.5 to 1.6, default 0.8).", "size")
+    "How big popups are on screen, from 0.5 to 1.6 (default 0.8).", "size")
   Pick("Legendary", {
-    { "on", "Legendary moment (default)", "The screen dims, a pillar of light drops onto the popup and it lands in slow motion. Not in combat." },
+    { "on", "Legendary moment (default)", "The screen dims, a pillar of light drops onto the popup and it lands in slow motion. Never in combat." },
     { "off", "Like the others", "A Legendary pops up like any other popup, with its shockwaves and embers." },
   }, function() return ns.settings.noLegendMoment and "off" or "on" end,
     function(v) ns.settings.noLegendMoment = v == "off" or nil end,
-    "How a Legendary arrives. Try it with the Legendary test popup.")
+    "How a Legendary popup arrives. To see it, pick Legendary under the preview and click Show as a real popup.")
 
   Header("Placement")
   local positions = {}
   for _, p in ipairs(ns.POPUP_POSITIONS) do positions[#positions + 1] = { p.key, p.label } end
   Pick("Position", positions, function() return ns.settings.popupPos or "midright" end,
     function(v) ns.settings.popupPos = v ~= "midright" and v or nil end,
-    "Where popups appear. Right of you, mid-screen stays clear of the quest tracker, the buffs and the fight.")
-  Pick("At once", { { 1, "1" }, { 2, "2 (default)" }, { 3, "3" } }, ns.PopupMax,
+    "Where on screen popups appear. The default, right of your character at mid-height, stays clear of the quest tracker, your buffs and the fight.")
+  Pick("Popups at once", { { 1, "1" }, { 2, "2 (default)" }, { 3, "3" } }, ns.PopupMax,
     function(v) ns.settings.popupMax = v ~= 2 and v or nil end,
-    "How many popups can be on screen together; more wait their turn (a better item cuts in).")
-  Pick("Mouse", {
-    { "through", "Pass through (default)", "Popups never block a click; hovering still holds one and shows the item's tooltip." },
-    { "item", "Catches clicks", "Click a popup to dismiss it, Shift+click to link it in chat." },
+    "How many popups can be on screen together. More wait their turn, except that a better item cuts in.")
+  Pick("Mouse clicks", {
+    { "through", "Pass through (default)", "Clicks go to the world behind popups. Hovering over one still keeps it up and shows the item's tooltip." },
+    { "item", "Popups catch clicks", "Click a popup to close it; Shift+click it to link the item in chat." },
   }, function() return ns.settings.popupMouse or "through" end,
     function(v) ns.settings.popupMouse = v ~= "through" and v or nil end,
-    "Whether popups catch the mouse.")
+    "Whether popups block mouse clicks or let them through to the world behind.")
 
   Header("The 3D item")
-  Add("Zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
-    "Camera distance for item models: smaller is closer and bigger (0.3 to 2, default 0.7).", "frame")
+  Add("Model zoom", 0.3, 2, 0.05, ns.ModelZoom, function(v) ns.settings.modelZoom = v end,
+    "How close the camera is to 3D items: a smaller number shows the item bigger. From 0.3 to 2 (default 0.7).", "frame")
   Add("Weapon tilt", 0, 355, 5, ns.WeaponTilt, function(v) ns.settings.weaponTilt = v end,
-    "Turns weapons so they stand up (0 = as the game draws them, 90 = upright, 270 if it stands on its head; default 90).",
+    "Turns weapons so they stand upright: 90 stands them up (default), 0 shows them the way the game draws them (lying down). If a weapon shows upside down, try 270.",
     "frame", function(v) return tostring(math.floor(v + 0.5)) end)
   Add("Sway speed", 0, 3, 0.1, ns.SpinSpeed, function(v) ns.settings.spinSpeed = v end,
-    "How fast the item sways side to side (0 = still, default 0.9). Epic and better turn once to face you first.", "none")
+    "How fast the item sways gently from side to side, from 0 (still) to 3 (default 0.9). Epic and better items first turn once all the way round.", "none")
 
   ---------------------------------------------------------------- right: the live preview
   box = CreateFrame("Frame", nil, panel, "BackdropTemplate")
@@ -176,7 +183,7 @@ local function Create()
   box:SetScript("OnUpdate", function(_, dt) view:Tick(math.min(dt, 0.1)) end)
   box:SetScript("OnShow", function() Changed("item") end)
 
-  local qLabel = UI.Label(panel, "GameFontHighlightSmall", "Quality")
+  local qLabel = UI.Label(panel, "GameFontHighlightSmall", "Preview rarity")
   qLabel:SetPoint("TOPLEFT", box, "BOTTOMLEFT", 2, -8)
   local qButtons, kButtons = {}, {}
   local function Mark(list, value)
@@ -184,19 +191,19 @@ local function Create()
   end
   local prev
   for q = 0, 5 do
-    local b = UI.Button(panel, QUALITY_NAMES[q]:sub(1, 4), 48, function(self)
+    local b = UI.Button(panel, QUALITY_SHORT[q], 48, function(self)
       pick.quality = self.value; Mark(qButtons, self.value); Changed("item")
     end)
     b.value = q
     local r, g, bl = ns.QualityColor(q)
     local fs = b:GetFontString()
     if fs then fs:SetTextColor(r, g, bl) end
-    UI.Tip(b, QUALITY_NAMES[q])
+    UI.Tip(b, "Preview how a popup looks for this rarity: " .. QUALITY_NAMES[q] .. ".")
     b:SetPoint("TOPLEFT", prev or qLabel, prev and "TOPRIGHT" or "BOTTOMLEFT", prev and 2 or 0, prev and 0 or -4)
     qButtons[#qButtons + 1] = b
     prev = b
   end
-  local kLabel = UI.Label(panel, "GameFontHighlightSmall", "Item")
+  local kLabel = UI.Label(panel, "GameFontHighlightSmall", "Preview item")
   kLabel:SetPoint("TOPLEFT", qButtons[1], "BOTTOMLEFT", 0, -8)
   prev = nil
   for _, k in ipairs(KINDS) do
@@ -204,6 +211,7 @@ local function Create()
       pick.kind = self.value; Mark(kButtons, self.value); Changed("item")
     end)
     b.value = k.key
+    UI.Tip(b, k.tip)
     b:SetPoint("TOPLEFT", prev or kLabel, prev and "TOPRIGHT" or "BOTTOMLEFT", prev and 4 or 0, prev and 0 or -4)
     kButtons[#kButtons + 1] = b
     prev = b
@@ -218,20 +226,22 @@ local function Create()
     ns:ShowLoot(copy)
   end
   local real = UI.Button(panel, "Show as a real popup", 170, PopReal)
+  UI.Tip(real, "Shows the previewed item as a real popup, where popups appear on your screen.")
   real:SetPoint("TOPLEFT", kButtons[1], "BOTTOMLEFT", 0, -10)
 
   -- Any item ID, shown in the preview's style as a real popup
-  local idLabel = UI.Label(panel, "GameFontHighlightSmall", "Check any item ID:")
+  local idLabel = UI.Label(panel, "GameFontHighlightSmall", "Try any item ID:")
   idLabel:SetPoint("TOPLEFT", real, "BOTTOMLEFT", 0, -12)
   local itemID = 19019
   local idBox = UI.NumberBox(panel, 60, function() return itemID end, function(v) itemID = math.floor(v) end,
-    1, 999999, "An item ID (from a database site) to see how it shows, as a real popup.")
+    1, 999999, "Type the ID of any item (from an item database website, the number in its address) to see how it looks as a popup.")
   idBox:SetPoint("LEFT", idLabel, "RIGHT", 10, 0)
-  local idGo = UI.Button(panel, "Check", 60, function()
+  local idGo = UI.Button(panel, "Show", 60, function()
     idBox:ClearFocus()
     ns.RunAction("model", tostring(itemID))
   end)
   idGo:SetPoint("LEFT", idBox, "RIGHT", 6, 0)
+  UI.Tip(idGo, "Shows the item with that ID as a real popup.")
   Mark(qButtons, pick.quality)
   Mark(kButtons, pick.kind)
 
