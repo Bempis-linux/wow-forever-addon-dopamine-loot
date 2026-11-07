@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- rounds 10-15: Achievement style; round 15 keeps Capsule 3 and Brush stroke -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Achievement Style Round 14</title>
+<title>Achievement Style Round 15</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; min-height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
@@ -87,33 +88,88 @@
   .U1 .fleck { position: absolute; z-index: 1; border-radius: 50%; background: var(--c); animation: fleck .5s .3s ease-out both; }
   @keyframes fleck { from { transform: translate(-40px, 6px) scale(.2); opacity: 0 } 30% { opacity: 1 } to { transform: none; opacity: 1 } }
 
-  /* U2. Neon sign: the name is a neon tube in the rarity's color that flickers on (two stutters, then
-     steady); a thin neon outline traces a frame around the item above it; the sign glows on the wall */
-  .U2 .tube { position: relative; padding: 8px 20px; margin-top: 6px; }
-  .U2 .name { font: 400 30px "Brush Script MT", "Segoe Script", cursive; color: #fff;
-    text-shadow: 0 0 2px #fff, 0 0 6px var(--c), 0 0 14px var(--c), 0 0 28px var(--c); animation: flick .7s .3s steps(1) both; }
-  @keyframes flick { 0% { opacity: 0 } 10% { opacity: 1 } 18% { opacity: .2 } 26% { opacity: 1 } 34% { opacity: .1 } 46%, 100% { opacity: 1 } }
-  .U2 .ring { position: absolute; top: 4px; width: 92px; height: 112px; border-radius: 46px 46px 10px 10px; border: 2px solid #fff;
-    box-shadow: 0 0 6px var(--c), 0 0 14px var(--c), inset 0 0 8px var(--c); animation: flick .7s .1s steps(1) both; }
-  .U2 .item { margin-top: -6px; }
-  .U2 .meta { margin-top: 0; color: var(--cl); text-shadow: 0 0 6px var(--c); animation: fade .3s 1s both; }
-  .U2 .wall { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 70%, color-mix(in srgb, var(--c) 25%, transparent), transparent 65%); animation: fade .3s .9s both; }
+  .keep { border-color: #b08a3a; }
+  .keep h2::after { content: "Keeper"; margin-left: 8px; font: 800 9px system-ui; letter-spacing: 1.5px; text-transform: uppercase; color: #1a1408; background: var(--gold); padding: 1px 6px; border-radius: 3px; vertical-align: 2px; }
 
-  /* U3. Torn reveal: a strip of the screen tears open with a jagged edge; the item and name sit inside
-     the tear on the rarity's color; the torn edges curl back with a light rim */
-  .U3 .tear { position: absolute; left: 0; right: 0; top: 66px; height: 128px; z-index: 1; animation: rip .38s cubic-bezier(.2,1.2,.3,1) both; }
-  .U3 .tear svg { width: 100%; height: 100%; }
-  @keyframes rip { from { transform: scaleY(0) } to { transform: none } }
-  .U3 .item { margin-top: -40px; z-index: 3; }
-  .U3 .name { z-index: 2; margin-top: -18px; font: 900 26px system-ui; letter-spacing: 1px; text-transform: uppercase; color: #fff; text-shadow: 0 2px 0 #000, 0 0 8px rgba(0,0,0,.7); animation: fade .25s .3s both; }
-  .U3 .meta { z-index: 2; margin-top: 2px; color: #fff; animation: fade .25s .38s both; }
+  /* N2. Neon sign, second take: hollow tube letters (an outline, not a script), the rarity word as a
+     small second sign above, one tube line the item stands on that draws itself. Lights up once,
+     one buzz, then steady */
+  .N2 .wall { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 62%, color-mix(in srgb, var(--c) 28%, transparent), transparent 60%); animation: fade .3s .5s both; }
+  .N2 .item { margin-top: -10px; }
+  .N2 svg.line { width: 300px; height: 14px; margin-top: -4px; overflow: visible; }
+  .N2 svg.line path { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; filter: drop-shadow(0 0 3px var(--c)) drop-shadow(0 0 8px var(--c));
+    stroke-dasharray: 320; animation: draw .4s .1s ease-out both; }
+  @keyframes draw { from { stroke-dashoffset: 320 } to { stroke-dashoffset: 0 } }
+  .N2 .rar { font: 800 11px system-ui; letter-spacing: 5px; text-transform: uppercase; color: #fff; margin-top: 4px;
+    text-shadow: 0 0 3px #fff, 0 0 8px var(--cl), 0 0 14px var(--cl); animation: on1 .5s .35s steps(1) both; }
+  .N2 .name { font: 800 31px "Arial Rounded MT Bold", "Segoe UI", system-ui; letter-spacing: 1px; color: transparent; -webkit-text-stroke: 1.6px #fff;
+    text-shadow: 0 0 4px var(--c), 0 0 12px var(--c), 0 0 26px var(--c); animation: on2 1.3s .45s steps(1) both; }
+  @keyframes on1 { 0% { opacity: 0 } 20% { opacity: 1 } 35% { opacity: .15 } 50%, 100% { opacity: 1 } }
+  @keyframes on2 { 0% { opacity: 0 } 8% { opacity: 1 } 14% { opacity: .2 } 20%, 74% { opacity: 1 } 77% { opacity: .55 } 80%, 100% { opacity: 1 } }
+  .N2 .meta { margin-top: 4px; animation: fade .3s .9s both; }
+
+  /* U4. Comic burst: a jagged starburst in the rarity's color with a halftone shade and a thick ink
+     outline slams in tilted; the name in bold comic capitals over it */
+  .U4 .burst { position: absolute; left: 50%; top: 50%; width: 330px; height: 170px; margin: -95px 0 0 -165px; z-index: 1; animation: slam .3s .05s cubic-bezier(.3,1.7,.5,1) both; }
+  .U4 .burst svg { width: 100%; height: 100%; overflow: visible; }
+  @keyframes slam { from { transform: scale(.2) rotate(-25deg); opacity: 0 } to { transform: rotate(-5deg); opacity: 1 } }
+  .U4 .item { margin-top: -60px; z-index: 3; }
+  .U4 .tagc { z-index: 2; position: relative; margin-top: -8px; font: 900 13px "Comic Sans MS", system-ui; color: #111; background: #fff; padding: 1px 8px; border: 2px solid #111; transform: rotate(-8deg); animation: pop .22s .32s cubic-bezier(.3,1.8,.5,1) both; }
+  .U4 .name { z-index: 2; position: relative; margin-top: 2px; font: 900 30px Impact, "Arial Black", system-ui; letter-spacing: 1px; text-transform: uppercase; color: #fff; transform: rotate(-5deg);
+    -webkit-text-stroke: 1.5px #111; text-shadow: 3px 3px 0 #111; animation: pop .25s .22s cubic-bezier(.3,1.6,.5,1) both; }
+  .U4 .meta { z-index: 2; position: relative; margin-top: 10px; color: #fff; animation: fade .25s .5s both; }
+
+  /* U5. Sticker slap: the item and its name are two die-cut stickers with a thick white edge, slapped
+     on one after the other, each a little crooked; a glint runs over the name sticker */
+  .U5 .item { width: 56px; height: 128px; animation: slap .26s .1s cubic-bezier(.3,1.5,.5,1) both, sway 3.6s 1.3s ease-in-out infinite; }
+  .U5 .item svg { filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 4px 3px rgba(0,0,0,.6)); }
+  @keyframes slap { from { transform: scale(1.6) rotate(12deg); opacity: 0 } 70% { opacity: 1 } to { transform: none; opacity: 1 } }
+  .U5 .label { position: relative; margin-top: -14px; z-index: 4; padding: 6px 18px 7px; border-radius: 14px; border: 4px solid #fff; transform: rotate(-4deg);
+    background: linear-gradient(var(--c), color-mix(in srgb, var(--c) 55%, #000)); box-shadow: 2px 5px 6px rgba(0,0,0,.55); overflow: hidden; text-align: center;
+    animation: slap2 .26s .32s cubic-bezier(.3,1.5,.5,1) both; }
+  @keyframes slap2 { from { transform: scale(1.6) rotate(-16deg); opacity: 0 } 70% { opacity: 1 } to { transform: rotate(-4deg); opacity: 1 } }
+  .U5 .label .name { font: 900 23px "Trebuchet MS", system-ui; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.45); }
+  .U5 .label .meta { color: rgba(255,255,255,.9); text-shadow: none; }
+  .U5 .label::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; left: -60px; transform: skewX(-20deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent); animation: shine .6s .75s ease-in-out both; }
+  .U5 .rarst { position: absolute; z-index: 5; right: 70px; top: 26px; font: 900 10px system-ui; letter-spacing: 1.5px; text-transform: uppercase; color: var(--c); background: #fff; padding: 4px 7px; border-radius: 50%;
+    transform: rotate(14deg); box-shadow: 1px 3px 4px rgba(0,0,0,.5); animation: slap .22s .55s cubic-bezier(.3,1.5,.5,1) both; }
+
+  /* U6. Kinetic type: no shapes, only letters. The rarity word drifts by huge and hollow behind; the
+     name's letters drop in one by one with a bounce; a thin line grows under them */
+  .U6 { overflow: hidden; }
+  .U6 .ghost { position: absolute; top: 34px; left: 0; white-space: nowrap; font: 900 92px system-ui; letter-spacing: 6px; text-transform: uppercase; color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--c) 55%, transparent); animation: drift 2.4s cubic-bezier(.1,.6,.3,1) both; }
+  @keyframes drift { from { transform: translateX(160px); opacity: 0 } 20% { opacity: 1 } to { transform: translateX(-20px); opacity: 1 } }
+  .U6 .item { margin-top: -26px; }
+  .U6 .name { position: relative; font: 800 30px Georgia, serif; color: var(--nc); text-shadow: 0 2px 0 #000, 0 0 8px rgba(0,0,0,.7); }
+  .U6 .name span { display: inline-block; animation: drop .32s cubic-bezier(.3,1.7,.5,1) both; }
+  @keyframes drop { from { transform: translateY(-34px); opacity: 0 } to { transform: none; opacity: 1 } }
+  .U6 .uline { height: 2px; width: 270px; background: linear-gradient(90deg, transparent, var(--c), transparent); margin: 2px 0 4px; animation: grow .4s .75s ease-out both; }
+  @keyframes grow { from { transform: scaleX(0) } }
+  .U6 .meta { animation: fade .3s .85s both; }
+
+  /* U7. Glitch: the name arrives split into red and cyan copies, jittering, sliced by bands, then
+     snaps together clean; the item flickers in the same way */
+  .U7 .name { position: relative; font: 900 30px system-ui; letter-spacing: 1px; color: #fff; text-transform: uppercase; animation: jit .5s .1s steps(1) both; }
+  .U7 .name::before, .U7 .name::after { content: attr(data-t); position: absolute; inset: 0; mix-blend-mode: screen; }
+  .U7 .name::before { color: #ff2a55; animation: rgb1 .55s .1s steps(1) both; }
+  .U7 .name::after { color: #2affee; animation: rgb2 .55s .1s steps(1) both; }
+  @keyframes rgb1 { 0% { transform: translate(-8px, 2px); clip-path: inset(0 0 60% 0) } 25% { transform: translate(6px, -1px); clip-path: inset(40% 0 0 0) } 50% { transform: translate(-3px, 0); clip-path: inset(20% 0 30% 0) } 75% { transform: translate(2px, 0); clip-path: none } 100% { transform: translate(-1px, 0); clip-path: none; opacity: 0 } }
+  @keyframes rgb2 { 0% { transform: translate(8px, -2px); clip-path: inset(50% 0 0 0) } 25% { transform: translate(-6px, 1px); clip-path: inset(0 0 50% 0) } 50% { transform: translate(4px, 0); clip-path: inset(10% 0 40% 0) } 75% { transform: translate(-2px, 0); clip-path: none } 100% { transform: translate(1px, 0); clip-path: none; opacity: 0 } }
+  @keyframes jit { 0% { opacity: 0 } 10% { opacity: 1; transform: skewX(-12deg) } 30% { transform: skewX(8deg) translateX(4px) } 50% { transform: none; opacity: .6 } 60%, 100% { opacity: 1; transform: none } }
+  .U7 .item { animation: jit .5s .05s steps(1) both, sway 3.6s 1.3s ease-in-out infinite; }
+  .U7 .band { position: absolute; left: 30px; right: 30px; height: 6px; background: var(--c); mix-blend-mode: screen; opacity: 0; animation: band .5s steps(1) both; }
+  @keyframes band { 0% { opacity: .7 } 20% { opacity: 0 } 40% { opacity: .5 } 60%, 100% { opacity: 0 } }
+  .U7 .rar { font: 700 10px ui-monospace, Consolas, monospace; letter-spacing: 3px; color: var(--cl); margin-top: -2px; animation: fade .2s .6s both; }
+  .U7 .rar::after { content: "_"; animation: blink .5s .8s steps(1) 4 both; }
+  @keyframes blink { 50% { opacity: 0 } }
+  .U7 .meta { margin-top: 2px; animation: fade .2s .65s both; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Achievement style, round 14</h1>
-  <p>Back to the plain Capsule, each with one or two additions only. The rim is the only thing that changes with rarity: its color, a glow from Epic, a gold rim for Legendary.
-    No orbits, filigree or loops beyond the item's sway. Pick a rarity, then Replay.</p>
+  <h1>Achievement style, round 15</h1>
+  <p>Capsule 3 is the keeper for Achievement; Brush stroke is kept as a unique style. Below: Neon reworked and four new frameless ideas. Pick a rarity, then Replay.</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
@@ -122,18 +178,19 @@
   <label><input type="checkbox" id="isnew" checked> First time looted</label>
   <label><input type="checkbox" id="isup" checked> Upgrade</label>
 </div>
+<h3>Keepers</h3>
 <div class="grid">
-  <div class="cell"><h2>1. Capsule, item level badge</h2><p>The item level moves into a small round badge that closes the bar's end and pops on last.</p><div class="scene" id="s1"></div></div>
-  <div class="cell"><h2>2. Capsule, rarity gauge</h2><p>Four small bars beside the rarity, filled up to it. The item level stays in the line under the name.</p><div class="scene" id="s2"></div></div>
-  <div class="cell"><h2>3. Capsule, badge and gauge</h2><p>Both, plus a thin bevel on the rim and an inner ring on the emblem: the most this direction should carry.</p><div class="scene" id="s3"></div></div>
-  <div class="cell"><h2>Round 11 Capsule, for comparison</h2><p>The one you picked, as it was.</p><div class="scene" id="s0"></div></div>
+  <div class="cell keep"><h2>Capsule 3, badge and gauge</h2><p>The Achievement style: the plain Capsule with the item-level badge, the rarity gauge, a thin bevel and the emblem's inner ring.</p><div class="scene" id="s3"></div></div>
+  <div class="cell keep"><h2>U1. Brush stroke</h2><p>One thick, rough stroke of paint in the item's color swipes across, the name over it in big white italic, flecks flying off the end.</p><div class="scene" id="u1"></div></div>
 </div>
-<h3>Unique styles, in Splash's spirit</h3>
-<p class="sub">No frame at all: one bold shape and its motion carry the moment, like Splash's slashing banner.</p>
+<h3>New unique ideas</h3>
+<p class="sub">Frameless, one bold idea each. Fonts here are stand-ins: in game we'd use the game's fonts or ship a free one of our own.</p>
 <div class="grid">
-  <div class="cell"><h2>U1. Brush stroke</h2><p>One thick, rough stroke of paint in the item's color swipes across, and the name is written over it in big white italic. Flecks of paint fly off the stroke's end.</p><div class="scene" id="u1"></div></div>
-  <div class="cell"><h2>U2. Neon sign</h2><p>The name is a neon tube that flickers on (two stutters, then steady), with a neon outline arching over the item. A soft glow spreads on the wall behind it.</p><div class="scene" id="u2"></div></div>
-  <div class="cell"><h2>U3. Torn reveal</h2><p>A strip of the screen rips open with jagged edges, showing the rarity's color inside, and the item and name sit in the tear.</p><div class="scene" id="u3"></div></div>
+  <div class="cell"><h2>N2. Neon sign, second take</h2><p>Hollow tube letters instead of a script, the rarity word as a small second sign, and one tube line the item stands on that draws itself. Lights up, one buzz, then steady.</p><div class="scene" id="n2"></div></div>
+  <div class="cell"><h2>U4. Comic burst</h2><p>A jagged starburst in the rarity's color, halftone-shaded with a thick ink outline, slams in tilted. The name in bold comic capitals, the rarity in a little caption box.</p><div class="scene" id="u4"></div></div>
+  <div class="cell"><h2>U5. Sticker slap</h2><p>The item and its name are die-cut stickers with a thick white edge, slapped on one after the other, a bit crooked. A round rarity sticker lands last; a glint runs over the name.</p><div class="scene" id="u5"></div></div>
+  <div class="cell"><h2>U6. Kinetic type</h2><p>Only letters. The rarity word drifts by huge and hollow behind; the name's letters drop in one by one with a bounce, and a thin line grows under them.</p><div class="scene" id="u6"></div></div>
+  <div class="cell"><h2>U7. Glitch</h2><p>The name arrives split into red and cyan copies, jittering and sliced, then snaps together clean. The rarity types itself in under it with a blinking cursor.</p><div class="scene" id="u7"></div></div>
 </div>
 <script>
 'use strict';
@@ -165,10 +222,7 @@ function old() {
     <div class="body"><div class="tag t1">${label}</div><div class="name t2" style="font-weight:600;font-size:20px">Arcanite Reaper</div><div class="meta t3">Two-Hand Axe · Item level 63</div><div class="shine"></div></div></div>`;
 }
 function render() {
-  $('s1').innerHTML = popup({ lvl: true });
-  $('s2').innerHTML = popup({ gauge: true });
   $('s3').innerHTML = popup({ lvl: true, gauge: true, bevel: true });
-  $('s0').innerHTML = old();
   const [c, cl, cd] = Q[q], vars = `--c:${c};--cl:${cl};--cd:${cd}`, item = `<div class="item">${axe(c)}</div>`;
   const meta = `<div class="meta">${Q[q][3]} · Two-Hand Axe · Item level 63</div>`;
   // U1: a rough brush stroke: a tapering band with ragged top and bottom edges and dry-brush streaks
@@ -179,13 +233,23 @@ function render() {
   $('u1').innerHTML = `<div class="uq U1" style="${vars}"><div class="stroke"><svg viewBox="0 0 380 60" preserveAspectRatio="none">
     <defs><linearGradient id="bs" x1="0" x2="1"><stop offset="0" stop-color="${cd}"/><stop offset=".35" stop-color="${c}"/><stop offset=".8" stop-color="${c}"/><stop offset="1" stop-color="${cl}"/></linearGradient></defs>
     <path d="${top}${bot} Z" fill="url(#bs)"/>${streaks}</svg></div>${flecks}${item}<div class="name">Arcanite Reaper</div>${meta}</div>`;
-  $('u2').innerHTML = `<div class="uq U2" style="${vars}"><div class="wall"></div><div class="ring"></div>${item}<div class="tube"><div class="name">Arcanite Reaper</div></div>${meta}</div>`;
-  // U3: the tear: jagged top and bottom edges with a light rim, the rarity color inside
-  let ta = 'M0 20', tb = '';
-  for (let x = 0; x <= 400; x += 14) { ta += ` L${x} ${(14 + Math.random() * 14).toFixed(0)} L${x + 7} ${(6 + Math.random() * 10).toFixed(0)}`; tb = ` L${x + 7} ${(98 + Math.random() * 8).toFixed(0)} L${x} ${(88 + Math.random() * 14).toFixed(0)}` + tb; }
-  $('u3').innerHTML = `<div class="uq U3" style="${vars}"><div class="tear"><svg viewBox="0 0 400 110" preserveAspectRatio="none">
-    <defs><linearGradient id="tr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${cd}"/><stop offset=".5" stop-color="${c}"/><stop offset="1" stop-color="${cd}"/></linearGradient></defs>
-    <path d="${ta} L400 20 L400 95${tb} Z" fill="url(#tr)" stroke="#f4ead2" stroke-width="2.5" stroke-linejoin="round"/></svg></div>${item}<div class="name">Arcanite Reaper</div>${meta}</div>`;
+  const label = Q[q][3], nm = 'Arcanite Reaper', meta2 = `<div class="meta">Two-Hand Axe · Item level 63</div>`;
+  $('n2').innerHTML = `<div class="uq N2" style="${vars}"><div class="wall"></div><div class="rar">${label}</div>${item}
+    <svg class="line" viewBox="0 0 300 14"><path d="M10 7 H290"/></svg><div class="name">${nm}</div>${meta2}</div>`;
+  // U4: a 16-point starburst with uneven spikes, a halftone dot pattern, a thick ink outline
+  let bp = '';
+  for (let i = 0; i < 32; i++) { const a = i / 32 * Math.PI * 2, r = i % 2 ? .62 : .9 + Math.random() * .12; bp += `${i ? 'L' : 'M'}${(50 + Math.cos(a) * 50 * r).toFixed(1)} ${(50 + Math.sin(a) * 50 * r).toFixed(1)} `; }
+  $('u4').innerHTML = `<div class="uq U4" style="${vars}"><div class="burst"><svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs><pattern id="ht" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".7" fill="#000" opacity=".35"/></pattern>
+    <radialGradient id="bg4"><stop offset="0" stop-color="${cl}"/><stop offset=".6" stop-color="${c}"/></radialGradient></defs>
+    <path d="${bp}Z" fill="url(#bg4)" stroke="#111" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <path d="${bp}Z" fill="url(#ht)" style="clip-path:inset(50% 0 0 0)"/></svg></div>
+    ${item}<div class="tagc">${label}!</div><div class="name">${nm}</div>${meta2}</div>`;
+  $('u5').innerHTML = `<div class="uq U5" style="${vars}">${item}<div class="label"><div class="name">${nm}</div><div class="meta">Two-Hand Axe · Item level 63</div></div><div class="rarst">${label}</div></div>`;
+  const letters = [...nm].map((ch, i) => `<span style="animation-delay:${(.25 + i * .035).toFixed(3)}s">${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
+  $('u6').innerHTML = `<div class="uq U6" style="${vars};--nc:${NAMECOLOR[q]}"><div class="ghost">${label} ${label}</div>${item}<div class="name">${letters}</div><div class="uline"></div>${meta2}</div>`;
+  const bands = [40, 96, 128].map((t, i) => `<i class="band" style="top:${t}px;animation-delay:${(.1 + i * .08).toFixed(2)}s"></i>`).join('');
+  $('u7').innerHTML = `<div class="uq U7" style="${vars}">${bands}${item}<div class="name" data-t="${nm}">${nm}</div><div class="rar">&gt; ${label.toUpperCase()}</div>${meta2}</div>`;
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
