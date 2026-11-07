@@ -3,185 +3,236 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Achievement Style Round 12</title>
+<title>Achievement Style Round 13</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; min-height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
   header { padding: 14px 18px 4px; }
   h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
-  header p { margin: 0; color: var(--muted); max-width: 900px; }
-  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 18px; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 980px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 18px; }
   .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .bar label { margin-left: 10px; cursor: pointer; }
   button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
   button:hover { background: #3a3020; } button.on { background: #4a3c1c; border-color: #b08a3a; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; padding: 6px 18px 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 12px; padding: 6px 18px 18px; }
   .cell { border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 40% 70%, #3d4a36, #1b2219 60%, #0f130e); }
   .cell h2 { margin: 0; padding: 8px 12px 0; font-size: 13px; color: var(--gold); }
-  .cell p { margin: 2px 12px 0; color: #c9c1ac; font-size: 12px; min-height: 50px; }
-  .scene { position: relative; height: 260px; display: flex; align-items: center; justify-content: center; }
+  .cell h2 em { color: #ffd36a; font-style: normal; font-size: 11px; margin-left: 4px; }
+  .cell p { margin: 2px 12px 0; color: #c9c1ac; font-size: 12px; min-height: 34px; }
+  .scene { position: relative; height: 230px; display: flex; align-items: center; justify-content: center; }
+  .notes { margin: 0 18px 18px; padding: 10px 14px; border: 1px solid #3a3426; border-radius: 6px; color: #c9c1ac; max-width: 980px; }
+  .notes b { color: var(--gold); }
 
-  /* shared pieces */
-  .item { width: 54px; height: 130px; animation: sway 3.6s 1.2s ease-in-out infinite; transform-origin: 50% 70%; position: relative; z-index: 3; }
-  .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
+  /* materials by rarity: the rim metal goes iron, steel, silver, gold */
+  .q2 { --m1: #b9b4aa; --m2: #6d6a63; --m3: #2b2a27; }
+  .q3 { --m1: #d6e2f0; --m2: #7d8ea3; --m3: #28313d; }
+  .q4 { --m1: #f1e9ff; --m2: #a394b8; --m3: #2e2738; }
+  .q5 { --m1: #fff2c4; --m2: #d1a24a; --m3: #4a3210; }
+
+  .item { width: 50px; height: 124px; position: relative; z-index: 4; transform-origin: 50% 70%; }
+  .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.7)); }
   @keyframes sway { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
-  .name { font: 600 20px Georgia, serif; letter-spacing: .4px; white-space: nowrap; text-shadow: 0 2px 5px #000; }
-  .info { font: 600 9.5px system-ui; letter-spacing: 1.5px; text-transform: uppercase; color: #b9b09a; text-shadow: 0 1px 3px #000; }
-  .tag { font: 700 9px system-ui; letter-spacing: 3px; text-transform: uppercase; color: var(--cl); }
-  .shine { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-  .shine::before { content: ""; position: absolute; top: 0; bottom: 0; width: 60px; left: -80px; transform: skewX(-20deg);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); animation: shine .7s .75s ease-in-out both; }
-  @keyframes shine { to { left: 110% } }
-  @keyframes pop { 0% { transform: scale(0); opacity: 0 } 60% { transform: scale(1.12); opacity: 1 } 100% { transform: scale(1) } }
-  @keyframes open { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
-  @keyframes fadeup { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
-  @keyframes drop { 0% { transform: translateY(-30px) scale(1.15); opacity: 0 } 55% { transform: translateY(3px) scale(.98); opacity: 1 } 100% { transform: none } }
-  @keyframes rise { from { transform: translateY(40px); opacity: 0 } to { transform: none; opacity: 1 } }
-  @keyframes draw { from { transform: scaleX(0) } to { transform: scaleX(1) } }
-  .t1 { animation: fadeup .3s .45s both } .t2 { animation: fadeup .3s .55s both } .t3 { animation: fadeup .3s .65s both }
-  /* rim: one stroke of the rarity color; Epic+ glows; Legendary gets a second gold line */
-  .lv2 { --glow: 0 0 18px -2px var(--c); } .lv3 { --glow: 0 0 26px 0 var(--c); }
 
-  /* A. Capsule: one shape: a round emblem holding the item that opens into a bar to the right */
-  .A { position: relative; display: flex; align-items: center; animation: pop .32s cubic-bezier(.3,1.6,.5,1) both; }
-  .A .emb { width: 96px; height: 96px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle, var(--cd) 0, #120d08 70%); border: 2px solid var(--c); box-shadow: var(--glow, none), inset 0 0 18px rgba(0,0,0,.8); }
-  .A .emb .item { height: 116px; margin-top: -22px; } /* the item breaks out of the top of its emblem */
-  .A .body { margin-left: -48px; height: 72px; padding: 0 26px 0 60px; display: flex; flex-direction: column; justify-content: center; gap: 2px; position: relative;
-    border-radius: 0 36px 36px 0; border: 2px solid var(--c); border-left: 0; box-shadow: var(--glow, none);
-    background: linear-gradient(90deg, #150f09, #1d150c 70%, #150f09); animation: open .34s .2s cubic-bezier(.2,.9,.2,1) both; }
-  .A.lv3 .body::after { content: ""; position: absolute; inset: 3px 3px 3px 0; border-radius: 0 32px 32px 0; border: 1px solid #ffd36a; border-left: 0; opacity: .7; }
-  .A.lv3 .emb::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; border: 1px solid #ffd36a; opacity: .7; }
+  /* the popup: emblem + bar + shield, one piece */
+  .pop { position: relative; display: flex; align-items: center; filter: drop-shadow(0 8px 12px rgba(0,0,0,.65)); }
+  .emb { width: 104px; height: 104px; flex: none; position: relative; z-index: 3; display: flex; justify-content: center; }
+  .emb svg.frame { position: absolute; inset: -6px; width: 116px; height: 116px; }
+  .emb .item { margin-top: -26px; }
+  /* choreography: the emblem rolls in from the left like a coin, the bar unspools behind it, the text
+     settles, the gauge fills one segment at a time, then the shield clicks on */
+  .emb { animation: roll .5s cubic-bezier(.2,1.1,.3,1) both; }
+  @keyframes roll { from { transform: translateX(-140px) rotate(-300deg); opacity: 0 } 30% { opacity: 1 } to { transform: none } }
+  .emb .item { animation: rise .35s .4s cubic-bezier(.2,1.4,.4,1) both; }
+  .live .emb .item { animation: rise .35s .4s cubic-bezier(.2,1.4,.4,1) both, sway 3.6s 1.4s ease-in-out infinite; }
+  @keyframes rise { from { transform: translateY(26px) scale(.8); opacity: 0 } to { transform: none; opacity: 1 } }
 
-  /* D. Crest: a hexagon crest holds the item; a bar with a pointed end runs right; at its end a small
-     shield shows the item level (like achievement points); rarity pips under the name */
-  .D { position: relative; display: flex; align-items: center; animation: pop .32s cubic-bezier(.3,1.6,.5,1) both; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
-  .D .hex { width: 92px; height: 104px; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
-    --hx: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); clip-path: var(--hx); background: var(--c); }
-  .D .hex::before { content: ""; position: absolute; inset: 3px; clip-path: var(--hx); background: radial-gradient(circle at 50% 40%, var(--cd), #110c07 75%); }
-  .D .hexwrap { position: relative; z-index: 2; filter: drop-shadow(var(--glow, 0 0 0 transparent)); }
-  .D .hexwrap .item { position: absolute; left: 19px; top: -20px; height: 118px; z-index: 3; }
-  .D .body { margin-left: -14px; height: 64px; padding: 0 44px 0 30px; display: flex; flex-direction: column; justify-content: center; gap: 1px; position: relative;
-    --bd: polygon(0 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 0 100%); clip-path: var(--bd); background: var(--c); animation: open .34s .18s cubic-bezier(.2,.9,.2,1) both; }
-  .D .body::before { content: ""; position: absolute; inset: 2px 2px 2px 0; clip-path: var(--bd); background: linear-gradient(90deg, #120d08, #1f160c 60%, #150f09); }
-  .D .body > * { position: relative; }
-  .D .pips { display: flex; gap: 4px; margin-top: 2px; }
-  .D .pips i { width: 6px; height: 6px; transform: rotate(45deg); background: var(--cl); box-shadow: 0 0 6px var(--c); animation: pop .2s both; }
-  .D .pips i.off { background: rgba(255,255,255,.12); box-shadow: none; }
-  .D .shield { position: absolute; right: -26px; top: 50%; margin-top: -24px; width: 42px; height: 48px; z-index: 3; display: flex; align-items: center; justify-content: center;
-    --sh: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%); clip-path: var(--sh); background: var(--c); animation: pop .26s .6s cubic-bezier(.3,1.8,.5,1) both; }
-  .D .shield::before { content: ""; position: absolute; inset: 2px; clip-path: var(--sh); background: linear-gradient(#2a1f12, #120d08); }
-  .D .shield b { position: relative; font: 700 15px Georgia, serif; color: #fff; margin-top: -6px; text-shadow: 0 0 6px var(--c); }
-  .D.lv3 .hex, .D.lv3 .body, .D.lv3 .shield { background: linear-gradient(#ffe08a, var(--c) 45%, #ffd36a); }
+  .body { margin-left: -52px; height: 78px; padding: 0 64px 0 66px; display: flex; flex-direction: column; justify-content: center; gap: 2px; position: relative; z-index: 2;
+    border-radius: 0 39px 39px 0; animation: open .4s .32s cubic-bezier(.2,.9,.2,1) both;
+    /* a beveled metal rim (light on top, dark under), the rarity line inside it, a dark fill with a fine grain */
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 2px, transparent 2px 5px) padding-box,
+      radial-gradient(ellipse at 30% 0, color-mix(in srgb, var(--c) 22%, transparent), transparent 60%) padding-box,
+      linear-gradient(#211a12, #0f0b07) padding-box,
+      linear-gradient(var(--m1), var(--m2) 45%, var(--m3)) border-box;
+    border: 3px solid transparent; border-left: 0;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 70%, transparent), inset 0 2px 0 rgba(255,255,255,.06), inset 0 -10px 18px rgba(0,0,0,.5); }
+  @keyframes open { from { clip-path: inset(0 100% 0 0 round 0 39px 39px 0) } to { clip-path: inset(0 0 0 0 round 0 39px 39px 0) } }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .tag { font: 800 9.5px system-ui; letter-spacing: 3px; text-transform: uppercase; color: var(--cl); }
+  .new { font: 800 8.5px system-ui; letter-spacing: 1.5px; padding: 1px 5px; border-radius: 3px; color: #1a1205; background: linear-gradient(#ffe9a0, #e0a83a); box-shadow: 0 0 8px rgba(255,200,80,.6); }
+  /* readability: a bigger name with a hard outline and shadow, so it reads in half a second */
+  .name { font: 700 22px Georgia, serif; letter-spacing: .3px; white-space: nowrap; color: var(--nc);
+    text-shadow: 0 0 1px #000, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000, 0 3px 6px #000; }
+  .meta { font: 600 10px system-ui; letter-spacing: 1.2px; text-transform: uppercase; color: #bdb49d; text-shadow: 0 1px 2px #000; }
+  .up { color: #3dff5a; font-weight: 800; letter-spacing: .5px; text-transform: none; }
+  .t1 { animation: fade .3s .55s both } .t2 { animation: fade .3s .62s both } .t3 { animation: fade .3s .72s both }
+  @keyframes fade { from { opacity: 0; transform: translateX(-8px) } to { opacity: 1; transform: none } }
 
-  /* E. Framed toast: a finished game-UI frame: a beveled item well on the left, the text right, a tab
-     with the rarity sticking up from the top edge, corner gems; the frame's edge lights up around it */
-  .E { position: relative; animation: drop .36s cubic-bezier(.3,1.5,.5,1) both; filter: drop-shadow(0 6px 12px rgba(0,0,0,.7)); }
-  .E .frame { position: relative; display: flex; align-items: center; gap: 14px; padding: 10px 26px 10px 10px; min-width: 300px;
-    background: linear-gradient(#22190f, #110c07); border: 2px solid var(--c); border-radius: 6px;
-    box-shadow: var(--glow, none), inset 0 0 0 1px rgba(0,0,0,.8), inset 0 0 0 3px rgba(255,255,255,.05); }
-  .E .frame::after { content: ""; position: absolute; inset: -2px; border-radius: 6px; pointer-events: none;
-    background: conic-gradient(from 0deg, transparent 0 80%, #fff 88%, transparent 96%) border-box; padding: 2px;
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: edge 1s .5s ease-out both; opacity: 0; }
-  @keyframes edge { 0% { opacity: 1; transform: rotate(0) } 100% { opacity: 0 } }
-  .E .well { width: 74px; height: 74px; flex: none; position: relative; border-radius: 4px; display: flex; justify-content: center;
-    background: radial-gradient(circle at 50% 45%, var(--cd), #0a0705 75%); box-shadow: inset 0 2px 6px rgba(0,0,0,.9), 0 0 0 1px var(--c), 0 0 0 3px #0d0905; }
-  .E .well .item { height: 106px; margin-top: -26px; }
-  .E .txt { display: flex; flex-direction: column; gap: 2px; }
-  .E .tabtop { position: absolute; top: -13px; left: 96px; padding: 2px 12px; background: linear-gradient(#2a1f12, #140e08); border: 1px solid var(--c); border-radius: 3px;
-    animation: fadeup .25s .4s both; }
-  .E .gem { position: absolute; width: 8px; height: 8px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--c)); box-shadow: 0 0 6px var(--c); }
-  .E .g1 { top: -5px; right: 14px; } .E .g2 { bottom: -5px; right: 14px; } .E .g3 { bottom: -5px; left: 14px; }
-  .E.lv3 .frame { border-color: #ffd36a; box-shadow: var(--glow), 0 0 0 1px var(--c), inset 0 0 0 1px rgba(0,0,0,.8); }
+  /* the rarity gauge: four chevrons, filled up to the item's rarity, one after another */
+  .gauge { display: flex; gap: 3px; }
+  .gauge i { width: 16px; height: 7px; clip-path: polygon(0 0, 75% 0, 100% 50%, 75% 100%, 0 100%, 25% 50%); background: rgba(255,255,255,.1); }
+  .gauge i.on { background: linear-gradient(var(--cl), var(--c)); box-shadow: 0 0 6px var(--c); animation: fill .18s both; }
+  @keyframes fill { from { background: rgba(255,255,255,.1); transform: scaleX(.4) } 60% { transform: scaleX(1.25) } to { transform: none } }
 
-  /* F. Swallowtail: Capsule's emblem, but the bar ends in a forked ribbon tail, and a thin second rim
-     runs inside the whole shape */
-  .F { position: relative; display: flex; align-items: center; animation: pop .32s cubic-bezier(.3,1.6,.5,1) both; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
-  .F .emb { width: 96px; height: 96px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; justify-content: center;
-    background: radial-gradient(circle, var(--cd) 0, #120d08 70%); border: 2px solid var(--c); box-shadow: var(--glow, none), inset 0 0 0 4px #120d08, inset 0 0 0 5px var(--cl); }
-  .F .emb .item { height: 116px; margin-top: -22px; }
-  .F .body { margin-left: -40px; height: 66px; padding: 0 64px 0 54px; display: flex; flex-direction: column; justify-content: center; gap: 1px; position: relative;
-    --sw: polygon(0 0, 100% 0, calc(100% - 26px) 50%, 100% 100%, 0 100%); clip-path: var(--sw); background: var(--c); animation: open .36s .2s cubic-bezier(.2,.9,.2,1) both; }
-  .F .body::before { content: ""; position: absolute; inset: 2px 3px 2px 0; clip-path: var(--sw); background: linear-gradient(90deg, #120d08, #20170d 65%, var(--cd)); }
-  .F .body::after { content: ""; position: absolute; left: 0; right: 30px; top: 6px; bottom: 6px; border-top: 1px solid var(--cl); border-bottom: 1px solid var(--cl); opacity: .35; }
-  .F .body > * { position: relative; z-index: 1; }
-  .F.lv3 .body, .F.lv3 .emb { border-color: #ffd36a; } .F.lv3 .body { background: linear-gradient(90deg, #ffd36a, var(--c)); }
+  /* the item-level shield at the bar's end: clicks on last */
+  .shield { position: absolute; right: -20px; top: 50%; margin-top: -30px; width: 50px; height: 60px; z-index: 4; animation: click .3s 1.15s cubic-bezier(.3,1.9,.5,1) both; }
+  .shield svg { width: 100%; height: 100%; }
+  .shield b { position: absolute; left: 0; right: 0; top: 13px; text-align: center; font: 800 17px Georgia, serif; color: #fff; text-shadow: 0 0 6px var(--c), 0 1px 0 #000; }
+  .shield small { position: absolute; left: 0; right: 0; top: 33px; text-align: center; font: 800 7px system-ui; letter-spacing: 1px; color: var(--m1); }
+  @keyframes click { from { transform: scale(1.8) rotate(-18deg); opacity: 0 } 60% { opacity: 1 } to { transform: none } }
 
-  /* G. Diamond HUD: the item in a diamond (a turned square); a sleek bar of dark glass to its right with
-     a bright edge only on its left, corner brackets at its ends, the name in caps */
-  .G { position: relative; display: flex; align-items: center; }
-  .G .dia { width: 78px; height: 78px; flex: none; position: relative; z-index: 2; margin: 0 6px; animation: pop .3s cubic-bezier(.3,1.6,.5,1) both; }
-  .G .dia::before { content: ""; position: absolute; inset: 0; transform: rotate(45deg); border: 2px solid var(--c); background: radial-gradient(circle, var(--cd), #0b0806 75%); box-shadow: var(--glow, none), 0 6px 12px rgba(0,0,0,.6); }
-  .G .dia .item { position: absolute; left: 12px; top: -30px; height: 128px; }
-  .G .glass { margin-left: -2px; height: 58px; padding: 0 30px 0 34px; display: flex; flex-direction: column; justify-content: center; gap: 1px; position: relative;
-    background: linear-gradient(90deg, rgba(10,8,6,.92), rgba(10,8,6,.7) 75%, rgba(10,8,6,0)); border-left: 3px solid var(--c); animation: open .34s .15s cubic-bezier(.2,.9,.2,1) both; }
-  .G .glass::before, .G .glass::after { content: ""; position: absolute; width: 10px; height: 10px; border: 2px solid var(--cl); }
-  .G .glass::before { left: 6px; top: -4px; border-right: 0; border-bottom: 0; } .G .glass::after { right: 26px; bottom: -4px; border-left: 0; border-top: 0; }
-  .G .name { font: 700 18px system-ui; letter-spacing: 2px; text-transform: uppercase; }
-  .G .line { height: 1px; width: 200px; background: linear-gradient(90deg, var(--c), transparent); transform-origin: 0 50%; animation: draw .4s .4s both; }
-  .G.lv3 .dia::before { border-color: #ffd36a; }
+  /* living details (optional): a glint runs along the rim now and then, the emblem's rim light turns slowly, gems twinkle */
+  .glint { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+  .glint::before { content: ""; position: absolute; top: -10px; bottom: -10px; width: 50px; left: -80px; transform: skewX(-22deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); animation: glint .8s 1.3s ease-in-out both; }
+  .live .glint::before { animation: glint 4.5s 1.3s ease-in-out infinite; }
+  @keyframes glint { 0% { left: -80px } 18%, 100% { left: 110% } }
+  .spin { transform-origin: 58px 58px; }
+  .live .spin { animation: spin 9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .tw { transform-box: fill-box; transform-origin: center; }
+  .live .tw { animation: tw 2.4s ease-in-out infinite; }
+  @keyframes tw { 0%, 100% { opacity: .55; transform: scale(.8) } 50% { opacity: 1; transform: scale(1.15) } }
 
-  /* H. Arch: a tall arched window holds the item upright (fits long weapons and staves); the bar is
-     tucked to its right, its top edge lined up with the arch's shoulder; a keystone gem crowns the arch */
-  .H { position: relative; display: flex; align-items: flex-end; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
-  .H .arch { width: 84px; height: 140px; flex: none; position: relative; z-index: 2; border-radius: 42px 42px 6px 6px; border: 2px solid var(--c); display: flex; justify-content: center; align-items: flex-end;
-    background: radial-gradient(ellipse at 50% 35%, var(--cd), #0e0a06 75%); box-shadow: var(--glow, none), inset 0 0 0 4px #0e0a06, inset 0 0 0 5px rgba(255,255,255,.08);
-    animation: rise .38s cubic-bezier(.2,1.2,.4,1) both; }
-  .H .arch .item { height: 128px; margin-bottom: 4px; }
-  .H .key { position: absolute; top: -8px; left: calc(50% - 7px); width: 14px; height: 14px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--cl) 35%, var(--c)); box-shadow: 0 0 10px var(--c); animation: pop .25s .5s both; }
-  .H .body { margin-left: -2px; margin-bottom: 10px; height: 70px; padding: 0 26px 0 22px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
-    background: linear-gradient(90deg, #1d150c, #150f09 80%, rgba(21,15,9,.6)); border: 2px solid var(--c); border-left: 0; border-radius: 0 6px 6px 0; position: relative; animation: open .34s .25s cubic-bezier(.2,.9,.2,1) both; }
-  .H.lv3 .arch, .H.lv3 .body { border-color: #ffd36a; }
+  /* rarity scaling: Rare an inner trim; Epic gems orbit the emblem; Legendary filigree and a gold halo */
+  .orbit { position: absolute; inset: -14px; z-index: 2; pointer-events: none; }
+  .live .orbit { animation: spin 12s linear infinite; }
+  .orbit i { position: absolute; width: 7px; height: 7px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--cl)); box-shadow: 0 0 8px var(--c); }
+  .halo { position: absolute; inset: -26px; border-radius: 50%; z-index: 1; background: radial-gradient(circle, color-mix(in srgb, var(--c) 45%, transparent) 40%, transparent 70%); animation: halo .6s .3s both; }
+  .live .halo { animation: halo .6s .3s both, breathe 3s 1s ease-in-out infinite; }
+  @keyframes halo { from { opacity: 0; transform: scale(.5) } to { opacity: 1; transform: none } }
+  @keyframes breathe { 50% { opacity: .55 } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Achievement style, round 12</h1>
-  <p>Capsule (your pick), Crest and Framed toast, plus three new takes in the same direction. Each is one shape. All can be built from our own textures,
-    the 3D item, and text. Pick a rarity, then Replay. Epic adds a glow to the rim; Legendary adds a second gold line.</p>
+  <h1>Achievement style, round 13</h1>
+  <p>Capsule is the base: the round emblem opening into a bar, with Crest's item-level shield and the rarity gauge. Three emblem shapes (coin, gem cut, seal).
+    Rims are metal by rarity (iron, steel, silver, gold), and each rarity adds a piece. Everything comes in order: the emblem rolls in, the bar unspools, the gauge
+    fills, the shield clicks on. Pick a rarity, then Replay.</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
-  <button data-q="2">Uncommon</button><button data-q="3" class="on">Rare</button><button data-q="4">Epic</button><button data-q="5">Legendary</button>
-  <span></span><button id="replay">Replay (R)</button>
+  <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4" class="on">Epic</button><button data-q="5">Legendary</button>
+  <button id="replay">Replay (R)</button>
+  <label><input type="checkbox" id="live" checked> Living details (loop while it's on screen)</label>
+  <label><input type="checkbox" id="isnew" checked> First time looted</label>
+  <label><input type="checkbox" id="isup" checked> Upgrade</label>
 </div>
 <div class="grid">
-  <div class="cell"><h2>A. Capsule <em style="color:#ffd36a;font-style:normal;font-size:11px">your pick</em></h2><p>A round emblem holds the item, which breaks out of its top. The emblem pops in, then opens into a bar to the right that carries the name. One rim runs around the whole shape, and a shine crosses it.</p><div class="scene" id="sA"></div></div>
-  <div class="cell"><h2>D. Crest <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A hexagon crest holds the item. A bar with a pointed end runs right, and rarity pips sit under the name (1 for Uncommon, up to 4 for Legendary). A small shield at the end pops in with the item level, like achievement points.</p><div class="scene" id="sD"></div></div>
-  <div class="cell"><h2>E. Framed toast</h2><p>A finished game-style frame. The item stands in a recessed well on the left and breaks out of its top, and a rarity tab sits on the top edge. A light runs once around the frame's edge as it lands.</p><div class="scene" id="sE"></div></div>
-  <div class="cell"><h2>F. Swallowtail <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>Capsule's emblem, but the bar ends in a forked ribbon tail that fades into the rarity color. A thin inner line runs inside both the emblem and the bar, like an engraved trim.</p><div class="scene" id="sF"></div></div>
-  <div class="cell"><h2>G. Diamond HUD <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>Sleek and modern. The item stands in a diamond. To its right a bar of dark glass fades out, with a bright edge only on its left, corner brackets, and the name in capitals over a line that draws in.</p><div class="scene" id="sG"></div></div>
-  <div class="cell"><h2>H. Arch <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A tall arched window holds the item upright, so long weapons and staves fit. A keystone gem crowns the arch, and the name bar is tucked against it on the right.</p><div class="scene" id="sH"></div></div>
+  <div class="cell"><h2>1. Coin <em>new</em></h2><p>A struck coin with a milled edge. It rolls in like a coin on its edge, and the rim light turns slowly while it's up.</p><div class="scene" id="s1"></div></div>
+  <div class="cell"><h2>2. Gem cut <em>new</em></h2><p>An octagon cut like a gem: facets catch the light from the top left, and the item sits in the table facet.</p><div class="scene" id="s2"></div></div>
+  <div class="cell"><h2>3. Seal <em>new</em></h2><p>A round seal with a scalloped edge and an embossed ring of dots, like a stamp of approval.</p><div class="scene" id="s3"></div></div>
+  <div class="cell"><h2>Round 11 Capsule, for comparison</h2><p>The one you picked, unchanged.</p><div class="scene" id="s0"></div></div>
+</div>
+<div class="notes">
+  <b>What each rarity adds.</b> Uncommon: an iron rim, 1 gauge segment. Rare: steel, a fine inner trim on the emblem, 2 segments.
+  Epic: silver, gems orbiting the emblem, 3 segments. Legendary: gold, filigree on the emblem, a breathing halo behind it, 4 segments.<br>
+  <b>Space.</b> The tag line carries the rarity and a NEW mark the first time you loot the item. The line under the name has the type and, for an
+  upgrade, how many item levels it beats what you wear. The item level itself moves to the shield.<br>
+  <b>In game.</b> The frames, rim and shield are our own generated textures, tinted by rarity. The gauge segments are one small texture.
+  The living details are an OnUpdate on the shown popup only; they stop when it hides.
 </div>
 <script>
 'use strict';
 const Q = { 2: ['#1eff00', '#9dff8a', '#0b3a05', 'Uncommon'], 3: ['#3a8cff', '#9cc8ff', '#0a2650', 'Rare'], 4: ['#a335ee', '#d9a8ff', '#2e0b48', 'Epic'], 5: ['#ff8000', '#ffd08a', '#4a2000', 'Legendary'] };
 const NAMECOLOR = { 2: '#1eff00', 3: '#5aa8ff', 4: '#b75cff', 5: '#ff9a2a' };
-let q = 3;
+let q = 4;
+const $ = id => document.getElementById(id);
 const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#5a4a3a"/><stop offset=".5" stop-color="#8a7358"/><stop offset="1" stop-color="#4a3c2e"/></linearGradient>
   <linearGradient id="bl" x1="0" x2="1"><stop offset="0" stop-color="#8b95a3"/><stop offset=".5" stop-color="#eef2f8"/><stop offset="1" stop-color="#6b7480"/></linearGradient></defs>
   <rect x="29" y="20" width="6" height="125" rx="3" fill="url(#h)"/>
   <path d="M32 14 C 10 10, 2 30, 4 52 C 14 44, 24 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
   <path d="M32 14 C 54 10, 62 30, 60 52 C 50 44, 40 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
   <circle cx="32" cy="30" r="6" fill="${c}" opacity=".9"/><circle cx="32" cy="30" r="2.5" fill="#fff" opacity=".8"/></svg>`;
+
+// the emblem frames, 116x116, center 58,58
+function defs(id, cd) {
+  return `<defs>
+    <linearGradient id="m${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--m1)"/><stop offset=".45" stop-color="var(--m2)"/><stop offset="1" stop-color="var(--m3)"/></linearGradient>
+    <radialGradient id="f${id}" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="${cd}"/><stop offset=".55" stop-color="#140e08"/><stop offset="1" stop-color="#070504"/></radialGradient>
+    <linearGradient id="rl${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  </defs>`;
+}
+function filigree(lv) { // Legendary: curls above and below the emblem
+  if (lv < 3) return '';
+  const curl = (y, s) => `<path d="M38 ${y} q 8 ${-8 * s} 20 0 q 12 ${8 * s} 20 0" fill="none" stroke="#ffd36a" stroke-width="2"/><path d="M50 ${y + 2 * s} q 8 ${-5 * s} 16 0" fill="none" stroke="#fff2c4" stroke-width="1" opacity=".7"/>`;
+  return curl(2, 1) + curl(114, -1);
+}
+function coin(c, cl, cd, lv) {
+  let teeth = '';
+  for (let i = 0; i < 48; i++) teeth += `<rect x="56.5" y="1" width="3" height="7" rx="1" fill="url(#mC)" transform="rotate(${i * 7.5} 58 58)"/>`;
+  return `<svg class="frame" viewBox="0 0 116 116">${defs('C', cd)}${teeth}
+    <circle cx="58" cy="58" r="50" fill="url(#mC)"/><circle cx="58" cy="58" r="45" fill="url(#fC)" stroke="${c}" stroke-width="1.5"/>
+    ${lv >= 1 ? `<circle cx="58" cy="58" r="41" fill="none" stroke="${cl}" stroke-width=".8" stroke-dasharray="2 3" opacity=".6"/>` : ''}
+    <g class="spin"><circle cx="58" cy="58" r="48" fill="none" stroke="url(#rlC)" stroke-width="3"/></g>${filigree(lv)}</svg>`;
+}
+function gem(c, cl, cd, lv) {
+  const oct = r => [...Array(8)].map((_, i) => { const a = (i * 45 + 22.5) * Math.PI / 180; return `${(58 + Math.cos(a) * r).toFixed(1)},${(58 + Math.sin(a) * r).toFixed(1)}`; }).join(' ');
+  const op = oct(54).split(' '), ip = oct(42).split(' ');
+  let facets = '';
+  for (let i = 0; i < 8; i++) { // each facet lit by its angle to the light (top left)
+    const a = (i * 45 + 45) * Math.PI / 180, lit = .5 + .5 * Math.cos(a - (225 * Math.PI / 180));
+    facets += `<polygon points="${op[i]} ${op[(i + 1) % 8]} ${ip[(i + 1) % 8]} ${ip[i]}" fill="url(#mG)" opacity="${(.45 + .55 * lit).toFixed(2)}"/>`;
+  }
+  return `<svg class="frame" viewBox="0 0 116 116">${defs('G', cd)}<polygon points="${oct(54)}" fill="#0b0806"/>${facets}
+    <polygon points="${oct(42)}" fill="url(#fG)" stroke="${c}" stroke-width="1.5"/>
+    ${lv >= 1 ? `<polygon points="${oct(37)}" fill="none" stroke="${cl}" stroke-width=".8" opacity=".5"/>` : ''}
+    <polygon class="tw" points="30,30 33,24 36,30 33,36" fill="#fff" opacity=".8"/>${filigree(lv)}</svg>`;
+}
+function seal(c, cl, cd, lv) {
+  let d = '';
+  for (let i = 0; i <= 24; i++) { const a = i * 15 * Math.PI / 180, r = i % 2 ? 50 : 55; d += `${i ? 'L' : 'M'}${(58 + Math.cos(a) * r).toFixed(1)} ${(58 + Math.sin(a) * r).toFixed(1)} `; }
+  let dots = '';
+  for (let i = 0; i < 24; i++) { const a = i * 15 * Math.PI / 180; dots += `<circle cx="${(58 + Math.cos(a) * 42).toFixed(1)}" cy="${(58 + Math.sin(a) * 42).toFixed(1)}" r="1.3" fill="var(--m1)" opacity=".8"/>`; }
+  return `<svg class="frame" viewBox="0 0 116 116">${defs('S', cd)}<path d="${d}Z" fill="url(#mS)" stroke="var(--m3)" stroke-width="1"/>
+    <circle cx="58" cy="58" r="46" fill="none" stroke="var(--m3)" stroke-width="2"/><circle cx="58" cy="58" r="38" fill="url(#fS)" stroke="${c}" stroke-width="1.5"/>${dots}
+    ${lv >= 1 ? `<circle cx="58" cy="58" r="34" fill="none" stroke="${cl}" stroke-width=".8" opacity=".5"/>` : ''}${filigree(lv)}</svg>`;
+}
+function shieldSVG(c) {
+  return `<svg viewBox="0 0 50 60"><defs><linearGradient id="sm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--m1)"/><stop offset=".5" stop-color="var(--m2)"/><stop offset="1" stop-color="var(--m3)"/></linearGradient>
+    <linearGradient id="sf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1f13"/><stop offset="1" stop-color="#0c0906"/></linearGradient></defs>
+    <path d="M3 3 H47 V34 Q47 48 25 58 Q3 48 3 34 Z" fill="url(#sm)"/><path d="M7 7 H43 V33 Q43 44 25 52 Q7 44 7 33 Z" fill="url(#sf)" stroke="${c}" stroke-width="1.2"/></svg>`;
+}
+function popup(shape) {
+  const [c, cl, cd, label] = Q[q], lv = q - 2;
+  const gauge = [0, 1, 2, 3].map(i => `<i class="${i <= lv ? 'on' : ''}" style="animation-delay:${(.85 + i * .09).toFixed(2)}s"></i>`).join('');
+  const orbit = lv >= 2 ? `<div class="orbit">${[0, 1, 2, 3, 4, 5].map(i => { const a = i * 60 * Math.PI / 180; return `<i style="left:${(62 + Math.cos(a) * 64).toFixed(0)}px;top:${(62 + Math.sin(a) * 64).toFixed(0)}px"></i>`; }).join('')}</div>` : '';
+  const halo = lv >= 3 ? '<div class="halo"></div>' : '';
+  const isNew = $('isnew').checked ? '<span class="new">NEW</span>' : '';
+  const up = $('isup').checked ? ' · <span class="up">▲ 12 over yours</span>' : '';
+  return `<div class="pop q${q}" style="--c:${c};--cl:${cl};--cd:${cd};--nc:${NAMECOLOR[q]}">
+    <div class="emb">${halo}${orbit}${shape(c, cl, cd, lv)}<div class="item">${axe(c)}</div></div>
+    <div class="body"><div class="row t1"><span class="tag">${label}</span>${isNew}<span class="gauge">${gauge}</span></div>
+      <div class="name t2">Arcanite Reaper</div><div class="meta t3">Two-Hand Axe${up}</div><div class="glint"></div></div>
+    <div class="shield">${shieldSVG(c)}<b>63</b><small>ITEM LVL</small></div></div>`;
+}
+// the round-11 Capsule, unchanged, for comparison
+const OLD = `<style>
+  .A0 { position: relative; display: flex; align-items: center; animation: pop0 .32s cubic-bezier(.3,1.6,.5,1) both; }
+  @keyframes pop0 { 0% { transform: scale(0); opacity: 0 } 60% { transform: scale(1.12); opacity: 1 } 100% { transform: scale(1) } }
+  .A0 .e { width: 96px; height: 96px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle, var(--cd) 0, #120d08 70%); border: 2px solid var(--c); box-shadow: inset 0 0 18px rgba(0,0,0,.8); }
+  .A0 .e .item { height: 116px; margin-top: -22px; }
+  .A0 .b { margin-left: -48px; height: 72px; padding: 0 26px 0 60px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+    border-radius: 0 36px 36px 0; border: 2px solid var(--c); border-left: 0; background: linear-gradient(90deg, #150f09, #1d150c 70%, #150f09); }
+  .A0 .n { font: 600 20px Georgia, serif; text-shadow: 0 2px 5px #000; white-space: nowrap; }
+  .A0 .i { font: 600 9.5px system-ui; letter-spacing: 1.5px; text-transform: uppercase; color: #b9b09a; }
+</style>`;
 function render() {
-  const [c, cl, cd, label] = Q[q], lv = q - 2, vars = `--c:${c};--cl:${cl};--cd:${cd}`, k = `lv${lv}`;
-  const item = `<div class="item">${axe(c)}</div>`;
-  const name = `<div class="name t2" style="color:${NAMECOLOR[q]}">Arcanite Reaper</div>`;
-  const tag = `<div class="tag t1">${label}</div>`, info = `<div class="info t3">Two-Hand Axe · Item level 63</div>`;
-  document.getElementById('sA').innerHTML = `<div class="A ${k}" style="${vars}"><div class="emb">${item}</div><div class="body">${tag}${name}${info}<div class="shine"></div></div></div>`;
-  const pips = [0, 1, 2, 3].map(i => `<i class="${i <= lv ? '' : 'off'}" style="animation-delay:${(.6 + i * .08).toFixed(2)}s"></i>`).join('');
-  document.getElementById('sD').innerHTML = `<div class="D ${k}" style="${vars}"><div class="hexwrap"><div class="hex"></div>${item}</div>
-    <div class="body">${tag}${name}<div class="pips">${pips}</div><div class="shine"></div></div><div class="shield"><b>63</b></div></div>`;
-  document.getElementById('sE').innerHTML = `<div class="E ${k}" style="${vars}"><div class="frame"><div class="well">${item}</div>
-    <div class="txt">${name}${info}</div><div class="shine"></div><i class="gem g1"></i><i class="gem g2"></i><i class="gem g3"></i></div><div class="tabtop">${tag}</div></div>`;
-  document.getElementById('sF').innerHTML = `<div class="F ${k}" style="${vars}"><div class="emb">${item}</div><div class="body">${tag}${name}${info}<div class="shine"></div></div></div>`;
-  document.getElementById('sG').innerHTML = `<div class="G ${k}" style="${vars}"><div class="dia">${item}</div><div class="glass">${tag}${name.replace('t2', 't2')}<div class="line"></div>${info}</div></div>`;
-  document.getElementById('sH').innerHTML = `<div class="H ${k}" style="${vars}"><div class="arch"><i class="key"></i>${item}</div><div class="body">${tag}${name}${info}<div class="shine"></div></div></div>`;
+  const live = $('live').checked;
+  for (const id of ['s1', 's2', 's3']) $(id).classList.toggle('live', live);
+  $('s1').innerHTML = popup(coin); $('s2').innerHTML = popup(gem); $('s3').innerHTML = popup(seal);
+  const [c, cl, cd, label] = Q[q];
+  $('s0').innerHTML = OLD + `<div class="A0" style="--c:${c};--cl:${cl};--cd:${cd}"><div class="e"><div class="item">${axe(c)}</div></div>
+    <div class="b"><div class="tag">${label}</div><div class="n" style="color:${NAMECOLOR[q]}">Arcanite Reaper</div><div class="i">Two-Hand Axe · Item level 63</div></div></div>`;
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
 });
-document.getElementById('replay').onclick = render;
+$('replay').onclick = render;
+for (const id of ['live', 'isnew', 'isup']) $(id).onchange = render;
 addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') render(); });
 render();
 </script>
