@@ -19,8 +19,7 @@ local LOWER = { HIGH = "MEDIUM", DIALOG = "HIGH" }
 -- The choices per rarity (setting "arrival" .. q); the first is the default
 ns.ARRIVALS = {
   [2] = { { "fireflies", "Fireflies" }, { "emerald", "Emerald flare" }, { "geyser", "Geyser" }, { "simple", "Simple sparks" } },
-  -- ("disint", Reverse disintegration, set aside for 1.1.0: back to its first version plus the fade, later)
-  [3] = { { "sapphire", "Sapphire flare" }, { "aurora", "Aurora arch" }, { "pool", "Light pool" }, { "simple", "Simple sparks" } },
+  [3] = { { "sapphire", "Sapphire flare" }, { "aurora", "Aurora arch" }, { "disint", "Reverse disintegration" }, { "pool", "Light pool" }, { "simple", "Simple sparks" } },
   [4] = { { "implode", "Implosion and galaxy" }, { "eclipse", "Eclipse" }, { "starfall", "Starfall" }, { "simple", "Simple sparks" } },
   [5] = { { "supernova", "Supernova" }, { "meteors", "Meteor shower" }, { "seal", "Golden seal" }, { "simple", "Simple sparks" } },
 }
@@ -487,60 +486,43 @@ local function ItemAlpha(view, a)
 end
 ns.ItemAlpha = ItemAlpha
 
--- Rare: reverse disintegration: specks of light pour in from all around and stay lit where they land,
--- so a glowing shape of the item builds up from the bottom behind a fine scanline; the item itself is
--- only a faint ghost until the line reaches the top, then it snaps in with a flash and the specks
--- scatter away (a 3D model can't be revealed slice by slice, so the specks do the building)
-local DIS_FROM, DIS_T, DIS_FLY, DIS_GHOST = 0.2, 0.75, 0.42, 0.12
+-- Rare: reverse disintegration (its first version, plus the fade): specks of light swirl in from all
+-- around onto the item, the low parts first; the item fades in as a glowing scanline sweeps up it (a
+-- 3D model can't be cut by a moving mask, so it fades in behind the line, through SetModelAlpha)
 function A.disint(view, x, y, s, r, g, b)
   local lr, lg, lb = Light(r, g, b)
   ItemAlpha(view, 0)
   local stage = view.stage
-  local W, H = stage:GetWidth() * 0.5, stage:GetHeight() * 0.9
+  local W, H = stage:GetWidth() * 0.5, stage:GetHeight()
   local specks = {}
-  for i = 1, 80 do
-    local fy = (i - 1) / 79 -- spread evenly up the item, so the shape builds all the way
-    specks[i] = { tx = (math.random() - 0.5) * W * 0.55, ty = (fy - 0.5) * H, an = math.random() * 6.28, d = Rnd(120, 240),
-      sw = Rnd(-1.6, 1.6), land = DIS_FROM + fy * DIS_T + Rnd(-0.03, 0.03), out = math.random() * 6.28 }
+  for i = 1, 60 do
+    local fy = math.random() -- where on the item it lands: 0 bottom, 1 top
+    local an, d = math.random() * 6.28, Rnd(140, 300)
+    specks[i] = { tx = (math.random() - 0.5) * W, ty = (fy - 0.5) * H, an = an, d = d, sw = Rnd(-2, 2), delay = fy * 0.35 + Rnd(0, 0.15) }
   end
-  local snapAt = DIS_FROM + DIS_T
-  Effect(view, snapAt + 0.6, function(e)
+  Effect(view, 1.4, function(e)
     local ox, oy, sc = Origin(e)
-    local since = e.t - snapAt -- after the snap (< 0 before it)
     for i, p in ipairs(specks) do
+      local u = math.min(1, math.max(0, (e.t - p.delay) / 0.5))
       local t = T(e, i, front, MEDIA .. "Mote", "ADD")
-      local white = i % 4 == 0
-      local cr, cg, cb = white and 1 or lr, white and 1 or lg, white and 1 or lb
-      local u = (e.t - (p.land - DIS_FLY)) / DIS_FLY
-      if u <= 0 then
-        t:SetAlpha(0)
-      elseif u < 1 then -- flying in, speeding up and curving
-        local k = (1 - u) ^ 2
+      if u <= 0 or u >= 1 then t:SetAlpha(0) else
+        local k = 1 - (1 - (1 - u) ^ 3) -- distance left, spiralling as it closes in
         local an = p.an + p.sw * k
-        Place(t, ox + (p.tx + math.cos(an) * p.d * k) * sc, oy + (p.ty + math.sin(an) * p.d * k * 0.8) * sc, 4 * sc, 4 * sc,
-          math.min(1, u * 4), cr, cg, cb)
-      elseif since < 0 then -- landed: it stays lit, part of the glowing shape
-        Place(t, ox + p.tx * sc, oy + p.ty * sc, 4.5 * sc, 4.5 * sc, 0.8, cr, cg, cb)
-      else -- the snap: it scatters away and fades
-        local v = since / 0.4
-        Place(t, ox + (p.tx + math.cos(p.out) * 60 * v) * sc, oy + (p.ty + math.sin(p.out) * 60 * v) * sc, 4 * sc, 4 * sc,
-          math.max(0, 1 - v), cr, cg, cb)
+        local white = i % 5 == 0
+        Place(t, ox + (p.tx + math.cos(an) * p.d * k) * sc, oy + (p.ty + math.sin(an) * p.d * k) * sc, 5 * sc, 5 * sc,
+          math.min(1, u * 3), white and 1 or lr, white and 1 or lg, white and 1 or lb)
       end
     end
-    local rev = math.min(1, math.max(0, (e.t - DIS_FROM) / DIS_T))
-    local line = rev > 0 and rev < 1
+    local rev = math.min(1, math.max(0, (e.t - 0.25) / 0.7)) -- the item fades in, bottom to top
+    if view.stage == stage then ItemAlpha(view, rev) end
     local ly = oy + (rev - 0.5) * H * sc
-    Place(T(e, "l1", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 1.3 * sc, 3 * sc, line and 1 or 0, 1, 1, 1)
-    Place(T(e, "l2", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 1.1 * sc, 10 * sc, line and 0.6 or 0, lr, lg, lb)
-    if view.stage == stage then -- a faint ghost while it builds, then it snaps in
-      ItemAlpha(view, since < 0 and DIS_GHOST * rev or DIS_GHOST + (1 - DIS_GHOST) * math.min(1, since / 0.1))
-    end
-    local fl = since >= 0 and math.max(0, 1 - since / 0.3) or 0 -- the flash as it snaps in
-    Place(T(e, "f", front, MEDIA .. "Glow", "ADD"), ox, oy, (120 + 80 * (1 - fl)) * sc, (160 + 80 * (1 - fl)) * sc, fl * 0.8, 1, 1, 1)
-    if since >= 0 and not e.done then
+    local line = rev > 0 and rev < 1
+    Place(T(e, "l1", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 2.4 * sc, 6 * sc, line and 1 or 0, 1, 1, 1)
+    Place(T(e, "l2", front, MEDIA .. "Glow", "ADD"), ox, ly, W * 2 * sc, 20 * sc, line and 0.7 or 0, lr, lg, lb)
+    if rev >= 1 and not e.done then
       e.done = true
-      Glints(ox, oy, 4, 50, sc)
-      Ring(view, lr, lg, lb, 110, 0.5)
+      Glints(ox, oy, 5, 70, sc)
+      Ring(view, lr, lg, lb, 120, 0.5)
     end
     if e.t >= e.life then ItemAlpha(view, 1) end
   end)
