@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Achievement Style Round 11</title>
+<title>Achievement Style Round 12</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; min-height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
@@ -92,12 +92,51 @@
   .E .gem { position: absolute; width: 8px; height: 8px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--c)); box-shadow: 0 0 6px var(--c); }
   .E .g1 { top: -5px; right: 14px; } .E .g2 { bottom: -5px; right: 14px; } .E .g3 { bottom: -5px; left: 14px; }
   .E.lv3 .frame { border-color: #ffd36a; box-shadow: var(--glow), 0 0 0 1px var(--c), inset 0 0 0 1px rgba(0,0,0,.8); }
+
+  /* F. Swallowtail: Capsule's emblem, but the bar ends in a forked ribbon tail, and a thin second rim
+     runs inside the whole shape */
+  .F { position: relative; display: flex; align-items: center; animation: pop .32s cubic-bezier(.3,1.6,.5,1) both; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+  .F .emb { width: 96px; height: 96px; border-radius: 50%; flex: none; position: relative; z-index: 2; display: flex; justify-content: center;
+    background: radial-gradient(circle, var(--cd) 0, #120d08 70%); border: 2px solid var(--c); box-shadow: var(--glow, none), inset 0 0 0 4px #120d08, inset 0 0 0 5px var(--cl); }
+  .F .emb .item { height: 116px; margin-top: -22px; }
+  .F .body { margin-left: -40px; height: 66px; padding: 0 64px 0 54px; display: flex; flex-direction: column; justify-content: center; gap: 1px; position: relative;
+    --sw: polygon(0 0, 100% 0, calc(100% - 26px) 50%, 100% 100%, 0 100%); clip-path: var(--sw); background: var(--c); animation: open .36s .2s cubic-bezier(.2,.9,.2,1) both; }
+  .F .body::before { content: ""; position: absolute; inset: 2px 3px 2px 0; clip-path: var(--sw); background: linear-gradient(90deg, #120d08, #20170d 65%, var(--cd)); }
+  .F .body::after { content: ""; position: absolute; left: 0; right: 30px; top: 6px; bottom: 6px; border-top: 1px solid var(--cl); border-bottom: 1px solid var(--cl); opacity: .35; }
+  .F .body > * { position: relative; z-index: 1; }
+  .F.lv3 .body, .F.lv3 .emb { border-color: #ffd36a; } .F.lv3 .body { background: linear-gradient(90deg, #ffd36a, var(--c)); }
+
+  /* G. Diamond HUD: the item in a diamond (a turned square); a sleek bar of dark glass to its right with
+     a bright edge only on its left, corner brackets at its ends, the name in caps */
+  .G { position: relative; display: flex; align-items: center; }
+  .G .dia { width: 78px; height: 78px; flex: none; position: relative; z-index: 2; margin: 0 6px; animation: pop .3s cubic-bezier(.3,1.6,.5,1) both; }
+  .G .dia::before { content: ""; position: absolute; inset: 0; transform: rotate(45deg); border: 2px solid var(--c); background: radial-gradient(circle, var(--cd), #0b0806 75%); box-shadow: var(--glow, none), 0 6px 12px rgba(0,0,0,.6); }
+  .G .dia .item { position: absolute; left: 12px; top: -30px; height: 128px; }
+  .G .glass { margin-left: -2px; height: 58px; padding: 0 30px 0 34px; display: flex; flex-direction: column; justify-content: center; gap: 1px; position: relative;
+    background: linear-gradient(90deg, rgba(10,8,6,.92), rgba(10,8,6,.7) 75%, rgba(10,8,6,0)); border-left: 3px solid var(--c); animation: open .34s .15s cubic-bezier(.2,.9,.2,1) both; }
+  .G .glass::before, .G .glass::after { content: ""; position: absolute; width: 10px; height: 10px; border: 2px solid var(--cl); }
+  .G .glass::before { left: 6px; top: -4px; border-right: 0; border-bottom: 0; } .G .glass::after { right: 26px; bottom: -4px; border-left: 0; border-top: 0; }
+  .G .name { font: 700 18px system-ui; letter-spacing: 2px; text-transform: uppercase; }
+  .G .line { height: 1px; width: 200px; background: linear-gradient(90deg, var(--c), transparent); transform-origin: 0 50%; animation: draw .4s .4s both; }
+  .G.lv3 .dia::before { border-color: #ffd36a; }
+
+  /* H. Arch: a tall arched window holds the item upright (fits long weapons and staves); the bar is
+     tucked to its right, its top edge lined up with the arch's shoulder; a keystone gem crowns the arch */
+  .H { position: relative; display: flex; align-items: flex-end; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+  .H .arch { width: 84px; height: 140px; flex: none; position: relative; z-index: 2; border-radius: 42px 42px 6px 6px; border: 2px solid var(--c); display: flex; justify-content: center; align-items: flex-end;
+    background: radial-gradient(ellipse at 50% 35%, var(--cd), #0e0a06 75%); box-shadow: var(--glow, none), inset 0 0 0 4px #0e0a06, inset 0 0 0 5px rgba(255,255,255,.08);
+    animation: rise .38s cubic-bezier(.2,1.2,.4,1) both; }
+  .H .arch .item { height: 128px; margin-bottom: 4px; }
+  .H .key { position: absolute; top: -8px; left: calc(50% - 7px); width: 14px; height: 14px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--cl) 35%, var(--c)); box-shadow: 0 0 10px var(--c); animation: pop .25s .5s both; }
+  .H .body { margin-left: -2px; margin-bottom: 10px; height: 70px; padding: 0 26px 0 22px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+    background: linear-gradient(90deg, #1d150c, #150f09 80%, rgba(21,15,9,.6)); border: 2px solid var(--c); border-left: 0; border-radius: 0 6px 6px 0; position: relative; animation: open .34s .25s cubic-bezier(.2,.9,.2,1) both; }
+  .H.lv3 .arch, .H.lv3 .body { border-color: #ffd36a; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Achievement style, round 11</h1>
-  <p>Capsule (your pick) next to two new takes. Each is one shape instead of a medallion next to a box. All three can be built from our own textures,
+  <h1>Achievement style, round 12</h1>
+  <p>Capsule (your pick), Crest and Framed toast, plus three new takes in the same direction. Each is one shape. All can be built from our own textures,
     the 3D item, and text. Pick a rarity, then Replay. Epic adds a glow to the rim; Legendary adds a second gold line.</p>
 </header>
 <div class="bar">
@@ -108,7 +147,10 @@
 <div class="grid">
   <div class="cell"><h2>A. Capsule <em style="color:#ffd36a;font-style:normal;font-size:11px">your pick</em></h2><p>A round emblem holds the item, which breaks out of its top. The emblem pops in, then opens into a bar to the right that carries the name. One rim runs around the whole shape, and a shine crosses it.</p><div class="scene" id="sA"></div></div>
   <div class="cell"><h2>D. Crest <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A hexagon crest holds the item. A bar with a pointed end runs right, and rarity pips sit under the name (1 for Uncommon, up to 4 for Legendary). A small shield at the end pops in with the item level, like achievement points.</p><div class="scene" id="sD"></div></div>
-  <div class="cell"><h2>E. Framed toast <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A finished game-style frame. The item stands in a recessed well on the left and breaks out of its top, and a rarity tab sits on the top edge. A light runs once around the frame's edge as it lands.</p><div class="scene" id="sE"></div></div>
+  <div class="cell"><h2>E. Framed toast</h2><p>A finished game-style frame. The item stands in a recessed well on the left and breaks out of its top, and a rarity tab sits on the top edge. A light runs once around the frame's edge as it lands.</p><div class="scene" id="sE"></div></div>
+  <div class="cell"><h2>F. Swallowtail <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>Capsule's emblem, but the bar ends in a forked ribbon tail that fades into the rarity color. A thin inner line runs inside both the emblem and the bar, like an engraved trim.</p><div class="scene" id="sF"></div></div>
+  <div class="cell"><h2>G. Diamond HUD <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>Sleek and modern. The item stands in a diamond. To its right a bar of dark glass fades out, with a bright edge only on its left, corner brackets, and the name in capitals over a line that draws in.</p><div class="scene" id="sG"></div></div>
+  <div class="cell"><h2>H. Arch <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A tall arched window holds the item upright, so long weapons and staves fit. A keystone gem crowns the arch, and the name bar is tucked against it on the right.</p><div class="scene" id="sH"></div></div>
 </div>
 <script>
 'use strict';
@@ -132,6 +174,9 @@ function render() {
     <div class="body">${tag}${name}<div class="pips">${pips}</div><div class="shine"></div></div><div class="shield"><b>63</b></div></div>`;
   document.getElementById('sE').innerHTML = `<div class="E ${k}" style="${vars}"><div class="frame"><div class="well">${item}</div>
     <div class="txt">${name}${info}</div><div class="shine"></div><i class="gem g1"></i><i class="gem g2"></i><i class="gem g3"></i></div><div class="tabtop">${tag}</div></div>`;
+  document.getElementById('sF').innerHTML = `<div class="F ${k}" style="${vars}"><div class="emb">${item}</div><div class="body">${tag}${name}${info}<div class="shine"></div></div></div>`;
+  document.getElementById('sG').innerHTML = `<div class="G ${k}" style="${vars}"><div class="dia">${item}</div><div class="glass">${tag}${name.replace('t2', 't2')}<div class="line"></div>${info}</div></div>`;
+  document.getElementById('sH').innerHTML = `<div class="H ${k}" style="${vars}"><div class="arch"><i class="key"></i>${item}</div><div class="body">${tag}${name}${info}<div class="shine"></div></div></div>`;
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
