@@ -43,7 +43,10 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      ribbon version is in View.lua but unlisted) and **Reverse disintegration** (Rare arrival; the user: "the
      first iteration seemed better, add the fade" = commit 3a59dc9's specks + the model fade of 42791b9;
      code `A.disint` in Arrivals.lua, unlisted).
-  4. Popup layered hit sounds (flair step 3, our own OGGs mixable with game kits per layer).
+  4. **Popup sounds per arrival animation** (the user, 2026-11-07): each arrival (Fireflies, Emerald flare,
+     Geyser, Sapphire flare, Aurora arch, Light pool, Implosion, Eclipse, Starfall, Supernova, Meteor shower,
+     Golden seal, the Legendary comet) gets its own sound, timed to its beats. Builds on flair step 3 (layered
+     hit sounds: our own OGGs, mixable with game kits per layer). Mockup with Play buttons first; the user picks by ear.
   5. Roadmap (plan.md, Ideas): **class-themed popup animations/styles**; accessibility (reduce motion, no
      flashes) tabled; drag-to-move popups, the NEW badge, the bag sparkle.
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
