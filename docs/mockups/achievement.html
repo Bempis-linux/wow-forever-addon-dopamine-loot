@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Achievement Style Round 10</title>
+<title>Achievement Style Round 11</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; min-height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
@@ -52,35 +52,52 @@
   .A.lv3 .body::after { content: ""; position: absolute; inset: 3px 3px 3px 0; border-radius: 0 32px 32px 0; border: 1px solid #ffd36a; border-left: 0; opacity: .7; }
   .A.lv3 .emb::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; border: 1px solid #ffd36a; opacity: .7; }
 
-  /* B. Plaque: a chamfered plaque the item rises out of; the name engraved in it; a gem on its top edge */
-  .B { position: relative; display: flex; flex-direction: column; align-items: center; }
-  .B .item { margin-bottom: -46px; animation: rise .4s .3s cubic-bezier(.2,1.2,.4,1) both, sway 3.6s 1.2s ease-in-out infinite; }
-  .B .plq { position: relative; width: 290px; padding: 42px 0 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; animation: drop .36s cubic-bezier(.3,1.5,.5,1) both;
-    --cut: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
-    clip-path: var(--cut); background: var(--c); filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
-  .B .plq::before { content: ""; position: absolute; inset: 2px; clip-path: var(--cut); background: linear-gradient(#21180e, #120d08); }
-  .B .plq > * { position: relative; }
-  .B .gem { position: absolute; top: -7px; left: calc(50% - 7px); width: 14px; height: 14px; transform: rotate(45deg); z-index: 4;
-    background: linear-gradient(135deg, #fff, var(--cl) 35%, var(--c)); box-shadow: 0 0 12px var(--c); animation: pop .25s .55s both; }
-  .B.lv3 .plq::after { content: ""; position: absolute; inset: 5px; clip-path: var(--cut); border: 1px solid #ffd36a; box-shadow: inset 0 0 0 1px #ffd36a; opacity: .6; }
-  .B .wrap { position: relative; filter: drop-shadow(var(--glow, 0 0 0 transparent)); }
+  /* D. Crest: a hexagon crest holds the item; a bar with a pointed end runs right; at its end a small
+     shield shows the item level (like achievement points); rarity pips under the name */
+  .D { position: relative; display: flex; align-items: center; animation: pop .32s cubic-bezier(.3,1.6,.5,1) both; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+  .D .hex { width: 92px; height: 104px; flex: none; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center;
+    --hx: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); clip-path: var(--hx); background: var(--c); }
+  .D .hex::before { content: ""; position: absolute; inset: 3px; clip-path: var(--hx); background: radial-gradient(circle at 50% 40%, var(--cd), #110c07 75%); }
+  .D .hexwrap { position: relative; z-index: 2; filter: drop-shadow(var(--glow, 0 0 0 transparent)); }
+  .D .hexwrap .item { position: absolute; left: 19px; top: -20px; height: 118px; z-index: 3; }
+  .D .body { margin-left: -14px; height: 64px; padding: 0 44px 0 30px; display: flex; flex-direction: column; justify-content: center; gap: 1px; position: relative;
+    --bd: polygon(0 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 0 100%); clip-path: var(--bd); background: var(--c); animation: open .34s .18s cubic-bezier(.2,.9,.2,1) both; }
+  .D .body::before { content: ""; position: absolute; inset: 2px 2px 2px 0; clip-path: var(--bd); background: linear-gradient(90deg, #120d08, #1f160c 60%, #150f09); }
+  .D .body > * { position: relative; }
+  .D .pips { display: flex; gap: 4px; margin-top: 2px; }
+  .D .pips i { width: 6px; height: 6px; transform: rotate(45deg); background: var(--cl); box-shadow: 0 0 6px var(--c); animation: pop .2s both; }
+  .D .pips i.off { background: rgba(255,255,255,.12); box-shadow: none; }
+  .D .shield { position: absolute; right: -26px; top: 50%; margin-top: -24px; width: 42px; height: 48px; z-index: 3; display: flex; align-items: center; justify-content: center;
+    --sh: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%); clip-path: var(--sh); background: var(--c); animation: pop .26s .6s cubic-bezier(.3,1.8,.5,1) both; }
+  .D .shield::before { content: ""; position: absolute; inset: 2px; clip-path: var(--sh); background: linear-gradient(#2a1f12, #120d08); }
+  .D .shield b { position: relative; font: 700 15px Georgia, serif; color: #fff; margin-top: -6px; text-shadow: 0 0 6px var(--c); }
+  .D.lv3 .hex, .D.lv3 .body, .D.lv3 .shield { background: linear-gradient(#ffe08a, var(--c) 45%, #ffd36a); }
 
-  /* C. Headline: no box at all: the item stands on a small disc, the text beside it over a rule that draws in */
-  .C { display: flex; align-items: flex-end; gap: 12px; }
-  .C .stand { position: relative; width: 80px; display: flex; flex-direction: column; align-items: center; }
-  .C .stand .item { animation: rise .38s .1s cubic-bezier(.2,1.2,.4,1) both, sway 3.6s 1.2s ease-in-out infinite; }
-  .C .disc { width: 80px; height: 18px; margin-top: -12px; border-radius: 50%; background: radial-gradient(ellipse, var(--cl), var(--c) 35%, transparent 70%); opacity: .8; animation: pop .3s both; }
-  .C .txt { padding-bottom: 12px; display: flex; flex-direction: column; gap: 3px; position: relative; }
-  .C .txt::before { content: ""; position: absolute; inset: -16px -40px -10px -20px; z-index: -1; background: radial-gradient(ellipse at 35% 55%, rgba(0,0,0,.55), transparent 70%); }
-  .C .rule { height: 2px; width: 230px; transform-origin: 0 50%; background: linear-gradient(90deg, var(--c), var(--cl) 40%, transparent); box-shadow: var(--glow, none); animation: draw .4s .3s cubic-bezier(.2,.9,.2,1) both; }
-  .C .name { font-size: 24px; }
-  .C.lv3 .rule { background: linear-gradient(90deg, #ffd36a, var(--c) 30%, var(--cl) 60%, transparent); }
+  /* E. Framed toast: a finished game-UI frame: a beveled item well on the left, the text right, a tab
+     with the rarity sticking up from the top edge, corner gems; the frame's edge lights up around it */
+  .E { position: relative; animation: drop .36s cubic-bezier(.3,1.5,.5,1) both; filter: drop-shadow(0 6px 12px rgba(0,0,0,.7)); }
+  .E .frame { position: relative; display: flex; align-items: center; gap: 14px; padding: 10px 26px 10px 10px; min-width: 300px;
+    background: linear-gradient(#22190f, #110c07); border: 2px solid var(--c); border-radius: 6px;
+    box-shadow: var(--glow, none), inset 0 0 0 1px rgba(0,0,0,.8), inset 0 0 0 3px rgba(255,255,255,.05); }
+  .E .frame::after { content: ""; position: absolute; inset: -2px; border-radius: 6px; pointer-events: none;
+    background: conic-gradient(from 0deg, transparent 0 80%, #fff 88%, transparent 96%) border-box; padding: 2px;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: edge 1s .5s ease-out both; opacity: 0; }
+  @keyframes edge { 0% { opacity: 1; transform: rotate(0) } 100% { opacity: 0 } }
+  .E .well { width: 74px; height: 74px; flex: none; position: relative; border-radius: 4px; display: flex; justify-content: center;
+    background: radial-gradient(circle at 50% 45%, var(--cd), #0a0705 75%); box-shadow: inset 0 2px 6px rgba(0,0,0,.9), 0 0 0 1px var(--c), 0 0 0 3px #0d0905; }
+  .E .well .item { height: 106px; margin-top: -26px; }
+  .E .txt { display: flex; flex-direction: column; gap: 2px; }
+  .E .tabtop { position: absolute; top: -13px; left: 96px; padding: 2px 12px; background: linear-gradient(#2a1f12, #140e08); border: 1px solid var(--c); border-radius: 3px;
+    animation: fadeup .25s .4s both; }
+  .E .gem { position: absolute; width: 8px; height: 8px; transform: rotate(45deg); background: linear-gradient(135deg, #fff, var(--c)); box-shadow: 0 0 6px var(--c); }
+  .E .g1 { top: -5px; right: 14px; } .E .g2 { bottom: -5px; right: 14px; } .E .g3 { bottom: -5px; left: 14px; }
+  .E.lv3 .frame { border-color: #ffd36a; box-shadow: var(--glow), 0 0 0 1px var(--c), inset 0 0 0 1px rgba(0,0,0,.8); }
 </style>
 </head>
 <body>
 <header>
-  <h1>Achievement style, round 10</h1>
-  <p>Three takes on Achievement, each one shape instead of a medallion next to a box. All three can be built from our own textures,
+  <h1>Achievement style, round 11</h1>
+  <p>Capsule (your pick) next to two new takes. Each is one shape instead of a medallion next to a box. All three can be built from our own textures,
     the 3D item, and text. Pick a rarity, then Replay. Epic adds a glow to the rim; Legendary adds a second gold line.</p>
 </header>
 <div class="bar">
@@ -89,9 +106,9 @@
   <span></span><button id="replay">Replay (R)</button>
 </div>
 <div class="grid">
-  <div class="cell"><h2>A. Capsule</h2><p>A round emblem holds the item, which breaks out of its top. The emblem pops in, then opens into a bar to the right that carries the name. One rim runs around the whole shape, and a shine crosses it.</p><div class="scene" id="sA"></div></div>
-  <div class="cell"><h2>B. Plaque</h2><p>A plaque with cut corners drops in, and the item rises out of it. The name is set into the plaque, with a gem on its top edge. Everything is centered.</p><div class="scene" id="sB"></div></div>
-  <div class="cell"><h2>C. Headline</h2><p>No box at all. The item rises onto a small glowing disc, and the text sits beside it over a rule that draws in. A soft shadow behind the text keeps it readable.</p><div class="scene" id="sC"></div></div>
+  <div class="cell"><h2>A. Capsule <em style="color:#ffd36a;font-style:normal;font-size:11px">your pick</em></h2><p>A round emblem holds the item, which breaks out of its top. The emblem pops in, then opens into a bar to the right that carries the name. One rim runs around the whole shape, and a shine crosses it.</p><div class="scene" id="sA"></div></div>
+  <div class="cell"><h2>D. Crest <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A hexagon crest holds the item. A bar with a pointed end runs right, and rarity pips sit under the name (1 for Uncommon, up to 4 for Legendary). A small shield at the end pops in with the item level, like achievement points.</p><div class="scene" id="sD"></div></div>
+  <div class="cell"><h2>E. Framed toast <em style="color:#ffd36a;font-style:normal;font-size:11px">new</em></h2><p>A finished game-style frame. The item stands in a recessed well on the left and breaks out of its top, and a rarity tab sits on the top edge. A light runs once around the frame's edge as it lands.</p><div class="scene" id="sE"></div></div>
 </div>
 <script>
 'use strict';
@@ -110,8 +127,11 @@ function render() {
   const name = `<div class="name t2" style="color:${NAMECOLOR[q]}">Arcanite Reaper</div>`;
   const tag = `<div class="tag t1">${label}</div>`, info = `<div class="info t3">Two-Hand Axe · Item level 63</div>`;
   document.getElementById('sA').innerHTML = `<div class="A ${k}" style="${vars}"><div class="emb">${item}</div><div class="body">${tag}${name}${info}<div class="shine"></div></div></div>`;
-  document.getElementById('sB').innerHTML = `<div class="B ${k}" style="${vars}">${item}<div class="wrap"><div class="gem"></div><div class="plq">${tag}${name}${info}<div class="shine"></div></div></div></div>`;
-  document.getElementById('sC').innerHTML = `<div class="C ${k}" style="${vars}"><div class="stand">${item}<div class="disc"></div></div><div class="txt">${tag}${name}<div class="rule"></div>${info}</div></div>`;
+  const pips = [0, 1, 2, 3].map(i => `<i class="${i <= lv ? '' : 'off'}" style="animation-delay:${(.6 + i * .08).toFixed(2)}s"></i>`).join('');
+  document.getElementById('sD').innerHTML = `<div class="D ${k}" style="${vars}"><div class="hexwrap"><div class="hex"></div>${item}</div>
+    <div class="body">${tag}${name}<div class="pips">${pips}</div><div class="shine"></div></div><div class="shield"><b>63</b></div></div>`;
+  document.getElementById('sE').innerHTML = `<div class="E ${k}" style="${vars}"><div class="frame"><div class="well">${item}</div>
+    <div class="txt">${name}${info}</div><div class="shine"></div><i class="gem g1"></i><i class="gem g2"></i><i class="gem g3"></i></div><div class="tabtop">${tag}</div></div>`;
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
