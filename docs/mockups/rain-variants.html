@@ -44,9 +44,9 @@ const DESC = {
   fountain: '<b>Fountain (today).</b> For comparison: the loot sprays up from your feet; the best goes last and highest, <b>hangs</b> at the top with a glint, then <b>slams</b> down.',
   bang: '<b>Big bang.</b> A point of light swells in the middle of the screen, pulling sparks in, then bursts: everything flies out and bounces off all four edges. <b>Finale, Collapse:</b> the best item stays behind, held in the glowing core while the rest scatters. Then the core collapses into it, it trembles, and it drops straight down onto the middle of the ground with a heavy slam.',
   firework: '<b>Firework.</b> One after another, items shoot up from your feet and burst into sparks of their rarity color at their peak, then float down. <b>Finale, Grand finale:</b> the best goes up last on a thick trail to the top of the screen and bursts biggest, with a ring and a crackle of white pops a beat later. It hangs glowing in the smoke, then slams down.',
-  vortex: '<b>Vortex.</b> A glow at your feet, then the loot <b>erupts upward</b> and is caught by a whirlwind that spins faster and faster before flinging everything outward. <b>Finale, Eye of the storm:</b> the best item spins alone in the eye. When the rest flies off, the funnel tightens around it and lifts it up, spinning faster, then it drills straight down into the ground.',
+  vortex: '<b>Vortex.</b> A glow at your feet, then the loot <b>erupts</b> in a wide fan, and the wind catches each piece mid-flight and eases it into a whirlwind that spins faster and faster. It lets go in one gust, a ring of wind and streaks blowing out, and everything flies off. <b>Finale, Eye of the storm:</b> the best item spins alone in the eye. When the rest flies off, the funnel tightens around it and lifts it up, spinning faster, then it drills straight down into the ground.',
   meteor: '<b>Meteor shower.</b> A glow at your feet, then the loot <b>shoots straight up</b> off the top of the screen. The sky glows at the top edge, and it all comes back down as meteors with burning trails. <b>Finale, The big one:</b> the screen darkens red and a shadow grows on the ground in the middle. The best item comes straight down as the biggest meteor and hits with a flash, three shockwaves, a shower of debris and a hard shake.',
-  fall: '<b>Waterfall.</b> The loot pours over the top edge in a stream and piles up; coins splash. <b>Finale, Last drop:</b> the stream stops, a light appears at the ledge, and the best item teeters there for a moment before it tips over. It falls alone in a long arc to the middle of the ground and lands in a splash crown of droplets in its color, ripples spreading along the ground.',
+  fall: '<b>Waterfall.</b> A glow at your feet, then the loot <b>shoots up in a geyser</b> into a glowing pool by the ledge at the top of the screen. The pool overflows and the loot pours over the edge in a stream, piling up at the bottom; coins splash. <b>Finale, Geyser:</b> the stream runs dry and the pool goes dark. Light wells up under the middle of the pile with ripples spreading out, then the best item bursts up out of it on a geyser of droplets, hangs at the top, and comes down into the middle in a splash crown.',
 };
 const QC = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'];
 const GLYPH = ['🗡️', '🛡️', '⚔️', '💍', '🔮', '🏹', '📜', '🧪', '🦴', '🧵', '👢', '🪓'];
@@ -247,20 +247,23 @@ const MODES = {
   vortex: {
     start(list) { this.cx = W / 2; this.cy = FLOOR() - 170; this.release = WIND + 1.9; this.eyeEnd = this.release + 0.8;
       list.forEach((s, i) => { s.x = W / 2; s.y = FLOOR() - 10; s.at = WIND + i * 0.012; }); },
-    launch(s) { // the eruption from your feet
-      s.vx = R(-220, 220); s.vy = -R(900, 1300); s.vr = R(-8, 8); s.phase = 'erupt'; s.catchAt = t + R(0.22, 0.34);
+    launch(s) { // the eruption from your feet: a fan of loot thrown up and out
+      s.vx = R(-420, 420); s.vy = -R(900, 1350); s.vr = R(-8, 8); s.phase = 'erupt'; s.catchAt = t + R(0.18, 0.42);
       if (s.it.best) { s.vx = 0; s.vy = -900; }
     },
     tick(s, dt) {
       if (s.phase === 'erupt') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.rot += s.vr * dt;
-        if (t >= s.catchAt) { s.phase = 'spin'; s.age = 0; s.fromX = s.x; s.fromY = s.y;
-          s.ang = Math.atan2((s.y - this.cy) / 0.32, s.x - this.cx); s.h = s.it.best ? 0 : R(-90, 90); s.r0 = s.it.best ? 0 : R(60, 110); } return; }
+        if (t >= s.catchAt) { s.phase = 'spin'; s.age = 0; s.fromX = s.x; s.fromY = s.y; s.fvx = s.vx; s.fvy = s.vy;
+          s.ang = Math.atan2((s.y - this.cy) / 0.32, s.x - this.cx); s.h = s.it.best ? 0 : R(-120, 120); s.r0 = s.it.best ? 0 : R(70, 130); } return; }
       if (s.phase === 'spin') {
         s.age += dt;
-        const k = Math.min(1, s.age / 1.0), spin = (4 + 9 * k) * (s.it.best ? 1.6 : 1), blend = Math.min(1, s.age / 0.35);
+        // caught by the wind: it keeps drifting along its own throw while the whirl pulls it in (eased)
+        const k = Math.min(1, s.age / 1.1), spin = (3.5 + 8 * k) * (s.it.best ? 1.6 : 1);
+        const b0 = Math.min(1, s.age / 0.6), blend = b0 * b0 * (3 - 2 * b0);
         s.ang += spin * dt;
-        const r = s.r0 + (s.it.best ? 0 : 90 * k) + s.h * 0.2, y = this.cy + s.h * k + Math.sin(s.ang * 2) * 8;
+        const r = s.r0 + (s.it.best ? 0 : 110 * k) + s.h * 0.25, y = this.cy - 20 * k + s.h * k + Math.sin(s.ang * 2) * 8;
         const px = this.cx + Math.cos(s.ang) * r, py = y + Math.sin(s.ang) * r * 0.32;
+        s.fromX += s.fvx * dt * (1 - blend); s.fromY += s.fvy * dt * (1 - blend); s.fvy += G * dt * (1 - blend);
         const nx = s.fromX + (px - s.fromX) * blend, ny = s.fromY + (py - s.fromY) * blend;
         s.vx = (nx - s.x) / dt; s.vy = (ny - s.y) / dt; s.x = nx; s.y = ny; s.rot += dt * (s.it.best ? 10 : 4);
         s.depth = s.it.best ? 0.5 : Math.sin(s.ang);
@@ -282,6 +285,12 @@ const MODES = {
       physics(s, dt, false);
     },
     impact(s) { dust(s.x, FLOOR(), 40, 2.2); }, // the drill throws up a wide ring of dust
+    pre() { // the release: one gust, a ring blowing out and streaks of wind
+      if (!scene.released && t >= this.release) { scene.released = true; flash = 0.2;
+        waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.5, r: 320, color: '#d8e6ff' });
+        for (let i = 0; i < 24; i++) { const a = Math.random() * Math.PI * 2, sp = R(500, 900);
+          parts.push({ x: this.cx + Math.cos(a) * 60, y: this.cy + Math.sin(a) * 20, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.35, life: 0.4, age: 0, size: 2, color: '#e6f0ff', g: 0, drag: 1.5 }); } }
+    },
     drawPre() {
       if (t < WIND) return feetGlow(t / WIND);
       let k, a, lift = 0, tight = 1;
@@ -326,29 +335,63 @@ const MODES = {
         ctx.strokeStyle = `rgba(255,120,60,${(0.4 + 0.4 * Math.sin(t * 20)) * u})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 30 + 70 * u, 9 + 16 * u, 0, 0, Math.PI * 2); ctx.stroke(); }
     },
   },
+  // Waterfall: a geyser from your feet fills a glowing pool high up; it overflows and pours down.
+  // Finale: the stream runs dry, light wells up under the middle of the pile, and the best bursts up
+  // out of it on a geyser of droplets, hangs, and comes down into the middle in a splash crown
   fall: {
-    start(list) { this.lip = W * 0.3; let last = 0;
-      list.forEach((s, i) => { if (!s.it.best) { s.at = i * (list.length > 25 ? 0.045 : 0.075); last = s.at; }
-        s.x = this.lip + R(-50, 50); s.y = -SIZE; s.vx = R(120, 360); s.vy = R(20, 90); s.vr = R(-3, 3); });
-      this.edgeAt = last + 0.6; this.tipAt = this.edgeAt + 0.6;
-      sprites[sprites.length - 1].at = this.edgeAt; },
-    launch(s) { if (s.it.best) { s.phase = 'edge'; s.x = this.lip; s.y = 22; s.glow = 1; } },
+    start(list) {
+      this.lip = W * 0.3; this.poolY = 46;
+      const n = list.length - 1, up = WIND, rise = 0.5, fill = up + rise;
+      list.forEach((s, i) => { s.x = W / 2; s.y = FLOOR() - 10;
+        if (!s.it.best) { s.at = up + i * Math.min(0.025, 0.5 / n); s.pourAt = fill + 0.35 + i * (n > 25 ? 0.045 : 0.075); } });
+      const last = fill + 0.35 + n * (n > 25 ? 0.045 : 0.075);
+      this.fillAt = fill; this.dryAt = last + 0.3; this.wellAt = this.dryAt + 0.4; this.surgeAt = this.wellAt + 0.8;
+      sprites[sprites.length - 1].at = this.surgeAt;
+    },
+    launch(s) {
+      if (s.it.best) { // out of the middle of the pile on a geyser of droplets, up to the top, then its hang
+        s.x = W / 2; s.y = FLOOR() - 10; s.vx = 0; s.vy = -Math.sqrt(2 * G * (FLOOR() - H * 0.2)); s.phase = 'rise'; s.glow = 1;
+        flash = 0.25; this.geyser(70); return; }
+      // the geyser: straight up to the pool by the ledge
+      s.phase = 'geyser'; s.vy = -Math.sqrt(2 * G * (FLOOR() - this.poolY)) * R(0.98, 1.02);
+      s.vx = (this.lip - 40 + R(-30, 30) - s.x) / (-s.vy / G);
+    },
+    geyser(n) { const c = BC(); for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + R(-0.25, 0.25), sp = R(400, 1000);
+      parts.push({ x: W / 2 + R(-10, 10), y: FLOOR() - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 1.1), age: 0, size: R(2, 3.5), color: i % 3 ? c : '#ffffff', g: 1300 }); } },
     tick(s, dt) {
-      if (s.phase === 'edge') { // teetering at the ledge
-        const u = (t - this.edgeAt) / (this.tipAt - this.edgeAt); s.rot = Math.sin(t * 14) * 0.25 * u; s.x = this.lip + Math.sin(t * 7) * 3;
-        if (t >= this.tipAt) { s.phase = null; s.slamming = true; s.vy = -260; s.vx = (W / 2 - s.x) / 0.95; s.vr = 2; }
+      if (s.phase === 'geyser') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.rot += 4 * dt;
+        s.trail.push([s.x, s.y]); if (s.trail.length > 5) s.trail.shift();
+        if (s.vy >= 0) { s.phase = 'pool'; s.trail.length = 0; s.px = this.lip - 40 + R(-40, 30); s.py = this.poolY + R(-4, 8); } return; }
+      if (s.phase === 'pool') { // bobbing in the pool until its turn to pour over
+        s.x += (s.px - s.x) * Math.min(1, dt * 6); s.y += (s.py + Math.sin(t * 5 + s.px) * 2 - s.y) * Math.min(1, dt * 6);
+        if (t >= s.pourAt) { s.phase = null; s.x = this.lip + R(-10, 10); s.vx = R(120, 360); s.vy = R(20, 90); s.vr = R(-3, 3); }
         return; }
+      if (s.phase === 'rise') { s.vy += G * dt; s.y += s.vy * dt; if (s.vy >= 0) startHang(s, 0.55); return; }
+      if (s.it.best && s.phase) return hangThenSlam(s, dt);
       physics(s, dt, false);
+    },
+    pre(dt) { // light welling up under the pile: ripples spreading from the middle
+      if (t >= this.wellAt && t < this.surgeAt) { scene.ripT = (scene.ripT || 0) - dt;
+        if (scene.ripT <= 0) { scene.ripT = 0.22; waves.push({ x: W / 2, y: FLOOR(), age: 0, life: 0.7, r: 150, color: BC(), ripple: true }); } }
     },
     impact(s) { // the splash crown and ripples
       const c = BC();
       for (let i = 0; i < 34; i++) { const a = -Math.PI / 2 + R(-0.7, 0.7), sp = R(280, 520); parts.push({ x: s.x + R(-8, 8), y: FLOOR() - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 0.9), age: 0, size: R(2, 3.5), color: c, g: 1100 }); }
       for (let i = 0; i < 3; i++) waves.push({ x: s.x, y: FLOOR(), age: -i * 0.15, life: 0.9, r: 200 + i * 60, color: c, ripple: true });
     },
-    drawPre() { ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(this.lip - 60, 0, 120, 6);
-      if (t > this.edgeAt - 0.3 && t < this.tipAt) { const u = Math.min(1, (t - this.edgeAt + 0.3) / 0.3);
-        const g = ctx.createRadialGradient(this.lip, 20, 0, this.lip, 20, 70); g.addColorStop(0, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.globalAlpha = 0.7 * u; ctx.fillStyle = g; ctx.fillRect(this.lip - 70, 0, 140, 90); ctx.globalAlpha = 1; } },
+    drawPre() {
+      if (t < WIND) return feetGlow(t / WIND);
+      // the pool by the ledge: glows while it holds loot, dims as it runs dry
+      const a = t < this.fillAt ? Math.max(0, (t - WIND) / 0.5) : t < this.dryAt ? 1 : Math.max(0, 1 - (t - this.dryAt) / 0.4);
+      if (a > 0) { const g = ctx.createRadialGradient(this.lip - 40, this.poolY + 10, 0, this.lip - 40, this.poolY + 10, 110);
+        g.addColorStop(0, 'rgba(140,200,255,.35)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.globalAlpha = a; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.ellipse(this.lip - 40, this.poolY + 14, 110, 26, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(200,230,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(this.lip - 140, this.poolY + 24); ctx.lineTo(this.lip + 8, this.poolY + 24); ctx.stroke(); ctx.globalAlpha = 1; }
+      if (t >= this.wellAt && t < this.surgeAt + 0.15) { // the glow under the middle of the pile
+        const u = Math.min(1, (t - this.wellAt) / (this.surgeAt - this.wellAt));
+        const g = ctx.createRadialGradient(W / 2, FLOOR(), 0, W / 2, FLOOR(), 40 + 100 * u); g.addColorStop(0, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalAlpha = 0.8 * u; ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 40 + 100 * u, 14 + 30 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+    },
   },
 };
 
