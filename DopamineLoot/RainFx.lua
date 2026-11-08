@@ -55,6 +55,7 @@ local function Create()
   FxToggle(cat, "Calm")
 
   N.Header(layout, "How it comes out")
+  ns.RainStyle() -- (moves an old Waterfall setting over to the Geyser before the choice reads it)
   local styles, tips = {}, {}
   for _, s in ipairs(ns.RAIN_STYLES) do
     styles[#styles + 1] = { s.key, s.label }

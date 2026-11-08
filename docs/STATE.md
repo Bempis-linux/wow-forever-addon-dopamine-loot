@@ -63,11 +63,17 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   2. an edit mode to drag the popups and the money tally into place; 3. stats: loot streak, session tally.
   Dungeon recap stays on the roadmap. Popup sounds per arrival (4) waits.
   **Built 2026-11-07, untested in game:** the rain animations (setting `rainStyle`, "Animation" under "How it
-  comes out" on the Loot rain page): Fountain (default, unchanged), Big bang (0.75 s wind-up at screen center,
-  pulled-in motes, dim, flash; bounces off all four edges via bounds.top), Firework, Vortex, Meteor shower,
-  Waterfall (picked in docs/mockups/rain-variants.html; the user liked all, slot reels rejected). Code: STYLE /
-  StyleLaunch / *Ctl controllers in Rain.lua; Core.Step got `gmul` (gravity multiplier; `s.g` is the green
-  channel!) and an optional ceiling. Next on the list after testing: mail / craft finales (verify APIs first).
+  comes out" on the Loot rain page), from docs/mockups/rain-variants.html round 4, each with a finale of its
+  own for the best item (Uncommon+): Fountain (default, unchanged: hang + slam); Big bang (wind-up at screen
+  center, bounces off all four edges; best held in the core, which collapses into it, then drops and slams);
+  Firework (best: biggest burst + crackle, hangs, slams); Vortex (erupts from your feet into the whirl, one
+  gust at release; best spins in the eye, lifted, drills down); Meteor shower (loot shoots up off the top,
+  falls back as meteors; warning (red dim, shadow), then the big one); Geyser (replaced Waterfall, "the
+  animations don't feel like they belong": rumbles, two jets, the tallest jet carries the best; splash crown).
+  The user: first version's hit-stop + shake ending felt awkward, so every animation got its own finale.
+  Code: STYLE / StyleLaunch / *Ctl controllers / StyleFrame / StyleImpact in Rain.lua; Core.Step got `gmul`
+  (gravity multiplier; `s.g` is the green channel!) and an optional ceiling. The Hang switch still gates the
+  hang in Firework and Geyser. Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
   (gitignored). It acts on nothing; never act on player text without the user.
