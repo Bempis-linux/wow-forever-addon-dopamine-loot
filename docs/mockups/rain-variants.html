@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loot Rain Variants</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0; color: var(--muted); max-width: 980px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button:hover { background: #3a3020; } button.on { background: #4a3c1c; border-color: #b08a3a; }
+  #play { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .wrap { padding: 0 18px 10px; }
+  canvas { display: block; width: 100%; height: 520px; border: 1px solid #3a3426; border-radius: 6px;
+    background: radial-gradient(ellipse at 50% 85%, #3d4a36, #1b2219 60%, #0f130e); }
+  #desc { padding: 0 18px 18px; color: #c9c1ac; max-width: 980px; min-height: 40px; }
+  #desc b { color: var(--gold); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Loot rain variants</h1>
+  <p>Five new ways for the loot to arrive. Pick one, a haul size and the best rarity, then Play (or Space). One scene at a time, no sound.</p>
+</header>
+<div class="bar">
+  <span>Animation</span>
+  <button data-mode="bang" class="on">Big bang</button><button data-mode="firework">Firework</button><button data-mode="vortex">Vortex</button><button data-mode="meteor">Meteor shower</button><button data-mode="fall">Waterfall</button>
+  <span>Haul</span>
+  <button data-n="8">8</button><button data-n="20" class="on">20</button><button data-n="40">40</button>
+  <span>Best</span>
+  <button data-best="3">Rare</button><button data-best="4" class="on">Epic</button><button data-best="5">Legendary</button>
+  <button id="play">Play (Space)</button>
+</div>
+<div class="wrap"><canvas id="cv"></canvas></div>
+<div id="desc"></div>
+<script>
+'use strict';
+const DESC = {
+  bang: '<b>Big bang.</b> A flash and a shockwave in the middle of the screen, and the whole haul bursts out at once. Everything hits and bounces off all four edges, losing speed with each bounce, and settles along the bottom. The best item glows as it flies.',
+  firework: '<b>Firework.</b> One after another, each item shoots up from your feet on a bright trail and bursts at its peak into sparks of its rarity color (bigger the rarer). The item then floats down out of its burst and lands. The best one goes last and highest.',
+  vortex: '<b>Vortex.</b> The loot spins up out of the ground into a widening whirlwind above you, faster and faster, then flings outward all at once and lands around you.',
+  meteor: '<b>Meteor shower.</b> Loot falls in from the top of the screen at a slant with burning trails and hits the ground in a puff of dust. The best item comes last as the biggest meteor, with a heavier impact.',
+  fall: '<b>Waterfall.</b> The loot pours over the top edge in a stream, like water over a ledge, and piles up at the bottom. Coins splash as they land.',
+};
+const QC = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'];
+const GLYPH = ['🗡️', '🛡️', '⚔️', '💍', '🔮', '🏹', '📜', '🧪', '🦴', '🧵', '👢', '🪓'];
+const COIN = { gold: ['#ffd84a', '#a8781a'], silver: ['#e8eef4', '#8a96a2'], copper: ['#e8945a', '#8a4a22'] };
+const SIZE = 34, G = 1500;
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let W = 800, H = 520, DPR = 1;
+let mode = 'bang', haul = 20, best = 4;
+let sprites = [], parts = [], waves = [], t = 0, shake = 0, flash = 0, scene = null;
+const R = (a, b) => a + Math.random() * (b - a);
+
+function resize() {
+  DPR = window.devicePixelRatio || 1;
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+const FLOOR = () => H - 46;
+
+// A haul: mostly low rarity, a few blues, the best item, and coins
+function makeHaul() {
+  const list = [];
+  const coins = Math.round(haul * 0.3), items = haul - coins;
+  for (let i = 0; i < items - 1; i++) {
+    const r = Math.random();
+    const q = r < 0.3 ? 0 : r < 0.55 ? 1 : r < 0.85 ? 2 : 3;
+    list.push({ q: Math.min(q, best), glyph: GLYPH[i % GLYPH.length] });
+  }
+  for (let i = 0; i < coins; i++) list.push({ coin: i % 5 === 0 ? 'gold' : i % 2 ? 'silver' : 'copper', q: 1 });
+  list.sort(() => Math.random() - 0.5);
+  list.push({ q: best, glyph: best >= 5 ? '⚔️' : best >= 4 ? '🛡️' : '💍', best: true }); // the best comes last
+  return list;
+}
+function sprite(it) {
+  return { it, x: 0, y: 0, vx: 0, vy: 0, rot: 0, vr: 0, state: 'wait', at: 0, a: 1, s: it.best ? 1.25 : 1, trail: [] };
+}
+
+// physics: gravity, bounces off the walls (and the ceiling when walls are on), the floor brings it to rest
+function physics(s, dt, walls, grav = G) {
+  s.vy += grav * dt;
+  s.x += s.vx * dt; s.y += s.vy * dt; s.rot += s.vr * dt;
+  const half = SIZE * s.s / 2;
+  if (walls) {
+    if (s.x < half) { s.x = half; s.vx = Math.abs(s.vx) * 0.72; s.vr *= -0.8; hitPuff(s, 'wall'); }
+    if (s.x > W - half) { s.x = W - half; s.vx = -Math.abs(s.vx) * 0.72; s.vr *= -0.8; hitPuff(s, 'wall'); }
+    if (s.y < half) { s.y = half; s.vy = Math.abs(s.vy) * 0.72; hitPuff(s, 'wall'); }
+  } else if (s.x < half || s.x > W - half) { s.x = Math.max(half, Math.min(W - half, s.x)); s.vx *= -0.5; }
+  if (s.y > FLOOR() - half) {
+    s.y = FLOOR() - half;
+    if (s.vy > 160) { s.vy = -s.vy * (walls ? 0.45 : 0.32); s.vx *= 0.8; s.vr *= 0.6; if (!s.landed) { s.landed = true; land(s); } }
+    else rest(s);
+  }
+}
+// at rest: slide into the nearest free spot along the floor (a second row on top when it's crowded)
+function rest(s) {
+  s.state = 'rest'; s.vx = s.vy = 0;
+  const step = SIZE + 4, slots = Math.floor((W - 20) / step);
+  let bestSlot = null, bestD = 1e9;
+  for (let row = 0; row < 4 && !bestSlot; row++) {
+    for (let i = 0; i < slots; i++) {
+      const x = 10 + step / 2 + i * step, key = row + ':' + i;
+      if (scene.taken[key]) continue;
+      const d = Math.abs(x - s.x);
+      if (d < bestD && (row === 0 ? d < 160 : d < 90 + row * 40)) { bestD = d; bestSlot = { key, x, y: FLOOR() - SIZE / 2 - row * (SIZE + 2) }; }
+    }
+  }
+  if (!bestSlot) bestSlot = { key: 'x' + Math.random(), x: s.x, y: FLOOR() - SIZE / 2 };
+  scene.taken[bestSlot.key] = true;
+  s.tx = bestSlot.x; s.ty = bestSlot.y - (s.s - 1) * SIZE / 2;
+  s.rot0 = s.rot; s.restT = 0;
+}
+function land(s) {
+  if (mode === 'meteor') { dust(s.x, FLOOR(), s.it.best ? 30 : 10, s.it.best ? 1.8 : 1); if (s.it.best) shake = 0.35; }
+  else if (mode === 'fall' && s.it.coin) splash(s);
+  else dust(s.x, FLOOR(), 4, 0.6);
+}
+function hitPuff(s, kind) { if (Math.hypot(s.vx, s.vy) > 300) for (let i = 0; i < 3; i++) parts.push({ x: s.x, y: s.y, vx: R(-60, 60), vy: R(-60, 60), life: 0.35, age: 0, size: 3, color: '#fff8e0', g: 0 }); }
+function dust(x, y, n, k) { for (let i = 0; i < n; i++) parts.push({ x: x + R(-10, 10), y, vx: R(-140, 140) * k, vy: R(-120, -20) * k, life: R(0.5, 0.9), age: 0, size: R(5, 10) * k, color: '#b8a888', g: 120, soft: true }); }
+function splash(s) { const c = COIN[s.it.coin][0]; for (let i = 0; i < 6; i++) parts.push({ x: s.x, y: FLOOR() - 4, vx: R(-120, 120), vy: R(-260, -120), life: 0.5, age: 0, size: 2.5, color: c, g: 900 }); }
+function burst(x, y, q, big) {
+  const n = [6, 8, 14, 24, 36, 52][q] * (big ? 1.4 : 1);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = R(120, 320) * (q >= 4 ? 1.3 : 1) * (big ? 1.25 : 1);
+    parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 1.1), age: 0, size: R(2, 3.5), color: QC[q] === '#ffffff' ? '#fff4c0' : QC[q], g: 240, drag: 2.2 });
+  }
+  if (q >= 4) waves.push({ x, y, age: 0, life: 0.6, r: 90 * (big ? 1.4 : 1), color: QC[q] });
+}
+
+// each animation: start() places and times the sprites; tick() moves them until they land
+const MODES = {
+  bang: {
+    start(list) {
+      const cx = W / 2, cy = H * 0.45;
+      flash = 1; waves.push({ x: cx, y: cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' });
+      list.forEach(s => { const a = Math.random() * Math.PI * 2, sp = R(700, 1500) * (s.it.best ? 0.8 : 1);
+        s.x = cx; s.y = cy; s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-9, 9); s.state = 'fly'; s.at = 0.05; });
+      burst(cx, cy, best, true);
+    },
+    tick(s, dt) { physics(s, dt, true); },
+  },
+  firework: {
+    start(list) {
+      list.forEach((s, i) => { s.x = W / 2 + R(-20, 20); s.y = FLOOR() - 10; s.state = 'wait';
+        s.at = i * (list.length > 25 ? 0.07 : 0.11) + (s.it.best ? 0.35 : 0);
+        s.apex = H * (s.it.best ? 0.14 : R(0.18, 0.5)); s.vx = R(-200, 200); });
+    },
+    launch(s) { // up to its own peak, aimed across the sky so the bursts spread out (the best one bursts in the middle)
+      s.vy = -Math.sqrt(2 * G * (s.y - s.apex)); s.phase = 'up';
+      const target = s.it.best ? W / 2 : W / 2 + R(-0.4, 0.4) * W;
+      s.vx = (target - s.x) / (-s.vy / G);
+    },
+    tick(s, dt) {
+      if (s.phase === 'up') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 10) s.trail.shift();
+        if (s.vy >= 0) { s.phase = 'float'; burst(s.x, s.y, s.it.coin ? 1 : s.it.q, s.it.best); s.vx = R(-60, 60); s.vy = 0; s.vr = R(-3, 3); if (s.it.best) flash = 0.5; } }
+      else { s.vx *= 1 - 1.5 * dt; s.trail.length = 0; physics(s, dt, false, s.vy > 130 ? G * 0.05 : G * 0.35); } // floats down out of the burst
+    },
+  },
+  vortex: {
+    start(list) {
+      this.cx = W / 2; this.cy = FLOOR() - 170;
+      list.forEach((s, i) => { s.state = 'wait'; s.at = i * 0.02; s.ang = R(0, Math.PI * 2); s.h = R(-90, 90); s.r0 = R(10, 30); });
+      this.release = 1.5;
+    },
+    launch(s) { s.phase = 'spin'; s.age = 0; },
+    tick(s, dt) {
+      if (s.phase === 'spin') {
+        s.age += dt;
+        const k = Math.min(1, s.age / 1.2), spin = 4 + 9 * k;
+        s.ang += spin * dt;
+        const r = s.r0 + 150 * k + s.h * 0.2, y = this.cy + s.h * k + Math.sin(s.ang * 2) * 8;
+        const px = this.cx + Math.cos(s.ang) * r, py = y + Math.sin(s.ang) * r * 0.32 + (1 - k) * 170;
+        s.vx = (px - s.x) / dt; s.vy = (py - s.y) / dt; s.x = px; s.y = py; s.rot += dt * 4;
+        s.depth = Math.sin(s.ang);
+        s.trail.push([s.x, s.y]); if (s.trail.length > 6) s.trail.shift();
+        if (t >= this.release) { s.phase = 'fling'; const out = 1.6; s.vx = Math.cos(s.ang) * 650 * out + R(-60, 60); s.vy = -R(250, 600); s.vr = R(-8, 8); s.trail.length = 0; s.depth = 0; }
+      } else physics(s, dt, false);
+    },
+  },
+  meteor: {
+    start(list) {
+      list.forEach((s, i) => { s.state = 'wait'; s.at = i * (list.length > 25 ? 0.06 : 0.1) + (s.it.best ? 0.5 : 0);
+        s.x = R(W * 0.25, W * 1.05); s.y = -40 - R(0, 80); s.vx = -R(260, 360) * (s.it.best ? 1.2 : 1); s.vy = R(700, 900) * (s.it.best ? 1.15 : 1); });
+    },
+    launch(s) { s.phase = 'fall'; },
+    tick(s, dt) {
+      if (s.phase === 'fall') { s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 14) s.trail.shift();
+        if (Math.random() < 0.5) parts.push({ x: s.x, y: s.y, vx: R(-30, 30), vy: R(-60, 0), life: 0.4, age: 0, size: R(2, 4), color: '#ffb050', g: 0 });
+        if (s.y > FLOOR() - SIZE * s.s / 2) { s.phase = 'land'; s.trail.length = 0; s.vy = 500; s.vx *= 0.35; s.vr = R(-4, 4); } }
+      else physics(s, dt, false);
+    },
+  },
+  fall: {
+    start(list) {
+      this.lip = W * 0.3;
+      list.forEach((s, i) => { s.state = 'wait'; s.at = i * (list.length > 25 ? 0.045 : 0.075) + (s.it.best ? 0.3 : 0);
+        s.x = this.lip + R(-50, 50); s.y = -SIZE; s.vx = R(120, 360); s.vy = R(20, 90); s.vr = R(-3, 3); });
+    },
+    launch(s) { s.phase = 'pour'; },
+    tick(s, dt) { physics(s, dt, false); },
+  },
+};
+
+function start() {
+  sprites = makeHaul().map(sprite); parts = []; waves = []; t = 0; shake = 0; flash = 0;
+  scene = { taken: {} };
+  MODES[mode].start(sprites);
+}
+function update(dt) {
+  t += dt;
+  const M = MODES[mode];
+  for (const s of sprites) {
+    if (s.state === 'wait' && t >= s.at) { s.state = 'fly'; if (M.launch) M.launch(s); }
+    if (s.state === 'fly') M.tick.call(M, s, dt);
+    else if (s.state === 'rest') { s.restT += dt; const k = Math.min(1, s.restT / 0.25); s.x += (s.tx - s.x) * k; s.y += (s.ty - s.y) * k; s.rot = s.rot0 * (1 - k) + Math.round(s.rot0 / (Math.PI * 2)) * Math.PI * 2 * k; s.trail.length = 0; }
+  }
+  for (const p of parts) { p.age += dt; p.vy += (p.g || 0) * dt; if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; } p.x += p.vx * dt; p.y += p.vy * dt; }
+  parts = parts.filter(p => p.age < p.life);
+  for (const w of waves) w.age += dt; waves = waves.filter(w => w.age < w.life);
+  shake = Math.max(0, shake - dt); flash = Math.max(0, flash - dt * 2.2);
+}
+
+function drawSprite(s) {
+  const sz = SIZE * s.s * (s.depth !== undefined ? 1 + 0.12 * (s.depth || 0) : 1);
+  // trails
+  if (s.trail.length > 1) {
+    const col = mode === 'meteor' ? '#ff9a3a' : (s.it.coin ? COIN[s.it.coin][0] : QC[s.it.q]);
+    for (let i = 1; i < s.trail.length; i++) {
+      const [x0, y0] = s.trail[i - 1], [x1, y1] = s.trail[i], k = i / s.trail.length;
+      ctx.strokeStyle = col; ctx.globalAlpha = k * 0.7; ctx.lineWidth = (mode === 'meteor' ? 10 : 5) * k * s.s;
+      ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot);
+  if (s.it.best || s.it.q >= 4) { ctx.shadowColor = QC[s.it.q]; ctx.shadowBlur = 18; }
+  if (s.it.coin) {
+    const [c1, c2] = COIN[s.it.coin], r = sz * 0.36;
+    const g = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 1, 0, 0, r); g.addColorStop(0, '#fff'); g.addColorStop(0.35, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.fillStyle = '#16120c'; ctx.strokeStyle = QC[s.it.q]; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(-sz / 2, -sz / 2, sz, sz, 5); ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+    ctx.font = `${Math.round(sz * 0.6)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(s.it.glyph, 0, 2);
+  }
+  ctx.restore();
+}
+function draw() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  if (shake > 0) ctx.translate(R(-1, 1) * 8 * shake / 0.35, R(-1, 1) * 8 * shake / 0.35);
+  // the ground and you
+  ctx.strokeStyle = 'rgba(255,230,170,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(20, FLOOR() + 0.5); ctx.lineTo(W - 20, FLOOR() + 0.5); ctx.stroke();
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR() + 4, 22, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.font = '40px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText('🧙', W / 2, FLOOR() + 2);
+  if (mode === 'fall') { ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(MODES.fall.lip - 60, 0, 120, 6); }
+  // vortex: a faint funnel while it spins
+  if (mode === 'vortex' && t < MODES.vortex.release + 0.2) {
+    const k = Math.min(1, t / 1.2), a = t < MODES.vortex.release ? 0.25 * k : 0.25 * (1 - (t - MODES.vortex.release) / 0.2);
+    ctx.strokeStyle = `rgba(200,220,255,${a})`; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.ellipse(W / 2, FLOOR() - 20 - i * 40 * k, 20 + i * 32 * k, 6 + i * 9 * k, 0, 0, Math.PI * 2); ctx.stroke(); }
+  }
+  // shockwaves
+  for (const w of waves) { const u = w.age / w.life; ctx.strokeStyle = w.color; ctx.globalAlpha = (1 - u) * 0.8; ctx.lineWidth = 6 * (1 - u) + 1; ctx.beginPath(); ctx.arc(w.x, w.y, w.r * (0.15 + u), 0, Math.PI * 2); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  // sprites: in the vortex, the ones behind first
+  const order = mode === 'vortex' ? [...sprites].sort((a, b) => (a.depth || 0) - (b.depth || 0)) : sprites;
+  for (const s of order) if (s.state !== 'wait') drawSprite(s);
+  // light beams over resting Rare+
+  for (const s of sprites) if (s.state === 'rest' && !s.it.coin && s.it.q >= 3) {
+    const k = Math.min(1, s.restT / 0.5), g = ctx.createLinearGradient(0, s.y, 0, s.y - 160);
+    g.addColorStop(0, QC[s.it.q] + '88'); g.addColorStop(1, QC[s.it.q] + '00');
+    ctx.globalAlpha = k * 0.6; ctx.fillStyle = g; ctx.fillRect(s.x - 10, s.y - 160, 20, 160); ctx.globalAlpha = 1;
+  }
+  // particles
+  for (const p of parts) { const u = p.age / p.life; ctx.globalAlpha = (1 - u) * (p.soft ? 0.5 : 1); ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (p.soft ? 1 + u : 1 - u * 0.5), 0, Math.PI * 2); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  if (flash > 0) { ctx.fillStyle = `rgba(255,248,225,${flash * 0.55})`; ctx.fillRect(0, 0, W, H); }
+}
+
+let last = performance.now();
+function frame(now) { const dt = Math.min(0.033, (now - last) / 1000); last = now; if (scene) update(dt); draw(); requestAnimationFrame(frame); }
+
+function pick(attr, cb) {
+  document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => {
+    document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); start();
+  });
+}
+pick('mode', v => { mode = v; document.getElementById('desc').innerHTML = DESC[v]; });
+pick('n', v => { haul = +v; });
+pick('best', v => { best = +v; });
+document.getElementById('play').onclick = start;
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); start(); } });
+addEventListener('resize', resize);
+resize();
+document.getElementById('desc').innerHTML = DESC[mode];
+start();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
