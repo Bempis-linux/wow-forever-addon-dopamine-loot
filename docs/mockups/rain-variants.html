@@ -18,18 +18,18 @@
   .wrap { padding: 0 18px 10px; }
   canvas { display: block; width: 100%; height: 520px; border: 1px solid #3a3426; border-radius: 6px;
     background: radial-gradient(ellipse at 50% 85%, #3d4a36, #1b2219 60%, #0f130e); }
-  #desc { padding: 0 18px 18px; color: #c9c1ac; max-width: 980px; min-height: 40px; }
+  #desc { padding: 0 18px 18px; color: #c9c1ac; max-width: 980px; min-height: 60px; }
   #desc b { color: var(--gold); }
 </style>
 </head>
 <body>
 <header>
-  <h1>Loot rain variants</h1>
-  <p>Five new ways for the loot to arrive. Pick one, a haul size and the best rarity, then Play (or Space). One scene at a time, no sound.</p>
+  <h1>Loot rain variants, round 2: each with its own finale</h1>
+  <p>The best item now gets a finale of its own in every animation, and Vortex and Meteor shower start with an eruption from your feet, the "I just looted" moment. Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
 </header>
 <div class="bar">
   <span>Animation</span>
-  <button data-mode="bang" class="on">Big bang</button><button data-mode="firework">Firework</button><button data-mode="vortex">Vortex</button><button data-mode="meteor">Meteor shower</button><button data-mode="fall">Waterfall</button>
+  <button data-mode="fountain">Fountain (today)</button><button data-mode="bang" class="on">Big bang</button><button data-mode="firework">Firework</button><button data-mode="vortex">Vortex</button><button data-mode="meteor">Meteor shower</button><button data-mode="fall">Waterfall</button>
   <span>Haul</span>
   <button data-n="8">8</button><button data-n="20" class="on">20</button><button data-n="40">40</button>
   <span>Best</span>
@@ -41,11 +41,12 @@
 <script>
 'use strict';
 const DESC = {
-  bang: '<b>Big bang.</b> First a wind-up: a point of light swells in the middle of the screen, sparks are pulled into it, it trembles and the screen dims, then it pinches small. Then a flash and a shockwave, and the whole haul bursts out at once. Everything hits and bounces off all four edges, losing speed with each bounce, and settles along the bottom. The best item glows as it flies.',
-  firework: '<b>Firework.</b> One after another, each item shoots up from your feet on a bright trail and bursts at its peak into sparks of its rarity color (bigger the rarer). The item then floats down out of its burst and lands. The best one goes last and highest.',
-  vortex: '<b>Vortex.</b> The loot spins up out of the ground into a widening whirlwind above you, faster and faster, then flings outward all at once and lands around you.',
-  meteor: '<b>Meteor shower.</b> Loot falls in from the top of the screen at a slant with burning trails and hits the ground in a puff of dust. The best item comes last as the biggest meteor, with a heavier impact.',
-  fall: '<b>Waterfall.</b> The loot pours over the top edge in a stream, like water over a ledge, and piles up at the bottom. Coins splash as they land.',
+  fountain: '<b>Fountain (today).</b> For comparison: the loot sprays up from your feet; the best goes last and highest, <b>hangs</b> at the top with a glint, then <b>slams</b> down.',
+  bang: '<b>Big bang.</b> A point of light swells in the middle of the screen, pulling sparks in, then bursts: everything flies out and bounces off all four edges. <b>Finale, Collapse:</b> the best item stays behind, held in the glowing core while the rest scatters. Then the core collapses into it, it trembles, and it drops straight down onto the middle of the ground with a heavy slam.',
+  firework: '<b>Firework.</b> One after another, items shoot up from your feet and burst into sparks of their rarity color at their peak, then float down. <b>Finale, Grand finale:</b> the best goes up last on a thick trail to the top of the screen and bursts biggest, with a ring and a crackle of white pops a beat later. It hangs glowing in the smoke, then slams down.',
+  vortex: '<b>Vortex.</b> A glow at your feet, then the loot <b>erupts upward</b> and is caught by a whirlwind that spins faster and faster before flinging everything outward. <b>Finale, Eye of the storm:</b> the best item spins alone in the eye. When the rest flies off, the funnel tightens around it and lifts it up, spinning faster, then it drills straight down into the ground.',
+  meteor: '<b>Meteor shower.</b> A glow at your feet, then the loot <b>shoots straight up</b> off the top of the screen. The sky glows at the top edge, and it all comes back down as meteors with burning trails. <b>Finale, The big one:</b> the screen darkens red and a shadow grows on the ground in the middle. The best item comes straight down as the biggest meteor and hits with a flash, three shockwaves, a shower of debris and a hard shake.',
+  fall: '<b>Waterfall.</b> The loot pours over the top edge in a stream and piles up; coins splash. <b>Finale, Last drop:</b> the stream stops, a light appears at the ledge, and the best item teeters there for a moment before it tips over. It falls alone in a long arc to the middle of the ground and lands in a splash crown of droplets in its color, ripples spreading along the ground.',
 };
 const QC = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'];
 const GLYPH = ['🗡️', '🛡️', '⚔️', '💍', '🔮', '🏹', '📜', '🧪', '🦴', '🧵', '👢', '🪓'];
@@ -54,8 +55,9 @@ const SIZE = 34, G = 1500;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 800, H = 520, DPR = 1;
 let mode = 'bang', haul = 20, best = 4;
-let sprites = [], parts = [], waves = [], t = 0, shake = 0, flash = 0, scene = null;
+let sprites = [], parts = [], waves = [], t = 0, shake = 0, shakeMax = 0.35, flash = 0, scene = null;
 const R = (a, b) => a + Math.random() * (b - a);
+const BC = () => QC[best] === '#ffffff' ? '#fff4c0' : QC[best];
 
 function resize() {
   DPR = window.devicePixelRatio || 1;
@@ -65,174 +67,288 @@ function resize() {
 }
 const FLOOR = () => H - 46;
 
-// A haul: mostly low rarity, a few blues, the best item, and coins
 function makeHaul() {
   const list = [];
   const coins = Math.round(haul * 0.3), items = haul - coins;
   for (let i = 0; i < items - 1; i++) {
     const r = Math.random();
     const q = r < 0.3 ? 0 : r < 0.55 ? 1 : r < 0.85 ? 2 : 3;
-    list.push({ q: Math.min(q, best), glyph: GLYPH[i % GLYPH.length] });
+    list.push({ q: Math.min(q, best - 1), glyph: GLYPH[i % GLYPH.length] });
   }
   for (let i = 0; i < coins; i++) list.push({ coin: i % 5 === 0 ? 'gold' : i % 2 ? 'silver' : 'copper', q: 1 });
   list.sort(() => Math.random() - 0.5);
-  list.push({ q: best, glyph: best >= 5 ? '⚔️' : best >= 4 ? '🛡️' : '💍', best: true }); // the best comes last
+  list.push({ q: best, glyph: best >= 5 ? '⚔️' : best >= 4 ? '🛡️' : '💍', best: true });
   return list;
 }
-function sprite(it) {
-  return { it, x: 0, y: 0, vx: 0, vy: 0, rot: 0, vr: 0, state: 'wait', at: 0, a: 1, s: it.best ? 1.25 : 1, trail: [] };
-}
+function sprite(it) { return { it, x: 0, y: 0, vx: 0, vy: 0, rot: 0, vr: 0, state: 'wait', at: 0, s: it.best ? 1.25 : 1, trail: [], glow: 0 }; }
 
-// physics: gravity, bounces off the walls (and the ceiling when walls are on), the floor brings it to rest
 function physics(s, dt, walls, grav = G) {
   s.vy += grav * dt;
   s.x += s.vx * dt; s.y += s.vy * dt; s.rot += s.vr * dt;
   const half = SIZE * s.s / 2;
   if (walls) {
-    if (s.x < half) { s.x = half; s.vx = Math.abs(s.vx) * 0.72; s.vr *= -0.8; hitPuff(s, 'wall'); }
-    if (s.x > W - half) { s.x = W - half; s.vx = -Math.abs(s.vx) * 0.72; s.vr *= -0.8; hitPuff(s, 'wall'); }
-    if (s.y < half) { s.y = half; s.vy = Math.abs(s.vy) * 0.72; hitPuff(s, 'wall'); }
+    if (s.x < half) { s.x = half; s.vx = Math.abs(s.vx) * 0.72; }
+    if (s.x > W - half) { s.x = W - half; s.vx = -Math.abs(s.vx) * 0.72; }
+    if (s.y < half) { s.y = half; s.vy = Math.abs(s.vy) * 0.72; }
   } else if (s.x < half || s.x > W - half) { s.x = Math.max(half, Math.min(W - half, s.x)); s.vx *= -0.5; }
   if (s.y > FLOOR() - half) {
     s.y = FLOOR() - half;
-    if (s.vy > 160) { s.vy = -s.vy * (walls ? 0.45 : 0.32); s.vx *= 0.8; s.vr *= 0.6; if (!s.landed) { s.landed = true; land(s); } }
-    else rest(s);
+    if (s.vy > 160) {
+      const hit = !s.landed; s.landed = true;
+      s.vy = -s.vy * (s.slamming ? 0.18 : walls ? 0.45 : 0.32); s.vx *= 0.8; s.vr *= 0.6;
+      if (hit) land(s);
+    } else rest(s);
   }
 }
-// at rest: slide into the nearest free spot along the floor (a second row on top when it's crowded)
 function rest(s) {
   s.state = 'rest'; s.vx = s.vy = 0;
+  if (s.it.best) { s.tx = W / 2; s.ty = FLOOR() - SIZE * s.s / 2; s.rot0 = s.rot; s.restT = 0; return; }
   const step = SIZE + 4, slots = Math.floor((W - 20) / step);
   let bestSlot = null, bestD = 1e9;
   for (let row = 0; row < 4 && !bestSlot; row++) {
     for (let i = 0; i < slots; i++) {
       const x = 10 + step / 2 + i * step, key = row + ':' + i;
-      if (scene.taken[key]) continue;
+      if (scene.taken[key] || (row === 0 && Math.abs(x - W / 2) < SIZE)) continue; // (the middle is the best's)
       const d = Math.abs(x - s.x);
       if (d < bestD && (row === 0 ? d < 160 : d < 90 + row * 40)) { bestD = d; bestSlot = { key, x, y: FLOOR() - SIZE / 2 - row * (SIZE + 2) }; }
     }
   }
   if (!bestSlot) bestSlot = { key: 'x' + Math.random(), x: s.x, y: FLOOR() - SIZE / 2 };
   scene.taken[bestSlot.key] = true;
-  s.tx = bestSlot.x; s.ty = bestSlot.y - (s.s - 1) * SIZE / 2;
+  s.tx = bestSlot.x; s.ty = bestSlot.y;
   s.rot0 = s.rot; s.restT = 0;
 }
 function land(s) {
-  if (mode === 'meteor') { dust(s.x, FLOOR(), s.it.best ? 30 : 10, s.it.best ? 1.8 : 1); if (s.it.best) shake = 0.35; }
-  else if (mode === 'fall' && s.it.coin) splash(s);
+  if (s.it.best && s.slamming) return slam(s);
+  if (s.meteor) dust(s.x, FLOOR(), 10, 1);
+  else if (mode === 'fall' && s.it.coin) splash(s.x, COIN[s.it.coin][0], 6, 1);
   else dust(s.x, FLOOR(), 4, 0.6);
 }
-function hitPuff(s, kind) { if (Math.hypot(s.vx, s.vy) > 300) for (let i = 0; i < 3; i++) parts.push({ x: s.x, y: s.y, vx: R(-60, 60), vy: R(-60, 60), life: 0.35, age: 0, size: 3, color: '#fff8e0', g: 0 }); }
+// the best's impact (every finale ends on one; some add their own touch)
+function slam(s) {
+  const c = BC(), big = best >= 5 ? 1.5 : best >= 4 ? 1.2 : 1;
+  waves.push({ x: s.x, y: FLOOR(), age: 0, life: 0.55, r: 170 * big, color: c, dome: true });
+  waves.push({ x: s.x, y: FLOOR(), age: -0.08, life: 0.45, r: 100 * big, color: '#ffffff', dome: true });
+  if (best >= 4) waves.push({ x: s.x, y: FLOOR(), age: -0.14, life: 0.8, r: 270 * big, color: c, dome: true });
+  for (let i = 0; i < 26 * big; i++) { const a = -Math.PI / 2 + R(-1.1, 1.1), sp = R(200, 520) * big;
+    parts.push({ x: s.x, y: FLOOR() - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.5, 0.9), age: 0, size: R(2, 3.5), color: c, g: 900 }); }
+  dust(s.x, FLOOR(), 16, 1.4);
+  shake = shakeMax = 0.3 * big;
+  if (MODES[mode].impact) MODES[mode].impact(s);
+}
 function dust(x, y, n, k) { for (let i = 0; i < n; i++) parts.push({ x: x + R(-10, 10), y, vx: R(-140, 140) * k, vy: R(-120, -20) * k, life: R(0.5, 0.9), age: 0, size: R(5, 10) * k, color: '#b8a888', g: 120, soft: true }); }
-function splash(s) { const c = COIN[s.it.coin][0]; for (let i = 0; i < 6; i++) parts.push({ x: s.x, y: FLOOR() - 4, vx: R(-120, 120), vy: R(-260, -120), life: 0.5, age: 0, size: 2.5, color: c, g: 900 }); }
+function splash(x, c, n, k) { for (let i = 0; i < n; i++) parts.push({ x, y: FLOOR() - 4, vx: R(-120, 120) * k, vy: R(-260, -120) * k, life: 0.5, age: 0, size: 2.5, color: c, g: 900 }); }
 function burst(x, y, q, big) {
-  const n = [6, 8, 14, 24, 36, 52][q] * (big ? 1.4 : 1);
+  const n = [6, 8, 14, 24, 36, 52][q] * (big ? 1.6 : 1), c = QC[q] === '#ffffff' ? '#fff4c0' : QC[q];
   for (let i = 0; i < n; i++) {
-    const a = Math.random() * Math.PI * 2, sp = R(120, 320) * (q >= 4 ? 1.3 : 1) * (big ? 1.25 : 1);
-    parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 1.1), age: 0, size: R(2, 3.5), color: QC[q] === '#ffffff' ? '#fff4c0' : QC[q], g: 240, drag: 2.2 });
+    const a = Math.random() * Math.PI * 2, sp = R(120, 320) * (q >= 4 ? 1.3 : 1) * (big ? 1.35 : 1);
+    parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 1.1) * (big ? 1.4 : 1), age: 0, size: R(2, 3.5), color: c, g: 240, drag: 2.2 });
   }
-  if (q >= 4) waves.push({ x, y, age: 0, life: 0.6, r: 90 * (big ? 1.4 : 1), color: QC[q] });
+  if (q >= 4 || big) waves.push({ x, y, age: 0, life: 0.6, r: 90 * (big ? 1.6 : 1), color: c });
+}
+function pullMotes(x, y, dt, rate, reach) {
+  scene.moteT = (scene.moteT || 0) - dt;
+  while (scene.moteT <= 0) { scene.moteT += rate;
+    const a = Math.random() * Math.PI * 2, d = R(reach * 0.6, reach);
+    parts.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, tx: x, ty: y, pull: true, life: 0.35, age: 0, size: R(1.5, 3), color: BC() }); }
+}
+// the fountain's finale, which others reuse: hold at the top (time nearly stops), then slam down
+function hangThenSlam(s, dt, hold) {
+  if (s.phase === 'hang') {
+    s.hangT -= dt;
+    s.glow = Math.min(1, s.glow + dt * 4);
+    if (s.hangT <= 0) { s.phase = 'slam'; s.slamming = true; s.vy = 200; s.vx = 0; }
+    return;
+  }
+  s.vy += G * 2.2 * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 8) s.trail.shift();
+  if (s.y > FLOOR() - SIZE * s.s / 2) { s.trail.length = 0; s.phase = null; physics(s, 0, false); }
+}
+function startHang(s, hold) { s.phase = 'hang'; s.hangT = hold; s.vx = 0; s.vy = 0; s.vr = 0; }
+function feetGlow(u) { // the ground wind-up: a glow swelling at your feet
+  const g = ctx.createRadialGradient(W / 2, FLOOR(), 0, W / 2, FLOOR(), 30 + 90 * u);
+  g.addColorStop(0, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.globalAlpha = 0.85 * u; ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 30 + 90 * u, 12 + 30 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
 }
 
-// each animation: start() places and times the sprites; tick() moves them until they land
+const WIND = 0.4; // the ground wind-up
 const MODES = {
-  // the wind-up (WIND s): a point of light swells in the middle, motes of light are pulled into it,
-  // it trembles and the screen dims a little; it pinches small, then bursts
+  fountain: {
+    start(list) { list.forEach((s, i) => { s.x = W / 2; s.y = FLOOR() - 10; s.at = WIND + (s.it.best ? i * 0.07 + 0.5 : i * 0.07); }); },
+    launch(s) { s.y = FLOOR() - 10; s.x = W / 2 + R(-15, 15);
+      if (s.it.best) { s.vx = 0; s.vy = -Math.sqrt(2 * G * (FLOOR() - H * 0.15)); s.phase = 'rise'; }
+      else { s.vx = R(-320, 320); s.vy = -R(800, 1150); s.vr = R(-8, 8); } },
+    tick(s, dt) {
+      if (s.it.best && s.phase === 'rise') { s.vy += G * dt; s.y += s.vy * dt; if (s.vy >= 0) startHang(s, 0.5); return; }
+      if (s.it.best && s.phase) return hangThenSlam(s, dt);
+      physics(s, dt, false);
+    },
+    drawPre() { if (t < WIND) feetGlow(t / WIND); },
+  },
   bang: {
     WIND: 0.75,
-    start(list) {
-      this.cx = W / 2; this.cy = H * 0.45; this.banged = false; this.nextMote = 0;
-      list.forEach(s => { s.x = this.cx; s.y = this.cy; s.state = 'wait'; s.at = this.WIND; });
-    },
+    start(list) { this.cx = W / 2; this.cy = H * 0.45; this.banged = false; this.collapseAt = this.WIND + 1.2;
+      list.forEach(s => { s.x = this.cx; s.y = this.cy; s.at = this.WIND; }); },
     launch(s) {
-      if (!this.banged) { // the first one out sets off the bang
-        this.banged = true; flash = 1; shake = 0.2;
-        waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' });
-        burst(this.cx, this.cy, best, true);
-      }
-      const a = Math.random() * Math.PI * 2, sp = R(700, 1500) * (s.it.best ? 0.8 : 1);
+      if (!this.banged) { this.banged = true; flash = 1; shake = shakeMax = 0.2;
+        waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' }); burst(this.cx, this.cy, best, true); }
+      if (s.it.best) { s.phase = 'held'; return; } // (it stays in the core)
+      const a = Math.random() * Math.PI * 2, sp = R(700, 1500);
       s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-9, 9);
     },
-    pre(dt) { // every frame before the bang: motes pulled inward
-      if (t >= this.WIND) return;
-      this.nextMote -= dt;
-      while (this.nextMote <= 0) {
-        this.nextMote += 0.012;
-        const a = Math.random() * Math.PI * 2, d = R(140, 260);
-        parts.push({ x: this.cx + Math.cos(a) * d, y: this.cy + Math.sin(a) * d, tx: this.cx, ty: this.cy, pull: true, life: 0.35, age: 0, size: R(1.5, 3), color: QC[best] === '#ffffff' ? '#fff4c0' : QC[best] });
-      }
+    pre(dt) {
+      if (t < this.WIND) pullMotes(this.cx, this.cy, dt, 0.012, 260);
+      else if (t > this.collapseAt - 0.3 && t < this.collapseAt) pullMotes(this.cx, this.cy, dt, 0.008, 160);
     },
-    drawPre() { // the core: swells, trembles, pinches small just before the bang
-      if (t >= this.WIND) return;
-      const u = t / this.WIND, pinch = u > 0.85 ? 1 - (u - 0.85) / 0.15 * 0.7 : 1;
-      const r = (6 + 26 * u * u) * pinch, j = 2.5 * u;
-      const x = this.cx + R(-j, j), y = this.cy + R(-j, j);
-      ctx.fillStyle = `rgba(0,0,0,${0.25 * u})`; ctx.fillRect(0, 0, W, H);
+    tick(s, dt) {
+      if (!s.it.best) return physics(s, dt, true);
+      if (s.phase === 'held') { // held in the core, bobbing gently; it trembles as the core collapses
+        const k = t > this.collapseAt - 0.3 ? (t - (this.collapseAt - 0.3)) / 0.3 : 0;
+        s.x = this.cx + R(-1, 1) * 4 * k; s.y = this.cy + Math.sin(t * 3) * 3; s.glow = 1;
+        if (t >= this.collapseAt) { s.phase = 'drop'; s.slamming = true; s.vy = 0; flash = 0.35; waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.35, r: 70, color: BC() }); }
+        return;
+      }
+      if (s.phase === 'drop') {
+        s.vy += G * 2.5 * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 8) s.trail.shift();
+        if (s.y > FLOOR() - SIZE * s.s / 2) { s.trail.length = 0; s.phase = null; physics(s, 0, false); }
+        return;
+      }
+      physics(s, dt, true);
+    },
+    drawPre() {
+      let u, r;
+      if (t < this.WIND) { u = t / this.WIND; const pinch = u > 0.85 ? 1 - (u - 0.85) / 0.15 * 0.7 : 1; r = (6 + 26 * u * u) * pinch;
+        ctx.fillStyle = `rgba(0,0,0,${0.25 * u})`; ctx.fillRect(0, 0, W, H); }
+      else if (t < this.collapseAt) { u = 1; const k = (t - this.WIND) / (this.collapseAt - this.WIND); r = t > this.collapseAt - 0.3 ? 30 * (this.collapseAt - t) / 0.3 : 30 + 6 * Math.sin(t * 6) * (1 - k * 0.3); }
+      else return;
+      const j = 2.5 * u, x = this.cx + R(-j, j), y = this.cy + R(-j, j);
       const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
-      g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, QC[best]); g.addColorStop(1, 'rgba(0,0,0,0)');
+      g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
     },
-    tick(s, dt) { physics(s, dt, true); },
   },
   firework: {
-    start(list) {
-      list.forEach((s, i) => { s.x = W / 2 + R(-20, 20); s.y = FLOOR() - 10; s.state = 'wait';
-        s.at = i * (list.length > 25 ? 0.07 : 0.11) + (s.it.best ? 0.35 : 0);
-        s.apex = H * (s.it.best ? 0.14 : R(0.18, 0.5)); s.vx = R(-200, 200); });
-    },
-    launch(s) { // up to its own peak, aimed across the sky so the bursts spread out (the best one bursts in the middle)
-      s.vy = -Math.sqrt(2 * G * (s.y - s.apex)); s.phase = 'up';
-      const target = s.it.best ? W / 2 : W / 2 + R(-0.4, 0.4) * W;
-      s.vx = (target - s.x) / (-s.vy / G);
-    },
+    start(list) { list.forEach((s, i) => { s.x = W / 2; s.y = FLOOR() - 10; s.at = WIND + i * (list.length > 25 ? 0.07 : 0.11) + (s.it.best ? 0.45 : 0);
+      s.apex = H * (s.it.best ? 0.12 : R(0.18, 0.5)); }); },
+    launch(s) { s.y = FLOOR() - 10; s.vy = -Math.sqrt(2 * G * (s.y - s.apex)); s.phase = 'up';
+      s.vx = ((s.it.best ? W / 2 : W / 2 + R(-0.4, 0.4) * W) - s.x) / (-s.vy / G); },
     tick(s, dt) {
-      if (s.phase === 'up') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 10) s.trail.shift();
-        if (s.vy >= 0) { s.phase = 'float'; burst(s.x, s.y, s.it.coin ? 1 : s.it.q, s.it.best); s.vx = R(-60, 60); s.vy = 0; s.vr = R(-3, 3); if (s.it.best) flash = 0.5; } }
-      else { s.vx *= 1 - 1.5 * dt; s.trail.length = 0; physics(s, dt, false, s.vy > 130 ? G * 0.05 : G * 0.35); } // floats down out of the burst
+      if (s.phase === 'up') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > (s.it.best ? 16 : 10)) s.trail.shift();
+        if (s.vy >= 0) { s.trail.length = 0; burst(s.x, s.y, s.it.coin ? 1 : s.it.q, s.it.best);
+          if (s.it.best) { flash = 0.5; startHang(s, 0.7); scene.crackleAt = t + 0.25; scene.cx = s.x; scene.cy = s.y; }
+          else { s.phase = 'float'; s.vx = R(-60, 60); s.vy = 0; s.vr = R(-3, 3); } } return; }
+      if (s.it.best) return hangThenSlam(s, dt);
+      s.vx *= 1 - 1.5 * dt; physics(s, dt, false, s.vy > 130 ? G * 0.05 : G * 0.35);
     },
+    pre() { if (scene.crackleAt && t >= scene.crackleAt) { scene.crackleAt = null; // the crackle: white pops all around the big burst
+      for (let i = 0; i < 16; i++) { const a = Math.random() * Math.PI * 2, d = R(50, 150), x = scene.cx + Math.cos(a) * d, y = scene.cy + Math.sin(a) * d * 0.8, d0 = R(0, 0.3);
+        for (let k = 0; k < 5; k++) { const b = Math.random() * Math.PI * 2; parts.push({ x, y, vx: Math.cos(b) * 60, vy: Math.sin(b) * 60, life: 0.35, age: -d0, size: 2.2, color: '#ffffff', g: 0 }); } } } },
+    drawPre() { if (t < WIND) feetGlow(t / WIND); },
   },
   vortex: {
-    start(list) {
-      this.cx = W / 2; this.cy = FLOOR() - 170;
-      list.forEach((s, i) => { s.state = 'wait'; s.at = i * 0.02; s.ang = R(0, Math.PI * 2); s.h = R(-90, 90); s.r0 = R(10, 30); });
-      this.release = 1.5;
+    start(list) { this.cx = W / 2; this.cy = FLOOR() - 170; this.release = WIND + 1.9; this.eyeEnd = this.release + 0.8;
+      list.forEach((s, i) => { s.x = W / 2; s.y = FLOOR() - 10; s.at = WIND + i * 0.012; }); },
+    launch(s) { // the eruption from your feet
+      s.vx = R(-220, 220); s.vy = -R(900, 1300); s.vr = R(-8, 8); s.phase = 'erupt'; s.catchAt = t + R(0.22, 0.34);
+      if (s.it.best) { s.vx = 0; s.vy = -900; }
     },
-    launch(s) { s.phase = 'spin'; s.age = 0; },
     tick(s, dt) {
+      if (s.phase === 'erupt') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.rot += s.vr * dt;
+        if (t >= s.catchAt) { s.phase = 'spin'; s.age = 0; s.fromX = s.x; s.fromY = s.y;
+          s.ang = Math.atan2((s.y - this.cy) / 0.32, s.x - this.cx); s.h = s.it.best ? 0 : R(-90, 90); s.r0 = s.it.best ? 0 : R(60, 110); } return; }
       if (s.phase === 'spin') {
         s.age += dt;
-        const k = Math.min(1, s.age / 1.2), spin = 4 + 9 * k;
+        const k = Math.min(1, s.age / 1.0), spin = (4 + 9 * k) * (s.it.best ? 1.6 : 1), blend = Math.min(1, s.age / 0.35);
         s.ang += spin * dt;
-        const r = s.r0 + 150 * k + s.h * 0.2, y = this.cy + s.h * k + Math.sin(s.ang * 2) * 8;
-        const px = this.cx + Math.cos(s.ang) * r, py = y + Math.sin(s.ang) * r * 0.32 + (1 - k) * 170;
-        s.vx = (px - s.x) / dt; s.vy = (py - s.y) / dt; s.x = px; s.y = py; s.rot += dt * 4;
-        s.depth = Math.sin(s.ang);
-        s.trail.push([s.x, s.y]); if (s.trail.length > 6) s.trail.shift();
-        if (t >= this.release) { s.phase = 'fling'; const out = 1.6; s.vx = Math.cos(s.ang) * 650 * out + R(-60, 60); s.vy = -R(250, 600); s.vr = R(-8, 8); s.trail.length = 0; s.depth = 0; }
-      } else physics(s, dt, false);
+        const r = s.r0 + (s.it.best ? 0 : 90 * k) + s.h * 0.2, y = this.cy + s.h * k + Math.sin(s.ang * 2) * 8;
+        const px = this.cx + Math.cos(s.ang) * r, py = y + Math.sin(s.ang) * r * 0.32;
+        const nx = s.fromX + (px - s.fromX) * blend, ny = s.fromY + (py - s.fromY) * blend;
+        s.vx = (nx - s.x) / dt; s.vy = (ny - s.y) / dt; s.x = nx; s.y = ny; s.rot += dt * (s.it.best ? 10 : 4);
+        s.depth = s.it.best ? 0.5 : Math.sin(s.ang);
+        if (!s.it.best) { s.trail.push([s.x, s.y]); if (s.trail.length > 6) s.trail.shift(); }
+        if (t >= this.release) {
+          if (s.it.best) { s.phase = 'eye'; s.eyeY = s.y; s.glow = 1; }
+          else { s.phase = 'fling'; s.vx = Math.cos(s.ang) * 1040 + R(-60, 60); s.vy = -R(250, 600); s.vr = R(-8, 8); s.trail.length = 0; s.depth = 0; }
+        }
+        return;
+      }
+      if (s.phase === 'eye') { // alone in the eye: lifted, spinning faster, then it drills down
+        const u = Math.min(1, (t - this.release) / (this.eyeEnd - this.release));
+        s.y = s.eyeY - 120 * u * u; s.x = this.cx + Math.sin(t * 40) * 3 * u; s.rot += dt * (10 + 30 * u);
+        if (t >= this.eyeEnd) { s.phase = 'drill'; s.slamming = true; s.vy = 600; }
+        return;
+      }
+      if (s.phase === 'drill') { s.vy += G * 3 * dt; s.y += s.vy * dt; s.rot += dt * 30; s.trail.push([s.x, s.y]); if (s.trail.length > 8) s.trail.shift();
+        if (s.y > FLOOR() - SIZE * s.s / 2) { s.trail.length = 0; s.phase = null; s.rot = 0; physics(s, 0, false); } return; }
+      physics(s, dt, false);
+    },
+    impact(s) { dust(s.x, FLOOR(), 40, 2.2); }, // the drill throws up a wide ring of dust
+    drawPre() {
+      if (t < WIND) return feetGlow(t / WIND);
+      let k, a, lift = 0, tight = 1;
+      if (t < this.release) { k = Math.min(1, (t - WIND - 0.3) / 1.0); a = 0.28 * Math.max(0, k); }
+      else if (t < this.eyeEnd) { const u = (t - this.release) / (this.eyeEnd - this.release); k = 1; tight = 1 - 0.75 * u; lift = 120 * u * u; a = 0.4; }
+      else { a = 0; }
+      if (a <= 0) return;
+      ctx.strokeStyle = `rgba(200,220,255,${a})`; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.ellipse(W / 2, FLOOR() - 20 - i * 40 * k - lift * i / 4, (20 + i * 32 * k) * tight, (6 + i * 9 * k) * tight, 0, 0, Math.PI * 2); ctx.stroke(); }
     },
   },
   meteor: {
-    start(list) {
-      list.forEach((s, i) => { s.state = 'wait'; s.at = i * (list.length > 25 ? 0.06 : 0.1) + (s.it.best ? 0.5 : 0);
-        s.x = R(W * 0.25, W * 1.05); s.y = -40 - R(0, 80); s.vx = -R(260, 360) * (s.it.best ? 1.2 : 1); s.vy = R(700, 900) * (s.it.best ? 1.15 : 1); });
-    },
-    launch(s) { s.phase = 'fall'; },
+    start(list) { this.upAt = WIND; this.downAt = WIND + 0.75; let i = 0;
+      list.forEach(s => { s.x = W / 2; s.y = FLOOR() - 10; s.at = WIND + R(0, 0.12); if (!s.it.best) s.fallAt = this.downAt + (i++) * (list.length > 25 ? 0.05 : 0.08); });
+      const last = this.downAt + i * (list.length > 25 ? 0.05 : 0.08);
+      this.warnAt = last + 0.5; this.bigAt = this.warnAt + 0.9; },
+    launch(s) { s.phase = 'up'; s.vx = R(-80, 80); s.vy = -R(2000, 2400); },
     tick(s, dt) {
-      if (s.phase === 'fall') { s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 14) s.trail.shift();
-        if (Math.random() < 0.5) parts.push({ x: s.x, y: s.y, vx: R(-30, 30), vy: R(-60, 0), life: 0.4, age: 0, size: R(2, 4), color: '#ffb050', g: 0 });
-        if (s.y > FLOOR() - SIZE * s.s / 2) { s.phase = 'land'; s.trail.length = 0; s.vy = 500; s.vx *= 0.35; s.vr = R(-4, 4); } }
-      else physics(s, dt, false);
+      if (s.phase === 'up') { s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > 6) s.trail.shift();
+        if (s.y < -60) { s.phase = 'gone'; s.trail.length = 0; } return; }
+      if (s.phase === 'gone') {
+        if (!s.it.best && t >= s.fallAt) { s.phase = 'fall'; s.meteor = true; s.x = R(W * 0.25, W * 0.95); s.y = -40 - R(0, 60); s.vx = -R(260, 360); s.vy = R(700, 900); }
+        if (s.it.best && t >= this.bigAt) { s.phase = 'big'; s.x = W / 2; s.y = -60; s.vx = 0; s.vy = 1500; s.slamming = true; }
+        return; }
+      if (s.phase === 'fall' || s.phase === 'big') { s.x += s.vx * dt; s.y += s.vy * dt; s.trail.push([s.x, s.y]); if (s.trail.length > (s.phase === 'big' ? 18 : 14)) s.trail.shift();
+        if (Math.random() < (s.phase === 'big' ? 1 : 0.5)) parts.push({ x: s.x + R(-6, 6), y: s.y, vx: R(-40, 40), vy: R(-80, 0), life: 0.45, age: 0, size: R(2, s.phase === 'big' ? 6 : 4), color: '#ffb050', g: 0 });
+        if (s.y > FLOOR() - SIZE * s.s / 2) { s.phase = null; s.trail.length = 0; if (s.slamming) { s.vy = 900; } else { s.vy = 500; s.vx *= 0.35; s.vr = R(-4, 4); } physics(s, 0, false); } return; }
+      physics(s, dt, false);
+    },
+    impact(s) { flash = 0.8; waves.push({ x: s.x, y: FLOOR(), age: -0.24, life: 1, r: 420, color: '#ffd0a0', dome: true });
+      for (let i = 0; i < 40; i++) { const a = -Math.PI / 2 + R(-1.2, 1.2), sp = R(250, 650); parts.push({ x: s.x, y: FLOOR() - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 1.1), age: 0, size: R(2, 4), color: '#ff9a3a', g: 1000 }); }
+      dust(s.x, FLOOR(), 30, 2.2); shake = shakeMax = 0.55; },
+    drawPre() {
+      if (t < WIND) return feetGlow(t / WIND);
+      if (t > this.upAt + 0.2 && t < this.downAt + 0.4) { // the sky glows where it went
+        const u = Math.min(1, (t - this.upAt - 0.2) / 0.3) * Math.min(1, (this.downAt + 0.4 - t) / 0.3);
+        const g = ctx.createLinearGradient(0, 0, 0, 60); g.addColorStop(0, `rgba(255,150,60,${0.5 * u})`); g.addColorStop(1, 'rgba(255,150,60,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 60); }
+      if (t > this.warnAt && t < this.bigAt + 0.1) { // the warning: the sky darkens red, a shadow grows where it will hit
+        const u = Math.min(1, (t - this.warnAt) / (this.bigAt - this.warnAt));
+        ctx.fillStyle = `rgba(60,0,0,${0.3 * u})`; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = `rgba(0,0,0,${0.5 * u})`; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 20 + 60 * u, 6 + 14 * u, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(255,120,60,${(0.4 + 0.4 * Math.sin(t * 20)) * u})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 30 + 70 * u, 9 + 16 * u, 0, 0, Math.PI * 2); ctx.stroke(); }
     },
   },
   fall: {
-    start(list) {
-      this.lip = W * 0.3;
-      list.forEach((s, i) => { s.state = 'wait'; s.at = i * (list.length > 25 ? 0.045 : 0.075) + (s.it.best ? 0.3 : 0);
+    start(list) { this.lip = W * 0.3; let last = 0;
+      list.forEach((s, i) => { if (!s.it.best) { s.at = i * (list.length > 25 ? 0.045 : 0.075); last = s.at; }
         s.x = this.lip + R(-50, 50); s.y = -SIZE; s.vx = R(120, 360); s.vy = R(20, 90); s.vr = R(-3, 3); });
+      this.edgeAt = last + 0.6; this.tipAt = this.edgeAt + 0.6;
+      sprites[sprites.length - 1].at = this.edgeAt; },
+    launch(s) { if (s.it.best) { s.phase = 'edge'; s.x = this.lip; s.y = 22; s.glow = 1; } },
+    tick(s, dt) {
+      if (s.phase === 'edge') { // teetering at the ledge
+        const u = (t - this.edgeAt) / (this.tipAt - this.edgeAt); s.rot = Math.sin(t * 14) * 0.25 * u; s.x = this.lip + Math.sin(t * 7) * 3;
+        if (t >= this.tipAt) { s.phase = null; s.slamming = true; s.vy = -260; s.vx = (W / 2 - s.x) / 0.95; s.vr = 2; }
+        return; }
+      physics(s, dt, false);
     },
-    launch(s) { s.phase = 'pour'; },
-    tick(s, dt) { physics(s, dt, false); },
+    impact(s) { // the splash crown and ripples
+      const c = BC();
+      for (let i = 0; i < 34; i++) { const a = -Math.PI / 2 + R(-0.7, 0.7), sp = R(280, 520); parts.push({ x: s.x + R(-8, 8), y: FLOOR() - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 0.9), age: 0, size: R(2, 3.5), color: c, g: 1100 }); }
+      for (let i = 0; i < 3; i++) waves.push({ x: s.x, y: FLOOR(), age: -i * 0.15, life: 0.9, r: 200 + i * 60, color: c, ripple: true });
+    },
+    drawPre() { ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(this.lip - 60, 0, 120, 6);
+      if (t > this.edgeAt - 0.3 && t < this.tipAt) { const u = Math.min(1, (t - this.edgeAt + 0.3) / 0.3);
+        const g = ctx.createRadialGradient(this.lip, 20, 0, this.lip, 20, 70); g.addColorStop(0, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalAlpha = 0.7 * u; ctx.fillStyle = g; ctx.fillRect(this.lip - 70, 0, 140, 90); ctx.globalAlpha = 1; } },
   },
 };
 
@@ -246,11 +362,11 @@ function update(dt) {
   const M = MODES[mode];
   if (M.pre) M.pre(dt);
   for (const s of sprites) {
-    if (s.state === 'wait' && t >= s.at) { s.state = 'fly'; if (M.launch) M.launch(s); }
+    if (s.state === 'wait' && t >= s.at) { s.state = 'fly'; if (M.launch) M.launch.call(M, s); }
     if (s.state === 'fly') M.tick.call(M, s, dt);
-    else if (s.state === 'rest') { s.restT += dt; const k = Math.min(1, s.restT / 0.25); s.x += (s.tx - s.x) * k; s.y += (s.ty - s.y) * k; s.rot = s.rot0 * (1 - k) + Math.round(s.rot0 / (Math.PI * 2)) * Math.PI * 2 * k; s.trail.length = 0; }
+    else if (s.state === 'rest') { s.restT += dt; const k = Math.min(1, s.restT / 0.25); s.x += (s.tx - s.x) * k; s.y += (s.ty - s.y) * k; s.rot = s.rot0 * (1 - k); s.trail.length = 0; s.glow = Math.max(0, s.glow - dt); }
   }
-  for (const p of parts) { p.age += dt;
+  for (const p of parts) { p.age += dt; if (p.age < 0) continue;
     if (p.pull) { const k = Math.min(1, dt * 9); p.x += (p.tx - p.x) * k; p.y += (p.ty - p.y) * k; continue; }
     p.vy += (p.g || 0) * dt; if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; } p.x += p.vx * dt; p.y += p.vy * dt; }
   parts = parts.filter(p => p.age < p.life);
@@ -260,16 +376,18 @@ function update(dt) {
 
 function drawSprite(s) {
   const sz = SIZE * s.s * (s.depth !== undefined ? 1 + 0.12 * (s.depth || 0) : 1);
-  // trails
   if (s.trail.length > 1) {
-    const col = mode === 'meteor' ? '#ff9a3a' : (s.it.coin ? COIN[s.it.coin][0] : QC[s.it.q]);
+    const col = (s.meteor || (mode === 'meteor' && s.phase === 'big')) ? '#ff9a3a' : (s.it.coin ? COIN[s.it.coin][0] : QC[s.it.q]);
+    const wide = mode === 'meteor' ? (s.phase === 'big' ? 22 : 10) : s.it.best ? 9 : 5;
     for (let i = 1; i < s.trail.length; i++) {
       const [x0, y0] = s.trail[i - 1], [x1, y1] = s.trail[i], k = i / s.trail.length;
-      ctx.strokeStyle = col; ctx.globalAlpha = k * 0.7; ctx.lineWidth = (mode === 'meteor' ? 10 : 5) * k * s.s;
+      ctx.strokeStyle = col; ctx.globalAlpha = k * 0.7; ctx.lineWidth = wide * k;
       ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
     }
     ctx.globalAlpha = 1;
   }
+  if (s.glow > 0) { const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, sz * 1.6); g.addColorStop(0, QC[s.it.q]); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.globalAlpha = 0.7 * s.glow; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x, s.y, sz * 1.6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
   ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot);
   if (s.it.best || s.it.q >= 4) { ctx.shadowColor = QC[s.it.q]; ctx.shadowBlur = 18; }
   if (s.it.coin) {
@@ -288,33 +406,26 @@ function draw() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.clearRect(0, 0, W, H);
   ctx.save();
-  if (shake > 0) ctx.translate(R(-1, 1) * 8 * shake / 0.35, R(-1, 1) * 8 * shake / 0.35);
-  // the ground and you
+  if (shake > 0) { const a = 9 * shake / shakeMax; ctx.translate(R(-1, 1) * a, R(-1, 1) * a); }
   ctx.strokeStyle = 'rgba(255,230,170,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(20, FLOOR() + 0.5); ctx.lineTo(W - 20, FLOOR() + 0.5); ctx.stroke();
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR() + 4, 22, 6, 0, 0, Math.PI * 2); ctx.fill();
   ctx.font = '40px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText('🧙', W / 2, FLOOR() + 2);
-  if (mode === 'fall') { ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(MODES.fall.lip - 60, 0, 120, 6); }
-  // vortex: a faint funnel while it spins
-  if (mode === 'vortex' && t < MODES.vortex.release + 0.2) {
-    const k = Math.min(1, t / 1.2), a = t < MODES.vortex.release ? 0.25 * k : 0.25 * (1 - (t - MODES.vortex.release) / 0.2);
-    ctx.strokeStyle = `rgba(200,220,255,${a})`; ctx.lineWidth = 1.5;
-    for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.ellipse(W / 2, FLOOR() - 20 - i * 40 * k, 20 + i * 32 * k, 6 + i * 9 * k, 0, 0, Math.PI * 2); ctx.stroke(); }
-  }
   if (MODES[mode].drawPre) MODES[mode].drawPre();
-  // shockwaves
-  for (const w of waves) { const u = w.age / w.life; ctx.strokeStyle = w.color; ctx.globalAlpha = (1 - u) * 0.8; ctx.lineWidth = 6 * (1 - u) + 1; ctx.beginPath(); ctx.arc(w.x, w.y, w.r * (0.15 + u), 0, Math.PI * 2); ctx.stroke(); }
+  for (const w of waves) { if (w.age < 0) continue; const u = w.age / w.life; ctx.strokeStyle = w.color; ctx.globalAlpha = (1 - u) * 0.8; ctx.lineWidth = 6 * (1 - u) + 1;
+    ctx.beginPath();
+    if (w.ripple) ctx.ellipse(w.x, w.y, w.r * (0.1 + u), w.r * (0.1 + u) * 0.12, 0, 0, Math.PI * 2);
+    else if (w.dome) ctx.arc(w.x, w.y, w.r * (0.15 + u), Math.PI, 2 * Math.PI);
+    else ctx.arc(w.x, w.y, w.r * (0.15 + u), 0, Math.PI * 2);
+    ctx.stroke(); }
   ctx.globalAlpha = 1;
-  // sprites: in the vortex, the ones behind first
   const order = mode === 'vortex' ? [...sprites].sort((a, b) => (a.depth || 0) - (b.depth || 0)) : sprites;
-  for (const s of order) if (s.state !== 'wait') drawSprite(s);
-  // light beams over resting Rare+
+  for (const s of order) if (s.state !== 'wait' && s.phase !== 'gone') drawSprite(s);
   for (const s of sprites) if (s.state === 'rest' && !s.it.coin && s.it.q >= 3) {
-    const k = Math.min(1, s.restT / 0.5), g = ctx.createLinearGradient(0, s.y, 0, s.y - 160);
+    const k = Math.min(1, s.restT / 0.5), hgt = s.it.best ? 240 : 160, g = ctx.createLinearGradient(0, s.y, 0, s.y - hgt);
     g.addColorStop(0, QC[s.it.q] + '88'); g.addColorStop(1, QC[s.it.q] + '00');
-    ctx.globalAlpha = k * 0.6; ctx.fillStyle = g; ctx.fillRect(s.x - 10, s.y - 160, 20, 160); ctx.globalAlpha = 1;
+    ctx.globalAlpha = k * 0.6; ctx.fillStyle = g; ctx.fillRect(s.x - 10, s.y - hgt, 20, hgt); ctx.globalAlpha = 1;
   }
-  // particles
-  for (const p of parts) { const u = p.age / p.life; ctx.globalAlpha = (1 - u) * (p.soft ? 0.5 : 1); ctx.fillStyle = p.color;
+  for (const p of parts) { if (p.age < 0) continue; const u = p.age / p.life; ctx.globalAlpha = (1 - u) * (p.soft ? 0.5 : 1); ctx.fillStyle = p.color;
     ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (p.soft ? 1 + u : 1 - u * 0.5), 0, Math.PI * 2); ctx.fill(); }
   ctx.globalAlpha = 1;
   ctx.restore();
