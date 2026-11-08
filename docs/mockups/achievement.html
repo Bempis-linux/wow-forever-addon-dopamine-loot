@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <!-- rounds 10-15: Achievement style; round 15 keeps Capsule 3 and Brush stroke -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Achievement Style Round 16</title>
+<title>Achievement Style Round 17</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; min-height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
@@ -165,65 +165,86 @@
   @keyframes blink { 50% { opacity: 0 } }
   .U7 .meta { margin-top: 2px; animation: fade .2s .65s both; }
 
-  /* fantasy uniques: one shared name look (a serif in the name color; in game the game's Morpheus or
-     Friz Quadrata), each with its own way of arriving */
-  .F .name { position: relative; font: 700 30px "Palatino Linotype", Georgia, serif; color: var(--nc); text-shadow: 0 2px 0 #000, 0 0 8px rgba(0,0,0,.7); white-space: nowrap; }
+  /* fantasy uniques: one shared layout (the name in a serif, in game the game's Morpheus or Friz
+     Quadrata; a small diamond divider; one info line), each with its own way of arriving. The
+     effects' counts grow with rarity */
+  .F .name { position: relative; font: 700 30px "Palatino Linotype", Georgia, serif; letter-spacing: .5px; color: var(--nc); text-shadow: 0 2px 0 #000, 0 0 8px rgba(0,0,0,.7); white-space: nowrap; }
   .F .wr { position: relative; display: inline-block; }
-  .F .meta { margin-top: 4px; animation: fade .3s 1.1s both; }
+  .F .div { position: relative; width: 190px; height: 10px; margin: 6px 0 2px; animation: grow .5s 1s ease-out both; }
+  .F .div::before, .F .div::after { content: ""; position: absolute; top: 4.5px; height: 1px; width: 84px; }
+  .F .div::before { left: 0; background: linear-gradient(90deg, transparent, var(--c)); }
+  .F .div::after { right: 0; background: linear-gradient(-90deg, transparent, var(--c)); }
+  .F .div i { position: absolute; left: 50%; top: 1px; width: 7px; height: 7px; margin-left: -3.5px; transform: rotate(45deg); background: var(--cl); box-shadow: 0 0 6px var(--c); }
+  .F .meta { animation: fade .4s 1.15s both; }
+  .F .glow { position: absolute; left: 50%; top: 50%; width: 320px; height: 160px; margin: -40px 0 0 -160px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--c) 18%, transparent), transparent 70%); animation: fade .8s .3s both; }
 
-  /* F1. Rune decode (Glitch, as magic): every letter starts as a glowing rune that flickers through
-     other runes, then settles into its letter, left to right */
-  .F1 .name span { display: inline-block; text-align: center; }
-  .F1 .name span.rune { color: var(--cl); text-shadow: 0 0 6px var(--c), 0 0 14px var(--c); }
-  .F1 .name span.set { animation: settle .45s ease-out both; }
-  @keyframes settle { from { color: #fff; text-shadow: 0 0 8px #fff, 0 0 18px var(--c); transform: translateY(-3px) } }
-  .F1 .halo { position: absolute; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 22%, transparent), transparent 65%); animation: fade .5s both; }
+  /* F1. Rune decode: each letter holds its place as a glowing rune that flickers through other runes;
+     left to right they settle into letters with a white flash, and each rune floats off as it goes */
+  .F1 .name span { position: relative; display: inline-block; }
+  .F1 .name span.r { color: transparent; text-shadow: none; }
+  .F1 .name span.r::after { content: attr(data-r); position: absolute; left: 50%; top: 0; transform: translateX(-50%); font-weight: 400;
+    color: var(--cl); text-shadow: 0 0 6px var(--c), 0 0 14px var(--c); }
+  .F1 .name span.s { animation: settle .55s ease-out both; }
+  @keyframes settle { from { color: #fff; text-shadow: 0 0 6px #fff, 0 0 16px var(--c), 0 0 28px var(--c) } }
+  .F1 .lift { position: absolute; top: 2px; font-style: normal; font-weight: 400; font-size: 20px; color: var(--cl); text-shadow: 0 0 6px var(--c), 0 0 12px var(--c);
+    pointer-events: none; animation: lift .9s ease-out forwards; }
+  @keyframes lift { from { opacity: .9; transform: translate(-50%, 0) } to { opacity: 0; transform: translate(-50%, -34px) scale(.6) } }
 
-  /* F2. Quill script (Kinetic type, as a scribe): a glowing nib writes the name left to right in
-     italic, leaving a fading glow; a swash underline is drawn after */
-  .F2 .name { font-style: italic; font-weight: 600; font-size: 32px; clip-path: inset(-20px 100% -20px 0); animation: write 1s .25s cubic-bezier(.45,0,.4,1) forwards, inkglow 1.6s .25s ease-out both; }
-  @keyframes write { to { clip-path: inset(-20px -12px -20px 0) } }
-  @keyframes inkglow { from { text-shadow: 0 2px 0 #000, 0 0 10px var(--c), 0 0 20px var(--c) } }
-  .F2 .nib { position: absolute; top: 55%; width: 7px; height: 7px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff, 0 0 14px var(--c), 0 0 26px var(--c); animation: nib 1s .25s cubic-bezier(.45,0,.4,1) both; }
-  @keyframes nib { 0% { left: 0; opacity: 0 } 5% { opacity: 1 } 92% { left: 100%; opacity: 1 } 100% { left: 100%; opacity: 0 } }
-  .F2 svg.swash { width: 260px; height: 16px; overflow: visible; }
-  .F2 svg.swash path { fill: none; stroke: var(--c); stroke-width: 1.8; stroke-linecap: round; filter: drop-shadow(0 0 3px var(--c)); stroke-dasharray: 300; animation: draw .5s 1.15s ease-out both; }
+  /* F2. Forged letters: each letter is struck in white-hot with a flash behind it and cools through
+     orange to its color; sparks arc off every strike and fall; the divider cools last */
+  .F2 .name span { position: relative; display: inline-block; animation: forge 1.3s var(--d) cubic-bezier(.2,.8,.3,1) both; }
+  .F2 .name span::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; z-index: -1; opacity: 0;
+    background: radial-gradient(circle, rgba(255,244,210,.95), rgba(255,140,30,.45) 38%, transparent 70%); animation: flash .4s var(--d) ease-out forwards; }
+  @keyframes flash { 0% { opacity: 1; transform: scale(.4) } 100% { opacity: 0; transform: scale(1.4) } }
+  @keyframes forge { 0% { transform: translateY(-12px) scale(1.5); opacity: 0; color: #fffbe6; text-shadow: 0 0 6px #fff, 0 0 16px #ffb040, 0 0 30px #ff6a00 }
+    12% { transform: none; opacity: 1; color: #fff4c0 } 45% { color: #ffb347; text-shadow: 0 0 6px #ff8a1a, 0 0 14px #ff4a00 }
+    100% { color: var(--nc); text-shadow: 0 2px 0 #000, 0 0 8px rgba(0,0,0,.7) } }
+  .F2 .spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #ffe0a0; box-shadow: 0 0 4px #ff9a2a, 0 0 8px #ff6a00; opacity: 0; animation: spark .7s ease-out forwards; }
+  @keyframes spark { 0% { transform: none; opacity: 1 } 45% { transform: translate(calc(var(--dx) * .6), var(--dy)); opacity: 1 }
+    100% { transform: translate(var(--dx), calc(var(--dy) + 44px)); opacity: 0 } }
+  .F2 .div { animation: grow .4s 1.05s ease-out both, cool 1.4s 1.05s ease-out both; }
+  @keyframes cool { from { filter: sepia(1) saturate(6) hue-rotate(-20deg) brightness(1.8) } }
 
-  /* F3. Forged letters (Kinetic type, as a forge): each letter is struck in white-hot, cools through
-     orange to its color; sparks jump off each strike */
-  .F3 .name span { display: inline-block; animation: forge 1.2s cubic-bezier(.2,.8,.3,1) both; }
-  @keyframes forge { 0% { transform: scale(1.8); opacity: 0; color: #fffbe6; text-shadow: 0 0 6px #fff, 0 0 16px #ffb040, 0 0 30px #ff6a00 }
-    12% { transform: none; opacity: 1; color: #fff4c0 } 45% { color: #ffb347; text-shadow: 0 0 6px #ff8a1a, 0 0 14px #ff4a00 } 100% { color: var(--nc); text-shadow: 0 2px 0 #000, 0 0 8px rgba(0,0,0,.7) } }
-  .F3 .spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #ffd27a; box-shadow: 0 0 4px #ff9a2a; opacity: 0; animation: spark .55s ease-out both; }
-  @keyframes spark { 0% { transform: none; opacity: 1 } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0 } }
-
-  /* F4. Mist summon: the item and the name gather out of a coloured mist: wide and blurred, they pull
-     together sharp while puffs of mist drift off */
-  .F4 .item { animation: gather 1s .1s cubic-bezier(.2,.7,.3,1) both, sway 3.6s 1.3s ease-in-out infinite; }
-  .F4 .name { animation: coalesce 1.2s .3s cubic-bezier(.2,.7,.3,1) both; }
+  /* F3. Mist summon: puffs of coloured mist swirl in from all sides and meet; the mist breathes out
+     in a soft ring as the item and the name gather sharp out of it; a low mist stays under the name */
+  .F3 .puff { position: absolute; left: 50%; top: 42%; border-radius: 50%; filter: blur(4px); opacity: 0;
+    background: radial-gradient(circle, color-mix(in srgb, var(--cl) 80%, transparent), transparent 68%); animation: converge 1s cubic-bezier(.4,0,.6,1) both; }
+  @keyframes converge { 0% { transform: translate(var(--sx), var(--sy)) scale(1.3); opacity: 0 } 35% { opacity: .8 } 100% { transform: translate(0, 0) scale(.2); opacity: 0 } }
+  .F3 .exhale { position: absolute; left: 50%; top: 42%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; filter: blur(3px); opacity: 0;
+    background: radial-gradient(circle, transparent 35%, color-mix(in srgb, var(--cl) 45%, transparent) 55%, transparent 72%); animation: exhale 1s .85s ease-out forwards; }
+  @keyframes exhale { 0% { transform: scale(.3); opacity: .9 } 100% { transform: scale(2.6); opacity: 0 } }
+  .F3 .bed { position: absolute; left: 50%; top: 64%; width: 330px; height: 64px; margin-left: -165px; border-radius: 50%; filter: blur(6px);
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--c) 32%, transparent), transparent 70%); animation: fade 1.2s 1s both; }
+  .F3 .item { animation: gather .9s .6s cubic-bezier(.2,.7,.3,1) both, sway 3.6s 1.6s ease-in-out infinite; }
+  .F3 .name { animation: coalesce 1s .75s cubic-bezier(.2,.7,.3,1) both; }
   @keyframes gather { from { filter: blur(10px); transform: scale(1.3); opacity: 0 } 40% { opacity: .8 } to { filter: none; transform: none; opacity: 1 } }
-  @keyframes coalesce { from { filter: blur(12px); letter-spacing: 16px; opacity: 0 } 40% { opacity: .8 } to { filter: none; letter-spacing: 0; opacity: 1 } }
-  .F4 .puff { position: absolute; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--cl) 40%, transparent), transparent 70%); filter: blur(5px); opacity: 0; animation: puff 2s ease-out both; }
-  @keyframes puff { 0% { transform: scale(.5); opacity: 0 } 25% { opacity: .9 } 100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0 } }
+  @keyframes coalesce { from { filter: blur(12px); letter-spacing: 16px; opacity: 0 } 40% { opacity: .8 } to { filter: none; letter-spacing: .5px; opacity: 1 } }
+  .F3 .div { animation-delay: 1.3s; } .F3 .meta { animation-delay: 1.4s; }
 
-  /* F5. Ember burn-in: a glowing ember edge sweeps across and the name burns into view behind it;
-     embers float up off the edge */
-  .F5 .name { -webkit-mask-image: linear-gradient(90deg, #000 42%, transparent 58%); mask-image: linear-gradient(90deg, #000 42%, transparent 58%);
-    -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-position: 100% 0; mask-position: 100% 0; animation: burn 1.1s .25s linear forwards, scorch 1.8s .25s ease-out both; }
-  @keyframes burn { to { -webkit-mask-position: 0 0; mask-position: 0 0 } }
-  @keyframes scorch { from { text-shadow: 0 2px 0 #000, 0 0 8px #ff7a1a, 0 0 18px #ff4a00 } }
-  .F5 .edge { position: absolute; top: -6px; bottom: -6px; width: 14px; margin-left: -7px; border-radius: 7px; background: radial-gradient(ellipse, #fff3c4, #ff9a2a 40%, transparent 70%);
-    filter: blur(1.5px); opacity: 0; animation: edge 1.1s .25s linear both; }
-  @keyframes edge { 0% { left: -6%; opacity: 1 } 90% { left: 104%; opacity: 1 } 100% { left: 104%; opacity: 0 } }
-  .F5 .ember { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #ffb347; box-shadow: 0 0 5px #ff7a1a; opacity: 0; animation: ember 1.3s ease-out both; }
-  @keyframes ember { 0% { transform: none; opacity: 1 } 100% { transform: translate(var(--dx), -46px); opacity: 0 } }
-  .F5 .item { animation: rise .32s .1s cubic-bezier(.2,1.4,.4,1) both, sway 3.6s 1.3s ease-in-out infinite; filter: drop-shadow(0 6px 10px color-mix(in srgb, #ff7a1a 35%, transparent)); }
+  /* F4. Ember burn-in: an ember edge sweeps across; the letters burn in glowing hot just behind it,
+     then cool to their color; embers and a little smoke rise off the edge */
+  .F4 .name { -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%); mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+    -webkit-mask-size: 220% 100%; mask-size: 220% 100%; }
+  .F4 .cool { animation: burn 1.1s .4s linear both; }
+  .F4 .hot { position: absolute; inset: 0; color: #ffd890; text-shadow: 0 0 4px #ff9a2a, 0 0 12px #ff5a00, 0 2px 0 #000; animation: burn 1.1s .15s linear both, cooloff .7s 1.3s ease-in forwards; }
+  @keyframes burn { from { -webkit-mask-position: 100% 0; mask-position: 100% 0 } to { -webkit-mask-position: 0 0; mask-position: 0 0 } }
+  @keyframes cooloff { to { opacity: 0 } }
+  .F4 .edge { position: absolute; top: -8px; bottom: -8px; width: 12px; margin-left: -6px; border-radius: 6px; filter: blur(1.5px); opacity: 0;
+    background: radial-gradient(ellipse, #fff6d0, #ff9a2a 40%, transparent 70%); animation: edge 1.1s .15s linear both; }
+  @keyframes edge { 0% { left: -10%; opacity: 0 } 8% { opacity: 1 } 88% { opacity: 1 } 100% { left: 110%; opacity: 0 } }
+  .F4 .ember { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #ffc060; box-shadow: 0 0 5px #ff7a1a; opacity: 0; animation: ember 1.3s ease-out forwards; }
+  @keyframes ember { 0% { transform: none; opacity: 1 } 50% { transform: translate(var(--dx), -26px); opacity: .9 } 100% { transform: translate(calc(var(--dx) * -.5), -58px); opacity: 0 } }
+  .F4 .smoke { position: absolute; top: -4px; width: 26px; height: 26px; border-radius: 50%; filter: blur(3px); opacity: 0;
+    background: radial-gradient(circle, rgba(160,150,140,.35), transparent 70%); animation: smoke 1.6s ease-out both; }
+  @keyframes smoke { 0% { opacity: 0; transform: scale(.5) } 30% { opacity: 1 } 100% { opacity: 0; transform: translate(6px, -52px) scale(2.2) } }
+  .F4 .item { filter: drop-shadow(0 6px 12px color-mix(in srgb, #ff7a1a 35%, transparent)); }
 </style>
 </head>
 <body>
 <header>
-  <h1>Achievement style, round 16</h1>
-  <p>Capsule 3 is the keeper for Achievement; Brush stroke is kept as a unique style. Below: five fantasy uniques, then the two round 15 ideas you liked. Pick a rarity, then Replay.</p>
+  <h1>Achievement style, round 17</h1>
+  <p>Capsule 3 is the keeper for Achievement; Brush stroke is kept as a unique style. Below: the four fantasy uniques, polished, then the two round 15 ideas you liked. Pick a rarity, then Replay.</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
@@ -238,13 +259,12 @@
   <div class="cell keep"><h2>U1. Brush stroke</h2><p>One thick, rough stroke of paint in the item's color swipes across, the name over it in big white italic, flecks flying off the end.</p><div class="scene" id="u1"></div></div>
 </div>
 <h3>Fantasy uniques</h3>
-<p class="sub">Frameless, the letters themselves are the show. F1 is Glitch done as magic; F2 and F3 are Kinetic type done as a scribe and a forge. The name font here is a stand-in for the game's Morpheus or Friz Quadrata.</p>
+<p class="sub">Frameless; the letters are the show. All four share one layout: the name, a small diamond divider, one info line. Sparks, mist and embers grow with rarity: try Legendary. The serif stands in for the game's Morpheus or Friz Quadrata.</p>
 <div class="grid">
-  <div class="cell"><h2>F1. Rune decode</h2><p>Every letter starts as a glowing rune that flickers through other runes, then settles into its letter, left to right.</p><div class="scene" id="f1"></div></div>
-  <div class="cell"><h2>F2. Quill script</h2><p>A glowing nib writes the name in italic, left to right, the fresh ink glowing as it dries. A swash underline is drawn last.</p><div class="scene" id="f2"></div></div>
-  <div class="cell"><h2>F3. Forged letters</h2><p>Each letter is struck in white-hot and cools through orange to its color; sparks jump off every strike.</p><div class="scene" id="f3"></div></div>
-  <div class="cell"><h2>F4. Mist summon</h2><p>The item and the name gather out of a coloured mist: wide and blurred, they pull together sharp while the mist drifts off.</p><div class="scene" id="f4"></div></div>
-  <div class="cell"><h2>F5. Ember burn-in</h2><p>A glowing ember edge sweeps across and the name burns into view behind it, embers floating up off the edge.</p><div class="scene" id="f5"></div></div>
+  <div class="cell"><h2>F1. Rune decode</h2><p>Each letter holds its place as a glowing rune flickering through other runes. Left to right they settle into letters with a white flash, and each rune floats off as it goes.</p><div class="scene" id="f1"></div></div>
+  <div class="cell"><h2>F2. Forged letters</h2><p>Each letter is struck in white-hot with a flash behind it, then cools through orange to its color. Sparks arc off every strike and fall; the divider cools last.</p><div class="scene" id="f2"></div></div>
+  <div class="cell"><h2>F3. Mist summon</h2><p>Puffs of colored mist swirl in from all sides and meet, then breathe out in a soft ring as the item and the name gather sharp. A low mist stays under the name.</p><div class="scene" id="f3"></div></div>
+  <div class="cell"><h2>F4. Ember burn-in</h2><p>An ember edge sweeps across; the letters burn in glowing hot just behind it, then cool to their color. Embers and a little smoke rise off the edge.</p><div class="scene" id="f4"></div></div>
 </div>
 <h3>Round 15 ideas you liked</h3>
 <div class="grid">
@@ -309,39 +329,46 @@ function render() {
   $('u6').innerHTML = `<div class="uq U6" style="${vars};--nc:${NAMECOLOR[q]}"><div class="ghost">${label} ${label}</div>${item}<div class="name">${letters}</div><div class="uline"></div>${meta2}</div>`;
   const bands = [40, 96, 128].map((t, i) => `<i class="band" style="top:${t}px;animation-delay:${(.1 + i * .08).toFixed(2)}s"></i>`).join('');
   $('u7').innerHTML = `<div class="uq U7" style="${vars}">${bands}${item}<div class="name" data-t="${nm}">${nm}</div><div class="rar">&gt; ${label.toUpperCase()}</div>${meta2}</div>`;
-  // fantasy uniques
-  const fv = `${vars};--nc:${NAMECOLOR[q]}`, fmeta = `<div class="meta">${label} · Two-Hand Axe · Item level 63</div>`, R = (a, b) => a + Math.random() * (b - a);
-  // F1: runes cycle in each letter's place until its turn to settle
-  const chars = [...nm];
-  $('f1').innerHTML = `<div class="uq F F1" style="${fv}"><div class="halo"></div>${item}<div class="name">${chars.map(ch => `<span class="rune">${ch === ' ' ? '&nbsp;' : RUNES[0]}</span>`).join('')}</div>${fmeta}</div>`;
+  // fantasy uniques; n (1 Uncommon .. 4 Legendary) scales the sparks, mist and embers
+  const n = q - 1, fv = `${vars};--nc:${NAMECOLOR[q]}`, R = (a, b) => a + Math.random() * (b - a);
+  const tail = `<div class="div"><i></i></div><div class="meta">${label} · Two-Hand Axe · Item level 63</div>`;
+  const chars = [...nm], glyph = ch => ch === ' ' ? '&nbsp;' : ch;
+  // F1: runes cycle in each letter's place until its turn; a settled letter sends its rune floating up
+  $('f1').innerHTML = `<div class="uq F F1" style="${fv}"><div class="glow"></div>${item}<div class="name">${chars.map(ch => `<span class="${ch === ' ' ? '' : 'r'}" data-r="${RUNES[0]}">${glyph(ch)}</span>`).join('')}</div>${tail}</div>`;
   clearInterval(runeTimer);
-  const spans = [...$('f1').querySelectorAll('.name span')], t0 = performance.now();
-  spans.forEach(s => s.style.minWidth = '0.62em');
+  const f1n = $('f1').querySelector('.name'), spans = [...f1n.children], t0 = performance.now();
   runeTimer = setInterval(() => {
     const t = performance.now() - t0; let left = 0;
     spans.forEach((s, i) => {
-      if (s.classList.contains('set')) return;
-      if (chars[i] === ' ') { s.className = 'set'; return; }
-      if (t > 300 + i * 60) { s.textContent = chars[i]; s.className = 'set'; s.style.minWidth = ''; }
-      else { s.textContent = RUNES[Math.floor(Math.random() * RUNES.length)]; left++; }
+      if (!s.classList.contains('r')) return;
+      if (t > 350 + i * 55) {
+        s.className = 's';
+        const l = document.createElement('i'); l.className = 'lift'; l.textContent = s.dataset.r; l.style.left = (s.offsetLeft + s.offsetWidth / 2) + 'px'; f1n.appendChild(l);
+      } else { s.dataset.r = RUNES[Math.floor(Math.random() * RUNES.length)]; left++; }
     });
-    if (!left && t > 300 + spans.length * 60) clearInterval(runeTimer);
+    if (!left) clearInterval(runeTimer);
   }, 70);
-  // F2: the nib rides the edge of the writing
-  $('f2').innerHTML = `<div class="uq F F2" style="${fv}">${item}<div class="wr"><div class="name">${nm}</div><i class="nib"></i></div>
-    <svg class="swash" viewBox="0 0 260 16"><path d="M8 10 C 70 2, 150 16, 214 8 S 250 4, 252 9"/></svg>${fmeta}</div>`;
-  // F3: one strike per letter; three sparks off each
-  const strike = i => (.2 + i * .06);
-  const forged = chars.map((ch, i) => `<span style="animation-delay:${strike(i).toFixed(2)}s">${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
-  let sparks = '';
-  chars.forEach((ch, i) => { if (ch === ' ' || i % 2) return; for (let k = 0; k < 3; k++) sparks += `<i class="spark" style="left:${(95 + i * 15 + R(-4, 4)).toFixed(0)}px;top:${(128 + R(-6, 6)).toFixed(0)}px;--dx:${R(-24, 24).toFixed(0)}px;--dy:${R(-36, -10).toFixed(0)}px;animation-delay:${(strike(i) + .03).toFixed(2)}s"></i>`; });
-  $('f3').innerHTML = `<div class="uq F F3" style="${fv}">${item}<div class="name">${forged}</div>${fmeta}${sparks}</div>`;
-  // F4: mist puffs around the item and the name, drifting outward
-  const puffs = [...Array(9)].map((_, i) => { const x = R(80, 320), y = R(40, 170), s = R(40, 80); return `<i class="puff" style="left:${(x - s / 2).toFixed(0)}px;top:${(y - s / 2).toFixed(0)}px;width:${s.toFixed(0)}px;height:${s.toFixed(0)}px;--dx:${((x - 200) * .35).toFixed(0)}px;--dy:${R(-30, -8).toFixed(0)}px;animation-delay:${(i * .05).toFixed(2)}s"></i>`; }).join('');
-  $('f4').innerHTML = `<div class="uq F F4" style="${fv}">${puffs}${item}<div class="name">${nm}</div>${fmeta}</div>`;
-  // F5: embers rise off the edge as it passes
-  const embers = [...Array(12)].map((_, i) => { const f = i / 11; return `<i class="ember" style="left:${(f * 100).toFixed(0)}%;top:${R(0, 30).toFixed(0)}px;--dx:${R(-10, 10).toFixed(0)}px;animation-delay:${(.25 + f * 1).toFixed(2)}s"></i>`; }).join('');
-  $('f5').innerHTML = `<div class="uq F F5" style="${fv}">${item}<div class="wr"><div class="name">${nm}</div><i class="edge"></i>${embers}</div>${fmeta}</div>`;
+  // F2: one strike per letter; sparks off each, more with rarity
+  $('f2').innerHTML = `<div class="uq F F2" style="${fv}">${item}<div class="name">${chars.map((ch, i) => `<span style="--d:${(.25 + i * .065).toFixed(3)}s">${glyph(ch)}</span>`).join('')}</div>${tail}</div>`;
+  const f2n = $('f2').querySelector('.name');
+  [...f2n.children].forEach((s, i) => {
+    if (chars[i] === ' ') return;
+    for (let k = 0; k < n; k++) {
+      const e = document.createElement('i'); e.className = 'spark';
+      e.style.cssText = `left:${(s.offsetLeft + s.offsetWidth / 2 + R(-3, 3)).toFixed(0)}px;top:${R(8, 22).toFixed(0)}px;--dx:${R(-30, 30).toFixed(0)}px;--dy:${R(-34, -12).toFixed(0)}px;animation-delay:${(.27 + i * .065).toFixed(3)}s`;
+      f2n.appendChild(e);
+    }
+  });
+  // F3: puffs start around the centre and swirl in
+  const puffs = [...Array(6 + 2 * n)].map((_, i, a) => {
+    const ang = i / a.length * Math.PI * 2 + R(-.3, .3), d = R(90, 150), s = R(50, 90);
+    return `<i class="puff" style="width:${s.toFixed(0)}px;height:${(s * .7).toFixed(0)}px;margin:${(-s * .35).toFixed(0)}px 0 0 ${(-s / 2).toFixed(0)}px;--sx:${(Math.cos(ang) * d * 1.4).toFixed(0)}px;--sy:${(Math.sin(ang) * d * .6).toFixed(0)}px;animation-delay:${R(0, .2).toFixed(2)}s"></i>`;
+  }).join('');
+  $('f3').innerHTML = `<div class="uq F F3" style="${fv}"><div class="bed"></div>${puffs}<div class="exhale"></div>${item}<div class="name">${nm}</div>${tail}</div>`;
+  // F4: embers rise where the edge passes; a little smoke after it
+  const embers = [...Array(6 + 4 * n)].map(() => { const f = Math.random(); return `<i class="ember" style="left:${(f * 100).toFixed(1)}%;top:${R(4, 30).toFixed(0)}px;--dx:${R(-14, 14).toFixed(0)}px;animation-delay:${(.15 + f * 1.1).toFixed(2)}s;animation-duration:${R(1, 1.6).toFixed(2)}s"></i>`; }).join('');
+  const smoke = [...Array(3 + n)].map((_, i) => `<i class="smoke" style="left:${R(5, 90).toFixed(0)}%;animation-delay:${(.5 + i * .15).toFixed(2)}s"></i>`).join('');
+  $('f4').innerHTML = `<div class="uq F F4" style="${fv}">${item}<div class="wr"><div class="name cool">${nm}</div><div class="name hot">${nm}</div><i class="edge"></i>${smoke}${embers}</div>${tail}</div>`;
 }
 const RUNES = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ';
 let runeTimer = 0;
