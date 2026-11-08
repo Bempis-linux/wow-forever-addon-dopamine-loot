@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-07, after 1.1.0: five new popup styles built (Achievement Capsule, Brush stroke, Rune decode, Forged letters, Ember burn-in), untested in game; the game is on dev. Read this first
+_Last checkpoint: 2026-11-08, after 1.1.0: rain animations cut to Fountain, Quick burst, Big bang; five new popup styles built (Achievement Capsule, Brush stroke, Rune decode, Forged letters, Ember burn-in), untested in game; the game is on dev. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -62,18 +62,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   at the bottom; plus more) and finales for Open All mail / Create All crafts (verify the APIs first);
   2. an edit mode to drag the popups and the money tally into place; 3. stats: loot streak, session tally.
   Dungeon recap stays on the roadmap. Popup sounds per arrival (4) waits.
-  **Built 2026-11-07, untested in game:** the rain animations (setting `rainStyle`, "Animation" under "How it
-  comes out" on the Loot rain page), from docs/mockups/rain-variants.html round 4, each with a finale of its
-  own for the best item (Uncommon+): Fountain (default, unchanged: hang + slam); Big bang (wind-up at screen
-  center, bounces off all four edges; best held in the core, which collapses into it, then drops and slams);
-  Firework (best: biggest burst + crackle, hangs, slams); Vortex (erupts from your feet into the whirl, one
-  gust at release; best spins in the eye, lifted, drills down); Meteor shower (loot shoots up off the top,
-  falls back as meteors; warning (red dim, shadow), then the big one); Geyser (replaced Waterfall, "the
-  animations don't feel like they belong": rumbles, two jets, the tallest jet carries the best; splash crown).
-  The user: first version's hit-stop + shake ending felt awkward, so every animation got its own finale.
-  Code: STYLE / StyleLaunch / *Ctl controllers / StyleFrame / StyleImpact in Rain.lua; Core.Step got `gmul`
-  (gravity multiplier; `s.g` is the green channel!) and an optional ceiling. The Hang switch still gates the
-  hang in Firework and Geyser. Next after testing: mail / craft finales (verify APIs first).
+  **Rain animations (2026-11-08, untested in game):** setting `rainStyle`, "Animation" under "How it comes
+  out" on the Loot rain page, from docs/mockups/rain-variants.html round 5: **Fountain** (default, unchanged),
+  **Quick burst** (new: a friend found the Fountain overstimulating; the Fountain's wind-up, then everything
+  blows up at once in one wide fan with a flash; the best keeps the hang + slam), **Big bang** (wind-up at
+  screen center, bounces off all four edges; best held in the core, which collapses into it, then drops and
+  slams). Firework, Vortex, Meteor shower and Geyser were built 2026-11-07 (fcfd311) and **dropped by the
+  user 2026-11-08**; a saved removed choice moves to Quick burst. The switch key `Hang` is now "Finale for the
+  best" and gates every animation's finale (Big bang's core too). Core.Step still reads `gmul` (unused now).
+  Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
   (gitignored). It acts on nothing; never act on player text without the user.

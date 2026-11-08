@@ -55,7 +55,7 @@ local function Create()
   FxToggle(cat, "Calm")
 
   N.Header(layout, "How it comes out")
-  ns.RainStyle() -- (moves an old Waterfall setting over to the Geyser before the choice reads it)
+  ns.RainStyle() -- (moves a removed animation over to Quick burst before the choice reads it)
   local styles, tips = {}, {}
   for _, s in ipairs(ns.RAIN_STYLES) do
     styles[#styles + 1] = { s.key, s.label }
@@ -69,7 +69,7 @@ local function Create()
     from[#from + 1] = { v, ns.FROM_NAMES[v]:gsub("^%l", string.upper) .. (v == "ground" and " (default)" or "") }
   end
   N.Choice(cat, "rainFrom", "Loot comes from", from, "ground",
-    "Where the loot shoots up from: the middle of the ground like a fountain, anywhere along the ground, from below the bottom of the screen, or the middle of the screen. (For the Fountain animation; the others have their own.)")
+    "Where the loot shoots up from: the middle of the ground like a fountain, anywhere along the ground, from below the bottom of the screen, or the middle of the screen. (For the Fountain and Quick burst; the Big bang starts in the middle of the screen.)")
   N.Slider(cat, "rainFloor", "Landing height", 0, 30, 1, 0,
     "Where the loot lands, in percent of the screen height up from the bottom (0 = the bottom edge, the default). Raise it to have the loot land above your action bars.",
     function(v) return math.floor(v + 0.5) .. "%" end)
