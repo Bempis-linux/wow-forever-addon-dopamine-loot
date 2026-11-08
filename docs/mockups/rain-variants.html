@@ -24,12 +24,12 @@
 </head>
 <body>
 <header>
-  <h1>Loot rain variants, round 2: each with its own finale</h1>
+  <h1>Loot rain variants, round 4: Waterfall becomes Geyser</h1>
   <p>The best item now gets a finale of its own in every animation, and Vortex and Meteor shower start with an eruption from your feet, the "I just looted" moment. Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
 </header>
 <div class="bar">
   <span>Animation</span>
-  <button data-mode="fountain">Fountain (today)</button><button data-mode="bang" class="on">Big bang</button><button data-mode="firework">Firework</button><button data-mode="vortex">Vortex</button><button data-mode="meteor">Meteor shower</button><button data-mode="fall">Waterfall</button>
+  <button data-mode="fountain">Fountain (today)</button><button data-mode="bang" class="on">Big bang</button><button data-mode="firework">Firework</button><button data-mode="vortex">Vortex</button><button data-mode="meteor">Meteor shower</button><button data-mode="geyser">Geyser</button>
   <span>Haul</span>
   <button data-n="8">8</button><button data-n="20" class="on">20</button><button data-n="40">40</button>
   <span>Best</span>
@@ -46,7 +46,7 @@ const DESC = {
   firework: '<b>Firework.</b> One after another, items shoot up from your feet and burst into sparks of their rarity color at their peak, then float down. <b>Finale, Grand finale:</b> the best goes up last on a thick trail to the top of the screen and bursts biggest, with a ring and a crackle of white pops a beat later. It hangs glowing in the smoke, then slams down.',
   vortex: '<b>Vortex.</b> A glow at your feet, then the loot <b>erupts</b> in a wide fan, and the wind catches each piece mid-flight and eases it into a whirlwind that spins faster and faster. It lets go in one gust, a ring of wind and streaks blowing out, and everything flies off. <b>Finale, Eye of the storm:</b> the best item spins alone in the eye. When the rest flies off, the funnel tightens around it and lifts it up, spinning faster, then it drills straight down into the ground.',
   meteor: '<b>Meteor shower.</b> A glow at your feet, then the loot <b>shoots straight up</b> off the top of the screen. The sky glows at the top edge, and it all comes back down as meteors with burning trails. <b>Finale, The big one:</b> the screen darkens red and a shadow grows on the ground in the middle. The best item comes straight down as the biggest meteor and hits with a flash, three shockwaves, a shower of debris and a hard shake.',
-  fall: '<b>Waterfall.</b> A glow at your feet, then the loot <b>shoots up in a geyser</b> into a glowing pool by the ledge at the top of the screen. The pool overflows and the loot pours over the edge in a stream, piling up at the bottom; coins splash. <b>Finale, Geyser:</b> the stream runs dry and the pool goes dark. Light wells up under the middle of the pile with ripples spreading out, then the best item bursts up out of it on a geyser of droplets, hangs at the top, and comes down into the middle in a splash crown.',
+  geyser: '<b>Geyser (replaces Waterfall).</b> The ground rumbles under your feet: a light shake, bubbles popping, steam rising. Then the loot <b>erupts on a jet of water</b> and sprays down around you. A breather of steam and bubbles, then a second, stronger jet with the rest. <b>Finale:</b> the longest rumble, light welling up under your feet in the best item&rsquo;s color, and the tallest jet carries the best item to the top. It hangs there, then comes down into the middle in a splash crown with ripples.',
 };
 const QC = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'];
 const GLYPH = ['🗡️', '🛡️', '⚔️', '💍', '🔮', '🏹', '📜', '🧪', '🦴', '🧵', '👢', '🪓'];
@@ -121,7 +121,7 @@ function rest(s) {
 function land(s) {
   if (s.it.best && s.slamming) return slam(s);
   if (s.meteor) dust(s.x, FLOOR(), 10, 1);
-  else if (mode === 'fall' && s.it.coin) splash(s.x, COIN[s.it.coin][0], 6, 1);
+  else if (mode === 'geyser') splash(s.x, s.it.coin ? COIN[s.it.coin][0] : '#cfe8ff', 5, 0.8);
   else dust(s.x, FLOOR(), 4, 0.6);
 }
 // the best's impact (every finale ends on one; some add their own touch)
@@ -335,44 +335,51 @@ const MODES = {
         ctx.strokeStyle = `rgba(255,120,60,${(0.4 + 0.4 * Math.sin(t * 20)) * u})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 30 + 70 * u, 9 + 16 * u, 0, 0, Math.PI * 2); ctx.stroke(); }
     },
   },
-  // Waterfall: a geyser from your feet fills a glowing pool high up; it overflows and pours down.
-  // Finale: the stream runs dry, light wells up under the middle of the pile, and the best bursts up
-  // out of it on a geyser of droplets, hangs, and comes down into the middle in a splash crown
-  fall: {
+  // Geyser: the ground rumbles (bubbles, steam), then the loot erupts on jets of water in pulses, each
+  // stronger; between them it steams and bubbles. Finale: the longest rumble, light welling up in the
+  // best item's color, and the tallest jet carries the best to the top: it hangs, then comes down into
+  // the middle in a splash crown
+  geyser: {
     start(list) {
-      this.lip = W * 0.3; this.poolY = 46;
-      const n = list.length - 1, up = WIND, rise = 0.5, fill = up + rise;
+      const n = list.length - 1, a = Math.ceil(n * 0.4);
+      this.pulses = [{ at: 0.7, h: 0.55 }, { at: 1.7, h: 0.75 }];
+      this.bigAt = 3.2; this.rumbles = [[0, 0.7, 0.5], [1.2, 1.7, 0.7], [2.4, 3.2, 1]];
+      this.jets = [];
       list.forEach((s, i) => { s.x = W / 2; s.y = FLOOR() - 10;
-        if (!s.it.best) { s.at = up + i * Math.min(0.025, 0.5 / n); s.pourAt = fill + 0.35 + i * (n > 25 ? 0.045 : 0.075); } });
-      const last = fill + 0.35 + n * (n > 25 ? 0.045 : 0.075);
-      this.fillAt = fill; this.dryAt = last + 0.3; this.wellAt = this.dryAt + 0.4; this.surgeAt = this.wellAt + 0.8;
-      sprites[sprites.length - 1].at = this.surgeAt;
+        if (s.it.best) { s.at = this.bigAt; return; }
+        const p = i < a ? 0 : 1; s.pulse = p; s.at = this.pulses[p].at + R(0, 0.12); });
     },
     launch(s) {
-      if (s.it.best) { // out of the middle of the pile on a geyser of droplets, up to the top, then its hang
-        s.x = W / 2; s.y = FLOOR() - 10; s.vx = 0; s.vy = -Math.sqrt(2 * G * (FLOOR() - H * 0.2)); s.phase = 'rise'; s.glow = 1;
-        flash = 0.25; this.geyser(70); return; }
-      // the geyser: straight up to the pool by the ledge
-      s.phase = 'geyser'; s.vy = -Math.sqrt(2 * G * (FLOOR() - this.poolY)) * R(0.98, 1.02);
-      s.vx = (this.lip - 40 + R(-30, 30) - s.x) / (-s.vy / G);
-    },
-    geyser(n) { const c = BC(); for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + R(-0.25, 0.25), sp = R(400, 1000);
-      parts.push({ x: W / 2 + R(-10, 10), y: FLOOR() - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.6, 1.1), age: 0, size: R(2, 3.5), color: i % 3 ? c : '#ffffff', g: 1300 }); } },
-    tick(s, dt) {
-      if (s.phase === 'geyser') { s.vy += G * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.rot += 4 * dt;
-        s.trail.push([s.x, s.y]); if (s.trail.length > 5) s.trail.shift();
-        if (s.vy >= 0) { s.phase = 'pool'; s.trail.length = 0; s.px = this.lip - 40 + R(-40, 30); s.py = this.poolY + R(-4, 8); } return; }
-      if (s.phase === 'pool') { // bobbing in the pool until its turn to pour over
-        s.x += (s.px - s.x) * Math.min(1, dt * 6); s.y += (s.py + Math.sin(t * 5 + s.px) * 2 - s.y) * Math.min(1, dt * 6);
-        if (t >= s.pourAt) { s.phase = null; s.x = this.lip + R(-10, 10); s.vx = R(120, 360); s.vy = R(20, 90); s.vr = R(-3, 3); }
+      const p = s.it.best ? null : this.pulses[s.pulse];
+      if (!p) { // the big one
+        this.jet(0.86, true); flash = 0.25; shake = shakeMax = 0.15;
+        s.x = W / 2; s.y = FLOOR() - 10; s.vx = 0; s.vy = -Math.sqrt(2 * G * (FLOOR() - H * 0.14)); s.phase = 'rise'; s.glow = 1;
         return; }
+      if (!p.fired) { p.fired = true; this.jet(p.h, false); }
+      // up the jet, spraying out around the top
+      s.vy = -Math.sqrt(2 * G * (FLOOR() - H * (1 - p.h) + R(-30, 40))); s.vx = R(-1, 1) * 230 * (0.6 + p.h); s.vr = R(-8, 8);
+    },
+    jet(h, big) { // a column of water shooting up, with spray
+      this.jets.push({ age: 0, life: big ? 1.1 : 0.7, h: H * h, w: big ? 30 : 18, big });
+      const c = big ? BC() : '#cfe8ff';
+      for (let i = 0; i < (big ? 80 : 40); i++) { const a = -Math.PI / 2 + R(-0.3, 0.3), sp = R(500, 1100) * (0.6 + h);
+        parts.push({ x: W / 2 + R(-8, 8), y: FLOOR() - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.7, 1.2), age: 0, size: R(2, 3.5), color: i % 3 ? c : '#ffffff', g: 1300 }); }
+      dust(W / 2, FLOOR(), big ? 14 : 6, 1);
+    },
+    pre(dt) {
+      for (const j of this.jets) j.age += dt;
+      this.jets = this.jets.filter(j => j.age < j.life);
+      // rumbling: a light shake, bubbles popping at your feet, steam rising (stronger before the big one)
+      for (const [a, b, k] of this.rumbles) if (t >= a && t < b) {
+        shake = Math.max(shake, 0.05 * k); shakeMax = 0.35;
+        if (Math.random() < 0.5 * k) parts.push({ x: W / 2 + R(-30, 30), y: FLOOR() - 2, vx: R(-10, 10), vy: R(-60, -20), life: R(0.2, 0.4), age: 0, size: R(2, 4), color: '#dff0ff', g: 0, ring: true });
+        if (Math.random() < 0.25 * k) parts.push({ x: W / 2 + R(-20, 20), y: FLOOR() - 6, vx: R(-15, 15), vy: R(-70, -40), life: R(0.9, 1.4), age: 0, size: R(8, 14), color: '#d8dde2', g: -10, soft: true });
+      }
+    },
+    tick(s, dt) {
       if (s.phase === 'rise') { s.vy += G * dt; s.y += s.vy * dt; if (s.vy >= 0) startHang(s, 0.55); return; }
       if (s.it.best && s.phase) return hangThenSlam(s, dt);
       physics(s, dt, false);
-    },
-    pre(dt) { // light welling up under the pile: ripples spreading from the middle
-      if (t >= this.wellAt && t < this.surgeAt) { scene.ripT = (scene.ripT || 0) - dt;
-        if (scene.ripT <= 0) { scene.ripT = 0.22; waves.push({ x: W / 2, y: FLOOR(), age: 0, life: 0.7, r: 150, color: BC(), ripple: true }); } }
     },
     impact(s) { // the splash crown and ripples
       const c = BC();
@@ -380,17 +387,21 @@ const MODES = {
       for (let i = 0; i < 3; i++) waves.push({ x: s.x, y: FLOOR(), age: -i * 0.15, life: 0.9, r: 200 + i * 60, color: c, ripple: true });
     },
     drawPre() {
-      if (t < WIND) return feetGlow(t / WIND);
-      // the pool by the ledge: glows while it holds loot, dims as it runs dry
-      const a = t < this.fillAt ? Math.max(0, (t - WIND) / 0.5) : t < this.dryAt ? 1 : Math.max(0, 1 - (t - this.dryAt) / 0.4);
-      if (a > 0) { const g = ctx.createRadialGradient(this.lip - 40, this.poolY + 10, 0, this.lip - 40, this.poolY + 10, 110);
-        g.addColorStop(0, 'rgba(140,200,255,.35)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.globalAlpha = a; ctx.fillStyle = g;
-        ctx.beginPath(); ctx.ellipse(this.lip - 40, this.poolY + 14, 110, 26, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(200,230,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(this.lip - 140, this.poolY + 24); ctx.lineTo(this.lip + 8, this.poolY + 24); ctx.stroke(); ctx.globalAlpha = 1; }
-      if (t >= this.wellAt && t < this.surgeAt + 0.15) { // the glow under the middle of the pile
-        const u = Math.min(1, (t - this.wellAt) / (this.surgeAt - this.wellAt));
-        const g = ctx.createRadialGradient(W / 2, FLOOR(), 0, W / 2, FLOOR(), 40 + 100 * u); g.addColorStop(0, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.globalAlpha = 0.8 * u; ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 40 + 100 * u, 14 + 30 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+      // before the big one: light welling up under your feet in the best item's color
+      if (t >= this.rumbles[2][0] && t < this.bigAt + 0.1) {
+        const u = Math.min(1, (t - this.rumbles[2][0]) / (this.bigAt - this.rumbles[2][0]));
+        const g = ctx.createRadialGradient(W / 2, FLOOR(), 0, W / 2, FLOOR(), 30 + 100 * u); g.addColorStop(0, BC()); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalAlpha = 0.85 * u; ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(W / 2, FLOOR(), 30 + 100 * u, 10 + 30 * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+      // the jets: a column that shoots up fast, holds, and thins out as it falls back
+      for (const j of this.jets) {
+        const u = j.age / j.life, up = Math.min(1, j.age / 0.12), h = j.h * up * (u > 0.6 ? 1 - (u - 0.6) / 0.4 * 0.5 : 1), w = j.w * (1 - 0.6 * u);
+        const g = ctx.createLinearGradient(0, FLOOR(), 0, FLOOR() - h);
+        const c = j.big ? BC() : '#cfe8ff';
+        g.addColorStop(0, '#ffffff'); g.addColorStop(0.3, c); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.globalAlpha = 0.75 * (1 - u * u); ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(W / 2 - w, FLOOR()); ctx.lineTo(W / 2 - w * 0.4, FLOOR() - h); ctx.lineTo(W / 2 + w * 0.4, FLOOR() - h); ctx.lineTo(W / 2 + w, FLOOR()); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
     },
   },
 };
