@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-06, **stop point after 1.1.0** (released: GitHub + CurseForge via the tag; the game switched back to release). Read this first
+_Last checkpoint: 2026-11-07, after 1.1.0: five new popup styles built (Achievement Capsule, Brush stroke, Rune decode, Forged letters, Ember burn-in), untested in game; the game is on dev. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -24,9 +24,9 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Workflow note: `actions/checkout` bumped to v5 (Node 20 warning).
   Wago not set up.
 - **Dev / release switch** (`tools/addon-mode.ps1`, CLAUDE.md section; command in CLAUDE.local.md):
-  "switch to dev/release" = run it, then the user `/reload`s. **The game is on release** (switched back 2026-11-06
-  after 1.1.0; update to 1.1.0 in the CurseForge app (on release only), refresh it if it still shows 1.0.1;
-  the app caches "latest version" for a while after an upload: refresh or restart it).
+  "switch to dev/release" = run it, then the user `/reload`s. **The game is on dev** (switched 2026-11-07 for
+  testing; 1.1.0 is the parked release copy). The CurseForge app caches "latest version" for a while after an
+  upload: refresh or restart it.
 - **Repo security** 2026-11-05: only Bempis-linux has access; rulesets "Protect main" (no force-push or
   delete) and "Protect release tags" (v* can't be deleted or moved), no bypass, even for the owner; wiki off.
   The user checks 2FA and installed apps themself.
@@ -39,10 +39,18 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      Claude restart). Use it for the next release. 1.1.0 was released by hand.
   2. **1.1.0 reached CurseForge** (workflow log: "Uploading DopamineLoot-v1.1.0-forever.zip (1.60.1 release)
      ... Success!"). Left: the user updates in the CurseForge app (on release), fully restarts, tests 1.1.0.
-  3. **Set aside in 1.1.0, to rework:** the **Achievement** style ("still awkward", not a coherent design; the
-     ribbon version is in View.lua but unlisted) and **Reverse disintegration** (Rare arrival; the user: "the
-     first iteration seemed better, add the fade" = commit 3a59dc9's specks + the model fade of 42791b9;
-     code `A.disint` in Arrivals.lua, unlisted).
+  3. **Reworked 2026-11-07, untested in game:** **Reverse disintegration** is back (3a59dc9's specks + the
+     item fading in via ItemAlpha; listed again for Rare). **Achievement** redesigned over mockup rounds 10-17
+     (docs/mockups/achievement.html, now only the keepers): the user kept **Capsule 3** (round emblem opening
+     into a rounded bar; rarity word + 4-bar rarity gauge, name, type; item level in a round badge at the
+     end; thin bevel, inner emblem ring; only the rim changes with rarity: Epic glow, Legendary glow + gold
+     rim) as Achievement, plus four new styles: **Brush stroke**, **Rune decode**, **Forged letters**,
+     **Ember burn-in** (the last three share name / diamond divider / one info line; effects scale with
+     rarity). Built in `DopamineLoot/Styles.lua` (kits hooked into View.lua); new textures Circle, Ring,
+     Pill, PillRim, Brush, Runes. The old ribbon Achievement code is removed. Rejected along the way:
+     Plaque, Headline, Crest, Framed toast, Swallowtail, Diamond HUD, Arch, coin/gem/seal emblems ("over
+     designed"), Neon, Torn reveal, Comic burst, Sticker slap, Kinetic type, Glitch, Quill script, Mist
+     summon. The NEW / upgrade marks from the mockup aren't built: the addon keeps no seen-items data yet.
   4. **Popup sounds per arrival animation** (the user, 2026-11-07): each arrival (Fireflies, Emerald flare,
      Geyser, Sapphire flare, Aurora arch, Light pool, Implosion, Eclipse, Starfall, Supernova, Meteor shower,
      Golden seal, the Legendary comet) gets its own sound, timed to its beats. Builds on flair step 3 (layered

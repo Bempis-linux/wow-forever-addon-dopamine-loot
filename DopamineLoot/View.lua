@@ -1,4 +1,4 @@
--- Dopamine Loot popup view: draws one item in one of three styles. The real popups (Popup.lua) and
+-- Dopamine Loot popup view: draws one item in the chosen style. The real popups (Popup.lua) and
 -- the live preview on the settings page (Look.lua) both use it, so the preview is exactly what you
 -- get. The item sways gently (Epic and better turn once to face you first): its 3D model where the
 -- client has one (weapons stand upright), otherwise its icon on a card that tilts.
@@ -6,6 +6,8 @@
 --   beam    a cone of light rising from a glowing disc (sparks drifting up through it for Rare+)
 --   banner  a ribbon in the quality color fading at both ends, the item on a diamond emblem, a shine
 --           sweeping across now and then
+--   splash, aura   a slanted banner slashing in; wisps of light rising
+--   achievement, brush, runes, forged, ember   in Styles.lua, through the hooks marked "kit" here
 -- Every style: the name in the game's title font, a flash of light as it appears, and an arrival
 -- that grows with rarity (picked in docs/mockups/popups.html): Rare a burst of sparks; Epic star
 -- glints (the game's star4) and a bigger burst; Legendary more of both, two shockwaves and embers.
@@ -47,7 +49,12 @@ ns.STYLES = {
   { key = "banner", label = "Banner", tip = "A ribbon in the item's color with its name on it, the item on a diamond emblem, a shine sweeping across." },
   { key = "splash", label = "Splash", tip = "A slanted banner slashes in behind a big name, with speed lines and a shine; the rarity is stamped on. Thicker the rarer: a crossing second banner for Epic, gold trim for Legendary." },
   { key = "aura", label = "Aura", tip = "The item in an aura of its color: soft wisps of light rise behind it and its glow breathes; the rarity under the name." },
-  -- set aside for 1.1.0 (the user: "still awkward"; the layout code stays): { key = "achievement", label = "Achievement", tip = "A small medallion with the item beside a name plate, like an achievement toast." },
+  -- the Capsule and the frameless four live in Styles.lua (picked in docs/mockups/achievement.html)
+  { key = "achievement", label = "Achievement", tip = "The item in a round emblem that opens into a bar: the rarity with a gauge, the name, the type; the item level in a small badge at the end." },
+  { key = "brush", label = "Brush stroke", tip = "A rough stroke of paint in the item's color swipes across under a big white name; flecks of paint fly off its end." },
+  { key = "runes", label = "Rune decode", tip = "The name's letters start as glowing runes flickering through other runes, then settle into letters one by one." },
+  { key = "forged", label = "Forged letters", tip = "Each letter is struck white-hot and cools to its color, sparks arcing off every strike. More sparks the rarer." },
+  { key = "ember", label = "Ember burn-in", tip = "An ember edge sweeps across and burns the name in, hot, then cooling; embers and a little smoke rise off it." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);
@@ -58,7 +65,13 @@ local LAYOUT = {
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
   splash = { w = 380, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 24 },
   aura = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 20 },
-  achievement = { w = 360, h = 140, stage = { -116, 0, 104, 130 }, text = "right", hit = { 0, 26, 30, 30 }, zoom = 1.9, font = 18 }, -- (zoom: the camera farther back, so the item fits in its medallion)
+  -- (Achievement: the stage is the emblem, a little higher so the item pokes out of its top; the
+  -- camera farther back so the item fits it)
+  achievement = { w = 400, h = 150, stage = { -140, 10, 96, 120 }, text = "right", hit = { 30, 20, 20, 20 }, zoom = 1.6, font = 19 },
+  brush = { w = 400, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 27 },
+  runes = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
+  forged = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
+  ember = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
@@ -90,7 +103,6 @@ end
 function ns.PopupStyle()
   local s = ns.settings.popupStyle
   if s == "halo" or s == "toast" then s = "relic"; ns.settings.popupStyle = s end -- both set aside (0.4.7, 0.4.14)
-  if s == "achievement" then return "relic" end -- set aside for 1.1.0 (not listed; the setting is kept)
   return LAYOUT[s or ""] and s or "relic"
 end
 function ns.PopupScale() return ns.settings.popupScale or 0.8 end
@@ -125,6 +137,9 @@ local function ShowsItemLevel(item)
   if item.classID then return item.classID == 2 or item.classID == 4 end
   return item.equipLoc ~= nil and item.equipLoc ~= "" and item.equipLoc ~= "INVTYPE_NON_EQUIP_IGNORE"
 end
+-- for Styles.lua (loaded after this file)
+ns.ViewTex, ns.ShowsItemLevel, ns.TITLE_FONT = Tex, ShowsItemLevel, TITLE_FONT
+local function Kit(style) return ns.STYLE_KITS and ns.STYLE_KITS[style] end
 
 function ns.CreateView(f)
   -- background art, all white textures tinted with the quality color
@@ -156,18 +171,9 @@ function ns.CreateView(f)
   f.auraGlow = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD")
   f.wisps = {}
   for i = 1, 14 do f.wisps[i] = Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD", 1) end
-  -- Achievement: a ribbon: the band (0) and its edge lines (1) start behind the medallion, whose dark
-  -- disc (2), ring in the quality color (3) and inner glow (4) sit on top of their left end
-  f.achPlate = Tex(f, "BORDER", WHITE, nil, 0)
-  f.achLine = Tex(f, "BORDER", WHITE, nil, 1)
-  f.achLine2 = Tex(f, "BORDER", WHITE, nil, 1)
-  f.medalDisc = Tex(f, "BORDER", MEDIA .. "Disc", nil, 2)
-  f.medalRing = Tex(f, "BORDER", MEDIA .. "Wave", "ADD", 3)
-  f.medalGlow = Tex(f, "BORDER", MEDIA .. "Glow", "ADD", 4)
   f.art = { f.glow, f.cone, f.bar, f.banner, f.bannerTop, f.bannerBottom, f.disc, f.line,
     f.shadow, f.emblem, f.emblemEdge, f.plateL, f.plateR, f.underL, f.underR,
-    f.splashBand, f.splashBand2, f.splashEdge, f.splashTrim, f.tabBack, f.auraGlow,
-    f.medalGlow, f.medalDisc, f.medalRing, f.achPlate, f.achLine, f.achLine2 }
+    f.splashBand, f.splashBand2, f.splashEdge, f.splashTrim, f.tabBack, f.auraGlow }
   for _, t in ipairs(f.wisps) do f.art[#f.art + 1] = t end
   -- banner v2: a streak of light sweeping across the band, clipped to it
   f.shineClip = CreateFrame("Frame", nil, f)
@@ -239,6 +245,7 @@ function ns.CreateView(f)
   if f.name.SetWordWrap then f.name:SetWordWrap(true) end
   f.name:SetShadowColor(0, 0, 0, 1)
   f.name:SetShadowOffset(1, -1)
+  for _, k in pairs(ns.STYLE_KITS or {}) do k.Create(f) end -- (Styles.lua: each style's own parts)
 
   function f:Layout()
     local style = self.styleOverride or ns.PopupStyle()
@@ -275,10 +282,16 @@ function ns.CreateView(f)
     self.info:SetWidth(0) -- (no limit, unless a style sets one)
     self.stamp:Hide()
     self.name:SetAlpha(1)
+    self.name:SetShadowOffset(1, -1)
+    for _, fs in ipairs({ self.info, self.badges, self.tag }) do fs:SetAlpha(1) end
     for _, l in ipairs(self.letters) do l:Hide() end
-    self.lettersOn = nil
+    self.lettersOn, self.ownLetters = nil, nil
+    for _, k in pairs(ns.STYLE_KITS or {}) do k.Reset(self) end
+    local kit = Kit(style)
 
-    if style == "relic" or style == "beam" then
+    if kit then
+      kit.Layout(self)
+    elseif style == "relic" or style == "beam" then
       if style == "relic" then
         self.glow:SetSize(210, 210)
         self.glow:SetPoint("CENTER", self.stage, "CENTER", 0, 0)
@@ -338,38 +351,6 @@ function ns.CreateView(f)
       self.badges:SetJustifyH("CENTER")
       self.tag:Show()
       for _, w in ipairs(self.wisps) do w.age = nil end
-    elseif style == "achievement" then
-      -- one ribbon: the medallion (a dark disc with a ring in the item's color and a soft glow inside)
-      -- sits on the left end of a dark band edged top and bottom by lines in the item's color; band
-      -- and lines start behind the medallion and fade out to the right, the text between them
-      self.medalGlow:SetSize(96, 96)
-      self.medalGlow:SetPoint("CENTER", self.stage, "CENTER")
-      self.medalDisc:SetSize(112, 112)
-      self.medalDisc:SetPoint("CENTER", self.stage, "CENTER")
-      self.medalRing:SetSize(124, 124)
-      self.medalRing:SetPoint("CENTER", self.stage, "CENTER")
-      self.achPlate:SetSize(290, 70)
-      self.achPlate:SetPoint("LEFT", self.stage, "CENTER", 0, 0)
-      if self.achPlate.SetGradient and CreateColor then
-        self.achPlate:SetGradient("HORIZONTAL", CreateColor(0.03, 0.025, 0.02, 0.9), CreateColor(0.03, 0.025, 0.02, 0))
-      else
-        self.achPlate:SetVertexColor(0.03, 0.025, 0.02, 0.7)
-      end
-      self.achLine:SetSize(290, 1.5)
-      self.achLine:SetPoint("BOTTOMLEFT", self.achPlate, "TOPLEFT", 0, 0)
-      self.achLine2:SetSize(290, 1.5)
-      self.achLine2:SetPoint("TOPLEFT", self.achPlate, "BOTTOMLEFT", 0, 0)
-      for _, t in ipairs({ self.medalGlow, self.medalDisc, self.medalRing, self.achPlate, self.achLine, self.achLine2 }) do t:Show() end
-      self.tag:SetPoint("TOPLEFT", self.stage, "CENTER", 70, 26)
-      self.name:SetPoint("TOPLEFT", self.tag, "BOTTOMLEFT", 0, -2)
-      self.name:SetWidth(200)
-      self.name:SetJustifyH("LEFT")
-      self.info:SetPoint("TOPLEFT", self.name, "BOTTOMLEFT", 0, -2)
-      self.info:SetJustifyH("LEFT")
-      self.info:SetWidth(200) -- (stays on the plate)
-      self.badges:SetPoint("LEFT", self.info, "RIGHT", 10, 0)
-      self.badges:SetJustifyH("LEFT")
-      self.tag:Show()
     elseif style == "compact" then
       -- one line: the icon, then the name on a dark strip that fades out to the right
       self.bar:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
@@ -414,7 +395,7 @@ function ns.CreateView(f)
       self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0) -- on the info line, inside the band
       self.badges:SetJustifyH("LEFT")
     end
-    if style ~= "banner" and style ~= "splash" then self.shineClip:Hide() end
+    if style ~= "banner" and style ~= "splash" and not (kit and kit.shine) then self.shineClip:Hide() end
   end
 
   -- Fill in an item. Call after the frame is shown (the model needs a visible frame).
@@ -438,24 +419,14 @@ function ns.CreateView(f)
     self.splashEdge:SetVertexColor(1, 1, 1, 0.9)
     self.splashBand2:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, 0.9) -- a darker stripe of the same color, crossing it
     self.splashTrim:SetVertexColor(1, 0.82, 0.4, 1)
-    -- the rarity word (the stamp in Splash; the tag in Aura and Achievement)
+    -- the rarity word (the stamp in Splash; the tag in Aura and Achievement, which spaces it out)
     local word = (_G["ITEM_QUALITY" .. q .. "_DESC"] or ({ "Common", "Uncommon", "Rare", "Epic", "Legendary" })[q] or ""):upper()
     self.stamp:SetText(word .. "!")
     self.tag:SetText(word)
     self.tag:SetTextColor(qr, qg, qb)
-    -- Aura and Achievement
+    -- Aura
     self.auraGlow:SetVertexColor(qr, qg, qb, 1)
     for _, w in ipairs(self.wisps) do w:SetVertexColor(r, g, b, 1) end
-    self.medalGlow:SetVertexColor(r, g, b, 0.45)
-    self.medalDisc:SetVertexColor(0.08, 0.06, 0.03, 0.95)
-    self.medalRing:SetVertexColor(r, g, b, 1)
-    if self.achLine.SetGradient and CreateColor then -- the line above the name, fading out to the right
-      self.achLine:SetGradient("HORIZONTAL", CreateColor(r, g, b, 0.9), CreateColor(r, g, b, 0))
-      self.achLine2:SetGradient("HORIZONTAL", CreateColor(r, g, b, 0.6), CreateColor(r, g, b, 0))
-    else
-      self.achLine:SetVertexColor(r, g, b, 0.6)
-      self.achLine2:SetVertexColor(r, g, b, 0.4)
-    end
     self.disc:SetVertexColor(math.min(1, r + 0.25), math.min(1, g + 0.25), math.min(1, b + 0.25), 1)
     self.banner:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, 0.92) -- dark ribbon so the name reads on it
     self.bannerTop:SetVertexColor(r, g, b, 1)
@@ -555,6 +526,8 @@ function ns.CreateView(f)
     self.stampW = self.stamp:GetStringWidth()
     self.splashDone, self.wispT = nil, 0
     self:PrepareLetters()
+    local kit = Kit(self.style)
+    if kit then kit.Set(self, item) end -- (after the name, info and letters are in)
     -- the name's shine waits until its letters have landed (Relic and Beam)
     if self.lettersOn and self.shineTimes then
       local wait = 0.15 + (self.letterCount or 0) * 0.05 + 0.26
@@ -616,11 +589,12 @@ function ns.CreateView(f)
 
   -- Epic and better: the name is laid out letter by letter (one text each, at the place the whole
   -- name puts it) so Tick can stamp them in one after another; the name itself shows again once they
-  -- have all landed. Only for a name on one line (a wrapped one just shows).
-  function f:PrepareLetters()
-    self.lettersOn = nil
+  -- have all landed. Only for a name on one line (a wrapped one just shows). force: whatever the
+  -- rarity (the styles in Styles.lua that bring the name in letter by letter themselves)
+  function f:PrepareLetters(force)
+    self.lettersOn, self.letterCount = nil, 0
     for _, l in ipairs(self.letters) do l:Hide() end
-    if self.q < 4 or self.style == "compact" then return end
+    if (self.q < 4 and not force) or self.style == "compact" then return end
     local text = self.name:GetText() or ""
     local face, size, flags = self.name:GetFont()
     if not face or text == "" then return end
@@ -638,6 +612,9 @@ function ns.CreateView(f)
       local l = self.letters[i]
       if not l then l = self.fx:CreateFontString(nil, "OVERLAY"); self.letters[i] = l end
       l:SetFont(face, size, flags or "")
+      if l.SetTextScale then l:SetTextScale(1) end -- (a letter scaled by the last arrival)
+      l.px = nil
+      l:SetAlpha(1)
       l:SetText(ch)
       l:SetTextColor(r, g, b)
       l:SetShadowColor(0, 0, 0, 1)
@@ -886,7 +863,9 @@ function ns.CreateView(f)
 
     if self.style == "splash" then self:SplashTick(fx) end
     if self.style == "aura" then self:AuraTick(dt, age) end
-    if self.lettersOn then self:Letters(fx) end
+    local kit = Kit(self.style)
+    if kit then kit.Tick(self, fx, dt) end
+    if self.lettersOn and not self.ownLetters then self:Letters(fx) end
 
     -- beam style, Rare and up: a few motes rise slowly through the light
     if self.style == "beam" and self.q >= 3 then

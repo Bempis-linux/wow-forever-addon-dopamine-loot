@@ -9,6 +9,7 @@
 --   Wave      a thin glowing ring that expands (legendary shockwave)
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 --   Pillar, Vignette   loot rain: the light pillar over resting Rare+, the Epic screen-edge pulse
+--   Circle, Ring, Pill, PillRim   Achievement (the Capsule); Brush   Brush stroke; Runes   Rune decode
 --   Chest*, Pouch*, Rays   deprecated chest show (written to deprecated/chest-show/Media/)
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
@@ -132,6 +133,80 @@ end))
 Write("Vignette", Fill(Canvas(256, 256), function(u, v)
   local t = math.max(0, math.min(1, (R(u, v) - 0.55) / 0.75))
   return t * t * (3 - 2 * t)
+end))
+
+-- Achievement style (the Capsule, picked in docs/mockups/achievement.html): crisp shapes, a one-pixel
+-- soft edge. Circle and Ring: the emblem and the item-level badge. Pill and PillRim: the bar, in three
+-- slices in game: the left half is a straight band (a one-pixel column of it is stretched for the
+-- middle), the right half the round end
+local function Edge(d, at, soft) local t = math.max(0, math.min(1, (at - d) / soft + 0.5)); return t end
+Write("Circle", Fill(Canvas(128, 128), function(u, v) return Edge(R(u, v), 0.97, 0.025) end))
+Write("Ring", Fill(Canvas(128, 128), function(u, v)
+  local r = R(u, v)
+  return Edge(math.abs(r - 0.945), 0.022, 0.025)
+end))
+local function PillDist(u, v) -- 0 at the middle line, 1 at the edge (straight left half, round right half)
+  if u < 0.5 then return math.abs(v - 0.5) * 2 end
+  return math.sqrt((u - 0.5) ^ 2 + (v - 0.5) ^ 2) * 2
+end
+Write("Pill", Fill(Canvas(128, 128), function(u, v) return Edge(PillDist(u, v), 0.97, 0.02) end))
+Write("PillRim", Fill(Canvas(128, 128), function(u, v) return Edge(math.abs(PillDist(u, v) - 0.945), 0.024, 0.02) end))
+
+-- Brush stroke style: one thick stroke of paint rising to the right, rough-edged, tapering at both
+-- ends (the tail thinner and drier), with dry-brush streaks along it. Deterministic noise.
+local function Hash(n) local s = math.sin(n * 127.1 + 311.7) * 43758.5453; return s - math.floor(s) end
+local function Noise(x) -- smooth value noise
+  local i, f = math.floor(x), x - math.floor(x)
+  local a, b = Hash(i), Hash(i + 1)
+  return a + (b - a) * f * f * (3 - 2 * f)
+end
+Write("Brush", Fill(Canvas(512, 128), function(u, v)
+  local center = 0.42 + 0.16 * u
+  local taper = math.min(1, u / 0.1) ^ 0.5 * math.min(1, (1 - u) / 0.3) ^ 0.7
+  local half = 0.34 * taper * (1 + 0.1 * (Noise(u * 38) - 0.5) + 0.05 * (Noise(u * 120 + 7) - 0.5))
+  if half <= 0 then return 0 end
+  local s = (v - center) / half -- -1..1 across the stroke
+  if math.abs(s) >= 1 then return 0 end
+  local lane = math.floor((s + 1) * 13)
+  local dry = Hash(lane + 3) -- each lane of bristles runs dry at its own point toward the tail
+  local stop = 0.72 + 0.26 * dry
+  local gap = u > stop and math.max(0, 1 - (u - stop) / 0.04) or 1
+  local streak = 0.82 + 0.18 * Hash(lane)
+  return Edge(math.abs(s), 0.96, 0.08) * streak * gap
+end))
+
+-- Rune decode style: 16 runes (Elder Futhark shapes, drawn as strokes) on a 4 x 4 sheet, a soft glow
+-- around each stroke; the game picks one with SetTexCoord
+local RUNES = {
+  { { .35, .1, .35, .9 }, { .35, .6, .7, .85 }, { .35, .4, .7, .65 } },                         -- fehu
+  { { .3, .1, .3, .9 }, { .3, .9, .7, .62 }, { .7, .62, .7, .1 } },                             -- uruz
+  { { .35, .1, .35, .9 }, { .35, .72, .68, .5 }, { .68, .5, .35, .28 } },                       -- thurisaz
+  { { .35, .1, .35, .9 }, { .35, .9, .7, .7 }, { .35, .66, .7, .46 } },                         -- ansuz
+  { { .35, .1, .35, .9 }, { .35, .9, .68, .72 }, { .68, .72, .35, .52 }, { .35, .52, .7, .1 } }, -- raidho
+  { { .66, .86, .34, .5 }, { .34, .5, .66, .14 } },                                             -- kenaz
+  { { .3, .1, .7, .9 }, { .3, .9, .7, .1 } },                                                   -- gebo
+  { { .35, .1, .35, .9 }, { .35, .9, .68, .7 }, { .68, .7, .35, .5 } },                         -- wunjo
+  { { .3, .1, .3, .9 }, { .7, .1, .7, .9 }, { .3, .62, .7, .38 } },                             -- hagalaz
+  { { .5, .1, .5, .9 }, { .3, .64, .7, .4 } },                                                  -- naudiz
+  { { .5, .1, .5, .9 } },                                                                       -- isa
+  { { .44, .84, .24, .58 }, { .24, .58, .44, .32 }, { .56, .68, .76, .42 }, { .76, .42, .56, .16 } }, -- jera
+  { { .5, .1, .5, .9 }, { .5, .9, .26, .64 }, { .5, .9, .74, .64 } },                           -- tiwaz
+  { { .36, .1, .36, .9 }, { .36, .9, .66, .7 }, { .66, .7, .36, .5 }, { .36, .5, .66, .3 }, { .66, .3, .36, .1 } }, -- berkano
+  { { .3, .1, .3, .9 }, { .7, .1, .7, .9 }, { .3, .9, .5, .62 }, { .5, .62, .7, .9 } },         -- ehwaz
+  { { .5, .1, .5, .9 }, { .5, .56, .26, .86 }, { .5, .56, .74, .86 } },                         -- algiz
+}
+local function SegDist(px, py, x1, y1, x2, y2)
+  local dx, dy = x2 - x1, y2 - y1
+  local t = math.max(0, math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)))
+  return math.sqrt((px - x1 - t * dx) ^ 2 + (py - y1 - t * dy) ^ 2)
+end
+Write("Runes", Fill(Canvas(256, 256), function(u, v)
+  local col, row = math.floor(u * 4), math.floor((1 - v) * 4) -- row 0 at the top
+  local cu, cv = u * 4 - col, 1 - ((1 - v) * 4 - row)        -- inside the cell, v up
+  local rune = RUNES[row * 4 + col + 1]
+  local d = 1
+  for _, s in ipairs(rune) do d = math.min(d, SegDist(cu, cv, s[1], s[2], s[3], s[4])) end
+  return Edge(d, 0.045, 0.02) + 0.35 * Bump(d, 0, 0.11)
 end))
 
 -- Deprecated (the chest show was set aside 2026-10-14): these go to deprecated/chest-show/Media/,

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <!-- rounds 10-15: Achievement style; round 15 keeps Capsule 3 and Brush stroke -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Achievement Style Round 17</title>
+<title>Achievement Style Final</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; min-height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
@@ -243,8 +243,8 @@
 </head>
 <body>
 <header>
-  <h1>Achievement style, round 17</h1>
-  <p>Capsule 3 is the keeper for Achievement; Brush stroke is kept as a unique style. Below: the four fantasy uniques, polished, then the two round 15 ideas you liked. Pick a rarity, then Replay.</p>
+  <h1>Achievement style, final</h1>
+  <p>The picks: Capsule 3 becomes the Achievement style; Brush stroke, Rune decode, Forged letters and Ember burn-in become new popup styles. Pick a rarity, then Replay.</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
@@ -257,26 +257,16 @@
 <div class="grid">
   <div class="cell keep"><h2>Capsule 3, badge and gauge</h2><p>The Achievement style: the plain Capsule with the item-level badge, the rarity gauge, a thin bevel and the emblem's inner ring.</p><div class="scene" id="s3"></div></div>
   <div class="cell keep"><h2>U1. Brush stroke</h2><p>One thick, rough stroke of paint in the item's color swipes across, the name over it in big white italic, flecks flying off the end.</p><div class="scene" id="u1"></div></div>
-</div>
-<h3>Fantasy uniques</h3>
-<p class="sub">Frameless; the letters are the show. All four share one layout: the name, a small diamond divider, one info line. Sparks, mist and embers grow with rarity: try Legendary. The serif stands in for the game's Morpheus or Friz Quadrata.</p>
-<div class="grid">
-  <div class="cell"><h2>F1. Rune decode</h2><p>Each letter holds its place as a glowing rune flickering through other runes. Left to right they settle into letters with a white flash, and each rune floats off as it goes.</p><div class="scene" id="f1"></div></div>
-  <div class="cell"><h2>F2. Forged letters</h2><p>Each letter is struck in white-hot with a flash behind it, then cools through orange to its color. Sparks arc off every strike and fall; the divider cools last.</p><div class="scene" id="f2"></div></div>
-  <div class="cell"><h2>F3. Mist summon</h2><p>Puffs of colored mist swirl in from all sides and meet, then breathe out in a soft ring as the item and the name gather sharp. A low mist stays under the name.</p><div class="scene" id="f3"></div></div>
-  <div class="cell"><h2>F4. Ember burn-in</h2><p>An ember edge sweeps across; the letters burn in glowing hot just behind it, then cool to their color. Embers and a little smoke rise off the edge.</p><div class="scene" id="f4"></div></div>
-</div>
-<h3>Round 15 ideas you liked</h3>
-<div class="grid">
-  <div class="cell"><h2>U6. Kinetic type</h2><p>Only letters. The rarity word drifts by huge and hollow behind; the name's letters drop in one by one with a bounce, and a thin line grows under them.</p><div class="scene" id="u6"></div></div>
-  <div class="cell"><h2>U7. Glitch</h2><p>The name arrives split into red and cyan copies, jittering and sliced, then snaps together clean. The rarity types itself in under it with a blinking cursor.</p><div class="scene" id="u7"></div></div>
+  <div class="cell keep"><h2>F1. Rune decode</h2><p>Each letter holds its place as a glowing rune flickering through other runes. Left to right they settle into letters with a white flash, and each rune floats off as it goes.</p><div class="scene" id="f1"></div></div>
+  <div class="cell keep"><h2>F2. Forged letters</h2><p>Each letter is struck in white-hot with a flash behind it, then cools through orange to its color. Sparks arc off every strike and fall; the divider cools last.</p><div class="scene" id="f2"></div></div>
+  <div class="cell keep"><h2>F4. Ember burn-in</h2><p>An ember edge sweeps across; the letters burn in glowing hot just behind it, then cool to their color. Embers and a little smoke rise off the edge.</p><div class="scene" id="f4"></div></div>
 </div>
 <script>
 'use strict';
 const Q = { 2: ['#1eff00', '#9dff8a', '#0b3a05', 'Uncommon'], 3: ['#3a8cff', '#9cc8ff', '#0a2650', 'Rare'], 4: ['#a335ee', '#d9a8ff', '#2e0b48', 'Epic'], 5: ['#ff8000', '#ffd08a', '#4a2000', 'Legendary'] };
 const NAMECOLOR = { 2: '#1eff00', 3: '#5aa8ff', 4: '#b75cff', 5: '#ff9a2a' };
 let q = 3;
-const $ = id => document.getElementById(id);
+const $ = id => document.getElementById(id) || {};
 const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#5a4a3a"/><stop offset=".5" stop-color="#8a7358"/><stop offset="1" stop-color="#4a3c2e"/></linearGradient>
   <linearGradient id="bl" x1="0" x2="1"><stop offset="0" stop-color="#8b95a3"/><stop offset=".5" stop-color="#eef2f8"/><stop offset="1" stop-color="#6b7480"/></linearGradient></defs>
   <rect x="29" y="20" width="6" height="125" rx="3" fill="url(#h)"/>

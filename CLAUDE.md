@@ -23,7 +23,9 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Core.lua                 saved data, events, /dl, Test actions (ns.AddAction, ns.RunAction)
   LootMsg.lua              pure parser of "You receive loot" lines (tools/test_lootmsg.lua)
   Sounds.lua               popup sounds per rarity (settings sound2..5, game kits) + our chimes (noChime3..5), rain sets (OGG)
-  View.lua                 the popup view: 3 styles, model or tilting card, flash, arrivals by rarity
+  View.lua                 the popup view: Relic, Beam, Banner, Splash, Aura; model or tilting card, flash, arrivals by rarity
+  Styles.lua               more popup styles as kits hooked into View: Achievement (Capsule), Brush stroke, Rune decode,
+                           Forged letters, Ember burn-in
   Popup.lua                popup stack, motion, waiting queue (uses View)
   RainCore.lua             loot rain, the pure part: ns.RainCore (physics, timing, spacing, coins; tools/test_rain.lua)
   Rain.lua                 loot rain drawing: sprites and every effect (ns.RAIN_FX switches)
@@ -87,7 +89,8 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   settings and there are no other commands. Every setting and test is a control on a page (number field
   or drag slider, choice, Test button); visual settings update a live preview on the page. Test buttons
   run `ns.RunAction`. No log window: the addon prints nothing.
-- Popup styles Relic (default) / Beam / Banner (Halo lens dropped 0.4.7; the Toast style set aside 0.4.14:
+- Popup styles Relic (default) / Beam / Banner / Splash / Aura / Achievement / Brush stroke / Rune decode / Forged
+  letters / Ember burn-in (the last five picked in docs/mockups/achievement.html, 2026-11-07; Halo lens dropped 0.4.7; the Toast style set aside 0.4.14:
   `deprecated/toast/`, README lists what needs work)
   are all options; weapons stand upright
   (`Model:SetPitch`, not SetRoll). Arrivals by rarity play in every style: Rare a burst of sparks,
