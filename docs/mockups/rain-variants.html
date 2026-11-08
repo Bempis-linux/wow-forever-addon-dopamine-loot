@@ -41,7 +41,7 @@
 <script>
 'use strict';
 const DESC = {
-  bang: '<b>Big bang.</b> A flash and a shockwave in the middle of the screen, and the whole haul bursts out at once. Everything hits and bounces off all four edges, losing speed with each bounce, and settles along the bottom. The best item glows as it flies.',
+  bang: '<b>Big bang.</b> First a wind-up: a point of light swells in the middle of the screen, sparks are pulled into it, it trembles and the screen dims, then it pinches small. Then a flash and a shockwave, and the whole haul bursts out at once. Everything hits and bounces off all four edges, losing speed with each bounce, and settles along the bottom. The best item glows as it flies.',
   firework: '<b>Firework.</b> One after another, each item shoots up from your feet on a bright trail and bursts at its peak into sparks of its rarity color (bigger the rarer). The item then floats down out of its burst and lands. The best one goes last and highest.',
   vortex: '<b>Vortex.</b> The loot spins up out of the ground into a widening whirlwind above you, faster and faster, then flings outward all at once and lands around you.',
   meteor: '<b>Meteor shower.</b> Loot falls in from the top of the screen at a slant with burning trails and hits the ground in a puff of dust. The best item comes last as the biggest meteor, with a heavier impact.',
@@ -136,13 +136,41 @@ function burst(x, y, q, big) {
 
 // each animation: start() places and times the sprites; tick() moves them until they land
 const MODES = {
+  // the wind-up (WIND s): a point of light swells in the middle, motes of light are pulled into it,
+  // it trembles and the screen dims a little; it pinches small, then bursts
   bang: {
+    WIND: 0.75,
     start(list) {
-      const cx = W / 2, cy = H * 0.45;
-      flash = 1; waves.push({ x: cx, y: cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' });
-      list.forEach(s => { const a = Math.random() * Math.PI * 2, sp = R(700, 1500) * (s.it.best ? 0.8 : 1);
-        s.x = cx; s.y = cy; s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-9, 9); s.state = 'fly'; s.at = 0.05; });
-      burst(cx, cy, best, true);
+      this.cx = W / 2; this.cy = H * 0.45; this.banged = false; this.nextMote = 0;
+      list.forEach(s => { s.x = this.cx; s.y = this.cy; s.state = 'wait'; s.at = this.WIND; });
+    },
+    launch(s) {
+      if (!this.banged) { // the first one out sets off the bang
+        this.banged = true; flash = 1; shake = 0.2;
+        waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' });
+        burst(this.cx, this.cy, best, true);
+      }
+      const a = Math.random() * Math.PI * 2, sp = R(700, 1500) * (s.it.best ? 0.8 : 1);
+      s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-9, 9);
+    },
+    pre(dt) { // every frame before the bang: motes pulled inward
+      if (t >= this.WIND) return;
+      this.nextMote -= dt;
+      while (this.nextMote <= 0) {
+        this.nextMote += 0.012;
+        const a = Math.random() * Math.PI * 2, d = R(140, 260);
+        parts.push({ x: this.cx + Math.cos(a) * d, y: this.cy + Math.sin(a) * d, tx: this.cx, ty: this.cy, pull: true, life: 0.35, age: 0, size: R(1.5, 3), color: QC[best] === '#ffffff' ? '#fff4c0' : QC[best] });
+      }
+    },
+    drawPre() { // the core: swells, trembles, pinches small just before the bang
+      if (t >= this.WIND) return;
+      const u = t / this.WIND, pinch = u > 0.85 ? 1 - (u - 0.85) / 0.15 * 0.7 : 1;
+      const r = (6 + 26 * u * u) * pinch, j = 2.5 * u;
+      const x = this.cx + R(-j, j), y = this.cy + R(-j, j);
+      ctx.fillStyle = `rgba(0,0,0,${0.25 * u})`; ctx.fillRect(0, 0, W, H);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+      g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, QC[best]); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
     },
     tick(s, dt) { physics(s, dt, true); },
   },
@@ -216,12 +244,15 @@ function start() {
 function update(dt) {
   t += dt;
   const M = MODES[mode];
+  if (M.pre) M.pre(dt);
   for (const s of sprites) {
     if (s.state === 'wait' && t >= s.at) { s.state = 'fly'; if (M.launch) M.launch(s); }
     if (s.state === 'fly') M.tick.call(M, s, dt);
     else if (s.state === 'rest') { s.restT += dt; const k = Math.min(1, s.restT / 0.25); s.x += (s.tx - s.x) * k; s.y += (s.ty - s.y) * k; s.rot = s.rot0 * (1 - k) + Math.round(s.rot0 / (Math.PI * 2)) * Math.PI * 2 * k; s.trail.length = 0; }
   }
-  for (const p of parts) { p.age += dt; p.vy += (p.g || 0) * dt; if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; } p.x += p.vx * dt; p.y += p.vy * dt; }
+  for (const p of parts) { p.age += dt;
+    if (p.pull) { const k = Math.min(1, dt * 9); p.x += (p.tx - p.x) * k; p.y += (p.ty - p.y) * k; continue; }
+    p.vy += (p.g || 0) * dt; if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; } p.x += p.vx * dt; p.y += p.vy * dt; }
   parts = parts.filter(p => p.age < p.life);
   for (const w of waves) w.age += dt; waves = waves.filter(w => w.age < w.life);
   shake = Math.max(0, shake - dt); flash = Math.max(0, flash - dt * 2.2);
@@ -269,6 +300,7 @@ function draw() {
     ctx.strokeStyle = `rgba(200,220,255,${a})`; ctx.lineWidth = 1.5;
     for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.ellipse(W / 2, FLOOR() - 20 - i * 40 * k, 20 + i * 32 * k, 6 + i * 9 * k, 0, 0, Math.PI * 2); ctx.stroke(); }
   }
+  if (MODES[mode].drawPre) MODES[mode].drawPre();
   // shockwaves
   for (const w of waves) { const u = w.age / w.life; ctx.strokeStyle = w.color; ctx.globalAlpha = (1 - u) * 0.8; ctx.lineWidth = 6 * (1 - u) + 1; ctx.beginPath(); ctx.arc(w.x, w.y, w.r * (0.15 + u), 0, Math.PI * 2); ctx.stroke(); }
   ctx.globalAlpha = 1;
