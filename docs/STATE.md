@@ -57,6 +57,11 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
      hit sounds: our own OGGs, mixable with game kits per layer). Mockup with Play buttons first; the user picks by ear.
   5. Roadmap (plan.md, Ideas): **class-themed popup animations/styles**; accessibility (reduce motion, no
      flashes) tabled; drag-to-move popups, the NEW badge, the bag sparkle.
+  **New order (the user, 2026-11-07, replaces 4-5 for now; in plan.md's Roadmap "next" row):** 1. new
+  animations: loot rain variants (their "big bang": a central burst bouncing off all screen edges, settling
+  at the bottom; plus more) and finales for Open All mail / Create All crafts (verify the APIs first);
+  2. an edit mode to drag the popups and the money tally into place; 3. stats: loot streak, session tally.
+  Dungeon recap stays on the roadmap. Popup sounds per arrival (4) waits.
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
   (gitignored). It acts on nothing; never act on player text without the user.
