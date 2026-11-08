@@ -62,6 +62,12 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   at the bottom; plus more) and finales for Open All mail / Create All crafts (verify the APIs first);
   2. an edit mode to drag the popups and the money tally into place; 3. stats: loot streak, session tally.
   Dungeon recap stays on the roadmap. Popup sounds per arrival (4) waits.
+  **Built 2026-11-07, untested in game:** the rain animations (setting `rainStyle`, "Animation" under "How it
+  comes out" on the Loot rain page): Fountain (default, unchanged), Big bang (0.75 s wind-up at screen center,
+  pulled-in motes, dim, flash; bounces off all four edges via bounds.top), Firework, Vortex, Meteor shower,
+  Waterfall (picked in docs/mockups/rain-variants.html; the user liked all, slot reels rejected). Code: STYLE /
+  StyleLaunch / *Ctl controllers in Rain.lua; Core.Step got `gmul` (gravity multiplier; `s.g` is the green
+  channel!) and an optional ceiling. Next on the list after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
   (gitignored). It acts on nothing; never act on player text without the user.

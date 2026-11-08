@@ -2,7 +2,8 @@
 -- bounces on an invisible trampoline. Items launch worst first; the best waits a beat, flies
 -- higher and lands in the middle. When it settles, the good stuff (Rare+ by default) becomes
 -- popups and the rest is pulled into your bag. Money rains as coins with a rolling total.
--- Every flourish is a switch on the "Loot rain effects" page (ns.RAIN_FX).
+-- Every flourish is a switch on the "Loot rain effects" page (ns.RAIN_FX); how the loot comes out
+-- (fountain, Big bang, Firework, Vortex, Meteor shower, Waterfall) is setting rainStyle (ns.RAIN_STYLES).
 -- The physics, launch timing, spacing and order are pure functions in RainCore.lua (ns.RainCore,
 -- tested offline by tools/test_rain.lua); this file drives plain textures from one OnUpdate.
 local _, ns = ...
@@ -68,6 +69,34 @@ local function RefreshFx()
   for _, fx in ipairs(ns.RAIN_FX) do fxOn[fx.key] = not ns.settings["noRain" .. fx.key] end
 end
 local function On(key) return fxOn[key] end
+
+-- How the loot comes out (setting rainStyle; picked in docs/mockups/rain-variants.html). pace scales
+-- the gaps between launches, bestPause the beat before the best; wind: the ground wind-up plays
+-- (the Big bang has its own)
+ns.RAIN_STYLES = {
+  { key = "fountain", label = "Fountain (default)", tip = "The loot sprays up from where it comes from (below), the best item last and highest, hanging at the top before it slams down." },
+  { key = "bang", label = "Big bang", tip = "A point of light swells in the middle of the screen, pulling sparks in (with Wind-up and burst on), then bursts: everything flies out at once, bounces off all four edges of the screen and settles at the bottom." },
+  { key = "firework", label = "Firework", tip = "Each item shoots up on a trail and bursts at its peak into sparks of its rarity color, then floats down. The best goes last and highest." },
+  { key = "vortex", label = "Vortex", tip = "The loot spins up into a whirlwind above you, faster and faster, then flings outward and lands around you." },
+  { key = "meteor", label = "Meteor shower", tip = "The loot falls in from the top of the screen at a slant with burning trails and hits the ground in a puff of dust. The best comes last, as the biggest meteor." },
+  { key = "fall", label = "Waterfall", tip = "The loot pours over the top edge of the screen in a stream and piles up at the bottom; coins splash as they land." },
+}
+local STYLE = {
+  fountain = { pace = 1, bestPause = 1, wind = true },
+  bang = { pace = 0, bestPause = 0 },
+  firework = { pace = 1.1, bestPause = 0.7, wind = true },
+  vortex = { pace = 0.25, bestPause = 0, wind = true },
+  meteor = { pace = 0.9, bestPause = 1 },
+  fall = { pace = 0.55, bestPause = 0.6 },
+}
+local BANG_T, SPIN_T = 0.75, 1.5 -- the Big bang's wind-up; how long the vortex spins before it flings
+local COIN_RGB = { gold = { 1, 0.85, 0.3 }, silver = { 0.9, 0.93, 0.97 }, copper = { 0.9, 0.55, 0.3 } }
+local BURST_SPARKS = { [0] = 6, 8, 14, 24, 36, 52 } -- a firework's sparks by rarity
+local METEOR_SPARK = { grav = 0, drag = 1, life = 1.4, size = 5 } -- (Spark only reads it)
+function ns.RainStyle()
+  local s = ns.settings.rainStyle
+  return STYLE[s or ""] and s or "fountain"
+end
 
 ns.FROM_NAMES = {
   ground = "the middle of the ground, like a fountain", spread = "anywhere along the ground",
@@ -138,6 +167,19 @@ local function Layer()
   -- the wind-up (setting Windup): a glow swelling where the loot comes out, a short column of light
   layer.windGlow = Tex(layer, "BORDER", MEDIA .. "Glow", "ADD")
   layer.windCol = Tex(layer, "BORDER", MEDIA .. "Pillar", "ADD")
+  -- the Big bang: the screen dims as its core swells, then a flash; the vortex: a faint funnel
+  layer.dim = Tex(layer, "BACKGROUND", WHITE)
+  layer.dim:SetAllPoints()
+  layer.dim:SetVertexColor(0, 0, 0, 1)
+  layer.bangCore = Tex(top, "BACKGROUND", MEDIA .. "Glow", "ADD")
+  layer.bangFlash = Tex(top, "BACKGROUND", WHITE, "ADD")
+  layer.bangFlash:SetAllPoints()
+  layer.bangFlash:SetVertexColor(1, 0.97, 0.88, 1)
+  layer.funnel = {}
+  for i = 1, 5 do
+    layer.funnel[i] = Tex(layer, "BORDER", MEDIA .. "Wave", "ADD")
+    layer.funnel[i]:SetVertexColor(0.8, 0.87, 1, 1)
+  end
   -- shockwaves rise from the ground line as half circles: drawn in a frame clipped to above it
   layer.domeClip = CreateFrame("Frame", nil, layer)
   if layer.domeClip.SetClipsChildren then layer.domeClip:SetClipsChildren(true) end
@@ -278,6 +320,11 @@ local function UpdateLive(dt)
         local rad = 10 + (p.radius - 10) * (1 - (1 - u) ^ 3)
         p.t:SetSize(rad * 2, p.h * (1 - 0.5 * u))
         p.t:SetAlpha((1 - u) * p.a)
+      elseif p.pull then -- a mote pulled into the Big bang's core
+        local f = math.min(1, dt * 9)
+        p.x, p.y = p.x + (p.x1 - p.x) * f, p.y + (p.y1 - p.y) * f
+        p.t:SetSize(p.size, p.size)
+        p.t:SetAlpha(1 - u)
       elseif p.zip then
         p.x = p.x0 + (p.x1 - p.x0) * u
         p.y = p.y0 + (p.y1 - p.y0) * u + math.sin(math.pi * u) * 16
@@ -358,6 +405,10 @@ local function Finish()
   if layer then
     layer.windGlow:Hide()
     layer.windCol:Hide()
+    layer.dim:Hide()
+    layer.bangCore:Hide()
+    layer.bangFlash:Hide()
+    for _, t in ipairs(layer.funnel) do t:Hide() end
     layer.count:SetAlpha(0)
     layer.money:SetAlpha(0)
     layer.tallyGlow:Hide()
@@ -391,6 +442,102 @@ function Skip()
   end
 end
 
+-- The animations' motion. A controller (s.ctl) runs every frame before the physics; it returns
+-- true while it moves the sprite itself, false to let the physics move it this frame.
+local function TrailColor(s, r, g, b) for _, gh in ipairs(s.ghosts) do gh:SetVertexColor(r, g, b, 1) end end
+-- Firework: it flies up under gravity to its peak, bursts there, then floats down (light gravity)
+local function FireworkCtl(st, s, dt, W, H, k)
+  if s.fwUp and s.vy <= 0 then
+    s.fwUp, s.trailAll = nil, nil
+    local q = s.coin and 1 or s.q
+    local r, g, b = Light(s.r, s.g, s.b)
+    if s.coin then r, g, b = unpack(COIN_RGB[s.coin]) end
+    local big = s.best and 1.25 or 1
+    Spark(s.x, s.y + s.size / 2, r, g, b, math.floor(BURST_SPARKS[math.min(q, 5)] * (s.best and 1.4 or 1)),
+      320 * k * (q >= 4 and 1.3 or 1) * big, { grav = 240 * k, drag = 2.2, life = 2.2, size = 6 })
+    if q >= 4 then Ring(s.x, s.y + s.size / 2, r, g, b, 90 * k * big, { life = 0.6 }) end
+    Tick(s.coin and 0 or s.q)
+    s.vx, s.vy, s.spin = (math.random() - 0.5) * 120 * k, 0, (math.random() - 0.5) * 6
+    s.float = true
+  end
+  if s.float then
+    if s.bounces > 0 then s.float, s.gmul, s.ctl = nil, nil, nil
+    else s.gmul = s.vy < -220 * k and 0.05 or 0.4 end -- (it drifts down at an easy pace)
+  end
+  return false
+end
+-- Vortex: it rises out of the ground into a widening whirl around a point above you, spinning
+-- faster, until the whole vortex lets go at once (st.releaseAt) and it flies off outward
+local function VortexCtl(st, s, dt, W, H, k)
+  if st.age >= st.releaseAt then
+    s.vx = math.cos(s.ang) * (600 + math.random() * 200) * k
+    s.vy = (250 + math.random() * 350) * k
+    s.spin, s.depth, s.ctl, s.trailAll = (math.random() - 0.5) * 16, nil, nil, nil
+    return false
+  end
+  s.spinAge = s.spinAge + dt
+  local kk = math.min(1, s.spinAge / 1.2)
+  s.ang = s.ang + (4 + 9 * kk) * dt
+  local r = s.r0 + 150 * k * kk + s.h * 0.2
+  local cy = bounds.floor + 170 * k
+  s.x = W / 2 + math.cos(s.ang) * r
+  s.y = cy + s.h * kk + math.sin(s.ang * 2) * 8 * k + math.sin(s.ang) * r * 0.32 - (1 - kk) * 170 * k - s.size / 2
+  s.rot = s.rot + 4 * dt
+  s.y = math.max(s.y, bounds.floor) -- (it starts at the ground)
+  s.depth = 1 + 0.12 * math.sin(s.ang) -- (nearer, bigger)
+  return true
+end
+-- Meteor: a straight, fast fall at a slant with sparks streaming off it; at the ground it hands
+-- over to the physics, already falling, so the next step lands it
+local function MeteorCtl(st, s, dt, W, H, k)
+  s.x, s.y = s.x + s.vx * dt, s.y + s.vy * dt
+  s.emberT = (s.emberT or 0) - dt
+  if s.emberT <= 0 then
+    s.emberT = 0.025
+    Spark(s.x, s.y + s.size / 2, 1, 0.65, 0.3, 1, 50 * k, METEOR_SPARK)
+  end
+  if s.y <= bounds.floor then
+    s.y, s.vy, s.vx, s.e = bounds.floor + 0.01, -500 * k, s.vx * 0.35, 0.32
+    s.x = math.max(bounds.left, math.min(bounds.right, s.x)) -- (on screen where it lands, no jump)
+    s.ctl, s.trailAll, s.meteorHit = nil, nil, true
+    return false
+  end
+  return true
+end
+-- Where each animation starts a sprite and how it flies (after Launch set it up as a fountain)
+local function StyleLaunch(st, s, isBest, W, H, k)
+  local style = st.style
+  s.hangPending = nil -- (the hang is the fountain's)
+  if style == "bang" then
+    local ang, sp = math.random() * 2 * math.pi, (700 + math.random() * 800) * k * (isBest and 0.8 or 1)
+    s.x, s.y = W / 2, st.bangY - s.size / 2
+    s.vx, s.vy, s.e, s.spin = math.cos(ang) * sp, math.sin(ang) * sp, 0.45, (math.random() - 0.5) * 18
+  elseif style == "firework" then
+    local g = -Core.GRAVITY * k
+    local apex = H * (isBest and 0.84 or 0.5 + 0.3 * math.random())
+    s.x, s.y = W / 2 + math.random(-20, 20) * k, bounds.floor
+    s.vy = math.sqrt(2 * g * math.max(40, apex - s.y))
+    local target = isBest and W / 2 or W / 2 + (math.random() - 0.5) * 0.8 * W
+    s.vx = (target - s.x) / (s.vy / g)
+    s.e, s.fwUp, s.trailAll, s.ctl = 0.4, true, true, FireworkCtl
+  elseif style == "vortex" then
+    st.releaseAt = st.releaseAt or st.age + SPIN_T
+    s.ang, s.h, s.r0, s.spinAge = math.random() * 2 * math.pi, (math.random() - 0.5) * 180 * k, (10 + math.random() * 20) * k, 0
+    s.x, s.y, s.trailAll, s.ctl = W / 2, bounds.floor, true, VortexCtl
+  elseif style == "meteor" then
+    if isBest then s.size = s.size * 1.25 end
+    s.x, s.y = W * (0.25 + 0.7 * math.random()), H + (40 + math.random() * 80) * k
+    s.vx = -(260 + math.random() * 100) * k * (isBest and 1.2 or 1)
+    s.vy = -(700 + math.random() * 200) * k * (isBest and 1.15 or 1)
+    s.trailAll, s.ctl = true, MeteorCtl
+    TrailColor(s, 1, 0.6, 0.25)
+  elseif style == "fall" then
+    s.x, s.y = W * 0.3 + (math.random() - 0.5) * 100 * k, H + s.size
+    s.vx, s.vy, s.e = (120 + math.random() * 240) * k, -(20 + math.random() * 70) * k, 0.45
+  end
+  if s.coin then s.trailAll = nil end -- (coins never trail: 40 sprites of ghosts would add up)
+end
+
 local function Launch(st, item, isBest, W, H, k)
   local s = Sprite()
   s.item, s.coin, s.best = item, item.coin, isBest
@@ -420,6 +567,7 @@ local function Launch(st, item, isBest, W, H, k)
   s.tx, s.leaving, s.leaveAt, s.handed, s.inBag, s.alpha, s.shrink = nil, nil, nil, nil, nil, 1, 1
   s.restAge, s.trailT, s.trail = 0, 0, {}
   s.joining, s.mx, s.my, s.delay = nil, nil, nil, nil
+  s.ctl, s.trailAll, s.fwUp, s.float, s.gmul, s.depth, s.meteorHit, s.emberT = nil, nil, nil, nil, nil, nil, nil, nil
   -- the best hangs at the top of its flight, then slams down (setting Hang)
   s.hangPending, s.hang, s.slam, s.glintAt = isBest and not item.coin and s.q >= 2 and On("Hang") or nil, nil, nil, nil
   local r, g, b = ns.QualityColor(s.q)
@@ -462,6 +610,7 @@ local function Launch(st, item, isBest, W, H, k)
   s.name:SetTextColor(r, g, b)
   s.f:SetAlpha(1)
   s.f:Show()
+  if st.style ~= "fountain" and not item.merged then StyleLaunch(st, s, isBest, W, H, k) end
   sprites[#sprites + 1] = s
   -- launched: a whoosh that climbs through the burst (the best has its moment
   -- on landing; a coin made by a merge has its chime)
@@ -490,6 +639,20 @@ local function Puff(x, y, n)
 end
 
 local function OnLand(st, s)
+  local k = bounds.k
+  if s.meteorHit then -- a meteor hits in a puff of dust; the best one shakes the screen
+    Puff(s.x, bounds.floor, s.best and 14 or 6)
+    if s.best then
+      st.shake = SHAKE_T * 1.5
+      local r, g, b = Light(s.r, s.g, s.b)
+      Dome(s.x, bounds.floor, r, g, b, 160 * k, { life = 0.55, glowA = 0.5 })
+      Spark(s.x, bounds.floor, 1, 0.7, 0.35, 18, 420 * k, { up = true, grav = 900 * k, size = 6 })
+    end
+  end
+  if s.coin and st.style == "fall" then -- the waterfall's coins splash
+    local c = COIN_RGB[s.coin]
+    Spark(s.x, bounds.floor + 4, c[1], c[2], c[3], 6, 220 * k, { up = true, grav = 900 * k, size = 4 })
+  end
   if s.coin then
     if s.item.merged then return end -- its chime already rang
     st.coinsLanded = st.coinsLanded + 1
@@ -511,7 +674,7 @@ local function OnLand(st, s)
       if On("Escalate") then ns:PlayStepTick(st.landed) else Tick(0) end
     end
   end
-  local x, y, k = s.x, bounds.floor, bounds.k
+  local x, y = s.x, bounds.floor
   local r, g, b = Light(s.r, s.g, s.b)
   if s.slam then -- by rarity: a shockwave, a white flash in it, a bright line along the ground, sparks
     local m = D.dome
@@ -621,12 +784,74 @@ local function Update(_, dt)
   local k = H / 768 -- physics constants are tuned for a 768-unit-tall UI
   bounds.left, bounds.right, bounds.k = SIZE, W - SIZE, k
   bounds.floor = 2 + H * (ns.settings.rainFloor or 0) / 100
+  bounds.top = st.style == "bang" and H - SIZE or nil -- (the Big bang bounces off the top edge too)
+  st.bangY = H * 0.55
   -- the dome clip: everything above the ground line, so shockwaves rise from it as half circles
   if layer.domeFloor ~= bounds.floor then
     layer.domeFloor = bounds.floor
     layer.domeClip:ClearAllPoints()
     layer.domeClip:SetPoint("BOTTOMLEFT", layer, "BOTTOMLEFT", 0, bounds.floor)
     layer.domeClip:SetPoint("TOPRIGHT", layer, "TOPRIGHT", 0, 0)
+  end
+
+  -- the Big bang (always its wind-up): a point of light in the middle of the screen swells and
+  -- trembles, pulling motes in, the screen dims, it pinches small, then bursts: a flash, a
+  -- shockwave, sparks in the best item's color, a small shake
+  if st.style == "bang" and not st.burst then
+    local cx, cy = W / 2, st.bangY
+    local r, g, b = Light(ns.QualityColor(st.bestQ))
+    if st.age >= BANG_T then
+      st.burst, st.flashA = true, 1
+      layer.bangCore:Hide()
+      layer.dim:Hide()
+      Ring(cx, cy, 1, 0.95, 0.8, math.max(W, H) * 0.6, { life = 0.8, a = 0.9 })
+      Ring(cx, cy, r, g, b, 260 * k, { life = 0.5 })
+      Spark(cx, cy, r, g, b, math.floor(BURST_SPARKS[math.min(5, st.bestQ)] * 1.4), 420 * k, { grav = 240 * k, drag = 2.2, life = 1.8, size = 7 })
+      st.shake = SHAKE_T * 0.7
+      if st.openSize == "big" then ns:PlayBurstSound() elseif st.openSize == "medium" then ns:PlayChestPop() end
+    else
+      local u = st.age / BANG_T
+      local pinch = u > 0.85 and 1 - (u - 0.85) / 0.15 * 0.7 or 1
+      local size = (20 + 170 * u * u) * pinch * k
+      local j = 2.5 * u * k
+      layer.bangCore:SetVertexColor(r, g, b, 1)
+      layer.bangCore:SetSize(size, size)
+      layer.bangCore:ClearAllPoints()
+      layer.bangCore:SetPoint("CENTER", layer, "BOTTOMLEFT", cx + (math.random() - 0.5) * 2 * j, cy + (math.random() - 0.5) * 2 * j)
+      layer.bangCore:SetAlpha(0.6 + 0.4 * u)
+      layer.bangCore:Show()
+      layer.dim:SetAlpha(0.25 * u)
+      layer.dim:Show()
+      st.moteT = (st.moteT or 0) - dt
+      while st.moteT <= 0 do -- motes pulled in from all around
+        st.moteT = st.moteT + 0.02
+        local t = table.remove(sparkPool) or Tex(top, "ARTWORK", MEDIA .. "Mote", "ADD")
+        t:SetVertexColor(r, g, b, 1)
+        local a, d = math.random() * 2 * math.pi, (140 + math.random() * 120) * k
+        live[#live + 1] = { t = t, spark = true, pull = true, x = cx + math.cos(a) * d, y = cy + math.sin(a) * d,
+          x1 = cx, y1 = cy, age = 0, life = 0.35, size = 4 + math.random() * 3 }
+      end
+    end
+  end
+  if st.flashA then
+    st.flashA = st.flashA - dt * 2.2
+    if st.flashA <= 0 then st.flashA = nil; layer.bangFlash:Hide()
+    else layer.bangFlash:SetAlpha(st.flashA * 0.5); layer.bangFlash:Show() end
+  end
+  -- the vortex's funnel: faint rings widening up from the ground while it spins
+  if st.style == "vortex" and st.releaseAt then
+    local kk = math.min(1, (st.age - (st.releaseAt - SPIN_T)) / 1.2)
+    local a = st.age < st.releaseAt and 0.3 * kk or 0.3 * (1 - (st.age - st.releaseAt) / 0.25)
+    for i, t in ipairs(layer.funnel) do
+      if a <= 0 then t:Hide() else
+        local n = i - 1
+        t:SetSize((40 + 64 * n * kk) * k, (12 + 18 * n * kk) * k)
+        t:ClearAllPoints()
+        t:SetPoint("CENTER", layer, "BOTTOMLEFT", W / 2, bounds.floor + (20 + 40 * n * kk) * k)
+        t:SetAlpha(a)
+        t:Show()
+      end
+    end
   end
 
   -- the wind-up (setting Windup): a glow swells where the loot comes out, then it bursts
@@ -663,11 +888,11 @@ local function Update(_, dt)
   while st.queue[1] and st.age >= st.nextLaunch do
     Launch(st, table.remove(st.queue, 1), false, W, H, k)
     st.launched = st.launched + 1
-    st.nextLaunch = st.nextLaunch + Core.Interval(st.launched, st.total, On("Escalate")) * (1 - 0.15 * st.calm)
+    st.nextLaunch = st.nextLaunch + Core.Interval(st.launched, st.total, On("Escalate")) * (1 - 0.15 * st.calm) * STYLE[st.style].pace
     if not st.queue[1] then st.lastLaunch = st.age end
   end
   if st.best and not st.queue[1] then
-    st.bestAt = st.bestAt or st.age + BEST_PAUSE
+    st.bestAt = st.bestAt or st.age + BEST_PAUSE * STYLE[st.style].bestPause
     if st.age >= st.bestAt then
       Launch(st, st.best, true, W, H, k)
       st.best, st.lastLaunch = nil, st.age
@@ -719,7 +944,10 @@ local function Update(_, dt)
       -- the slam: it falls on from the top of its hang under gravity and an extra pull (stronger the
       -- rarer), speeding up smoothly into the ground instead of jumping to full speed
       if s.slam and s.bounces == 0 then s.vy = s.vy - Drop(s.q).pull * k * sdt end
-      if Core.Advance(s, sdt, bounds) then
+      -- an animation moving it itself (Styles: the vortex's whirl, a meteor's fall)
+      if s.ctl and s.ctl(st, s, sdt, W, H, k) then
+        -- (it moved; the physics waits)
+      elseif Core.Advance(s, sdt, bounds) then
         s.squash = SQUASH_T
         if s.bounces == 1 then OnLand(st, s) elseif s.bounces == 2 and not s.coin then Tick(0) end
       end
@@ -769,7 +997,7 @@ local function Update(_, dt)
     s.trailT = s.trailT + dt
     if s.trailT >= GHOST_EVERY then
       s.trailT = 0
-      if On("Trails") and s.q >= 3 and not s.coin and not s.resting and not s.leaving then
+      if (s.trailAll or (On("Trails") and s.q >= 3 and not s.coin)) and not s.resting and not s.leaving then
         table.insert(s.trail, 1, { x = s.x, y = s.y, rot = s.rot })
         if #s.trail > GHOSTS then table.remove(s.trail) end
       elseif s.trail[1] then
@@ -864,7 +1092,7 @@ local function Update(_, dt)
       f:Hide()
       s.shadow:Hide()
     else
-      local size = s.size * s.shrink
+      local size = s.size * s.shrink * (s.depth or 1)
       local w, h = size, size
       if s.squash > 0 then -- squashed flat as it hits, springing back a little tall, then settled
         local p = 1 - s.squash / SQUASH_T
@@ -1168,8 +1396,11 @@ function ns:Rain(items, copper, test)
   for _, it in ipairs(all) do bestQ = math.max(bestQ, it.quality or 0) end
   -- test rains (the settings' Test buttons) neither count toward the calm nor get calmed
   local calm = merging and mergedCalm or test and 0 or CalmLevel(bestQ, copper)
-  local wind = On("Windup") and calm == 0 and not merging
+  local style = ns.RainStyle()
+  local wind = On("Windup") and calm == 0 and not merging and STYLE[style].wind
+  local bang = style == "bang" and not merging and calm == 0 and On("Windup") -- (a burst joining one in the air comes straight out)
   state = {
+    style = style,
     age = 0, nextLaunch = 0, queue = queue, launched = 0, total = #queue, best = best, extra = extra,
     all = all, handedOff = {}, stayQuality = ns.settings.stayQuality or 3,
     landed = 0, copper = coins > 0 and copper or 0, coins = coins, coinsLanded = 0, shownCopper = 0,
@@ -1180,6 +1411,7 @@ function ns:Rain(items, copper, test)
     coinsIn = 0, itemsIn = 0, coinsToBag = 0, tallyPop = 0, countBag = On("Gather"),
   }
   if wind then state.nextLaunch = WIND_T end -- the loot comes out with the burst
+  if bang then state.nextLaunch = BANG_T elseif style == "bang" then state.burst = true end
   layer.count:SetText("")
   layer.money:SetText("")
   layer.money:SetAlpha(1)
@@ -1190,7 +1422,7 @@ function ns:Rain(items, copper, test)
   local size = open == "always" and "big" or open == "never" and "small" or Core.HaulSize(all, copper)
   if calm > 0 then size = "small" end
   state.openSize = size
-  if not wind then
+  if not wind and not bang then
     if size == "big" then ns:PlayBurstSound() elseif size == "medium" then ns:PlayChestPop() end
   end
   driver:SetScript("OnUpdate", Update)

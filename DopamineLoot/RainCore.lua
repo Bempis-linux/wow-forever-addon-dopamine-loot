@@ -22,18 +22,21 @@ function Core.LaunchSpeed(vy, y0, mid, k)
   return math.sqrt(vy * vy + 2 * -Core.GRAVITY * (k or 1) * rise)
 end
 
--- One physics step for a sprite {x, y, vx, vy, e (restitution), resting, bounces}.
--- bounds = {left, right, floor, k}; k scales gravity and speeds with the screen height (UI scale)
--- so the arc looks the same at any UI scale. Returns "bounce" when it hit the floor this step.
+-- One physics step for a sprite {x, y, vx, vy, e (restitution), resting, bounces; gmul: a gravity
+-- multiplier (a firework's item floating down)}.
+-- bounds = {left, right, floor, k; top: a ceiling it bounces off (the Big bang)}; k scales gravity
+-- and speeds with the screen height (UI scale) so the arc looks the same at any UI scale. Returns
+-- "bounce" when it hit the floor this step.
 function Core.Step(s, dt, b)
   if s.resting then return nil end
   dt = math.min(dt, 1 / 30) -- a hitch can't tunnel a sprite through the floor
   local k = b.k or 1
-  s.vy = s.vy + Core.GRAVITY * k * dt
+  s.vy = s.vy + Core.GRAVITY * k * (s.gmul or 1) * dt
   s.x = s.x + s.vx * dt
   s.y = s.y + s.vy * dt
   if s.x < b.left then s.x, s.vx = b.left, math.abs(s.vx) * 0.8
   elseif s.x > b.right then s.x, s.vx = b.right, -math.abs(s.vx) * 0.8 end
+  if b.top and s.y > b.top and s.vy > 0 then s.y, s.vy = b.top, -s.vy * 0.72 end
   if s.y <= b.floor and s.vy < 0 then
     s.y = b.floor
     s.bounces = (s.bounces or 0) + 1
