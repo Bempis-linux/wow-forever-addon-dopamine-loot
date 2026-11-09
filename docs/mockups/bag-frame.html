@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bag Strain Frame</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0; color: var(--muted); max-width: 900px; }
+  button { background: #4a3c1c; color: var(--text); border: 1px solid #d0a040; border-radius: 4px; padding: 5px 12px; cursor: pointer; font: 600 13px system-ui; margin: 8px 18px; }
+  table { border-collapse: collapse; margin: 6px 18px; }
+  th { font: 600 11px system-ui; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 6px 18px; text-align: center; }
+  th.opt { text-align: left; color: var(--gold); text-transform: none; letter-spacing: 0; font-size: 13px; width: 260px; }
+  th.opt small { display: block; color: var(--muted); font-weight: 400; font-size: 11.5px; margin-top: 2px; }
+  td { padding: 22px 30px 14px; background: linear-gradient(#1a1610, #0c0a07); border: 1px solid #2a2418; text-align: center; }
+  .cell { position: relative; display: inline-block; width: 38px; height: 38px; }
+  .bag { position: absolute; inset: 0; transform-origin: 50% 100%; }
+  .icon { position: absolute; inset: 0; border-radius: 3px; background: radial-gradient(circle at 40% 35%, #c08a48, #6a4218 75%); box-shadow: inset 0 0 0 1px #2a1808;
+    display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 1; }
+  .bubble { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); padding: 0 7px 1px; border-radius: 9px; font: 800 10.5px system-ui; color: #1a1205; background: #ffc040; white-space: nowrap; }
+  .bubble.full { background: #ff5a3c; color: #fff; }
+  .tremble { animation: tremble .12s linear infinite; }
+  @keyframes tremble { 0% { translate: 0 0 } 25% { translate: .6px -.3px } 50% { translate: -.5px .2px } 75% { translate: .3px .4px } 100% { translate: 0 0 } }
+
+  /* A: a clean square edge, brighter and thicker with strain */
+  .A .bag::after { content: ""; position: absolute; inset: calc(-2px - 2px * var(--p)); border: calc(1.5px + 1px * var(--p)) solid var(--c); border-radius: 4px;
+    box-shadow: 0 0 calc(4px + 6px * var(--p)) var(--c); opacity: calc(.5 + .5 * var(--p)); z-index: 2; }
+  /* B: the game's action-button glow border (UI-ActionButton-Border, additive), tinted */
+  .B .bag::before { content: ""; position: absolute; inset: -9px; border-radius: 8px; z-index: 0;
+    background: radial-gradient(closest-side, transparent 62%, var(--c) 78%, transparent 100%); filter: blur(1.5px); opacity: calc(.45 + .55 * var(--p)); mix-blend-mode: screen; }
+  .B .bag::after { content: ""; position: absolute; inset: -1px; border: 1px solid var(--c); border-radius: 3px; opacity: calc(.4 + .5 * var(--p)); z-index: 2; }
+  /* C: light seeping in from the edges, no outline */
+  .C .icon { box-shadow: inset 0 0 0 1px #2a1808, inset 0 0 calc(4px + 8px * var(--p)) calc(1px * var(--p)) var(--c); }
+  .C .bag::after { content: ""; position: absolute; inset: 0; border-radius: 3px; box-shadow: 0 0 calc(3px + 5px * var(--p)) var(--c); opacity: calc(.4 + .6 * var(--p)); z-index: 0; }
+  /* D: a soft glow behind, nothing on the icon */
+  .D .bag::before { content: ""; position: absolute; inset: calc(-8px - 6px * var(--p)); border-radius: 30%; z-index: 0;
+    background: radial-gradient(closest-side, var(--c), transparent); opacity: calc(.35 + .5 * var(--p)); }
+</style>
+</head>
+<body>
+<header>
+  <h1>The bulging bag: a square frame (no drawstring)</h1>
+  <p>The drawstring whip is gone in all four. The ring is replaced by something square that follows the bag icon, with no dashes. Each option is shown at 3 left, 1 left (it trembles) and Full. "Loot" plays the squash on all of them. The bag here is a stand-in; in game it's the backpack button's own icon.</p>
+</header>
+<button id="loot">Loot (play the squash)</button>
+<table>
+  <tr><th></th><th>3 left</th><th>1 left</th><th>Full</th></tr>
+  <tr class="A"><th class="opt">A. Clean edge (ours)<small>A solid square outline, amber to red, a little thicker and brighter as it fills.</small></th></tr>
+  <tr class="B"><th class="opt">B. The game's glow border<small>The action button's own glow (UI-ActionButton-Border), tinted amber, red when full, plus a thin edge.</small></th></tr>
+  <tr class="C"><th class="opt">C. Light from inside<small>No outline: light seeps in from the icon's edges, "about to burst at the seams".</small></th></tr>
+  <tr class="D"><th class="opt">D. Glow only<small>Just a soft glow behind the bag; the puffing does the rest.</small></th></tr>
+</table>
+<script>
+const STATES = [[3, .4], [1, .8], [0, 1]];
+document.querySelectorAll('tr[class]').forEach(tr => {
+  STATES.forEach(([n, p]) => {
+    const td = document.createElement('td');
+    const c = n === 0 ? 'rgb(255,70,50)' : 'rgb(255,190,80)';
+    td.innerHTML = `<div class="cell" style="--p:${p};--c:${c}"><div class="bag ${n <= 1 ? 'tremble' : ''}" style="transform:scale(${1 + .14 * p})"><div class="icon">🎒</div></div>
+      <div class="bubble ${n === 0 ? 'full' : ''}">${n === 0 ? 'Full' : n + ' left'}</div></div>`;
+    tr.appendChild(td);
+  });
+});
+document.getElementById('loot').onclick = () => document.querySelectorAll('.bag').forEach(b => {
+  const s = parseFloat(b.style.transform.match(/[\d.]+/)[0]), fr = [];
+  for (let i = 0; i <= 36; i++) { const u = i / 36, a = .25 * Math.exp(-4.2 * u) * Math.cos(u * Math.PI * 5.5), k = s + .08 * Math.sin(Math.PI * Math.min(u / .4, 1));
+    fr.push({ transform: `scale(${k * (1 + a)}, ${k / (1 + a)})` }); }
+  b.animate(fr, { duration: 950 });
+});
+</script>
+</body>
+</html>
