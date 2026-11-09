@@ -9,67 +9,118 @@
   html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
   header { padding: 14px 18px 4px; }
   h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
-  header p { margin: 0; color: var(--muted); max-width: 900px; }
-  button { background: #4a3c1c; color: var(--text); border: 1px solid #d0a040; border-radius: 4px; padding: 5px 12px; cursor: pointer; font: 600 13px system-ui; margin: 8px 18px; }
-  table { border-collapse: collapse; margin: 6px 18px; }
-  th { font: 600 11px system-ui; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 6px 18px; text-align: center; }
-  th.opt { text-align: left; color: var(--gold); text-transform: none; letter-spacing: 0; font-size: 13px; width: 260px; }
-  th.opt small { display: block; color: var(--muted); font-weight: 400; font-size: 11.5px; margin-top: 2px; }
-  td { padding: 22px 30px 14px; background: linear-gradient(#1a1610, #0c0a07); border: 1px solid #2a2418; text-align: center; }
-  .cell { position: relative; display: inline-block; width: 38px; height: 38px; }
+  h2 { font-size: 14px; margin: 16px 18px 2px; color: var(--gold); }
+  header p, p.lead { margin: 0 18px 0 0; color: var(--muted); max-width: 920px; }
+  p.lead { margin: 0 18px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 940px; gap: 10px; margin: 6px 18px; }
+  .card { background: #120f0a; border: 1px solid #2a2418; border-radius: 6px; padding: 8px 10px 10px; cursor: pointer; }
+  .card.on { border-color: #d0a040; box-shadow: 0 0 0 1px #d0a040; }
+  .card b { color: var(--gold); font-size: 12.5px; } .card small { display: block; color: var(--muted); font-size: 11px; min-height: 30px; }
+  .scene { display: flex; gap: 26px; justify-content: center; padding: 26px 0 10px; background: linear-gradient(#1c241a, #10150e); border-radius: 4px; margin-top: 6px; }
+  .big { display: flex; gap: 40px; justify-content: center; margin: 8px 18px; padding: 40px 0 26px; background: radial-gradient(ellipse at 50% 120%, #2d3b2a, #141b12); border: 1px solid #3a3426; border-radius: 6px; }
+  .row { display: flex; gap: 3px; align-items: flex-end; }
+  .slot { position: relative; width: 38px; height: 38px; }
+  .other { width: 38px; height: 38px; border-radius: 2px; background: radial-gradient(circle at 40% 35%, #7a6a5a, #2a2018); box-shadow: inset 0 0 0 1px #000, 0 0 0 1px #3a3020; font-size: 20px; display: flex; align-items: center; justify-content: center; }
   .bag { position: absolute; inset: 0; transform-origin: 50% 100%; }
-  .icon { position: absolute; inset: 0; border-radius: 3px; background: radial-gradient(circle at 40% 35%, #c08a48, #6a4218 75%); box-shadow: inset 0 0 0 1px #2a1808;
-    display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 1; }
-  .bubble { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); padding: 0 7px 1px; border-radius: 9px; font: 800 10.5px system-ui; color: #1a1205; background: #ffc040; white-space: nowrap; }
-  .bubble.full { background: #ff5a3c; color: #fff; }
+  .icon { position: absolute; inset: 0; border-radius: 2px; background: radial-gradient(circle at 40% 35%, #c08a48, #5a3816 75%); box-shadow: inset 0 0 0 1px #000;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; z-index: 1; overflow: hidden; }
   .tremble { animation: tremble .12s linear infinite; }
   @keyframes tremble { 0% { translate: 0 0 } 25% { translate: .6px -.3px } 50% { translate: -.5px .2px } 75% { translate: .3px .4px } 100% { translate: 0 0 } }
+  @keyframes breathe { 0%, 100% { opacity: var(--lo) } 50% { opacity: 1 } }
+  @keyframes ants { to { background-position: 0 0, 40px 0, 0 40px, 40px 40px; } }
 
-  /* A: a clean square edge, brighter and thicker with strain */
-  .A .bag::after { content: ""; position: absolute; inset: calc(-2px - 2px * var(--p)); border: calc(1.5px + 1px * var(--p)) solid var(--c); border-radius: 4px;
-    box-shadow: 0 0 calc(4px + 6px * var(--p)) var(--c); opacity: calc(.5 + .5 * var(--p)); z-index: 2; }
-  /* B: the game's action-button glow border (UI-ActionButton-Border, additive), tinted */
-  .B .bag::before { content: ""; position: absolute; inset: -9px; border-radius: 8px; z-index: 0;
-    background: radial-gradient(closest-side, transparent 62%, var(--c) 78%, transparent 100%); filter: blur(1.5px); opacity: calc(.45 + .55 * var(--p)); mix-blend-mode: screen; }
-  .B .bag::after { content: ""; position: absolute; inset: -1px; border: 1px solid var(--c); border-radius: 3px; opacity: calc(.4 + .5 * var(--p)); z-index: 2; }
-  /* C: light seeping in from the edges, no outline */
-  .C .icon { box-shadow: inset 0 0 0 1px #2a1808, inset 0 0 calc(4px + 8px * var(--p)) calc(1px * var(--p)) var(--c); }
-  .C .bag::after { content: ""; position: absolute; inset: 0; border-radius: 3px; box-shadow: 0 0 calc(3px + 5px * var(--p)) var(--c); opacity: calc(.4 + .6 * var(--p)); z-index: 0; }
-  /* D: a soft glow behind, nothing on the icon */
-  .D .bag::before { content: ""; position: absolute; inset: calc(-8px - 6px * var(--p)); border-radius: 30%; z-index: 0;
-    background: radial-gradient(closest-side, var(--c), transparent); opacity: calc(.35 + .5 * var(--p)); }
+  /* ---- highlights ---- */
+  /* H1: the game's quality border (Interface\Common\WhiteIconFrame), tinted, breathing slowly */
+  .h1 .bag::after { content: ""; position: absolute; inset: -1px; z-index: 2; border-radius: 2px; --lo: .65; animation: breathe 2.4s ease-in-out infinite;
+    box-shadow: inset 0 0 0 2px var(--c), inset 0 0 0 3px rgba(0,0,0,.5), inset 0 0 6px 2px color-mix(in srgb, var(--c) 45%, transparent); }
+  /* H2: the game's proc glow (the action button "ants": ActionButtonSpellAlertManager / spell activation overlay), orange, red when full */
+  .h2 .bag::before { content: ""; position: absolute; inset: -6px; z-index: 0; border-radius: 6px;
+    background: radial-gradient(closest-side, transparent 70%, color-mix(in srgb, var(--c) 70%, transparent) 86%, transparent 100%); }
+  .h2 .bag::after { content: ""; position: absolute; inset: -3px; z-index: 2; border-radius: 3px;
+    background: linear-gradient(90deg, var(--c) 50%, transparent 0) top / 8px 2px repeat-x, linear-gradient(90deg, var(--c) 50%, transparent 0) bottom / 8px 2px repeat-x,
+      linear-gradient(0deg, var(--c) 50%, transparent 0) left / 2px 8px repeat-y, linear-gradient(0deg, var(--c) 50%, transparent 0) right / 2px 8px repeat-y;
+    filter: drop-shadow(0 0 2px var(--c)); animation: ants 1.2s linear infinite; }
+  /* H3: four gold corner brackets that press outward with the strain */
+  .h3 .bag .cn { position: absolute; width: 9px; height: 9px; z-index: 2; border-color: var(--c); border-style: solid; border-width: 0; filter: drop-shadow(0 0 2px var(--c)) drop-shadow(0 1px 0 #000); }
+  .h3 .bag .cn.a { left: calc(-3px - 2px * var(--p)); top: calc(-3px - 2px * var(--p)); border-left-width: 2px; border-top-width: 2px; }
+  .h3 .bag .cn.b { right: calc(-3px - 2px * var(--p)); top: calc(-3px - 2px * var(--p)); border-right-width: 2px; border-top-width: 2px; }
+  .h3 .bag .cn.c { left: calc(-3px - 2px * var(--p)); bottom: calc(-3px - 2px * var(--p)); border-left-width: 2px; border-bottom-width: 2px; }
+  .h3 .bag .cn.d { right: calc(-3px - 2px * var(--p)); bottom: calc(-3px - 2px * var(--p)); border-right-width: 2px; border-bottom-width: 2px; }
+  /* H4: light leaking out of the bag, from the bottom up, no frame */
+  .h4 .icon::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, color-mix(in srgb, var(--c) 75%, transparent), transparent 70%);
+    mix-blend-mode: screen; opacity: calc(.5 + .5 * var(--p)); --lo: .6; animation: breathe 2s ease-in-out infinite; }
+  .h4 .bag::before { content: ""; position: absolute; left: -4px; right: -4px; bottom: -5px; height: 14px; z-index: 0; border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 80%, transparent), transparent); }
+
+  /* ---- counts ---- */
+  .cnt { position: absolute; z-index: 3; pointer-events: none; white-space: nowrap; }
+  /* T1: the game's stack-count number in the corner (NumberFontNormal: white, outlined), tinted */
+  .t1 .cnt { right: 2px; bottom: 1px; font: 700 14px "Arial Narrow", Arial, sans-serif; color: var(--tc);
+    text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000, 1px 1px #000; }
+  /* T2: a small tooltip-style tab above (the game's dark backdrop, thin gold edge, gold Friz text) */
+  .t2 .cnt { left: 50%; bottom: 44px; transform: translateX(-50%); padding: 1px 6px 2px; font: 600 10.5px "Friz Quadrata TT", Georgia, serif; color: var(--tc);
+    background: rgba(8,8,12,.92); border: 1px solid #6a5a36; border-radius: 3px; box-shadow: 0 0 0 1px #000; }
+  /* T3: floating outlined words above, no background (like the game's on-screen text) */
+  .t3 .cnt { left: 50%; bottom: 42px; transform: translateX(-50%); font: 700 12px "Friz Quadrata TT", Georgia, serif; color: var(--tc);
+    text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000, 0 0 6px rgba(0,0,0,.8); }
+  /* T4: none */
+  .t4 .cnt { display: none; }
 </style>
 </head>
 <body>
-<header>
-  <h1>The bulging bag: a square frame (no drawstring)</h1>
-  <p>The drawstring whip is gone in all four. The ring is replaced by something square that follows the bag icon, with no dashes. Each option is shown at 3 left, 1 left (it trembles) and Full. "Loot" plays the squash on all of them. The bag here is a stand-in; in game it's the backpack button's own icon.</p>
+<header style="padding-left:18px">
+  <h1>The bulging bag, round 2: a finished look</h1>
+  <p>The squash, wobble and spill stay as they are. These options replace the test-looking square edge and the bubble with the game's own look. Pick one highlight and one count (click a card); the big preview at the top uses your picks. "Loot" plays the squash. Bag icons here are stand-ins for the real ones.</p>
 </header>
-<button id="loot">Loot (play the squash)</button>
-<table>
-  <tr><th></th><th>3 left</th><th>1 left</th><th>Full</th></tr>
-  <tr class="A"><th class="opt">A. Clean edge (ours)<small>A solid square outline, amber to red, a little thicker and brighter as it fills.</small></th></tr>
-  <tr class="B"><th class="opt">B. The game's glow border<small>The action button's own glow (UI-ActionButton-Border), tinted amber, red when full, plus a thin edge.</small></th></tr>
-  <tr class="C"><th class="opt">C. Light from inside<small>No outline: light seeps in from the icon's edges, "about to burst at the seams".</small></th></tr>
-  <tr class="D"><th class="opt">D. Glow only<small>Just a soft glow behind the bag; the puffing does the rest.</small></th></tr>
-</table>
+<div class="bar"><button class="go" id="loot">Loot (play the squash)</button><span>Preview</span><button data-st="2" class="on">2 left</button><button data-st="1">1 left</button><button data-st="0">Full</button></div>
+<div class="big" id="big"></div>
+
+<h2>Highlight</h2>
+<p class="lead">H1 and H2 are the game's own art (by path, tinted); H3 and H4 are ours.</p>
+<div class="grid" id="hgrid"></div>
+<h2>Count</h2>
+<p class="lead">T1 is the game's own stack-count font; T2 uses the game's tooltip look; T3 is outlined text like the game's on-screen messages.</p>
+<div class="grid" id="tgrid"></div>
+
 <script>
-const STATES = [[3, .4], [1, .8], [0, 1]];
-document.querySelectorAll('tr[class]').forEach(tr => {
-  STATES.forEach(([n, p]) => {
-    const td = document.createElement('td');
-    const c = n === 0 ? 'rgb(255,70,50)' : 'rgb(255,190,80)';
-    td.innerHTML = `<div class="cell" style="--p:${p};--c:${c}"><div class="bag ${n <= 1 ? 'tremble' : ''}" style="transform:scale(${1 + .14 * p})"><div class="icon">🎒</div></div>
-      <div class="bubble ${n === 0 ? 'full' : ''}">${n === 0 ? 'Full' : n + ' left'}</div></div>`;
-    tr.appendChild(td);
-  });
-});
+const H = [['h1', 'H1. Quality border (game)', 'The bag slot\'s own border, as on a quality item, tinted amber (red when full), breathing slowly.'],
+  ['h2', 'H2. Proc glow (game)', 'The marching glow an action button gets when a spell procs: orange, red when full. The loudest.'],
+  ['h3', 'H3. Corner brackets (ours)', 'Four gold corners that press outward as it fills; quiet, reads like "tight".'],
+  ['h4', 'H4. Light leaking out (ours)', 'No frame: warm light glows up from the bottom of the bag and spills under it.']];
+const T = [['t1', 'T1. Corner number (game)', 'Like a stack count: "2" in the corner, amber; "0" in red when full.'],
+  ['t2', 'T2. Tooltip tab (game look)', 'A small dark tab with a thin gold edge: "2 left" / "Full".'],
+  ['t3', 'T3. Outlined words', '"2 left" / "Full" floating above in the game\'s outlined text.'],
+  ['t4', 'T4. None', 'No count: the highlight and the puffing tell it.']];
+let h = 'h1', t = 't1', st = 2;
+const colors = n => n === 0 ? ['#ff4632', '#ff5a46'] : ['#ffbe50', '#ffd27a'];
+function slot(hc, tc, n, main) {
+  const p = n === 0 ? 1 : n === 1 ? .8 : .6, [c, tcol] = colors(n);
+  return `<div class="${hc} ${tc}"><div class="row">${main ? '<div class="other">🧪</div><div class="other">📜</div>' : ''}
+    <div class="slot" style="--p:${p};--c:${c};--tc:${tcol}"><div class="bag ${n <= 1 ? 'tremble' : ''}" style="transform:scale(${1 + .12 * p})">
+      <div class="icon">🎒</div><i class="cn a"></i><i class="cn b"></i><i class="cn c"></i><i class="cn d"></i></div>
+      <div class="cnt">${tc === 't1' ? n : n === 0 ? 'Full' : n + ' left'}</div></div>
+    ${main ? '<div class="other">🟪</div><div class="other">🟩</div><div class="other">🟦</div>' : ''}</div></div>`;
+}
+function render() {
+  document.getElementById('big').innerHTML = slot(h, t, st, true);
+  const hg = document.getElementById('hgrid'), tg = document.getElementById('tgrid');
+  hg.innerHTML = H.map(([k, n, d]) => `<div class="card ${k === h ? 'on' : ''}" data-h="${k}"><b>${n}</b><small>${d}</small><div class="scene">${slot(k, t, 2)}${slot(k, t, 0)}</div></div>`).join('');
+  tg.innerHTML = T.map(([k, n, d]) => `<div class="card ${k === t ? 'on' : ''}" data-t="${k}"><b>${n}</b><small>${d}</small><div class="scene">${slot(h, k, 2)}${slot(h, k, 0)}</div></div>`).join('');
+  hg.querySelectorAll('[data-h]').forEach(c => c.onclick = () => { h = c.dataset.h; render(); });
+  tg.querySelectorAll('[data-t]').forEach(c => c.onclick = () => { t = c.dataset.t; render(); });
+}
+document.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-st]').forEach(x => x.classList.toggle('on', x === b)); st = +b.dataset.st; render(); });
 document.getElementById('loot').onclick = () => document.querySelectorAll('.bag').forEach(b => {
   const s = parseFloat(b.style.transform.match(/[\d.]+/)[0]), fr = [];
   for (let i = 0; i <= 36; i++) { const u = i / 36, a = .25 * Math.exp(-4.2 * u) * Math.cos(u * Math.PI * 5.5), k = s + .08 * Math.sin(Math.PI * Math.min(u / .4, 1));
     fr.push({ transform: `scale(${k * (1 + a)}, ${k / (1 + a)})` }); }
   b.animate(fr, { duration: 950 });
 });
+render();
 </script>
 </body>
 </html>
