@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bag and Gathering</title>
+<title>Bag, Gathering, Crafting</title>
 <style>
   :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
   html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
   header { padding: 14px 18px 4px; }
   h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
-  h2 { font-size: 14px; margin: 16px 18px 2px; color: var(--gold); }
+  header p { margin: 0; color: var(--muted); max-width: 1000px; }
+  h2 { font-size: 14px; margin: 18px 18px 2px; color: var(--gold); }
   p.lead { margin: 0 18px 4px; color: var(--muted); max-width: 1000px; }
   .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
   .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
@@ -19,75 +20,111 @@
   .stage { position: relative; margin: 6px 18px; height: 300px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
     background: radial-gradient(ellipse at 40% 75%, #2d3b2a, #172015 60%, #0d120c); }
   .fx { position: absolute; pointer-events: none; }
+  .char { position: absolute; bottom: 60px; font-size: 40px; transform: translateX(-50%); }
+  .icon { width: 30px; height: 30px; border: 2px solid var(--qc, #1eff00); border-radius: 4px; background: #16120c; display: flex; align-items: center; justify-content: center; font-size: 17px; box-sizing: border-box; }
 
   /* ---------- the bag ---------- */
   .actionbar { position: absolute; right: 0; bottom: 0; left: 0; height: 46px; background: linear-gradient(#1a1610, #0c0a07); border-top: 1px solid #3a3020; }
   .slot { position: absolute; bottom: 5px; width: 36px; height: 36px; border: 1px solid #5a4a2a; border-radius: 3px; background: #15110b; }
-  .bag { position: absolute; right: 22px; bottom: 5px; width: 40px; height: 40px; transform-origin: 50% 100%; }
+  .bagwrap { position: absolute; right: 22px; bottom: 5px; width: 40px; height: 40px; transform-origin: 50% 100%; }
+  .bag { width: 40px; height: 40px; transform-origin: 50% 100%; }
   .bag svg { width: 100%; height: 100%; overflow: visible; }
-  .bubble { position: absolute; right: 18px; bottom: 50px; padding: 1px 7px 2px; border-radius: 9px; font: 800 11px system-ui; color: #1a1205; background: #ffc040;
+  .bag.tremble { animation: tremble .12s linear infinite; }
+  @keyframes tremble { 0% { translate: 0 0 } 25% { translate: .6px -.3px } 50% { translate: -.5px .2px } 75% { translate: .3px .4px } 100% { translate: 0 0 } }
+  .bubble { position: absolute; right: 18px; bottom: 58px; padding: 1px 7px 2px; border-radius: 9px; font: 800 11px system-ui; color: #1a1205; background: #ffc040;
     box-shadow: 0 0 8px rgba(255,180,40,.6); opacity: 0; transform: scale(.4); transition: opacity .2s, transform .25s cubic-bezier(.3,1.8,.5,1); }
   .bubble.show { opacity: 1; transform: none; }
   .bubble.full { background: #ff5a3c; color: #fff; box-shadow: 0 0 10px rgba(255,80,50,.7); }
-  .char { position: absolute; left: 50%; bottom: 60px; font-size: 40px; transform: translateX(-50%); }
-  .icon { width: 30px; height: 30px; border: 2px solid var(--qc, #1eff00); border-radius: 4px; background: #16120c; display: flex; align-items: center; justify-content: center; font-size: 17px; box-sizing: border-box; }
+  .nobubble .bubble { display: none; }
 
   /* ---------- gathering ---------- */
   .node { position: absolute; left: 34%; bottom: 52px; font-size: 44px; transform-origin: 50% 100%; }
-  .tally { position: absolute; right: 16px; top: 60px; width: 210px; display: flex; flex-direction: column; gap: 4px; transition: opacity .6s; }
+  .tally { position: absolute; right: 16px; top: 46px; width: 230px; display: flex; flex-direction: column; gap: 4px; transition: opacity .6s; }
   .tally .head { font: 700 10px system-ui; letter-spacing: 2px; color: #b9b09a; text-transform: uppercase; display: flex; justify-content: space-between; }
-  .row { display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 3px; border-radius: 4px;
-    background: linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.15)); }
+  .row { position: relative; display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 3px; border-radius: 4px; background: linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.15)); }
   .row .icon { width: 24px; height: 24px; font-size: 14px; border-width: 1.5px; }
-  .row .nm { flex: 1; font: 600 12px Georgia, serif; color: #fff; white-space: nowrap; }
+  .row .nm { flex: 1; font: 600 12px Georgia, serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .n { font: 800 13px system-ui; color: #ffe9a8; min-width: 32px; text-align: right; }
-  .row .plus { font: 800 11px system-ui; color: #9dff8a; margin-left: 4px; opacity: 0; }
-  .skill { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; }
+  .row .plus { position: absolute; right: -2px; top: -8px; font: 800 11px system-ui; color: #9dff8a; opacity: 0; }
+  .row .stack { position: absolute; right: 44px; top: 50%; margin-top: -9px; font: 800 9px system-ui; color: #1a1205; background: #ffd34a; border-radius: 3px; padding: 1px 5px; opacity: 0; }
+  .recap { position: absolute; right: 16px; top: 46px; width: 230px; padding: 7px 10px; border-radius: 5px; background: rgba(0,0,0,.6); border-left: 2px solid #d0a040;
+    font: 600 11.5px system-ui; color: #e8e2d0; opacity: 0; }
+  .recap b { color: #ffe9a8; }
+  .note { position: absolute; font: 700 14px system-ui; color: #ffe9a8; text-shadow: 0 0 6px #000; }
+  .skill { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; }
   .skill .t { font: 700 15px Georgia, serif; color: #fff; text-shadow: 0 0 8px #3a8cff, 0 1px 0 #000; }
   .skill .t b { color: #9cc8ff; }
   .skill .barw { width: 200px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
-  .skill .barw i { display: block; height: 100%; background: linear-gradient(90deg, #3a8cff, #9cc8ff); box-shadow: 0 0 6px #3a8cff; }
+  .skill .barw i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3a8cff, #9cc8ff); box-shadow: 0 0 6px #3a8cff; }
   .skill small { font: 600 10px system-ui; color: #b9b09a; }
   .calmnote { position: absolute; left: 12px; top: 10px; font: 600 11px system-ui; color: #9a927e; }
+
+  /* ---------- crafting ---------- */
+  .station { position: absolute; left: 30%; bottom: 52px; font-size: 44px; }
+  .pile { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0; }
+  .pile .stackc { position: relative; width: 44px; height: 44px; }
+  .pile .cnt { font: 800 22px Georgia, serif; color: #fff; text-shadow: 0 0 8px rgba(255,220,120,.8), 0 1px 0 #000; }
+  .pile .nm { font: 700 14px Georgia, serif; color: #fff; text-shadow: 0 1px 0 #000; }
+  .recipe { position: absolute; left: 14px; top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .rchip { display: flex; align-items: center; gap: 8px; padding: 3px 9px; border-radius: 4px; background: rgba(0,0,0,.55); font: 600 12px Georgia, serif; }
+  .rchip i { width: 10px; height: 10px; border-radius: 2px; background: var(--rc); box-shadow: 0 0 5px var(--rc); }
+  .heads { position: absolute; left: 14px; top: 76px; max-width: 280px; padding: 6px 10px; border-radius: 5px; background: rgba(0,0,0,.7); border-left: 2px solid var(--rc, #ffd100);
+    font: 600 11.5px system-ui; color: #e8e2d0; opacity: 0; }
 </style>
 </head>
 <body>
 <header>
-  <h1>The bulging bag, and gathering that pops</h1>
+  <h1>Bag, gathering and crafting, round 2</h1>
+  <p>From the brainstorm: the bag under pressure (1-4, the bubble as an option), gathering's core (8 burst, 10 tally, 11 climbing notes, 14 skill-ups, 16 rare finds, 18 calm) and extras (12 stack milestones, 17 session recap), crafting (21 Create All pile, 22 the same skill bar, 23 recipe color heads-up). Sound is off; turn it on to hear the climbing notes.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button></div>
 </header>
 
-<h2>1. The bulging bag</h2>
-<p class="lead">Our own drawing over the game's backpack button (the game's frames stay untouched). The bag is drawn a little fuller the fuller your bags are. With a few slots left, each item that goes in makes it swell and wobble, the stitches glow amber and a small bubble says how many are left. When it's full, the item bounces off the bag, the bag shakes "no" with a puff of dust, and the bubble turns red: <b>Bags full</b>. Press <b>Loot an item</b> a few times at each fullness.</p>
+<h2>1. The bag under pressure</h2>
+<p class="lead">With 4 slots or fewer, each item <b>pumps the bag up a notch</b>: it swells, holds, and only partly deflates, so it stays bigger each time (1). It <b>strains</b>: the drawstring pulls tight, the stitches stretch with light glowing through, and at the last slot it trembles at rest (2). <b>Full:</b> the next item makes it strain, the drawstring snaps open, a puff of loot spills out the top and gets sucked back in, and it shakes "nope" (3). <b>Release:</b> free up space and it lets out a "pfff", shrinking back with a puff of air (4). The count bubble (6) is an option.</p>
 <div class="bar">
-  <span>Free slots</span>
-  <button data-free="16" class="on">16 (plenty)</button><button data-free="4">4</button><button data-free="1">1</button><button data-free="0">0 (full)</button>
-  <button class="go" id="loot">Loot an item</button>
+  <span>Free slots</span><button data-free="16" class="on">16</button><button data-free="4">4</button><button data-free="1">1</button><button data-free="0">0</button>
+  <button class="go" id="loot">Loot an item</button><button id="sell">Sell 6 items (release)</button>
+  <span>Bubble</span><button data-bub="1" class="on">On</button><button data-bub="0">Off</button>
 </div>
 <div class="stage" id="bagStage">
-  <div class="char">🧙</div>
+  <div class="char" style="left:50%">🧙</div>
   <div class="actionbar">
     <div class="slot" style="left:20px"></div><div class="slot" style="left:60px"></div><div class="slot" style="left:100px"></div>
     <div class="slot" style="right:150px"></div><div class="slot" style="right:110px"></div><div class="slot" style="right:70px"></div>
   </div>
-  <div class="bag" id="bag"><svg viewBox="0 0 40 40" id="bagSvg"></svg></div>
+  <div class="bagwrap" id="bagwrap"><div class="bag" id="bag"><svg viewBox="0 0 40 40" id="bagSvg"></svg></div></div>
   <div class="bubble" id="bubble"></div>
 </div>
 
-<h2>2. Gathering pops</h2>
-<p class="lead">Made to stay fun for hours: small, quick and quiet. <b>Node pop</b>: a tiny burst in the node's own style where you gathered (leaves and petals, rock chips with a spark, a splash ring, tufts) and the pieces arc toward the tally. <b>Harvest tally</b>: a small list at the side counting this session's materials, the new ones popping "+2"; it fades out after a while without gathering. <b>Rare find</b> (a gem from a vein, a rare herb, a rare fish): a bigger burst and the normal popup. <b>Skill up</b>: your new skill with a bar to the next unlock. <b>Calm</b>: after many gathers in a row the pops get smaller and silent, the tally keeps counting.</p>
+<h2>2. Gathering</h2>
+<p class="lead"><b>Every gather</b>: a tiny burst in the node's style (8); the pieces fly into the <b>harvest tally</b> (10); each gather in a run plays a soft note a step higher (11; the ♪ shows the step), resetting after a pause. <b>Now and then</b>: a material reaching a full stack flashes its row with a stack mark (12); a skill-up shows your new skill with a bar to the next unlock (14). <b>Rare</b>: a gem, rare herb or rare fish gets a bigger burst and the normal popup (16). <b>Stop</b>: after a while without gathering the tally folds into a one-line recap, then fades (17). <b>Calm</b>: after many gathers in a row, bursts shrink and go silent; the tally and rare finds stay full (18).</p>
 <div class="bar">
-  <span>Gather</span>
-  <button class="go" data-g="herb">🌿 Herb</button><button class="go" data-g="ore">⛏️ Ore</button><button class="go" data-g="fish">🎣 Fish</button><button class="go" data-g="skin">🔪 Skin</button>
-  <button data-rare>💎 Rare find</button><button data-skill>⭐ Skill up</button>
-  <span>Mode</span>
-  <button data-calm="0" class="on">Fresh</button><button data-calm="1">An hour in (calm)</button>
+  <span>Gather</span><button class="go" data-g="herb">🌿 Herb</button><button class="go" data-g="ore">⛏️ Ore</button><button class="go" data-g="fish">🎣 Fish</button><button class="go" data-g="skin">🔪 Skin</button>
+  <button data-rare>💎 Rare find</button><button data-skill="g">⭐ Skill up</button><button id="stop">⏸ Stop (recap)</button>
+  <span>Mode</span><button data-calm="0" class="on">Fresh</button><button data-calm="1">An hour in (calm)</button>
 </div>
 <div class="stage" id="gStage">
   <div class="calmnote" id="calmnote"></div>
   <div class="char" style="left:24%">🧙</div>
   <div class="node" id="node">🌿</div>
   <div class="tally" id="tally"><div class="head"><span>Gathered</span><span id="tot">0</span></div></div>
-  <div class="skill" id="skill"><div class="t" id="skillT"></div><div class="barw"><i id="skillBar"></i></div><small id="skillNext"></small></div>
+  <div class="recap" id="recap"></div>
+  <div class="skill" id="gskill"><div class="t"></div><div class="barw"><i></i></div><small></small></div>
+</div>
+
+<h2>3. Crafting</h2>
+<p class="lead"><b>Create All</b> (21): instead of a popup per item, each result hops from the station onto one pile that counts up, and the batch ends with a closing flourish and one line, "×12 Silk Bandage". <b>Skill-up</b> (22): the same bar as gathering. <b>Recipe color</b> (23): when your skill turns a recipe from orange to yellow (or yellow to green, green to gray), a small heads-up says so, since that's when skill-ups slow down.</p>
+<div class="bar">
+  <span>Profession</span><button data-prof="tailor" class="on">🧵 Tailoring</button><button data-prof="alch">⚗️ Alchemy</button><button data-prof="smith">🔨 Blacksmithing</button>
+  <button class="go" id="one">Craft one</button><button class="go" id="all">Create All ×12</button>
+</div>
+<div class="stage" id="cStage">
+  <div class="char" style="left:18%">🧙</div>
+  <div class="station" id="station">🧵</div>
+  <div class="recipe"><div class="rchip" id="rchip" style="--rc:#ff8040"><i></i><span id="rname">Silk Bandage</span></div></div>
+  <div class="heads" id="heads"></div>
+  <div class="pile" id="pile"><div class="stackc" id="stackc"></div><div class="cnt" id="cnt"></div><div class="nm" id="pnm"></div></div>
+  <div class="skill" id="cskill"><div class="t"></div><div class="barw"><i></i></div><small></small></div>
 </div>
 
 <script>
@@ -99,16 +136,27 @@ function pick(attr, cb) {
     document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]);
   });
 }
-// a particle: a div flying from (x, y) with velocity, gravity, life (all in px, s)
+// --- sound (off by default): a soft bell note n steps up a pentatonic scale
+let snd = false, actx;
+pick('snd', v => { snd = v === '1'; });
+function note(step, vol = .12) {
+  if (!snd) return;
+  actx = actx || new AudioContext();
+  const scale = [0, 2, 4, 7, 9], semis = scale[step % 5] + 12 * Math.floor(step / 5), f = 523.25 * Math.pow(2, semis / 12);
+  const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f;
+  g.gain.setValueAtTime(0, actx.currentTime); g.gain.linearRampToValueAtTime(vol, actx.currentTime + .01); g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + .6);
+  o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + .65);
+}
+// --- helpers: particles, rings, arcs
 function particle(stage, o) {
   const d = document.createElement('div'); d.className = 'fx';
   d.style.cssText = `left:${o.x}px;top:${o.y}px;width:${o.size}px;height:${o.h || o.size}px;background:${o.color};border-radius:${o.round === false ? '1px' : '50%'};box-shadow:0 0 ${o.glow || 0}px ${o.color}`;
   if (o.text) { d.textContent = o.text; d.style.background = 'none'; d.style.fontSize = o.size + 'px'; d.style.width = d.style.height = 'auto'; }
   stage.appendChild(d);
-  const frames = [], n = 12;
+  const fr = [], n = 12;
   for (let i = 0; i <= n; i++) { const t = o.life * i / n;
-    frames.push({ transform: `translate(${o.vx * t}px, ${o.vy * t + 0.5 * (o.g || 0) * t * t}px) rotate(${(o.spin || 0) * t}deg) scale(${o.scaleTo ? 1 + (o.scaleTo - 1) * i / n : 1})`, opacity: i === n ? 0 : (o.fade ? 1 - i / n * .6 : 1) }); }
-  d.animate(frames, { duration: o.life * 1000, easing: 'linear' }).onfinish = () => d.remove();
+    fr.push({ transform: `translate(${o.vx * t}px, ${o.vy * t + .5 * (o.g || 0) * t * t}px) rotate(${(o.spin || 0) * t}deg) scale(${o.scaleTo ? 1 + (o.scaleTo - 1) * i / n : 1})`, opacity: i === n ? 0 : (o.fade ? 1 - i / n * .6 : 1) }); }
+  d.animate(fr, { duration: o.life * 1000 }).onfinish = () => d.remove();
 }
 function ring(stage, x, y, color, size, life, flat) {
   const d = document.createElement('div'); d.className = 'fx';
@@ -116,94 +164,130 @@ function ring(stage, x, y, color, size, life, flat) {
   stage.appendChild(d);
   d.animate([{ transform: 'scale(.15)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], { duration: life * 1000, easing: 'ease-out' }).onfinish = () => d.remove();
 }
-// an icon flying on an arc from (x0, y0) to (x1, y1)
 function fly(stage, html, x0, y0, x1, y1, dur, arc, onEnd, shrink = .55) {
   const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html; d.style.left = x0 + 'px'; d.style.top = y0 + 'px';
   stage.appendChild(d);
-  const frames = [];
-  for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u);
-    frames.push({ transform: `translate(${(x1 - x0) * e}px, ${(y1 - y0) * e - arc * Math.sin(Math.PI * u)}px) scale(${1 - (1 - shrink) * u})` }); }
-  d.animate(frames, { duration: dur * 1000, easing: 'linear' }).onfinish = () => { d.remove(); onEnd && onEnd(); };
+  const fr = [];
+  for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u); fr.push({ transform: `translate(${(x1 - x0) * e}px, ${(y1 - y0) * e - arc * Math.sin(Math.PI * u)}px) scale(${1 - (1 - shrink) * u})` }); }
+  d.animate(fr, { duration: dur * 1000 }).onfinish = () => { d.remove(); onEnd && onEnd(); };
+}
+function showSkill(el, name, lvl, from, to, nextText) {
+  el.querySelector('.t').innerHTML = `${name} <b>${lvl}</b>`; el.querySelector('small').textContent = nextText;
+  el.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .12 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2600 });
+  el.querySelector('i').animate([{ width: `${(lvl - 1 - from) / (to - from) * 100}%` }, { width: `${(lvl - from) / (to - from) * 100}%` }], { duration: 700, delay: 300, fill: 'forwards' });
+  ring(el.parentNode, el.parentNode.clientWidth / 2, 28, '#3a8cff', 220, .6, .25);
 }
 
-// ---------------- 1. the bag ----------------
-let free = 16;
-const TOTAL = 16;
-function drawBag(swell = 0, strain = 0) {
-  const full = 1 - free / TOTAL, w = 13 + 5 * full + 3 * swell; // fuller: rounder
-  const seam = strain > 0 ? `rgba(255,${180 - 120 * (free === 0)},60,${.5 + .5 * strain})` : '#3a2410';
+// =================== 1. the bag ===================
+let free = 16, held = 0; // held: how puffed up it stays (0..1)
+const bagEl = $('bag'), wrap = $('bagwrap');
+function pressure() { return free > 4 ? 0 : (5 - free) / 5; } // 4 left .2 .. 0 left 1
+function drawBag(open = 0) {
+  const p = pressure(), w = 13 + 4 * (1 - free / 16) + 4 * held, glow = p > 0 ? `rgba(255,${200 - 140 * (free === 0)},90,${.35 + .65 * p})` : '#3a2410';
+  const gap = 2 + 3 * p; // stitches pull apart
+  const neck = 6 + 5 * open, tieY = 12 - 3 * open;
   $('bagSvg').innerHTML = `
-    <defs><radialGradient id="lea" cx="40%" cy="40%"><stop offset="0" stop-color="#b07a3c"/><stop offset="1" stop-color="#5a3816"/></radialGradient></defs>
-    <path d="M${20 - w * .55} 12 Q20 ${8 - 2 * full} ${20 + w * .55} 12 L${20 + w * .55 + 1} 14 L${20 - w * .55 - 1} 14 Z" fill="#7a4e22" stroke="#3a2410"/>
-    <ellipse cx="20" cy="${25 - 1.5 * full}" rx="${w}" ry="${12.5 + 2 * full + 1.5 * swell}" fill="url(#lea)" stroke="#3a2410" stroke-width="1.2"/>
-    <path d="M${20 - w * .7} ${24} Q20 ${30 + 2 * full} ${20 + w * .7} ${24}" fill="none" stroke="${seam}" stroke-width="1.4" stroke-dasharray="2 2"/>
-    <rect x="17" y="11" width="6" height="4" rx="1" fill="#d8b04a" stroke="#6a4a10" stroke-width=".6"/>`;
+    <defs><radialGradient id="lea" cx="40%" cy="38%"><stop offset="0" stop-color="#c08a48"/><stop offset="1" stop-color="#5a3816"/></radialGradient>
+      <radialGradient id="hot"><stop offset="0" stop-color="${glow}"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+    ${p > 0 ? `<ellipse cx="20" cy="25" rx="${w + 6}" ry="${16 + 4 * held}" fill="url(#hot)" opacity="${.5 * p}"/>` : ''}
+    <path d="M${20 - neck} ${tieY + 1} Q20 ${tieY - 4 - 3 * open} ${20 + neck} ${tieY + 1} L${20 + neck + 1} ${tieY + 3} L${20 - neck - 1} ${tieY + 3} Z" fill="#7a4e22" stroke="#3a2410"/>
+    <ellipse cx="20" cy="${25 - held}" rx="${w}" ry="${12.5 + 2 * (1 - free / 16) + 2.5 * held}" fill="url(#lea)" stroke="#3a2410" stroke-width="1.2"/>
+    <path d="M${20 - w * .72} 24 Q20 ${30 + 3 * held} ${20 + w * .72} 24" fill="none" stroke="${glow}" stroke-width="${1.2 + .6 * p}" stroke-dasharray="${2} ${gap}"/>
+    <path d="M${20 - w * .55} 18 Q20 ${21 + 2 * held} ${20 + w * .55} 18" fill="none" stroke="${glow}" stroke-width="1" stroke-dasharray="1.6 ${gap}" opacity="${p ? .8 : 0}"/>
+    <line x1="${20 - neck}" y1="${tieY + 2}" x2="${20 + neck}" y2="${tieY + 2}" stroke="${open ? '#d8b04a' : (p > .5 ? '#ffd890' : '#d8b04a')}" stroke-width="${p > .5 && !open ? 1.6 : 1}"/>
+    <circle cx="${20 + neck + 2}" cy="${tieY + 3}" r="1.6" fill="#d8b04a"/>`;
+  bagEl.classList.toggle('tremble', free <= 1 && free >= 0 && !open);
 }
 function bubble() {
   const b = $('bubble');
-  if (free <= 4) { b.textContent = free === 0 ? 'Bags full' : `${free} left`; b.classList.add('show'); b.classList.toggle('full', free === 0); }
-  else b.classList.remove('show');
-}
-function bagHit() {
-  const bag = $('bag'), st = $('bagStage'), bx = st.clientWidth - 42, by = st.clientHeight - 25;
-  if (free === 0) { // bounces off: the bag shakes "no", a puff of dust
-    bag.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px) rotate(-6deg)' }, { transform: 'translateX(4px) rotate(6deg)' },
-      { transform: 'translateX(-3px) rotate(-4deg)' }, { transform: 'translateX(2px) rotate(2deg)' }, { transform: 'none' }], { duration: 450 });
-    for (let i = 0; i < 10; i++) particle(st, { x: bx - 4, y: by - 6, size: R(6, 11), color: 'rgba(190,170,140,.55)', vx: R(-60, 60), vy: R(-60, -15), g: 30, life: R(.5, .8), scaleTo: 2 });
-    drawBag(0, 1); setTimeout(() => drawBag(0, 1), 10);
-    $('bubble').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 300 });
-    return;
-  }
-  free = Math.max(0, free - 1); syncFree();
-  const tight = free <= 4, s = tight ? 1 : 0.4;
-  bag.animate([{ transform: 'scale(1,1)' }, { transform: `scale(${1 + .22 * s},${1 - .16 * s})` }, { transform: `scale(${1 - .08 * s},${1 + .1 * s})` },
-    { transform: `scale(${1 + .05 * s},${1 - .03 * s})` }, { transform: 'scale(1,1)' }], { duration: tight ? 650 : 380, easing: 'ease-out' });
-  if (tight) { drawBag(1, 1); setTimeout(() => drawBag(0, 1), 260); ring(st, bx, by - 4, '#ffc040', 60, .4); } else drawBag();
-  bubble();
+  if (free <= 4) { b.textContent = free === 0 ? 'Full' : `${free} left`; b.classList.add('show'); b.classList.toggle('full', free === 0); } else b.classList.remove('show');
 }
 function syncFree() { document.querySelectorAll('[data-free]').forEach(x => x.classList.toggle('on', +x.dataset.free === free)); }
-pick('free', v => { free = +v; drawBag(0, free <= 4 ? 1 : 0); bubble(); });
+function setHeld(h) { held = h; wrap.style.transform = `scale(${1 + .16 * held})`; drawBag(); }
+pick('free', v => { free = +v; setHeld(free <= 4 ? pressure() * .9 : 0); bubble(); });
+pick('bub', v => { $('bagStage').classList.toggle('nobubble', v === '0'); });
+function bagPoint() { const st = $('bagStage'); return [st.clientWidth - 42, st.clientHeight - 25]; }
 $('loot').onclick = () => {
-  const st = $('bagStage'), x0 = st.clientWidth / 2 - 15, y0 = st.clientHeight - 110, bx = st.clientWidth - 57, by = st.clientHeight - 45;
+  const st = $('bagStage'), x0 = st.clientWidth / 2 - 15, y0 = st.clientHeight - 110, [bx, by] = bagPoint();
   const qc = ['#9d9d9d', '#ffffff', '#1eff00'][Math.floor(Math.random() * 3)], g = ['🗡️', '🧪', '🪙', '🦴', '📜'][Math.floor(Math.random() * 5)];
-  if (free === 0) { // it flies at the bag and bounces back off, falling away
-    fly(st, `<div class="icon" style="--qc:${qc}">${g}</div>`, x0, y0, bx - 6, by + 2, .5, 70, () => {
-      bagHit(); particle(st, { x: bx - 10, y: by - 6, size: 18, text: g, vx: -90, vy: -120, g: 600, life: .7, spin: -200, fade: true });
-    }, .8);
-  } else fly(st, `<div class="icon" style="--qc:${qc}">${g}</div>`, x0, y0, bx, by, .55, 80, bagHit);
+  fly(st, `<div class="icon" style="--qc:${qc}">${g}</div>`, x0, y0, bx - 15, by - 20, .55, 80, () => {
+    if (free === 0) return burstFull(g);
+    free -= 1; syncFree();
+    const p = pressure();
+    if (p === 0) { // plenty of room: a small bump
+      bagEl.animate([{ transform: 'scale(1,1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1,1)' }], { duration: 300 });
+    } else { // pumps up a notch: swells, holds, only partly deflates
+      const peak = p * 1.25, keep = p * .9;
+      wrap.animate([{ transform: `scale(${1 + .16 * held})` }, { transform: `scale(${1 + .16 * peak + .08})`, offset: .3 }, { transform: `scale(${1 + .16 * peak + .04})`, offset: .6 },
+        { transform: `scale(${1 + .16 * keep})` }], { duration: 700, easing: 'ease-out' });
+      setTimeout(() => setHeld(keep), 700);
+      held = Math.max(held, p * .6); drawBag();
+    }
+    bubble();
+  }, .7);
+};
+function burstFull(g) { // strains, the drawstring snaps open, loot spills out the top and is sucked back in, "nope"
+  const st = $('bagStage'), [bx, by] = bagPoint();
+  bagEl.classList.remove('tremble');
+  wrap.animate([{ transform: `scale(${1 + .16 * held})` }, { transform: `scale(${1 + .16 * held + .14}, ${1 + .16 * held + .06})`, offset: .35 }, { transform: `scale(${1 + .16 * held})` }], { duration: 420 });
+  setTimeout(() => { drawBag(1); // the snap: the neck flies open
+    const spill = ['🪙', '🦴', '🧪', '📜', g];
+    spill.forEach((s, i) => {
+      const d = document.createElement('div'); d.className = 'fx'; d.textContent = s; d.style.cssText = `left:${bx - 8}px;top:${by - 34}px;font-size:14px`;
+      st.appendChild(d);
+      const dx = (i - 2) * 14 + R(-4, 4), up = R(36, 54);
+      d.animate([{ transform: 'translate(0,0) scale(.5)', opacity: 0 }, { transform: `translate(${dx}px,${-up}px) scale(1) rotate(${R(-40, 40)}deg)`, opacity: 1, offset: .45 },
+        { transform: `translate(${dx * .7}px,${-up + 6}px) scale(1)`, offset: .62 }, { transform: 'translate(0,4px) scale(.3)', opacity: 0 }], { duration: 900, easing: 'ease-in-out' }).onfinish = () => d.remove();
+    });
+    for (let i = 0; i < 8; i++) particle(st, { x: bx - 4, y: by - 30, size: R(5, 9), color: 'rgba(200,180,150,.5)', vx: R(-50, 50), vy: R(-70, -30), g: 40, life: R(.5, .8), scaleTo: 2 });
+  }, 150);
+  setTimeout(() => { drawBag(0); // sucked back in, the neck pulls shut: "nope"
+    bagEl.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-9deg)' }, { transform: 'rotate(8deg)' }, { transform: 'rotate(-5deg)' }, { transform: 'rotate(3deg)' }, { transform: 'rotate(0)' }], { duration: 480 });
+    $('bubble').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 300 });
+    setTimeout(() => bagEl.classList.add('tremble'), 500);
+  }, 1000);
+}
+$('sell').onclick = () => { // the release: "pfff", it shrinks back with a puff of air
+  if (free > 6) return;
+  const st = $('bagStage'), [bx, by] = bagPoint(), before = held;
+  free = Math.min(16, free + 6); syncFree(); bubble();
+  bagEl.classList.remove('tremble');
+  wrap.animate([{ transform: `scale(${1 + .16 * before})` }, { transform: 'scale(.86,.9)', offset: .55 }, { transform: 'scale(1.04,.98)', offset: .8 }, { transform: 'scale(1)' }], { duration: 650, easing: 'ease-out' });
+  setHeld(free <= 4 ? pressure() * .9 : 0);
+  for (let i = 0; i < 14; i++) particle(st, { x: bx - 3, y: by - 34, size: R(4, 8), color: 'rgba(230,225,215,.45)', vx: R(-40, 40), vy: R(-110, -50), g: -20, life: R(.6, 1), scaleTo: 2.4 });
+  ring(st, bx, by - 30, 'rgba(230,225,215,.6)', 50, .5, .5);
 };
 drawBag();
 
-// ---------------- 2. gathering ----------------
+// =================== 2. gathering ===================
 const KIND = {
-  herb: { node: '🌿', mat: ['🌿', 'Peacebloom', '#ffffff'], rare: ['🌸', 'Black Lotus', '#ffffff', true], colors: ['#7ad34a', '#b8f070', '#f0e070', '#ff9ad0'] },
-  ore: { node: '🪨', mat: ['🟫', 'Copper Ore', '#ffffff'], rare: ['💚', 'Tigerseye', '#1eff00'], colors: ['#8a7a6a', '#b0a090', '#c87a3a', '#fff0b0'] },
-  fish: { node: '🫧', mat: ['🐟', 'Raw Brilliant Smallfish', '#ffffff'], rare: ['🐠', 'Oily Blackmouth', '#1eff00'], colors: ['#bfe6ff', '#8ac8ff', '#ffffff'] },
-  skin: { node: '🦌', mat: ['🟤', 'Light Leather', '#ffffff'], rare: ['🟣', 'Thick Hide', '#1eff00'], colors: ['#a07850', '#d8b890', '#6a4a30'] },
+  herb: { node: '🌿', name: 'Herbalism', mat: ['🌿', 'Peacebloom', '#ffffff'], rare: ['🌸', 'Black Lotus', '#ffffff'], colors: ['#7ad34a', '#b8f070', '#f0e070', '#ff9ad0'] },
+  ore: { node: '⛰️', name: 'Mining', mat: ['🟫', 'Copper Ore', '#ffffff'], rare: ['💚', 'Tigerseye', '#1eff00'], colors: ['#8a7a6a', '#b0a090', '#c87a3a', '#fff0b0'] },
+  fish: { node: '🫧', name: 'Fishing', mat: ['🐟', 'Raw Brilliant Smallfish', '#ffffff'], rare: ['🐠', 'Oily Blackmouth', '#1eff00'], colors: ['#bfe6ff', '#8ac8ff', '#ffffff'] },
+  skin: { node: '🦌', name: 'Skinning', mat: ['🟤', 'Light Leather', '#ffffff'], rare: ['🟣', 'Thick Hide', '#1eff00'], colors: ['#a07850', '#d8b890', '#6a4a30'] },
 };
-let calm = false, kind = 'herb', counts = {}, total = 0, idleT = 0, skill = 74;
+let calm = false, kind = 'herb', counts = {}, total = 0, step = 0, lastG = 0, gskill = { herb: 74, ore: 74, fish: 74, skin: 74 }, session = {};
 const rows = {};
-pick('calm', v => { calm = v === '1'; $('calmnote').textContent = calm ? 'Calm: an hour of gathering in. Pops are small and silent; the tally still counts.' : ''; });
-function nodePos() { const st = $('gStage'); return [st.clientWidth * 0.34 + 22, st.clientHeight - 80]; }
+pick('calm', v => { calm = v === '1'; $('calmnote').textContent = calm ? 'Calm: an hour in. Bursts are small and silent; the tally, stacks, skill-ups and rare finds stay full.' : ''; });
+function nodePos() { const st = $('gStage'); return [st.clientWidth * .34 + 22, st.clientHeight - 80]; }
 function pop(k, rare) {
-  const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], m = calm && !rare ? .45 : 1;
+  const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], m = calm && !rare ? .4 : 1;
   $('node').textContent = K.node;
   $('node').animate([{ transform: 'scale(1)' }, { transform: `scale(${1 + .15 * m},${1 - .12 * m})` }, { transform: 'scale(1)' }], { duration: 260 });
   const n = Math.round((rare ? 26 : 10) * m);
-  for (let i = 0; i < n; i++) {
-    const c = K.colors[i % K.colors.length];
+  for (let i = 0; i < n; i++) { const c = K.colors[i % K.colors.length];
     if (k === 'herb') particle(st, { x: x + R(-8, 8), y: y + R(-10, 4), size: R(4, 7), h: R(2, 4), color: c, round: false, vx: R(-70, 70) * m, vy: R(-140, -60) * m, g: 160, life: R(.6, 1), spin: R(-400, 400) });
     else if (k === 'ore') particle(st, { x: x + R(-6, 6), y: y + R(-6, 6), size: R(3, 6), color: c, round: false, vx: R(-120, 120) * m, vy: R(-170, -60) * m, g: 600, life: R(.4, .7), spin: R(-500, 500), glow: i % 4 === 3 ? 6 : 0 });
     else if (k === 'fish') particle(st, { x: x + R(-6, 6), y: y + 8, size: R(2.5, 4.5), color: c, vx: R(-70, 70) * m, vy: R(-180, -90) * m, g: 650, life: R(.5, .8) });
-    else particle(st, { x: x + R(-8, 8), y: y + R(-8, 6), size: R(3, 5), color: c, vx: R(-50, 50) * m, vy: R(-80, -30) * m, g: 40, life: R(.7, 1.1), fade: true });
-  }
+    else particle(st, { x: x + R(-8, 8), y: y + R(-8, 6), size: R(3, 5), color: c, vx: R(-50, 50) * m, vy: R(-80, -30) * m, g: 40, life: R(.7, 1.1), fade: true }); }
   if (k === 'fish') ring(st, x, y + 14, '#bfe6ff', 70 * m + 20, .6, .3);
-  if (rare) { ring(st, x, y, KIND[k].rare[2] === '#1eff00' ? '#1eff00' : '#ffffff', 140, .6); ring(st, x, y, '#fff6c0', 80, .45); }
+  if (rare) { ring(st, x, y, KIND[k].rare[2], 140, .6); ring(st, x, y, '#fff6c0', 80, .45); }
 }
 function tallyRow(mat) {
   const [g, name, qc] = mat;
   if (!rows[name]) {
-    const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="n">0</span><span class="plus"></span>`;
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="stack"></span><span class="n">×0</span><span class="plus"></span>`;
     $('tally').appendChild(r); rows[name] = r; counts[name] = 0;
     r.animate([{ opacity: 0, transform: 'translateX(20px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
   }
@@ -211,22 +295,32 @@ function tallyRow(mat) {
 }
 function gather(k, rare) {
   const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], mat = rare ? K.rare : K.mat, n = rare ? 1 : Math.ceil(R(1, 3.9));
-  $('tally').style.opacity = 1; idleT = 0;
+  $('tally').style.opacity = 1; $('recap').style.opacity = 0;
+  const now = performance.now(); if (now - lastG > 6000) step = 0; lastG = now; // the run's notes reset after a pause
   pop(k, rare);
+  if (!calm || rare) { note(step); }
+  const nt = document.createElement('div'); nt.className = 'note fx'; nt.textContent = '♪'.repeat(1) + (step + 1); nt.style.left = (x - 6) + 'px'; nt.style.top = (y - 50) + 'px';
+  if (!calm) { st.appendChild(nt); nt.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, offset: .2 }, { opacity: 0, transform: `translateY(-${14 + step * 2}px)` }], { duration: 900 }).onfinish = () => nt.remove(); }
+  step += 1;
   const row = tallyRow(mat), rr = row.getBoundingClientRect(), sr = st.getBoundingClientRect();
   for (let i = 0; i < Math.min(n, 3); i++) setTimeout(() => {
     fly(st, `<div class="icon" style="--qc:${mat[2]};width:22px;height:22px;font-size:12px">${mat[0]}</div>`, x - 11, y - 20, rr.left - sr.left + 3, rr.top - sr.top + 3, .55 + i * .05, 70, () => {
-      counts[mat[1]] += 1; total += 1;
+      const before = counts[mat[1]]; counts[mat[1]] += 1; total += 1; session[mat[1]] = counts[mat[1]];
       row.querySelector('.n').textContent = '×' + counts[mat[1]]; $('tot').textContent = total;
       row.querySelector('.n').animate([{ transform: 'scale(1.5)', color: '#fff' }, { transform: 'scale(1)' }], { duration: 220 });
       const p = row.querySelector('.plus'); p.textContent = '+' + (i + 1);
       p.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-10px)' }], { duration: 700 });
-      row.animate([{ background: `linear-gradient(90deg, ${mat[2]}55, rgba(0,0,0,.15))` }, { background: 'linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.15))' }], { duration: 400 });
+      if (Math.floor(counts[mat[1]] / 20) > Math.floor(before / 20)) { // a full stack (20): the row flashes, a stack mark clinks in
+        const s = row.querySelector('.stack'); s.textContent = `${Math.floor(counts[mat[1]] / 20)} stack${counts[mat[1]] >= 40 ? 's' : ''}`;
+        s.animate([{ opacity: 0, transform: 'scale(2)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 300, fill: 'forwards' });
+        row.animate([{ boxShadow: '0 0 0 1px #ffd34a, 0 0 14px #ffd34a' }, { boxShadow: '0 0 0 0 transparent' }], { duration: 900 });
+        note(step + 4, .15);
+      }
     }, .8);
   }, i * 90);
   if (rare) setTimeout(() => {
     const card = document.createElement('div'); card.className = 'fx';
-    card.style.cssText = 'left:50%;top:70px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px';
+    card.style.cssText = 'left:50%;top:60px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px';
     card.innerHTML = `<div style="font-size:40px;filter:drop-shadow(0 0 10px ${mat[2]})">${mat[0]}</div><div style="font:700 18px Georgia,serif;color:${mat[2]};text-shadow:0 1px 0 #000,0 0 6px #000">${mat[1]}</div><div style="font:600 10px system-ui;color:#c9c2b0">Rare find · the normal popup</div>`;
     st.appendChild(card);
     card.animate([{ opacity: 0, transform: 'translate(-50%, 14px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2400 }).onfinish = () => card.remove();
@@ -234,17 +328,76 @@ function gather(k, rare) {
 }
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { kind = b.dataset.g; gather(kind, false); });
 document.querySelector('[data-rare]').onclick = () => gather(kind, true);
-document.querySelector('[data-skill]').onclick = () => {
-  skill += 1; const nextAt = 125, from = 75;
-  const names = { herb: 'Herbalism', ore: 'Mining', fish: 'Fishing', skin: 'Skinning' };
-  $('skillT').innerHTML = `${names[kind]} <b>${skill}</b>`;
-  $('skillNext').textContent = skill < nextAt ? `${nextAt - skill} to Silverleaf / Tin` : 'Journeyman: train for more';
-  const s = $('skill');
-  s.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .12 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2600 });
-  $('skillBar').animate([{ width: `${(skill - 1 - from) / (nextAt - from) * 100}%` }, { width: `${(skill - from) / (nextAt - from) * 100}%` }], { duration: 700, delay: 300, fill: 'forwards' });
-  ring($('gStage'), $('gStage').clientWidth / 2, 34, '#3a8cff', 220, .6, .25);
+document.querySelector('[data-skill="g"]').onclick = () => { gskill[kind] += 1; const lv = gskill[kind];
+  showSkill($('gskill'), KIND[kind].name, lv, 50, 125, lv < 125 ? `${125 - lv} to ${kind === 'ore' ? 'Tin' : kind === 'herb' ? 'Briarthorn' : 'the next zone'}` : 'Train Journeyman for more'); note(9, .14); };
+$('stop').onclick = () => { // the recap: the tally folds into one line, then fades
+  const parts = Object.entries(session).map(([n, c]) => `<b>${c}</b> ${n}`).join(', ') || 'nothing yet';
+  const sk = Object.entries(gskill).filter(([k, v]) => v > 74).map(([k, v]) => `${KIND[k].name} +${v - 74}`).join(', ');
+  $('recap').innerHTML = `This run: ${parts}${sk ? '<br>' + sk : ''}`;
+  $('tally').style.opacity = 0;
+  $('recap').animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 5000 });
 };
-setInterval(() => { idleT += 1; if (idleT === 12) $('tally').style.opacity = .0; }, 1000); // (fades out after a while without gathering; 12 s here, longer in game)
+
+// =================== 3. crafting ===================
+const PROF = {
+  tailor: { st: '🧵', name: 'Tailoring', item: ['🩹', 'Silk Bandage', '#ffffff'], colors: ['#f0e6d0', '#d8c8a8', '#ffffff'] },
+  alch: { st: '⚗️', name: 'Alchemy', item: ['🧪', 'Healing Potion', '#ffffff'], colors: ['#ff6a6a', '#ffb0b0', '#ffffff'] },
+  smith: { st: '🔨', name: 'Blacksmithing', item: ['⚔️', 'Heavy Copper Broadaxe', '#1eff00'], colors: ['#ffd27a', '#ff9a3a', '#fff4c0'] },
+};
+let prof = 'tailor', cskill = 140, busy = false;
+const RC = [[150, '#ff8040', 'orange'], [160, '#ffff40', 'yellow'], [175, '#40c040', 'green'], [999, '#9d9d9d', 'gray']];
+function recipeColor() { return RC.find(r => cskill < r[0]); }
+function syncRecipe() { const P = PROF[prof], rc = recipeColor(); $('station').textContent = P.st; $('rname').textContent = P.item[1]; $('rchip').style.setProperty('--rc', rc[1]); }
+pick('prof', v => { prof = v; syncRecipe(); });
+function flourish(st, x, y) { const P = PROF[prof];
+  for (let i = 0; i < 9; i++) {
+    if (prof === 'alch') particle(st, { x: x + R(-8, 8), y: y, size: R(4, 8), color: P.colors[i % 3], vx: R(-25, 25), vy: R(-90, -40), g: -20, life: R(.6, .9), fade: true });
+    else if (prof === 'smith') particle(st, { x: x, y: y + 10, size: R(2, 4), color: P.colors[i % 3], vx: R(-140, 140), vy: R(-160, -40), g: 700, life: R(.35, .6), glow: 6 });
+    else particle(st, { x: x + R(-10, 10), y: y + R(-4, 4), size: R(5, 9), h: 1.5, color: P.colors[i % 3], round: false, vx: R(-40, 40), vy: R(-60, -20), g: 60, life: R(.5, .8), spin: R(-200, 200) });
+  }
+}
+function craftSkill(maybe) { // skill-ups get rarer as the recipe's color cools
+  const chance = { orange: 1, yellow: .6, green: .25, gray: 0 }[recipeColor()[2]];
+  if (Math.random() > chance) return;
+  const before = recipeColor(); cskill += 1;
+  showSkill($('cskill'), PROF[prof].name, cskill, 125, 225, `${225 - cskill} to Artisan`);
+  const after = recipeColor();
+  if (after !== before) { // the recipe changed color: a heads-up (23)
+    $('rchip').style.setProperty('--rc', after[1]);
+    $('rchip').animate([{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 400 });
+    const h = $('heads'); h.style.setProperty('--rc', after[1]);
+    h.innerHTML = `<b style="color:${after[1]}">${PROF[prof].item[1]}</b> is now ${after[2]}: ${after[2] === 'gray' ? 'no more skill-ups from it.' : 'skill-ups from it come less often.'}`;
+    h.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none', offset: .08 }, { opacity: 1, offset: .9 }, { opacity: 0 }], { duration: 4200 });
+  }
+}
+function stationPos() { const st = $('cStage'); return [st.clientWidth * .30 + 22, st.clientHeight - 84]; }
+$('one').onclick = () => { if (busy) return; const st = $('cStage'), [x, y] = stationPos(); flourish(st, x, y); note(4, .1); craftSkill();
+  const P = PROF[prof], card = document.createElement('div'); card.className = 'fx';
+  card.style.cssText = `left:${x - 15}px;top:${y - 30}px`; card.innerHTML = `<div class="icon" style="--qc:${P.item[2]}">${P.item[0]}</div>`; st.appendChild(card);
+  card.animate([{ transform: 'translateY(0) scale(.6)', opacity: 0 }, { transform: 'translateY(-36px) scale(1)', opacity: 1, offset: .3 }, { transform: 'translateY(-44px)', opacity: 1, offset: .8 }, { opacity: 0 }], { duration: 1200 }).onfinish = () => card.remove(); };
+$('all').onclick = () => { // Create All: each result hops onto one pile that counts up, then one closing line (21)
+  if (busy) return; busy = true;
+  const st = $('cStage'), [x, y] = stationPos(), P = PROF[prof], pile = $('pile'), sc = $('stackc'), N = 12;
+  sc.innerHTML = ''; $('cnt').textContent = ''; $('pnm').textContent = '';
+  pile.style.opacity = 1;
+  const pr = sc.getBoundingClientRect(), sr = st.getBoundingClientRect(), px = pr.left - sr.left, py = pr.top - sr.top;
+  for (let i = 0; i < N; i++) setTimeout(() => {
+    flourish(st, x, y); craftSkill();
+    fly(st, `<div class="icon" style="--qc:${P.item[2]}">${P.item[0]}</div>`, x - 15, y - 20, px + 7, py + 7 - Math.min(i, 5) * 2, .5, 60, () => {
+      const it = document.createElement('div'); it.className = 'icon'; it.style.cssText = `--qc:${P.item[2]};position:absolute;left:${7 + R(-3, 3)}px;top:${7 - Math.min(i, 5) * 2}px;transform:rotate(${R(-12, 12)}deg)`; it.textContent = P.item[0];
+      sc.appendChild(it);
+      $('cnt').textContent = '×' + (i + 1);
+      $('cnt').animate([{ transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 200 });
+      note(Math.min(i, 9), .07);
+      if (i === N - 1) setTimeout(() => { // the closing flourish: a ring, the name, a chord
+        $('pnm').textContent = P.item[1]; ring(st, px + 22, py + 22, '#ffd34a', 120, .6); ring(st, px + 22, py + 22, '#ffffff', 70, .45);
+        note(0, .1); note(2, .1); note(4, .1);
+        setTimeout(() => { pile.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' }).onfinish = () => { pile.style.opacity = 0; busy = false; }; }, 2200);
+      }, 200);
+    }, .8);
+  }, i * 380);
+};
+syncRecipe();
 </script>
 </body>
 </html>

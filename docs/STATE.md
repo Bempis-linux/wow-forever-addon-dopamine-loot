@@ -1,7 +1,7 @@
 # Session state — Dopamine Loot
 
 _Last checkpoint: 2026-11-09, **stop point after 1.2.1**, night of 2026-11-09 (released and on CurseForge; the game
-stays on dev). Next session: the user picks from docs/mockups/gathering.html (bulging bag, gathering pops). Read this first
+stays on dev). Next session: the user reviews docs/mockups/gathering.html round 2 (bag, gathering, crafting). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -25,7 +25,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   **harvest tally** (session counts per material, "+N", fades when idle), rare finds (gems, rare herbs/fish)
   get a bigger burst + the normal popup, **skill-ups** with a bar to the next unlock, **calm** after many
   gathers (smaller, silent; the tally still counts). Mockup: docs/mockups/gathering.html (round 1, no picks
-  yet). 3. then **profession crafting** (rounds off professions; the Create All finale). APIs for all of this
+  yet). 3. then **profession crafting** (rounds off professions; the Create All finale).
+  **Brainstorm picks (2026-11-09):** bag = the pressure story (the user's idea: "swelling like it's about to
+  pop"): pumps up a notch per loot and only partly deflates, strain tells (tight drawstring, stitches glowing
+  apart, trembles at the last slot), full = strains, drawstring snaps open, loot spills out the top and is
+  sucked back in, "nope" shake; release = "pfff" deflate when space frees; count bubble optional.
+  Gathering core: node burst, harvest tally, climbing notes per run, skill-ups with a bar to the next
+  unlock, rare finds = full popup, calm after long runs; extras: stack milestones (20), session recap on stop.
+  Crafting: Create All pile with a count + closing flourish, the same skill bar, recipe color heads-up
+  (orange -> yellow -> green -> gray). Mockup docs/mockups/gathering.html round 2 shows all of it. APIs for all of this
   (researched 2026-11-09, evidence from Forever addons RoadToSixty, NodeSight, Narcissus, EasyFishing):
   - Bag space: C_Container.GetContainerNumFreeSlots(0..4) -> free, bagFamily; count only bagFamily == 0;
     BAG_UPDATE_DELAYED. Full bags: UI_ERROR_MESSAGE (errorType, msg): errorType == LE_GAME_ERR_INV_FULL or
