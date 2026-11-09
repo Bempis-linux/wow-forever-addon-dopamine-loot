@@ -51,6 +51,14 @@
 </div>
 <div class="stage" id="gStage"><div class="char">🧙</div><div class="node" id="gNode">🌿</div><div class="note" id="gNote"></div></div>
 
+<h2>1c. Herbalism normal, round 2: new designs</h2>
+<p class="lead">The rare is now G2 Golden seed (built). Fresh ideas for the everyday herb, all quieter than the rare: <b>Current</b> (petals spiral, pollen drifts) · <b>H1 Dandelion</b>: a puff of seed fluff (little white tufts on stems) lifts off and floats away on the breeze · <b>H2 Leaf flutter</b>: three or four leaves flip and flutter up and to the side, turning like real leaves, with a couple of dewdrop sparkles · <b>H3 Gold sparkle</b>: a small fountain of gold motes rises from the herb and a soft green ring pulses at its base (a little echo of the golden seed) · <b>H4 Pluck pop</b>: the herb pops with a quick green ring, a few leaves pop out like confetti and a puff of pollen drifts up.</p>
+<div class="bar">
+  <span>Normal</span><button data-h2="cur">Current</button><button data-h2="h1" class="on">H1 Dandelion</button><button data-h2="h2">H2 Leaf flutter</button><button data-h2="h3">H3 Gold sparkle</button><button data-h2="h4">H4 Pluck pop</button>
+  <button class="go" id="h2Play">🌿 Gather</button><button id="h2Run">Run ×5</button><button id="h2Rare">🌸 Rare (Golden seed)</button>
+</div>
+<div class="stage" id="h2Stage"><div class="char">🧙</div><div class="node" id="h2Node">🌿</div><div class="note" id="h2Note"></div></div>
+
 <h2>2. Skinning (built: N2 Clean cut + R1 Double slash)</h2>
 <p class="lead"><b>Normal</b>: Current (a knife glint, fur tufts drift down) · <b>N1 Glint and scraps</b>: the glint leaves a short afterimage, a second quick flick follows, and small leather scraps tumble with the tufts · <b>N2 Clean cut</b>: one crisp glint with a bright tip that runs along the blade, softer, fluffier tufts.<br>
 <b>Rare</b>: Current (a long streak with glints) · <b>R1 Double slash</b>: two quick glints cross in an X, a flash where they meet, sparks along both · <b>R2 Pelt sheen</b>: a broad sheen of light sweeps across a soft hide-shaped glow, like light running over fine leather, with glints at its edge · <b>R3 Trophy</b>: the hide pops up big over the carcass with a gold rim and a shine sweep, holds a beat, then flies to the window.</p>
@@ -237,6 +245,57 @@ $('gRare').onclick = () => {
   HN.cur(x, y); G2[g2](x, y);
   $('gNote').textContent = 'Rare: ' + { g0: 'G0 Golden bloom', g1: 'G1 Sunrise', g2: 'G2 Golden seed', g3: 'G3 Wreath' }[g2];
 };
+
+// ---- round 2: new normal herb designs ----
+let h2 = 'h1';
+pick('h2', v => h2 = v);
+const FLUFF = '<div style="position:relative;width:14px;height:14px;margin:-7px"><i style="position:absolute;left:6px;top:7px;width:1px;height:8px;background:rgba(255,255,255,.7)"></i>' +
+  '<i style="position:absolute;left:1px;top:0;width:12px;height:12px;border-radius:50%;background:radial-gradient(rgba(255,255,255,.95),rgba(255,255,255,.35) 45%,transparent 70%)"></i></div>';
+const H2 = {
+  cur: HN.cur,
+  h1(x, y) { // Dandelion: seed fluff lifts off and floats away on the breeze
+    for (let i = 0; i < 9; i++) { const vx = R(30, 70), vy = R(25, 55), ph = R(0, 6), life = R(1.8, 2.4);
+      pathEl(FLUFF, '', x + R(-8, 8), y - R(0, 10), life, u => [vx * u * life + 6 * Math.sin(u * 7 + ph), vy * u * life + 10 * Math.sin(u * 3), 15 * Math.sin(u * 6 + ph), .9 + .2 * u, u > .7 ? (1 - u) / .3 : 1], i * .04); }
+    for (let i = 0; i < 4; i++) ballistic(x + R(-6, 6), y, { vx: R(10, 40), vy: R(20, 40), g: -6, life: R(1.2, 1.6), size: 3, color: '#fff2a0', glow: 6, fade: true, delay: .2 + i * .06 });
+    noise(0, .35, .012, 2500);
+  },
+  h2(x, y) { // Leaf flutter: leaves flip and flutter up and aside, dewdrop sparkles
+    for (let i = 0; i < 4; i++) { const dir = i % 2 ? 1 : -1, vx = R(30, 70) * dir, up = R(50, 80), ph = R(0, 6);
+      pathEl(LEAF(14, 8), '', x, y - 6, R(1.3, 1.7), u => [vx * u + 10 * Math.sin(u * 8 + ph), up * Math.sin(Math.PI * Math.min(u * 1.3, 1)) - 25 * u * u, 40 * Math.sin(u * 7 + ph) + 360 * u * dir, 1, u > .75 ? (1 - u) * 4 : 1], i * .05)
+        .firstChild.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(-1)' }, { transform: 'scaleX(1)' }], { duration: 420, iterations: 4 }); }
+    for (let i = 0; i < 2; i++) star(x + R(-14, 14), y - R(10, 24), 12, '#dff6ff', .5, .1 + i * .15);
+    noise(0, .25, .015, 3000);
+  },
+  h3(x, y) { // Gold sparkle: a small fountain of gold motes, a soft green ring at the base
+    el('', `left:${x - 30}px;top:${y + 10}px;width:60px;height:18px;border-radius:50%;border:2px solid rgba(150,240,120,.7);box-shadow:0 0 10px rgba(150,240,120,.5)`,
+      [{ transform: 'scale(.3)', opacity: 1 }, { transform: 'scale(1.3)', opacity: 0 }], 700, 0, 'ease-out');
+    for (let i = 0; i < 12; i++) ballistic(x + R(-6, 6), y - 4, { vx: R(-35, 35), vy: R(90, 150), g: 160, life: R(.9, 1.3), size: R(2.5, 4), color: i % 3 ? '#ffd34a' : '#fff6c0', glow: 7, fade: true, delay: i * .03 });
+    tone(1568, .02, .025, .4); tone(2093, .1, .02, .4);
+  },
+  h4(x, y) { // Pluck pop: a quick green ring, leaves pop out like confetti, a puff of pollen
+    el('', `left:${x - 26}px;top:${y - 26}px;width:52px;height:52px;border-radius:50%;border:2px solid rgba(150,240,120,.8)`,
+      [{ transform: 'scale(.2)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], 380, 0, 'ease-out');
+    for (let i = 0; i < 6; i++) { const vx = R(-110, 110), vy = R(120, 200), sp = R(-720, 720);
+      pathEl(LEAF(10, 6), '', x, y - 6, R(.8, 1.1), u => { const t = u * .95; return [vx * t, vy * t - 280 * t * t, sp * u]; }); }
+    for (let i = 0; i < 8; i++) ballistic(x + R(-10, 10), y - 6, { vx: R(-30, 30), vy: R(20, 50), g: -10, life: R(1, 1.5), size: R(6, 10), color: 'rgba(255,240,170,.35)', grow: 2, fade: true, delay: .1 });
+    tone(880, 0, .03, .15, 'triangle'); noise(0, .1, .02, 2000);
+  },
+};
+function seed(x, y) { // the built rare, for context
+  const cy = y - 50;
+  pathEl(MOTE(10, '#ffe48a'), '', x, y - 6, .95, u => { const t = u * .95, e = 1 - Math.pow(1 - Math.min(1, t / .45), 2); return [0, 44 * e + (t > .45 ? 2 * Math.sin((t - .45) * 20) : 0), 0, 1, 1]; });
+  setTimeout(() => { ring(x, cy, '#ffe48a', 90, .5); star(x, cy, 50, '#fff6c0', .5); rays(x, cy, 12, 0, 330, 90, 0, 1.4, 'rgba(255,220,120,.6)', 15); leafRing(x, cy, 10, 30, 0, 1.6);
+    for (let i = 0; i < 26; i++) ballistic(x + R(-10, 10), cy, { vx: R(-110, 110), vy: R(20, 140), g: 160, life: R(1.1, 1.7), size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .05 + i * .01 }); }, 900);
+}
+function herb2(rare) {
+  ST = $('h2Stage'); const [x, y] = pos('h2Node');
+  $('h2Node').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1)' }], { duration: 260 });
+  H2[h2](x, y); if (rare) seed(x, y);
+  $('h2Note').textContent = { cur: 'Current', h1: 'H1 Dandelion', h2: 'H2 Leaf flutter', h3: 'H3 Gold sparkle', h4: 'H4 Pluck pop' }[h2] + (rare ? ' + Golden seed' : '');
+}
+$('h2Play').onclick = () => herb2(false);
+$('h2Run').onclick = () => { for (let i = 0; i < 5; i++) setTimeout(() => herb2(false), i * 450); };
+$('h2Rare').onclick = () => herb2(true);
 
 // =================== Skinning ===================
 let sn = 'cur', sr = 'r1';

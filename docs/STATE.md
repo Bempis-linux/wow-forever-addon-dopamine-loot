@@ -42,7 +42,9 @@ herb normal Current/N1 leaves and petals/N2 gentle swirl, herb rare Current/R1 B
 bloom; skin normal Current/N1 glint and scraps/N2 clean cut, skin rare Current/R1 Double slash/R2 Pelt sheen/R3
 Trophy. **Picks (2026-11-09):** skinning N2 Clean cut + R1 Double slash (built in Gather.lua: Slash() with a tip,
 Tufts(), RARE.skin = the X); herbalism normal stays as is; none of the herb options landed, but Golden bloom is "a good
-idea": round 2 in the same file (G0 Golden bloom, G1 Sunrise, G2 Golden seed, G3 Wreath), waiting for a pick.
+idea": round 2 in the same file; the user picked **G2 Golden seed** (built: RARE.herb, the seed rises, cracks open at
+0.9 s: rays (Streak.tga), leaf ring (Petal.tga tinted green), pollen shower). The user wants new designs for the normal
+herb gather too: section 1c (H1 Dandelion, H2 Leaf flutter, H3 Gold sparkle, H4 Pluck pop), waiting for a pick.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

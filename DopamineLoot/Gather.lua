@@ -246,18 +246,40 @@ function BURST.herb(x, y, rare, m, quiet)
   end
   if rare then RARE.herb(x, y, quiet) end
 end
-function RARE.herb(x, y, quiet) -- a flower blooms open, gold pollen
-  for i = 0, 7 do
-    local a = i * math.pi / 4
-    Fx({ file = MEDIA .. "Petal.tga", x = x, y = y + 10, size = 4, size1 = 30, life = 1.5, delay = 0.1, r = 1, gg = 0.7, b = 0.86,
-      path = function(u) local e = math.min(1, u / 0.35); local d = 15 * e; return math.sin(a) * d, math.cos(a) * d, -a - 0.3 * u end })
+-- G2 "Golden seed" (docs/mockups/gather-polish.html, 1b): a seed of light lifts out of the herb, hangs a
+-- beat, then cracks open: light rays flash out, a ring of leaves unfolds, and gold pollen showers down
+local SEED_UP, OPEN = 44, 0.9
+function RARE.herb(x, y, quiet)
+  Fx({ file = MEDIA .. "Mote.tga", x = x, y = y + 6, size = 16, life = OPEN + 0.05, add = true, r = 1, gg = 0.89, b = 0.54,
+    path = function(u)
+      local t = u * (OPEN + 0.05)
+      local e = 1 - (1 - math.min(1, t / 0.45)) ^ 2
+      return 0, SEED_UP * e + (t > 0.45 and 2 * math.sin((t - 0.45) * 20) or 0), 0
+    end })
+  for i = 0, 5 do -- its little trail
+    Fx({ file = MEDIA .. "Mote.tga", x = x + R(-3, 3), y = y + 6 + i * 7, size = 5, life = 0.6, delay = i * 0.06, add = true, fade = true,
+      r = 1, gg = 0.89, b = 0.54, path = function() return 0, 0, 0 end })
   end
-  for _ = 1, 20 do
-    Fx({ file = MEDIA .. "Mote.tga", x = x, y = y + 10, vx = R(-90, 90), vy = R(30, 120), g = 30, size = R(4, 7), life = R(1, 1.6),
-      delay = 0.35, add = true, fade = true, r = 1, gg = 0.83, b = 0.29 })
+  local cx, cy = x, y + 6 + SEED_UP
+  -- it cracks open
+  Fx({ file = MEDIA .. "Ring.tga", x = cx, y = cy, size = 12, size1 = 90, life = 0.5, delay = OPEN, add = true, r = 1, gg = 0.89, b = 0.54 })
+  Glint(cx, cy, 56, 1, 0.96, 0.75, 0.5, OPEN)
+  for i = 0, 11 do -- rays flashing out (a streak from the middle outward, turning a little)
+    local a = i / 12 * 2 * math.pi
+    Fx({ file = MEDIA .. "Streak.tga", x = cx, y = cy, size = 10, size1 = 90, life = 1.4, delay = OPEN, add = true, a = 0.8,
+      r = 1, gg = 0.86, b = 0.47,
+      path = function(u) local s = 10 + 80 * math.min(1, u * 2.5); local r = a + 0.26 * u; return math.cos(r) * s / 2, math.sin(r) * s / 2, r end })
   end
-  Fx({ file = MEDIA .. "Ring.tga", x = x, y = y + 10, size = 15, size1 = 120, life = 0.7, delay = 0.3, add = true, r = 1, gg = 0.83, b = 0.29 })
-  Sound("RareHerb", 0.1, quiet)
+  for i = 0, 9 do -- a ring of leaves unfolding
+    local a = i / 10 * 2 * math.pi
+    Fx({ file = MEDIA .. "Petal.tga", x = cx, y = cy, size = 6, size1 = 16, life = 1.6, delay = OPEN, r = 0.45, gg = 0.8, b = 0.3,
+      path = function(u) local e = 1 - (1 - math.min(1, u / 0.4)) ^ 3; return math.sin(a) * 30 * e, math.cos(a) * 30 * e, -a end })
+  end
+  for i = 1, 26 do -- gold pollen showering down
+    Fx({ file = MEDIA .. "Mote.tga", x = cx + R(-10, 10), y = cy, vx = R(-110, 110), vy = R(20, 140), g = 160, size = R(4, 7),
+      life = R(1.1, 1.7), delay = OPEN + 0.05 + i * 0.01, add = true, fade = true, r = 1, gg = 0.83, b = 0.29 })
+  end
+  Sound("RareHerb", OPEN, quiet)
 end
 
 function BURST.ore(x, y, rare, m, quiet)
