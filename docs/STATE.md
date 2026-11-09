@@ -56,6 +56,13 @@ scraps and tufts). The user isn't 100% happy with the skinning sounds (the rare 
 docs/mockups/skin-sounds.html (tools/gen_skin_sound_candidates.sh, embedded): normal N0 now/N1 soft swish/N2 blade
 shing/N3 leather rip/N4 swish and thump/N5 snick; Double slash R0 now/R1 twin shing chord/R2 swishes and gong/R3
 shing and sparkle; Flurry F0 now/F1 shing storm/F2 whoosh storm. **The user kept the current sounds** (2026-11-09).
+**Release plan (2026-11-09):** a cohesion pass first, then release 1.3.0 (bag, gathering, Move frames, popup layout).
+The user: mixing compact and full popups "seems kind of messy". Picked: **two lanes + one row look**: big cards stay
+right of the character; compact popups leave that stack and become harvest-style rows (icon with quality border,
+name in its color, gold count, x2 merging) in a "Picked up" feed in the right-hand column with the harvest window.
+Mockup docs/mockups/cohesion.html (in game units, 1366x768): V1 Picked up above Harvest / V2 one window, two
+sections / V3 below; small items of a big loot in the column or "With it" under the card. Finding: at the default
+63% a 300-wide card overlaps a right column (ends 1160, column starts 1118): move the default to ~55%. Waiting for picks.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

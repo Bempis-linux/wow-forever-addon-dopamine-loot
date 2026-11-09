@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popup Cohesion</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0; color: var(--muted); max-width: 1000px; }
+  header p b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .screen { position: relative; margin: 6px 18px; width: 1366px; height: 768px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 45% 75%, #34442f, #1a2417 55%, #0d120c); }
+  .minimap { position: absolute; right: 18px; top: 14px; width: 140px; height: 140px; border-radius: 50%; border: 3px solid #6a5a36; background: radial-gradient(#4a5a3a, #2a3524 70%); box-shadow: 0 0 0 1px #000, inset 0 0 12px #000; }
+  .char { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); font-size: 54px; }
+  .bars { position: absolute; left: 22%; right: 22%; bottom: 8px; height: 40px; display: flex; gap: 3px; justify-content: center; }
+  .bars i { width: 36px; height: 36px; border: 1px solid #5a4a2a; border-radius: 3px; background: #15110b; }
+  .bags { position: absolute; right: 12px; bottom: 8px; display: flex; gap: 3px; }
+  .bags i { width: 34px; height: 34px; border: 1px solid #8a6a2a; border-radius: 3px; background: #1d150c; font-style: normal; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .zone { position: absolute; border: 1px dashed rgba(255,255,255,.18); border-radius: 6px; color: rgba(255,255,255,.35); font: 600 10px system-ui; text-transform: uppercase; letter-spacing: .08em; padding: 3px 6px; pointer-events: none; display: none; }
+  .zones .zone { display: block; }
+
+  /* ---- the shared row: the harvest window's look ---- */
+  .col { position: absolute; right: 18px; width: 230px; display: flex; flex-direction: column; gap: 2px; }
+  .blk { display: flex; flex-direction: column; gap: 2px; transition: opacity .5s; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; font: 700 12px Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000; }
+  .head small { font: 600 10.5px system-ui; color: #b9b09a; }
+  .sec { display: flex; align-items: center; gap: 6px; margin: 3px 0 1px; padding: 0 4px; font: 700 10px system-ui; letter-spacing: .08em; text-transform: uppercase; color: var(--pc); }
+  .sec::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--pc), transparent); opacity: .6; }
+  .row { position: relative; display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 6px 0 4px; border-radius: 2px;
+    background: linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.04)); border-left: 2px solid var(--pc, transparent); }
+  .icon { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--qc); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 6px rgba(0,0,0,.9), 0 0 5px color-mix(in srgb, var(--qc) 40%, transparent); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+  .row .nm { flex: 1; font: 600 12px "Friz Quadrata TT", Georgia, serif; color: var(--qc); text-shadow: 0 1px 1px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .ty { font: 600 10px system-ui; color: #9a927e; white-space: nowrap; }
+  .row .n { font: 700 15px Georgia, serif; color: #ffd100; min-width: 22px; text-align: right; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; }
+  .row .plus { font: 700 12px Georgia, serif; color: #73ff59; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; opacity: 0; }
+
+  /* ---- the big card (a stand-in for the chosen popup style, e.g. Relic) ---- */
+  .cards { position: absolute; left: 55%; top: 24%; display: flex; flex-direction: column; gap: 10px; }
+  .card { position: relative; box-sizing: border-box; width: 300px; padding: 12px 14px 10px 84px; min-height: 64px; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(0,0,0,.78), rgba(0,0,0,.25)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--qc) 50%, transparent), 0 0 22px color-mix(in srgb, var(--qc) 30%, transparent); }
+  .card .big { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; font-size: 38px; border-width: 2px; }
+  .card .w { font: 700 10px system-ui; letter-spacing: .14em; text-transform: uppercase; color: var(--qc); }
+  .card .nm { font: 700 17px Georgia, serif; color: var(--qc); text-shadow: 0 1px 0 #000; }
+  .card .ty { font: 600 11px system-ui; color: #c9c2b0; }
+  .card .with { margin-top: 7px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.12); display: flex; flex-direction: column; gap: 2px; }
+  .card .with .row { height: 22px; background: none; border-left: 0; padding: 0; }
+  .card .with .icon { width: 18px; height: 18px; font-size: 11px; }
+  .card .with .nm { font-size: 11.5px; }
+  .card .with small { font: 600 9.5px system-ui; color: #9a927e; letter-spacing: .1em; text-transform: uppercase; }
+  .gone { opacity: 0 !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Popups and the harvest window: one layout</h1>
+  <p>Your pick: <b>two lanes + one row look</b>. Big cards (your popup style, a stand-in here) stay right of your character for the moments that matter. Everything small (the compact popups) leaves that stack and becomes a row in the <b>right-hand column</b>, in the same look as the harvest window: icon with quality border, name in its color, gold count; the same item twice merges into "×2". A loot with a big item and small ones: the big one gets its card, the small ones go to the column (or tuck under the card: "With it" below). Three ways to arrange the column; "Show zones" outlines the screen's areas. Note: with a column on the right edge, the big cards' default spot moves a little toward your character (55% across instead of 63%) so they never overlap it: at 63% a 300-wide card ends at 1160 and the column starts at 1118.</p>
+</header>
+<div class="bar">
+  <span>Column</span><button data-v="above" class="on">V1 Picked up above Harvest</button><button data-v="one">V2 One window, two sections</button><button data-v="below">V3 Picked up below Harvest</button>
+  <span>Small items of a big loot</span><button data-w="col" class="on">In the column</button><button data-w="card">With it (under the card)</button>
+  <button id="zones">Show zones</button>
+</div>
+<div class="bar">
+  <span>Loot</span><button class="go" id="mixed">Mixed loot (Rare + 2 Uncommon + gray)</button><button class="go" id="small">Small loot (2 Uncommon + white)</button><button class="go" id="epic">An Epic alone</button><button class="go" id="herb">Gather herbs</button><button id="clear">Clear</button>
+</div>
+<div class="screen" id="scr">
+  <div class="minimap"></div>
+  <div class="char">🧙</div>
+  <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="bags"><i>🎒</i><i></i><i></i><i></i><i></i></div>
+  <div class="zone" style="left:54%;top:20%;width:33%;height:52%">Big moments</div>
+  <div class="zone" style="right:10px;top:192px;width:246px;bottom:60px">Small things: picked up + harvest</div>
+  <div class="zone" style="right:6px;bottom:4px;width:196px;height:44px">Bag</div>
+  <div class="cards" id="cards"></div>
+  <div class="col" id="col" style="top:200px"></div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const Q = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'], WORD = ['Poor', 'Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
+let v = 'above', w = 'col';
+const picked = {}, harvest = {};
+let pickedOrder = [], pickedTimer;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('v', x => { v = x; render(); });
+pick('w', x => { w = x; });
+$('zones').onclick = () => $('scr').classList.toggle('zones');
+
+function rowHTML(it, n, stripe) {
+  return `<div class="row" style="--qc:${Q[it.q]};--pc:${stripe || 'transparent'}"><div class="icon" style="--qc:${Q[it.q]}">${it.g}</div><span class="nm">${it.name}</span>` +
+    (it.type ? `<span class="ty">${it.type}</span>` : '') + `<span class="plus"></span><span class="n">${n > 1 ? '×' + n : ''}</span></div>`;
+}
+// the column: Picked up and Harvest, arranged by the variant
+function render() {
+  const col = $('col'), p = pickedOrder.filter(k => picked[k]);
+  const pick = p.length ? `<div class="blk" id="pblk">${v === 'one' ? '' : '<div class="head"><span>Picked up</span></div>'}${v === 'one' ? '<div class="sec" style="--pc:#d8c8a0">Picked up</div>' : ''}${p.map(k => rowHTML(picked[k].it, picked[k].n)).join('')}</div>` : '';
+  const hk = Object.keys(harvest);
+  const total = hk.reduce((s, k) => s + harvest[k].n, 0);
+  const harv = hk.length ? `<div class="blk">${v === 'one' ? '' : `<div class="head"><span>Harvest</span><span>${total}</span></div>`}<div class="sec" style="--pc:#4fbf4a">🌿 Herbs</div>${hk.map(k => rowHTML(harvest[k].it, harvest[k].n, '#4fbf4a')).join('')}</div>` : '';
+  const head = v === 'one' && (p.length || hk.length) ? `<div class="head"><span>Loot</span><small>${total ? total + ' gathered' : ''}</small></div>` : '';
+  col.innerHTML = head + (v === 'below' ? harv + pick : pick + harv);
+}
+function bumpRow(name) {
+  const r = [...$('col').querySelectorAll('.row')].find(x => x.querySelector('.nm').textContent === name);
+  if (r) { r.animate([{ transform: 'translateX(14px)', opacity: .2 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    r.querySelector('.n').animate([{ transform: 'scale(1.5)', color: '#fff' }, { transform: 'scale(1)' }], { duration: 240 }); }
+  return r;
+}
+function addPicked(it) {
+  const key = it.name;
+  if (picked[key]) picked[key].n += it.n || 1; else { picked[key] = { it, n: it.n || 1 }; pickedOrder.push(key); }
+  render(); bumpRow(it.name);
+  clearTimeout(pickedTimer); // the picked-up rows fade a few seconds after the last one
+  pickedTimer = setTimeout(() => { const b = $('pblk'); if (b) { b.classList.add('gone'); setTimeout(() => { pickedOrder.forEach(k => delete picked[k]); pickedOrder = []; render(); }, 500); } }, 6000);
+}
+function card(it, extras) {
+  const c = document.createElement('div'); c.className = 'card'; c.style.setProperty('--qc', Q[it.q]);
+  c.innerHTML = `<div class="icon big" style="--qc:${Q[it.q]}">${it.g}</div><div class="w">${WORD[it.q]}</div><div class="nm">${it.name}</div><div class="ty">${it.type}</div>` +
+    (extras && extras.length ? `<div class="with"><small>With it</small>${extras.map(e => rowHTML(e, e.n || 1)).join('')}</div>` : '');
+  $('cards').prepend(c);
+  c.animate([{ transform: 'scale(1.15)', opacity: 0 }, { transform: 'scale(.97)', opacity: 1, offset: .6 }, { transform: 'scale(1)' }], { duration: 380, easing: 'ease-out' });
+  setTimeout(() => { c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(20px)' }], { duration: 400 }).onfinish = () => c.remove(); }, 4500);
+}
+const ITEMS = {
+  rare: { g: '🗡️', name: 'Cruel Barb', q: 3, type: 'Sword' },
+  epic: { g: '🪓', name: 'Arcanite Reaper', q: 4, type: 'Two-Handed Axe' },
+  u1: { g: '🧤', name: 'Scouting Gloves', q: 2, type: 'Leather' },
+  u2: { g: '💍', name: 'Jade Ring', q: 2, type: 'Finger' },
+  gray: { g: '🦴', name: 'Broken Fang', q: 0, type: '' },
+  white: { g: '🧵', name: 'Linen Cloth', q: 1, type: '', n: 3 },
+};
+$('mixed').onclick = () => {
+  const small = [ITEMS.u1, ITEMS.u2, ITEMS.gray];
+  card(ITEMS.rare, w === 'card' ? small : null);
+  if (w === 'col') small.forEach((it, i) => setTimeout(() => addPicked(it), 120 + i * 110));
+};
+$('small').onclick = () => [ITEMS.u1, ITEMS.u2, ITEMS.white].forEach((it, i) => setTimeout(() => addPicked(it), i * 110));
+$('epic').onclick = () => card(ITEMS.epic);
+$('herb').onclick = () => {
+  const it = Math.random() < .5 ? { g: '🌼', name: 'Peacebloom', q: 1 } : { g: '🍃', name: 'Silverleaf', q: 1 }, n = 1 + Math.floor(Math.random() * 3);
+  if (harvest[it.name]) harvest[it.name].n += n; else harvest[it.name] = { it, n };
+  render(); const r = bumpRow(it.name);
+  if (r) { const p = r.querySelector('.plus'); p.textContent = '+' + n; p.animate([{ opacity: 1 }, { opacity: 1, offset: .7 }, { opacity: 0 }], { duration: 1500 }); }
+};
+$('clear').onclick = () => { Object.keys(picked).forEach(k => delete picked[k]); pickedOrder = []; Object.keys(harvest).forEach(k => delete harvest[k]); $('cards').innerHTML = ''; render(); };
+// the mock screen is the game's UI size at 1080p (1366 x 768 units; card 300 wide, column 230), shrunk to fit
+function fit() { $('scr').style.zoom = Math.min(1, (window.innerWidth - 40) / 1368); }
+window.addEventListener('resize', fit); fit();
+// start with a little harvest up
+harvest.Peacebloom = { it: { g: '🌼', name: 'Peacebloom', q: 1 }, n: 9 }; harvest.Silverleaf = { it: { g: '🍃', name: 'Silverleaf', q: 1 }, n: 4 };
+render();
+</script>
+</body>
+</html>
