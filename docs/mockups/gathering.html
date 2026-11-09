@@ -12,6 +12,7 @@
   header p { margin: 0; color: var(--muted); max-width: 1000px; }
   h2 { font-size: 14px; margin: 18px 18px 2px; color: var(--gold); }
   p.lead { margin: 0 18px 4px; color: var(--muted); max-width: 1000px; }
+  p.lead i { color: #c9c2b0; font-style: normal; font-weight: 600; }
   .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
   .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
   button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
@@ -31,33 +32,61 @@
   .bag svg { width: 100%; height: 100%; overflow: visible; }
   .bag.tremble { animation: tremble .12s linear infinite; }
   @keyframes tremble { 0% { translate: 0 0 } 25% { translate: .6px -.3px } 50% { translate: -.5px .2px } 75% { translate: .3px .4px } 100% { translate: 0 0 } }
+  .plainbag { position: absolute; right: 24px; bottom: 7px; width: 34px; height: 34px; border: 1px solid #8a6a2a; border-radius: 3px; background: #1d150c; display: none; align-items: center; justify-content: center; font-size: 20px; }
+  .bagoff .plainbag { display: flex; } .bagoff .bagwrap, .bagoff .bubble { display: none; }
   .bubble { position: absolute; right: 18px; bottom: 58px; padding: 1px 7px 2px; border-radius: 9px; font: 800 11px system-ui; color: #1a1205; background: #ffc040;
     box-shadow: 0 0 8px rgba(255,180,40,.6); opacity: 0; transform: scale(.4); transition: opacity .2s, transform .25s cubic-bezier(.3,1.8,.5,1); }
   .bubble.show { opacity: 1; transform: none; }
   .bubble.full { background: #ff5a3c; color: #fff; box-shadow: 0 0 10px rgba(255,80,50,.7); }
   .nobubble .bubble { display: none; }
+  .space { position: absolute; right: 14px; top: 10px; font: 600 11px system-ui; color: #b9b09a; text-align: right; }
+  .space b { color: #ffe9a8; }
+  /* a native-looking settings strip (B9) */
+  .wpanel { position: absolute; left: 12px; top: 10px; padding: 8px 10px; border: 1px solid #6a5a36; border-radius: 4px; background: rgba(10,8,6,.88); display: flex; flex-direction: column; gap: 6px;
+    font: 12px "Friz Quadrata TT", Georgia, serif; color: #ffd100; box-shadow: 0 0 0 1px #000; }
+  .wpanel label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #fff; }
+  .cb { width: 16px; height: 16px; border: 1px solid #8a7a50; border-radius: 2px; background: #111; position: relative; }
+  .cb.on::after { content: "✔"; position: absolute; left: 1px; top: -4px; font-size: 15px; color: #ffd100; text-shadow: 0 0 3px #000; }
+  .wbtn { background: linear-gradient(#8a1a10, #4a0a06); border: 1px solid #c8a050; border-radius: 3px; color: #ffd100; font: 12px Georgia, serif; padding: 3px 12px; }
+  .wbtn:hover { background: linear-gradient(#a82418, #5a0e08); }
+  .wpanel small { font: 10px system-ui; color: #8a826e; }
+  .tag { position: absolute; font: 600 10px system-ui; color: #c9c2b0; background: rgba(0,0,0,.65); border-radius: 3px; padding: 1px 6px; white-space: nowrap; }
 
   /* ---------- gathering ---------- */
+  #gStage { height: 340px; }
   .node { position: absolute; left: 34%; bottom: 52px; font-size: 44px; transform-origin: 50% 100%; }
-  .tally { position: absolute; right: 16px; top: 46px; width: 230px; display: flex; flex-direction: column; gap: 4px; transition: opacity .6s; }
-  .tally .head { font: 700 10px system-ui; letter-spacing: 2px; color: #b9b09a; text-transform: uppercase; display: flex; justify-content: space-between; }
-  .row { position: relative; display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 3px; border-radius: 4px; background: linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.15)); }
-  .row .icon { width: 24px; height: 24px; font-size: 14px; border-width: 1.5px; }
-  .row .nm { flex: 1; font: 600 12px Georgia, serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row .n { font: 800 13px system-ui; color: #ffe9a8; min-width: 32px; text-align: right; }
-  .row .plus { position: absolute; right: -2px; top: -8px; font: 800 11px system-ui; color: #9dff8a; opacity: 0; }
-  .row .stack { position: absolute; right: 44px; top: 50%; margin-top: -9px; font: 800 9px system-ui; color: #1a1205; background: #ffd34a; border-radius: 3px; padding: 1px 5px; opacity: 0; }
-  .recap { position: absolute; right: 16px; top: 46px; width: 230px; padding: 7px 10px; border-radius: 5px; background: rgba(0,0,0,.6); border-left: 2px solid #d0a040;
-    font: 600 11.5px system-ui; color: #e8e2d0; opacity: 0; }
+  .minimap { position: absolute; right: 18px; top: 12px; width: 96px; height: 96px; border-radius: 50%; border: 3px solid #6a5a36;
+    background: radial-gradient(circle at 45% 45%, #4a5a3a, #2a3524 70%); box-shadow: 0 0 0 1px #000, inset 0 0 12px #000; }
+  .minimap::after { content: "▲"; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 10px; }
+  .tally { position: absolute; width: 210px; display: flex; flex-direction: column; gap: 3px; transition: opacity .6s; }
+  .tally.mini { right: 12px; top: 116px; }
+  .tally.bagdock { right: 70px; bottom: 54px; }
+  .tally .head { font: 700 11px Georgia, serif; letter-spacing: 1px; color: #ffd100; text-shadow: 0 1px 0 #000; display: flex; justify-content: space-between; padding: 0 4px; }
+  .row { position: relative; display: flex; align-items: center; gap: 7px; padding: 2px 6px 2px 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.05)); }
+  .gicon { width: 26px; height: 26px; box-sizing: border-box; border: 1.5px solid var(--qc); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 7px rgba(0,0,0,.9), 0 0 4px color-mix(in srgb, var(--qc) 50%, transparent);
+    display: flex; align-items: center; justify-content: center; font-size: 15px; flex: none; }
+  .row .nm { flex: 1; font: 600 12px "Friz Quadrata TT", Georgia, serif; color: var(--qc); text-shadow: 0 1px 1px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .n { font: 700 16px "Morpheus", Georgia, serif; color: #ffd100; min-width: 34px; text-align: right;
+    text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000, 0 0 4px rgba(0,0,0,.8); }
+  .row .plus { position: absolute; right: -4px; top: -10px; font: 800 12px system-ui; color: #9dff8a; opacity: 0; text-shadow: 0 1px 0 #000; }
+  .row .stack { position: absolute; right: 46px; top: 50%; margin-top: -9px; font: 800 9px system-ui; color: #1a1205; background: #ffd34a; border-radius: 3px; padding: 1px 5px; opacity: 0; }
+  .recap { position: absolute; width: 210px; padding: 7px 10px; border-radius: 4px; background: rgba(0,0,0,.65); border-left: 2px solid #d0a040;
+    font: 600 11.5px system-ui; color: #e8e2d0; opacity: 0; pointer-events: none; }
   .recap b { color: #ffe9a8; }
   .note { position: absolute; font: 700 14px system-ui; color: #ffe9a8; text-shadow: 0 0 6px #000; }
   .skill { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; }
-  .skill .t { font: 700 15px Georgia, serif; color: #fff; text-shadow: 0 0 8px #3a8cff, 0 1px 0 #000; }
-  .skill .t b { color: #9cc8ff; }
-  .skill .barw { width: 200px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
-  .skill .barw i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3a8cff, #9cc8ff); box-shadow: 0 0 6px #3a8cff; }
+  .skill .t { font: 700 15px Georgia, serif; color: #fff; text-shadow: 0 0 8px var(--pc, #3a8cff), 0 1px 0 #000; }
+  .skill .t b { color: var(--pl, #9cc8ff); }
+  .skill .sbar { display: flex; align-items: center; gap: 6px; }
+  .skill .barw { width: 200px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+  .skill .barw i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pc, #3a8cff), var(--pl, #9cc8ff)); box-shadow: 0 0 6px var(--pc, #3a8cff); }
+  .skill .unlock { width: 22px; height: 22px; font-size: 13px; }
   .skill small { font: 600 10px system-ui; color: #b9b09a; }
-  .calmnote { position: absolute; left: 12px; top: 10px; font: 600 11px system-ui; color: #9a927e; }
+  .runbox { position: absolute; left: 12px; top: 10px; width: 250px; font: 600 11px system-ui; color: #b9b09a; display: flex; flex-direction: column; gap: 4px; }
+  .runbox .m { height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .runbox .m i { display: block; height: 100%; width: 0; background: #ffd34a; transition: width .2s; }
+  .runbox .calm { color: #8ac8ff; }
 
   /* ---------- crafting ---------- */
   .station { position: absolute; left: 30%; bottom: 52px; font-size: 44px; }
@@ -74,45 +103,59 @@
 </head>
 <body>
 <header>
-  <h1>Bag, gathering and crafting, round 2</h1>
-  <p>From the brainstorm: the bag under pressure (1-4, the bubble as an option), gathering's core (8 burst, 10 tally, 11 climbing notes, 14 skill-ups, 16 rare finds, 18 calm) and extras (12 stack milestones, 17 session recap), crafting (21 Create All pile, 22 the same skill bar, 23 recipe color heads-up). Sound is off; turn it on to hear the climbing notes.</p>
+  <h1>Bag, gathering and crafting, round 3</h1>
+  <p>Polish from the shortlist. <b>Bag:</b> B1 game art vs. our leather bag, B2 squash and stretch with a settle wobble, B4 the drawstring snap, B5 the release sized by how much was freed, B6 special bags don't strain it, B7 the full moment at most every 4 s, B9 a switch and a Test bag button. <b>Gathering:</b> G2 the tally in the game's style, docked under the minimap or beside the bag, G4 "+N" merging when gathers come fast, G5 the skill bar in the profession's color with the next unlock's icon, G7 notes reset after 8 s idle and calm comes on by itself after many gathers. Crafting is unchanged from round 2. Sound is off; turn it on to hear the notes.</p>
   <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button></div>
 </header>
 
 <h2>1. The bag under pressure</h2>
-<p class="lead">With 4 slots or fewer, each item <b>pumps the bag up a notch</b>: it swells, holds, and only partly deflates, so it stays bigger each time (1). It <b>strains</b>: the drawstring pulls tight, the stitches stretch with light glowing through, and at the last slot it trembles at rest (2). <b>Full:</b> the next item makes it strain, the drawstring snaps open, a puff of loot spills out the top and gets sucked back in, and it shakes "nope" (3). <b>Release:</b> free up space and it lets out a "pfff", shrinking back with a puff of air (4). The count bubble (6) is an option.</p>
+<p class="lead"><i>B1</i> Two looks: <b>Game art</b> (in game: the backpack button's own icon, puffing up inside a ring of ours that glows and splits under strain) or <b>Leather bag</b> (round 2's, drawn by us). <i>B2</i> Each item lands with a <b>squash</b> (wide and short), a <b>stretch</b>, then a short wobble as it settles; switch to "Straight" to compare with round 2. <i>B4</i> Full: the drawstring <b>whips out</b> as a line with a tiny "pop" ring. <i>B5</i> Freeing 1 slot is a small <b>sigh</b>; freeing 6 is a <b>big exhale</b>. <i>B6</i> An herb going into an herb bag gets a small green glint and doesn't strain the bag. <i>B7</i> The full moment plays on the game's real "Inventory is full" error, at most once every 4 s; looting again sooner gets a small "nope" only (try clicking Loot fast at 0). <i>B9</i> The switch and Test bag button (top left) are how it would look on the settings page.</p>
 <div class="bar">
-  <span>Free slots</span><button data-free="16" class="on">16</button><button data-free="4">4</button><button data-free="1">1</button><button data-free="0">0</button>
-  <button class="go" id="loot">Loot an item</button><button id="sell">Sell 6 items (release)</button>
+  <span>Look</span><button data-art="game" class="on">Game art</button><button data-art="leather">Leather bag</button>
+  <span>Motion</span><button data-mo="sq" class="on">Squash &amp; wobble</button><button data-mo="st">Straight (round 2)</button>
   <span>Bubble</span><button data-bub="1" class="on">On</button><button data-bub="0">Off</button>
 </div>
+<div class="bar">
+  <span>Free slots</span><button data-free="16" class="on">16</button><button data-free="4">4</button><button data-free="1">1</button><button data-free="0">0</button>
+  <button class="go" id="loot">Loot an item</button><button class="go" id="lootHerb">Loot an herb (herb bag)</button>
+  <button id="free1">Free 1 (a sigh)</button><button id="free6">Free 6 (a big exhale)</button>
+</div>
 <div class="stage" id="bagStage">
+  <div class="wpanel"><label id="bagOnL"><span class="cb on" id="bagOn"></span>Bulging bag</label><button class="wbtn" id="testBag">Test bag</button><small>on the settings page (B9)</small></div>
+  <div class="space" id="space"></div>
   <div class="char" style="left:50%">🧙</div>
   <div class="actionbar">
     <div class="slot" style="left:20px"></div><div class="slot" style="left:60px"></div><div class="slot" style="left:100px"></div>
     <div class="slot" style="right:150px"></div><div class="slot" style="right:110px"></div><div class="slot" style="right:70px"></div>
   </div>
+  <div class="plainbag">🎒</div>
   <div class="bagwrap" id="bagwrap"><div class="bag" id="bag"><svg viewBox="0 0 40 40" id="bagSvg"></svg></div></div>
   <div class="bubble" id="bubble"></div>
 </div>
 
 <h2>2. Gathering</h2>
-<p class="lead"><b>Every gather</b>: a tiny burst in the node's style (8); the pieces fly into the <b>harvest tally</b> (10); each gather in a run plays a soft note a step higher (11; the ♪ shows the step), resetting after a pause. <b>Now and then</b>: a material reaching a full stack flashes its row with a stack mark (12); a skill-up shows your new skill with a bar to the next unlock (14). <b>Rare</b>: a gem, rare herb or rare fish gets a bigger burst and the normal popup (16). <b>Stop</b>: after a while without gathering the tally folds into a one-line recap, then fades (17). <b>Calm</b>: after many gathers in a row, bursts shrink and go silent; the tally and rare finds stay full (18).</p>
+<p class="lead"><i>G2</i> The tally in the game's look: item icons with quality borders, names in the quality color, counts in the game's gold numbers; <b>docked</b> under the minimap or beside the bag (edit mode can move it later). <i>G4</i> When gathers come fast, the "+N" <b>adds up</b> on one label (+2, +5, +9) instead of a new one each time; try "Rapid ×5". <i>G5</i> Skill-ups: the bar in the <b>profession's color</b>, filling toward the next unlock, whose icon sits at the bar's end. <i>G7</i> Top left: the run's note climbs and <b>resets after 8 s idle</b>; <b>calm</b> comes on by itself after 12 gathers in 10 min here (a setting in game; 40 by default?) and drops back after a break. Rare finds, stacks (20) and the recap are as in round 2.</p>
 <div class="bar">
   <span>Gather</span><button class="go" data-g="herb">🌿 Herb</button><button class="go" data-g="ore">⛏️ Ore</button><button class="go" data-g="fish">🎣 Fish</button><button class="go" data-g="skin">🔪 Skin</button>
-  <button data-rare>💎 Rare find</button><button data-skill="g">⭐ Skill up</button><button id="stop">⏸ Stop (recap)</button>
-  <span>Mode</span><button data-calm="0" class="on">Fresh</button><button data-calm="1">An hour in (calm)</button>
+  <button class="go" id="rapid">Rapid ×5</button><button data-rare>💎 Rare find</button><button data-skill="g">⭐ Skill up</button><button id="stop">⏸ Stop (recap)</button>
+</div>
+<div class="bar">
+  <span>Tally</span><button data-dock="mini" class="on">Under the minimap</button><button data-dock="bagdock">Beside the bag</button>
+  <span>Time</span><button id="skip8">Skip 8 s</button><button id="brk">Take a 10 min break</button>
 </div>
 <div class="stage" id="gStage">
-  <div class="calmnote" id="calmnote"></div>
+  <div class="runbox" id="runbox"><div id="runNote"></div><div id="runCount"></div><div class="m"><i id="runMeter"></i></div><div class="calm" id="calmnote"></div></div>
+  <div class="minimap"></div>
   <div class="char" style="left:24%">🧙</div>
   <div class="node" id="node">🌿</div>
-  <div class="tally" id="tally"><div class="head"><span>Gathered</span><span id="tot">0</span></div></div>
+  <div class="actionbar"><div class="slot" style="left:20px"></div><div class="slot" style="left:60px"></div><div class="slot" style="right:110px"></div><div class="slot" style="right:70px"></div>
+    <div class="slot" style="right:24px;font-size:20px;display:flex;align-items:center;justify-content:center;border-color:#8a6a2a">🎒</div></div>
+  <div class="tally mini" id="tally"><div class="head"><span>Harvest</span><span id="tot">0</span></div></div>
   <div class="recap" id="recap"></div>
-  <div class="skill" id="gskill"><div class="t"></div><div class="barw"><i></i></div><small></small></div>
+  <div class="skill" id="gskill"><div class="t"></div><div class="sbar"><div class="barw"><i></i></div><div class="gicon unlock"></div></div><small></small></div>
 </div>
 
-<h2>3. Crafting</h2>
+<h2>3. Crafting (unchanged from round 2)</h2>
 <p class="lead"><b>Create All</b> (21): instead of a popup per item, each result hops from the station onto one pile that counts up, and the batch ends with a closing flourish and one line, "×12 Silk Bandage". <b>Skill-up</b> (22): the same bar as gathering. <b>Recipe color</b> (23): when your skill turns a recipe from orange to yellow (or yellow to green, green to gray), a small heads-up says so, since that's when skill-ups slow down.</p>
 <div class="bar">
   <span>Profession</span><button data-prof="tailor" class="on">🧵 Tailoring</button><button data-prof="alch">⚗️ Alchemy</button><button data-prof="smith">🔨 Blacksmithing</button>
@@ -124,7 +167,7 @@
   <div class="recipe"><div class="rchip" id="rchip" style="--rc:#ff8040"><i></i><span id="rname">Silk Bandage</span></div></div>
   <div class="heads" id="heads"></div>
   <div class="pile" id="pile"><div class="stackc" id="stackc"></div><div class="cnt" id="cnt"></div><div class="nm" id="pnm"></div></div>
-  <div class="skill" id="cskill"><div class="t"></div><div class="barw"><i></i></div><small></small></div>
+  <div class="skill" id="cskill"><div class="t"></div><div class="sbar"><div class="barw"><i></i></div></div><small></small></div>
 </div>
 
 <script>
@@ -151,7 +194,6 @@ function note(step, vol = .12) {
 function particle(stage, o) {
   const d = document.createElement('div'); d.className = 'fx';
   d.style.cssText = `left:${o.x}px;top:${o.y}px;width:${o.size}px;height:${o.h || o.size}px;background:${o.color};border-radius:${o.round === false ? '1px' : '50%'};box-shadow:0 0 ${o.glow || 0}px ${o.color}`;
-  if (o.text) { d.textContent = o.text; d.style.background = 'none'; d.style.fontSize = o.size + 'px'; d.style.width = d.style.height = 'auto'; }
   stage.appendChild(d);
   const fr = [], n = 12;
   for (let i = 0; i <= n; i++) { const t = o.life * i / n;
@@ -171,66 +213,125 @@ function fly(stage, html, x0, y0, x1, y1, dur, arc, onEnd, shrink = .55) {
   for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u); fr.push({ transform: `translate(${(x1 - x0) * e}px, ${(y1 - y0) * e - arc * Math.sin(Math.PI * u)}px) scale(${1 - (1 - shrink) * u})` }); }
   d.animate(fr, { duration: dur * 1000 }).onfinish = () => { d.remove(); onEnd && onEnd(); };
 }
-function showSkill(el, name, lvl, from, to, nextText) {
+function tag(stage, text, x, y, dur = 1600) {
+  const d = document.createElement('div'); d.className = 'tag fx'; d.textContent = text; d.style.left = x + 'px'; d.style.top = y + 'px'; stage.appendChild(d);
+  d.animate([{ opacity: 0 }, { opacity: 1, offset: .1 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: dur }).onfinish = () => d.remove();
+}
+function showSkill(el, name, lvl, from, to, nextText, colors, unlockGlyph) {
+  el.style.setProperty('--pc', colors ? colors[0] : '#3a8cff'); el.style.setProperty('--pl', colors ? colors[1] : '#9cc8ff');
   el.querySelector('.t').innerHTML = `${name} <b>${lvl}</b>`; el.querySelector('small').textContent = nextText;
-  el.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .12 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2600 });
-  el.querySelector('i').animate([{ width: `${(lvl - 1 - from) / (to - from) * 100}%` }, { width: `${(lvl - from) / (to - from) * 100}%` }], { duration: 700, delay: 300, fill: 'forwards' });
-  ring(el.parentNode, el.parentNode.clientWidth / 2, 28, '#3a8cff', 220, .6, .25);
+  const u = el.querySelector('.unlock'); if (u) { u.textContent = unlockGlyph || ''; u.style.setProperty('--qc', colors ? colors[1] : '#fff'); }
+  el.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .12 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2800 });
+  el.querySelector('i').animate([{ width: `${Math.max(0, lvl - 1 - from) / (to - from) * 100}%` }, { width: `${Math.min(1, (lvl - from) / (to - from)) * 100}%` }], { duration: 700, delay: 300, fill: 'forwards' });
+  if (u && lvl >= to) u.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', boxShadow: `0 0 14px ${colors[1]}` }, { transform: 'scale(1)' }], { duration: 500, delay: 900 });
+  ring(el.parentNode, el.parentNode.clientWidth / 2, 30, colors ? colors[0] : '#3a8cff', 220, .6, .25);
 }
 
 // =================== 1. the bag ===================
-let free = 16, held = 0; // held: how puffed up it stays (0..1)
+let free = 16, herbFree = 10, held = 0, art = 'game', motion = 'sq', bagOn = true, lastFull = -1e9;
 const bagEl = $('bag'), wrap = $('bagwrap');
+const S = h => 1 + .16 * h; // the bag's resting size for a given "held" puff
 function pressure() { return free > 4 ? 0 : (5 - free) / 5; } // 4 left .2 .. 0 left 1
+function strainColor(p) { return p > 0 ? `rgba(255,${200 - 140 * (free === 0)},90,${.35 + .65 * p})` : '#3a2410'; }
 function drawBag(open = 0) {
-  const p = pressure(), w = 13 + 4 * (1 - free / 16) + 4 * held, glow = p > 0 ? `rgba(255,${200 - 140 * (free === 0)},90,${.35 + .65 * p})` : '#3a2410';
-  const gap = 2 + 3 * p; // stitches pull apart
-  const neck = 6 + 5 * open, tieY = 12 - 3 * open;
-  $('bagSvg').innerHTML = `
-    <defs><radialGradient id="lea" cx="40%" cy="38%"><stop offset="0" stop-color="#c08a48"/><stop offset="1" stop-color="#5a3816"/></radialGradient>
-      <radialGradient id="hot"><stop offset="0" stop-color="${glow}"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
-    ${p > 0 ? `<ellipse cx="20" cy="25" rx="${w + 6}" ry="${16 + 4 * held}" fill="url(#hot)" opacity="${.5 * p}"/>` : ''}
-    <path d="M${20 - neck} ${tieY + 1} Q20 ${tieY - 4 - 3 * open} ${20 + neck} ${tieY + 1} L${20 + neck + 1} ${tieY + 3} L${20 - neck - 1} ${tieY + 3} Z" fill="#7a4e22" stroke="#3a2410"/>
-    <ellipse cx="20" cy="${25 - held}" rx="${w}" ry="${12.5 + 2 * (1 - free / 16) + 2.5 * held}" fill="url(#lea)" stroke="#3a2410" stroke-width="1.2"/>
-    <path d="M${20 - w * .72} 24 Q20 ${30 + 3 * held} ${20 + w * .72} 24" fill="none" stroke="${glow}" stroke-width="${1.2 + .6 * p}" stroke-dasharray="${2} ${gap}"/>
-    <path d="M${20 - w * .55} 18 Q20 ${21 + 2 * held} ${20 + w * .55} 18" fill="none" stroke="${glow}" stroke-width="1" stroke-dasharray="1.6 ${gap}" opacity="${p ? .8 : 0}"/>
-    <line x1="${20 - neck}" y1="${tieY + 2}" x2="${20 + neck}" y2="${tieY + 2}" stroke="${open ? '#d8b04a' : (p > .5 ? '#ffd890' : '#d8b04a')}" stroke-width="${p > .5 && !open ? 1.6 : 1}"/>
-    <circle cx="${20 + neck + 2}" cy="${tieY + 3}" r="1.6" fill="#d8b04a"/>`;
-  bagEl.classList.toggle('tremble', free <= 1 && free >= 0 && !open);
+  const p = pressure(), glow = strainColor(p);
+  if (art === 'leather') {
+    const w = 13 + 4 * (1 - free / 16) + 4 * held, gap = 2 + 3 * p, neck = 6 + 5 * open, tieY = 12 - 3 * open;
+    $('bagSvg').innerHTML = `
+      <defs><radialGradient id="lea" cx="40%" cy="38%"><stop offset="0" stop-color="#c08a48"/><stop offset="1" stop-color="#5a3816"/></radialGradient>
+        <radialGradient id="hot"><stop offset="0" stop-color="${glow}"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+      ${p > 0 ? `<ellipse cx="20" cy="25" rx="${w + 6}" ry="${16 + 4 * held}" fill="url(#hot)" opacity="${.5 * p}"/>` : ''}
+      <path d="M${20 - neck} ${tieY + 1} Q20 ${tieY - 4 - 3 * open} ${20 + neck} ${tieY + 1} L${20 + neck + 1} ${tieY + 3} L${20 - neck - 1} ${tieY + 3} Z" fill="#7a4e22" stroke="#3a2410"/>
+      <ellipse cx="20" cy="${25 - held}" rx="${w}" ry="${12.5 + 2 * (1 - free / 16) + 2.5 * held}" fill="url(#lea)" stroke="#3a2410" stroke-width="1.2"/>
+      <path d="M${20 - w * .72} 24 Q20 ${30 + 3 * held} ${20 + w * .72} 24" fill="none" stroke="${glow}" stroke-width="${1.2 + .6 * p}" stroke-dasharray="2 ${gap}"/>
+      <path d="M${20 - w * .55} 18 Q20 ${21 + 2 * held} ${20 + w * .55} 18" fill="none" stroke="${glow}" stroke-width="1" stroke-dasharray="1.6 ${gap}" opacity="${p ? .8 : 0}"/>
+      <line x1="${20 - neck}" y1="${tieY + 2}" x2="${20 + neck}" y2="${tieY + 2}" stroke="${open ? '#d8b04a' : (p > .5 ? '#ffd890' : '#d8b04a')}" stroke-width="${p > .5 && !open ? 1.6 : 1}"/>
+      <circle cx="${20 + neck + 2}" cy="${tieY + 3}" r="1.6" fill="#d8b04a"/>`;
+  } else { // game art: the backpack icon (stand-in for the button's own texture) puffing inside our ring
+    const k = 1 + .14 * held, segs = 12, circ = 2 * Math.PI * 18.5, gapL = .6 + 2.6 * p, segL = circ / segs - gapL;
+    $('bagSvg').innerHTML = `
+      <defs><radialGradient id="lea" cx="40%" cy="35%"><stop offset="0" stop-color="#c89a58"/><stop offset="1" stop-color="#5a3816"/></radialGradient>
+        <radialGradient id="hot"><stop offset=".55" stop-color="${glow}"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+      ${p > 0 ? `<circle cx="20" cy="20" r="${25 + 3 * held}" fill="url(#hot)" opacity="${.55 * p}"/>` : ''}
+      <circle cx="20" cy="20" r="18.5" fill="#0d0a06" stroke="#6a5226" stroke-width="2"/>
+      <g transform="translate(20 22) scale(${k}) translate(-20 -22)">
+        <path d="M15 13 Q20 ${7 - 2 * open} 25 13" stroke="#5a3816" fill="none" stroke-width="1.6"/>
+        <rect x="11" y="13" width="18" height="17" rx="4.5" fill="url(#lea)" stroke="#3a2410" stroke-width="1"/>
+        <g transform="rotate(${-38 * open} 11 18)"><path d="M11 18.5 Q20 ${12 - 2 * held} 29 18.5 L29 20.5 Q20 ${16 - held} 11 20.5 Z" fill="#7a4e22" stroke="#3a2410" stroke-width=".8"/>
+          <rect x="18.6" y="18.2" width="2.8" height="4" rx=".6" fill="#d8b04a"/></g>
+        <path d="M13.5 26.5 Q20 28.5 26.5 26.5" stroke="${p > 0 ? glow : '#3a2410'}" stroke-width="${.8 + .5 * p}" fill="none" stroke-dasharray="1.4 ${1 + 2 * p}"/>
+      </g>
+      <circle cx="20" cy="20" r="18.5" fill="none" stroke="${p > 0 ? glow : '#b08a3a'}" stroke-width="${1.3 + .7 * p}" stroke-dasharray="${segL} ${gapL}" opacity="${p > 0 ? 1 : .7}" transform="rotate(-90 20 20)"/>`;
+  }
+  bagEl.classList.toggle('tremble', free <= 1 && !open);
 }
 function bubble() {
   const b = $('bubble');
   if (free <= 4) { b.textContent = free === 0 ? 'Full' : `${free} left`; b.classList.add('show'); b.classList.toggle('full', free === 0); } else b.classList.remove('show');
+  $('space').innerHTML = `Bags: <b>${free}</b> free (counted)<br>Herb bag: <b>${herbFree}</b> free (not counted, B6)`;
 }
 function syncFree() { document.querySelectorAll('[data-free]').forEach(x => x.classList.toggle('on', +x.dataset.free === free)); }
-function setHeld(h) { held = h; wrap.style.transform = `scale(${1 + .16 * held})`; drawBag(); }
+function setHeld(h) { held = h; wrap.style.transform = `scale(${S(held)})`; drawBag(); }
+// B2: squash and stretch with a settle wobble (volume kept: wide and short, then tall and narrow, dying out)
+function squash(s0, s1, amp, dur, over = 0) {
+  const fr = [];
+  for (let i = 0; i <= 36; i++) { const u = i / 36, s = s0 + (s1 - s0) * (1 - Math.pow(1 - u, 3)) + over * Math.sin(Math.PI * Math.min(u / .4, 1)), a = amp * Math.exp(-4.2 * u) * Math.cos(u * Math.PI * 5.5);
+    fr.push({ transform: `scale(${s * (1 + a)}, ${s / (1 + a)})` }); }
+  wrap.animate(fr, { duration: dur });
+}
+pick('art', v => { art = v; drawBag(); });
+pick('mo', v => { motion = v; });
 pick('free', v => { free = +v; setHeld(free <= 4 ? pressure() * .9 : 0); bubble(); });
 pick('bub', v => { $('bagStage').classList.toggle('nobubble', v === '0'); });
+$('bagOnL').onclick = () => { bagOn = !bagOn; $('bagOn').classList.toggle('on', bagOn); $('bagStage').classList.toggle('bagoff', !bagOn); };
 function bagPoint() { const st = $('bagStage'); return [st.clientWidth - 42, st.clientHeight - 25]; }
-$('loot').onclick = () => {
+function loot(herb) {
   const st = $('bagStage'), x0 = st.clientWidth / 2 - 15, y0 = st.clientHeight - 110, [bx, by] = bagPoint();
-  const qc = ['#9d9d9d', '#ffffff', '#1eff00'][Math.floor(Math.random() * 3)], g = ['🗡️', '🧪', '🪙', '🦴', '📜'][Math.floor(Math.random() * 5)];
+  const qc = herb ? '#ffffff' : ['#9d9d9d', '#ffffff', '#1eff00'][Math.floor(Math.random() * 3)], g = herb ? '🌿' : ['🗡️', '🧪', '🪙', '🦴', '📜'][Math.floor(Math.random() * 5)];
   fly(st, `<div class="icon" style="--qc:${qc}">${g}</div>`, x0, y0, bx - 15, by - 20, .55, 80, () => {
-    if (free === 0) return burstFull(g);
+    if (!bagOn) { if (!herb && free > 0) { free -= 1; syncFree(); bubble(); } return; }
+    if (herb && herbFree > 0) { // B6: into the herb bag: a green glint, no strain, size unchanged
+      herbFree -= 1; bubble();
+      ring(st, bx, by - 20, '#7ad34a', 44, .45); for (let i = 0; i < 5; i++) particle(st, { x: bx + R(-10, 10), y: by - 26, size: R(3, 5), h: 2, color: '#9be070', round: false, vx: R(-30, 30), vy: R(-60, -30), g: 80, life: .6, spin: R(-300, 300) });
+      if (motion === 'sq') squash(S(held), S(held), .05, 380); else bagEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.05,.96)' }, { transform: 'scale(1)' }], { duration: 250 });
+      tag(st, 'herb bag: no strain', bx - 120, by - 70);
+      return;
+    }
+    if (free === 0) return fullMoment(g);
     free -= 1; syncFree();
     const p = pressure();
     if (p === 0) { // plenty of room: a small bump
-      bagEl.animate([{ transform: 'scale(1,1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1,1)' }], { duration: 300 });
+      if (motion === 'sq') squash(S(held), S(held), .12, 520);
+      else bagEl.animate([{ transform: 'scale(1,1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1,1)' }], { duration: 300 });
     } else { // pumps up a notch: swells, holds, only partly deflates
-      const peak = p * 1.25, keep = p * .9;
-      wrap.animate([{ transform: `scale(${1 + .16 * held})` }, { transform: `scale(${1 + .16 * peak + .08})`, offset: .3 }, { transform: `scale(${1 + .16 * peak + .04})`, offset: .6 },
-        { transform: `scale(${1 + .16 * keep})` }], { duration: 700, easing: 'ease-out' });
-      setTimeout(() => setHeld(keep), 700);
-      held = Math.max(held, p * .6); drawBag();
+      const before = held, keep = p * .9;
+      if (motion === 'sq') { setHeld(keep); squash(S(before), S(keep), .2 + .1 * p, 950, .1 + .06 * p); }
+      else { const peak = p * 1.25;
+        wrap.animate([{ transform: `scale(${S(before)})` }, { transform: `scale(${S(peak) + .08})`, offset: .3 }, { transform: `scale(${S(peak) + .04})`, offset: .6 }, { transform: `scale(${S(keep)})` }], { duration: 700, easing: 'ease-out' });
+        setHeld(keep); }
     }
     bubble();
   }, .7);
-};
-function burstFull(g) { // strains, the drawstring snaps open, loot spills out the top and is sucked back in, "nope"
-  const st = $('bagStage'), [bx, by] = bagPoint();
+}
+function fullMoment(g) { // B7: on the real "Inventory is full" error, the big moment at most every 4 s
+  const st = $('bagStage'), [bx, by] = bagPoint(), now = performance.now();
+  if (now - lastFull < 4000) { // too soon: a small "nope" only
+    bagEl.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-5deg)' }, { transform: 'rotate(4deg)' }, { transform: 'rotate(0)' }], { duration: 260 });
+    $('bubble').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 220 });
+    tag(st, 'within 4 s: small nope only', bx - 180, by - 70, 1200);
+    return;
+  }
+  lastFull = now;
   bagEl.classList.remove('tremble');
-  wrap.animate([{ transform: `scale(${1 + .16 * held})` }, { transform: `scale(${1 + .16 * held + .14}, ${1 + .16 * held + .06})`, offset: .35 }, { transform: `scale(${1 + .16 * held})` }], { duration: 420 });
-  setTimeout(() => { drawBag(1); // the snap: the neck flies open
+  if (motion === 'sq') squash(S(held), S(held), -.12, 380, .07); // strains: tall and tight first
+  else wrap.animate([{ transform: `scale(${S(held)})` }, { transform: `scale(${S(held) + .14}, ${S(held) + .06})`, offset: .35 }, { transform: `scale(${S(held)})` }], { duration: 420 });
+  setTimeout(() => { drawBag(1); // the snap (B4): the drawstring whips out as a line, a tiny pop ring
+    const nx = bx, ny = by - 33, line = document.createElement('div'); line.className = 'fx';
+    line.style.cssText = `left:${nx}px;top:${ny}px;width:34px;height:2px;border-radius:1px;background:linear-gradient(90deg,#d8b04a,#ffe9a8);transform-origin:0 50%;box-shadow:0 0 4px #ffd890`;
+    st.appendChild(line);
+    line.animate([{ transform: 'rotate(-20deg) scaleX(.15)', opacity: 1 }, { transform: 'rotate(-140deg) scaleX(1)', opacity: 1, offset: .3 }, { transform: 'rotate(-175deg) scaleX(.85)', offset: .5 },
+      { transform: 'rotate(-150deg) scaleX(.6)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.2,.9,.3,1)' }).onfinish = () => line.remove();
+    ring(st, nx, ny, '#ffe9a8', 26, .28); ring(st, nx, ny, '#ffffff', 14, .2);
     const spill = ['🪙', '🦴', '🧪', '📜', g];
     spill.forEach((s, i) => {
       const d = document.createElement('div'); d.className = 'fx'; d.textContent = s; d.style.cssText = `left:${bx - 8}px;top:${by - 34}px;font-size:14px`;
@@ -242,33 +343,72 @@ function burstFull(g) { // strains, the drawstring snaps open, loot spills out t
     for (let i = 0; i < 8; i++) particle(st, { x: bx - 4, y: by - 30, size: R(5, 9), color: 'rgba(200,180,150,.5)', vx: R(-50, 50), vy: R(-70, -30), g: 40, life: R(.5, .8), scaleTo: 2 });
   }, 150);
   setTimeout(() => { drawBag(0); // sucked back in, the neck pulls shut: "nope"
+    if (motion === 'sq') squash(S(held), S(held), .14, 420);
     bagEl.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-9deg)' }, { transform: 'rotate(8deg)' }, { transform: 'rotate(-5deg)' }, { transform: 'rotate(3deg)' }, { transform: 'rotate(0)' }], { duration: 480 });
     $('bubble').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 300 });
     setTimeout(() => bagEl.classList.add('tremble'), 500);
   }, 1000);
 }
-$('sell').onclick = () => { // the release: "pfff", it shrinks back with a puff of air
-  if (free > 6) return;
-  const st = $('bagStage'), [bx, by] = bagPoint(), before = held;
-  free = Math.min(16, free + 6); syncFree(); bubble();
+function release(n) { // B5: the puff sized by how much was freed: a sigh (1) .. a big exhale (6+)
+  const st = $('bagStage'), [bx, by] = bagPoint(), before = held, k = Math.min(n, 6) / 6;
+  free = Math.min(16, free + n); syncFree(); bubble();
+  if (!bagOn) return;
   bagEl.classList.remove('tremble');
-  wrap.animate([{ transform: `scale(${1 + .16 * before})` }, { transform: 'scale(.86,.9)', offset: .55 }, { transform: 'scale(1.04,.98)', offset: .8 }, { transform: 'scale(1)' }], { duration: 650, easing: 'ease-out' });
   setHeld(free <= 4 ? pressure() * .9 : 0);
-  for (let i = 0; i < 14; i++) particle(st, { x: bx - 3, y: by - 34, size: R(4, 8), color: 'rgba(230,225,215,.45)', vx: R(-40, 40), vy: R(-110, -50), g: -20, life: R(.6, 1), scaleTo: 2.4 });
-  ring(st, bx, by - 30, 'rgba(230,225,215,.6)', 50, .5, .5);
+  const low = 1 - .03 - .13 * k;
+  if (motion === 'sq') {
+    const fr = [], s0 = S(before), s1 = S(held);
+    for (let i = 0; i <= 36; i++) { const u = i / 36, dip = Math.sin(Math.PI * Math.min(u / .55, 1)) * (s1 * (1 - low)), s = s0 + (s1 - s0) * Math.min(u / .4, 1) - dip, a = .06 * k * Math.exp(-4 * u) * Math.sin(u * Math.PI * 5);
+      fr.push({ transform: `scale(${s * (1 + a)}, ${s / (1 + a)})` }); }
+    wrap.animate(fr, { duration: 450 + 450 * k });
+  } else wrap.animate([{ transform: `scale(${S(before)})` }, { transform: `scale(${low},${low + .04})`, offset: .55 }, { transform: `scale(${S(held) * 1.03},${S(held) * .98})`, offset: .8 }, { transform: `scale(${S(held)})` }], { duration: 450 + 300 * k, easing: 'ease-out' });
+  const np = Math.round(3 + 15 * k);
+  for (let i = 0; i < np; i++) particle(st, { x: bx - 3, y: by - 34, size: R(3, 5) + 4 * k, color: 'rgba(230,225,215,.45)', vx: R(-20, 20) * (1 + k), vy: R(-70, -40) * (1 + .8 * k), g: -20, life: R(.5, .8) + .3 * k, scaleTo: 1.6 + k });
+  if (k > .5) ring(st, bx, by - 30, 'rgba(230,225,215,.6)', 50, .5, .5);
+  tag(st, n === 1 ? 'a sigh' : 'a big exhale', bx - 110, by - 64, 1100);
+}
+$('loot').onclick = () => loot(false);
+$('lootHerb').onclick = () => loot(true);
+$('free1').onclick = () => release(1);
+$('free6').onclick = () => release(6);
+$('testBag').onclick = () => { // B9: a short show: four items to full, the full moment, then a big release
+  if (!bagOn) $('bagOnL').onclick();
+  free = 4; lastFull = -1e9; syncFree(); setHeld(pressure() * .9); bubble();
+  [0, 650, 1300, 1950, 2700].forEach(t => setTimeout(() => loot(false), t));
+  setTimeout(() => release(6), 5200);
 };
-drawBag();
+drawBag(); bubble();
 
 // =================== 2. gathering ===================
 const KIND = {
-  herb: { node: '🌿', name: 'Herbalism', mat: ['🌿', 'Peacebloom', '#ffffff'], rare: ['🌸', 'Black Lotus', '#ffffff'], colors: ['#7ad34a', '#b8f070', '#f0e070', '#ff9ad0'] },
-  ore: { node: '⛰️', name: 'Mining', mat: ['🟫', 'Copper Ore', '#ffffff'], rare: ['💚', 'Tigerseye', '#1eff00'], colors: ['#8a7a6a', '#b0a090', '#c87a3a', '#fff0b0'] },
-  fish: { node: '🫧', name: 'Fishing', mat: ['🐟', 'Raw Brilliant Smallfish', '#ffffff'], rare: ['🐠', 'Oily Blackmouth', '#1eff00'], colors: ['#bfe6ff', '#8ac8ff', '#ffffff'] },
-  skin: { node: '🦌', name: 'Skinning', mat: ['🟤', 'Light Leather', '#ffffff'], rare: ['🟣', 'Thick Hide', '#1eff00'], colors: ['#a07850', '#d8b890', '#6a4a30'] },
+  herb: { node: '🌿', name: 'Herbalism', mat: ['🌿', 'Peacebloom', '#ffffff'], rare: ['🌸', 'Black Lotus', '#1eff00'], colors: ['#7ad34a', '#b8f070', '#f0e070', '#ff9ad0'],
+    prof: ['#2e9e3a', '#8ef07a'], skill: 64, from: 50, to: 70, unlock: ['🥀', 'Briarthorn'] },
+  ore: { node: '⛰️', name: 'Mining', mat: ['🟫', 'Copper Ore', '#ffffff'], rare: ['💚', 'Tigerseye', '#1eff00'], colors: ['#8a7a6a', '#b0a090', '#c87a3a', '#fff0b0'],
+    prof: ['#c8642a', '#ffb070'], skill: 60, from: 1, to: 65, unlock: ['🪨', 'Tin Vein'] },
+  fish: { node: '🫧', name: 'Fishing', mat: ['🐟', 'Raw Brilliant Smallfish', '#ffffff'], rare: ['🐠', 'Oily Blackmouth', '#1eff00'], colors: ['#bfe6ff', '#8ac8ff', '#ffffff'],
+    prof: ['#2a7cff', '#8ac8ff'], skill: 70, from: 1, to: 75, unlock: ['📘', 'Journeyman'] },
+  skin: { node: '🦌', name: 'Skinning', mat: ['🟤', 'Light Leather', '#ffffff'], rare: ['🟣', 'Thick Hide', '#1eff00'], colors: ['#a07850', '#d8b890', '#6a4a30'],
+    prof: ['#9a6a3a', '#e0b880'], skill: 70, from: 1, to: 75, unlock: ['📘', 'Journeyman'] },
 };
-let calm = false, kind = 'herb', counts = {}, total = 0, step = 0, lastG = 0, gskill = { herb: 74, ore: 74, fish: 74, skin: 74 }, session = {};
-const rows = {};
-pick('calm', v => { calm = v === '1'; $('calmnote').textContent = calm ? 'Calm: an hour in. Bursts are small and silent; the tally, stacks, skill-ups and rare finds stay full.' : ''; });
+const CALM_N = 12, WINDOW = 600000, IDLE = 8000; // calm after 12 gathers in 10 min (demo; a setting in game); notes reset after 8 s
+let calm = false, kind = 'herb', counts = {}, total = 0, step = 0, lastG = -1e9, session = {}, offset = 0, hist = [], dock = 'mini';
+const rows = {}, startSkill = Object.fromEntries(Object.entries(KIND).map(([k, K]) => [k, K.skill]));
+const clock = () => performance.now() + offset;
+function runTick() { // G7: the run's note, its idle countdown, and the calm meter
+  const now = clock(); hist = hist.filter(t => now - t < WINDOW);
+  const idle = now - lastG, left = Math.max(0, (IDLE - idle) / 1000);
+  if (idle >= IDLE) step = 0;
+  $('runNote').textContent = step ? `Run note ♪${step} · resets in ${left.toFixed(0)} s idle` : 'Run note: starts low on the next gather';
+  $('runCount').textContent = `Gathers in the last 10 min: ${hist.length} / ${CALM_N}`;
+  $('runMeter').style.width = Math.min(100, hist.length / CALM_N * 100) + '%';
+  const was = calm; calm = hist.length >= CALM_N;
+  if (calm !== was) $('calmnote').textContent = calm ? 'Calm is on: small, silent bursts; the tally, stacks, skill-ups and rare finds stay full.' : 'Back to fresh after a break.';
+}
+setInterval(runTick, 200);
+$('skip8').onclick = () => { offset += IDLE; runTick(); };
+$('brk').onclick = () => { offset += WINDOW; runTick(); };
+pick('dock', v => { dock = v; $('tally').className = 'tally ' + v; $('recap').style.cssText = v === 'mini' ? 'right:12px;top:116px' : 'right:70px;bottom:54px'; });
+$('recap').style.cssText = 'right:12px;top:116px';
 function nodePos() { const st = $('gStage'); return [st.clientWidth * .34 + 22, st.clientHeight - 80]; }
 function pop(k, rare) {
   const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], m = calm && !rare ? .4 : 1;
@@ -286,31 +426,37 @@ function pop(k, rare) {
 function tallyRow(mat) {
   const [g, name, qc] = mat;
   if (!rows[name]) {
-    const r = document.createElement('div'); r.className = 'row';
-    r.innerHTML = `<div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="stack"></span><span class="n">×0</span><span class="plus"></span>`;
-    $('tally').appendChild(r); rows[name] = r; counts[name] = 0;
+    const r = document.createElement('div'); r.className = 'row'; r.style.setProperty('--qc', qc);
+    r.innerHTML = `<div class="gicon">${g}</div><span class="nm">${name}</span><span class="stack"></span><span class="n">0</span><span class="plus"></span>`;
+    $('tally').appendChild(r); rows[name] = r; counts[name] = 0; r.plusN = 0; r.plusT = -1e9;
     r.animate([{ opacity: 0, transform: 'translateX(20px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
   }
   return rows[name];
 }
+function plus(row, n) { // G4: fast gathers add up on one label
+  const now = performance.now(), p = row.querySelector('.plus');
+  row.plusN = now - row.plusT < 1500 ? row.plusN + n : n; row.plusT = now;
+  p.textContent = '+' + row.plusN;
+  p.getAnimations().forEach(a => a.cancel());
+  p.animate([{ opacity: 1, transform: 'scale(1.45)' }, { opacity: 1, transform: 'scale(1)', offset: .12 }, { opacity: 1, offset: .75 }, { opacity: 0, transform: 'translateY(-8px)' }], { duration: 1900 });
+}
 function gather(k, rare) {
   const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], mat = rare ? K.rare : K.mat, n = rare ? 1 : Math.ceil(R(1, 3.9));
   $('tally').style.opacity = 1; $('recap').style.opacity = 0;
-  const now = performance.now(); if (now - lastG > 6000) step = 0; lastG = now; // the run's notes reset after a pause
+  const now = clock(); if (now - lastG >= IDLE) step = 0; lastG = now; hist.push(now); runTick();
   pop(k, rare);
-  if (!calm || rare) { note(step); }
-  const nt = document.createElement('div'); nt.className = 'note fx'; nt.textContent = '♪'.repeat(1) + (step + 1); nt.style.left = (x - 6) + 'px'; nt.style.top = (y - 50) + 'px';
-  if (!calm) { st.appendChild(nt); nt.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, offset: .2 }, { opacity: 0, transform: `translateY(-${14 + step * 2}px)` }], { duration: 900 }).onfinish = () => nt.remove(); }
+  if (!calm || rare) note(step);
+  if (!calm) { const nt = document.createElement('div'); nt.className = 'note fx'; nt.textContent = '♪' + (step + 1); nt.style.left = (x - 6) + 'px'; nt.style.top = (y - 50) + 'px';
+    st.appendChild(nt); nt.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, offset: .2 }, { opacity: 0, transform: `translateY(-${14 + step * 2}px)` }], { duration: 900 }).onfinish = () => nt.remove(); }
   step += 1;
   const row = tallyRow(mat), rr = row.getBoundingClientRect(), sr = st.getBoundingClientRect();
+  plus(row, n);
   for (let i = 0; i < Math.min(n, 3); i++) setTimeout(() => {
-    fly(st, `<div class="icon" style="--qc:${mat[2]};width:22px;height:22px;font-size:12px">${mat[0]}</div>`, x - 11, y - 20, rr.left - sr.left + 3, rr.top - sr.top + 3, .55 + i * .05, 70, () => {
-      const before = counts[mat[1]]; counts[mat[1]] += 1; total += 1; session[mat[1]] = counts[mat[1]];
-      row.querySelector('.n').textContent = '×' + counts[mat[1]]; $('tot').textContent = total;
-      row.querySelector('.n').animate([{ transform: 'scale(1.5)', color: '#fff' }, { transform: 'scale(1)' }], { duration: 220 });
-      const p = row.querySelector('.plus'); p.textContent = '+' + (i + 1);
-      p.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-10px)' }], { duration: 700 });
-      if (Math.floor(counts[mat[1]] / 20) > Math.floor(before / 20)) { // a full stack (20): the row flashes, a stack mark clinks in
+    fly(st, `<div class="gicon" style="--qc:${mat[2]};width:22px;height:22px;font-size:12px">${mat[0]}</div>`, x - 11, y - 20, rr.left - sr.left + 2, rr.top - sr.top + 2, .55 + i * .05, 70, () => {
+      const add = i === Math.min(n, 3) - 1 ? n - i : 1, before = counts[mat[1]]; counts[mat[1]] += add; total += add; session[mat[1]] = counts[mat[1]];
+      row.querySelector('.n').textContent = counts[mat[1]]; $('tot').textContent = total;
+      row.querySelector('.n').animate([{ transform: 'scale(1.45)', color: '#fff' }, { transform: 'scale(1)' }], { duration: 220 });
+      if (Math.floor(counts[mat[1]] / 20) > Math.floor(before / 20)) { // a full stack (20)
         const s = row.querySelector('.stack'); s.textContent = `${Math.floor(counts[mat[1]] / 20)} stack${counts[mat[1]] >= 40 ? 's' : ''}`;
         s.animate([{ opacity: 0, transform: 'scale(2)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 300, fill: 'forwards' });
         row.animate([{ boxShadow: '0 0 0 1px #ffd34a, 0 0 14px #ffd34a' }, { boxShadow: '0 0 0 0 transparent' }], { duration: 900 });
@@ -320,25 +466,31 @@ function gather(k, rare) {
   }, i * 90);
   if (rare) setTimeout(() => {
     const card = document.createElement('div'); card.className = 'fx';
-    card.style.cssText = 'left:50%;top:60px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px';
+    card.style.cssText = 'left:50%;top:70px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px';
     card.innerHTML = `<div style="font-size:40px;filter:drop-shadow(0 0 10px ${mat[2]})">${mat[0]}</div><div style="font:700 18px Georgia,serif;color:${mat[2]};text-shadow:0 1px 0 #000,0 0 6px #000">${mat[1]}</div><div style="font:600 10px system-ui;color:#c9c2b0">Rare find · the normal popup</div>`;
     st.appendChild(card);
     card.animate([{ opacity: 0, transform: 'translate(-50%, 14px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2400 }).onfinish = () => card.remove();
   }, 250);
 }
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { kind = b.dataset.g; gather(kind, false); });
+$('rapid').onclick = () => { for (let i = 0; i < 5; i++) setTimeout(() => gather(kind, false), i * 280); };
 document.querySelector('[data-rare]').onclick = () => gather(kind, true);
-document.querySelector('[data-skill="g"]').onclick = () => { gskill[kind] += 1; const lv = gskill[kind];
-  showSkill($('gskill'), KIND[kind].name, lv, 50, 125, lv < 125 ? `${125 - lv} to ${kind === 'ore' ? 'Tin' : kind === 'herb' ? 'Briarthorn' : 'the next zone'}` : 'Train Journeyman for more'); note(9, .14); };
+document.querySelector('[data-skill="g"]').onclick = () => { // G5: the bar in the profession's color, the next unlock's icon at its end
+  const K = KIND[kind]; K.skill += 1; const lv = K.skill;
+  if (lv > K.to) { K.from = K.to; K.to += 25; K.unlock = ['📘', 'the next rank']; }
+  const text = lv >= K.to ? `${K.unlock[1]} unlocked!` : `${K.to - lv} to ${K.unlock[1]}`;
+  showSkill($('gskill'), K.name, lv, K.from, K.to, text, K.prof, K.unlock[0]); note(9, .14);
+};
 $('stop').onclick = () => { // the recap: the tally folds into one line, then fades
   const parts = Object.entries(session).map(([n, c]) => `<b>${c}</b> ${n}`).join(', ') || 'nothing yet';
-  const sk = Object.entries(gskill).filter(([k, v]) => v > 74).map(([k, v]) => `${KIND[k].name} +${v - 74}`).join(', ');
+  const sk = Object.entries(KIND).filter(([k, K]) => K.skill > startSkill[k]).map(([k, K]) => `${K.name} +${K.skill - startSkill[k]}`).join(', ');
   $('recap').innerHTML = `This run: ${parts}${sk ? '<br>' + sk : ''}`;
   $('tally').style.opacity = 0;
   $('recap').animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 5000 });
 };
+runTick();
 
-// =================== 3. crafting ===================
+// =================== 3. crafting (round 2) ===================
 const PROF = {
   tailor: { st: '🧵', name: 'Tailoring', item: ['🩹', 'Silk Bandage', '#ffffff'], colors: ['#f0e6d0', '#d8c8a8', '#ffffff'] },
   alch: { st: '⚗️', name: 'Alchemy', item: ['🧪', 'Healing Potion', '#ffffff'], colors: ['#ff6a6a', '#ffb0b0', '#ffffff'] },
@@ -356,7 +508,7 @@ function flourish(st, x, y) { const P = PROF[prof];
     else particle(st, { x: x + R(-10, 10), y: y + R(-4, 4), size: R(5, 9), h: 1.5, color: P.colors[i % 3], round: false, vx: R(-40, 40), vy: R(-60, -20), g: 60, life: R(.5, .8), spin: R(-200, 200) });
   }
 }
-function craftSkill(maybe) { // skill-ups get rarer as the recipe's color cools
+function craftSkill() { // skill-ups get rarer as the recipe's color cools
   const chance = { orange: 1, yellow: .6, green: .25, gray: 0 }[recipeColor()[2]];
   if (Math.random() > chance) return;
   const before = recipeColor(); cskill += 1;

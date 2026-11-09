@@ -1,8 +1,12 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-09, **stop point after 1.2.1**, night of 2026-11-09 (released and on CurseForge; the game
-stays on dev). Next session: **polish the bag / gathering / crafting ideas** (the user likes round 2 of
-docs/mockups/gathering.html); start from the polish list under "Polish ideas" below, the user picks. Read this first
+_Last checkpoint: 2026-11-09, after 1.2.1 (released and on CurseForge; the game stays on dev). **Mockup round 3**
+of docs/mockups/gathering.html is up (the user took Claude's shortlist): bag B1 (Game art: the backpack icon in our
+splitting ring, vs. the leather bag), B2 squash and stretch + settle wobble (vs. Straight), B4 drawstring whip + pop
+ring, B5 sigh vs. big exhale, B6 herb bag no strain, B7 full moment at most every 4 s, B9 switch + Test bag; gathering
+G2 game-style tally docked under the minimap or beside the bag, G4 merging "+N", G5 skill bar in the profession's
+color with the unlock icon, G7 notes reset after 8 s idle, calm automatic after N gathers in 10 min (demo 12; default
+in game open, 40?). Crafting unchanged. **Next: the user's picks from round 3, then build the bag first.** Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
