@@ -21,6 +21,9 @@ local function Create()
   N.Slider(cat, "gatherCalm", "Calm after", 0, 100, 5, 40,
     "After this many gathers within 10 minutes, the bursts get small and the notes stop (the tally and rare finds stay). 0: never calm down.",
     function(v) return math.floor(v + 0.5) .. " gathers" end)
+  N.Choice(cat, "skinRare", "Rare skinning find", {
+    { "slash", "Double slash (default)" }, { "flurry", "Flurry" },
+  }, "slash", "How a rare skinning find plays: two glints crossing in an X, or a flurry of quick slashes from every angle ending in one big slash. Try it with Test rare (Skinning picked below).")
   N.Toggle(cat, "noSkillUp", "Skill-up bar",
     "When a profession's skill goes up: your new skill and a bar in the profession's color toward what's next (the next herb or ore you can gather, or the next rank).", true)
 

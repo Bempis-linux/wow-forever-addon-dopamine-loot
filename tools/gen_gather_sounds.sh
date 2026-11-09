@@ -57,3 +57,11 @@ render RareOre 1.1 0.16 "$(pluck 0 2637 4)+0.8*$(pluck 0.12 3520 4)+0.5*$(pluck 
 render RareFish 1.2 0.2 "$(glide 0 300 900 0.45 2)+0.3*gte(t,0.85)*(random(0)*2-1)*exp(-12*(t-0.85))"
 render RareSkin 0.9 0.14 "$(glide 0 1500 3200 0.4 3)+0.6*$(glide 0.05 2250 4800 0.4 3)"
 render Unlock 1.8 0.18 "$(pluck 0 523.25 3)+$(pluck 0.1 659.25 3)+$(pluck 0.2 783.99 3)+$(pluck 0.3 1046.5 2)+0.8*($(pluck 0.45 1318.5 1.6)+$(pluck 0.45 1568 1.6))"
+
+# Round 2 (docs/mockups/gather-polish.html):
+#   HerbPop       herbalism (H4 "Pluck pop"): a soft woody pop
+#   FlurryHit     skinning rare "Flurry": one quick slash of the storm (a short bright tick)
+#   FlurryFinal   the flurry's big final slash: a low hit, a whoosh and two bright bells
+render HerbPop 0.3 0.2 "sin(2*PI*880*t)*exp(-40*t)*min(1,t*400)+0.5*sin(2*PI*1320*t)*exp(-60*t)+0.15*(random(0)*2-1)*exp(-50*t)"
+render FlurryHit 0.15 0.14 "(random(0)*2-1)*exp(-45*t)*(0.4+0.6*sin(2*PI*3200*t))+0.4*sin(2*PI*2800*t)*exp(-60*t)"
+render FlurryFinal 1.3 0.22 "sin(2*PI*(55*t+40*(1-exp(-8*t))))*exp(-5*t)+0.35*(random(0)*2-1)*exp(-9*t)+0.35*$(pluck 0.02 1760 4)+0.3*$(pluck 0.06 2637 4)"

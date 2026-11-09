@@ -233,17 +233,22 @@ end
 local BURST = {} -- the whole gather's burst (with the rare part when the gather itself is rare)
 local RARE = {}  -- the rare part alone (a rare item arriving after the gather's first line)
 
+-- H4 "Pluck pop" (docs/mockups/gather-polish.html, 1c): the herb pops with a quick green ring, a few
+-- leaves pop out like confetti and a puff of pollen drifts up
 function BURST.herb(x, y, rare, m, quiet)
-  local colors = { { 1, 0.84, 0.93 }, { 1, 1, 1 }, { 1, 0.6, 0.82 }, { 0.78, 0.94, 0.54 } }
-  for i = 1, math.floor(12 * m + 0.5) do -- petals spiral up
-    local a0, c = i / 12 * 2 * math.pi, colors[(i - 1) % 4 + 1]
-    Fx({ file = MEDIA .. "Petal.tga", x = x, y = y, size = R(7, 10), life = R(1, 1.4), delay = i * 0.015, r = c[1], gg = c[2], b = c[3],
-      path = function(u) local a = a0 + u * 4.2; local r = 6 + 34 * u; return math.cos(a) * r + 30 * u * u, 70 * u + 10 * math.sin(a), a end })
+  Fx({ file = MEDIA .. "Ring.tga", x = x, y = y, size = 10, size1 = 52, life = 0.38, add = true, r = 0.59, gg = 0.94, b = 0.47 })
+  local greens = { { 0.72, 0.94, 0.44 }, { 0.36, 0.72, 0.24 }, { 0.55, 0.85, 0.33 } }
+  for i = 1, math.floor(6 * m + 0.5) do -- leaves popping out like confetti
+    local vx, vy, sp, c = R(-110, 110), R(120, 200), R(-12, 12), greens[(i - 1) % 3 + 1]
+    Fx({ file = MEDIA .. "Petal.tga", x = x, y = y + 6, size = R(9, 12), life = R(0.8, 1.1), r = c[1], gg = c[2], b = c[3],
+      path = function(u) local t = u * 0.95; return vx * t, vy * t - 280 * t * t, sp * u end })
   end
-  for i = 1, math.floor(9 * m + 0.5) do -- pollen drifting off on a breeze
-    Fx({ file = MEDIA .. "Mote.tga", x = x + R(-10, 10), y = y + R(-6, 6), vx = R(20, 60), vy = R(20, 50), g = -8, size = R(5, 8),
-      life = R(1.4, 2), delay = 0.2 + i * 0.04, add = true, fade = true, r = 1, gg = 0.95, b = 0.63 })
+  for _ = 1, math.floor(8 * m + 0.5) do -- a puff of pollen drifting up
+    local s = R(8, 13)
+    Fx({ file = MEDIA .. "Glow.tga", x = x + R(-10, 10), y = y + 6, vx = R(-30, 30), vy = R(20, 50), g = -10, size = s, size1 = s * 2,
+      life = R(1, 1.5), delay = 0.1, fade = true, a = 0.45, r = 1, gg = 0.94, b = 0.67 })
   end
+  Sound("HerbPop", 0, quiet)
   if rare then RARE.herb(x, y, quiet) end
 end
 -- G2 "Golden seed" (docs/mockups/gather-polish.html, 1b): a seed of light lifts out of the herb, hangs a
@@ -378,7 +383,47 @@ function BURST.skin(x, y, rare, m, quiet)
       spin = R(-9, 9), r = c[1], gg = c[2], b = c[3] })
   end
 end
-function RARE.skin(x, y, quiet) -- R1 "Double slash": two glints cross in an X, a flash where they meet, sparks
+-- R4 "Flurry" (docs/mockups/gather-polish.html): the screen dims, a storm of quick slashes cuts in from
+-- every angle around the carcass, faster and faster, a beat of stillness, then one big final slash with
+-- a white flash, a shockwave and a spray of sparks
+local dim, flash -- full-screen textures on the effects layer (made in Create)
+local function Flurry(x, y, quiet)
+  local cx, cy = x, y + 16
+  Tween(2, function(u) dim:SetAlpha(0.55 * math.min(1, u / 0.12, (1 - u) / 0.2)) end)
+  local t = 0.1
+  for i = 0, 10 do
+    local a = math.rad(R(-80, 80) + (i % 2 == 1 and 180 or 0))
+    local len, off = R(110, 170), R(-26, 26)
+    local sx, sy = cx - off * math.sin(a), cy + off * math.cos(a)
+    Slash(sx, sy, len, a, t, false, 0.22)
+    Slash(sx, sy - 2, len, a, t + 0.1, false, 0.38, 0.4) -- a faint afterimage
+    Fx({ file = MEDIA .. "Mote.tga", x = sx, y = sy, vx = R(-120, 120), vy = R(20, 140), g = 300, size = 5, life = R(0.3, 0.5),
+      delay = t + 0.05, add = true, r = 0.91, gg = 0.96, b = 1 })
+    Glint(sx + R(-10, 10), sy + R(-10, 10), 16, 1, 1, 1, 0.25, t + 0.06)
+    Sound("FlurryHit", t, quiet)
+    t = t + math.max(0.045, 0.13 - i * 0.009) -- faster and faster
+  end
+  local fin = t + 0.32 -- a beat of stillness, then the final slash
+  Slash(cx, cy, 300, 0.96, fin, false, 0.5)
+  Slash(cx, cy - 3, 300, 0.96, fin + 0.03, false, 0.7, 0.6)
+  Tween(0.26, function(u) flash:SetAlpha(0.55 * (1 - u)) end, fin)
+  Fx({ file = MEDIA .. "Ring.tga", x = cx, y = cy, size = 20, size1 = 220, life = 0.6, delay = fin, add = true })
+  Fx({ file = MEDIA .. "Ring.tga", x = cx, y = cy, size = 14, size1 = 140, life = 0.5, delay = fin + 0.06, add = true, r = 0.75, gg = 0.88, b = 1 })
+  Glint(cx, cy, 80, 1, 1, 1, 0.6, fin)
+  Glint(cx, cy, 50, 0.81, 0.91, 1, 0.6, fin + 0.05)
+  for i = 1, 30 do
+    local warm = i % 3 == 0
+    Fx({ file = MEDIA .. "Mote.tga", x = cx, y = cy, vx = R(-260, 260), vy = R(-60, 260), g = 380, size = R(4, 6), life = R(0.5, 0.9),
+      delay = fin, add = true, r = 1, gg = warm and 0.88 or 1, b = warm and 0.69 or 1 })
+  end
+  C_Timer.After(fin, function() Tufts(cx, cy - 16, 8) end)
+  Sound("FlurryFinal", fin, quiet)
+end
+
+-- The rare skinning find: the Double slash (default) or the Flurry (setting skinRare, Gathering page)
+function RARE.skin(x, y, quiet)
+  if ns.settings.skinRare == "flurry" then return Flurry(x, y, quiet) end
+  -- R1 "Double slash": two glints cross in an X, a flash where they meet, sparks
   local cy = y + 10
   Slash(x, cy, 170, 0.56, 0)
   Slash(x, cy, 170, -0.56, 0.12)
@@ -764,6 +809,15 @@ local function Create()
   layer:SetAllPoints(UIParent)
   layer:SetFrameStrata("FULLSCREEN_DIALOG") -- bursts and flying pieces (above the settings window for tests)
   layer:SetFrameLevel(100) -- (above the window too, when a test raises it to the same strata)
+  dim = layer:CreateTexture(nil, "BACKGROUND") -- the Flurry's dimmed screen (darker at the edges)
+  dim:SetAllPoints()
+  dim:SetTexture(MEDIA .. "Vignette.tga")
+  dim:SetVertexColor(0, 0, 0)
+  dim:SetAlpha(0)
+  flash = layer:CreateTexture(nil, "BACKGROUND", nil, 1) -- and its white flash
+  flash:SetAllPoints()
+  flash:SetColorTexture(1, 1, 1, 1)
+  flash:SetAlpha(0)
   layer:SetScript("OnUpdate", Step)
   tally = CreateFrame("Frame", nil, UIParent)
   tally:SetFrameStrata("MEDIUM")
