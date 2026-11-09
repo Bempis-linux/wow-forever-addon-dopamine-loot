@@ -1,6 +1,7 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-09, after 1.1.0: rain animations Fountain, Quick burst, Big bang; Vacuum gather; popup styles Achievement (Capsule), Rune decode, Forged letters (Brush stroke and Ember burn-in removed), untested in game; the game is on dev. Read this first
+_Last checkpoint: 2026-11-09, **stop point after 1.2.0** (released and on CurseForge; the game stays on dev to
+keep working). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -8,6 +9,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 **ground** = where they land (setting rainFloor).
 
 ## Where things stand
+- **1.2.0 released** 2026-11-09 (tag `v1.2.0`, CHANGELOG): rain animations Fountain / Quick burst / Big bang
+  (polished: even ring or fan, speed by weight, neat row, quiet finale), Finale for the best, the Vacuum
+  gather, popup styles Achievement (Capsule) / Rune decode / Forged letters, the item level inscribed in the
+  underline (Relic, Beam, Aura) and Splash's slanted block, Reverse disintegration back. Workflow: CurseForge
+  "Uploading DopamineLoot-v1.2.0-forever.zip (1.60.1 release) ... Success!", GitHub release made, zip checked
+  (one DopamineLoot/ folder). Stop point: **the game stays on dev** (the user's choice, to keep working).
+  Open / next: the Aura animation rework (heartbeat, sunbeam, framed word: pushed to later), then the
+  roadmap: mail / craft finales (verify APIs), edit mode, stats. docs/curseforge.md's description still
+  lists 1.1.0's features (the user updates the project page by hand if wanted).
 - **1.1.0 released** 2026-11-06 (tag `v1.1.0`): the flair update (CHANGELOG): popup arrivals per rarity
   (Arrivals page), Splash and Aura styles, the Legendary comet, rain flair and sounds picked by ear, money
   tally, split filters, Always rain for. Not tested together in game by the user beyond the pieces above.
