@@ -247,32 +247,18 @@ kits.fantasy = { -- (not a style: the parts the two share)
     c.divR = P(Tex(f.fx, "ARTWORK", WHITE, nil, 3))
     c.dia = P(Tex(f.fx, "ARTWORK", MEDIA .. "Diamond", nil, 4))
     c.glow = P(Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD"))
-    -- the item level in a small round badge in the divider's middle (like Achievement's)
-    c.badge = P(Tex(f.fx, "ARTWORK", MEDIA .. "Circle", nil, 5))
-    c.badgeRing = P(Tex(f.fx, "ARTWORK", MEDIA .. "Ring", nil, 6))
-    c.lvl = P(f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
-    c.lvlTag = P(f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall"))
-    c.lvl:SetFont(ns.TITLE_FONT or "Fonts\\FRIZQT__.TTF", 13, "")
-    c.lvl:SetShadowColor(0, 0, 0, 1); c.lvl:SetShadowOffset(1, -1)
-    c.lvlTag:SetFont("Fonts\\FRIZQT__.TTF", 6, "")
-    for _, fs in ipairs({ c.lvl, c.lvlTag }) do fs:SetWidth(34); fs:SetJustifyH("CENTER") end
   end,
   Reset = function(f) HideAll(f, "fantasy") end,
 }
-local BADGE = 34
 local function FantasyLayout(f)
   local c = f.kit.fantasy
-  f.name:SetPoint("TOP", f.stage, "BOTTOM", 0, -14) -- (room between the item and the name)
+  f.name:SetPoint("TOP", f.stage, "BOTTOM", 0, -4)
   f.name:SetWidth(f.L.w - 20)
   f.name:SetJustifyH("CENTER")
   c.dia:SetSize(9, 9)
   c.dia:SetPoint("TOP", f.name, "BOTTOM", 0, -6)
   c.divL:SetSize(84, 1); c.divL:SetPoint("RIGHT", c.dia, "LEFT", -2, 0)
   c.divR:SetSize(84, 1); c.divR:SetPoint("LEFT", c.dia, "RIGHT", 2, 0)
-  c.badge:SetSize(BADGE, BADGE); c.badgeRing:SetSize(BADGE, BADGE)
-  c.badge:SetPoint("CENTER", c.dia, "CENTER"); c.badgeRing:SetPoint("CENTER", c.dia, "CENTER")
-  c.lvl:SetPoint("CENTER", c.dia, "CENTER", 1, 3)
-  c.lvlTag:SetPoint("CENTER", c.dia, "CENTER", 0, -8)
   f.info:SetPoint("TOP", c.dia, "BOTTOM", 0, -5)
   f.info:SetJustifyH("CENTER")
   f.badges:SetPoint("TOP", f.info, "BOTTOM", 0, -3)
@@ -280,26 +266,11 @@ local function FantasyLayout(f)
   c.glow:SetSize(320, 170)
   c.glow:SetPoint("CENTER", f.name, "CENTER", 0, 10)
 end
-local function FantasySet(f, item)
+local function FantasySet(f)
   local c = f.kit.fantasy
   local r, g, b = f.r, f.g, f.b
-  -- the info line keeps the rarity (in its color) and the type; the item level goes in the badge,
-  -- which takes the diamond's place (the diamond stays as the divider's anchor, sized to the badge)
-  c.hasLvl = ns.ShowsItemLevel(item)
-  local info = c.hasLvl and (item.typeText or "") or (f.info:GetText() or "")
-  local word = ("|cff%02x%02x%02x%s|r"):format(math.floor(math.min(1, r + 0.3) * 255), math.floor(math.min(1, g + 0.3) * 255),
-    math.floor(math.min(1, b + 0.3) * 255), QualityWord(f.q))
-  f.info:SetText(word .. (info ~= "" and "  ·  " .. info or ""))
-  if c.hasLvl then
-    c.dia:SetSize(BADGE, BADGE)
-    c.lvl:SetText(item.ilvl); c.lvlTag:SetText("ILVL")
-    c.badge:SetVertexColor(0.09, 0.065, 0.04, 1)
-    c.badgeRing:SetVertexColor(r, g, b, 1)
-    c.lvl:SetTextColor(1, 1, 1)
-    c.lvlTag:SetTextColor(math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35))
-  else
-    c.dia:SetSize(9, 9)
-  end
+  local info = f.info:GetText() or ""
+  f.info:SetText(QualityWord(f.q) .. (info ~= "" and "  ·  " .. info or ""))
   Gradient(c.divL, r, g, b, 0, r, g, b, 1)
   Gradient(c.divR, r, g, b, 1, r, g, b, 0)
   c.dia:SetVertexColor(math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35), 1)
@@ -314,14 +285,7 @@ end
 local function FantasyTail(f, fx, at)
   local c = f.kit.fantasy
   local u = OutCubic((fx - at) / 0.5)
-  c.dia:SetShown(u > 0 and not c.hasLvl); c.divL:SetShown(u > 0); c.divR:SetShown(u > 0)
-  -- the badge: big, a touch small, settled (with the divider)
-  local bt = Clamp01((fx - at) / 0.26)
-  local bs = bt < 0.6 and 1.15 * (bt / 0.6) or 1.15 - 0.15 * ((bt - 0.6) / 0.4)
-  local showBadge = c.hasLvl and bt > 0
-  for _, t in ipairs({ c.badge, c.badgeRing }) do t:SetSize(math.max(1, BADGE * bs), math.max(1, BADGE * bs)); t:SetShown(showBadge) end
-  c.lvl:SetShown(showBadge); c.lvlTag:SetShown(showBadge)
-  c.lvl:SetAlpha(bt); c.lvlTag:SetAlpha(bt)
+  c.dia:SetShown(u > 0); c.divL:SetShown(u > 0); c.divR:SetShown(u > 0)
   c.divL:SetWidth(math.max(1, 84 * u)); c.divR:SetWidth(math.max(1, 84 * u))
   local a = Clamp01((fx - at - 0.15) / 0.4)
   f.info:SetAlpha(a); f.badges:SetAlpha(a)
@@ -354,9 +318,9 @@ kits.runes = {
   end,
   Reset = function(f) HideAll(f, "runes") end,
   Layout = FantasyLayout,
-  Set = function(f, item)
+  Set = function(f)
     local c = f.kit.runes
-    FantasySet(f, item)
+    FantasySet(f)
     local fc = f.kit.fantasy
     fc.glowA = 0.22
     local lr, lg, lb = math.min(1, f.r + 0.4), math.min(1, f.g + 0.4), math.min(1, f.b + 0.4)
@@ -445,9 +409,9 @@ kits.forged = {
   end,
   Reset = function(f) HideAll(f, "forged") end,
   Layout = FantasyLayout,
-  Set = function(f, item)
+  Set = function(f)
     local c = f.kit.forged
-    FantasySet(f, item)
+    FantasySet(f)
     for _, t in ipairs(c.flashes) do t:SetVertexColor(1, 0.8, 0.5, 1) end
     -- sparks off every strike, more the rarer (Uncommon 1 a letter .. Legendary 4)
     local per, s = math.max(1, math.min(4, f.q - 1)), 0

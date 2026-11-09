@@ -91,6 +91,10 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Aura, Splash. Round 3 picks (2026-11-09), built: Relic, Beam, Aura = D, a small "iLvl 63" tag (pill) at the end of
   the line (the user: D looks best, B (end of the name) uses space better: open whether to move it); Splash = E,
   a number block at the banner's left end (upright in game; the mockup's is slanted with the banner).
+  **Reverted 2026-11-09 after the user saw them in game** ("kind of ugly"; never wanted Rune/Forged changed):
+  Rune decode and Forged letters (spacing, divider badge, line), Banner's badge and line, and the Relic/Beam/Aura
+  tag are back as they were at 5ad893b. Kept: Achievement's polish (gauge, rarity word, name 21) and Splash's
+  number block ("isn't terrible"). Lesson: polish only what the user named; don't touch styles they're happy with.
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
