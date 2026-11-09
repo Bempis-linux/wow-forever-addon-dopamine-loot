@@ -59,12 +59,25 @@
   .splash .row { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
   .splash .slab .lvl.left { position: absolute; left: -18px; top: 50%; margin-top: -16px; transform: none; }
   .splash .slab .lvl.corner { position: absolute; right: -14px; bottom: -14px; transform: rotate(-8deg); }
+  .plate .pill.end { position: absolute; right: -40px; top: 50%; margin-top: -9px; }
+  .plate .lvl.mini.end { position: absolute; right: -14px; top: 50%; margin-top: -11px; }
+  .namerow .pill { margin-left: 2px; }
+  /* Splash round 3 */
+  .splash .slab .num { position: absolute; left: -34px; top: 0; bottom: 0; width: 38px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #160f08; border: 1.5px solid var(--cl); box-sizing: border-box; line-height: 1; }
+  .splash .slab .num b { font: 900 15px system-ui; color: #fff; } .splash .slab .num small { font: 800 6px system-ui; letter-spacing: 1px; color: var(--cl); }
+  .splash .hang { position: absolute; right: 18px; bottom: -19px; padding: 2px 9px 3px; background: #160f08; border: 1.5px solid var(--cl); border-top: 0; font: 800 10px system-ui; color: #fff; }
+  .splash .hang i, .splash .stamp2 i, .splash .tab i { font-style: normal; color: var(--cl); font-size: 8px; letter-spacing: .5px; margin-right: 3px; }
+  .splash .stamp2 { position: absolute; right: -26px; bottom: -18px; font: 900 11px system-ui; color: #fff; transform: rotate(-6deg); padding: 1px 6px; border: 2px solid #fff; background: color-mix(in srgb, var(--c) 60%, #000); box-shadow: 0 2px 4px #000; }
+  .splash .tab { transform: skewX(-12deg); margin-top: 8px; padding: 3px 14px; background: rgba(10,7,4,.85); border-bottom: 1px solid var(--c); display: flex; gap: 10px; align-items: center; }
+  .splash .tab > * { transform: skewX(12deg); }
+  .splash .tab .t { font: 600 10px system-ui; color: #d8d0bc; } .splash .tab .n { font: 800 11px system-ui; color: #fff; }
 </style>
 </head>
 <body>
 <header>
-  <h1>The info line, round 2: where the item-level badge goes</h1>
-  <p>Kept from round 1: the line under the name is just the rarity in its color and the type, and Banner (picked: the badge at the band's right end, now built). For Relic, Beam, Aura and Splash, four places for the item level to try: <b>A</b> pinned to the item (round 1), <b>B</b> at the end of the name, <b>C</b> in a divider under the name (the way Rune decode and Forged letters now do it), <b>D</b> a small tag at the end of the line. Pick one per style (or one for all).</p>
+  <h1>The info line, round 3</h1>
+  <p>From round 2: the end of the name (B) uses the space best, but on Relic and Beam the round badge makes the popup wide, and the small tag (D) looked right there. So for Relic and Beam: <b>D</b> again next to the tag moved to the end of the name (<b>B tag</b>) and a smaller round badge at the end of the name (<b>B small</b>). Aura: <b>B</b>, <b>D</b> and <b>B tag</b>. Splash, all new: <b>E</b> a number block cut into the banner's left end, <b>F</b> a tab hanging under the banner, <b>G</b> a second little stamp under the rarity stamp, <b>H</b> the type and level on a dark slanted strip under the banner.</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
@@ -92,12 +105,22 @@ function render() {
     const tag = kind === 'aura' ? `<div class="tagw">${label.toUpperCase()}</div>` : '';
     const rar = kind !== 'aura';
     const name = inner => kind === 'aura' ? `<div class="namerow">${inner}</div>` : `<div class="plate">${inner}</div>`;
+    const pill = '<span class="pill end"><i>iLvl</i>63</span>', pillIn = '<span class="pill"><i>iLvl</i>63</span>';
     return {
+      Btag: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${name(nm + (kind === 'aura' ? pillIn : pill))}${line('', rar)}</div>`,
+      Bsmall: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${name(nm + L('mini end'))}${line('', rar)}</div>`,
       A: `<div class="${cls}" style="${v}"><div class="pin">${item}${L()}</div>${tag}${name(nm)}${line('', rar)}</div>`,
       B: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${name(nm + L(kind === 'aura' ? '' : 'end'))}${line('', rar)}</div>`,
       C: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${kind === 'aura' ? nm : name(nm)}<div class="div">${L()}</div>${line('', rar)}</div>`,
       D: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${name(nm)}${line(` <span class="pill"><i>iLvl</i>63</span>`, rar)}</div>`,
     };
+  };
+  const stamp = `<div class="stamp">${label.toUpperCase()}!</div>`;
+  const splash3 = {
+    E: `<div class="splash" style="${v}">${item}<div class="slab"><div class="num"><b>63</b><small>ILVL</small></div>${nm}${stamp}</div><div class="row">${line('', false)}</div></div>`,
+    F: `<div class="splash" style="${v}">${item}<div class="slab">${nm}${stamp}<div class="hang"><i>iLvl</i>63</div></div><div class="row" style="margin-top:24px">${line('', false)}</div></div>`,
+    G: `<div class="splash" style="${v}">${item}<div class="slab">${nm}${stamp}<div class="stamp2"><i>iLvl</i>63</div></div><div class="row">${line('', false)}</div></div>`,
+    H: `<div class="splash" style="${v}">${item}<div class="slab">${nm}${stamp}</div><div class="tab"><span class="t">Two-Handed Axes</span><span class="n"><i>iLvl</i>63</span></div></div>`,
   };
   const splash = {
     A: `<div class="splash" style="${v}">${item}<div class="slab">${nm}<div class="stamp">${label.toUpperCase()}!</div></div><div class="row">${line('', false)}${L()}</div></div>`,
@@ -107,14 +130,18 @@ function render() {
   };
   const DESC = {
     relic: { A: 'Pinned to the item’s lower right, like a medal (round 1).', B: 'At the right end of the name’s plate, like Banner and Achievement.', C: 'In a short divider under the name, like Rune decode and Forged letters.', D: 'A small tag at the end of the line.' },
+    relic3: { D: 'A small tag at the end of the line (round 2).', Btag: 'The small tag at the end of the name, just past the plate.', Bsmall: 'A smaller round badge (no ILVL word) at the end of the plate.' },
+    aura3: { B: 'The round badge at the end of the name (round 2).', D: 'A small tag at the end of the line (round 2).', Btag: 'The small tag at the end of the name.' },
+    splash3: { E: 'A number block cut into the banner’s left end, like a jersey number.', F: 'A small tab hanging under the banner’s right end.', G: 'A second little stamp under the rarity stamp.', H: 'The type and the level on a dark slanted strip under the banner, the level in white.' },
     splash: { A: 'Beside the type under the banner (round 1).', B: 'At the banner’s left end, opposite the stamp.', C: 'Hanging off the banner’s lower right corner, tilted like the stamp.', D: 'A small tag at the end of the line.' },
   };
-  const styles = [['Relic', 'The item over its name on a soft plate.', below('relic'), DESC.relic],
-    ['Beam', 'A pillar of light behind the item, the name on a plate.', below('beam'), DESC.relic],
-    ['Aura', 'Soft wisps behind the item; the rarity word spaced out above the name (so the line keeps only the type).', below('aura'), DESC.relic],
-    ['Splash', 'A slanted banner behind a big name and a rarity stamp (the line keeps only the type).', splash, DESC.splash]];
-  document.getElementById('out').innerHTML = styles.map(([h, p, v4, d]) =>
-    `<h3>${h} <small>${p}</small></h3><div class="grid">${['A', 'B', 'C', 'D'].map(k => `<div class="cell"><h2>${h} ${k}</h2><p>${d[k]}</p><div class="scene">${v4[k]}</div></div>`).join('')}</div>`).join('');
+  const styles = [['Relic', 'The item over its name on a soft plate.', below('relic'), DESC.relic3, ['D', 'Btag', 'Bsmall']],
+    ['Beam', 'A pillar of light behind the item, the name on a plate.', below('beam'), DESC.relic3, ['D', 'Btag', 'Bsmall']],
+    ['Aura', 'Soft wisps behind the item; the rarity word spaced out above the name.', below('aura'), DESC.aura3, ['B', 'D', 'Btag']],
+    ['Splash', 'A slanted banner behind a big name and a rarity stamp.', splash3, DESC.splash3, ['E', 'F', 'G', 'H']]];
+  const LBL = { Btag: 'B tag', Bsmall: 'B small' };
+  document.getElementById('out').innerHTML = styles.map(([h, p, v4, d, keys]) =>
+    `<h3>${h} <small>${p}</small></h3><div class="grid">${keys.map(k => `<div class="cell"><h2>${h} ${LBL[k] || k}</h2><p>${d[k]}</p><div class="scene">${v4[k]}</div></div>`).join('')}</div>`).join('');
 }
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
