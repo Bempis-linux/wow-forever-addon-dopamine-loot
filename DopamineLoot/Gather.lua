@@ -257,9 +257,13 @@ local function NewRow(d)
   count:SetPoint("RIGHT", -6, 0)
   count:SetTextColor(1, 0.82, 0)
   row.count = count
+  -- "+N" just left of the count, bold and outlined (the stack mark steps aside while it shows)
   local plus = row:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
-  plus:SetPoint("BOTTOMRIGHT", row, "TOPRIGHT", 2, -6)
-  plus:SetTextColor(0.62, 1, 0.54)
+  plus:SetFont("Fonts\\FRIZQT__.TTF", 13, "OUTLINE")
+  plus:SetPoint("RIGHT", count, "LEFT", -5, 0)
+  plus:SetTextColor(0.45, 1, 0.35)
+  plus:SetShadowColor(0, 0, 0, 1)
+  plus:SetShadowOffset(1, -1)
   plus:SetAlpha(0)
   row.plus = plus
   local stack = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -301,8 +305,10 @@ local function Plus(row, n)
   row.plusAt = my
   Tween(1.9, function(u)
     if row.plusAt ~= my then return end
-    row.plus:SetAlpha(u < 0.75 and 1 or 1 - (u - 0.75) / 0.25)
-    row.plus:SetTextHeight(12 * (u < 0.12 and 1.45 - 0.45 * u / 0.12 or 1))
+    local a = u < 0.75 and 1 or 1 - (u - 0.75) / 0.25
+    row.plus:SetAlpha(a)
+    row.stack:SetAlpha(1 - a)
+    row.plus:SetTextHeight(13 * (u < 0.12 and 1.35 - 0.35 * u / 0.12 or 1))
   end)
 end
 
