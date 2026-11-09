@@ -1,9 +1,10 @@
 -- Dopamine Loot bulging bag (docs/mockups/gathering.html, round 3: Game art + Squash & wobble).
 -- With 4 normal bag slots or fewer left, the backpack button puffs up: a copy of its own icon swells a
--- notch with each slot filled and only partly deflates, inside a ring of ours that glows and splits apart
--- under the strain; at the last slot it trembles. Each change lands with a squash (wide and short), a
--- stretch and a short settling wobble. Full (the game's "Inventory is full"): it strains, the drawstring
--- whips out, the loot spills out the top and is sucked back in, and it shakes "nope" (the whole show at
+-- notch with each slot filled and only partly deflates, inside a clean square edge of ours, amber to red,
+-- thicker and brighter with the strain (docs/mockups/bag-frame.html, A); at the last slot it trembles.
+-- Each change lands with a squash (wide and short), a stretch and a short settling wobble. Full (the
+-- game's "Inventory is full"): it strains, pops open with a tiny ring, the loot spills out the top and is
+-- sucked back in, and it shakes "nope" (the whole show at
 -- most every 4 s; sooner, a small nope only). Freeing space lets it out: a sigh for one slot, a big
 -- exhale for six. Special bags (herb, mining...) aren't counted. Nothing is drawn while 5+ slots are
 -- free, or while the backpack button is hidden; we only read the button's place, never touch it.
@@ -13,12 +14,11 @@ local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local FALLBACK_ICON = "Interface\\Buttons\\Button-Backpack-Up"
 local THRESHOLD = 4          -- slots left when the bag starts to strain
 local FULL_GAP = 4           -- seconds between two full-bag shows
-local DASHES = 12            -- the ring's segments
 local MAX_FX = 32
 
 local f                      -- the overlay frame (created on first use)
-local icon, glow, whip, bubble, bubbleText
-local dashes, fx = {}, {}
+local icon, bubble, bubbleText
+local edges, halos, fx = {}, {}, {} -- the square edge's four sides, their soft glow, the little effects
 local free                   -- normal slots free, as last counted (nil until the first count)
 local shown = 99             -- the count the bag shows (the test plays its own)
 local held = 0               -- how puffed up the bag stays (0..1)
@@ -113,7 +113,7 @@ local function Ring(size, r, g, b, life, delay)
 end
 
 ---------------------------------------------------------------------------
--- Drawing: the icon, the ring and the glow, squashed around the bag's bottom
+-- Drawing: the icon and its square edge, squashed around the bag's bottom
 ---------------------------------------------------------------------------
 local W = 30 -- the button's size in our frame's units (read each frame)
 
@@ -122,35 +122,40 @@ local function Strain(p, full)
   return 1, full and 0.24 or 0.78, 0.35, 0.35 + 0.65 * p
 end
 
+-- One side of a square (1 top, 2 right, 3 bottom, 4 left) around (cx, cy), half size ex x ey, w thick
+local function Side(line, i, cx, cy, ex, ey, w, r, g, b, alpha)
+  local e = w / 2 -- reach into the corners so they close
+  local x1, y1, x2, y2
+  if i == 1 then x1, y1, x2, y2 = -ex - e, ey, ex + e, ey
+  elseif i == 2 then x1, y1, x2, y2 = ex, ey + e, ex, -ey - e
+  elseif i == 3 then x1, y1, x2, y2 = ex + e, -ey, -ex - e, -ey
+  else x1, y1, x2, y2 = -ex, -ey - e, -ex, ey + e end
+  line:SetStartPoint("CENTER", f, cx + x1, cy + y1)
+  line:SetEndPoint("CENTER", f, cx + x2, cy + y2)
+  line:SetThickness(w)
+  line:SetColorTexture(r, g, b, alpha)
+end
+
 local function Draw(s, a, open, rot, jx, jy)
   local p = Pressure(shown)
   local sx, sy = s * (1 + a), s / (1 + a)
   local lift = W / 2 * (sy - 1) -- squash around the bottom: the middle rises as it stretches
   local r, g, b, al = Strain(p, shown == 0)
-  -- the icon puffs up inside the ring too
+  -- the icon puffs up inside the edge too
   local k = 1 + 0.14 * held
+  local hx, hy = W * 0.45 * k * sx, W * 0.45 * k * sy -- the icon's half size
+  local cx, cy = jx + rot * W, lift + jy + open * 4 -- rot: the "nope" head-shake; open: the pop's hop
   icon:ClearAllPoints()
-  icon:SetPoint("CENTER", f, "CENTER", jx + rot * W, lift + jy + open * 4) -- rot: the "nope" head-shake
-  icon:SetSize(W * 0.9 * k * sx, W * 0.9 * k * sy)
-  -- the ring: segments that split apart under strain (and burst outward at the snap)
-  local radius = W * 0.62 + open * 5
-  local circ = 2 * math.pi * radius
-  local gap = circ / DASHES * (0.08 + 0.35 * p)
-  local len = circ / DASHES - gap
-  local half = len / 2 / radius -- each segment: an arc's chord, drawn as a line
-  for i, d in ipairs(dashes) do
-    local an = (i - 0.5) / DASHES * 2 * math.pi
-    d:SetStartPoint("CENTER", f, radius * math.cos(an - half) * sx + jx, radius * math.sin(an - half) * sy + lift + jy)
-    d:SetEndPoint("CENTER", f, radius * math.cos(an + half) * sx + jx, radius * math.sin(an + half) * sy + lift + jy)
-    d:SetThickness(1.5 + 0.8 * p)
-    d:SetColorTexture(r, g, b, al * (1 - 0.5 * open))
+  icon:SetPoint("CENTER", f, "CENTER", cx, cy)
+  icon:SetSize(hx * 2, hy * 2)
+  -- the square edge just outside the icon: thicker, brighter and a little farther out with strain,
+  -- with a soft glow (wider, faint, additive lines) under it
+  local th = 1.5 + p
+  local ex, ey = hx + 2 + 2 * p, hy + 2 + 2 * p
+  for i = 1, 4 do
+    Side(edges[i], i, cx, cy, ex, ey, th, r, g, b, (0.5 + 0.5 * p) * al)
+    Side(halos[i], i, cx, cy, ex, ey, th + 4 + 6 * p, r, g, b, 0.22 * p)
   end
-  glow:ClearAllPoints()
-  glow:SetPoint("CENTER", f, "CENTER", 0, lift)
-  local gs = W * (2 + 0.2 * held) * s
-  glow:SetSize(gs, gs)
-  glow:SetVertexColor(r, g, b)
-  glow:SetAlpha(0.55 * p)
 end
 
 -- The squash: volume kept, wide and short first, then tall and narrow, dying out, while the size
@@ -186,7 +191,6 @@ end
 
 local function ClearFx()
   for _, p in ipairs(fx) do p.on = false; p.tex:Hide() end
-  whip.t = nil; whip:Hide()
   motion, nope, openT = nil, nil, nil
 end
 
@@ -227,7 +231,7 @@ local function OnUpdate(_, dt)
     local t = elapsed - openT
     if t > 0.85 then openT = nil elseif t > 0 then open = math.min(1, t / 0.08, (0.85 - t) / 0.15) end
   end
-  local moving = motion or nope or openT or whip.t
+  local moving = motion or nope or openT
   if shown <= 1 and open == 0 and not motion then -- the last slot: it trembles at rest (30 times a second)
     tremT = tremT + dt
     if tremT >= 1 / 30 then
@@ -242,23 +246,8 @@ local function OnUpdate(_, dt)
     dirty = false
     Draw(s, a, open, rot, jx, jy)
   end
-  -- the drawstring whipping out
-  if whip.t then
-    whip.t = whip.t + dt
-    local u = whip.t / 0.52
-    if u >= 1 then whip.t = nil; whip:Hide() else
-      local e = 1 - (1 - math.min(u / 0.3, 1)) ^ 3
-      local an = math.rad(20 + 120 * e + (u > 0.3 and 35 * math.sin(math.min((u - 0.3) / 0.4, 1) * math.pi) or 0))
-      local len = 34 * (u < 0.3 and 0.15 + 0.85 * e or 1 - 0.4 * (u - 0.3) / 0.7)
-      local oy = W / 2 + 2
-      whip:SetStartPoint("CENTER", f, 0, oy)
-      whip:SetEndPoint("CENTER", f, len * math.cos(an), oy + len * math.sin(an))
-      whip:SetColorTexture(1, 0.85, 0.45, u < 0.6 and 1 or 1 - (u - 0.6) / 0.4)
-      whip:Show()
-    end
-  end
   local busy = StepFx(dt)
-  if held <= 0 and not motion and not nope and not openT and not whip.t and not busy and shown > THRESHOLD then
+  if held <= 0 and not motion and not nope and not openT and not busy and shown > THRESHOLD then
     f:Hide() -- nothing to show: the game's own button is back on its own
   end
 end
@@ -269,18 +258,16 @@ local function Create()
   f:SetFrameStrata("HIGH")
   f:SetSize(W, W)
   f:Hide()
-  glow = f:CreateTexture(nil, "BACKGROUND")
-  glow:SetTexture(MEDIA .. "Glow.tga")
-  glow:SetBlendMode("ADD")
   back = f:CreateTexture(nil, "BORDER")
   back:SetPoint("CENTER")
   back:SetColorTexture(0.05, 0.04, 0.02, 1)
   back:SetSize(W * 0.86, W * 0.86)
   icon = f:CreateTexture(nil, "ARTWORK")
-  for i = 1, DASHES do dashes[i] = f:CreateLine(nil, "OVERLAY") end
-  whip = f:CreateLine(nil, "OVERLAY")
-  whip:SetThickness(2)
-  whip:Hide()
+  for i = 1, 4 do
+    halos[i] = f:CreateLine(nil, "BACKGROUND")
+    halos[i]:SetBlendMode("ADD")
+    edges[i] = f:CreateLine(nil, "OVERLAY")
+  end
   bubble = CreateFrame("Frame", nil, f)
   bubble:SetSize(40, 16)
   bubble:SetPoint("BOTTOM", f, "TOP", 0, 10)
@@ -369,10 +356,9 @@ local function Full()
   lastFull = now
   -- strains: tall and tight first
   Squash(Size(held), Size(held), -0.12, 0.38, 0.07)
-  C_Timer.After(0.15, function() -- the snap: the drawstring whips out, a tiny pop, the loot spills
+  C_Timer.After(0.15, function() -- the snap: it pops open with a tiny ring, the loot spills
     if not f then return end
     openT = elapsed
-    whip.t = 0
     Ring(18, 1, 0.92, 0.66, 0.28)
     Ring(10, 1, 1, 1, 0.2)
     local icons = SpillIcons()
