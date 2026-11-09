@@ -24,7 +24,7 @@
 </head>
 <body>
 <header>
-  <h1>Loot rain variants, round 6: a quick Vacuum into the bag</h1>
+  <h1>Loot rain variants, round 7: the Vacuum in a wave, each item its own way</h1>
   <p><b>Gather</b> compares the end of the rain: <b>One by one</b> (today: each item flies into the bag a beat after the last) or <b>Vacuum</b> (new: a short inhale, then everything is sucked into the bag together and it gulps it in one pop). Rare and better still rise into their popups. Round 5: New: <b>Quick burst</b>, a short Fountain where everything blows up at once. <b>Finale</b> on/off is the proposed switch for the best item's finale in every animation (it would replace "Hang time for the best"). Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
 </header>
 <div class="bar">
@@ -268,7 +268,8 @@ function gatherStep(dt) {
       s.sx = s.x; s.sy = s.y; s.shrink = 1; s.alpha = 1;
       if (!s.it.coin && s.it.q >= 3) { s.state = 'popup'; s.leaveAt = t + pd; pd += 0.15; continue; }
       s.state = 'gather'; scene.toGo++;
-      if (gather === 'vac') { s.leaveAt = t + 0.28; s.dur = 0.32 + 0.12 * Math.min(1, Math.abs(BAG()[0] - s.x) / W); s.jit = R(0, 6); }
+      if (gather === 'vac') { const far = Math.min(1, Math.abs(BAG()[0] - s.x) / W); s.inh = 0.28 + 0.2 * far + R(0, 0.06); s.leaveAt = t + s.inh;
+        s.dur = (0.32 + 0.12 * far) * R(0.85, 1.2) * (s.it.coin ? 0.85 : 1); s.arc = R(40, 150); s.bend = R(-60, 60); s.lift = R(6, 18); s.shk = R(2, 6); s.spin = R(8, 20) * (Math.random() < 0.5 ? -1 : 1); }
       else { s.leaveAt = t + 0.35 + gd; s.dur = 0.65; gd += Math.min(0.11, 2.8 / n); }
     }
     return;
@@ -278,14 +279,14 @@ function gatherStep(dt) {
     if (s.state === 'popup') { if (t >= s.leaveAt) { s.y -= dt * 500; s.alpha = Math.max(0, 1 - (t - s.leaveAt) / 0.5); } continue; }
     if (s.state !== 'gather') continue;
     if (t < s.leaveAt) { // (the vacuum's inhale: it lifts a little and trembles; air rushes to the bag)
-      if (gather === 'vac') { const u = 1 - (s.leaveAt - t) / 0.28; s.x = s.sx + R(-1, 1) * 2.5 * u; s.y = s.sy - 10 * u;
+      if (gather === 'vac') { const u = 1 - (s.leaveAt - t) / s.inh; s.x = s.sx + R(-1, 1) * s.shk * u; s.y = s.sy - s.lift * u * u;
         if (Math.random() < dt * 14) parts.push({ x: s.x, y: s.y, tx: bx, ty: by, pull: true, life: 0.3, age: 0, size: R(1.5, 2.5), color: s.it.coin ? COIN[s.it.coin][0] : '#e8f0ff' }); }
       continue; }
     if (s.done) continue;
     const u = Math.min(1, (t - s.leaveAt) / s.dur), e = gather === 'vac' ? u * u * u : u * u;
-    const x0 = s.sx, y0 = gather === 'vac' ? s.sy - 10 : s.sy, cx = (x0 + bx) / 2, cy = Math.min(y0, by) - (gather === 'vac' ? 90 : 220);
+    const vac = gather === 'vac', x0 = s.sx, y0 = vac ? s.sy - s.lift : s.sy, cx = (x0 + bx) / 2 + (vac ? s.bend : 0), cy = Math.min(y0, by) - (vac ? s.arc : 220);
     s.x = (1 - e) * (1 - e) * x0 + 2 * (1 - e) * e * cx + e * e * bx; s.y = (1 - e) * (1 - e) * y0 + 2 * (1 - e) * e * cy + e * e * by;
-    s.shrink = 1 - 0.7 * e; s.rot += dt * (gather === 'vac' ? 14 : 0);
+    s.shrink = 1 - 0.7 * e; s.rot += dt * (vac ? s.spin : 0);
     if (gather === 'vac' && u > 0.3) { s.trail.push([s.x, s.y]); if (s.trail.length > 5) s.trail.shift(); }
     if (u >= 1) { s.done = true; s.alpha = 0; s.trail.length = 0; scene.inBag++;
       const c = s.it.coin ? COIN[s.it.coin][0] : QC[s.it.q];

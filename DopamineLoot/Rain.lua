@@ -26,8 +26,9 @@ local GHOSTS, GHOST_EVERY, DUST = 6, 0.035, 7
 local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
 local GATHER_T, JOIN_T, FLASH_T = 0.65, 0.32, 0.4 -- (the gather: each item's flight into the bag)
 -- The Vacuum gather (setting rainGather; docs/mockups/rain-variants.html, round 6): a short inhale, then
--- everything is sucked into the bag together, farther ones a little longer, and the bag gulps it in one pop
-local INHALE_T, VAC_T, VAC_FAR = 0.28, 0.32, 0.12
+-- everything is sucked into the bag in a wave rolling toward it (the nearest go first), each on its own
+-- arc, speed, spin and lift, and the bag gulps it all in one pop
+local INHALE_T, VAC_T, VAC_FAR, VAC_WAVE = 0.28, 0.32, 0.12, 0.2
 local WIND_T = 0.38 -- the wind-up before the burst
 -- The best item's drop by rarity (setting Hang): the rarer, the longer it hangs at the top, the harder
 -- it falls (a comet trail from Rare, longer for Epic and Legendary) and the bigger its landing.
@@ -753,9 +754,14 @@ local function Settle(st)
     if not s.coin and Core.Stays(s.item, st.stayQuality) then
       s.leaving, s.leaveAt, pd = "popup", st.age + pd, pd + 0.15
     elseif On("Gather") then
-      if st.vacuum then -- all at once, after the inhale
-        s.leaving, s.leaveAt = "gather", st.age + INHALE_T
-        s.gatherT = VAC_T + VAC_FAR * math.min(1, math.abs(bx - s.x) / W)
+      if st.vacuum then -- after the inhale, in a wave from the bag outward; each its own way
+        local far = math.min(1, math.abs(bx - s.x) / W)
+        s.inhaleT = INHALE_T + VAC_WAVE * far + math.random() * 0.06
+        s.leaving, s.leaveAt = "gather", st.age + s.inhaleT
+        s.gatherT = (VAC_T + VAC_FAR * far) * (0.85 + math.random() * 0.35) * (s.coin and 0.85 or 1)
+        s.vacArc, s.vacBend = 40 + math.random() * 110, (math.random() - 0.5) * 120 -- (how high it arcs; a sideways bulge)
+        s.vacLift, s.vacShake = 6 + math.random() * 12, 2 + math.random() * 4
+        s.vacSpin = (8 + math.random() * 12) * (math.random() < 0.5 and -1 or 1)
       else
         s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.11, 2.8 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
         s.gatherT = GATHER_T
@@ -979,8 +985,8 @@ local function Update(_, dt)
       if st.age < s.leaveAt then
         busy = true
         if s.leaving == "gather" and st.vacuum then -- the inhale: it lifts a little and trembles; air rushes to the bag
-          local u = 1 - (s.leaveAt - st.age) / INHALE_T
-          s.x, s.y = s.sx + (math.random() - 0.5) * 5 * u * k, s.sy + 10 * k * u
+          local u = 1 - (s.leaveAt - st.age) / s.inhaleT
+          s.x, s.y = s.sx + (math.random() - 0.5) * 2 * s.vacShake * u * k, s.sy + s.vacLift * k * u * u
           if math.random() < dt * 14 then
             if not bx then bx, by = BagPoint() end
             local t = table.remove(sparkPool) or Tex(top, "ARTWORK", MEDIA .. "Mote", "ADD")
@@ -1006,12 +1012,12 @@ local function Update(_, dt)
           local u = math.min(1, t / s.gatherT)
           local vac = st.vacuum
           local e = vac and u * u * u or u * u -- (the vacuum: slow off the ground, then a rush)
-          local y0 = vac and s.sy + 10 * k or s.sy
-          local cx, cy = (s.sx + bx) / 2, math.max(y0, by) + (vac and 90 or 220) * k
+          local y0 = vac and s.sy + s.vacLift * k or s.sy
+          local cx, cy = (s.sx + bx) / 2 + (vac and s.vacBend * k or 0), math.max(y0, by) + (vac and s.vacArc or 220) * k
           s.x = (1 - e) * (1 - e) * s.sx + 2 * (1 - e) * e * cx + e * e * bx
           s.y = (1 - e) * (1 - e) * y0 + 2 * (1 - e) * e * cy + e * e * by - s.size / 2
           s.shrink = 1 - (vac and 0.7 or 0.6) * e
-          if vac then s.rot = s.rot + 14 * dt end
+          if vac then s.rot = s.rot + s.vacSpin * dt end
           if u >= 1 and not s.inBag then
             s.inBag = true
             st.gathered = st.gathered + 1
