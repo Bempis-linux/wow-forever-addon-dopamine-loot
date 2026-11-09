@@ -72,10 +72,21 @@ function ns:MERCHANT_CLOSED() merchantOpen = false end
 
 function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
   if self.Secret(text) then return end -- hidden loot line (secret value)
-  local isSelf = guid ~= nil and not self.Secret(guid) and guid == UnitGUID("player")
+  local isSelf = not self.Secret(guid) and guid ~= nil and guid == UnitGUID("player")
   local link, count, src = M.Parse(text, patterns, isSelf)
   if not link then return end
   if src == "pushed" and merchantOpen then src = "bought" end
+  -- a gather (Gather.lua) goes to the harvest tally instead of the rain; Uncommon+ finds still pop up
+  if self.settings.enabled == false then return end
+  local gather, gatherId, gx, gy
+  if src == "loot" and ns.GatherKind then gather, gatherId, gx, gy = ns.GatherKind() end
+  if gather then
+    ns.ItemData(link, count, src, function(d)
+      ns.Gathered(d, gather, gatherId, gx, gy)
+      if WantsPopup(d.quality or 0) and d.quality >= 2 then ns:ShowLoot(d) end
+    end)
+    return
+  end
   if (self.settings.noPopup and self.settings.noRain) or self.settings.enabled == false or src == "bought" then return end
   ns.ItemData(link, count, src, function(d)
     local q = d.quality or 0

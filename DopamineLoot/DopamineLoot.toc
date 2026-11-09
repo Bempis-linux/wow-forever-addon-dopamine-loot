@@ -11,6 +11,7 @@
 ## X-License: MIT
 
 Core.lua
+Mover.lua
 LootMsg.lua
 Sounds.lua
 View.lua
@@ -20,8 +21,11 @@ RainCore.lua
 Rain.lua
 LootFeed.lua
 Bag.lua
+Gather.lua
+Skill.lua
 Settings.lua
 Look.lua
 Arrivals.lua
 RainFx.lua
 Pages.lua
+GatherPage.lua

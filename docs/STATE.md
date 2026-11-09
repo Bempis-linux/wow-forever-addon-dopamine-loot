@@ -16,7 +16,13 @@ accident (restored in 947a51e from v1.2.1); check `git status` for mass deletion
 switched to dev 2026-11-09 for the bag test (the stale parked 1.1.0 renamed to Interface\DopamineLoot.old-1.1.0 so
 the script could park 1.2.1; delete it when the user agrees). Check `addon-mode.ps1 status` before each test. **The bag is
 accepted in game** ("pretty good", 2026-11-09; the full moment from a real full bag and the rain timing not seen yet).
-Next: gathering (G2, G4, G5, G7 from round 3; open: tally docked under the minimap or beside the bag, calm threshold). Read this first
+**Gathering built 2026-11-09, untested in game:** Gather.lua, Skill.lua, GatherPage.lua, and Mover.lua (the user:
+make the tally draggable from the start, as a general system for other frames like the popups next; no hooks into
+the game's Edit Mode, our own "Move frames" overlay instead). Calm after 40 gathers in 10 min (setting gatherCalm,
+0 = never). Sounds from tools/gen_gather_sounds.sh (GatherNote00..10, GatherStack, SkillUp; not picked by ear yet).
+Gathered items skip the rain; Uncommon+ finds still pop up. To verify in game: `/dump C_Item.GetItemInfoInstant(2447)`
+(expect returns 6,7 = 7,9; 2770 -> 7,7; 2318 -> 7,6), LOOT_READY count per gather (/etrace), the burst at the cursor
+(clicked node) vs. the interact key, the skill unlock levels (Classic's). Next after testing: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

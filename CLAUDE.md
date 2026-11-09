@@ -31,7 +31,13 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Rain.lua                 loot rain drawing: sprites and every effect (ns.RAIN_FX switches)
   LootFeed.lua             CHAT_MSG_LOOT -> item data -> burst collector (+ looted money) -> popup or rain
   Bag.lua                  the bulging bag: overlay on the backpack button at <=4 free normal slots (squash,
-                           strain ring, full-bag snap on UI_ERROR_MESSAGE, release puff); Test bag (testbag)
+                           game quality border + corner count, full-bag snap on UI_ERROR_MESSAGE, release puff)
+  Mover.lua                drag-to-move for any of our frames: ns.Mover.Register{key, frame, label, point, x, y,
+                           preview}; "Move frames" (Unlock) / Done (Lock) / Reset; saved in settings.pos
+  Gather.lua               gathering: detect at LOOT_READY (fishing, node herb/ore, all-leather skinning), node
+                           burst, harvest tally (movable), merging +N, climbing notes (GatherNote*), calm
+  Skill.lua                skill-up banner (CHAT_MSG_SKILL): bar in the profession's color to the next unlock
+  GatherPage.lua           "Gathering" page (native): switches, calm, placement, tests
   Settings.lua             first page + helpers: ns.Native (plain pages on our own frames: Toggle, Slider, Choice, Button),
                            ns.UI (custom controls incl. Dropdown)
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check

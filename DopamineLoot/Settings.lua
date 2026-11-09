@@ -352,6 +352,11 @@ local function CreateGeneral()
     "The number of free slots in the bulging bag's corner, like a stack count (a red 0 when there's no room).", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noSound", "Sounds",
     "Turns every Dopamine Loot sound on or off at once. The game's own sounds are not affected. More settings on the Sounds page.", true)
+  N.Header(layout, "Placement")
+  N.Button(layout, "Drag frames into place", "Move frames", function() ns.Mover.Unlock() end,
+    "Shows a box over each Dopamine Loot frame you can move (the harvest tally, the skill-up bar): drag them where you want them, then click Done. Close this window to see them.")
+  N.Button(layout, "Put them back", "Reset positions", function() ns.Mover.Reset() end,
+    "Moves every movable Dopamine Loot frame back to where it started.")
   N.Header(layout, "Try it")
   N.Choice(cat, "testQuality", "Test popup rarity", TESTS, 4,
     "The rarity of the item the two test popup buttons below show.")

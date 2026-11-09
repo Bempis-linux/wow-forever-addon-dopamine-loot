@@ -142,6 +142,13 @@ end
 function ns:PlayGatherSound()
   if not self.settings.noSound then PlaySoundFile(MEDIA .. "Gather.ogg", Channel()) end
 end
+-- Gathering (tools/gen_gather_sounds.sh): the n-th gather of a run climbs the scale (Melody, 0..10)
+function ns:PlayGatherNote(n)
+  if self.settings.noSound then return end
+  PlaySoundFile(("%sGatherNote%02d.ogg"):format(MEDIA, ns.RainCore.Melody(n, 10)), Channel())
+end
+function ns:PlayGatherStack() if not self.settings.noSound then PlaySoundFile(MEDIA .. "GatherStack.ogg", Channel()) end end
+function ns:PlaySkillUp() if not self.settings.noSound then PlaySoundFile(MEDIA .. "SkillUp.ogg", Channel()) end end
 
 -- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
 local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
