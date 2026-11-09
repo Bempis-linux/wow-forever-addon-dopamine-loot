@@ -228,9 +228,8 @@ function ns.CreateView(f)
   -- keeps the rarity and the type (Banner keeps its old line):
   -- Splash a number block at the banner's left end; Relic, Beam and Aura a small "iLvl 63" tag at
   -- the end of the line (a pill: Pill/PillRim in three slices, like Achievement's bar)
-  f.lvlBlock = Tex(f.fx, "ARTWORK", WHITE, nil, 5)
-  f.lvlEdges = {}
-  for i = 1, 4 do f.lvlEdges[i] = Tex(f.fx, "ARTWORK", WHITE, nil, 6) end
+  f.lvlBlock = Tex(f.fx, "ARTWORK", MEDIA .. "SlantBlock", nil, 5) -- (leaning like the banner's slash)
+  f.lvlEdges = { Tex(f.fx, "ARTWORK", MEDIA .. "SlantRim", nil, 6) }
   f.pill, f.pillRim = {}, {}
   for i = 1, 3 do
     f.pill[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Pill", nil, 5)
@@ -359,12 +358,8 @@ function ns.CreateView(f)
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -8)
       self.badges:SetJustifyH("CENTER")
       self.stamp:SetPoint("CENTER", self.stage, "BOTTOMRIGHT", 34, 10)
-      self.lvlBlock:SetPoint("CENTER", self.stage, "BOTTOM", -SPLASH_W / 2 + 40, -25)
-      local e = self.lvlEdges -- (its rim: four thin lines)
-      e[1]:SetPoint("TOPLEFT", self.lvlBlock); e[1]:SetPoint("TOPRIGHT", self.lvlBlock); e[1]:SetHeight(1.5)
-      e[2]:SetPoint("BOTTOMLEFT", self.lvlBlock); e[2]:SetPoint("BOTTOMRIGHT", self.lvlBlock); e[2]:SetHeight(1.5)
-      e[3]:SetPoint("TOPLEFT", self.lvlBlock); e[3]:SetPoint("BOTTOMLEFT", self.lvlBlock); e[3]:SetWidth(1.5)
-      e[4]:SetPoint("TOPRIGHT", self.lvlBlock); e[4]:SetPoint("BOTTOMRIGHT", self.lvlBlock); e[4]:SetWidth(1.5)
+      self.lvlBlock:SetPoint("CENTER", self.stage, "BOTTOM", -SPLASH_W / 2 + 44, -25)
+      self.lvlEdges[1]:SetAllPoints(self.lvlBlock) -- (its rim, the same shape)
       self.lvlNum:ClearAllPoints(); self.lvlNum:SetPoint("CENTER", self.lvlBlock, "CENTER", 1, 3)
       self.lvlTag:ClearAllPoints(); self.lvlTag:SetPoint("CENTER", self.lvlBlock, "CENTER", 0, -10)
       self.shineClip:SetAllPoints(self.splashBand)
@@ -957,7 +952,7 @@ function ns.CreateView(f)
       local show = bt > 0
       local kind = self.lvlKind
       if kind == "block" then
-        self.lvlBlock:SetSize(math.max(1, 40 * bs), math.max(1, 42 * bs)); self.lvlBlock:SetShown(show)
+        self.lvlBlock:SetSize(math.max(1, 52 * bs), math.max(1, 44 * bs)); self.lvlBlock:SetShown(show)
         for _, t in ipairs(self.lvlEdges) do t:SetShown(show) end
       else
         for _, list in ipairs({ self.pill, self.pillRim }) do for _, t in ipairs(list) do t:SetShown(show); t:SetAlpha(bt) end end

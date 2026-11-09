@@ -100,7 +100,9 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   on the tag/block look in game (the user finds them a bit ugly in game).
   Round 4 mockup (info-line.html, the user said "go with your suggestions"): Gem or Readout for the item level
   (Relic, Beam, Aura), an upgrade arrow, a reworked Aura (heartbeat glow, sunbeam column with dust, framed
-  rarity word, bigger name), Splash's block slanted. Waiting for picks.
+  rarity word, bigger name), Splash's block slanted. Picks: **Splash's slanted block** (built: SlantBlock/SlantRim
+  textures, 52x44); the Gem and Readout didn't feel "final"; the Aura animation rework is pushed to later.
+  Next: a design for the item level / info line that is striking, uses space well and reads at a glance.
   **Upgrade arrow API (researched 2026-11-09, works on Forever per Road to Sixty / Narcissus):**
   GetInventoryItemLink("player", slot) (nil = empty, a plain read, no taint/secret); level via
   (C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo)(link); our own equipLoc -> slot table (no

@@ -10,6 +10,7 @@
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 --   Pillar, Vignette   loot rain: the light pillar over resting Rare+, the Epic screen-edge pulse
 --   Circle, Ring, Pill, PillRim   Achievement (the Capsule); Runes   Rune decode
+--   SlantBlock, SlantRim   Splash: the item-level block, leaning like the banner's slash
 --   Chest*, Pouch*, Rays   deprecated chest show (written to deprecated/chest-show/Media/)
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
@@ -128,6 +129,18 @@ end))
 Write("SplashEdge", Fill(Canvas(512, 128), function(u, v)
   local d = BandAt(u, v)
   return (Bump(d, 1, 0.045) + 0.5 * Bump(d, 1, 0.12)) * Ends(u)
+end))
+-- Splash's item-level block (picked in docs/mockups/info-line.html, round 4): a parallelogram whose
+-- sides lean right like the banner's slash, shown at 52x44; SlantRim is its 1.5 px outline
+local function SlantDist(u, v) -- how far inside the block, in shown pixels (negative outside)
+  local vb = (v - 0.05) / 0.9
+  local x0, x1 = 0.04 + 0.16 * vb, 0.8 + 0.16 * vb
+  return math.min(math.min(u - x0, x1 - u) * 52 * 0.98, math.min(v - 0.05, 0.95 - v) * 44)
+end
+Write("SlantBlock", Fill(Canvas(64, 64), function(u, v) return SlantDist(u, v) + 0.5 end))
+Write("SlantRim", Fill(Canvas(64, 64), function(u, v)
+  local d = SlantDist(u, v)
+  return math.max(0, math.min(1, d + 0.5)) * math.max(0, math.min(1, 2 - d))
 end))
 
 Write("Vignette", Fill(Canvas(256, 256), function(u, v)
