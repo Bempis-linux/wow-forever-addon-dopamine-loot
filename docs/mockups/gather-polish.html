@@ -59,12 +59,12 @@
 </div>
 <div class="stage" id="h2Stage"><div class="char">🧙</div><div class="node" id="h2Node">🌿</div><div class="note" id="h2Note"></div></div>
 
-<h2>2. Skinning (built: N2 Clean cut + R1 Double slash)</h2>
+<h2>2. Skinning (built: N1 Glint and scraps + R1 Double slash; new: R4 Flurry)</h2>
 <p class="lead"><b>Normal</b>: Current (a knife glint, fur tufts drift down) · <b>N1 Glint and scraps</b>: the glint leaves a short afterimage, a second quick flick follows, and small leather scraps tumble with the tufts · <b>N2 Clean cut</b>: one crisp glint with a bright tip that runs along the blade, softer, fluffier tufts.<br>
-<b>Rare</b>: Current (a long streak with glints) · <b>R1 Double slash</b>: two quick glints cross in an X, a flash where they meet, sparks along both · <b>R2 Pelt sheen</b>: a broad sheen of light sweeps across a soft hide-shaped glow, like light running over fine leather, with glints at its edge · <b>R3 Trophy</b>: the hide pops up big over the carcass with a gold rim and a shine sweep, holds a beat, then flies to the window.</p>
+<b>Rare</b>: Current (a long streak with glints) · <b>R1 Double slash</b>: two quick glints cross in an X, a flash where they meet, sparks along both · <b>R2 Pelt sheen</b>: a broad sheen of light sweeps across a soft hide-shaped glow, like light running over fine leather, with glints at its edge · <b>R3 Trophy</b>: the hide pops up big over the carcass with a gold rim and a shine sweep, holds a beat, then flies to the window · <b>R4 Flurry</b> (new, inspired by a blade-flurry finisher): the screen dims a touch, a storm of quick slashes cuts in from every angle around the carcass (each with a spark and a tick), faster and faster, a beat of stillness, then one big final slash with a white flash, a shockwave and a spray of sparks.</p>
 <div class="bar">
-  <span>Normal</span><button data-sn="cur" class="on">Current</button><button data-sn="n1">N1 Glint and scraps</button><button data-sn="n2">N2 Clean cut</button>
-  <span>Rare</span><button data-sr="cur">Current</button><button data-sr="r1" class="on">R1 Double slash</button><button data-sr="r2">R2 Pelt sheen</button><button data-sr="r3">R3 Trophy</button>
+  <span>Normal</span><button data-sn="cur">Current</button><button data-sn="n1" class="on">N1 Glint and scraps</button><button data-sn="n2">N2 Clean cut</button>
+  <span>Rare</span><button data-sr="cur">Current</button><button data-sr="r1">R1 Double slash</button><button data-sr="r2">R2 Pelt sheen</button><button data-sr="r3">R3 Trophy</button><button data-sr="r4" class="on">R4 Flurry</button>
 </div>
 <div class="bar"><button class="go" id="sPlay">🔪 Skin</button><button class="go" id="sRare">🟣 Rare find</button></div>
 <div class="stage cave" id="sStage"><div class="char">🧙</div><div class="node" id="sNode">🦌</div><div class="note" id="sNote"></div></div>
@@ -298,7 +298,7 @@ $('h2Run').onclick = () => { for (let i = 0; i < 5; i++) setTimeout(() => herb2(
 $('h2Rare').onclick = () => herb2(true);
 
 // =================== Skinning ===================
-let sn = 'cur', sr = 'r1';
+let sn = 'n1', sr = 'r4';
 pick('sn', v => sn = v); pick('sr', v => sr = v);
 function streak(x, y, w, angle, life = .36, delay = 0, tip = false) {
   el(`<div style="width:${w}px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff,transparent);box-shadow:0 0 10px #fff"></div>`,
@@ -348,11 +348,40 @@ const SR = {
     tufts(x, y, 6); noise(0, .12, .035, 3000); tone(1318, .3, .05, .6); tone(1976, .4, .05, .8);
   },
 };
+SR.r4 = function (x, y) { // Flurry: a storm of quick slashes from every angle, faster and faster, a stillness, one big final slash
+  const cx = x, cy = y - 16, N = 11;
+  el('', 'left:0;top:0;right:0;bottom:0;width:100%;height:100%;background:radial-gradient(ellipse at ' + cx + 'px ' + cy + 'px,transparent 15%,rgba(0,0,0,.55) 70%)',
+    [{ opacity: 0 }, { opacity: 1, offset: .12 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 2000);
+  let t = .1;
+  for (let i = 0; i < N; i++) {
+    const ang = R(-80, 80) + (i % 2 ? 180 : 0), ar = ang * Math.PI / 180, len = R(110, 170), off = R(-26, 26);
+    const sx = cx + off * Math.sin(ar), sy = cy + off * Math.cos(ar), d = t;
+    streak(sx, sy, len, ang, .22, d);
+    // a faint afterimage
+    el(`<div style="width:${len}px;height:2px;background:linear-gradient(90deg,transparent,rgba(200,230,255,.6),transparent)"></div>`, `left:${sx - len / 2}px;top:${sy + 2}px`,
+      [{ transform: `rotate(${ang}deg) scaleX(1)`, opacity: .6 }, { transform: `rotate(${ang}deg) scaleX(1.05)`, opacity: 0 }], 380, (d + .1) * 1000);
+    ballistic(sx, sy, { vx: R(-120, 120), vy: R(20, 140), g: 300, life: R(.3, .5), size: 3, color: '#e8f4ff', glow: 6, delay: d + .05 });
+    star(sx + R(-10, 10), sy + R(-10, 10), 14, '#ffffff', .25, d + .06);
+    setTimeout(() => { noise(0, .06, .035, 4000 + i * 150); tone(2600 + i * 90, 0, .015, .08, 'triangle'); }, d * 1000);
+    t += Math.max(.045, .13 - i * .009); // faster and faster
+  }
+  const fin = t + .32; // a beat of stillness, then the final slash
+  setTimeout(() => {
+    streak(cx, cy, 300, -55, .5); streak(cx, cy + 3, 300, -55, .7, .03);
+    el('', 'left:0;top:0;width:100%;height:100%;background:#fff', [{ opacity: .55 }, { opacity: 0 }], 260);
+    ring(cx, cy, '#ffffff', 220, .6, 0, 3); ring(cx, cy, '#bfe0ff', 140, .5, .06, 2);
+    star(cx, cy, 80, '#ffffff', .6); star(cx, cy, 50, '#cfe8ff', .6, .05);
+    for (let i = 0; i < 30; i++) ballistic(cx, cy, { vx: R(-260, 260), vy: R(-60, 260), g: 380, life: R(.5, .9), size: R(2.5, 4), color: i % 3 ? '#ffffff' : '#ffe0b0', glow: 7 });
+    tufts(cx, cy + 16, 8, true);
+    noise(0, .3, .07, 1500); tone(110, 0, .12, .6); tone(1760, .02, .05, .9); tone(2637, .06, .04, 1);
+    const st = ST; st.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-4px,2px)' }, { transform: 'translate(3px,-2px)' }, { transform: 'translate(-2px,1px)' }, { transform: 'translate(0,0)' }], { duration: 260 });
+  }, fin * 1000);
+};
 const sty = document.createElement('style'); sty.textContent = '@keyframes sw { to { left: 60px; } }'; document.head.appendChild(sty);
 function skin(rare) {
   ST = $('sStage'); const [x, y] = pos('sNode');
   $('sNode').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.08,.94)' }, { transform: 'scale(1)' }], { duration: 220 });
-  if (rare) { if (sr !== 'r1') SN[sn](x, y); SR[sr](x, y); } else SN[sn](x, y);
+  if (rare) { if (sr !== 'r1' && sr !== 'r4') SN[sn](x, y); SR[sr](x, y); } else SN[sn](x, y);
   $('sNote').textContent = rare ? `Normal: ${sn === 'cur' ? 'Current' : sn.toUpperCase()} · Rare: ${sr === 'cur' ? 'Current' : sr.toUpperCase()}` : `Normal: ${sn === 'cur' ? 'Current' : sn.toUpperCase()}`;
 }
 $('sPlay').onclick = () => skin(false);

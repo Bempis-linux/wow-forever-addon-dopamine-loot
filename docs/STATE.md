@@ -45,6 +45,9 @@ Tufts(), RARE.skin = the X); herbalism normal stays as is; none of the herb opti
 idea": round 2 in the same file; the user picked **G2 Golden seed** (built: RARE.herb, the seed rises, cracks open at
 0.9 s: rays (Streak.tga), leaf ring (Petal.tga tinted green), pollen shower). The user wants new designs for the normal
 herb gather too: section 1c (H1 Dandelion, H2 Leaf flutter, H3 Gold sparkle, H4 Pluck pop), waiting for a pick.
+Correction: the user meant skinning **N1 Glint and scraps** (not N2): built (afterimage, a second flick, leather
+scraps). Asked for an Omnislash-style rare: mockup R4 Flurry (dim, ~11 slashes from every angle speeding up, a beat
+of stillness, a big final slash with a flash, shockwave, sparks, a small shake), waiting for a verdict vs. R1 (built).
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

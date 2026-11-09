@@ -338,11 +338,11 @@ function RARE.fish(x, y, quiet, icon) -- a big shimmering leap
   Sound("RareFish", 0, quiet)
 end
 
--- The knife glint (docs/mockups/gather-polish.html, N2 "Clean cut"): one crisp streak at angle a
--- (radians, 0.49 = up-right), w long; tip: a bright point running along the blade as it cuts
-local function Slash(x, y, w, a, delay, tip)
+-- A knife glint: a streak at angle a (radians, 0.49 = up-right), w long; tip: a bright point running
+-- along the blade as it cuts; life, alpha: optional (an afterimage is fainter and lingers)
+local function Slash(x, y, w, a, delay, tip, life, alpha)
   local ca, sa = math.cos(a), math.sin(a)
-  Fx({ file = MEDIA .. "Streak.tga", x = x, y = y, size = 10, size1 = w, life = 0.4, delay = delay, add = true, rot = a,
+  Fx({ file = MEDIA .. "Streak.tga", x = x, y = y, size = 10, size1 = w, life = life or 0.4, delay = delay, add = true, rot = a, a = alpha,
     path = function(u) return 4 * u * ca, 4 * u * sa, a end })
   if tip then
     Fx({ file = MEDIA .. "Mote.tga", x = x, y = y, size = 9, life = 0.4, delay = delay, add = true,
@@ -363,9 +363,20 @@ function BURST.skin(x, y, rare, m, quiet)
     RARE.skin(x, y, quiet)
     return
   end
-  Slash(x, y + 6, 100, 0.49, 0, true)
+  -- N1 "Glint and scraps" (docs/mockups/gather-polish.html): the glint with a fainter afterimage, a second
+  -- quick flick the other way, leather scraps tumbling with the tufts
+  Slash(x, y + 6, 90, 0.49, 0)
+  Slash(x - 6, y + 2, 90, 0.49, 0.04, false, 0.5, 0.5)
+  Slash(x + 10, y + 14, 50, -0.56, 0.18, false, 0.28)
   Sound("Slash", 0, quiet)
+  Sound("Slash", 0.18, quiet)
   Tufts(x, y, math.floor(7 * m + 0.5))
+  local scraps = { { 0.54, 0.35, 0.19 }, { 0.63, 0.47, 0.31 }, { 0.42, 0.25, 0.13 } }
+  for i = 1, math.floor(4 * m + 0.5) do
+    local c = scraps[(i - 1) % 3 + 1]
+    Fx({ file = MEDIA .. "Diamond.tga", x = x, y = y, vx = R(-90, 90), vy = R(60, 140), g = 420, size = R(5, 8), life = R(0.6, 0.9),
+      spin = R(-9, 9), r = c[1], gg = c[2], b = c[3] })
+  end
 end
 function RARE.skin(x, y, quiet) -- R1 "Double slash": two glints cross in an X, a flash where they meet, sparks
   local cy = y + 10
