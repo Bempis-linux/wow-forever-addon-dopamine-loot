@@ -52,7 +52,10 @@ of stillness, a big final slash with a flash, shockwave, sparks, a small shake).
 pop** (built: green ring, leaf confetti, pollen puff, HerbPop.ogg). New sounds: HerbPop, FlurryHit, FlurryFinal.
 Nitpicks (2026-11-09, done): a rare find's item (popup + flight) waits for the finale: ns.GatherRareDelay (herb: after
 the seed opens, OPEN + 0.25; skin Flurry: FLURRY_FINAL + 0.25; others 0); default skinning back to one slash (keeps
-scraps and tufts).
+scraps and tufts). The user isn't 100% happy with the skinning sounds (the rare is "pretty good"): candidates in
+docs/mockups/skin-sounds.html (tools/gen_skin_sound_candidates.sh, embedded): normal N0 now/N1 soft swish/N2 blade
+shing/N3 leather rip/N4 swish and thump/N5 snick; Double slash R0 now/R1 twin shing chord/R2 swishes and gong/R3
+shing and sparkle; Flurry F0 now/F1 shing storm/F2 whoosh storm. Waiting for picks by ear.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
