@@ -9,69 +9,68 @@
   html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
   header { padding: 14px 18px 4px; }
   h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
-  header p { margin: 0 0 4px; color: var(--muted); max-width: 980px; }
+  h3 { margin: 14px 18px 4px; font-size: 14px; color: var(--gold); }
+  h3 small { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 6px; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 1000px; }
   .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 18px; }
   .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
   button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
   button:hover { background: #3a3020; } button.on { background: #4a3c1c; border-color: #b08a3a; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; padding: 6px 18px 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; padding: 4px 18px 8px; }
   .cell { border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 40% 70%, #3d4a36, #1b2219 60%, #0f130e); }
-  .cell h2 { margin: 0; padding: 8px 12px 0; font-size: 13px; color: var(--gold); }
-  .cell p { margin: 2px 12px 0; color: #c9c1ac; font-size: 12px; min-height: 34px; }
-  .scene { position: relative; height: 230px; display: flex; align-items: center; justify-content: center; }
+  .cell.picked { border-color: #b08a3a; }
+  .cell h2 { margin: 0; padding: 7px 10px 0; font-size: 12.5px; color: var(--gold); }
+  .cell p { margin: 2px 10px 0; color: #c9c1ac; font-size: 11.5px; min-height: 32px; }
+  .scene { position: relative; height: 215px; display: flex; align-items: center; justify-content: center; }
 
-  .item { width: 44px; height: 106px; position: relative; flex: none; }
+  .item { width: 40px; height: 98px; position: relative; flex: none; }
   .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.7)); }
-  .name { font: 700 20px Georgia, serif; color: var(--nc); white-space: nowrap; text-shadow: 0 1px 0 #000, 0 2px 6px #000; }
-  .info { font: 600 10.5px system-ui; color: #d8d0bc; text-shadow: 0 1px 2px #000; white-space: nowrap; }
+  .name { font: 700 18px Georgia, serif; color: var(--nc); white-space: nowrap; text-shadow: 0 1px 0 #000, 0 2px 6px #000; }
+  .info { font: 600 10px system-ui; color: #d8d0bc; text-shadow: 0 1px 2px #000; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
   .info .rq { color: var(--cl); }
-  /* the badge: Achievement's item-level badge, the same everywhere */
-  .lvl { width: 34px; height: 34px; border-radius: 50%; box-sizing: border-box; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  .lvl { width: 32px; height: 32px; border-radius: 50%; box-sizing: border-box; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: #160f08; border: 2px solid var(--c); box-shadow: 0 0 8px -2px var(--c), 0 2px 4px rgba(0,0,0,.6); line-height: 1; z-index: 4; }
-  .lvl b { font: 800 13px Georgia, serif; color: #fff; } .lvl small { font: 800 5.5px system-ui; letter-spacing: 1px; color: var(--cl); margin-top: 1px; }
-  .before .lvl { display: none; } .after .ilvl { display: none; } .before .rq { display: none; } .before .rqs { display: none; }
+  .lvl b { font: 800 12px Georgia, serif; color: #fff; } .lvl small { font: 800 5px system-ui; letter-spacing: 1px; color: var(--cl); margin-top: 1px; }
+  .lvl.mini { width: 22px; height: 22px; border-width: 1.5px; } .lvl.mini b { font-size: 9.5px; } .lvl.mini small { display: none; }
+  /* a pill: "iLvl 63" as a small tag, no circle */
+  .pill { font: 700 9.5px system-ui; color: #fff; padding: 1px 7px 2px; border-radius: 9px; border: 1px solid var(--c); background: #160f08; box-shadow: 0 0 6px -2px var(--c); white-space: nowrap; }
+  .pill i { font-style: normal; color: var(--cl); font-weight: 800; font-size: 8px; letter-spacing: .5px; margin-right: 3px; }
+  .div { display: flex; align-items: center; gap: 4px; }
+  .div::before, .div::after { content: ""; height: 1px; width: 70px; }
+  .div::before { background: linear-gradient(90deg, transparent, var(--c)); } .div::after { background: linear-gradient(-90deg, transparent, var(--c)); }
 
-  /* Relic / Beam / Aura: the item, the name under it, one line under that. After: the badge sits
-     at the item's lower right like a medal on it */
   .stack { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
-  .stack .pin { position: relative; }
-  .stack .pin .lvl { position: absolute; right: -26px; bottom: 2px; }
-  .plate { padding: 2px 14px 3px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.55) 20%, rgba(0,0,0,.55) 80%, transparent); border-bottom: 1px solid var(--c); }
-  .beam .pin::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 60px; height: 150px; margin-left: -30px;
-    background: linear-gradient(0deg, color-mix(in srgb, var(--c) 45%, transparent), transparent); filter: blur(6px); z-index: -1; }
-  .aura .pin::before { content: ""; position: absolute; left: 50%; top: 50%; width: 130px; height: 130px; margin: -65px 0 0 -65px; border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--c) 35%, transparent), transparent 70%); z-index: -1; }
-  .aura .tagw { font: 800 9.5px system-ui; letter-spacing: 3px; color: var(--cl); }
+  .pin { position: relative; }
+  .pin .lvl { position: absolute; right: -24px; bottom: 2px; }
+  .plate { position: relative; padding: 2px 14px 3px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.55) 20%, rgba(0,0,0,.55) 80%, transparent); border-bottom: 1px solid var(--c); display: flex; align-items: center; gap: 8px; }
+  .plate .lvl.end { position: absolute; right: -22px; top: 50%; margin-top: -16px; }
+  .beam .pin::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 56px; height: 140px; margin-left: -28px;
+    background: linear-gradient(0deg, color-mix(in srgb, var(--c) 55%, transparent), transparent); filter: blur(6px); }
+  .aura .pin::before { content: ""; position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 35%, transparent), transparent 70%); }
+  .aura .tagw { font: 800 9px system-ui; letter-spacing: 3px; color: var(--cl); }
+  .namerow { display: flex; align-items: center; gap: 8px; }
 
-  /* Banner: the item left, a band with the name and the line. After: the badge at the band's end */
-  .banner { display: flex; align-items: center; }
-  .banner .band { position: relative; margin-left: -10px; padding: 10px 18px 10px 26px; min-width: 210px; display: flex; align-items: center; gap: 12px;
-    background: linear-gradient(90deg, rgba(20,14,8,.95), rgba(20,14,8,.85)); border-top: 1px solid var(--c); border-bottom: 1px solid var(--c); }
-  .banner .txt { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-
-  /* Splash: a slanted banner behind a big name, a rarity stamp. After: the badge at the banner's
-     right end, next to the stamp */
   .splash { position: relative; display: flex; flex-direction: column; align-items: center; }
-  .splash .slab { position: relative; padding: 6px 30px; transform: skewX(-12deg); background: color-mix(in srgb, var(--c) 80%, #000); box-shadow: 0 3px 0 #fff3 inset; margin-top: 6px; }
+  .splash .slab { position: relative; padding: 5px 26px; transform: skewX(-12deg); background: color-mix(in srgb, var(--c) 80%, #000); box-shadow: 0 3px 0 #fff3 inset; margin-top: 6px; }
   .splash .slab > * { transform: skewX(12deg); }
-  .splash .name { font-size: 24px; color: #fff; }
-  .splash .stamp { position: absolute; right: -6px; top: -16px; font: 900 12px system-ui; color: #fff; transform: rotate(8deg); text-shadow: 0 1px 0 #000, 0 0 4px #000; }
-  .splash .row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-  .splash .lvl { transform: none; }
+  .splash .name { font-size: 21px; color: #fff; }
+  .splash .stamp { position: absolute; right: -6px; top: -15px; font: 900 11px system-ui; color: #fff; transform: rotate(8deg); text-shadow: 0 1px 0 #000, 0 0 4px #000; }
+  .splash .row { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+  .splash .slab .lvl.left { position: absolute; left: -18px; top: 50%; margin-top: -16px; transform: none; }
+  .splash .slab .lvl.corner { position: absolute; right: -14px; bottom: -14px; transform: rotate(-8deg); }
 </style>
 </head>
-<body class="after">
+<body>
 <header>
-  <h1>The info line in the other styles</h1>
-  <p>Achievement shows the item level in a small round badge, so the line under the name keeps only the type. The same for Relic, Beam, Aura, Banner and Splash: Before is what's in the game ("Two-Handed Axes · item level 63"), After moves the item level into the same badge, placed where each style has room, and puts the rarity word in its color at the front of the line (Aura and Splash already say the rarity elsewhere, so they keep just the type). Items without an item level (bags, potions) look as before.</p>
+  <h1>The info line, round 2: where the item-level badge goes</h1>
+  <p>Kept from round 1: the line under the name is just the rarity in its color and the type, and Banner (picked: the badge at the band's right end, now built). For Relic, Beam, Aura and Splash, four places for the item level to try: <b>A</b> pinned to the item (round 1), <b>B</b> at the end of the name, <b>C</b> in a divider under the name (the way Rune decode and Forged letters now do it), <b>D</b> a small tag at the end of the line. Pick one per style (or one for all).</p>
 </header>
 <div class="bar">
-  <span>Look</span>
-  <button data-v="before">Before</button><button data-v="after" class="on">After</button>
   <span>Rarity</span>
   <button data-q="3">Rare</button><button data-q="4" class="on">Epic</button><button data-q="5">Legendary</button>
 </div>
-<div class="grid" id="grid"></div>
+<div id="out"></div>
 <script>
 'use strict';
 const Q = { 3: ['#3a8cff', '#9cc8ff', 'Rare', '#5aa8ff'], 4: ['#a335ee', '#d9a8ff', 'Epic', '#b75cff'], 5: ['#ff8000', '#ffd08a', 'Legendary', '#ff9a2a'] };
@@ -83,31 +82,43 @@ const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" 
   <path d="M32 14 C 54 10, 62 30, 60 52 C 50 44, 40 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
   <circle cx="32" cy="30" r="6" fill="${c}" opacity=".9"/><circle cx="32" cy="30" r="2.5" fill="#fff" opacity=".8"/></svg>`;
 function render() {
-  const [c, cl, label, nc] = Q[q], vars = `--c:${c};--cl:${cl};--nc:${nc}`;
-  const item = `<div class="item">${axe(c)}</div>`, lvl = '<div class="lvl"><b>63</b><small>ILVL</small></div>';
-  const line = `<span class="rq">${label}</span><span class="rqs"> &nbsp;·&nbsp; </span>Two-Handed Axes<span class="ilvl"> &nbsp;·&nbsp; item level 63</span>`;
-  const plain = `Two-Handed Axes<span class="ilvl"> &nbsp;·&nbsp; item level 63</span>`;
-  const cells = [
-    ['Relic', 'The item over its name on a soft plate. After: the badge at the item’s lower right, like a medal pinned to it.',
-      `<div class="stack" style="${vars}"><div class="pin">${item}${lvl}</div><div class="plate"><div class="name">Arcanite Reaper</div></div><div class="info">${line}</div></div>`],
-    ['Beam', 'A pillar of light behind the item. After: the same badge on the item.',
-      `<div class="stack beam" style="${vars}"><div class="pin">${item}${lvl}</div><div class="plate"><div class="name">Arcanite Reaper</div></div><div class="info">${line}</div></div>`],
-    ['Aura', 'Soft wisps behind the item, the rarity word spaced out. After: the badge on the item; the line drops the rarity it already shows.',
-      `<div class="stack aura" style="${vars}"><div class="pin">${item}${lvl}</div><div class="tagw">${label.toUpperCase()}</div><div class="name">Arcanite Reaper</div><div class="info">${plain}</div></div>`],
-    ['Banner', 'The item at the left of a band with the name and the line. After: the badge at the band’s right end, as in Achievement.',
-      `<div class="banner" style="${vars}">${item}<div class="band"><div class="txt"><div class="name">Arcanite Reaper</div><div class="info">${line}</div></div>${lvl}</div></div>`],
-    ['Splash', 'A slanted banner behind a big name, a rarity stamp. After: the badge beside the type under the banner.',
-      `<div class="splash" style="${vars}">${item}<div class="slab"><div class="name">Arcanite Reaper</div><div class="stamp">${label.toUpperCase()}!</div></div><div class="row"><div class="info">${plain}</div>${lvl}</div></div>`],
-  ];
-  document.getElementById('grid').innerHTML = cells.map(([h, p, html]) => `<div class="cell"><h2>${h}</h2><p>${p}</p><div class="scene">${html}</div></div>`).join('');
+  const [c, cl, label, nc] = Q[q], v = `--c:${c};--cl:${cl};--nc:${nc}`;
+  const item = `<div class="item">${axe(c)}</div>`, nm = '<div class="name">Arcanite Reaper</div>';
+  const L = (cls = '') => `<div class="lvl ${cls}"><b>63</b><small>ILVL</small></div>`;
+  const line = (extra = '', rar = true) => `<div class="info">${rar ? `<span class="rq">${label}</span> · ` : ''}Two-Handed Axes${extra}</div>`;
+  // four places, for the item-over-name styles (kind: relic, beam, aura)
+  const below = kind => {
+    const cls = kind === 'beam' ? 'stack beam' : kind === 'aura' ? 'stack aura' : 'stack';
+    const tag = kind === 'aura' ? `<div class="tagw">${label.toUpperCase()}</div>` : '';
+    const rar = kind !== 'aura';
+    const name = inner => kind === 'aura' ? `<div class="namerow">${inner}</div>` : `<div class="plate">${inner}</div>`;
+    return {
+      A: `<div class="${cls}" style="${v}"><div class="pin">${item}${L()}</div>${tag}${name(nm)}${line('', rar)}</div>`,
+      B: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${name(nm + L(kind === 'aura' ? '' : 'end'))}${line('', rar)}</div>`,
+      C: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${kind === 'aura' ? nm : name(nm)}<div class="div">${L()}</div>${line('', rar)}</div>`,
+      D: `<div class="${cls}" style="${v}"><div class="pin">${item}</div>${tag}${name(nm)}${line(` <span class="pill"><i>iLvl</i>63</span>`, rar)}</div>`,
+    };
+  };
+  const splash = {
+    A: `<div class="splash" style="${v}">${item}<div class="slab">${nm}<div class="stamp">${label.toUpperCase()}!</div></div><div class="row">${line('', false)}${L()}</div></div>`,
+    B: `<div class="splash" style="${v}">${item}<div class="slab">${L('left')}${nm}<div class="stamp">${label.toUpperCase()}!</div></div><div class="row">${line('', false)}</div></div>`,
+    C: `<div class="splash" style="${v}">${item}<div class="slab">${nm}<div class="stamp">${label.toUpperCase()}!</div>${L('corner')}</div><div class="row">${line('', false)}</div></div>`,
+    D: `<div class="splash" style="${v}">${item}<div class="slab">${nm}<div class="stamp">${label.toUpperCase()}!</div></div><div class="row">${line(` <span class="pill"><i>iLvl</i>63</span>`, false)}</div></div>`,
+  };
+  const DESC = {
+    relic: { A: 'Pinned to the item’s lower right, like a medal (round 1).', B: 'At the right end of the name’s plate, like Banner and Achievement.', C: 'In a short divider under the name, like Rune decode and Forged letters.', D: 'A small tag at the end of the line.' },
+    splash: { A: 'Beside the type under the banner (round 1).', B: 'At the banner’s left end, opposite the stamp.', C: 'Hanging off the banner’s lower right corner, tilted like the stamp.', D: 'A small tag at the end of the line.' },
+  };
+  const styles = [['Relic', 'The item over its name on a soft plate.', below('relic'), DESC.relic],
+    ['Beam', 'A pillar of light behind the item, the name on a plate.', below('beam'), DESC.relic],
+    ['Aura', 'Soft wisps behind the item; the rarity word spaced out above the name (so the line keeps only the type).', below('aura'), DESC.relic],
+    ['Splash', 'A slanted banner behind a big name and a rarity stamp (the line keeps only the type).', splash, DESC.splash]];
+  document.getElementById('out').innerHTML = styles.map(([h, p, v4, d]) =>
+    `<h3>${h} <small>${p}</small></h3><div class="grid">${['A', 'B', 'C', 'D'].map(k => `<div class="cell"><h2>${h} ${k}</h2><p>${d[k]}</p><div class="scene">${v4[k]}</div></div>`).join('')}</div>`).join('');
 }
-function pick(attr, cb) {
-  document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => {
-    document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); render();
-  });
-}
-pick('v', v => { document.body.className = v; });
-pick('q', v => { q = +v; });
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
+});
 render();
 </script>
 </body>

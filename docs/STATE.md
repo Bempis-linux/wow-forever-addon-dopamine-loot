@@ -85,7 +85,10 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   round 18): Achievement gauge 13x6 and brighter, clearer rarity word, name 21; flat icons centered in the
   emblem (cardY), the level badge text centered. Rune decode / Forged letters: 14 px more under the item, the
   info line = colored rarity + type, the item level in a round badge on the divider. Proposed next (mockup
-  docs/mockups/info-line.html, the user to pick): the same badge for Relic, Beam, Aura, Banner, Splash.
+  docs/mockups/info-line.html): the user picked Banner (badge at the band's right end; line = colored rarity +
+  type; built 2026-11-09) and likes the colored, simpler line; round 2 of the mockup tries four badge spots
+  (A on the item, B end of the name, C divider under the name, D a small tag on the line) for Relic, Beam,
+  Aura, Splash: waiting for picks.
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
