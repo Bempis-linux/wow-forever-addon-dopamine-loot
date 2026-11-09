@@ -348,8 +348,8 @@ local function CreateGeneral()
     "When you loot several items at once (or a lot of money), they spray up and bounce down at the bottom of the screen; the best item lands last and becomes a popup. In combat it waits until the fight is over. More settings on the Loot rain page.", true)
   N.Toggle(cat, "noBag", "Bulging bag",
     "When your bags are nearly full (4 slots or fewer), the backpack button puffs up a notch with each item and strains at the seams; when they're full, the loot spills out and is sucked back in. Herb, mining and other special bags don't count.", true, function() if ns.SyncBag then ns.SyncBag() end end)
-  N.Toggle(cat, "noBagCount", "Slots-left bubble",
-    "A small \"3 left\" bubble above the bulging bag (\"Full\" when there's no room).", true, function() if ns.SyncBag then ns.SyncBag() end end)
+  N.Toggle(cat, "noBagCount", "Slots-left number",
+    "The number of free slots in the bulging bag's corner, like a stack count (a red 0 when there's no room).", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noSound", "Sounds",
     "Turns every Dopamine Loot sound on or off at once. The game's own sounds are not affected. More settings on the Sounds page.", true)
   N.Header(layout, "Try it")

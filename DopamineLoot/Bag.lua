@@ -1,7 +1,8 @@
 -- Dopamine Loot bulging bag (docs/mockups/gathering.html, round 3: Game art + Squash & wobble).
 -- With 4 normal bag slots or fewer left, the backpack button puffs up: a copy of its own icon swells a
--- notch with each slot filled and only partly deflates, inside a clean square edge of ours, amber to red,
--- thicker and brighter with the strain (docs/mockups/bag-frame.html, A); at the last slot it trembles.
+-- notch with each slot filled and only partly deflates, with the game's quality border on it, amber to red,
+-- breathing slowly, and the slots left in its corner (docs/mockups/bag-frame.html round 2: H1 + T1); at the
+-- last slot it trembles.
 -- Each change lands with a squash (wide and short), a stretch and a short settling wobble. Full (the
 -- game's "Inventory is full"): it strains, pops open with a tiny ring, the loot spills out the top and is
 -- sucked back in, and it shakes "nope" (the whole show at
@@ -17,8 +18,10 @@ local FULL_GAP = 4           -- seconds between two full-bag shows
 local MAX_FX = 32
 
 local f                      -- the overlay frame (created on first use)
-local icon, bubble, bubbleText
-local edges, halos, fx = {}, {}, {} -- the square edge's four sides, their soft glow, the little effects
+local BORDER = "Interface\\COMMON\\WhiteIconFrame" -- the game's item-slot quality border, tinted
+local icon, border, borderGlow, count
+local borderA = 0
+local fx = {}
 local free                   -- normal slots free, as last counted (nil until the first count)
 local shown = 99             -- the count the bag shows (the test plays its own)
 local held = 0               -- how puffed up the bag stays (0..1)
@@ -122,40 +125,22 @@ local function Strain(p, full)
   return 1, full and 0.24 or 0.78, 0.35, 0.35 + 0.65 * p
 end
 
--- One side of a square (1 top, 2 right, 3 bottom, 4 left) around (cx, cy), half size ex x ey, w thick
-local function Side(line, i, cx, cy, ex, ey, w, r, g, b, alpha)
-  local e = w / 2 -- reach into the corners so they close
-  local x1, y1, x2, y2
-  if i == 1 then x1, y1, x2, y2 = -ex - e, ey, ex + e, ey
-  elseif i == 2 then x1, y1, x2, y2 = ex, ey + e, ex, -ey - e
-  elseif i == 3 then x1, y1, x2, y2 = ex + e, -ey, -ex - e, -ey
-  else x1, y1, x2, y2 = -ex, -ey - e, -ex, ey + e end
-  line:SetStartPoint("CENTER", f, cx + x1, cy + y1)
-  line:SetEndPoint("CENTER", f, cx + x2, cy + y2)
-  line:SetThickness(w)
-  line:SetColorTexture(r, g, b, alpha)
-end
-
 local function Draw(s, a, open, rot, jx, jy)
   local p = Pressure(shown)
   local sx, sy = s * (1 + a), s / (1 + a)
   local lift = W / 2 * (sy - 1) -- squash around the bottom: the middle rises as it stretches
   local r, g, b, al = Strain(p, shown == 0)
-  -- the icon puffs up inside the edge too
   local k = 1 + 0.14 * held
-  local hx, hy = W * 0.45 * k * sx, W * 0.45 * k * sy -- the icon's half size
+  local w, h = W * 0.9 * k * sx, W * 0.9 * k * sy
   local cx, cy = jx + rot * W, lift + jy + open * 4 -- rot: the "nope" head-shake; open: the pop's hop
   icon:ClearAllPoints()
   icon:SetPoint("CENTER", f, "CENTER", cx, cy)
-  icon:SetSize(hx * 2, hy * 2)
-  -- the square edge just outside the icon: thicker, brighter and a little farther out with strain,
-  -- with a soft glow (wider, faint, additive lines) under it
-  local th = 1.5 + p
-  local ex, ey = hx + 2 + 2 * p, hy + 2 + 2 * p
-  for i = 1, 4 do
-    Side(edges[i], i, cx, cy, ex, ey, th, r, g, b, (0.5 + 0.5 * p) * al)
-    Side(halos[i], i, cx, cy, ex, ey, th + 4 + 6 * p, r, g, b, 0.22 * p)
-  end
+  icon:SetSize(w, h)
+  -- the game's quality border on the icon, tinted by the strain, and a soft copy of it for the glow
+  border:SetVertexColor(r, g, b)
+  borderGlow:SetVertexColor(r, g, b)
+  borderGlow:SetSize(w * 1.18, h * 1.18)
+  borderA = al
 end
 
 -- The squash: volume kept, wide and short first, then tall and narrow, dying out, while the size
@@ -177,16 +162,14 @@ local function Deflate(s0, s1, k)
 end
 
 local dirty = true -- something changed: redraw even if nothing moves
-local function ShowBubble()
+-- The slots left, in the corner like a stack count: amber, a red 0 when full
+local function ShowCount()
   dirty = true
-  if not bubble then return end
-  if ns.settings.noBagCount or shown > THRESHOLD then bubble:Hide(); return end
-  bubbleText:SetText(shown == 0 and "Full" or (shown .. " left"))
-  local tex = bubble.bg
-  if shown == 0 then tex:SetVertexColor(1, 0.35, 0.24); bubbleText:SetTextColor(1, 1, 1)
-  else tex:SetVertexColor(1, 0.75, 0.25); bubbleText:SetTextColor(0.1, 0.07, 0.02) end
-  bubble:SetWidth(bubbleText:GetStringWidth() + 14)
-  bubble:Show()
+  if not count then return end
+  if ns.settings.noBagCount or shown > THRESHOLD then count:Hide(); return end
+  count:SetText(shown)
+  if shown == 0 then count:SetTextColor(1, 0.35, 0.27) else count:SetTextColor(1, 0.82, 0.48) end
+  count:Show()
 end
 
 local function ClearFx()
@@ -246,6 +229,10 @@ local function OnUpdate(_, dt)
     dirty = false
     Draw(s, a, open, rot, jx, jy)
   end
+  -- the border breathes slowly (2.4 s)
+  local breath = 0.65 + 0.35 * (0.5 + 0.5 * math.sin(elapsed * 2 * math.pi / 2.4))
+  border:SetAlpha(borderA * breath)
+  borderGlow:SetAlpha(0.45 * Pressure(shown) * breath)
   local busy = StepFx(dt)
   if held <= 0 and not motion and not nope and not openT and not busy and shown > THRESHOLD then
     f:Hide() -- nothing to show: the game's own button is back on its own
@@ -263,20 +250,17 @@ local function Create()
   back:SetColorTexture(0.05, 0.04, 0.02, 1)
   back:SetSize(W * 0.86, W * 0.86)
   icon = f:CreateTexture(nil, "ARTWORK")
-  for i = 1, 4 do
-    halos[i] = f:CreateLine(nil, "BACKGROUND")
-    halos[i]:SetBlendMode("ADD")
-    edges[i] = f:CreateLine(nil, "OVERLAY")
-  end
-  bubble = CreateFrame("Frame", nil, f)
-  bubble:SetSize(40, 16)
-  bubble:SetPoint("BOTTOM", f, "TOP", 0, 10)
-  bubble.bg = bubble:CreateTexture(nil, "BACKGROUND")
-  bubble.bg:SetAllPoints()
-  bubble.bg:SetTexture(MEDIA .. "Circle.tga") -- stretched: a rounded lozenge
-  bubbleText = bubble:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  bubbleText:SetPoint("CENTER", 0, 0)
-  bubble:Hide()
+  borderGlow = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+  borderGlow:SetTexture(BORDER)
+  borderGlow:SetBlendMode("ADD")
+  borderGlow:SetPoint("CENTER", icon, "CENTER")
+  border = f:CreateTexture(nil, "OVERLAY")
+  border:SetTexture(BORDER)
+  border:SetAllPoints(icon)
+  count = f:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+  count:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -2, 2)
+  count:SetJustifyH("RIGHT")
+  count:Hide()
   f:SetScript("OnUpdate", OnUpdate)
 end
 
@@ -287,7 +271,7 @@ local function Wake()
   local b = Button()
   CopyIcon(b)
   f:Show()
-  ShowBubble()
+  ShowCount()
   return true
 end
 
@@ -296,7 +280,7 @@ end
 ---------------------------------------------------------------------------
 local function Pump(n) -- a slot was filled
   shown = n
-  ShowBubble()
+  ShowCount()
   if Pressure(n) <= 0 or not Wake() then held = Rest(n); return end
   local before, p = held, Pressure(n)
   held = Rest(n)
@@ -307,7 +291,7 @@ local function Release(n, freed) -- space was freed: a sigh for one slot, a big 
   local before = held
   shown = n
   held = Rest(n)
-  ShowBubble()
+  ShowCount()
   if before <= 0 or not Wake() then return end
   local k = math.min(freed, 6) / 6
   Deflate(Size(before), Size(held), k)
@@ -347,7 +331,7 @@ local function Full()
   if not Wake() then return end
   if free == 0 or testing then shown = 0 end -- (an error with space left still plays; the count stays true)
   if held < Rest(shown) then held = Rest(shown) end
-  ShowBubble()
+  ShowCount()
   local now = GetTime()
   if now - lastFull < FULL_GAP then -- too soon: a small "nope" only
     nope = { t = 0, dur = 0.26, amp = 0.09 }
@@ -385,7 +369,7 @@ local function Sync()
   free = CountFree() or free
   if free then shown = free; held = Rest(free) end
   if held > 0 then Wake() end
-  ShowBubble()
+  ShowCount()
 end
 ns.SyncBag = Sync
 
@@ -400,7 +384,7 @@ function ns:BAG_UPDATE_DELAYED()
   if testing then return end -- the test's end syncs
   if not old or not Enabled() then -- the first count (after login), or switched off: no animation
     shown, held = n, Rest(n)
-    if held > 0 and Wake() then ShowBubble() end
+    if held > 0 and Wake() then ShowCount() end
     return
   end
   if n < old then Pump(n) elseif n > old then Release(n, n - old) end

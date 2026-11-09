@@ -8,7 +8,7 @@ G2 game-style tally docked under the minimap or beside the bag, G4 merging "+N",
 color with the unlock icon, G7 notes reset after 8 s idle, calm automatic after N gathers in 10 min (demo 12; default
 in game open, 40?). Crafting unchanged. **The user picked Game art + Squash; the bag is built (Bag.lua, untested in
 game):** switches "Bulging bag" / "Slots-left bubble" and "Test bag" on the first page; ring and drawstring are Line
-widgets (2026-11-09 after testing: drawstring removed, the ring replaced by option A of docs/mockups/bag-frame.html, a clean square edge + soft glow; the user: "pretty good animation"); not shown at 5+ free; full moment from UI_ERROR_MESSAGE (verify `/dump LE_GAME_ERR_INV_FULL, ERR_INV_FULL`
+widgets (2026-11-09 after testing: drawstring removed, the ring replaced by then (the edge and bubble "look like tests") bag-frame.html round 2 picks H1 + T1: the game's WhiteIconFrame quality border tinted amber/red, breathing, and the slots left as a corner number in NumberFontNormal; the user likes the animations); not shown at 5+ free; full moment from UI_ERROR_MESSAGE (verify `/dump LE_GAME_ERR_INV_FULL, ERR_INV_FULL`
 and `/dump MainMenuBarBackpackButton.icon:GetAtlas(), MainMenuBarBackpackButton.icon:GetTexture()`). Known: the
 bag pumps when the loot arrives, before a loot rain's gather reaches it (maybe hold it until the gather). Version
 not bumped (bumped at release). **Gotcha (2026-11-09):** commit 055406a deleted all of DopamineLoot/Media by
