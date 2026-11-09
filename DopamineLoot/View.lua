@@ -58,7 +58,7 @@ ns.STYLES = {
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);
 -- zoom: camera distance multiplier so the item fits that style's frame
 local LAYOUT = {
-  relic = { w = 260, h = 230, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
+  relic = { w = 260, h = 238, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   beam = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 19 },
   banner = { w = 420, h = 170, stage = { -140, -6, 110, 150 }, text = "band", hit = { 20, 20, 30, 30 }, zoom = 1, font = 18 },
   splash = { w = 380, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 24 },
@@ -224,26 +224,18 @@ function ns.CreateView(f)
   f.stampBack = Tex(f.fx, "ARTWORK", WHITE, nil, 4)
   f.fxAll[#f.fxAll + 1] = f.stampEdge
   f.fxAll[#f.fxAll + 1] = f.stampBack
-  -- The item level's own mark (docs/mockups/info-line.html, rounds 1-3), so the line under the name
-  -- keeps the rarity and the type (Banner keeps its old line):
-  -- Splash a number block at the banner's left end; Relic, Beam and Aura a small "iLvl 63" tag at
-  -- the end of the line (a pill: Pill/PillRim in three slices, like Achievement's bar)
+  -- The item level's own mark (docs/mockups/info-line.html, rounds 1-5), so the line under the name
+  -- keeps the rarity and the type (Banner keeps its old line): Splash a number block at the banner's
+  -- left end; Relic, Beam and Aura the number inscribed in the name's underline (the line breaks in the
+  -- middle and the number sits in the gap, white with a soft glow in the rarity color)
   f.lvlBlock = Tex(f.fx, "ARTWORK", MEDIA .. "SlantBlock", nil, 5) -- (leaning like the banner's slash)
   f.lvlEdges = { Tex(f.fx, "ARTWORK", MEDIA .. "SlantRim", nil, 6) }
-  f.pill, f.pillRim = {}, {}
-  for i = 1, 3 do
-    f.pill[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Pill", nil, 5)
-    f.pillRim[i] = Tex(f.fx, "ARTWORK", MEDIA .. "PillRim", nil, 6)
-    local l, r = ({ 0, 0.47, 0.5 })[i], ({ 0.5, 0.48, 1 })[i]
-    f.pill[i]:SetTexCoord(l, r, 0, 1); f.pillRim[i]:SetTexCoord(l, r, 0, 1)
-  end
-  f.lvlParts = { f.lvlBlock }
-  for _, list in ipairs({ f.lvlEdges, f.pill, f.pillRim }) do for _, t in ipairs(list) do f.lvlParts[#f.lvlParts + 1] = t end end
-  for _, t in ipairs(f.lvlParts) do f.fxAll[#f.fxAll + 1] = t end
-  f.pillText = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  f.pillText:SetFont("Fonts\\FRIZQT__.TTF", 9, "")
-  f.pillText:SetShadowColor(0, 0, 0, 1); f.pillText:SetShadowOffset(1, -1)
-  f.pillText:Hide()
+  f.insGlow = Tex(f.fx, "ARTWORK", MEDIA .. "Glow", "ADD", 5)
+  for _, t in ipairs({ f.lvlBlock, f.lvlEdges[1], f.insGlow }) do f.fxAll[#f.fxAll + 1] = t end
+  f.insNum = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  f.insNum:SetFont(TITLE_FONT or "Fonts\\FRIZQT__.TTF", 14, "")
+  f.insNum:SetShadowColor(0, 0, 0, 1); f.insNum:SetShadowOffset(1, -1)
+  f.insNum:Hide()
   f.lvlNum = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   f.lvlTag = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   f.lvlNum:SetFont(TITLE_FONT or "Fonts\\FRIZQT__.TTF", 15, "")
@@ -305,7 +297,7 @@ function ns.CreateView(f)
     self.tag:Hide()
     self.info:SetWidth(0) -- (no limit, unless a style sets one)
     self.stamp:Hide()
-    self.lvlNum:Hide(); self.lvlTag:Hide(); self.pillText:Hide(); self.lvlOn, self.lvlKind = nil, nil
+    self.lvlNum:Hide(); self.lvlTag:Hide(); self.insNum:Hide(); self.lvlOn, self.lvlKind, self.insGap = nil, nil, nil
     self.name:SetAlpha(1)
     self.name:SetShadowOffset(1, -1)
     for _, fs in ipairs({ self.info, self.badges, self.tag }) do fs:SetAlpha(1) end
@@ -528,7 +520,7 @@ function ns.CreateView(f)
     local info = {}
     local st = self.style
     local kind = ShowsItemLevel(item) and (st == "splash" and "block"
-      or (st == "relic" or st == "beam" or st == "aura") and "pill") or nil
+      or (st == "relic" or st == "beam" or st == "aura") and "ins") or nil
     if st == "relic" or st == "beam" then -- (Aura and Splash say the rarity already; Banner keeps its old line)
       info[1] = ("|cff%02x%02x%02x%s|r"):format(math.floor(math.min(1, r + 0.3) * 255), math.floor(math.min(1, g + 0.3) * 255),
         math.floor(math.min(1, b + 0.3) * 255), _G["ITEM_QUALITY" .. q .. "_DESC"] or "")
@@ -544,10 +536,10 @@ function ns.CreateView(f)
       self.lvlTag:SetTextColor(lr, lg, lb)
       self.lvlBlock:SetVertexColor(0.09, 0.065, 0.04, 0.96)
       for _, t in ipairs(self.lvlEdges) do t:SetVertexColor(lr, lg, lb, 1) end
-    elseif kind == "pill" then
-      self.pillText:SetText(("|cff%02x%02x%02xiLvl|r %d"):format(math.floor(lr * 255), math.floor(lg * 255), math.floor(lb * 255), item.ilvl))
-      for _, t in ipairs(self.pill) do t:SetVertexColor(0.09, 0.065, 0.04, 0.96) end
-      for _, t in ipairs(self.pillRim) do t:SetVertexColor(r, g, b, 1) end
+    elseif kind == "ins" then
+      self.insNum:SetText(item.ilvl)
+      self.insNum:SetTextColor(1, 1, 1)
+      self.insGlow:SetVertexColor(r, g, b, 1)
     end
     self.info:SetText(self.style == "compact" and "" or table.concat(info, "  ·  "))
     self.badges:SetText(Badges(item))
@@ -557,24 +549,17 @@ function ns.CreateView(f)
       self.name:SetWidth(math.max(20, math.min(measure(self.name) + 2, self.L.w - self.L.stage[3] - 20 - bw)))
     end
     local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
-    self.pillW = nil
-    if kind == "pill" then
-      local PH = 14
-      local pw = math.floor(self.pillText:GetStringWidth() + 14)
-      self.pillW = pw
-      local above = st == "aura" and self.tag or self.name
-      self.info:ClearAllPoints()
-      self.info:SetPoint("TOP", above, "BOTTOM", -(pw + 6) / 2, -3)
-      self.badges:ClearAllPoints() -- (the badges stay centered under the name)
-      self.badges:SetPoint("TOP", self.info, "BOTTOM", (pw + 6) / 2, -3)
-      for i, list in ipairs({ self.pill, self.pillRim }) do
-        list[1]:SetSize(PH / 2, PH); list[2]:SetSize(math.max(1, pw - PH), PH); list[3]:SetSize(PH / 2, PH)
-        if iw > 0 then list[1]:SetPoint("LEFT", self.info, "RIGHT", 6, 0)
-        else list[1]:SetPoint("TOPLEFT", self.info, "TOPRIGHT", 6, 0) end -- (no line: under the name, not on it)
-        list[2]:SetPoint("LEFT", list[1], "RIGHT"); list[3]:SetPoint("LEFT", list[2], "RIGHT")
-      end
-      self.pillText:ClearAllPoints()
-      self.pillText:SetPoint("CENTER", self.pill[2], "CENTER", 0, 0)
+    if kind == "ins" then
+      -- the number sits on the underline, in a gap; what was under the name moves down to clear it
+      self.insGap = math.floor(self.insNum:GetStringWidth() + 12)
+      self.insNum:ClearAllPoints()
+      self.insNum:SetPoint("CENTER", self.name, "BOTTOM", 0, -2)
+      self.insGlow:SetSize(self.insGap + 16, 22)
+      self.insGlow:SetPoint("CENTER", self.insNum, "CENTER", 0, 0)
+      local below = st == "aura" and self.tag or self.info
+      below:ClearAllPoints()
+      below:SetPoint("TOP", self.name, "BOTTOM", 0, -11)
+      if st == "aura" then self:Underline(nil) end -- (Aura has no plate: just the line)
     end
     if self.style == "banner" then
       -- badges ride the info line inside the band; under the name if there's no info, below it if too long
@@ -587,7 +572,7 @@ function ns.CreateView(f)
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
       end
     end
-    if self.style == "relic" or self.style == "beam" then self:Plate(iw + (self.pillW and self.pillW + 6 or 0)) end
+    if self.style == "relic" or self.style == "beam" then self:Plate(iw) end
     -- Splash: the info tab only when there's info; the stamp's width at its normal size (it's
     -- scaled up by hand as it slams in)
     self.tabBack:SetShown(self.style == "splash" and (self.info:GetText() or "") ~= "")
@@ -617,12 +602,34 @@ function ns.CreateView(f)
 
   -- Relic and beam: the plate behind the text, the underline under the name and the name's shine,
   -- sized to the text as it is now (iw = the info line's width, 0 if there is none)
+  -- the thin line under the name in the rarity color, fading out to both sides; split in the middle
+  -- around the inscribed item level (self.insGap) when there is one. nw: the name's width (nil: measure)
+  function f:Underline(nw)
+    if not nw then
+      local measure = self.name.GetUnboundedStringWidth or self.name.GetStringWidth
+      nw = math.min(measure(self.name), self.name:GetWidth())
+    end
+    local r, g, b = self.r, self.g, self.b
+    local gap = (self.insGap or 0) / 2
+    local gradient = self.underL.SetGradient and CreateColor
+    for i, t in ipairs({ self.underL, self.underR }) do
+      t:SetSize(math.max(gap > 0 and 18 or 1, nw / 2 + 10 - gap), 1) -- (a short name still gets a line each side)
+      t:SetPoint(i == 1 and "TOPRIGHT" or "TOPLEFT", self.name, "BOTTOM", i == 1 and -gap or gap, -1)
+      if gradient then
+        local clear, full = CreateColor(r, g, b, 0), CreateColor(r, g, b, 0.9)
+        t:SetGradient("HORIZONTAL", i == 1 and clear or full, i == 1 and full or clear)
+      else
+        t:SetVertexColor(r, g, b, 0.6)
+      end
+      t:Show()
+    end
+  end
   function f:Plate(iw)
     local measure = self.name.GetUnboundedStringWidth or self.name.GetStringWidth
     local nw = math.min(measure(self.name), self.name:GetWidth())
     local nh = self.name:GetStringHeight() or 20
     local half = math.max(nw, iw) / 2 + 36
-    local h = nh + (iw > 0 and (self.info:GetStringHeight() or 12) + 4 or 0) + 12
+    local h = nh + (iw > 0 and (self.info:GetStringHeight() or 12) + 4 or 0) + 12 + (self.insGap and 8 or 0)
     local r, g, b = self.r, self.g, self.b
     local gradient = self.plateL.SetGradient and CreateColor
     for i, t in ipairs({ self.plateL, self.plateR }) do
@@ -636,17 +643,7 @@ function ns.CreateView(f)
       end
       t:Show()
     end
-    for i, t in ipairs({ self.underL, self.underR }) do
-      t:SetSize(nw / 2 + 10, 1)
-      t:SetPoint(i == 1 and "TOPRIGHT" or "TOPLEFT", self.name, "BOTTOM", 0, -1)
-      if gradient then
-        local clear, full = CreateColor(r, g, b, 0), CreateColor(r, g, b, 0.9)
-        t:SetGradient("HORIZONTAL", i == 1 and clear or full, i == 1 and full or clear)
-      else
-        t:SetVertexColor(r, g, b, 0.6)
-      end
-      t:Show()
-    end
+    self:Underline(nw)
     -- the shine: Uncommon and up, brighter from Epic, twice for a Legendary
     self.nameClip:ClearAllPoints()
     self.nameClip:SetPoint("CENTER", self.name, "CENTER")
@@ -946,19 +943,19 @@ function ns.CreateView(f)
         m:SetAlpha(math.sin(math.pi * t) * 0.7)
       end
     end
-    if self.lvlOn then
-      local bt = math.max(0, math.min(1, (fx - 0.35) / 0.26))
+    if self.lvlOn then -- (the inscribed number comes in with the text; the block pops in a beat later)
+      local bt = math.max(0, math.min(1, (fx - (self.lvlKind == "ins" and 0.05 or 0.35)) / 0.26))
       local bs = bt < 0.6 and 1.15 * (bt / 0.6) or 1.15 - 0.15 * ((bt - 0.6) / 0.4)
       local show = bt > 0
       local kind = self.lvlKind
       if kind == "block" then
         self.lvlBlock:SetSize(math.max(1, 52 * bs), math.max(1, 44 * bs)); self.lvlBlock:SetShown(show)
         for _, t in ipairs(self.lvlEdges) do t:SetShown(show) end
-      else
-        for _, list in ipairs({ self.pill, self.pillRim }) do for _, t in ipairs(list) do t:SetShown(show); t:SetAlpha(bt) end end
-        self.pillText:SetShown(show); self.pillText:SetAlpha(bt)
+      else -- the inscribed number fades in, its glow a little brighter for a moment
+        self.insNum:SetShown(show); self.insNum:SetAlpha(bt)
+        self.insGlow:SetShown(show); self.insGlow:SetAlpha(0.45 * bt + 0.35 * math.sin(math.pi * bt))
       end
-      if kind ~= "pill" then
+      if kind ~= "ins" then
         self.lvlNum:SetShown(show); self.lvlTag:SetShown(show)
         self.lvlNum:SetAlpha(bt); self.lvlTag:SetAlpha(bt)
       end

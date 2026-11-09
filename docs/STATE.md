@@ -102,7 +102,9 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   (Relic, Beam, Aura), an upgrade arrow, a reworked Aura (heartbeat glow, sunbeam column with dust, framed
   rarity word, bigger name), Splash's block slanted. Picks: **Splash's slanted block** (built: SlantBlock/SlantRim
   textures, 52x44); the Gem and Readout didn't feel "final"; the Aura animation rework is pushed to later.
-  Next: a design for the item level / info line that is striking, uses space well and reads at a glance.
+  Then round 5 (2026-11-09): **the inscribed number, number only** (built, untested): Relic, Beam, Aura show the
+  item level white with a soft glow in a gap of the name's underline (f:Underline, insNum, insGlow); the line is
+  colored rarity + type (Aura: type). The iLvl pill is gone.
   **Upgrade arrow API (researched 2026-11-09, works on Forever per Road to Sixty / Narcissus):**
   GetInventoryItemLink("player", slot) (nil = empty, a plain read, no taint/secret); level via
   (C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo)(link); our own equipLoc -> slot table (no
