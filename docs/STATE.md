@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-09, **stop point after 1.2.0** (released and on CurseForge; the game stays on dev to
+_Last checkpoint: 2026-11-09, **stop point after 1.2.1** (released and on CurseForge; the game stays on dev to
 keep working). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
@@ -15,7 +15,7 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   underline (Relic, Beam, Aura) and Splash's slanted block, Reverse disintegration back. Workflow: CurseForge
   "Uploading DopamineLoot-v1.2.0-forever.zip (1.60.1 release) ... Success!", GitHub release made, zip checked
   (one DopamineLoot/ folder). Stop point: **the game stays on dev** (the user's choice, to keep working).
-  After 1.2.0 (on dev, unreleased): **the neat row is removed** (the user: after the loot settles it "jarringly
+- **1.2.1 released** 2026-11-09 (tag `v1.2.1`; CurseForge upload "Success!"): **the neat row is removed** (the user: after the loot settles it "jarringly
   shifts the items around"); items stay where they land, Spread out still nudges them apart as each rests.
   Open / next: the Aura animation rework (heartbeat, sunbeam, framed word: pushed to later), then the
   roadmap: mail / craft finales (verify APIs), edit mode, stats. docs/curseforge.md's description still
