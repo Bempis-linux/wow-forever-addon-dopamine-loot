@@ -1,7 +1,8 @@
 # Session state — Dopamine Loot
 
 _Last checkpoint: 2026-11-09, **stop point after 1.2.1**, night of 2026-11-09 (released and on CurseForge; the game
-stays on dev). Next session: the user reviews docs/mockups/gathering.html round 2 (bag, gathering, crafting). Read this first
+stays on dev). Next session: **polish the bag / gathering / crafting ideas** (the user likes round 2 of
+docs/mockups/gathering.html); start from the polish list under "Polish ideas" below, the user picks. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -33,7 +34,39 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Gathering core: node burst, harvest tally, climbing notes per run, skill-ups with a bar to the next
   unlock, rare finds = full popup, calm after long runs; extras: stack milestones (20), session recap on stop.
   Crafting: Create All pile with a count + closing flourish, the same skill bar, recipe color heads-up
-  (orange -> yellow -> green -> gray). Mockup docs/mockups/gathering.html round 2 shows all of it. APIs for all of this
+  (orange -> yellow -> green -> gray). Mockup docs/mockups/gathering.html round 2 shows all of it; the user
+  likes it (2026-11-09) and wants a polish pass next session.
+  **Polish ideas** (written 2026-11-09 for the next session; the user picks, then mockup round 3):
+  Bag, visual: B1 the bag drawn from game art (the backpack icon in a ring) vs. our own leather bag, both
+  shown; B2 squash-and-stretch with a short settle wobble instead of a straight scale; B3 the strain light
+  in the bag's own color for special bags (herb bag green, mining bag stone); B4 the snap: the drawstring
+  whips out as a line, a tiny "pop" ring; B5 the release puff shaped by how much was freed (a sigh vs. a
+  big exhale). Bag, functional: B6 count only normal bags (bagFamily 0), herbs into an herb bag don't
+  strain it; B7 the full-bag moment fires on the real "Inventory is full" error (loot left in the window),
+  at most once every few seconds; B8 the overlay follows the backpack button and hides with it (Baganator
+  or Edit Mode moving it); B9 a switch and a "Test bag" button on a page; B10 the threshold (4 slots) as a
+  setting; B11 quieter in combat (no sound, small wobble).
+  Gathering, visual: G1 node bursts tuned per material tier (copper chips vs. thorium chips with a blue
+  glint; peacebloom petals vs. golden sansam gold motes); G2 the tally in the game's style (item icons with
+  quality borders, Morpheus numbers) and docked under the minimap or beside the bag (placeable later with
+  edit mode); G3 the tally row slides to the top when it changes; G4 the "+N" counts merging when gathers
+  come fast; G5 the skill bar in the profession's color with the unlock's icon at its end; G6 a rare find's
+  burst in the node's style, not the generic one. Gathering, functional: G7 the notes reset after 8 s idle,
+  and "calm" kicks in after N gathers in 10 min (setting), dropping back after a break; G8 the tally per
+  session and per zone, kept until logout (or a reset button), the recap after 60 s idle; G9 stacks use the
+  item's real stack size (GetItemInfo maxStack), not 20; G10 skill-ups from CHAT_MSG_SKILL diffing
+  GetProfessionInfo, the next unlock from a small table per profession (Tin 65, Silverleaf 70...); G11
+  rare = item quality >= Uncommon from a gather, or a small list (Black Lotus, Arcane Crystal) for the
+  Legendary treatment; G12 a Gathering settings page: on/off per kind, tally on/off, sounds, calm.
+  Crafting, visual: C1 the pile shows the real item icon stacking with a slight fan; C2 the closing
+  flourish in the profession's style (anvil sparks, a potion fizz, a snip of thread); C3 the recipe chip
+  next to the trade skill window, or as a toast if the window is closed; C4 a "+N skill" summary on the
+  closing line ("×12 Silk Bandage · Tailoring +4"). Crafting, functional: C5 batch "You create" lines
+  into one pile (the burst collector), end on UPDATE_TRADESKILL_CAST_STOPPED or a 2 s gap; C6 single crafts
+  stay a normal popup; C7 recipe colors from the trade skill API's difficulty (verify on Forever) or the
+  skill thresholds; C8 crafted items skip the rain; C9 cancel mid-batch closes the pile with the count so
+  far. Shared: S1 one "Professions" settings page for gathering + crafting; S2 every piece follows the
+  existing Calm / sound / combat rules; S3 one shared skill-bar widget for gathering and crafting. APIs for all of this
   (researched 2026-11-09, evidence from Forever addons RoadToSixty, NodeSight, Narcissus, EasyFishing):
   - Bag space: C_Container.GetContainerNumFreeSlots(0..4) -> free, bagFamily; count only bagFamily == 0;
     BAG_UPDATE_DELAYED. Full bags: UI_ERROR_MESSAGE (errorType, msg): errorType == LE_GAME_ERR_INV_FULL or
