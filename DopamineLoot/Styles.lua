@@ -111,8 +111,11 @@ kits.achievement = {
     c.bevel:SetHeight(1)
     c.badge:SetSize(40, 40); c.badgeRing:SetSize(40, 40)
     c.badge:SetPoint("CENTER", c.fillEnd, "RIGHT", -6, 0); c.badgeRing:SetPoint("CENTER", c.badge, "CENTER")
-    c.lvl:SetPoint("CENTER", c.badge, "CENTER", 0, 3)
-    c.lvlTag:SetPoint("CENTER", c.badge, "CENTER", 0, -10)
+    -- the number and "ILVL" as one centered block (full badge width, centered text: the title font's
+    -- digits sit left of their box when anchored by their own center)
+    for _, fs in ipairs({ c.lvl, c.lvlTag }) do fs:SetWidth(40); fs:SetJustifyH("CENTER") end
+    c.lvl:SetPoint("CENTER", c.badge, "CENTER", 1, 4)
+    c.lvlTag:SetPoint("CENTER", c.badge, "CENTER", 0, -9)
     f.tag:SetPoint("LEFT", f, "CENTER", ex + TEXT_X, 21)
     f.name:SetPoint("LEFT", f, "CENTER", ex + TEXT_X, 1)
     f.name:SetWidth(230)

@@ -239,16 +239,34 @@
     background: radial-gradient(circle, rgba(160,150,140,.35), transparent 70%); animation: smoke 1.6s ease-out both; }
   @keyframes smoke { 0% { opacity: 0; transform: scale(.5) } 30% { opacity: 1 } 100% { opacity: 0; transform: translate(6px, -52px) scale(2.2) } }
   .F4 .item { filter: drop-shadow(0 6px 12px color-mix(in srgb, #ff7a1a 35%, transparent)); }
+  /* round 18: the polish (body.polish) */
+  .polish .gauge { gap: 3px; } .polish .gauge i { width: 13px; height: 6px; border-radius: 2px; background: rgba(255,255,255,.2); }
+  .polish .gauge i.on { box-shadow: 0 0 6px var(--c), 0 0 2px #fff inset; filter: brightness(1.25); }
+  .polish .tag { font-size: 10.5px; color: color-mix(in srgb, var(--cl) 80%, #fff); text-shadow: 0 0 6px color-mix(in srgb, var(--c) 60%, transparent); }
+  .polish .pop .name { font-size: 23px; }
+  .polish .F .item { margin-bottom: 16px; }
+  .polish .scene { height: 250px; } .polish .uq.F { height: auto; } .polish .F > * { flex: none; }
+  .F .div b { display: none; }
+  .polish .F .div { width: 230px; height: 34px; margin: 2px 0 0; }
+  .polish .F .div::before, .polish .F .div::after { top: 16.5px; width: 92px; }
+  .polish .F .div i { display: none; }
+  .polish .F .div b { display: flex; position: absolute; left: 50%; top: 0; width: 34px; height: 34px; margin-left: -17px; border-radius: 50%; flex-direction: column; align-items: center; justify-content: center;
+    background: #160f08; border: 2px solid var(--c); box-shadow: 0 0 8px -2px var(--c); box-sizing: border-box; line-height: 1; }
+  .polish .F .div b span { font: 800 13px Georgia, serif; color: #fff; }
+  .polish .F .div b small { font: 800 5.5px system-ui; letter-spacing: 1px; color: var(--cl); margin-top: 1px; }
+  .F .meta .rq { color: var(--cl); }
 </style>
 </head>
-<body>
+<body class="polish">
 <header>
-  <h1>Achievement style, final</h1>
-  <p>The picks: Capsule 3 becomes the Achievement style; Brush stroke, Rune decode, Forged letters and Ember burn-in become new popup styles. Pick a rarity, then Replay.</p>
+  <h1>Popup polish (round 18)</h1>
+  <p>Before is what's in the game; After is the polish. Achievement: a taller, brighter rarity gauge, a clearer rarity word and a slightly bigger name. Rune decode and Forged letters: more room between the item and the name, and the info line shortened the Achievement way: the rarity and type on the line (the rarity in its color), the item level in a small round badge in the middle of the divider. Pick a rarity, then Replay.</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
   <button data-q="2">Uncommon</button><button data-q="3" class="on">Rare</button><button data-q="4">Epic</button><button data-q="5">Legendary</button>
+  <span>Look</span>
+  <button data-pol="0">Before</button><button data-pol="1" class="on">After</button>
   <button id="replay">Replay (R)</button>
   <label><input type="checkbox" id="isnew" checked> First time looted</label>
   <label><input type="checkbox" id="isup" checked> Upgrade</label>
@@ -256,10 +274,8 @@
 <h3>Keepers</h3>
 <div class="grid">
   <div class="cell keep"><h2>Capsule 3, badge and gauge</h2><p>The Achievement style: the plain Capsule with the item-level badge, the rarity gauge, a thin bevel and the emblem's inner ring.</p><div class="scene" id="s3"></div></div>
-  <div class="cell keep"><h2>U1. Brush stroke</h2><p>One thick, rough stroke of paint in the item's color swipes across, the name over it in big white italic, flecks flying off the end.</p><div class="scene" id="u1"></div></div>
   <div class="cell keep"><h2>F1. Rune decode</h2><p>Each letter holds its place as a glowing rune flickering through other runes. Left to right they settle into letters with a white flash, and each rune floats off as it goes.</p><div class="scene" id="f1"></div></div>
   <div class="cell keep"><h2>F2. Forged letters</h2><p>Each letter is struck in white-hot with a flash behind it, then cools through orange to its color. Sparks arc off every strike and fall; the divider cools last.</p><div class="scene" id="f2"></div></div>
-  <div class="cell keep"><h2>F4. Ember burn-in</h2><p>An ember edge sweeps across; the letters burn in glowing hot just behind it, then cool to their color. Embers and a little smoke rise off the edge.</p><div class="scene" id="f4"></div></div>
 </div>
 <script>
 'use strict';
@@ -321,7 +337,9 @@ function render() {
   $('u7').innerHTML = `<div class="uq U7" style="${vars}">${bands}${item}<div class="name" data-t="${nm}">${nm}</div><div class="rar">&gt; ${label.toUpperCase()}</div>${meta2}</div>`;
   // fantasy uniques; n (1 Uncommon .. 4 Legendary) scales the sparks, mist and embers
   const n = q - 1, fv = `${vars};--nc:${NAMECOLOR[q]}`, R = (a, b) => a + Math.random() * (b - a);
-  const tail = `<div class="div"><i></i></div><div class="meta">${label} · Two-Hand Axe · Item level 63</div>`;
+  const pol = document.body.classList.contains('polish');
+  const tail = pol ? `<div class="div"><i></i><b><span>63</span><small>ILVL</small></b></div><div class="meta"><span class="rq">${label}</span> · Two-Hand Axe</div>`
+    : `<div class="div"><i></i></div><div class="meta">${label} · Two-Hand Axe · Item level 63</div>`;
   const chars = [...nm], glyph = ch => ch === ' ' ? '&nbsp;' : ch;
   // F1: runes cycle in each letter's place until its turn; a settled letter sends its rune floating up
   $('f1').innerHTML = `<div class="uq F F1" style="${fv}"><div class="glow"></div>${item}<div class="name">${chars.map(ch => `<span class="${ch === ' ' ? '' : 'r'}" data-r="${RUNES[0]}">${glyph(ch)}</span>`).join('')}</div>${tail}</div>`;
@@ -366,6 +384,9 @@ document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
 });
 $('replay').onclick = render;
+document.querySelectorAll('[data-pol]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-pol]').forEach(x => x.classList.toggle('on', x === b)); document.body.classList.toggle('polish', b.dataset.pol === '1'); render();
+});
 for (const id of ['isnew', 'isup']) $(id).onchange = render;
 addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') render(); });
 render();

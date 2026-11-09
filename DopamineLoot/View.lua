@@ -64,8 +64,8 @@ local LAYOUT = {
   splash = { w = 380, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 24 },
   aura = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 20 },
   -- (Achievement: the stage is the emblem, a little higher so the item pokes out of its top; the
-  -- camera farther back so the item fits it)
-  achievement = { w = 400, h = 150, stage = { -140, 10, 96, 120 }, text = "right", hit = { 30, 20, 20, 20 }, zoom = 1.6, font = 19 },
+  -- camera farther back so the item fits it; cardY puts a flat icon back in the emblem's middle)
+  achievement = { w = 400, h = 150, stage = { -140, 10, 96, 120 }, cardY = -10, text = "right", hit = { 30, 20, 20, 20 }, zoom = 1.6, font = 19 },
   runes = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
   forged = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
@@ -254,6 +254,8 @@ function ns.CreateView(f)
     for i, m in ipairs(self.rise) do m:SetSize(4 + (i % 2), 4 + (i % 2)) end -- beam's motes (SetItem shows them for Rare+)
     local cs = L.icon and L.stage[3] or CARD
     self.card:SetSize(cs, cs)
+    self.card:ClearAllPoints()
+    self.card:SetPoint("CENTER", self.stage, "CENTER", 0, L.cardY or 0)
     self.shine:Hide()
     self.nameShine:Hide()
     self.shineTimes = nil

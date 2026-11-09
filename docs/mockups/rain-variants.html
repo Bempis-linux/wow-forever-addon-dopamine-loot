@@ -24,18 +24,20 @@
 </head>
 <body>
 <header>
-  <h1>Loot rain variants, round 7: the Vacuum in a wave, each item its own way</h1>
-  <p><b>Gather</b> compares the end of the rain: <b>One by one</b> (today: each item flies into the bag a beat after the last) or <b>Vacuum</b> (new: a short inhale, then everything is sucked into the bag together and it gulps it in one pop). Rare and better still rise into their popups. Round 5: New: <b>Quick burst</b>, a short Fountain where everything blows up at once. <b>Finale</b> on/off is the proposed switch for the best item's finale in every animation (it would replace "Hang time for the best"). Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
+  <h1>Loot rain, round 8: polishing the Big bang and Quick burst</h1>
+  <p><b>Polish</b> compares what&rsquo;s in the game (Before) with the cleanup (After). Big bang: one crisp ring in the best item&rsquo;s color and a beat of stillness instead of the flash; the dim fades out; sparks spiral into the core; the loot leaves as an even ring, coins fastest and grays slowest; softer walls and a little air so it settles sooner; slower spin; the core waits for a quiet moment before it collapses; everything slides into a neat row under the best. Quick burst: the even fan, speed by weight, slower spin and the neat row. <b>Gather</b> compares the end of the rain: <b>One by one</b> (today: each item flies into the bag a beat after the last) or <b>Vacuum</b> (new: a short inhale, then everything is sucked into the bag together and it gulps it in one pop). Rare and better still rise into their popups. Round 5: New: <b>Quick burst</b>, a short Fountain where everything blows up at once. <b>Finale</b> on/off is the proposed switch for the best item's finale in every animation (it would replace "Hang time for the best"). Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
 </header>
 <div class="bar">
   <span>Animation</span>
-  <button data-mode="fountain">Fountain (today)</button><button data-mode="bang">Big bang</button><button data-mode="burst" class="on">Quick burst (new)</button>
+  <button data-mode="fountain">Fountain (today)</button><button data-mode="bang" class="on">Big bang</button><button data-mode="burst">Quick burst</button>
   <span>Haul</span>
   <button data-n="8">8</button><button data-n="20" class="on">20</button><button data-n="40">40</button>
   <span>Best</span>
   <button data-best="3">Rare</button><button data-best="4" class="on">Epic</button><button data-best="5">Legendary</button>
   <span>Gather</span>
   <button data-gather="one">One by one (today)</button><button data-gather="vac" class="on">Vacuum (new)</button>
+  <span>Polish</span>
+  <button data-pol="0">Before (the game)</button><button data-pol="1" class="on">After</button>
   <span>Finale</span>
   <button data-fin="1" class="on">On</button><button data-fin="0">Off</button>
   <button id="play">Play (Space)</button>
@@ -55,7 +57,7 @@ const COIN = { gold: ['#ffd84a', '#a8781a'], silver: ['#e8eef4', '#8a96a2'], cop
 const SIZE = 34, G = 1500;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 800, H = 520, DPR = 1;
-let mode = 'burst', haul = 20, best = 4, finale = true, gather = 'vac';
+let mode = 'bang', haul = 20, best = 4, finale = true, gather = 'vac', pol = true, freeze = 0;
 let sprites = [], parts = [], waves = [], t = 0, shake = 0, shakeMax = 0.35, flash = 0, scene = null;
 const R = (a, b) => a + Math.random() * (b - a);
 const BC = () => QC[best] === '#ffffff' ? '#fff4c0' : QC[best];
@@ -85,18 +87,20 @@ function sprite(it) { return { it, x: 0, y: 0, vx: 0, vy: 0, rot: 0, vr: 0, stat
 
 function physics(s, dt, walls, grav = G) {
   s.vy += grav * dt;
+  if (s.air && !s.landed) { const d = Math.exp(-s.air * dt); s.vx *= d; s.vy *= Math.exp(-s.air * 0.4 * dt); }
   s.x += s.vx * dt; s.y += s.vy * dt; s.rot += s.vr * dt;
   const half = SIZE * s.s / 2;
   if (walls) {
-    if (s.x < half) { s.x = half; s.vx = Math.abs(s.vx) * 0.72; }
-    if (s.x > W - half) { s.x = W - half; s.vx = -Math.abs(s.vx) * 0.72; }
-    if (s.y < half) { s.y = half; s.vy = Math.abs(s.vy) * 0.72; }
+    const we = s.wallE || 0.72;
+    if (s.x < half) { s.x = half; s.vx = Math.abs(s.vx) * we; }
+    if (s.x > W - half) { s.x = W - half; s.vx = -Math.abs(s.vx) * we; }
+    if (s.y < half) { s.y = half; s.vy = Math.abs(s.vy) * we; }
   } else if (s.x < half || s.x > W - half) { s.x = Math.max(half, Math.min(W - half, s.x)); s.vx *= -0.5; }
   if (s.y > FLOOR() - half) {
     s.y = FLOOR() - half;
     if (s.vy > 160) {
       const hit = !s.landed; s.landed = true;
-      s.vy = -s.vy * (s.slamming ? 0.18 : walls ? 0.45 : 0.32); s.vx *= 0.8; s.vr *= 0.6;
+      s.vy = -s.vy * (s.slamming ? 0.18 : s.floorE || (walls ? 0.45 : 0.32)); s.vx *= 0.8; s.vr *= 0.6;
       if (hit) land(s);
     } else rest(s);
   }
@@ -147,6 +151,22 @@ function burst(x, y, q, big) {
   }
   if (q >= 4 || big) waves.push({ x, y, age: 0, life: 0.6, r: 90 * (big ? 1.6 : 1), color: c });
 }
+// polish: how fast a piece flies by what it is (coins lightest .. grays heaviest)
+const WEIGHT = s => s.it.coin ? 1.3 : s.it.q >= 2 ? 1.05 : s.it.q === 1 ? 0.92 : 0.76;
+function spiralMotes(x, y, dt, rate, reach) {
+  scene.moteT = (scene.moteT || 0) - dt;
+  while (scene.moteT <= 0) { scene.moteT += rate;
+    parts.push({ spiral: true, cx: x, cy: y, a: Math.random() * Math.PI * 2, d: R(reach * 0.7, reach), w: 5, life: 0.5, age: 0, x, y, size: R(1.2, 2.4), color: BC() }); }
+}
+// polish: once everything rests, it slides into an even row (or two) centered under the best
+function neatRow() {
+  const step = SIZE + 6, rest = sprites.filter(s => !s.it.best), y0 = FLOOR() - SIZE / 2;
+  const left = rest.filter(s => s.x < W / 2).sort((a, b) => b.x - a.x), right = rest.filter(s => s.x >= W / 2).sort((a, b) => a.x - b.x);
+  const per = Math.floor((W / 2 - 30) / step) - 1;
+  for (const [list, dir] of [[left, -1], [right, 1]]) list.forEach((s, i) => {
+    const row = Math.floor(i / per), col = i % per;
+    s.tx = W / 2 + dir * (col + 1) * step; s.ty = y0 - row * (SIZE + 2); s.restT = 0; s.rot0 = s.rot; });
+}
 function pullMotes(x, y, dt, rate, reach) {
   scene.moteT = (scene.moteT || 0) - dt;
   while (scene.moteT <= 0) { scene.moteT += rate;
@@ -187,18 +207,28 @@ const MODES = {
   },
   bang: {
     WIND: 0.75,
-    start(list) { this.cx = W / 2; this.cy = H * 0.45; this.banged = false; this.collapseAt = this.WIND + 1.2;
-      list.forEach(s => { s.x = this.cx; s.y = this.cy; s.at = this.WIND; }); },
+    start(list) { this.cx = W / 2; this.cy = H * 0.45; this.banged = false; this.collapseAt = pol ? Infinity : this.WIND + 1.2; this.decided = !pol;
+      let i = 0; list.forEach(s => { s.x = this.cx; s.y = this.cy; s.at = this.WIND; if (!s.it.best) s.slot = i++; }); },
     launch(s) {
-      if (!this.banged) { this.banged = true; flash = 1; shake = shakeMax = 0.2;
-        waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' }); burst(this.cx, this.cy, best, true); }
+      if (!this.banged) { this.banged = true;
+        if (pol) { freeze = 0.07; shake = shakeMax = 0.1; // (one crisp ring in the best's color; a beat of stillness instead of the flash)
+          waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.6, r: 300, color: BC() }); burst(this.cx, this.cy, best, false); }
+        else { flash = 0.3; shake = shakeMax = 0.2;
+          waves.push({ x: this.cx, y: this.cy, age: 0, life: 0.8, r: Math.max(W, H) * 0.6, color: '#fff1c8' }); burst(this.cx, this.cy, best, true); } }
       if (s.it.best && finale) { s.phase = 'held'; return; } // (it stays in the core)
-      const a = Math.random() * Math.PI * 2, sp = R(700, 1500);
-      s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-9, 9);
+      if (pol) { // evenly spread (the golden angle), speed by weight, softer walls, a little air, slow spin
+        const a = s.slot * 2.39996323 + R(-0.12, 0.12), sp = 1150 * WEIGHT(s) * R(0.92, 1.08);
+        s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-3, 3); s.wallE = 0.5; s.floorE = 0.35; s.air = 0.9;
+      } else { const a = Math.random() * Math.PI * 2, sp = R(700, 1500);
+        s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp; s.vr = R(-9, 9); }
     },
     pre(dt) {
-      if (t < this.WIND) pullMotes(this.cx, this.cy, dt, 0.012, 260);
-      else if (finale && t > this.collapseAt - 0.3 && t < this.collapseAt) pullMotes(this.cx, this.cy, dt, 0.008, 160);
+      if (t < this.WIND) (pol ? spiralMotes : pullMotes)(this.cx, this.cy, dt, pol ? 0.02 : 0.012, 260);
+      else if (finale && t > this.collapseAt - 0.3 && t < this.collapseAt) (pol ? spiralMotes : pullMotes)(this.cx, this.cy, dt, pol ? 0.015 : 0.008, 160);
+      if (!this.decided && t > this.WIND) { // polish: the core waits for a quiet moment, then collapses
+        const rest = sprites.filter(s => !s.it.best), down = rest.filter(s => s.state === 'rest' || (s.landed && Math.abs(s.vy) < 200)).length;
+        if (down >= rest.length * 0.8 || t > this.WIND + 2.6) { this.decided = true; this.collapseAt = Math.max(t + 0.45, this.WIND + 1.0); }
+      }
     },
     tick(s, dt) {
       if (!s.it.best || !s.phase) return physics(s, dt, true);
@@ -217,7 +247,8 @@ const MODES = {
     },
     drawPre() {
       let u, r;
-      if (t < this.WIND) { u = t / this.WIND; const pinch = u > 0.85 ? 1 - (u - 0.85) / 0.15 * 0.7 : 1; r = (6 + 26 * u * u) * pinch;
+      if (pol && t >= this.WIND && t < this.WIND + 0.3) { ctx.fillStyle = `rgba(0,0,0,${0.25 * (1 - (t - this.WIND) / 0.3)})`; ctx.fillRect(0, 0, W, H); } // (the dim fades out)
+      if (t < this.WIND) { u = t / this.WIND; const pinch = u > 0.85 ? 1 - (u - 0.85) / 0.15 * (pol ? 0.85 : 0.7) : 1; r = (6 + 26 * u * u) * pinch;
         ctx.fillStyle = `rgba(0,0,0,${0.25 * u})`; ctx.fillRect(0, 0, W, H); }
       else if (finale && t < this.collapseAt) { u = 1; const k = (t - this.WIND) / (this.collapseAt - this.WIND); r = t > this.collapseAt - 0.3 ? 30 * (this.collapseAt - t) / 0.3 : 30 + 6 * Math.sin(t * 6) * (1 - k * 0.3); }
       else return;
@@ -231,13 +262,16 @@ const MODES = {
   // (a flash, a dome and sparks in the best item's color); the best rises with them, hangs, slams
   burst: {
     WIND: 0.45,
-    start(list) { this.fired = false; list.forEach(s => { s.x = W / 2; s.y = FLOOR() - 10; s.at = this.WIND + R(0, 0.04); }); },
+    start(list) { this.fired = false; const n = list.filter(s => !s.it.best).length; let j = 0;
+      list.forEach(s => { s.x = W / 2; s.y = FLOOR() - 10; s.at = this.WIND + R(0, 0.04); if (!s.it.best) s.fan = -1 + 2 * (j++ + 0.5) / n; }); },
     launch(s) {
       if (!this.fired) { this.fired = true; flash = 0.45; shake = shakeMax = 0.12;
         waves.push({ x: W / 2, y: FLOOR(), age: 0, life: 0.5, r: 240, color: BC(), dome: true });
         burst(W / 2, FLOOR() - 20, best, false); dust(W / 2, FLOOR(), 12, 1.2); }
       s.y = FLOOR() - 10; s.x = W / 2 + R(-12, 12);
       if (s.it.best && finale) { s.vx = 0; s.vy = -Math.sqrt(2 * G * (FLOOR() - H * 0.15)); s.phase = 'rise'; return; }
+      if (pol) { const a = s.fan + R(-0.04, 0.04); // evenly across the fan, speed by weight, slow spin
+        s.vx = a * 430; s.vy = -990 * (0.8 + 0.2 * WEIGHT(s)) * R(0.95, 1.05) * (1 - 0.25 * Math.abs(a)); s.vr = R(-3, 3); s.floorE = 0.28; return; }
       const a = R(-1, 1);
       s.vx = a * 430 + R(-40, 40); s.vy = -R(780, 1200) * (1 - 0.25 * Math.abs(a)); s.vr = R(-8, 8);
     },
@@ -259,7 +293,9 @@ const BAG = () => [W - 46, H - 22];
 function gatherStep(dt) {
   scene.bagBump = Math.max(0, scene.bagBump - dt * 4);
   if (!scene.gathering) {
-    if (!scene.gatherAt && sprites.length && sprites.every(s => s.state === 'rest')) scene.gatherAt = t + 0.7;
+    if (!scene.gatherAt && sprites.length && sprites.every(s => s.state === 'rest')) {
+      if (pol && mode !== 'fountain' && !scene.neat) { scene.neat = true; neatRow(); }
+      scene.gatherAt = t + (pol && mode !== 'fountain' ? 1.0 : 0.7); }
     if (!scene.gatherAt || t < scene.gatherAt) return;
     scene.gathering = true;
     const order = [...sprites].sort((a, b) => a.x - b.x), n = order.length;
@@ -299,6 +335,7 @@ function gatherStep(dt) {
   }
 }
 function update(dt) {
+  if (freeze > 0) { freeze -= dt; dt *= 0.04; } // (the polished Big bang's beat of stillness at the burst)
   t += dt;
   const M = MODES[mode];
   if (M.pre) M.pre(dt);
@@ -309,6 +346,7 @@ function update(dt) {
   }
   gatherStep(dt);
   for (const p of parts) { p.age += dt; if (p.age < 0) continue;
+    if (p.spiral) { p.a += p.w * dt; p.d *= Math.exp(-4.2 * dt); p.x = p.cx + Math.cos(p.a) * p.d; p.y = p.cy + Math.sin(p.a) * p.d * 0.85; continue; }
     if (p.pull) { const k = Math.min(1, dt * 9); p.x += (p.tx - p.x) * k; p.y += (p.ty - p.y) * k; continue; }
     p.vy += (p.g || 0) * dt; if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; } p.x += p.vx * dt; p.y += p.vy * dt; }
   parts = parts.filter(p => p.age < p.life);
@@ -393,6 +431,7 @@ pick('n', v => { haul = +v; });
 pick('best', v => { best = +v; });
 pick('fin', v => { finale = v === '1'; });
 pick('gather', v => { gather = v; });
+pick('pol', v => { pol = v === '1'; });
 document.getElementById('play').onclick = start;
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); start(); } });
 addEventListener('resize', resize);
