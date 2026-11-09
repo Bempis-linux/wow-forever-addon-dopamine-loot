@@ -1,7 +1,7 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-09, **stop point after 1.2.1** (released and on CurseForge; the game stays on dev to
-keep working). Read this first
+_Last checkpoint: 2026-11-09, **stop point after 1.2.1**, night of 2026-11-09 (released and on CurseForge; the game
+stays on dev). Next session: the user picks from docs/mockups/gathering.html (bulging bag, gathering pops). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -17,6 +17,20 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   (one DopamineLoot/ folder). Stop point: **the game stays on dev** (the user's choice, to keep working).
 - **1.2.1 released** 2026-11-09 (tag `v1.2.1`; CurseForge upload "Success!"): **the neat row is removed** (the user: after the loot settles it "jarringly
   shifts the items around"); items stay where they land, Spread out still nudges them apart as each rests.
+  **New priority (the user, 2026-11-09), before the roadmap:** 1. **the bulging bag** (our own overlay on
+  the backpack button: rounder the fuller; with few slots left each loot makes it swell/wobble, amber
+  stitches, a "N left" bubble; full: the item bounces off, the bag shakes "no", dust, red "Bags full");
+  2. **gathering pops** ("gathering is addictive already: add to it without being annoying for hours"):
+  a small themed burst at the node (leaves/petals, rock chips + spark, splash ring, tufts), pieces arc into a
+  **harvest tally** (session counts per material, "+N", fades when idle), rare finds (gems, rare herbs/fish)
+  get a bigger burst + the normal popup, **skill-ups** with a bar to the next unlock, **calm** after many
+  gathers (smaller, silent; the tally still counts). Mockup: docs/mockups/gathering.html (round 1, no picks
+  yet). 3. then **profession crafting** (rounds off professions; the Create All finale). APIs for all of this
+  (bag space, full-bag error, gather source, skill-ups, created items) were being checked when the session
+  ended: re-run the wow-api-researcher if the findings below are missing.
+  Ideas list from 2026-11-09 (not picked yet): roll-win dice + WON stamp, junk-selling finale, AH-money mail
+  rain, trophy shelf (best drops in 3D), first-of-its-kind moments, gold milestones, lucky drop, screenshot
+  at an Epic's peak.
   Open / next: the Aura animation rework (heartbeat, sunbeam, framed word: pushed to later), then the
   roadmap: mail / craft finales (verify APIs), edit mode, stats. docs/curseforge.md's description still
   lists 1.1.0's features (the user updates the project page by hand if wanted).

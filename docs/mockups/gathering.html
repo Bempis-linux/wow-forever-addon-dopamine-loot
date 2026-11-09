@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bag and Gathering</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  h2 { font-size: 14px; margin: 16px 18px 2px; color: var(--gold); }
+  p.lead { margin: 0 18px 4px; color: var(--muted); max-width: 1000px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button:hover { background: #3a3020; } button.on { background: #4a3c1c; border-color: #b08a3a; }
+  button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 300px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 40% 75%, #2d3b2a, #172015 60%, #0d120c); }
+  .fx { position: absolute; pointer-events: none; }
+
+  /* ---------- the bag ---------- */
+  .actionbar { position: absolute; right: 0; bottom: 0; left: 0; height: 46px; background: linear-gradient(#1a1610, #0c0a07); border-top: 1px solid #3a3020; }
+  .slot { position: absolute; bottom: 5px; width: 36px; height: 36px; border: 1px solid #5a4a2a; border-radius: 3px; background: #15110b; }
+  .bag { position: absolute; right: 22px; bottom: 5px; width: 40px; height: 40px; transform-origin: 50% 100%; }
+  .bag svg { width: 100%; height: 100%; overflow: visible; }
+  .bubble { position: absolute; right: 18px; bottom: 50px; padding: 1px 7px 2px; border-radius: 9px; font: 800 11px system-ui; color: #1a1205; background: #ffc040;
+    box-shadow: 0 0 8px rgba(255,180,40,.6); opacity: 0; transform: scale(.4); transition: opacity .2s, transform .25s cubic-bezier(.3,1.8,.5,1); }
+  .bubble.show { opacity: 1; transform: none; }
+  .bubble.full { background: #ff5a3c; color: #fff; box-shadow: 0 0 10px rgba(255,80,50,.7); }
+  .char { position: absolute; left: 50%; bottom: 60px; font-size: 40px; transform: translateX(-50%); }
+  .icon { width: 30px; height: 30px; border: 2px solid var(--qc, #1eff00); border-radius: 4px; background: #16120c; display: flex; align-items: center; justify-content: center; font-size: 17px; box-sizing: border-box; }
+
+  /* ---------- gathering ---------- */
+  .node { position: absolute; left: 34%; bottom: 52px; font-size: 44px; transform-origin: 50% 100%; }
+  .tally { position: absolute; right: 16px; top: 60px; width: 210px; display: flex; flex-direction: column; gap: 4px; transition: opacity .6s; }
+  .tally .head { font: 700 10px system-ui; letter-spacing: 2px; color: #b9b09a; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .row { display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 3px; border-radius: 4px;
+    background: linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.15)); }
+  .row .icon { width: 24px; height: 24px; font-size: 14px; border-width: 1.5px; }
+  .row .nm { flex: 1; font: 600 12px Georgia, serif; color: #fff; white-space: nowrap; }
+  .row .n { font: 800 13px system-ui; color: #ffe9a8; min-width: 32px; text-align: right; }
+  .row .plus { font: 800 11px system-ui; color: #9dff8a; margin-left: 4px; opacity: 0; }
+  .skill { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; }
+  .skill .t { font: 700 15px Georgia, serif; color: #fff; text-shadow: 0 0 8px #3a8cff, 0 1px 0 #000; }
+  .skill .t b { color: #9cc8ff; }
+  .skill .barw { width: 200px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .skill .barw i { display: block; height: 100%; background: linear-gradient(90deg, #3a8cff, #9cc8ff); box-shadow: 0 0 6px #3a8cff; }
+  .skill small { font: 600 10px system-ui; color: #b9b09a; }
+  .calmnote { position: absolute; left: 12px; top: 10px; font: 600 11px system-ui; color: #9a927e; }
+</style>
+</head>
+<body>
+<header>
+  <h1>The bulging bag, and gathering that pops</h1>
+</header>
+
+<h2>1. The bulging bag</h2>
+<p class="lead">Our own drawing over the game's backpack button (the game's frames stay untouched). The bag is drawn a little fuller the fuller your bags are. With a few slots left, each item that goes in makes it swell and wobble, the stitches glow amber and a small bubble says how many are left. When it's full, the item bounces off the bag, the bag shakes "no" with a puff of dust, and the bubble turns red: <b>Bags full</b>. Press <b>Loot an item</b> a few times at each fullness.</p>
+<div class="bar">
+  <span>Free slots</span>
+  <button data-free="16" class="on">16 (plenty)</button><button data-free="4">4</button><button data-free="1">1</button><button data-free="0">0 (full)</button>
+  <button class="go" id="loot">Loot an item</button>
+</div>
+<div class="stage" id="bagStage">
+  <div class="char">🧙</div>
+  <div class="actionbar">
+    <div class="slot" style="left:20px"></div><div class="slot" style="left:60px"></div><div class="slot" style="left:100px"></div>
+    <div class="slot" style="right:150px"></div><div class="slot" style="right:110px"></div><div class="slot" style="right:70px"></div>
+  </div>
+  <div class="bag" id="bag"><svg viewBox="0 0 40 40" id="bagSvg"></svg></div>
+  <div class="bubble" id="bubble"></div>
+</div>
+
+<h2>2. Gathering pops</h2>
+<p class="lead">Made to stay fun for hours: small, quick and quiet. <b>Node pop</b>: a tiny burst in the node's own style where you gathered (leaves and petals, rock chips with a spark, a splash ring, tufts) and the pieces arc toward the tally. <b>Harvest tally</b>: a small list at the side counting this session's materials, the new ones popping "+2"; it fades out after a while without gathering. <b>Rare find</b> (a gem from a vein, a rare herb, a rare fish): a bigger burst and the normal popup. <b>Skill up</b>: your new skill with a bar to the next unlock. <b>Calm</b>: after many gathers in a row the pops get smaller and silent, the tally keeps counting.</p>
+<div class="bar">
+  <span>Gather</span>
+  <button class="go" data-g="herb">🌿 Herb</button><button class="go" data-g="ore">⛏️ Ore</button><button class="go" data-g="fish">🎣 Fish</button><button class="go" data-g="skin">🔪 Skin</button>
+  <button data-rare>💎 Rare find</button><button data-skill>⭐ Skill up</button>
+  <span>Mode</span>
+  <button data-calm="0" class="on">Fresh</button><button data-calm="1">An hour in (calm)</button>
+</div>
+<div class="stage" id="gStage">
+  <div class="calmnote" id="calmnote"></div>
+  <div class="char" style="left:24%">🧙</div>
+  <div class="node" id="node">🌿</div>
+  <div class="tally" id="tally"><div class="head"><span>Gathered</span><span id="tot">0</span></div></div>
+  <div class="skill" id="skill"><div class="t" id="skillT"></div><div class="barw"><i id="skillBar"></i></div><small id="skillNext"></small></div>
+</div>
+
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a);
+const $ = id => document.getElementById(id);
+function pick(attr, cb) {
+  document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => {
+    document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]);
+  });
+}
+// a particle: a div flying from (x, y) with velocity, gravity, life (all in px, s)
+function particle(stage, o) {
+  const d = document.createElement('div'); d.className = 'fx';
+  d.style.cssText = `left:${o.x}px;top:${o.y}px;width:${o.size}px;height:${o.h || o.size}px;background:${o.color};border-radius:${o.round === false ? '1px' : '50%'};box-shadow:0 0 ${o.glow || 0}px ${o.color}`;
+  if (o.text) { d.textContent = o.text; d.style.background = 'none'; d.style.fontSize = o.size + 'px'; d.style.width = d.style.height = 'auto'; }
+  stage.appendChild(d);
+  const frames = [], n = 12;
+  for (let i = 0; i <= n; i++) { const t = o.life * i / n;
+    frames.push({ transform: `translate(${o.vx * t}px, ${o.vy * t + 0.5 * (o.g || 0) * t * t}px) rotate(${(o.spin || 0) * t}deg) scale(${o.scaleTo ? 1 + (o.scaleTo - 1) * i / n : 1})`, opacity: i === n ? 0 : (o.fade ? 1 - i / n * .6 : 1) }); }
+  d.animate(frames, { duration: o.life * 1000, easing: 'linear' }).onfinish = () => d.remove();
+}
+function ring(stage, x, y, color, size, life, flat) {
+  const d = document.createElement('div'); d.className = 'fx';
+  d.style.cssText = `left:${x - size / 2}px;top:${y - size * (flat || 1) / 2}px;width:${size}px;height:${size * (flat || 1)}px;border:2px solid ${color};border-radius:50%;`;
+  stage.appendChild(d);
+  d.animate([{ transform: 'scale(.15)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], { duration: life * 1000, easing: 'ease-out' }).onfinish = () => d.remove();
+}
+// an icon flying on an arc from (x0, y0) to (x1, y1)
+function fly(stage, html, x0, y0, x1, y1, dur, arc, onEnd, shrink = .55) {
+  const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html; d.style.left = x0 + 'px'; d.style.top = y0 + 'px';
+  stage.appendChild(d);
+  const frames = [];
+  for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u);
+    frames.push({ transform: `translate(${(x1 - x0) * e}px, ${(y1 - y0) * e - arc * Math.sin(Math.PI * u)}px) scale(${1 - (1 - shrink) * u})` }); }
+  d.animate(frames, { duration: dur * 1000, easing: 'linear' }).onfinish = () => { d.remove(); onEnd && onEnd(); };
+}
+
+// ---------------- 1. the bag ----------------
+let free = 16;
+const TOTAL = 16;
+function drawBag(swell = 0, strain = 0) {
+  const full = 1 - free / TOTAL, w = 13 + 5 * full + 3 * swell; // fuller: rounder
+  const seam = strain > 0 ? `rgba(255,${180 - 120 * (free === 0)},60,${.5 + .5 * strain})` : '#3a2410';
+  $('bagSvg').innerHTML = `
+    <defs><radialGradient id="lea" cx="40%" cy="40%"><stop offset="0" stop-color="#b07a3c"/><stop offset="1" stop-color="#5a3816"/></radialGradient></defs>
+    <path d="M${20 - w * .55} 12 Q20 ${8 - 2 * full} ${20 + w * .55} 12 L${20 + w * .55 + 1} 14 L${20 - w * .55 - 1} 14 Z" fill="#7a4e22" stroke="#3a2410"/>
+    <ellipse cx="20" cy="${25 - 1.5 * full}" rx="${w}" ry="${12.5 + 2 * full + 1.5 * swell}" fill="url(#lea)" stroke="#3a2410" stroke-width="1.2"/>
+    <path d="M${20 - w * .7} ${24} Q20 ${30 + 2 * full} ${20 + w * .7} ${24}" fill="none" stroke="${seam}" stroke-width="1.4" stroke-dasharray="2 2"/>
+    <rect x="17" y="11" width="6" height="4" rx="1" fill="#d8b04a" stroke="#6a4a10" stroke-width=".6"/>`;
+}
+function bubble() {
+  const b = $('bubble');
+  if (free <= 4) { b.textContent = free === 0 ? 'Bags full' : `${free} left`; b.classList.add('show'); b.classList.toggle('full', free === 0); }
+  else b.classList.remove('show');
+}
+function bagHit() {
+  const bag = $('bag'), st = $('bagStage'), bx = st.clientWidth - 42, by = st.clientHeight - 25;
+  if (free === 0) { // bounces off: the bag shakes "no", a puff of dust
+    bag.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px) rotate(-6deg)' }, { transform: 'translateX(4px) rotate(6deg)' },
+      { transform: 'translateX(-3px) rotate(-4deg)' }, { transform: 'translateX(2px) rotate(2deg)' }, { transform: 'none' }], { duration: 450 });
+    for (let i = 0; i < 10; i++) particle(st, { x: bx - 4, y: by - 6, size: R(6, 11), color: 'rgba(190,170,140,.55)', vx: R(-60, 60), vy: R(-60, -15), g: 30, life: R(.5, .8), scaleTo: 2 });
+    drawBag(0, 1); setTimeout(() => drawBag(0, 1), 10);
+    $('bubble').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 300 });
+    return;
+  }
+  free = Math.max(0, free - 1); syncFree();
+  const tight = free <= 4, s = tight ? 1 : 0.4;
+  bag.animate([{ transform: 'scale(1,1)' }, { transform: `scale(${1 + .22 * s},${1 - .16 * s})` }, { transform: `scale(${1 - .08 * s},${1 + .1 * s})` },
+    { transform: `scale(${1 + .05 * s},${1 - .03 * s})` }, { transform: 'scale(1,1)' }], { duration: tight ? 650 : 380, easing: 'ease-out' });
+  if (tight) { drawBag(1, 1); setTimeout(() => drawBag(0, 1), 260); ring(st, bx, by - 4, '#ffc040', 60, .4); } else drawBag();
+  bubble();
+}
+function syncFree() { document.querySelectorAll('[data-free]').forEach(x => x.classList.toggle('on', +x.dataset.free === free)); }
+pick('free', v => { free = +v; drawBag(0, free <= 4 ? 1 : 0); bubble(); });
+$('loot').onclick = () => {
+  const st = $('bagStage'), x0 = st.clientWidth / 2 - 15, y0 = st.clientHeight - 110, bx = st.clientWidth - 57, by = st.clientHeight - 45;
+  const qc = ['#9d9d9d', '#ffffff', '#1eff00'][Math.floor(Math.random() * 3)], g = ['🗡️', '🧪', '🪙', '🦴', '📜'][Math.floor(Math.random() * 5)];
+  if (free === 0) { // it flies at the bag and bounces back off, falling away
+    fly(st, `<div class="icon" style="--qc:${qc}">${g}</div>`, x0, y0, bx - 6, by + 2, .5, 70, () => {
+      bagHit(); particle(st, { x: bx - 10, y: by - 6, size: 18, text: g, vx: -90, vy: -120, g: 600, life: .7, spin: -200, fade: true });
+    }, .8);
+  } else fly(st, `<div class="icon" style="--qc:${qc}">${g}</div>`, x0, y0, bx, by, .55, 80, bagHit);
+};
+drawBag();
+
+// ---------------- 2. gathering ----------------
+const KIND = {
+  herb: { node: '🌿', mat: ['🌿', 'Peacebloom', '#ffffff'], rare: ['🌸', 'Black Lotus', '#ffffff', true], colors: ['#7ad34a', '#b8f070', '#f0e070', '#ff9ad0'] },
+  ore: { node: '🪨', mat: ['🟫', 'Copper Ore', '#ffffff'], rare: ['💚', 'Tigerseye', '#1eff00'], colors: ['#8a7a6a', '#b0a090', '#c87a3a', '#fff0b0'] },
+  fish: { node: '🫧', mat: ['🐟', 'Raw Brilliant Smallfish', '#ffffff'], rare: ['🐠', 'Oily Blackmouth', '#1eff00'], colors: ['#bfe6ff', '#8ac8ff', '#ffffff'] },
+  skin: { node: '🦌', mat: ['🟤', 'Light Leather', '#ffffff'], rare: ['🟣', 'Thick Hide', '#1eff00'], colors: ['#a07850', '#d8b890', '#6a4a30'] },
+};
+let calm = false, kind = 'herb', counts = {}, total = 0, idleT = 0, skill = 74;
+const rows = {};
+pick('calm', v => { calm = v === '1'; $('calmnote').textContent = calm ? 'Calm: an hour of gathering in. Pops are small and silent; the tally still counts.' : ''; });
+function nodePos() { const st = $('gStage'); return [st.clientWidth * 0.34 + 22, st.clientHeight - 80]; }
+function pop(k, rare) {
+  const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], m = calm && !rare ? .45 : 1;
+  $('node').textContent = K.node;
+  $('node').animate([{ transform: 'scale(1)' }, { transform: `scale(${1 + .15 * m},${1 - .12 * m})` }, { transform: 'scale(1)' }], { duration: 260 });
+  const n = Math.round((rare ? 26 : 10) * m);
+  for (let i = 0; i < n; i++) {
+    const c = K.colors[i % K.colors.length];
+    if (k === 'herb') particle(st, { x: x + R(-8, 8), y: y + R(-10, 4), size: R(4, 7), h: R(2, 4), color: c, round: false, vx: R(-70, 70) * m, vy: R(-140, -60) * m, g: 160, life: R(.6, 1), spin: R(-400, 400) });
+    else if (k === 'ore') particle(st, { x: x + R(-6, 6), y: y + R(-6, 6), size: R(3, 6), color: c, round: false, vx: R(-120, 120) * m, vy: R(-170, -60) * m, g: 600, life: R(.4, .7), spin: R(-500, 500), glow: i % 4 === 3 ? 6 : 0 });
+    else if (k === 'fish') particle(st, { x: x + R(-6, 6), y: y + 8, size: R(2.5, 4.5), color: c, vx: R(-70, 70) * m, vy: R(-180, -90) * m, g: 650, life: R(.5, .8) });
+    else particle(st, { x: x + R(-8, 8), y: y + R(-8, 6), size: R(3, 5), color: c, vx: R(-50, 50) * m, vy: R(-80, -30) * m, g: 40, life: R(.7, 1.1), fade: true });
+  }
+  if (k === 'fish') ring(st, x, y + 14, '#bfe6ff', 70 * m + 20, .6, .3);
+  if (rare) { ring(st, x, y, KIND[k].rare[2] === '#1eff00' ? '#1eff00' : '#ffffff', 140, .6); ring(st, x, y, '#fff6c0', 80, .45); }
+}
+function tallyRow(mat) {
+  const [g, name, qc] = mat;
+  if (!rows[name]) {
+    const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="n">0</span><span class="plus"></span>`;
+    $('tally').appendChild(r); rows[name] = r; counts[name] = 0;
+    r.animate([{ opacity: 0, transform: 'translateX(20px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
+  }
+  return rows[name];
+}
+function gather(k, rare) {
+  const st = $('gStage'), [x, y] = nodePos(), K = KIND[k], mat = rare ? K.rare : K.mat, n = rare ? 1 : Math.ceil(R(1, 3.9));
+  $('tally').style.opacity = 1; idleT = 0;
+  pop(k, rare);
+  const row = tallyRow(mat), rr = row.getBoundingClientRect(), sr = st.getBoundingClientRect();
+  for (let i = 0; i < Math.min(n, 3); i++) setTimeout(() => {
+    fly(st, `<div class="icon" style="--qc:${mat[2]};width:22px;height:22px;font-size:12px">${mat[0]}</div>`, x - 11, y - 20, rr.left - sr.left + 3, rr.top - sr.top + 3, .55 + i * .05, 70, () => {
+      counts[mat[1]] += 1; total += 1;
+      row.querySelector('.n').textContent = '×' + counts[mat[1]]; $('tot').textContent = total;
+      row.querySelector('.n').animate([{ transform: 'scale(1.5)', color: '#fff' }, { transform: 'scale(1)' }], { duration: 220 });
+      const p = row.querySelector('.plus'); p.textContent = '+' + (i + 1);
+      p.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-10px)' }], { duration: 700 });
+      row.animate([{ background: `linear-gradient(90deg, ${mat[2]}55, rgba(0,0,0,.15))` }, { background: 'linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.15))' }], { duration: 400 });
+    }, .8);
+  }, i * 90);
+  if (rare) setTimeout(() => {
+    const card = document.createElement('div'); card.className = 'fx';
+    card.style.cssText = 'left:50%;top:70px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px';
+    card.innerHTML = `<div style="font-size:40px;filter:drop-shadow(0 0 10px ${mat[2]})">${mat[0]}</div><div style="font:700 18px Georgia,serif;color:${mat[2]};text-shadow:0 1px 0 #000,0 0 6px #000">${mat[1]}</div><div style="font:600 10px system-ui;color:#c9c2b0">Rare find · the normal popup</div>`;
+    st.appendChild(card);
+    card.animate([{ opacity: 0, transform: 'translate(-50%, 14px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2400 }).onfinish = () => card.remove();
+  }, 250);
+}
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { kind = b.dataset.g; gather(kind, false); });
+document.querySelector('[data-rare]').onclick = () => gather(kind, true);
+document.querySelector('[data-skill]').onclick = () => {
+  skill += 1; const nextAt = 125, from = 75;
+  const names = { herb: 'Herbalism', ore: 'Mining', fish: 'Fishing', skin: 'Skinning' };
+  $('skillT').innerHTML = `${names[kind]} <b>${skill}</b>`;
+  $('skillNext').textContent = skill < nextAt ? `${nextAt - skill} to Silverleaf / Tin` : 'Journeyman: train for more';
+  const s = $('skill');
+  s.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .12 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2600 });
+  $('skillBar').animate([{ width: `${(skill - 1 - from) / (nextAt - from) * 100}%` }, { width: `${(skill - from) / (nextAt - from) * 100}%` }], { duration: 700, delay: 300, fill: 'forwards' });
+  ring($('gStage'), $('gStage').clientWidth / 2, 34, '#3a8cff', 220, .6, .25);
+};
+setInterval(() => { idleT += 1; if (idleT === 12) $('tally').style.opacity = .0; }, 1000); // (fades out after a while without gathering; 12 s here, longer in game)
+</script>
+</body>
+</html>
