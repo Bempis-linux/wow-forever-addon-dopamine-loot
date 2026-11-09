@@ -6,11 +6,12 @@ Loot that feels like loot. A World of Warcraft addon for **WoW: Forever** (Inter
   3D. Each rarity arrives with its own show, picked on the Arrivals page: fireflies or an emerald flare for
   green, a sapphire flare or an aurora for blue, an implosion, eclipse or starfall for purple, and for a
   Legendary the screen dims and a comet streaks down before a supernova. Styles: Relic, Beam, Banner,
-  Splash and Aura.
-- **Loot rain**: loot several things at once, a pile of money or a quest reward, and it all bursts up from
-  the ground, bounces and settles; the best item hangs at the top and slams down, harder the rarer it is.
-  Coins merge into silver and gold, Rare+ items get a light beam, everything gathers into your bag and a
-  money tally counts it up above the bag.
+  Splash, Aura, Achievement, Rune decode and Forged letters.
+- **Loot rain**: loot several things at once, a pile of money or a quest reward, and it all bursts up and
+  settles: as a Fountain, a Quick burst or a Big bang from the middle of the screen. The best item gets a
+  finale and slams down, harder the rarer it is. Coins merge into silver and gold, Rare+ items get a light
+  beam, everything gathers into your bag (one by one, or in one quick vacuum) and a money tally counts it
+  up above the bag.
 - **Sounds**: a sound per rarity (the game's own, picked by ear) plus soft thuds, a pouch and coins for the
   rain, moving gently in pitch as the loot keeps coming.
 

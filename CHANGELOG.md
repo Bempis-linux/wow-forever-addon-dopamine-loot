@@ -1,5 +1,28 @@
 # Dopamine Loot
 
+## 1.2.0 (2026-11-09)
+
+New ways for the loot rain to play out, three new popup styles, and a cleaner look for the item level.
+
+- **Loot rain animations** (Loot rain page, "Animation"):
+  - **Fountain** (default): the loot sprays up one piece after another, as before.
+  - **Quick burst**: a short Fountain. Everything blows up at once in an even fan, and lands in a neat row.
+  - **Big bang**: a point of light swells in the middle of the screen, then bursts. The loot flies out in an
+    even ring, bounces off the screen edges and settles into a neat row, while the best item waits in the
+    glowing core until the rest has landed, then drops and slams down.
+- **Finale for the best**: replaces "Hang time for the best" and covers every animation (your old choice
+  carries over).
+- **Vacuum** (Loot rain page, "How it gathers"): instead of one by one, everything trembles for a moment and
+  is sucked into your bag in one quick wave, with one gulp at the end. Quiet on calm repeats.
+- **New popup styles**: **Achievement** (a round emblem opening into a rounded bar, with a rarity gauge and
+  the item level in a badge), **Rune decode** (the name's letters start as glowing runes and settle into
+  letters) and **Forged letters** (each letter struck white-hot, cooling to its color, with sparks).
+- **Item level**: Relic, Beam and Aura show it in a gap in the line under the name, with the rarity and the
+  type below; Splash shows it in a slanted block cut into its banner.
+- **Reverse disintegration** is back as a Rare arrival: specks of light gather and the item fades in.
+- Fixes: an item shown as an icon now sits in the middle of the Achievement emblem; a few rain sounds and
+  flashes now respect the calm and slow-motion switches.
+
 ## 1.1.0 (2026-11-06)
 
 The flair update: new popup arrivals and styles, a livelier loot rain with new sounds, and clearer settings.
