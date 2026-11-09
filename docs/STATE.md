@@ -24,7 +24,14 @@ Gathered items skip the rain; Uncommon+ finds still pop up. To verify in game: `
 (expect returns 6,7 = 7,9; 2770 -> 7,7; 2318 -> 7,6), LOOT_READY count per gather (/etrace), the burst at the cursor
 (clicked node) vs. the interact key, the skill unlock levels (Classic's). User test 2026-11-09: "pretty good right off
 the bat"; +N made bigger/outlined; tally visibility picked: linger 12 s + 2 s per gather in 10 min (max 90), hides
-when combat starts, right-click dismisses (all come back on the next gather). Next: popups movable via Mover. Read this first
+when combat starts, right-click dismisses (all come back on the next gather). Then the user wanted gathering personalized per profession: brainstorm picks
+(2026-11-09) in docs/mockups/gather-themes.html: themed bursts (herb petals spiral + pollen, rare a bloom; mining three
+strikes + chips + dust, rare gem star flare + prismatic glints; fishing ripples + droplets + the fish flips, rare a
+leap; skinning knife glint + fur tufts + the hide flops, rare a shine sweep), the harvest window with sections per
+profession, session pace ("17 in 1 min, ~1530/h"), vendor value, full-stack milestones (badge "x1" + shine + chime),
+and the unlock reveal for skill-ups ("You can now gather Briarthorn!"; at a rank cap "maxed: train Expert"). Not
+picked: themed skill bars, quiet routine skill-ups, rank-cap nudge as its own item. Waiting for the user's look.
+After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

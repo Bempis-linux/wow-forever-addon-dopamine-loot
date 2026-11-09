@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gathering Themes</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p, p.lead { margin: 0; color: var(--muted); max-width: 980px; }
+  p.lead { margin: 0 18px 4px; }
+  p.lead b { color: #c9c2b0; }
+  h2 { font-size: 14px; margin: 18px 18px 2px; color: var(--gold); }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 420px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 35% 80%, #2d3b2a, #172015 60%, #0d120c); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .char { position: absolute; bottom: 60px; left: 18%; font-size: 40px; transform: translateX(-50%); }
+  .node { position: absolute; left: 30%; bottom: 52px; font-size: 46px; transform-origin: 50% 100%; }
+  .water { position: absolute; left: 22%; right: 52%; bottom: 40px; height: 40px; border-radius: 50%; background: radial-gradient(ellipse, #2a5a7a, transparent 70%); opacity: 0; }
+  .icon { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--qc, #fff); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 6px rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  /* the harvest window */
+  .tally { position: absolute; right: 16px; top: 14px; width: 240px; display: flex; flex-direction: column; gap: 2px; }
+  .tally .head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; font: 700 12px Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000; }
+  .tally .meta { display: flex; justify-content: space-between; padding: 0 4px 4px; font: 600 10.5px system-ui; color: #b9b09a; }
+  .tally .meta .val { color: #fff; }
+  .coin { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 2px 0 1px; vertical-align: -0px; box-shadow: inset 0 -1px 0 rgba(0,0,0,.4); }
+  .g { background: #f2c94c; } .s { background: #c9ced6; } .c { background: #c27a3a; }
+  .sec { display: flex; align-items: center; gap: 6px; margin: 4px 0 1px; padding: 0 4px; font: 700 10.5px system-ui; letter-spacing: .08em; text-transform: uppercase; color: var(--pc); }
+  .sec::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--pc), transparent); opacity: .6; }
+  .row { position: relative; display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 6px 0 2px; border-radius: 2px; overflow: hidden;
+    background: linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.04)); border-left: 2px solid var(--pc); }
+  .row .nm { flex: 1; font: 600 12px "Friz Quadrata TT", Georgia, serif; color: var(--qc); text-shadow: 0 1px 1px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .n { font: 700 16px "Morpheus", Georgia, serif; color: #ffd100; min-width: 28px; text-align: right; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; }
+  .row .plus { font: 700 13px "Friz Quadrata TT", Georgia, serif; color: #73ff59; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; opacity: 0; }
+  .row .badge { display: none; align-items: center; gap: 2px; padding: 0 4px; height: 15px; border-radius: 3px; font: 800 10px system-ui; color: #1a1205;
+    background: linear-gradient(#ffe48a, #d9a520); box-shadow: 0 0 0 1px #000, 0 0 6px rgba(255,200,60,.6); }
+  .row .badge.on { display: inline-flex; }
+  .row .shine { position: absolute; top: 0; bottom: 0; width: 60px; left: -70px; background: linear-gradient(90deg, transparent, rgba(255,230,150,.55), transparent); transform: skewX(-20deg); }
+
+  /* the skill-up banner */
+  .skill { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0; }
+  .skill .t { font: 700 16px Georgia, serif; color: #fff; text-shadow: 0 0 8px var(--pc), 0 1px 0 #000; }
+  .skill .t b { color: var(--pl); }
+  .skill .sbar { display: flex; align-items: center; gap: 7px; }
+  .skill .barw { width: 200px; height: 7px; border-radius: 3px; background: rgba(0,0,0,.6); overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.7); }
+  .skill .barw i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pc), var(--pl)); box-shadow: 0 0 6px var(--pc); }
+  .skill .u { position: relative; width: 26px; height: 26px; font-size: 16px; }
+  .skill small { font: 600 10.5px system-ui; color: #d8d2c0; }
+  .reveal { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0; }
+  .reveal .big { width: 46px; height: 46px; font-size: 28px; border-width: 2px; }
+  .reveal .line { font: 700 15px "Friz Quadrata TT", Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000, 0 0 8px rgba(0,0,0,.8); }
+  .reveal .line b { color: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Gathering, personalized per profession</h1>
+  <p>Your picks: a themed burst per profession; the harvest window with sections, pace, vendor value and full-stack milestones; the unlock reveal for skill-ups. Click a profession to gather (it switches the node). Sound is off; turn it on for the strike rhythm and chimes. The clock here runs fast (each gather = 20 s) so the pace line moves.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button></div>
+</header>
+
+<h2>1. Gathering</h2>
+<p class="lead"><b>Herbalism</b>: petals spiral up and pollen drifts away on a breeze; rare: a flower blooms open with gold pollen. <b>Mining</b>: three pick-strike sparks in rhythm, rock chips, a settling dust puff; rare gem: a star flare and prismatic glints. <b>Fishing</b>: rings ripple out, droplets fly, the fish flips on its way to the window; rare: a big shimmering leap. <b>Skinning</b>: a quick knife-glint slash, fur tufts drifting down, the hide flops on its way; rare: a big shine sweep.</p>
+<div class="bar">
+  <span>Gather</span><button class="go" data-g="herb">🌿 Herb</button><button class="go" data-g="ore">⛏️ Ore</button><button class="go" data-g="fish">🎣 Fish</button><button class="go" data-g="skin">🔪 Skin</button>
+  <button data-rare>💎 Rare find</button><button id="run">Run ×5</button><button id="stack">Fill a stack</button>
+</div>
+<div class="bar">
+  <span>Skill</span><button id="sk">⭐ Skill up</button><button class="go" id="unlock">🔓 Skill up to an unlock</button>
+</div>
+<div class="stage" id="st">
+  <div class="water" id="water"></div>
+  <div class="char">🧙</div>
+  <div class="node" id="node">🌿</div>
+  <div class="tally" id="tally">
+    <div class="head"><span>Harvest</span><span id="tot">0</span></div>
+    <div class="meta"><span id="pace">just started</span><span>≈ <span class="val" id="val">0</span></span></div>
+    <div id="secs"></div>
+  </div>
+  <div class="skill" id="skill"><div class="t"></div><div class="sbar"><div class="barw"><i></i></div><div class="icon u"></div></div><small></small></div>
+  <div class="reveal" id="reveal"><div class="icon big"></div><div class="line"></div></div>
+</div>
+
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), st = $('st');
+let snd = false, actx;
+document.querySelectorAll('[data-snd]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-snd]').forEach(x => x.classList.toggle('on', x === b)); snd = b.dataset.snd === '1'; });
+function tone(f, t = 0, vol = .1, dec = .5, type = 'sine') {
+  if (!snd) return; actx = actx || new AudioContext();
+  const o = actx.createOscillator(), g = actx.createGain(), at = actx.currentTime + t; o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .008); g.gain.exponentialRampToValueAtTime(.0001, at + dec);
+  o.connect(g).connect(actx.destination); o.start(at); o.stop(at + dec + .05);
+}
+// a positioned element animated by keyframes, removed when done
+function el(html, css, frames, dur, delay = 0, ease = 'linear') {
+  const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; st.appendChild(d);
+  d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d;
+}
+function ballistic(x, y, o) { // o: vx, vy (px/s, up negative), g, life (s), size, color, round, spin, glow, h
+  const fr = [], n = 14;
+  for (let i = 0; i <= n; i++) { const t = o.life * i / n; fr.push({ transform: `translate(${o.vx * t}px,${o.vy * t + .5 * o.g * t * t}px) rotate(${(o.spin || 0) * t}deg) scale(${o.grow ? 1 + (o.grow - 1) * i / n : 1})`, opacity: i === n ? 0 : (o.fade ? 1 - .7 * i / n : 1) }); }
+  el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.h || o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:${o.round === false ? '1px' : '50%'};box-shadow:0 0 ${o.glow || 0}px ${o.color}`, fr, o.life * 1000, o.delay || 0);
+}
+function ring(x, y, color, size, life, flat = 1, delay = 0, width = 2) {
+  el('', `left:${x - size / 2}px;top:${y - size * flat / 2}px;width:${size}px;height:${size * flat}px;border:${width}px solid ${color};border-radius:50%`,
+    [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay, 'ease-out');
+}
+function star(x, y, size, color, life, delay = 0, rot = 0) { // a 4-point glint
+  el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`,
+    `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`,
+    [{ transform: `scale(0) rotate(${rot}deg)`, opacity: 1 }, { transform: `scale(1) rotate(${rot + 30}deg)`, opacity: 1, offset: .3 }, { transform: `scale(.6) rotate(${rot + 60}deg)`, opacity: 0 }], life * 1000, delay);
+}
+function nodePos() { const n = $('node').getBoundingClientRect(), s = st.getBoundingClientRect(); return [n.left - s.left + n.width / 2, n.top - s.top + n.height / 2]; }
+
+// ---------------- themed bursts ----------------
+const THEME = {
+  herb: { node: '🌿', name: 'Herbalism', sec: 'Herbs', pc: '#4fbf4a', pl: '#9ff08a', sicon: '🌿', items: [['🌼', 'Peacebloom', '#fff', 10], ['🍃', 'Silverleaf', '#fff', 6], ['🪴', 'Earthroot', '#fff', 8]], rare: ['🌸', 'Swiftthistle', '#1eff00', 40] },
+  ore: { node: '🪨', name: 'Mining', sec: 'Ore', pc: '#d07a3a', pl: '#ffb070', sicon: '⛏️', items: [['🟫', 'Copper Ore', '#fff', 5], ['🪨', 'Rough Stone', '#fff', 2]], rare: ['💚', 'Malachite', '#1eff00', 50] },
+  fish: { node: '🫧', name: 'Fishing', sec: 'Fish', pc: '#3a8cff', pl: '#9cc8ff', sicon: '🎣', items: [['🐟', 'Raw Brilliant Smallfish', '#fff', 1], ['🐡', 'Raw Longjaw Mud Snapper', '#fff', 4]], rare: ['🐠', 'Firefin Snapper', '#1eff00', 30] },
+  skin: { node: '🦌', name: 'Skinning', sec: 'Leather', pc: '#b07a46', pl: '#e8c08a', sicon: '🔪', items: [['🟤', 'Light Leather', '#fff', 15], ['🟫', 'Ruined Leather Scraps', '#9d9d9d', 1]], rare: ['🟣', 'Light Hide', '#fff', 60] },
+};
+const HERB = { burst(x, y, rare) {
+    for (let i = 0; i < 12; i++) { // petals spiralling up
+      const a0 = i / 12 * Math.PI * 2, c = ['#ffd6ec', '#ffffff', '#ff9ad0', '#c8f08a'][i % 4], fr = [], life = R(1, 1.4);
+      for (let k = 0; k <= 16; k++) { const u = k / 16, a = a0 + u * 4.2, r = 6 + 34 * u; fr.push({ transform: `translate(${Math.cos(a) * r + 30 * u * u}px,${-70 * u - 10 * Math.sin(a)}px) rotate(${a * 57}deg)`, opacity: u > .75 ? (1 - u) * 4 : 1 }); }
+      el('', `left:${x}px;top:${y}px;width:7px;height:4px;margin:-2px -3px;background:${c};border-radius:60% 0 60% 0`, fr, life * 1000, i * 15);
+    }
+    for (let i = 0; i < 9; i++) ballistic(x + R(-10, 10), y + R(-6, 6), { vx: R(20, 60), vy: R(-50, -20), g: -8, life: R(1.4, 2), size: R(2, 3.5), color: '#fff2a0', glow: 6, fade: true, delay: 200 + i * 40 });
+    if (rare) { // a flower blooms open
+      for (let i = 0; i < 8; i++) { const a = i * 45;
+        el('', `left:${x - 7}px;top:${y - 40}px;width:14px;height:30px;border-radius:50%;background:radial-gradient(ellipse at 50% 20%,#fff,#ff9ad0 70%);transform-origin:50% 100%`,
+          [{ transform: `rotate(${a}deg) scale(0)`, opacity: 1 }, { transform: `rotate(${a}deg) scale(1.15)`, opacity: 1, offset: .35 }, { transform: `rotate(${a + 15}deg) scale(1.05)`, opacity: 1, offset: .75 }, { transform: `rotate(${a + 25}deg) scale(1.2)`, opacity: 0 }], 1500, 100, 'ease-out'); }
+      for (let i = 0; i < 20; i++) ballistic(x, y - 10, { vx: R(-90, 90), vy: R(-120, -30), g: 30, life: R(1, 1.6), size: R(2, 4), color: '#ffd34a', glow: 8, fade: true, delay: 350 });
+      ring(x, y - 10, '#ffd34a', 120, .7, 1, 300);
+    }
+  } };
+const ORE = { burst(x, y, rare) {
+    [0, 140, 280].forEach((t, k) => { // three strikes in rhythm
+      const sx = x + R(-10, 10), sy = y + R(-12, 4);
+      star(sx, sy, 22 + k * 4, '#fff6c8', .3, t);
+      setTimeout(() => tone(1800 + k * 120, 0, .05, .12, 'triangle'), t);
+      for (let i = 0; i < 5; i++) ballistic(sx, sy, { vx: R(-160, 160), vy: R(-200, -60), g: 700, life: R(.25, .45), size: 2.5, color: '#ffd27a', glow: 5, delay: t });
+      for (let i = 0; i < 4; i++) ballistic(sx, sy, { vx: R(-110, 110), vy: R(-150, -50), g: 650, life: R(.4, .7), size: R(3, 6), h: R(2, 4), color: ['#8a7a6a', '#b0a090', '#c87a3a'][i % 3], round: false, spin: R(-600, 600), delay: t });
+    });
+    for (let i = 0; i < 6; i++) ballistic(x + R(-14, 14), y + 14, { vx: R(-30, 30), vy: R(-26, -8), g: 4, life: R(1, 1.5), size: R(10, 16), color: 'rgba(170,155,140,.35)', grow: 2.2, fade: true, delay: 320 });
+    if (rare) {
+      setTimeout(() => { star(x, y - 20, 70, '#ffffff', .7); star(x, y - 20, 46, '#7dffb0', .7, 60, 45);
+        ['#ff6a6a', '#ffd34a', '#7dffb0', '#6ac8ff', '#c08aff'].forEach((c, i) => { for (let j = 0; j < 3; j++) star(x + R(-40, 40), y - 20 + R(-36, 30), R(8, 13), c, .6, 120 + i * 60 + j * 30); });
+        tone(2093, 0, .07, .8); tone(2637, .08, .06, .8); }, 380);
+    }
+  } };
+const FISH = { burst(x, y, rare) {
+    $('water').animate([{ opacity: 0 }, { opacity: .8, offset: .2 }, { opacity: 0 }], { duration: 1600 });
+    [0, 180, 360].forEach((t, k) => ring(x, y + 24, '#bfe6ff', 70 + k * 40, 1, .28, t, 1.5));
+    for (let i = 0; i < 12; i++) ballistic(x + R(-8, 8), y + 18, { vx: R(-80, 80), vy: R(-200, -100), g: 650, life: R(.5, .8), size: R(2.5, 4.5), color: '#cfeeff' });
+    tone(420, 0, .05, .25, 'sine'); tone(300, .06, .04, .3, 'sine');
+    if (rare) { // a big shimmering leap
+      const fr = []; for (let k = 0; k <= 20; k++) { const u = k / 20; fr.push({ transform: `translate(${90 * u}px,${-130 * Math.sin(Math.PI * u)}px) rotate(${-40 + 80 * u}deg)`, opacity: u > .9 ? (1 - u) * 10 : 1 }); }
+      el('<div style="font-size:30px;filter:drop-shadow(0 0 8px #6ac8ff)">🐠</div>', `left:${x - 15}px;top:${y - 4}px`, fr, 1100);
+      for (let i = 0; i < 14; i++) setTimeout(() => star(x + 90 * i / 14 + R(-6, 6), y - 130 * Math.sin(Math.PI * i / 14) + R(-6, 6), R(7, 11), '#bfe6ff', .5), i * 70);
+      ring(x + 90, y + 24, '#bfe6ff', 120, .9, .28, 1000, 2);
+    }
+  }, flip: true };
+const SKIN = { burst(x, y, rare) {
+    const w = rare ? 220 : 80;
+    el('', `left:${x - w / 2}px;top:${y - 6}px;width:${w}px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff,transparent);box-shadow:0 0 10px #fff;transform-origin:0 50%`,
+      [{ transform: 'rotate(-28deg) scaleX(0)', opacity: 1 }, { transform: 'rotate(-28deg) scaleX(1)', opacity: 1, offset: .45 }, { transform: 'rotate(-28deg) scaleX(1) translateX(10px)', opacity: 0 }], 360, 0, 'ease-out');
+    tone(3000, 0, .03, .1, 'triangle');
+    for (let i = 0; i < 9; i++) { const fr = [], dx = R(-50, 50), life = R(1.1, 1.6);
+      for (let k = 0; k <= 16; k++) { const u = k / 16; fr.push({ transform: `translate(${dx * u + 8 * Math.sin(u * 9 + i)}px,${-30 * Math.sin(Math.PI * Math.min(u * 1.6, 1)) + 50 * u * u}px)`, opacity: 1 - u }); }
+      el('', `left:${x}px;top:${y}px;width:${R(5, 8)}px;height:${R(5, 8)}px;border-radius:50%;background:radial-gradient(#e0c09a,#8a5a30 70%,transparent);filter:blur(.4px)`, fr, life * 1000, 80 + i * 20); }
+    if (rare) for (let i = 0; i < 6; i++) star(x - w / 2 + w * i / 5, y - 6 - (w * i / 5) * .53 + w * .26, 12, '#fff', .45, 100 + i * 40);
+  }, flop: true };
+const KIT = { herb: HERB, ore: ORE, fish: FISH, skin: SKIN };
+
+// ---------------- the harvest window ----------------
+const STACK = 20;
+let kind = 'herb', clock = 0, gathers = 0, total = 0, value = 0, step = 0;
+const sections = {}, rows = {};
+function money(c) {
+  const g = Math.floor(c / 10000), s = Math.floor(c / 100) % 100, cc = c % 100;
+  return (g ? `${g}<i class="coin g"></i> ` : '') + (g || s ? `${s}<i class="coin s"></i> ` : '') + `${cc}<i class="coin c"></i>`;
+}
+function section(k) {
+  if (sections[k]) return sections[k];
+  const T = THEME[k], s = document.createElement('div');
+  s.innerHTML = `<div class="sec" style="--pc:${T.pc}">${T.sicon} ${T.sec}</div><div class="rows"></div>`;
+  $('secs').appendChild(s); sections[k] = s.querySelector('.rows');
+  s.animate([{ opacity: 0, transform: 'translateX(16px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
+  return sections[k];
+}
+function row(k, it) {
+  const key = it[1]; if (rows[key]) return rows[key];
+  const T = THEME[k], r = document.createElement('div'); r.className = 'row'; r.style.setProperty('--pc', T.pc); r.style.setProperty('--qc', it[2]);
+  r.innerHTML = `<div class="icon" style="--qc:${it[2]}">${it[0]}</div><span class="nm">${it[1]}</span><span class="badge">▤ <b>×1</b></span><span class="plus"></span><span class="n">0</span><div class="shine"></div>`;
+  section(k).appendChild(r); r.n = 0; r.plusN = 0; r.plusT = -1e9; rows[key] = r;
+  r.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 }); return r;
+}
+function bump(r, add, it) {
+  const before = r.n; r.n += add; total += add; value += add * it[3];
+  r.querySelector('.n').textContent = r.n; $('tot').textContent = total; $('val').innerHTML = money(value);
+  r.querySelector('.n').animate([{ transform: 'scale(1.45)', color: '#fff' }, { transform: 'scale(1)' }], { duration: 220 });
+  $('val').animate([{ color: '#fff6c0' }, { color: '#fff' }], { duration: 400 });
+  if (Math.floor(r.n / STACK) > Math.floor(before / STACK)) { // a full stack: the milestone
+    const b = r.querySelector('.badge'), n = Math.floor(r.n / STACK); b.classList.add('on'); b.querySelector('b').textContent = '×' + n;
+    b.animate([{ transform: 'scale(2.2) rotate(-12deg)', opacity: 0 }, { transform: 'scale(.9)', opacity: 1, offset: .6 }, { transform: 'scale(1)' }], { duration: 420, easing: 'ease-out' });
+    r.querySelector('.shine').animate([{ left: '-70px' }, { left: '260px' }], { duration: 700, easing: 'ease-in-out' });
+    r.animate([{ boxShadow: '0 0 0 1px #ffd34a, 0 0 16px #ffd34a' }, { boxShadow: '0 0 0 0 transparent' }], { duration: 1100 });
+    const rr = r.getBoundingClientRect(), sr = st.getBoundingClientRect();
+    for (let i = 0; i < 8; i++) star(rr.left - sr.left + R(10, rr.width - 10), rr.top - sr.top + R(0, rr.height), R(7, 11), '#ffe48a', .5, i * 50);
+    tone(1318, 0, .08, .5); tone(1976, .09, .08, .6);
+  }
+}
+function plus(r, n) {
+  const now = performance.now(); r.plusN = now - r.plusT < 1500 ? r.plusN + n : n; r.plusT = now;
+  const p = r.querySelector('.plus'); p.textContent = '+' + r.plusN; p.getAnimations().forEach(a => a.cancel());
+  p.animate([{ opacity: 1, transform: 'scale(1.35)' }, { opacity: 1, transform: 'scale(1)', offset: .12 }, { opacity: 1, offset: .75 }, { opacity: 0 }], { duration: 1900 });
+}
+function pace() {
+  clock += 20; gathers += 1;
+  const m = Math.max(1, Math.round(clock / 60)), perH = Math.round(total / (clock / 3600));
+  $('pace').textContent = `${total} in ${m} min · ~${perH}/h`;
+}
+function fly(icon, x0, y0, r, delay, spin, onEnd) {
+  const rr = r.getBoundingClientRect(), sr = st.getBoundingClientRect(), x1 = rr.left - sr.left + 2, y1 = rr.top - sr.top + 2, fr = [];
+  for (let i = 0; i <= 18; i++) { const u = i / 18, e = u * u * (3 - 2 * u);
+    const rot = spin === 'flip' ? 360 * Math.min(1, u * 1.4) : spin === 'flop' ? 22 * Math.sin(u * 14) * (1 - u) : 0;
+    fr.push({ transform: `translate(${(x1 - x0) * e}px,${(y1 - y0) * e - 80 * Math.sin(Math.PI * u)}px) rotate(${rot}deg) scale(${1 - .3 * u})` }); }
+  const d = el(icon, `left:${x0}px;top:${y0}px`, fr, 650, delay); d.getAnimations()[0].onfinish = () => { d.remove(); onEnd(); };
+}
+function gather(k, rare, n) {
+  kind = k; const T = THEME[k], K = KIT[k];
+  $('node').textContent = T.node;
+  $('node').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1)' }], { duration: 260 });
+  const [x, y] = nodePos(); K.burst(x, y, rare);
+  const now = performance.now(); if (now - (gather.last || 0) > 8000) step = 0; gather.last = now;
+  const scale = [0, 2, 4, 7, 9], s = step++; tone(659 * Math.pow(2, (scale[s % 5] + 12 * Math.floor(s / 5)) / 12), .05, .07, .6);
+  const it = rare ? T.rare : T.items[Math.floor(Math.random() * T.items.length)], cnt = n || (rare ? 1 : Math.ceil(R(1, 3.9))), r = row(k, it);
+  plus(r, cnt); pace();
+  for (let i = 0; i < Math.min(cnt, 3); i++) fly(`<div class="icon" style="--qc:${it[2]}">${it[0]}</div>`, x - 11, y - 20, r, (rare ? 450 : 150) + i * 90,
+    K.flip ? 'flip' : K.flop ? 'flop' : '', () => bump(r, i === Math.min(cnt, 3) - 1 ? cnt - i : 1, it));
+}
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => gather(b.dataset.g, false));
+document.querySelector('[data-rare]').onclick = () => gather(kind, true);
+$('run').onclick = () => { for (let i = 0; i < 5; i++) setTimeout(() => gather(kind, false), i * 320); };
+$('stack').onclick = () => { // tops up the kind's first item to just under a stack, then gathers into it
+  const T = THEME[kind], it = T.items[0], r = row(kind, it), need = STACK - (r.n % STACK);
+  if (need > 3) { bump(r, need - 3, it); }
+  setTimeout(() => { $('node').textContent = T.node; const [x, y] = nodePos(); KIT[kind].burst(x, y, false); plus(r, 3); pace();
+    for (let i = 0; i < 3; i++) fly(`<div class="icon" style="--qc:${it[2]}">${it[0]}</div>`, x - 11, y - 20, r, 150 + i * 90, KIT[kind].flip ? 'flip' : KIT[kind].flop ? 'flop' : '', () => bump(r, 1, it)); }, 200);
+};
+
+// ---------------- skill-ups ----------------
+const SK = { herb: { lvl: 64, from: 50, to: 70, next: ['🥀', 'Briarthorn'], after: [85, ['🌿', 'Stranglekelp']] },
+  ore: { lvl: 60, from: 1, to: 65, next: ['⚪', 'Tin'], after: [75, ['🥈', 'Silver']] },
+  fish: { lvl: 70, from: 1, to: 75, next: ['📘', 'Journeyman'], after: [150, ['📗', 'Expert']] },
+  skin: { lvl: 70, from: 1, to: 75, next: ['📘', 'Journeyman'], after: [150, ['📗', 'Expert']] } };
+function banner(k) {
+  const T = THEME[k], s = SK[k], el2 = $('skill');
+  el2.style.setProperty('--pc', T.pc); el2.style.setProperty('--pl', T.pl);
+  el2.querySelector('.t').innerHTML = `${T.name} <b>${s.lvl}</b>`;
+  const u = el2.querySelector('.u'); u.textContent = s.next[0]; u.style.setProperty('--qc', T.pl);
+  el2.querySelector('small').textContent = s.lvl >= s.to ? '' : `${s.to - s.lvl} to ${s.next[1]}`;
+  el2.getAnimations().forEach(a => a.cancel());
+  el2.animate([{ opacity: 0, transform: 'translate(-50%,8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: s.lvl >= s.to ? 3600 : 2800 });
+  el2.querySelector('i').animate([{ width: `${Math.max(0, s.lvl - 1 - s.from) / (s.to - s.from) * 100}%` }, { width: `${Math.min(1, (s.lvl - s.from) / (s.to - s.from)) * 100}%` }], { duration: 700, delay: 250, fill: 'forwards' });
+  tone(784, 0, .06, .5); tone(988, .07, .06, .5); tone(1175, .14, .06, .5); tone(1568, .21, .07, .7);
+}
+function skillUp(toUnlock) {
+  const s = SK[kind];
+  if (toUnlock) s.lvl = s.to - 1;
+  s.lvl += 1; banner(kind);
+  if (s.lvl >= s.to) setTimeout(() => reveal(kind), 950);
+}
+function reveal(k) { // the unlock: the icon at the bar's end flies down, lights up, and the line says what's new
+  const T = THEME[k], s = SK[k], rv = $('reveal'), ic = rv.querySelector('.big');
+  ic.textContent = s.next[0]; ic.style.setProperty('--qc', T.pl);
+  rv.querySelector('.line').innerHTML = /Journeyman|Expert/.test(s.next[1]) ? `${T.name} maxed: train <b>${s.after[1][1]}</b>` : `You can now gather <b>${s.next[1]}</b>!`;
+  rv.getAnimations().forEach(a => a.cancel());
+  rv.animate([{ opacity: 0, transform: 'translate(-50%,-30px) scale(.6)' }, { opacity: 1, transform: 'translate(-50%,0) scale(1.08)', offset: .12 }, { transform: 'translate(-50%,0) scale(1)', offset: .2 }, { opacity: 1, offset: .88 }, { opacity: 0 }], { duration: 3600, easing: 'ease-out' });
+  ic.animate([{ filter: 'brightness(0) drop-shadow(0 0 0 transparent)' }, { filter: 'brightness(0)', offset: .2 }, { filter: `brightness(1.6) drop-shadow(0 0 12px ${T.pl})`, offset: .45 }, { filter: 'brightness(1) drop-shadow(0 0 6px ' + T.pl + ')' }], { duration: 1400, fill: 'forwards' });
+  const rr = ic.getBoundingClientRect(), sr = st.getBoundingClientRect(), x = rr.left - sr.left + rr.width / 2, y = rr.top - sr.top + rr.height / 2;
+  setTimeout(() => { ring(x, y, T.pl, 130, .7); ring(x, y, '#fff6c0', 80, .5, 1, 80); for (let i = 0; i < 10; i++) star(x + R(-50, 50), y + R(-30, 30), R(8, 13), T.pl, .6, i * 40);
+    tone(1046, 0, .08, .8); tone(1318, .1, .08, .8); tone(1568, .2, .08, .9); tone(2093, .3, .09, 1.2); }, 600);
+  setTimeout(() => { s.from = s.to; s.to = s.after[0]; s.next = s.after[1]; s.after = [s.to + 25, ['📘', 'the next one']]; }, 3600);
+}
+$('sk').onclick = () => skillUp(false);
+$('unlock').onclick = () => skillUp(true);
+</script>
+</body>
+</html>
