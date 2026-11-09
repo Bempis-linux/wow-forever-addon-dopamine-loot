@@ -368,13 +368,9 @@ function BURST.skin(x, y, rare, m, quiet)
     RARE.skin(x, y, quiet)
     return
   end
-  -- N1 "Glint and scraps" (docs/mockups/gather-polish.html): the glint with a fainter afterimage, a second
-  -- quick flick the other way, leather scraps tumbling with the tufts
+  -- one knife glint (the user, 2026-11-09: back to a single slash), leather scraps tumbling with the tufts
   Slash(x, y + 6, 90, 0.49, 0)
-  Slash(x - 6, y + 2, 90, 0.49, 0.04, false, 0.5, 0.5)
-  Slash(x + 10, y + 14, 50, -0.56, 0.18, false, 0.28)
   Sound("Slash", 0, quiet)
-  Sound("Slash", 0.18, quiet)
   Tufts(x, y, math.floor(7 * m + 0.5))
   local scraps = { { 0.54, 0.35, 0.19 }, { 0.63, 0.47, 0.31 }, { 0.42, 0.25, 0.13 } }
   for i = 1, math.floor(4 * m + 0.5) do
@@ -387,11 +383,23 @@ end
 -- every angle around the carcass, faster and faster, a beat of stillness, then one big final slash with
 -- a white flash, a shockwave and a spray of sparks
 local dim, flash -- full-screen textures on the effects layer (made in Create)
+local FLURRY_START, FLURRY_HITS, FLURRY_PAUSE = 0.1, 11, 0.32
+local function FlurryGap(i) return math.max(0.045, 0.13 - i * 0.009) end
+local FLURRY_FINAL = FLURRY_START + FLURRY_PAUSE -- when the final slash lands
+for i = 0, FLURRY_HITS - 1 do FLURRY_FINAL = FLURRY_FINAL + FlurryGap(i) end
+
+-- How long a rare find's item waits (its popup and its flight into the window) so it shows after the
+-- finale: after the Golden seed blooms, after the Flurry's last slash; 0 = right away
+function ns.GatherRareDelay(k)
+  if k == "herb" then return OPEN + 0.25 end
+  if k == "skin" and ns.settings.skinRare == "flurry" then return FLURRY_FINAL + 0.25 end
+  return 0
+end
 local function Flurry(x, y, quiet)
   local cx, cy = x, y + 16
   Tween(2, function(u) dim:SetAlpha(0.55 * math.min(1, u / 0.12, (1 - u) / 0.2)) end)
-  local t = 0.1
-  for i = 0, 10 do
+  local t = FLURRY_START
+  for i = 0, FLURRY_HITS - 1 do
     local a = math.rad(R(-80, 80) + (i % 2 == 1 and 180 or 0))
     local len, off = R(110, 170), R(-26, 26)
     local sx, sy = cx - off * math.sin(a), cy + off * math.cos(a)
@@ -401,9 +409,9 @@ local function Flurry(x, y, quiet)
       delay = t + 0.05, add = true, r = 0.91, gg = 0.96, b = 1 })
     Glint(sx + R(-10, 10), sy + R(-10, 10), 16, 1, 1, 1, 0.25, t + 0.06)
     Sound("FlurryHit", t, quiet)
-    t = t + math.max(0.045, 0.13 - i * 0.009) -- faster and faster
+    t = t + FlurryGap(i) -- faster and faster
   end
-  local fin = t + 0.32 -- a beat of stillness, then the final slash
+  local fin = t + FLURRY_PAUSE -- a beat of stillness, then the final slash
   Slash(cx, cy, 300, 0.96, fin, false, 0.5)
   Slash(cx, cy - 3, 300, 0.96, fin + 0.03, false, 0.7, 0.6)
   Tween(0.26, function(u) flash:SetAlpha(0.55 * (1 - u)) end, fin)
@@ -791,7 +799,7 @@ function ns.Gathered(d, k, id, x, y)
   local n = d.count or 1
   Plus(row, n)
   local count = math.min(n, 3)
-  local wait = rare and (k == "fish" and 0.9 or 0.4) or 0.12
+  local wait = rare and (ns.GatherRareDelay(k) > 0 and ns.GatherRareDelay(k) or (k == "fish" and 0.9 or 0.4)) or 0.12
   for i = 1, count do
     local add = (i == count) and (n - count + 1) or 1
     Fly(d.icon, x, y + 10, row, wait + (i - 1) * 0.09, FLIGHT[k], function()
@@ -909,7 +917,10 @@ local function TestGather(k, rare, count)
     ns.ItemData(TEST_RARE[k] or 818, 1, "test", function(d)
       d.rare, d.test = true, true -- (a test popup shows above the settings window)
       ns.Gathered(d, k, id, x, y)
-      if ns.MinQuality and (d.quality or 0) >= ns.MinQuality() and not ns.settings.noPopup then ns:ShowLoot(d) end
+      if ns.MinQuality and (d.quality or 0) >= ns.MinQuality() and not ns.settings.noPopup then
+        local wait = ns.GatherRareDelay(k)
+        if wait > 0 then C_Timer.After(wait, function() ns:ShowLoot(d) end) else ns:ShowLoot(d) end
+      end
     end)
   end
 end

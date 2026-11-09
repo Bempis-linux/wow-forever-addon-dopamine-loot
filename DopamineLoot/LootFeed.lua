@@ -83,7 +83,10 @@ function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
   if gather then
     ns.ItemData(link, count, src, function(d)
       ns.Gathered(d, gather, gatherId, gx, gy)
-      if WantsPopup(d.quality or 0) and d.quality >= 2 then ns:ShowLoot(d) end
+      if WantsPopup(d.quality or 0) and d.quality >= 2 then -- after the rare burst's finale
+        local wait = ns.GatherRareDelay and ns.GatherRareDelay(gather) or 0
+        if wait > 0 then C_Timer.After(wait, function() ns:ShowLoot(d) end) else ns:ShowLoot(d) end
+      end
     end)
     return
   end
