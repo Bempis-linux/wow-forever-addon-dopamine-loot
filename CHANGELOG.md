@@ -1,5 +1,10 @@
 # Dopamine Loot
 
+## 1.2.1 (2026-11-09)
+
+- Loot rain: after a Big bang or Quick burst settles, the items stay where they landed instead of shuffling
+  into a row.
+
 ## 1.2.0 (2026-11-09)
 
 New ways for the loot rain to play out, three new popup styles, and a cleaner look for the item level.
