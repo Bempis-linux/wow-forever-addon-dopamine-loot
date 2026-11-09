@@ -95,6 +95,9 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Rune decode and Forged letters (spacing, divider badge, line), Banner's badge and line, and the Relic/Beam/Aura
   tag are back as they were at 5ad893b. Kept: Achievement's polish (gauge, rarity word, name 21) and Splash's
   number block ("isn't terrible"). Lesson: polish only what the user named; don't touch styles they're happy with.
+  Correction (same day): the user wanted the mockup picks kept to iterate on, so the Relic/Beam/Aura "iLvl" tag
+  (D) and Splash's block (E) are back; only Rune decode, Forged letters and Banner stay as before. Next: iterate
+  on the tag/block look in game (the user finds them a bit ugly in game).
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
