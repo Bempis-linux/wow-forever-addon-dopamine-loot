@@ -9,7 +9,7 @@
 --   Wave      a thin glowing ring that expands (legendary shockwave)
 --   Diamond, DiamondEdge, Shine   banner v2: the emblem behind the item and the shine sweep
 --   Pillar, Vignette   loot rain: the light pillar over resting Rare+, the Epic screen-edge pulse
---   Circle, Ring, Pill, PillRim   Achievement (the Capsule); Brush   Brush stroke; Runes   Rune decode
+--   Circle, Ring, Pill, PillRim   Achievement (the Capsule); Runes   Rune decode
 --   Chest*, Pouch*, Rays   deprecated chest show (written to deprecated/chest-show/Media/)
 local root = (arg and arg[0] or ""):match("^(.-)tools[/\\]") or ""
 local DIR = root .. "DopamineLoot/Media/"
@@ -151,29 +151,6 @@ local function PillDist(u, v) -- 0 at the middle line, 1 at the edge (straight l
 end
 Write("Pill", Fill(Canvas(128, 128), function(u, v) return Edge(PillDist(u, v), 0.97, 0.02) end))
 Write("PillRim", Fill(Canvas(128, 128), function(u, v) return Edge(math.abs(PillDist(u, v) - 0.945), 0.024, 0.02) end))
-
--- Brush stroke style: one thick stroke of paint rising to the right, rough-edged, tapering at both
--- ends (the tail thinner and drier), with dry-brush streaks along it. Deterministic noise.
-local function Hash(n) local s = math.sin(n * 127.1 + 311.7) * 43758.5453; return s - math.floor(s) end
-local function Noise(x) -- smooth value noise
-  local i, f = math.floor(x), x - math.floor(x)
-  local a, b = Hash(i), Hash(i + 1)
-  return a + (b - a) * f * f * (3 - 2 * f)
-end
-Write("Brush", Fill(Canvas(512, 128), function(u, v)
-  local center = 0.42 + 0.16 * u
-  local taper = math.min(1, u / 0.1) ^ 0.5 * math.min(1, (1 - u) / 0.3) ^ 0.7
-  local half = 0.34 * taper * (1 + 0.1 * (Noise(u * 38) - 0.5) + 0.05 * (Noise(u * 120 + 7) - 0.5))
-  if half <= 0 then return 0 end
-  local s = (v - center) / half -- -1..1 across the stroke
-  if math.abs(s) >= 1 then return 0 end
-  local lane = math.floor((s + 1) * 13)
-  local dry = Hash(lane + 3) -- each lane of bristles runs dry at its own point toward the tail
-  local stop = 0.72 + 0.26 * dry
-  local gap = u > stop and math.max(0, 1 - (u - stop) / 0.04) or 1
-  local streak = 0.82 + 0.18 * Hash(lane)
-  return Edge(math.abs(s), 0.96, 0.08) * streak * gap
-end))
 
 -- Rune decode style: 16 runes (Elder Futhark shapes, drawn as strokes) on a 4 x 4 sheet, a soft glow
 -- around each stroke; the game picks one with SetTexCoord

@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-08, after 1.1.0: rain animations cut to Fountain, Quick burst, Big bang; five new popup styles built (Achievement Capsule, Brush stroke, Rune decode, Forged letters, Ember burn-in), untested in game; the game is on dev. Read this first
+_Last checkpoint: 2026-11-09, after 1.1.0: rain animations Fountain, Quick burst, Big bang; Vacuum gather; popup styles Achievement (Capsule), Rune decode, Forged letters (Brush stroke and Ember burn-in removed), untested in game; the game is on dev. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
@@ -73,7 +73,10 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   The user: Quick burst "looks pretty good" (2026-11-08). **Vacuum gather** (setting `rainGather` "one" default /
   "vacuum", "How it gathers" under Afterwards; mockup round 6), untested in game: a 0.28 s inhale (lift, tremble,
   motes rushing to the bag), then everything sucked in together on a tight cubic curve, one gulp (rings, sparks,
-  ChestPop) instead of a ring and note per item.
+  ChestPop) instead of a ring and note per item. 2026-11-09: a wave from the bag outward, each item its own arc,
+  bend, speed, spin and lift (the user: "Wayyy better"). Big bang's opening flash softened (flashA 1 -> 0.3, the
+  big ring 0.9 -> 0.5: "a little too shocking"). **Brush stroke and Ember burn-in popup styles removed** by the
+  user 2026-11-09 (a saved one falls back to Relic; Brush.tga deleted).
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`

@@ -7,7 +7,7 @@
 --   banner  a ribbon in the quality color fading at both ends, the item on a diamond emblem, a shine
 --           sweeping across now and then
 --   splash, aura   a slanted banner slashing in; wisps of light rising
---   achievement, brush, runes, forged, ember   in Styles.lua, through the hooks marked "kit" here
+--   achievement, runes, forged   in Styles.lua, through the hooks marked "kit" here
 -- Every style: the name in the game's title font, a flash of light as it appears, and an arrival
 -- that grows with rarity (picked in docs/mockups/popups.html): Rare a burst of sparks; Epic star
 -- glints (the game's star4) and a bigger burst; Legendary more of both, two shockwaves and embers.
@@ -51,10 +51,8 @@ ns.STYLES = {
   { key = "aura", label = "Aura", tip = "The item in an aura of its color: soft wisps of light rise behind it and its glow breathes; the rarity under the name." },
   -- the Capsule and the frameless four live in Styles.lua (picked in docs/mockups/achievement.html)
   { key = "achievement", label = "Achievement", tip = "The item in a round emblem that opens into a bar: the rarity with a gauge, the name, the type; the item level in a small badge at the end." },
-  { key = "brush", label = "Brush stroke", tip = "A rough stroke of paint in the item's color swipes across under a big white name; flecks of paint fly off its end." },
   { key = "runes", label = "Rune decode", tip = "The name's letters start as glowing runes flickering through other runes, then settle into letters one by one." },
   { key = "forged", label = "Forged letters", tip = "Each letter is struck white-hot and cools to its color, sparks arcing off every strike. More sparks the rarer." },
-  { key = "ember", label = "Ember burn-in", tip = "An ember edge sweeps across and burns the name in, hot, then cooling; embers and a little smoke rise off it." },
 }
 -- view size; the stage (x, y, width, height) where the item stands; where the text goes; the
 -- clickable part (insets left, right, top, bottom: the empty glow around it lets clicks through);
@@ -68,10 +66,8 @@ local LAYOUT = {
   -- (Achievement: the stage is the emblem, a little higher so the item pokes out of its top; the
   -- camera farther back so the item fits it)
   achievement = { w = 400, h = 150, stage = { -140, 10, 96, 120 }, text = "right", hit = { 30, 20, 20, 20 }, zoom = 1.6, font = 19 },
-  brush = { w = 400, h = 240, stage = { 0, -4, 130, 150 }, text = "below", hit = { 70, 70, 0, 0 }, zoom = 1, font = 27 },
   runes = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
   forged = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
-  ember = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }
@@ -102,7 +98,7 @@ end
 -- Look settings (all on the "Popup look" settings page)
 function ns.PopupStyle()
   local s = ns.settings.popupStyle
-  if s == "halo" or s == "toast" then s = "relic"; ns.settings.popupStyle = s end -- both set aside (0.4.7, 0.4.14)
+  if s == "halo" or s == "toast" or s == "brush" or s == "ember" then s = "relic"; ns.settings.popupStyle = s end -- set aside (0.4.7, 0.4.14; Brush stroke and Ember burn-in 2026-11-09)
   return LAYOUT[s or ""] and s or "relic"
 end
 function ns.PopupScale() return ns.settings.popupScale or 0.8 end

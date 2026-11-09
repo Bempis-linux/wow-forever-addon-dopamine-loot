@@ -511,9 +511,9 @@ local function StyleFrame(st, W, H, k, dt)
     local cx, cy = W / 2, st.bangY
     if not st.burst then -- the wind-up: a point of light swells and trembles, pulling motes in; the screen dims
       if st.age >= st.bangT then
-        st.burst, st.flashA = true, 1
+        st.burst, st.flashA = true, 0.3 -- (a soft flash: the full one was too much, the user 2026-11-09)
         layer.dim:Hide()
-        Ring(cx, cy, 1, 0.95, 0.8, math.max(W, H) * 0.6, { life = 0.8, a = 0.9 })
+        Ring(cx, cy, 1, 0.95, 0.8, math.max(W, H) * 0.6, { life = 0.8, a = 0.5 })
         Ring(cx, cy, r, g, b, 260 * k, { life = 0.5 })
         Spark(cx, cy, r, g, b, math.floor(BURST_SPARKS[math.min(5, st.bestQ)] * 1.4), 420 * k, { grav = 240 * k, drag = 2.2, life = 1.8, size = 7 })
         st.shake = SHAKE_T * 0.7
