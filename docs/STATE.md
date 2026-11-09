@@ -6,7 +6,14 @@ splitting ring, vs. the leather bag), B2 squash and stretch + settle wobble (vs.
 ring, B5 sigh vs. big exhale, B6 herb bag no strain, B7 full moment at most every 4 s, B9 switch + Test bag; gathering
 G2 game-style tally docked under the minimap or beside the bag, G4 merging "+N", G5 skill bar in the profession's
 color with the unlock icon, G7 notes reset after 8 s idle, calm automatic after N gathers in 10 min (demo 12; default
-in game open, 40?). Crafting unchanged. **Next: the user's picks from round 3, then build the bag first.** Read this first
+in game open, 40?). Crafting unchanged. **The user picked Game art + Squash; the bag is built (Bag.lua, untested in
+game):** switches "Bulging bag" / "Slots-left bubble" and "Test bag" on the first page; ring and drawstring are Line
+widgets; not shown at 5+ free; full moment from UI_ERROR_MESSAGE (verify `/dump LE_GAME_ERR_INV_FULL, ERR_INV_FULL`
+and `/dump MainMenuBarBackpackButton.icon:GetAtlas(), MainMenuBarBackpackButton.icon:GetTexture()`). Known: the
+bag pumps when the loot arrives, before a loot rain's gather reaches it (maybe hold it until the gather). Version
+not bumped (bumped at release). **Gotcha (2026-11-09):** commit 055406a deleted all of DopamineLoot/Media by
+accident (restored in 947a51e from v1.2.1); check `git status` for mass deletions before committing. Next: the user
+tests the bag, then gathering (G2, G4, G5, G7). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

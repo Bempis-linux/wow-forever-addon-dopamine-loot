@@ -30,6 +30,8 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   RainCore.lua             loot rain, the pure part: ns.RainCore (physics, timing, spacing, coins; tools/test_rain.lua)
   Rain.lua                 loot rain drawing: sprites and every effect (ns.RAIN_FX switches)
   LootFeed.lua             CHAT_MSG_LOOT -> item data -> burst collector (+ looted money) -> popup or rain
+  Bag.lua                  the bulging bag: overlay on the backpack button at <=4 free normal slots (squash,
+                           strain ring, full-bag snap on UI_ERROR_MESSAGE, release puff); Test bag (testbag)
   Settings.lua             first page + helpers: ns.Native (plain pages on our own frames: Toggle, Slider, Choice, Button),
                            ns.UI (custom controls incl. Dropdown)
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check

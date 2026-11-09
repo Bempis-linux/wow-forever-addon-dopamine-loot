@@ -277,12 +277,13 @@ function N.Header(page, text)
 end
 
 -- A check box. off = the setting is a "no..." flag (checked means on), as most of ours are
-function N.Toggle(cat, key, label, tip, off)
+function N.Toggle(cat, key, label, tip, off, onChange)
   local page = pages[cat]
   local _, middle = Row(page, label, tip)
   local cb = Check(page.content, "", tip)
   cb:SetScript("OnClick", function(self)
     if off then ns.settings[key] = (not self:GetChecked()) or nil else ns.settings[key] = self:GetChecked() or nil end
+    if onChange then onChange() end
   end)
   refreshers[#refreshers + 1] = function()
     if off then cb:SetChecked(not ns.settings[key]) else cb:SetChecked(ns.settings[key] and true or false) end
@@ -345,6 +346,10 @@ local function CreateGeneral()
     "Shows a card beside your character for each item you loot, with the item turning in 3D. More settings on the Popups page.", true)
   N.Toggle(cat, "noRain", "Loot rain",
     "When you loot several items at once (or a lot of money), they spray up and bounce down at the bottom of the screen; the best item lands last and becomes a popup. In combat it waits until the fight is over. More settings on the Loot rain page.", true)
+  N.Toggle(cat, "noBag", "Bulging bag",
+    "When your bags are nearly full (4 slots or fewer), the backpack button puffs up a notch with each item and strains at the seams; when they're full, the loot spills out and is sucked back in. Herb, mining and other special bags don't count.", true, function() if ns.SyncBag then ns.SyncBag() end end)
+  N.Toggle(cat, "noBagCount", "Slots-left bubble",
+    "A small \"3 left\" bubble above the bulging bag (\"Full\" when there's no room).", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noSound", "Sounds",
     "Turns every Dopamine Loot sound on or off at once. The game's own sounds are not affected. More settings on the Sounds page.", true)
   N.Header(layout, "Try it")
@@ -358,6 +363,8 @@ local function CreateGeneral()
     "An Uncommon looted together with a Rare: the Rare shows as a full popup and the Uncommon as a compact one-line popup.")
   N.Button(layout, "Start a loot rain", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
     "Rains test loot taken from your bags, with better items mixed in. How many items: Test rain size, on the Loot rain page.")
+  N.Button(layout, "Fill the bag to bursting", "Test bag", function() ns.RunAction("testbag") end,
+    "Plays the bulging bag: four items to full, the full-bag moment, then a big release. Your bags aren't touched.")
   N.Button(layout, "Simulate a quest reward", "Test reward", function() ns.RunAction("testquest") end,
     "An item and some money rained together, the way finishing a quest plays.")
 end

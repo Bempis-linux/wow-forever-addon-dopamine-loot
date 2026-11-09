@@ -19,6 +19,7 @@ Popup.lua
 RainCore.lua
 Rain.lua
 LootFeed.lua
+Bag.lua
 Settings.lua
 Look.lua
 Arrivals.lua
