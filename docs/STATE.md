@@ -40,7 +40,10 @@ sounds) are "100%", keep as is (don't touch); herbalism and skinning rares need 
 ring of small pink dots in game), and polish the herb and skin normal bursts. Mockup docs/mockups/gather-polish.html:
 herb normal Current/N1 leaves and petals/N2 gentle swirl, herb rare Current/R1 Blossom/R2 Petal storm/R3 Golden
 bloom; skin normal Current/N1 glint and scraps/N2 clean cut, skin rare Current/R1 Double slash/R2 Pelt sheen/R3
-Trophy. Waiting for picks. After that: popups movable via Mover. Read this first
+Trophy. **Picks (2026-11-09):** skinning N2 Clean cut + R1 Double slash (built in Gather.lua: Slash() with a tip,
+Tufts(), RARE.skin = the X); herbalism normal stays as is; none of the herb options landed, but Golden bloom is "a good
+idea": round 2 in the same file (G0 Golden bloom, G1 Sunrise, G2 Golden seed, G3 Wreath), waiting for a pick.
+After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

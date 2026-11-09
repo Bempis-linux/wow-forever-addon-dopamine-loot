@@ -43,7 +43,15 @@
 <div class="bar"><button class="go" id="hPlay">🌿 Gather</button><button class="go" id="hRare">🌸 Rare find</button></div>
 <div class="stage" id="hStage"><div class="char">🧙</div><div class="node" id="hNode">🌿</div><div class="note" id="hNote"></div></div>
 
-<h2>2. Skinning</h2>
+<h2>1b. Herbalism rare, round 2: around the Golden bloom</h2>
+<p class="lead">The normal herb burst stays as it is in game. All four build on round 1's Golden bloom (light rays, leaves opening, gold motes). <b>G0 Golden bloom</b>: round 1's, for comparison · <b>G1 Sunrise</b>: the rays rise from behind the herb like a sunrise (a half fan, warm), the leaves open around a small gold flower that pops at the center, and the motes float up instead of raining · <b>G2 Golden seed</b>: a seed of light lifts out of the herb, hangs a beat, then cracks open: the rays flash out, the leaves unfold, and gold pollen showers down · <b>G3 Wreath</b>: a wreath of leaves spins slowly open like a halo while soft rays turn behind it, and little gold petals of light drift off on the breeze.</p>
+<div class="bar">
+  <span>Rare</span><button data-g2="g0">G0 Golden bloom</button><button data-g2="g1" class="on">G1 Sunrise</button><button data-g2="g2">G2 Golden seed</button><button data-g2="g3">G3 Wreath</button>
+  <button class="go" id="gRare">🌸 Rare find</button>
+</div>
+<div class="stage" id="gStage"><div class="char">🧙</div><div class="node" id="gNode">🌿</div><div class="note" id="gNote"></div></div>
+
+<h2>2. Skinning (built: N2 Clean cut + R1 Double slash)</h2>
 <p class="lead"><b>Normal</b>: Current (a knife glint, fur tufts drift down) · <b>N1 Glint and scraps</b>: the glint leaves a short afterimage, a second quick flick follows, and small leather scraps tumble with the tufts · <b>N2 Clean cut</b>: one crisp glint with a bright tip that runs along the blade, softer, fluffier tufts.<br>
 <b>Rare</b>: Current (a long streak with glints) · <b>R1 Double slash</b>: two quick glints cross in an X, a flash where they meet, sparks along both · <b>R2 Pelt sheen</b>: a broad sheen of light sweeps across a soft hide-shaped glow, like light running over fine leather, with glints at its edge · <b>R3 Trophy</b>: the hide pops up big over the carcass with a gold rim and a shine sweep, holds a beat, then flies to the window.</p>
 <div class="bar">
@@ -174,6 +182,61 @@ function herb(rare) {
 }
 $('hPlay').onclick = () => herb(false);
 $('hRare').onclick = () => herb(true);
+
+// ---- round 2: golden bloom variants ----
+let g2 = 'g1';
+pick('g2', v => g2 = v);
+function rays(cx, cy, n, from, to, len, delay, dur, color = 'rgba(255,220,120,.55)', spin = 12) {
+  for (let i = 0; i < n; i++) { const a = from + (to - from) * (n > 1 ? i / (n - 1) : .5);
+    el('', `left:${cx - 3}px;top:${cy - len}px;width:6px;height:${len}px;transform-origin:50% 100%;background:linear-gradient(transparent,${color});filter:blur(1.5px)`,
+      [{ transform: `rotate(${a}deg) scaleY(0)`, opacity: 0 }, { transform: `rotate(${a + spin * .4}deg) scaleY(1)`, opacity: 1, offset: .35 }, { transform: `rotate(${a + spin}deg) scaleY(1.1)`, opacity: 0 }], dur * 1000, delay * 1000); }
+}
+function leafRing(cx, cy, n, rad, delay, dur, turn = 0) {
+  for (let i = 0; i < n; i++) { const a = i * 360 / n, ar = a * Math.PI / 180;
+    pathEl(LEAF(16, 9), '', cx, cy, dur, u => { const e = 1 - Math.pow(1 - Math.min(1, u / .4), 3), t = ar + turn * u * Math.PI / 180;
+      return [Math.sin(t) * rad * e, Math.cos(t) * rad * e, -(a + turn * u) + 45, .3 + .9 * e, u > .7 ? (1 - u) / .3 : 1]; }, delay); }
+}
+const G2 = {
+  g0(x, y) { HR.r3(x, y); },
+  g1(x, y) { // Sunrise
+    const cx = x, cy = y - 24;
+    rays(cx, cy + 10, 9, -80, 80, 110, .05, 2, 'rgba(255,200,110,.6)', 6);
+    pathEl('<div style="width:160px;height:80px;margin:-80px -80px 0;border-radius:80px 80px 0 0;background:radial-gradient(ellipse at 50% 100%,rgba(255,200,110,.35),transparent 70%)"></div>', '', cx, cy + 10, 2, u => [0, 0, 0, .6 + .4 * Math.min(1, u * 3), u < .2 ? u / .2 : (u > .7 ? (1 - u) / .3 : 1)]);
+    leafRing(cx, cy, 8, 28, .2, 1.8);
+    for (let i = 0; i < 5; i++) { const a = i * 72, ar = a * Math.PI / 180;
+      pathEl(PETAL(12, 16, '#ffd34a'), '', cx, cy, 1.6, u => { const e = u < .3 ? 0 : Math.min(1, (u - .3) / .2); return [Math.sin(ar) * 7 * e, Math.cos(ar) * 7 * e, a, e * (1 + .15 * Math.sin(Math.min(1, (u - .3) / .2) * Math.PI)), u > .75 ? (1 - u) / .25 : 1]; }, .1); }
+    pathEl(MOTE(8, '#fff6c0'), '', cx, cy, 1.4, u => [0, 0, 0, u < .35 ? 0 : 1, u > .75 ? (1 - u) / .25 : 1], .1);
+    for (let i = 0; i < 18; i++) ballistic(cx + R(-60, 60), cy + R(0, 10), { vx: R(-12, 12), vy: R(30, 70), g: -6, life: R(1.4, 2), size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .5 + i * .04 });
+    [523, 659, 784].forEach((f, i) => tone(f, .1 + i * .12, .04, 1.6)); tone(1568, .55, .04, 1.2);
+  },
+  g2(x, y) { // Golden seed
+    const cx = x, cy = y - 50;
+    pathEl(MOTE(10, '#ffe48a'), '', x, y - 6, .9, u => { const e = 1 - Math.pow(1 - Math.min(1, u / .5), 2); return [0, 44 * e + (u > .5 ? 2 * Math.sin((u - .5) * 20) : 0), 0, .6 + .5 * e, 1]; });
+    for (let i = 0; i < 6; i++) ballistic(x + R(-4, 4), y - 6 - i * 7, { vx: 0, vy: 0, g: 0, life: .6, size: 2, color: '#ffe48a', glow: 5, fade: true, delay: i * .06 });
+    setTimeout(() => {
+      ring(cx, cy, '#ffe48a', 90, .5); star(cx, cy, 50, '#fff6c0', .5);
+      rays(cx, cy, 12, 0, 330, 90, 0, 1.4, 'rgba(255,220,120,.6)', 15);
+      leafRing(cx, cy, 10, 30, 0, 1.6);
+      for (let i = 0; i < 26; i++) ballistic(cx + R(-10, 10), cy, { vx: R(-110, 110), vy: R(20, 140), g: 160, life: R(1.1, 1.7), size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .05 + i * .01 });
+    }, 900);
+    tone(880, 0, .03, .6); tone(1175, .3, .03, .5); tone(1568, .9, .07, 1.2); tone(2093, .95, .06, 1.2); tone(784, .9, .05, 1.6);
+  },
+  g3(x, y) { // Wreath
+    const cx = x, cy = y - 40;
+    rays(cx, cy, 10, 0, 324, 80, .05, 2.2, 'rgba(255,220,120,.4)', 40);
+    leafRing(cx, cy, 12, 32, .1, 2.2, 120);
+    pathEl('<div style="width:76px;height:76px;margin:-38px;border-radius:50%;box-shadow:0 0 18px 4px rgba(255,220,120,.45), inset 0 0 14px rgba(255,220,120,.4)"></div>', '', cx, cy, 2, u => [0, 0, 0, .5 + .5 * Math.min(1, u / .4), u < .2 ? u / .2 : (u > .7 ? (1 - u) / .3 : 1)], .1);
+    for (let i = 0; i < 12; i++) { const a = R(0, Math.PI * 2), d = .5 + i * .07;
+      pathEl(PETAL(7, 9, '#ffd34a'), 'filter:drop-shadow(0 0 4px #ffd34a)', cx + Math.cos(a) * 32, cy - Math.sin(a) * 32, 1.5, u => [50 * u + 8 * Math.sin(u * 8 + i), 20 * u - 30 * u * u, 200 * u, 1, 1 - u], d); }
+    [659, 784, 988].forEach((f, i) => tone(f, .1 + i * .15, .035, 1.8)); tone(1318, .6, .035, 1.4);
+  },
+};
+$('gRare').onclick = () => {
+  ST = $('gStage'); const [x, y] = pos('gNode');
+  $('gNode').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1)' }], { duration: 260 });
+  HN.cur(x, y); G2[g2](x, y);
+  $('gNote').textContent = 'Rare: ' + { g0: 'G0 Golden bloom', g1: 'G1 Sunrise', g2: 'G2 Golden seed', g3: 'G3 Wreath' }[g2];
+};
 
 // =================== Skinning ===================
 let sn = 'cur', sr = 'r1';

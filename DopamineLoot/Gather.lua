@@ -316,29 +316,53 @@ function RARE.fish(x, y, quiet, icon) -- a big shimmering leap
   Sound("RareFish", 0, quiet)
 end
 
-local function Slash(x, y, w) -- the knife glint: a bright streak slashing up-right
-  Fx({ file = MEDIA .. "Streak.tga", x = x, y = y + 6, size = 10, size1 = w, life = 0.36, add = true, rot = 0.49,
-    path = function(u) return 4 * u, 2 * u, 0.49 end })
+-- The knife glint (docs/mockups/gather-polish.html, N2 "Clean cut"): one crisp streak at angle a
+-- (radians, 0.49 = up-right), w long; tip: a bright point running along the blade as it cuts
+local function Slash(x, y, w, a, delay, tip)
+  local ca, sa = math.cos(a), math.sin(a)
+  Fx({ file = MEDIA .. "Streak.tga", x = x, y = y, size = 10, size1 = w, life = 0.4, delay = delay, add = true, rot = a,
+    path = function(u) return 4 * u * ca, 4 * u * sa, a end })
+  if tip then
+    Fx({ file = MEDIA .. "Mote.tga", x = x, y = y, size = 9, life = 0.4, delay = delay, add = true,
+      path = function(u) local d = -w / 2 + w * u; return d * ca, d * sa, 0 end })
+  end
 end
-function BURST.skin(x, y, rare, m, quiet)
-  if not rare then Slash(x, y, 90) end -- (a rare's long one comes below)
-  Sound("Slash", 0, quiet)
-  for i = 1, math.floor(9 * m + 0.5) do -- fur tufts drifting down
+local function Tufts(x, y, n) -- soft, fluffy fur tufts drifting down
+  for i = 1, n do
     local dx, ph = R(-50, 50), i
-    Fx({ file = MEDIA .. "Glow.tga", x = x, y = y, size = R(9, 13), life = R(1.1, 1.6), delay = 0.08 + i * 0.02, fade = true,
-      r = 0.72, gg = 0.52, b = 0.32,
+    Fx({ file = MEDIA .. "Glow.tga", x = x, y = y, size = R(12, 17), life = R(1.1, 1.6), delay = 0.08 + i * 0.02, fade = true,
+      r = 0.76, gg = 0.56, b = 0.36, a = 0.85,
       path = function(u) return dx * u + 8 * math.sin(u * 9 + ph), 30 * math.sin(math.pi * math.min(u * 1.6, 1)) - 50 * u * u, 0 end })
   end
-  if rare then RARE.skin(x, y, quiet) end
 end
-function RARE.skin(x, y, quiet) -- a long shine sweep
-  local w = 240
-  Slash(x, y, w)
-  for i = 0, 5 do
-    local d = -w / 2 + w * i / 5
-    Glint(x + d * 0.88, y + 6 + d * 0.47, 16, 1, 1, 1, 0.45, 0.1 + i * 0.04)
+function BURST.skin(x, y, rare, m, quiet)
+  if rare then -- the rare's double slash replaces the single one
+    Tufts(x, y, 6)
+    RARE.skin(x, y, quiet)
+    return
   end
-  Sound("RareSkin", 0, quiet)
+  Slash(x, y + 6, 100, 0.49, 0, true)
+  Sound("Slash", 0, quiet)
+  Tufts(x, y, math.floor(7 * m + 0.5))
+end
+function RARE.skin(x, y, quiet) -- R1 "Double slash": two glints cross in an X, a flash where they meet, sparks
+  local cy = y + 10
+  Slash(x, cy, 170, 0.56, 0)
+  Slash(x, cy, 170, -0.56, 0.12)
+  Sound("Slash", 0, quiet)
+  Sound("Slash", 0.12, quiet)
+  Fx({ file = MEDIA .. "Ring.tga", x = x, y = cy, size = 10, size1 = 70, life = 0.4, delay = 0.17, add = true })
+  Glint(x, cy, 46, 1, 1, 1, 0.5, 0.17)
+  Glint(x, cy, 30, 1, 0.88, 0.69, 0.5, 0.22)
+  for k = 0, 1 do
+    local a = k == 0 and 0.56 or -0.56
+    for _ = 1, 6 do
+      local d = R(-80, 80)
+      Fx({ file = MEDIA .. "Mote.tga", x = x + d * math.cos(a), y = cy + d * math.sin(a), vx = R(-60, 60), vy = R(20, 90), g = 300,
+        size = 5, life = R(0.35, 0.6), delay = 0.05 + k * 0.12, add = true, r = 1, gg = 0.91, b = 0.75 })
+    end
+  end
+  Sound("RareSkin", 0.17, quiet)
 end
 
 ---------------------------------------------------------------------------
