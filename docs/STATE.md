@@ -26,8 +26,21 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   get a bigger burst + the normal popup, **skill-ups** with a bar to the next unlock, **calm** after many
   gathers (smaller, silent; the tally still counts). Mockup: docs/mockups/gathering.html (round 1, no picks
   yet). 3. then **profession crafting** (rounds off professions; the Create All finale). APIs for all of this
-  (bag space, full-bag error, gather source, skill-ups, created items) were being checked when the session
-  ended: re-run the wow-api-researcher if the findings below are missing.
+  (researched 2026-11-09, evidence from Forever addons RoadToSixty, NodeSight, Narcissus, EasyFishing):
+  - Bag space: C_Container.GetContainerNumFreeSlots(0..4) -> free, bagFamily; count only bagFamily == 0;
+    BAG_UPDATE_DELAYED. Full bags: UI_ERROR_MESSAGE (errorType, msg): errorType == LE_GAME_ERR_INV_FULL or
+    msg == ERR_INV_FULL (verify both with /dump); no CHAT_MSG_LOOT then, the item stays in the window.
+    Backpack button: read MainMenuBarBackpackButton's center as Rain.lua's BagPoint does (no touching it).
+  - Gather source: at LOOT_READY (LOOT_OPENED fallback) IsFishingLoot() = fishing; GetLootSourceInfo(slot)
+    GUID "GameObject-" + ore/herb item class = mining/herbalism (pcall, issecretvalue guard); "Creature-" with
+    only leather/hide = skinning; isFromItem = disenchant/container. Don't use gather spell IDs (Forever has
+    its own). Tag the CHAT_MSG_LOOT records until LOOT_CLOSED.
+  - Skill-ups: CHAT_MSG_SKILL as a trigger, then diff GetProfessions()/GetProfessionInfo(i) (pcall; nil
+    holes; may be empty for ~5 s after login). GetSkillLineInfo does NOT exist on Forever.
+    C_SkillInfo.GetSkillLineInfoByID(186) may (verify).
+  - Crafting: "You create" CHAT_MSG_LOOT lines (LootMsg.lua already has them); batch them; the end via
+    UPDATE_TRADESKILL_CAST_STOPPED or a quiet gap.
+  - To /dump in game: LE_GAME_ERR_INV_FULL, ERR_INV_FULL, SKILL_RANK_UP, C_SkillInfo, loot source GUIDs.
   Ideas list from 2026-11-09 (not picked yet): roll-win dice + WON stamp, junk-selling finale, AH-money mail
   rain, trophy shelf (best drops in 3D), first-of-its-kind moments, gold milestones, lucky drop, screenshot
   at an Epic's peak.
