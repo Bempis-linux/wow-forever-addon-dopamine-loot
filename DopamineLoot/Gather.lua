@@ -23,7 +23,10 @@ local GetInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
 local GetInfoInstant = (C_Item and C_Item.GetItemInfoInstant) or GetItemInfoInstant
 local TRADE_GOODS, GEM = 7, 3
 local SUB_HERB, SUB_METAL_STONE, SUB_LEATHER = 9, 7, 6
-local NOTE_RESET, CALM_WINDOW, GRACE, MERGE_T, TALLY_IDLE, MAX_ROWS, MAX_FX = 8, 600, 1, 1.5, 90, 8, 80
+local NOTE_RESET, CALM_WINDOW, GRACE, MERGE_T, MAX_ROWS, MAX_FX = 8, 600, 1, 1.5, 8, 80
+-- How long the tally stays after the last gather: 12 s for a herb picked on the way while questing,
+-- 2 s more for each gather in the last 10 minutes, up to 90 s in a real farming run
+local LINGER_MIN, LINGER_PER, LINGER_MAX = 12, 2, 90
 local ROW_W, ROW_H = 210, 26
 
 local layer, tally, header, total
@@ -36,6 +39,7 @@ local step, lastGather = 0, -999
 local hist = {}                    -- times of recent gathers (calm)
 local sum = 0
 local lastShown = -999
+local dismissedAt                  -- set when the tally is sent away early (right-click, combat)
 
 local function On() return not ns.settings.noGather and ns.settings.enabled ~= false end
 local function CalmLimit() local v = ns.settings.gatherCalm; if v == nil then return 40 end return v end
@@ -43,6 +47,10 @@ local function Calm()
   local now, limit = GetTime(), CalmLimit()
   while hist[1] and now - hist[1] > CALM_WINDOW do table.remove(hist, 1) end
   return limit > 0 and #hist >= limit
+end
+local function Linger()
+  Calm() -- (drops gathers older than 10 minutes)
+  return math.min(LINGER_MAX, LINGER_MIN + LINGER_PER * #hist)
 end
 
 ---------------------------------------------------------------------------
@@ -159,14 +167,22 @@ local function Step(_, dt)
       if u >= 1 then table.remove(tweens, i) end
     end
   end
-  -- the tally fades after a while without gathering (not while it's being placed)
+  -- (Dismiss is below; Step only reads dismissedAt)
+  -- the tally fades after a while without gathering, or at once when dismissed (not while it's being placed)
   if tally and tally:IsShown() and not (ns.Mover and ns.Mover.IsUnlocked()) then
-    local idle = GetTime() - lastShown
-    if idle > TALLY_IDLE then
-      local a = 1 - (idle - TALLY_IDLE) / 0.6
-      if a <= 0 then tally:Hide(); tally:SetFrameStrata("MEDIUM") else tally:SetAlpha(a) end
+    local now = GetTime()
+    local start, dur = lastShown + Linger(), 0.6
+    if dismissedAt then start, dur = dismissedAt, 0.3 end
+    if now > start then
+      local a = 1 - (now - start) / dur
+      if a <= 0 then tally:Hide(); tally:SetFrameStrata("MEDIUM") else tally:SetAlpha(math.min(tally:GetAlpha(), a)) end
     end
   end
+end
+
+-- Hides the tally now (right-click, a fight starting); it comes back on the next gather
+local function Dismiss()
+  if tally and tally:IsShown() and not (ns.Mover and ns.Mover.IsUnlocked()) then dismissedAt = GetTime() end
 end
 
 local function R(a, b) return a + math.random() * (b - a) end
@@ -330,7 +346,7 @@ end
 
 local function ShowTally()
   if ns.settings.noGatherTally then return false end
-  lastShown = GetTime()
+  lastShown, dismissedAt = GetTime(), nil
   tally:SetAlpha(1)
   tally:Show()
   return true
@@ -416,6 +432,16 @@ local function Create()
   tally:SetFrameStrata("MEDIUM")
   tally:SetSize(ROW_W, 40)
   tally:Hide()
+  -- right-click sends it away until the next gather (only clicks on it are caught; it's small)
+  tally:EnableMouse(true)
+  tally:SetScript("OnMouseUp", function(_, button) if button == "RightButton" then Dismiss() end end)
+  tally:SetScript("OnEnter", function(self)
+    ns.Tooltip():SetOwner(self, "ANCHOR_LEFT")
+    ns.Tooltip():SetText("Harvest", 1, 0.82, 0)
+    ns.Tooltip():AddLine("What you gathered this session. Right-click to hide it; it comes back on your next gather.", 1, 1, 1, true)
+    ns.Tooltip():Show()
+  end)
+  tally:SetScript("OnLeave", function(self) if ns.Tooltip():IsOwned(self) then ns.Tooltip():Hide() end end)
   header = tally:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   header:SetPoint("TOPLEFT", 4, 0)
   header:SetText("Harvest")
@@ -455,7 +481,13 @@ end
 
 ns.OnInit(function()
   Create()
-  ns:RegisterEvents("LOOT_READY", "LOOT_OPENED", "LOOT_CLOSED")
+  ns:RegisterEvents("LOOT_READY", "LOOT_OPENED", "LOOT_CLOSED", "PLAYER_REGEN_DISABLED")
+  -- a fight starts: the tally steps out of the way (back on the next gather)
+  local regen = ns.PLAYER_REGEN_DISABLED
+  ns.PLAYER_REGEN_DISABLED = function(self, ...)
+    if regen then regen(self, ...) end
+    Dismiss()
+  end
   -- LootFeed.lua handles LOOT_OPENED and LOOT_CLOSED too: run both
   local opened, closed = ns.LOOT_OPENED, ns.LOOT_CLOSED
   ns.LOOT_OPENED = function(self, ...)

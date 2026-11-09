@@ -22,7 +22,9 @@ the game's Edit Mode, our own "Move frames" overlay instead). Calm after 40 gath
 0 = never). Sounds from tools/gen_gather_sounds.sh (GatherNote00..10, GatherStack, SkillUp; not picked by ear yet).
 Gathered items skip the rain; Uncommon+ finds still pop up. To verify in game: `/dump C_Item.GetItemInfoInstant(2447)`
 (expect returns 6,7 = 7,9; 2770 -> 7,7; 2318 -> 7,6), LOOT_READY count per gather (/etrace), the burst at the cursor
-(clicked node) vs. the interact key, the skill unlock levels (Classic's). Next after testing: popups movable via Mover. Read this first
+(clicked node) vs. the interact key, the skill unlock levels (Classic's). User test 2026-11-09: "pretty good right off
+the bat"; +N made bigger/outlined; tally visibility picked: linger 12 s + 2 s per gather in 10 min (max 90), hides
+when combat starts, right-click dismisses (all come back on the next gather). Next: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
