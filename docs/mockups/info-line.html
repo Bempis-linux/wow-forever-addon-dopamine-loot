@@ -16,102 +16,61 @@
   .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
   button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
   button:hover { background: #3a3020; } button.on { background: #4a3c1c; border-color: #b08a3a; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; padding: 4px 18px 8px; }
-  .cell { border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 40% 70%, #2a3a34, #141c18 60%, #0c100e); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; padding: 4px 18px 8px; }
+  /* a game-like backdrop: dark teal forest */
+  .cell { border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 50% 60%, #1d3634, #0f1f1f 60%, #091312); }
   .cell h2 { margin: 0; padding: 7px 10px 0; font-size: 12.5px; color: var(--gold); }
-  .cell p { margin: 2px 10px 0; color: #c9c1ac; font-size: 11.5px; min-height: 32px; }
-  .scene { position: relative; height: 250px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .scene { position: relative; height: 240px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 
   .item { width: 40px; height: 98px; position: relative; flex: none; z-index: 2; }
   .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.7)); }
-  .name { font: 700 18px Georgia, serif; color: var(--nc); white-space: nowrap; text-shadow: 0 1px 0 #000, 0 2px 6px #000; letter-spacing: .3px; font-variant: small-caps; }
-  .info { font: 600 10px system-ui; color: #d8d0bc; text-shadow: 0 1px 2px #000; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  /* the game's title font is Morpheus (in small caps); Palatino stands in */
+  .name { font: 400 19px "Palatino Linotype", Georgia, serif; font-variant: small-caps; letter-spacing: .4px; color: var(--nc); white-space: nowrap;
+    text-shadow: 1px -1px 0 #000, 0 0 3px #000; }
+  .info { font: 400 10.5px "Friz Quadrata", "Trebuchet MS", sans-serif; color: #c9c2b0; text-shadow: 1px -1px 0 #000; white-space: nowrap; }
   .info .rq { color: var(--cl); }
-  .up { font: 800 10px system-ui; color: #3dff5a; text-shadow: 0 0 4px rgba(0,0,0,.9); white-space: nowrap; }
-  .up.down { color: #9a9a9a; }
-
-  /* 1. the gem socket: a small faceted gem in the rarity color, the number on it */
-  .gem { position: relative; width: 24px; height: 24px; flex: none; display: inline-flex; align-items: center; justify-content: center; margin: 0 3px; }
-  .gem::before { content: ""; position: absolute; inset: 3px; transform: rotate(45deg); border: 1px solid color-mix(in srgb, var(--cl) 80%, #fff);
-    background: conic-gradient(from 45deg, color-mix(in srgb, var(--c) 55%, #fff), var(--c) 25%, color-mix(in srgb, var(--c) 55%, #000) 50%, var(--c) 75%, color-mix(in srgb, var(--c) 55%, #fff));
-    box-shadow: 0 0 8px -1px var(--c), inset 0 0 3px rgba(255,255,255,.5); }
-  .gem::after { content: ""; position: absolute; left: 7px; top: 5px; width: 4px; height: 3px; border-radius: 50%; background: rgba(255,255,255,.75); transform: rotate(-30deg); }
-  .gem b { position: relative; font: 800 10px Georgia, serif; color: #fff; text-shadow: 0 0 2px #000, 0 1px 1px #000, 0 0 4px #000; }
-
-  /* 2. the stat readout: no frame; the number in the rarity color over a tiny ITEM LEVEL */
-  .readout { display: flex; flex-direction: column; align-items: center; line-height: 1; padding-left: 10px; margin-left: 2px; border-left: 1px solid color-mix(in srgb, var(--c) 55%, transparent); }
-  .readout b { font: 700 20px Georgia, serif; color: var(--cl); text-shadow: 0 1px 0 #000, 0 0 8px color-mix(in srgb, var(--c) 50%, transparent); }
-  .readout small { font: 800 6px system-ui; letter-spacing: 1.2px; color: #b9b09a; margin-top: 2px; }
-  .readout .up { margin-top: 3px; font-size: 9px; }
-  .txt { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .withread { display: flex; align-items: center; gap: 8px; }
-
-  .stack { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+  .stack { display: flex; flex-direction: column; align-items: center; gap: 2px; position: relative; }
   .pin { position: relative; }
-  .plate { position: relative; padding: 2px 14px 3px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.55) 20%, rgba(0,0,0,.55) 80%, transparent); border-bottom: 1px solid var(--c); }
-  .beam .pin::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 56px; height: 140px; margin-left: -28px;
-    background: linear-gradient(0deg, color-mix(in srgb, var(--c) 55%, transparent), transparent); filter: blur(6px); }
+  .plate { position: relative; padding: 1px 16px 3px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.55) 20%, rgba(0,0,0,.55) 80%, transparent); }
+  .beam .pin::before { content: ""; position: absolute; left: 50%; bottom: -8px; width: 54px; height: 140px; margin-left: -27px;
+    background: linear-gradient(0deg, color-mix(in srgb, var(--c) 65%, transparent), transparent); filter: blur(6px); }
+  .aura .pin::before { content: ""; position: absolute; left: 50%; top: 50%; width: 130px; height: 130px; margin: -65px 0 0 -65px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 45%, transparent), transparent 70%); }
+  .aura .tagw { font: 700 9px "Trebuchet MS", sans-serif; letter-spacing: 3px; color: var(--cl); }
 
-  /* Aura, before (the game today) */
-  .aura0 .pin::before { content: ""; position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--c) 35%, transparent), transparent 70%); }
-  .aura0 .tagw { font: 800 9px system-ui; letter-spacing: 3px; color: var(--cl); }
-  /* Aura, new: 7 a heartbeat on arrival, then a slow breath; 9 a narrow sunbeam column with dust
-     motes drifting through it; 11 the rarity word framed by fading lines, a bigger name */
-  .aura .glow { position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; z-index: -1;
-    background: radial-gradient(circle, color-mix(in srgb, var(--c) 45%, transparent), transparent 68%);
-    animation: beat .9s ease-out both, breathe 3.2s .9s ease-in-out infinite; }
-  @keyframes beat { 0% { transform: scale(.4); opacity: 0 } 18% { transform: scale(1.25); opacity: 1 } 32% { transform: scale(.95); opacity: .7 }
-    48% { transform: scale(1.15); opacity: .95 } 100% { transform: scale(1); opacity: .75 } }
-  @keyframes breathe { 0%, 100% { transform: scale(1); opacity: .75 } 50% { transform: scale(1.08); opacity: .9 } }
-  .scene .col { position: absolute; left: 50%; bottom: 0; width: 34px; height: 230px; margin-left: -17px; z-index: 0; filter: blur(5px);
-    background: linear-gradient(0deg, color-mix(in srgb, var(--cl) 40%, transparent), color-mix(in srgb, var(--c) 25%, transparent) 60%, transparent);
-    animation: colin .6s .15s ease-out both; }
-  @keyframes colin { from { transform: scaleY(0); transform-origin: bottom; opacity: 0 } to { transform: none; opacity: 1 } }
-  .scene .mote { position: absolute; width: 2.5px; height: 2.5px; border-radius: 50%; background: var(--cl); box-shadow: 0 0 4px var(--c); opacity: 0; z-index: 1;
-    animation: drift var(--d) var(--t) linear infinite; }
-  @keyframes drift { 0% { transform: translate(0, 0); opacity: 0 } 15% { opacity: .9 } 85% { opacity: .7 } 100% { transform: translate(var(--dx), -150px); opacity: 0 } }
-  .aura .frame { display: flex; align-items: center; gap: 8px; font: 800 9px system-ui; letter-spacing: 3px; color: var(--cl); z-index: 2; }
-  .aura .frame::before, .aura .frame::after { content: ""; height: 1px; width: 46px; }
-  .aura .frame::before { background: linear-gradient(90deg, transparent, var(--c)); } .aura .frame::after { background: linear-gradient(-90deg, transparent, var(--c)); }
-  .aura .pin { isolation: isolate; z-index: 2; }
-  .aura .name { font-size: 21px; z-index: 2; }
-  .aura .info { color: #b9b09a; z-index: 2; }
+  /* today: the underline is one unbroken line; the line carries the iLvl tag */
+  .under { display: block; height: 1px; margin: 1px auto 0; width: 100%; background: linear-gradient(90deg, transparent, var(--c) 30%, var(--c) 70%, transparent); }
+  .pill { display: inline-block; font: 700 9px "Trebuchet MS", sans-serif; color: #fff; padding: 0 6px; border-radius: 7px; border: 1px solid var(--c); background: #160f08; margin-left: 4px; vertical-align: 1px; }
+  .pill i { font-style: normal; color: var(--cl); }
 
-  /* Splash */
-  .splash { position: relative; display: flex; flex-direction: column; align-items: center; }
-  .splash .slab { position: relative; padding: 5px 26px; transform: skewX(-12deg); background: color-mix(in srgb, var(--c) 80%, #000); box-shadow: 0 3px 0 #fff3 inset; margin-top: 6px; }
-  .splash .slab > .name, .splash .slab > .stamp { transform: skewX(12deg); }
-  .splash .name { font-size: 21px; color: #fff; font-variant: normal; }
-  .splash .stamp { position: absolute; right: -6px; top: -15px; font: 900 11px system-ui; color: #fff; transform: rotate(8deg); text-shadow: 0 1px 0 #000, 0 0 4px #000; }
-  .splash .row { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
-  /* 6. the block slants with the banner (the in-game one is upright today) */
-  .splash .slab .num { position: absolute; left: -36px; top: 0; bottom: 0; width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: #160f08; border: 1.5px solid var(--cl); box-sizing: border-box; line-height: 1; }
-  .splash .slab .num > * { transform: skewX(12deg); }
-  .splash .slab .num b { font: 900 15px system-ui; color: #fff; } .splash .slab .num small { font: 800 6px system-ui; letter-spacing: 1px; color: var(--cl); }
-  .splash .slab .num.upright { transform: skewX(12deg); } .splash .slab .num.upright > * { transform: none; }
-  .splash .slab .gem { position: absolute; left: -20px; top: 50%; margin-top: -12px; transform: skewX(12deg) scale(1.3); }
+  /* the inscribed number: the underline breaks in the middle and the item level sits in the gap,
+     white with a soft glow in the rarity color, like a hallmark stamped on a blade */
+  .ins { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: -3px; }
+  .ins::before, .ins::after { content: ""; flex: 1; height: 1px; }
+  .ins::before { background: linear-gradient(90deg, transparent, var(--c) 45%, var(--cl)); }
+  .ins::after { background: linear-gradient(-90deg, transparent, var(--c) 45%, var(--cl)); }
+  .ins b { font: 700 13px "Palatino Linotype", Georgia, serif; color: #fff; line-height: 1; letter-spacing: .5px;
+    text-shadow: 0 0 6px var(--c), 0 0 2px var(--c), 1px -1px 0 #000; }
+  .ins small { font: 700 7px "Trebuchet MS", sans-serif; letter-spacing: 1.5px; color: var(--cl); margin-left: 2px; vertical-align: 2px; }
+  .v2 .ins b small { display: none; }
+  .v3 .ins b { font-size: 15px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>The info line, round 4: the item level without a badge, and a stronger Aura</h1>
-  <p>Relic and Beam: <b>Gem</b> (the number on a small faceted gem in the rarity color, at the end of the line) or <b>Readout</b> (no frame: the number in the rarity color over a tiny ITEM LEVEL, to the right of the name). <b>Upgrade</b> adds the change against what you have equipped (green up, gray down). Aura: the game today next to the new Aura (a heartbeat on arrival then a slow breath, a narrow sunbeam with dust drifting through it, the rarity word between fading lines, a bigger name), with the gem or the readout. Splash: the block slanted with the banner (the game's is upright) or the gem. Replay restarts the animations.</p>
+  <h1>The info line, round 5: the inscribed number</h1>
+  <p>The thin line under the name breaks in the middle and the item level sits in the gap, white with a soft glow in the rarity color, like a hallmark stamped on a blade. Under it, one quiet line: the rarity in its color and the type. Two takes: <b>with ILVL</b> (a tiny "ILVL" after the number) and <b>number only</b> (bigger, nothing else). <b>Today</b> is what the game shows now. The backdrop and fonts stand in for the game's (Morpheus for the name, Friz Quadrata for the line).</p>
 </header>
 <div class="bar">
   <span>Rarity</span>
-  <button data-q="3">Rare</button><button data-q="4" class="on">Epic</button><button data-q="5">Legendary</button>
-  <span>Upgrade</span>
-  <button data-up="1" class="on">Shown (+12)</button><button data-up="2">Lower (−4)</button><button data-up="0">Off</button>
-  <button id="replay">Replay</button>
+  <button data-q="2">Uncommon</button><button data-q="3">Rare</button><button data-q="4" class="on">Epic</button><button data-q="5">Legendary</button>
 </div>
 <div id="out"></div>
 <script>
 'use strict';
-const Q = { 3: ['#3a8cff', '#9cc8ff', 'Rare', '#5aa8ff'], 4: ['#a335ee', '#d9a8ff', 'Epic', '#b75cff'], 5: ['#ff8000', '#ffd08a', 'Legendary', '#ff9a2a'] };
-let q = 4, up = 1;
-const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#5a4a3a"/><stop offset=".5" stop-color="#8a7358"/><stop offset="1" stop-color="#4a3c2e"/></linearGradient>
+const Q = { 2: ['#1eff00', '#9dff8a', 'Uncommon', '#1eff00'], 3: ['#0070dd', '#7cb8ff', 'Rare', '#2a8cff'], 4: ['#a335ee', '#d9a8ff', 'Epic', '#b75cff'], 5: ['#ff8000', '#ffc070', 'Legendary', '#ff9a2a'] };
+let q = 4;
+const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#2a2a30"/><stop offset=".5" stop-color="#4a4a55"/><stop offset="1" stop-color="#22222a"/></linearGradient>
   <linearGradient id="bl" x1="0" x2="1"><stop offset="0" stop-color="#8b95a3"/><stop offset=".5" stop-color="#eef2f8"/><stop offset="1" stop-color="#6b7480"/></linearGradient></defs>
   <rect x="29" y="20" width="6" height="125" rx="3" fill="url(#h)"/>
   <path d="M32 14 C 10 10, 2 30, 4 52 C 14 44, 24 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
@@ -119,48 +78,25 @@ const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" 
   <circle cx="32" cy="30" r="6" fill="${c}" opacity=".9"/><circle cx="32" cy="30" r="2.5" fill="#fff" opacity=".8"/></svg>`;
 function render() {
   const [c, cl, label, nc] = Q[q], v = `--c:${c};--cl:${cl};--nc:${nc}`;
-  const item = `<div class="item">${axe(c)}</div>`, nm = '<div class="name">Arcanite Reaper</div>';
-  const U = up === 1 ? '<span class="up">▲ +12</span>' : up === 2 ? '<span class="up down">▼ 4</span>' : '';
-  const gem = `<span class="gem"><b>63</b></span>${U}`;
-  const readout = `<div class="readout"><b>63</b><small>ITEM LEVEL</small>${U}</div>`;
-  const line = (extra = '', rar = true) => `<div class="info">${rar ? `<span class="rq">${label}</span> · ` : ''}Two-Handed Axes${extra}</div>`;
-  const cls = kind => kind === 'beam' ? 'stack beam' : 'stack';
-  const relic = kind => [
-    ['Gem', 'The number on a small faceted gem in the rarity color, at the end of the line.',
-      `<div class="${cls(kind)}" style="${v}"><div class="pin">${item}</div><div class="plate">${nm}</div>${line(gem)}</div>`],
-    ['Readout', 'No frame: the number big in the rarity color over a tiny ITEM LEVEL, to the right of the name and line.',
-      `<div class="${cls(kind)}" style="${v}"><div class="pin">${item}</div><div class="withread"><div class="txt"><div class="plate">${nm}</div>${line()}</div>${readout}</div></div>`],
-  ];
-  const motes = () => [...Array(9)].map((_, i) => `<i class="mote" style="left:${(46 + Math.random() * 8).toFixed(1)}%;bottom:${(20 + Math.random() * 40).toFixed(0)}px;--d:${(3 + Math.random() * 2).toFixed(1)}s;--t:${(i * .35).toFixed(2)}s;--dx:${(Math.random() * 16 - 8).toFixed(0)}px"></i>`).join('');
-  const auraNew = inner => `<div class="col" style="${v}"></div><div style="${v};position:absolute;inset:0">${motes()}</div><div class="stack aura" style="${v}"><div class="pin"><div class="glow"></div>${item}</div><div class="frame">${label.toUpperCase()}</div>${inner}</div>`;
-  const aura = [
-    ['Today (the game)', 'For comparison: a soft glow and the plain text.',
-      `<div class="stack aura0" style="${v}"><div class="pin">${item}</div><div class="tagw">${label.toUpperCase()}</div><div class="name">Arcanite Reaper</div><div class="info">Two-Handed Axes · item level 63</div></div>`],
-    ['New + Gem', 'Heartbeat, sunbeam with drifting dust, framed rarity word, bigger name; the gem on the line.', auraNew(`${nm}${line(gem, false)}`)],
-    ['New + Readout', 'The same new Aura with the readout beside the name.', auraNew(`<div class="withread"><div class="txt">${nm}${line('', false)}</div>${readout}</div>`)],
-  ];
-  const stamp = `<div class="stamp">${label.toUpperCase()}!</div>`;
-  const splash = [
-    ['Slanted block', 'The number block cut into the banner’s left end, slanted with it.',
-      `<div class="splash" style="${v}">${item}<div class="slab"><div class="num"><b>63</b><small>ILVL</small></div>${nm}${stamp}</div><div class="row">${line(U, false)}</div></div>`],
-    ['Upright block (the game today)', 'What the game shows now, for comparison.',
-      `<div class="splash" style="${v}">${item}<div class="slab"><div class="num upright"><b>63</b><small>ILVL</small></div>${nm}${stamp}</div><div class="row">${line(U, false)}</div></div>`],
-    ['Gem', 'The gem at the banner’s left end, a little bigger.',
-      `<div class="splash" style="${v}">${item}<div class="slab"><span class="gem"><b>63</b></span>${nm}${stamp}</div><div class="row">${line(U, false)}</div></div>`],
-  ];
-  const styles = [['Relic', 'The item over its name on a soft plate.', relic('relic')], ['Beam', 'A pillar of light behind the item.', relic('beam')],
-    ['Aura', 'The weakest style: today vs. the rework.', aura], ['Splash', 'A slanted banner behind a big name and a rarity stamp.', splash]];
-  document.getElementById('out').innerHTML = styles.map(([h, p, set]) =>
-    `<h3>${h} <small>${p}</small></h3><div class="grid">${set.map(([k, d, html]) => `<div class="cell"><h2>${h}: ${k}</h2><p>${d}</p><div class="scene">${html}</div></div>`).join('')}</div>`).join('');
+  const item = `<div class="pin">${`<div class="item">${axe(c)}</div>`}</div>`, nm = '<div class="name">Arcanite Reaper</div>';
+  const line = (rar, extra = '') => `<div class="info">${rar ? `<span class="rq">${label}</span> · ` : ''}Two-Handed Axes${extra}</div>`;
+  const ins = small => `<div class="ins"><b>63${small ? '<small>ILVL</small>' : ''}</b></div>`;
+  const pill = '<span class="pill"><i>iLvl</i> 63</span>';
+  const build = (kind, mode) => {
+    const cls = `stack ${kind} ${mode === 'num' ? 'v3' : ''}`, rar = kind !== 'aura';
+    const tag = kind === 'aura' ? `<div class="tagw">${label.toUpperCase()}</div>` : '';
+    const wrapName = inner => kind === 'aura' ? `<div>${inner}</div>` : `<div class="plate">${inner}</div>`;
+    if (mode === 'today') return `<div class="${cls}" style="${v}">${item}${tag}${wrapName(nm + (kind === 'aura' ? '' : '<span class="under"></span>'))}${line(rar, pill)}</div>`;
+    return `<div class="${cls}" style="${v}">${item}${tag}${wrapName(nm + ins(mode === 'ilvl'))}${line(rar)}</div>`;
+  };
+  const modes = [['ilvl', 'Inscribed, with ILVL'], ['num', 'Inscribed, number only'], ['today', 'Today (the game)']];
+  const styles = [['Relic', 'the item over its name on a soft plate', 'relic'], ['Beam', 'a pillar of light behind the item', 'beam'], ['Aura', 'a soft glow; the rarity word above the name', 'aura']];
+  document.getElementById('out').innerHTML = styles.map(([h, p, kind]) =>
+    `<h3>${h} <small>${p}</small></h3><div class="grid">${modes.map(([m, t]) => `<div class="cell"><h2>${h}: ${t}</h2><div class="scene">${build(kind, m)}</div></div>`).join('')}</div>`).join('');
 }
-function pick(attr, cb) {
-  document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => {
-    document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); render();
-  });
-}
-pick('q', v => { q = +v; });
-pick('up', v => { up = +v; });
-document.getElementById('replay').onclick = render;
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-q]').forEach(x => x.classList.toggle('on', x === b)); q = +b.dataset.q; render();
+});
 render();
 </script>
 </body>
