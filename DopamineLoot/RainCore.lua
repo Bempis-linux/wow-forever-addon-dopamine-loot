@@ -196,34 +196,6 @@ end
 
 -- Where a resting sprite settles so it doesn't overlap the others: the nearest free x to x.
 -- me and each taken = {x (target), half (half width), wide (keeps a name's width)}.
--- The neat row (Big bang, Quick burst): once everything has landed it slides into one even row,
--- centered on `center` (the best's spot), each side keeping its order outward from the middle.
--- list = { {x, half, wide}, ... } (not the best); returns their new x in the same order. Neighbors
--- keep the gap Core.Slot keeps (wide = a name shown above: 150 between two, the best's too); a side that would run
--- off the screen is squeezed to fit.
-function Core.NeatRow(list, center, bestHalf, left, right, bestWide)
-  local out = {}
-  for _, side in ipairs({ -1, 1 }) do
-    local idx = {}
-    for i, o in ipairs(list) do
-      if (side < 0) == (o.x < center) then idx[#idx + 1] = i end
-    end
-    table.sort(idx, function(a, b) return math.abs(list[a].x - center) < math.abs(list[b].x - center) end)
-    local pos, prev, prevHalf = {}, 0, bestHalf or 20
-    for n, i in ipairs(idx) do
-      local o = list[i]
-      local prevWide = n > 1 and list[idx[n - 1]].wide or (n == 1 and bestWide)
-      local gap = (o.wide and prevWide) and 150 or prevHalf + o.half + 6
-      prev = prev + gap
-      pos[n], prevHalf = prev, o.half
-    end
-    local room = side < 0 and center - left or right - center
-    local squeeze = (prev > room and prev > 0) and room / prev or 1
-    for n, i in ipairs(idx) do out[i] = center + side * pos[n] * squeeze end
-  end
-  return out
-end
-
 function Core.Slot(x, me, taken, left, right)
   local function Free(px)
     for _, o in ipairs(taken) do

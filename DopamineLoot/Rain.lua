@@ -927,7 +927,6 @@ local function Update(_, dt)
         local c = Launch(st, { coin = m.into, merged = true }, false, W, H, k)
         c.x, c.y, c.vx, c.vy, c.e, c.spin = m.x, bounds.floor, 0, 430 * k, 0.35, 0
         st.mergesDone = st.mergesDone + 1
-        st.neat = nil -- (the row closes up again around the bigger coin)
         ns:PlayMergeSound(m.into, st.mergesDone)
         st.flashes[#st.flashes + 1] = { x = m.x, y = bounds.floor + c.size / 2, age = 0 }
       end
@@ -1009,21 +1008,6 @@ local function Update(_, dt)
     end
   end
 
-  -- the neat row (Big bang, Quick burst): everything down, it slides into one even row under the best
-  if allResting and not st.neat and st.style ~= "fountain" and On("Spacing") then
-    st.neat = true
-    local list, who, bestHalf, bestWide = {}, {}, nil, false
-    for _, o in ipairs(sprites) do
-      if o.best then bestHalf, bestWide = o.size / 2, On("Names") and o.q >= 3 and not o.coin
-      elseif not o.leaving and not o.joining then
-        who[#who + 1] = o
-        list[#list + 1] = { x = o.x, half = o.size / 2, wide = On("Names") and o.q >= 3 and not o.coin }
-      end
-    end
-    local xs = Core.NeatRow(list, W / 2, bestHalf, bounds.left, bounds.right, bestWide)
-    for i, o in ipairs(who) do o.tx = xs[i] end
-    st.hold = -0.3 -- (a moment longer to look, while it slides)
-  end
   -- settle once everything rests (or it's been going long enough), after a moment to look
   if st.lastLaunch and not st.settleAt and (allResting or (not merging and st.age > st.lastLaunch + 4.5)) then
     st.hold = st.hold + dt

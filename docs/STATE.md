@@ -15,6 +15,8 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   underline (Relic, Beam, Aura) and Splash's slanted block, Reverse disintegration back. Workflow: CurseForge
   "Uploading DopamineLoot-v1.2.0-forever.zip (1.60.1 release) ... Success!", GitHub release made, zip checked
   (one DopamineLoot/ folder). Stop point: **the game stays on dev** (the user's choice, to keep working).
+  After 1.2.0 (on dev, unreleased): **the neat row is removed** (the user: after the loot settles it "jarringly
+  shifts the items around"); items stay where they land, Spread out still nudges them apart as each rests.
   Open / next: the Aura animation rework (heartbeat, sunbeam, framed word: pushed to later), then the
   roadmap: mail / craft finales (verify APIs), edit mode, stats. docs/curseforge.md's description still
   lists 1.1.0's features (the user updates the project page by hand if wanted).
