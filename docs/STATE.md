@@ -88,7 +88,9 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   docs/mockups/info-line.html): the user picked Banner (badge at the band's right end; line = colored rarity +
   type; built 2026-11-09) and likes the colored, simpler line; round 2 of the mockup tries four badge spots
   (A on the item, B end of the name, C divider under the name, D a small tag on the line) for Relic, Beam,
-  Aura, Splash: waiting for picks.
+  Aura, Splash. Round 3 picks (2026-11-09), built: Relic, Beam, Aura = D, a small "iLvl 63" tag (pill) at the end of
+  the line (the user: D looks best, B (end of the name) uses space better: open whether to move it); Splash = E,
+  a number block at the banner's left end (upright in game; the mockup's is slanted with the banner).
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`

@@ -224,12 +224,29 @@ function ns.CreateView(f)
   f.stampBack = Tex(f.fx, "ARTWORK", WHITE, nil, 4)
   f.fxAll[#f.fxAll + 1] = f.stampEdge
   f.fxAll[#f.fxAll + 1] = f.stampBack
-  -- Banner: the item level in a round badge at the band's right end (docs/mockups/info-line.html;
-  -- the same badge as Achievement's)
+  -- The item level's own mark (docs/mockups/info-line.html, rounds 1-3), so the line under the name
+  -- keeps the rarity and the type: Banner a round badge at the band's right end (Achievement's);
+  -- Splash a number block at the banner's left end; Relic, Beam and Aura a small "iLvl 63" tag at
+  -- the end of the line (a pill: Pill/PillRim in three slices, like Achievement's bar)
   f.lvlBadge = Tex(f.fx, "ARTWORK", MEDIA .. "Circle", nil, 5)
   f.lvlRing = Tex(f.fx, "ARTWORK", MEDIA .. "Ring", nil, 6)
-  f.fxAll[#f.fxAll + 1] = f.lvlBadge
-  f.fxAll[#f.fxAll + 1] = f.lvlRing
+  f.lvlBlock = Tex(f.fx, "ARTWORK", WHITE, nil, 5)
+  f.lvlEdges = {}
+  for i = 1, 4 do f.lvlEdges[i] = Tex(f.fx, "ARTWORK", WHITE, nil, 6) end
+  f.pill, f.pillRim = {}, {}
+  for i = 1, 3 do
+    f.pill[i] = Tex(f.fx, "ARTWORK", MEDIA .. "Pill", nil, 5)
+    f.pillRim[i] = Tex(f.fx, "ARTWORK", MEDIA .. "PillRim", nil, 6)
+    local l, r = ({ 0, 0.47, 0.5 })[i], ({ 0.5, 0.48, 1 })[i]
+    f.pill[i]:SetTexCoord(l, r, 0, 1); f.pillRim[i]:SetTexCoord(l, r, 0, 1)
+  end
+  f.lvlParts = { f.lvlBadge, f.lvlRing, f.lvlBlock }
+  for _, list in ipairs({ f.lvlEdges, f.pill, f.pillRim }) do for _, t in ipairs(list) do f.lvlParts[#f.lvlParts + 1] = t end end
+  for _, t in ipairs(f.lvlParts) do f.fxAll[#f.fxAll + 1] = t end
+  f.pillText = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  f.pillText:SetFont("Fonts\\FRIZQT__.TTF", 9, "")
+  f.pillText:SetShadowColor(0, 0, 0, 1); f.pillText:SetShadowOffset(1, -1)
+  f.pillText:Hide()
   f.lvlNum = f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   f.lvlTag = f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   f.lvlNum:SetFont(TITLE_FONT or "Fonts\\FRIZQT__.TTF", 15, "")
@@ -291,7 +308,7 @@ function ns.CreateView(f)
     self.tag:Hide()
     self.info:SetWidth(0) -- (no limit, unless a style sets one)
     self.stamp:Hide()
-    self.lvlNum:Hide(); self.lvlTag:Hide(); self.lvlOn = nil
+    self.lvlNum:Hide(); self.lvlTag:Hide(); self.pillText:Hide(); self.lvlOn, self.lvlKind = nil, nil
     self.name:SetAlpha(1)
     self.name:SetShadowOffset(1, -1)
     for _, fs in ipairs({ self.info, self.badges, self.tag }) do fs:SetAlpha(1) end
@@ -344,6 +361,14 @@ function ns.CreateView(f)
       self.badges:SetPoint("TOP", self.info, "BOTTOM", 0, -8)
       self.badges:SetJustifyH("CENTER")
       self.stamp:SetPoint("CENTER", self.stage, "BOTTOMRIGHT", 34, 10)
+      self.lvlBlock:SetPoint("CENTER", self.stage, "BOTTOM", -SPLASH_W / 2 + 40, -25)
+      local e = self.lvlEdges -- (its rim: four thin lines)
+      e[1]:SetPoint("TOPLEFT", self.lvlBlock); e[1]:SetPoint("TOPRIGHT", self.lvlBlock); e[1]:SetHeight(1.5)
+      e[2]:SetPoint("BOTTOMLEFT", self.lvlBlock); e[2]:SetPoint("BOTTOMRIGHT", self.lvlBlock); e[2]:SetHeight(1.5)
+      e[3]:SetPoint("TOPLEFT", self.lvlBlock); e[3]:SetPoint("BOTTOMLEFT", self.lvlBlock); e[3]:SetWidth(1.5)
+      e[4]:SetPoint("TOPRIGHT", self.lvlBlock); e[4]:SetPoint("BOTTOMRIGHT", self.lvlBlock); e[4]:SetWidth(1.5)
+      self.lvlNum:ClearAllPoints(); self.lvlNum:SetPoint("CENTER", self.lvlBlock, "CENTER", 1, 3)
+      self.lvlTag:ClearAllPoints(); self.lvlTag:SetPoint("CENTER", self.lvlBlock, "CENTER", 0, -10)
       self.shineClip:SetAllPoints(self.splashBand)
       self.shineClip:Show()
       self.shine:SetSize(90, 120)
@@ -499,6 +524,7 @@ function ns.CreateView(f)
     self.name:SetText(item.name or "?")
     -- (Banner with the item-level badge: the name leaves room for it at the band's end)
     if self.style == "banner" and ShowsItemLevel(item) then self.name:SetWidth(self.L.w - 190 - 46) end
+    if self.style == "splash" and ShowsItemLevel(item) then self.name:SetWidth(self.L.w - 30 - 100) end -- (both sides: it stays centered)
     -- a long name: a size or two smaller until it fits on one line (wrapping to two only if even
     -- the smallest doesn't), so it never spills out of the band
     local face, size, flags = self.name:GetFont()
@@ -513,21 +539,30 @@ function ns.CreateView(f)
     end
     self.name:SetTextColor(r, g, b)
     local info = {}
-    local badge = self.style == "banner" and ShowsItemLevel(item)
-    if self.style == "banner" then
+    local st = self.style
+    local kind = ShowsItemLevel(item) and (st == "banner" and "badge" or st == "splash" and "block"
+      or (st == "relic" or st == "beam" or st == "aura") and "pill") or nil
+    if st == "banner" or st == "relic" or st == "beam" then -- (Aura and Splash say the rarity already)
       info[1] = ("|cff%02x%02x%02x%s|r"):format(math.floor(math.min(1, r + 0.3) * 255), math.floor(math.min(1, g + 0.3) * 255),
         math.floor(math.min(1, b + 0.3) * 255), _G["ITEM_QUALITY" .. q .. "_DESC"] or "")
       if info[1] == "|cff000000|r" then info[1] = nil end
     end
     if item.typeText and item.typeText ~= "" then info[#info + 1] = item.typeText end
-    if ShowsItemLevel(item) and not badge then info[#info + 1] = "item level " .. item.ilvl end
-    self.lvlOn = badge or nil
-    if badge then
+    if ShowsItemLevel(item) and not kind then info[#info + 1] = "item level " .. item.ilvl end
+    self.lvlOn, self.lvlKind = kind and true or nil, kind
+    local lr, lg, lb = math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35)
+    if kind == "badge" or kind == "block" then
       self.lvlNum:SetText(item.ilvl); self.lvlTag:SetText("ILVL")
+      self.lvlNum:SetTextColor(1, 1, 1)
+      self.lvlTag:SetTextColor(lr, lg, lb)
       self.lvlBadge:SetVertexColor(0.09, 0.065, 0.04, 1)
       self.lvlRing:SetVertexColor(r, g, b, 1)
-      self.lvlNum:SetTextColor(1, 1, 1)
-      self.lvlTag:SetTextColor(math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35))
+      self.lvlBlock:SetVertexColor(0.09, 0.065, 0.04, 0.96)
+      for _, t in ipairs(self.lvlEdges) do t:SetVertexColor(lr, lg, lb, 1) end
+    elseif kind == "pill" then
+      self.pillText:SetText(("|cff%02x%02x%02xiLvl|r %d"):format(math.floor(lr * 255), math.floor(lg * 255), math.floor(lb * 255), item.ilvl))
+      for _, t in ipairs(self.pill) do t:SetVertexColor(0.09, 0.065, 0.04, 0.96) end
+      for _, t in ipairs(self.pillRim) do t:SetVertexColor(r, g, b, 1) end
     end
     self.info:SetText(self.style == "compact" and "" or table.concat(info, "  ·  "))
     self.badges:SetText(Badges(item))
@@ -537,6 +572,25 @@ function ns.CreateView(f)
       self.name:SetWidth(math.max(20, math.min(measure(self.name) + 2, self.L.w - self.L.stage[3] - 20 - bw)))
     end
     local iw = self.info:GetText() ~= "" and self.info:GetStringWidth() or 0
+    self.pillW = nil
+    if kind == "pill" then
+      local PH = 14
+      local pw = math.floor(self.pillText:GetStringWidth() + 14)
+      self.pillW = pw
+      local above = st == "aura" and self.tag or self.name
+      self.info:ClearAllPoints()
+      self.info:SetPoint("TOP", above, "BOTTOM", -(pw + 6) / 2, -3)
+      self.badges:ClearAllPoints() -- (the badges stay centered under the name)
+      self.badges:SetPoint("TOP", self.info, "BOTTOM", (pw + 6) / 2, -3)
+      for i, list in ipairs({ self.pill, self.pillRim }) do
+        list[1]:SetSize(PH / 2, PH); list[2]:SetSize(math.max(1, pw - PH), PH); list[3]:SetSize(PH / 2, PH)
+        if iw > 0 then list[1]:SetPoint("LEFT", self.info, "RIGHT", 6, 0)
+        else list[1]:SetPoint("TOPLEFT", self.info, "TOPRIGHT", 6, 0) end -- (no line: under the name, not on it)
+        list[2]:SetPoint("LEFT", list[1], "RIGHT"); list[3]:SetPoint("LEFT", list[2], "RIGHT")
+      end
+      self.pillText:ClearAllPoints()
+      self.pillText:SetPoint("CENTER", self.pill[2], "CENTER", 0, 0)
+    end
     if self.style == "banner" then
       -- badges ride the info line inside the band; under the name if there's no info, below it if too long
       self.badges:ClearAllPoints()
@@ -548,7 +602,7 @@ function ns.CreateView(f)
         self.badges:SetPoint("LEFT", self.info, "RIGHT", 12, 0)
       end
     end
-    if self.style == "relic" or self.style == "beam" then self:Plate(iw) end
+    if self.style == "relic" or self.style == "beam" then self:Plate(iw + (self.pillW and self.pillW + 6 or 0)) end
     -- Splash: the info tab only when there's info; the stamp's width at its normal size (it's
     -- scaled up by hand as it slams in)
     self.tabBack:SetShown(self.style == "splash" and (self.info:GetText() or "") ~= "")
@@ -911,9 +965,20 @@ function ns.CreateView(f)
       local bt = math.max(0, math.min(1, (fx - 0.35) / 0.26))
       local bs = bt < 0.6 and 1.15 * (bt / 0.6) or 1.15 - 0.15 * ((bt - 0.6) / 0.4)
       local show = bt > 0
-      for _, t in ipairs({ self.lvlBadge, self.lvlRing }) do t:SetSize(math.max(1, 40 * bs), math.max(1, 40 * bs)); t:SetShown(show) end
-      self.lvlNum:SetShown(show); self.lvlTag:SetShown(show)
-      self.lvlNum:SetAlpha(bt); self.lvlTag:SetAlpha(bt)
+      local kind = self.lvlKind
+      if kind == "badge" then
+        for _, t in ipairs({ self.lvlBadge, self.lvlRing }) do t:SetSize(math.max(1, 40 * bs), math.max(1, 40 * bs)); t:SetShown(show) end
+      elseif kind == "block" then
+        self.lvlBlock:SetSize(math.max(1, 40 * bs), math.max(1, 42 * bs)); self.lvlBlock:SetShown(show)
+        for _, t in ipairs(self.lvlEdges) do t:SetShown(show) end
+      else
+        for _, list in ipairs({ self.pill, self.pillRim }) do for _, t in ipairs(list) do t:SetShown(show); t:SetAlpha(bt) end end
+        self.pillText:SetShown(show); self.pillText:SetAlpha(bt)
+      end
+      if kind ~= "pill" then
+        self.lvlNum:SetShown(show); self.lvlTag:SetShown(show)
+        self.lvlNum:SetAlpha(bt); self.lvlTag:SetAlpha(bt)
+      end
       if bt >= 1 then self.lvlOn = false end -- (settled: nothing more to do)
     end
     if self.style == "banner" then
