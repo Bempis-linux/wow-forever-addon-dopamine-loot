@@ -65,9 +65,9 @@ local LAYOUT = {
   aura = { w = 260, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 55, 55, 0, 0 }, zoom = 1, font = 20 },
   -- (Achievement: the stage is the emblem, a little higher so the item pokes out of its top; the
   -- camera farther back so the item fits it; cardY puts a flat icon back in the emblem's middle)
-  achievement = { w = 400, h = 150, stage = { -140, 10, 96, 120 }, cardY = -10, text = "right", hit = { 30, 20, 20, 20 }, zoom = 1.6, font = 19 },
-  runes = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
-  forged = { w = 300, h = 250, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
+  achievement = { w = 400, h = 150, stage = { -140, 10, 96, 120 }, cardY = -10, text = "right", hit = { 30, 20, 20, 20 }, zoom = 1.6, font = 21 },
+  runes = { w = 300, h = 280, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
+  forged = { w = 300, h = 280, stage = { 0, -8, 130, 150 }, text = "below", hit = { 60, 60, 0, 0 }, zoom = 1, font = 22 },
   -- low rarities and combat (Popup.lua decides): one line, the icon and the name
   compact = { w = 260, h = 30, stage = { -116, 0, 22, 22 }, text = "compact", hit = { 0, 0, 0, 0 }, zoom = 1, font = 14, icon = true },
 }

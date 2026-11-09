@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popup Info Line</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 980px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button:hover { background: #3a3020; } button.on { background: #4a3c1c; border-color: #b08a3a; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; padding: 6px 18px 18px; }
+  .cell { border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 40% 70%, #3d4a36, #1b2219 60%, #0f130e); }
+  .cell h2 { margin: 0; padding: 8px 12px 0; font-size: 13px; color: var(--gold); }
+  .cell p { margin: 2px 12px 0; color: #c9c1ac; font-size: 12px; min-height: 34px; }
+  .scene { position: relative; height: 230px; display: flex; align-items: center; justify-content: center; }
+
+  .item { width: 44px; height: 106px; position: relative; flex: none; }
+  .item svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.7)); }
+  .name { font: 700 20px Georgia, serif; color: var(--nc); white-space: nowrap; text-shadow: 0 1px 0 #000, 0 2px 6px #000; }
+  .info { font: 600 10.5px system-ui; color: #d8d0bc; text-shadow: 0 1px 2px #000; white-space: nowrap; }
+  .info .rq { color: var(--cl); }
+  /* the badge: Achievement's item-level badge, the same everywhere */
+  .lvl { width: 34px; height: 34px; border-radius: 50%; box-sizing: border-box; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #160f08; border: 2px solid var(--c); box-shadow: 0 0 8px -2px var(--c), 0 2px 4px rgba(0,0,0,.6); line-height: 1; z-index: 4; }
+  .lvl b { font: 800 13px Georgia, serif; color: #fff; } .lvl small { font: 800 5.5px system-ui; letter-spacing: 1px; color: var(--cl); margin-top: 1px; }
+  .before .lvl { display: none; } .after .ilvl { display: none; } .before .rq { display: none; } .before .rqs { display: none; }
+
+  /* Relic / Beam / Aura: the item, the name under it, one line under that. After: the badge sits
+     at the item's lower right like a medal on it */
+  .stack { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+  .stack .pin { position: relative; }
+  .stack .pin .lvl { position: absolute; right: -26px; bottom: 2px; }
+  .plate { padding: 2px 14px 3px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.55) 20%, rgba(0,0,0,.55) 80%, transparent); border-bottom: 1px solid var(--c); }
+  .beam .pin::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 60px; height: 150px; margin-left: -30px;
+    background: linear-gradient(0deg, color-mix(in srgb, var(--c) 45%, transparent), transparent); filter: blur(6px); z-index: -1; }
+  .aura .pin::before { content: ""; position: absolute; left: 50%; top: 50%; width: 130px; height: 130px; margin: -65px 0 0 -65px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 35%, transparent), transparent 70%); z-index: -1; }
+  .aura .tagw { font: 800 9.5px system-ui; letter-spacing: 3px; color: var(--cl); }
+
+  /* Banner: the item left, a band with the name and the line. After: the badge at the band's end */
+  .banner { display: flex; align-items: center; }
+  .banner .band { position: relative; margin-left: -10px; padding: 10px 18px 10px 26px; min-width: 210px; display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(90deg, rgba(20,14,8,.95), rgba(20,14,8,.85)); border-top: 1px solid var(--c); border-bottom: 1px solid var(--c); }
+  .banner .txt { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+
+  /* Splash: a slanted banner behind a big name, a rarity stamp. After: the badge at the banner's
+     right end, next to the stamp */
+  .splash { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .splash .slab { position: relative; padding: 6px 30px; transform: skewX(-12deg); background: color-mix(in srgb, var(--c) 80%, #000); box-shadow: 0 3px 0 #fff3 inset; margin-top: 6px; }
+  .splash .slab > * { transform: skewX(12deg); }
+  .splash .name { font-size: 24px; color: #fff; }
+  .splash .stamp { position: absolute; right: -6px; top: -16px; font: 900 12px system-ui; color: #fff; transform: rotate(8deg); text-shadow: 0 1px 0 #000, 0 0 4px #000; }
+  .splash .row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .splash .lvl { transform: none; }
+</style>
+</head>
+<body class="after">
+<header>
+  <h1>The info line in the other styles</h1>
+  <p>Achievement shows the item level in a small round badge, so the line under the name keeps only the type. The same for Relic, Beam, Aura, Banner and Splash: Before is what's in the game ("Two-Handed Axes · item level 63"), After moves the item level into the same badge, placed where each style has room, and puts the rarity word in its color at the front of the line (Aura and Splash already say the rarity elsewhere, so they keep just the type). Items without an item level (bags, potions) look as before.</p>
+</header>
+<div class="bar">
+  <span>Look</span>
+  <button data-v="before">Before</button><button data-v="after" class="on">After</button>
+  <span>Rarity</span>
+  <button data-q="3">Rare</button><button data-q="4" class="on">Epic</button><button data-q="5">Legendary</button>
+</div>
+<div class="grid" id="grid"></div>
+<script>
+'use strict';
+const Q = { 3: ['#3a8cff', '#9cc8ff', 'Rare', '#5aa8ff'], 4: ['#a335ee', '#d9a8ff', 'Epic', '#b75cff'], 5: ['#ff8000', '#ffd08a', 'Legendary', '#ff9a2a'] };
+let q = 4;
+const axe = c => `<svg viewBox="0 0 64 150"><defs><linearGradient id="h" x1="0" x2="1"><stop offset="0" stop-color="#5a4a3a"/><stop offset=".5" stop-color="#8a7358"/><stop offset="1" stop-color="#4a3c2e"/></linearGradient>
+  <linearGradient id="bl" x1="0" x2="1"><stop offset="0" stop-color="#8b95a3"/><stop offset=".5" stop-color="#eef2f8"/><stop offset="1" stop-color="#6b7480"/></linearGradient></defs>
+  <rect x="29" y="20" width="6" height="125" rx="3" fill="url(#h)"/>
+  <path d="M32 14 C 10 10, 2 30, 4 52 C 14 44, 24 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
+  <path d="M32 14 C 54 10, 62 30, 60 52 C 50 44, 40 42, 32 46 Z" fill="url(#bl)" stroke="#3a3f48"/>
+  <circle cx="32" cy="30" r="6" fill="${c}" opacity=".9"/><circle cx="32" cy="30" r="2.5" fill="#fff" opacity=".8"/></svg>`;
+function render() {
+  const [c, cl, label, nc] = Q[q], vars = `--c:${c};--cl:${cl};--nc:${nc}`;
+  const item = `<div class="item">${axe(c)}</div>`, lvl = '<div class="lvl"><b>63</b><small>ILVL</small></div>';
+  const line = `<span class="rq">${label}</span><span class="rqs"> &nbsp;·&nbsp; </span>Two-Handed Axes<span class="ilvl"> &nbsp;·&nbsp; item level 63</span>`;
+  const plain = `Two-Handed Axes<span class="ilvl"> &nbsp;·&nbsp; item level 63</span>`;
+  const cells = [
+    ['Relic', 'The item over its name on a soft plate. After: the badge at the item’s lower right, like a medal pinned to it.',
+      `<div class="stack" style="${vars}"><div class="pin">${item}${lvl}</div><div class="plate"><div class="name">Arcanite Reaper</div></div><div class="info">${line}</div></div>`],
+    ['Beam', 'A pillar of light behind the item. After: the same badge on the item.',
+      `<div class="stack beam" style="${vars}"><div class="pin">${item}${lvl}</div><div class="plate"><div class="name">Arcanite Reaper</div></div><div class="info">${line}</div></div>`],
+    ['Aura', 'Soft wisps behind the item, the rarity word spaced out. After: the badge on the item; the line drops the rarity it already shows.',
+      `<div class="stack aura" style="${vars}"><div class="pin">${item}${lvl}</div><div class="tagw">${label.toUpperCase()}</div><div class="name">Arcanite Reaper</div><div class="info">${plain}</div></div>`],
+    ['Banner', 'The item at the left of a band with the name and the line. After: the badge at the band’s right end, as in Achievement.',
+      `<div class="banner" style="${vars}">${item}<div class="band"><div class="txt"><div class="name">Arcanite Reaper</div><div class="info">${line}</div></div>${lvl}</div></div>`],
+    ['Splash', 'A slanted banner behind a big name, a rarity stamp. After: the badge beside the type under the banner.',
+      `<div class="splash" style="${vars}">${item}<div class="slab"><div class="name">Arcanite Reaper</div><div class="stamp">${label.toUpperCase()}!</div></div><div class="row"><div class="info">${plain}</div>${lvl}</div></div>`],
+  ];
+  document.getElementById('grid').innerHTML = cells.map(([h, p, html]) => `<div class="cell"><h2>${h}</h2><p>${p}</p><div class="scene">${html}</div></div>`).join('');
+}
+function pick(attr, cb) {
+  document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => {
+    document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); render();
+  });
+}
+pick('v', v => { document.body.className = v; });
+pick('q', v => { q = +v; });
+render();
+</script>
+</body>
+</html>

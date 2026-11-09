@@ -90,6 +90,10 @@ local STYLE = {
 }
 local BANG_T = 0.75 -- the Big bang's wind-up
 local BURST_SPARKS = { [0] = 6, 8, 14, 24, 36, 52 } -- the Big bang's sparks by rarity
+-- The polish round (docs/mockups/rain-variants.html, round 8): how fast a piece flies by what it is
+-- (coins lightest, grays heaviest), so the Big bang's ring and the Quick burst's fan come apart in layers
+local GOLDEN = 2.39996323 -- the golden angle: the Big bang's loot spreads evenly around the core
+local function Weight(s) return s.coin and 1.3 or s.q >= 2 and 1.05 or s.q == 1 and 0.92 or 0.76 end
 -- the animations taken out 2026-11-08 (Firework, Vortex, Meteor shower, Geyser and the old Waterfall)
 local GONE = { firework = true, vortex = true, meteor = true, geyser = true, fall = true }
 function ns.RainStyle()
@@ -316,7 +320,12 @@ local function UpdateLive(dt)
         local rad = 10 + (p.radius - 10) * (1 - (1 - u) ^ 3)
         p.t:SetSize(rad * 2, p.h * (1 - 0.5 * u))
         p.t:SetAlpha((1 - u) * p.a)
-      elseif p.pull then -- a mote pulled into the Big bang's core
+      elseif p.spiral then -- a mote spiralling into the Big bang's core
+        p.a, p.d = p.a + 5 * dt, p.d * math.exp(-4.2 * dt)
+        p.x, p.y = p.cx + math.cos(p.a) * p.d, p.cy + math.sin(p.a) * p.d * 0.85
+        p.t:SetSize(p.size, p.size)
+        p.t:SetAlpha(math.min(1, 3 * (1 - u)))
+      elseif p.pull then -- a mote pulled toward a point (the Vacuum's air rushing to the bag)
         local f = math.min(1, dt * 9)
         p.x, p.y = p.x + (p.x1 - p.x) * f, p.y + (p.y1 - p.y) * f
         p.t:SetSize(p.size, p.size)
@@ -479,12 +488,15 @@ local function StyleLaunch(st, s, isBest, W, H, k)
   if style == "bang" then
     s.hangPending = nil -- (its finale is the core, not the fountain's hang)
     s.x, s.y = W / 2, st.bangY - s.size / 2
-    if fin then
-      st.collapseAt, st.bangHold = st.t0 + 1.2, s
+    if fin then -- (the core collapses once most of the loot is down: StyleFrame decides when)
+      st.collapseAt, st.bangHold = math.huge, s
       s.ctl, s.spin = BangBestCtl, 0
-    else
-      local ang, sp = math.random() * 2 * math.pi, (700 + math.random() * 800) * k
-      s.vx, s.vy, s.e, s.spin = math.cos(ang) * sp, math.sin(ang) * sp, 0.45, (math.random() - 0.5) * 18
+    else -- an even ring, speed by weight; soft walls and a little air so it settles; slow spin
+      st.bangN = (st.bangN or 0) + 1
+      local ang = st.bangN * GOLDEN + (math.random() - 0.5) * 0.24
+      local sp = 1150 * Weight(s) * (0.92 + math.random() * 0.16) * k
+      s.vx, s.vy, s.e, s.spin = math.cos(ang) * sp, math.sin(ang) * sp, 0.35, (math.random() - 0.5) * 6
+      s.we, s.air = 0.5, 0.9
     end
   elseif style == "burst" then -- the fountain's flight, all at once in a wider fan
     if not st.flashed then
@@ -493,9 +505,20 @@ local function StyleLaunch(st, s, isBest, W, H, k)
       if st.openSize == "small" then LaunchSound(st, s) end -- (no burst sound for a small haul: one whoosh instead)
     end
     if not isBest or not s.hangPending then
-      local a = math.random() * 2 - 1
-      s.vx, s.vy = (a * 430 + math.random(-40, 40)) * k, s.vy * (1 - 0.25 * math.abs(a))
-      if ns.settings.rainFrom == "spread" then s.vx = s.vx * 0.5 end
+      -- an even fan (each piece its own slot across it, in a shuffled order so rarities mix), speed
+      -- by weight, slow spin, a low bounce
+      if not st.fan then
+        st.fan = {}
+        local n = math.max(1, st.total)
+        for i = 1, n do st.fan[i] = -1 + 2 * (i - 0.5) / n end
+        for i = n, 2, -1 do local j = math.random(i); st.fan[i], st.fan[j] = st.fan[j], st.fan[i] end
+      end
+      local a = (table.remove(st.fan) or (math.random() * 2 - 1)) + (math.random() - 0.5) * 0.08
+      local v0 = 800 * (0.8 + 0.2 * Weight(s)) * (0.95 + math.random() * 0.1) * (1 - 0.25 * math.abs(a)) * k
+      local from = ns.settings.rainFrom or "ground"
+      s.vy = from == "middle" and v0 or Core.LaunchSpeed(v0, s.y, math.max(H * 0.38, bounds.floor + H * 0.13), k)
+      s.vx, s.spin, s.e = a * 430 * k, (math.random() - 0.5) * 6, 0.3
+      if from == "spread" then s.vx = s.vx * 0.5 end
     end
   end
   -- everything comes out at once: no whoosh per item (the burst's sound covers it)
@@ -511,16 +534,16 @@ local function StyleFrame(st, W, H, k, dt)
     local cx, cy = W / 2, st.bangY
     if not st.burst then -- the wind-up: a point of light swells and trembles, pulling motes in; the screen dims
       if st.age >= st.bangT then
-        st.burst, st.flashA = true, 0.3 -- (a soft flash: the full one was too much, the user 2026-11-09)
-        layer.dim:Hide()
-        Ring(cx, cy, 1, 0.95, 0.8, math.max(W, H) * 0.6, { life = 0.8, a = 0.5 })
-        Ring(cx, cy, r, g, b, 260 * k, { life = 0.5 })
-        Spark(cx, cy, r, g, b, math.floor(BURST_SPARKS[math.min(5, st.bestQ)] * 1.4), 420 * k, { grav = 240 * k, drag = 2.2, life = 1.8, size = 7 })
-        st.shake = SHAKE_T * 0.7
+        -- one crisp ring in the best item's color and a beat of stillness instead of a flash; the
+        -- dim fades out (below); half the sparks; a small shake
+        st.burst, st.dimFrom = true, st.age
+        Ring(cx, cy, r, g, b, 300 * k, { life = 0.6 })
+        Spark(cx, cy, r, g, b, math.floor(BURST_SPARKS[math.min(5, st.bestQ)] * 0.7), 420 * k, { grav = 240 * k, drag = 2.2, life = 1.8, size = 7 })
+        st.stopT, st.shake = On("Hitstop") and 0.07 or 0, SHAKE_T * 0.35
         if st.openSize == "big" then ns:PlayBurstSound() elseif st.openSize == "medium" then ns:PlayChestPop() end
       else
         local u = st.age / st.bangT
-        local pinch = u > 0.85 and 1 - (u - 0.85) / 0.15 * 0.7 or 1
+        local pinch = u > 0.85 and 1 - (u - 0.85) / 0.15 * 0.85 or 1 -- (it pinches in, then lets go)
         st.coreSize = (20 + 170 * u * u) * pinch * k
         st.coreJitter = 2.5 * u * k
         layer.dim:SetAlpha(0.25 * u)
@@ -528,11 +551,25 @@ local function StyleFrame(st, W, H, k, dt)
         st.pull = true
       end
     elseif st.bangHold and st.bangHold.ctl then -- the core holds the best item, pulsing; it collapses into it
+      if st.collapseAt == math.huge then -- a quiet moment first: most of the loot down, then it collapses
+        local n, down = 0, 0
+        for _, o in ipairs(sprites) do
+          if o ~= st.bangHold then
+            n = n + 1
+            if o.resting or (o.bounces > 0 and math.abs(o.vy) < 200 * k) then down = down + 1 end
+          end
+        end
+        if down >= n * 0.8 or st.age > st.t0 + 2.6 then st.collapseAt = math.max(st.age + 0.45, st.t0 + 1) end
+      end
       local left = st.collapseAt - st.age
       st.coreSize = (left < 0.3 and 90 * left / 0.3 or 90 + 14 * math.sin(st.age * 6)) * k
       st.coreJitter, st.pull = 0, left < 0.3
     else
       st.coreSize, st.pull = nil, false
+    end
+    if st.dimFrom then
+      local u = (st.age - st.dimFrom) / 0.3
+      if u >= 1 then st.dimFrom = nil; layer.dim:Hide() else layer.dim:SetAlpha(0.25 * (1 - u)) end
     end
     if st.coreSize then
       layer.bangCore:SetVertexColor(r, g, b, 1)
@@ -549,9 +586,10 @@ local function StyleFrame(st, W, H, k, dt)
         st.moteT = st.moteT + 0.02
         local t = table.remove(sparkPool) or Tex(top, "ARTWORK", MEDIA .. "Mote", "ADD")
         t:SetVertexColor(r, g, b, 1)
-        local a, d = math.random() * 2 * math.pi, (100 + math.random() * 140) * k
-        live[#live + 1] = { t = t, spark = true, pull = true, x = cx + math.cos(a) * d, y = cy + math.sin(a) * d,
-          x1 = cx, y1 = cy, age = 0, life = 0.35, size = 4 + math.random() * 3 }
+        -- (they spiral in: the angle turns while the distance shrinks)
+        local a, d = math.random() * 2 * math.pi, (130 + math.random() * 110) * k
+        live[#live + 1] = { t = t, spark = true, spiral = true, cx = cx, cy = cy, a = a, d = d,
+          x = cx + math.cos(a) * d, y = cy + math.sin(a) * d * 0.85, age = 0, life = 0.5, size = 3 + math.random() * 3 }
       end
     end
   end
@@ -591,7 +629,7 @@ local function Launch(st, item, isBest, W, H, k)
   s.tx, s.leaving, s.leaveAt, s.handed, s.inBag, s.alpha, s.shrink = nil, nil, nil, nil, nil, 1, 1
   s.restAge, s.trailT, s.trail = 0, 0, {}
   s.joining, s.mx, s.my, s.delay = nil, nil, nil, nil
-  s.ctl, s.deferSound = nil, nil
+  s.ctl, s.deferSound, s.we, s.air = nil, nil, nil, nil
   -- the best hangs at the top of its flight, then slams down (setting Hang: the finale)
   s.hangPending, s.hang, s.slam, s.glintAt = isBest and not item.coin and s.q >= 2 and On("Hang") or nil, nil, nil, nil
   local r, g, b = ns.QualityColor(s.q)
@@ -889,6 +927,7 @@ local function Update(_, dt)
         local c = Launch(st, { coin = m.into, merged = true }, false, W, H, k)
         c.x, c.y, c.vx, c.vy, c.e, c.spin = m.x, bounds.floor, 0, 430 * k, 0.35, 0
         st.mergesDone = st.mergesDone + 1
+        st.neat = nil -- (the row closes up again around the bigger coin)
         ns:PlayMergeSound(m.into, st.mergesDone)
         st.flashes[#st.flashes + 1] = { x = m.x, y = bounds.floor + c.size / 2, age = 0 }
       end
@@ -970,6 +1009,21 @@ local function Update(_, dt)
     end
   end
 
+  -- the neat row (Big bang, Quick burst): everything down, it slides into one even row under the best
+  if allResting and not st.neat and st.style ~= "fountain" and On("Spacing") then
+    st.neat = true
+    local list, who, bestHalf, bestWide = {}, {}, nil, false
+    for _, o in ipairs(sprites) do
+      if o.best then bestHalf, bestWide = o.size / 2, On("Names") and o.q >= 3 and not o.coin
+      elseif not o.leaving and not o.joining then
+        who[#who + 1] = o
+        list[#list + 1] = { x = o.x, half = o.size / 2, wide = On("Names") and o.q >= 3 and not o.coin }
+      end
+    end
+    local xs = Core.NeatRow(list, W / 2, bestHalf, bounds.left, bounds.right, bestWide)
+    for i, o in ipairs(who) do o.tx = xs[i] end
+    st.hold = -0.3 -- (a moment longer to look, while it slides)
+  end
   -- settle once everything rests (or it's been going long enough), after a moment to look
   if st.lastLaunch and not st.settleAt and (allResting or (not merging and st.age > st.lastLaunch + 4.5)) then
     st.hold = st.hold + dt

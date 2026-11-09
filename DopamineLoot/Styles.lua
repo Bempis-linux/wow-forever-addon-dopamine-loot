@@ -125,8 +125,8 @@ kits.achievement = {
     f.badges:SetPoint("LEFT", f.info, "RIGHT", 10, 0)
     f.badges:SetJustifyH("LEFT")
     for i, g in ipairs(c.gauge) do
-      g:SetSize(12, 4)
-      if i == 1 then g:SetPoint("LEFT", f.tag, "RIGHT", 8, 0) else g:SetPoint("LEFT", c.gauge[i - 1], "RIGHT", 2, 0) end
+      g:SetSize(13, 6)
+      if i == 1 then g:SetPoint("LEFT", f.tag, "RIGHT", 8, 0) else g:SetPoint("LEFT", c.gauge[i - 1], "RIGHT", 3, 0) end
     end
     f.shineClip:ClearAllPoints()
     f.shineClip:SetPoint("TOPLEFT", c.fill, "TOPLEFT")
@@ -153,7 +153,7 @@ kits.achievement = {
     local extra = math.max(0, (f.name:GetStringHeight() or 0) - (fontSize or 19) * 1.3)
     c.lineY[1], c.lineY[3] = 21 + extra / 2, -20 - extra / 2
     -- the bar reaches past the longest line (the badge needs a little more room)
-    local tw = math.max(Measure(f.name), Measure(f.tag) + 8 + 4 * 14,
+    local tw = math.max(Measure(f.name), Measure(f.tag) + 8 + 4 * 16,
       Measure(f.info) + (f.badges:GetText() ~= "" and Measure(f.badges) + 10 or 0))
     c.w = math.max(40, TEXT_X + math.min(tw, 230) + (c.hasLvl and 36 or 22) - BAR_H / 2)
     c.fill:SetSize(c.w, BAR_H); c.rim:SetSize(c.w, BAR_H)
@@ -175,9 +175,11 @@ kits.achievement = {
     c.glow:SetVertexColor(r, g, b, 1)
     c.glowA = q >= 5 and 0.55 or q >= 4 and 0.35 or 0
     c.lit = math.max(1, math.min(4, q - 1)) -- the gauge: Uncommon 1 bar .. Legendary 4
+    c.litR, c.litG, c.litB = math.min(1, r + 0.2), math.min(1, g + 0.2), math.min(1, b + 0.2) -- (lit bars a touch brighter)
     for i, t in ipairs(c.gauge) do
-      if i <= c.lit then t:SetVertexColor(r, g, b, 1) else t:SetVertexColor(1, 1, 1, 0.12) end
+      if i <= c.lit then t:SetVertexColor(c.litR, c.litG, c.litB, 1) else t:SetVertexColor(1, 1, 1, 0.2) end
     end
+    f.tag:SetTextColor(math.min(1, r + 0.3), math.min(1, g + 0.3), math.min(1, b + 0.3)) -- (the rarity word, clearer)
   end,
   -- the emblem pops, the bar opens to the right, the lines fade in one after another, the gauge fills,
   -- the badge pops on last and a shine runs along the bar
@@ -213,7 +215,7 @@ kits.achievement = {
       g:SetShown(fx >= 0.38)
       local on = i <= c.lit and fx >= 0.55 + (i - 1) * 0.07
       if i <= c.lit then
-        if on then g:SetVertexColor(f.r, f.g, f.b, 1) else g:SetVertexColor(1, 1, 1, 0.12) end
+        if on then g:SetVertexColor(c.litR, c.litG, c.litB, 1) else g:SetVertexColor(1, 1, 1, 0.2) end
       end
       g:SetAlpha(Clamp01((fx - 0.38) / 0.25))
     end
@@ -245,18 +247,32 @@ kits.fantasy = { -- (not a style: the parts the two share)
     c.divR = P(Tex(f.fx, "ARTWORK", WHITE, nil, 3))
     c.dia = P(Tex(f.fx, "ARTWORK", MEDIA .. "Diamond", nil, 4))
     c.glow = P(Tex(f, "BACKGROUND", MEDIA .. "Glow", "ADD"))
+    -- the item level in a small round badge in the divider's middle (like Achievement's)
+    c.badge = P(Tex(f.fx, "ARTWORK", MEDIA .. "Circle", nil, 5))
+    c.badgeRing = P(Tex(f.fx, "ARTWORK", MEDIA .. "Ring", nil, 6))
+    c.lvl = P(f.fx:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
+    c.lvlTag = P(f.fx:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall"))
+    c.lvl:SetFont(ns.TITLE_FONT or "Fonts\\FRIZQT__.TTF", 13, "")
+    c.lvl:SetShadowColor(0, 0, 0, 1); c.lvl:SetShadowOffset(1, -1)
+    c.lvlTag:SetFont("Fonts\\FRIZQT__.TTF", 6, "")
+    for _, fs in ipairs({ c.lvl, c.lvlTag }) do fs:SetWidth(34); fs:SetJustifyH("CENTER") end
   end,
   Reset = function(f) HideAll(f, "fantasy") end,
 }
+local BADGE = 34
 local function FantasyLayout(f)
   local c = f.kit.fantasy
-  f.name:SetPoint("TOP", f.stage, "BOTTOM", 0, -4)
+  f.name:SetPoint("TOP", f.stage, "BOTTOM", 0, -14) -- (room between the item and the name)
   f.name:SetWidth(f.L.w - 20)
   f.name:SetJustifyH("CENTER")
   c.dia:SetSize(9, 9)
   c.dia:SetPoint("TOP", f.name, "BOTTOM", 0, -6)
   c.divL:SetSize(84, 1); c.divL:SetPoint("RIGHT", c.dia, "LEFT", -2, 0)
   c.divR:SetSize(84, 1); c.divR:SetPoint("LEFT", c.dia, "RIGHT", 2, 0)
+  c.badge:SetSize(BADGE, BADGE); c.badgeRing:SetSize(BADGE, BADGE)
+  c.badge:SetPoint("CENTER", c.dia, "CENTER"); c.badgeRing:SetPoint("CENTER", c.dia, "CENTER")
+  c.lvl:SetPoint("CENTER", c.dia, "CENTER", 1, 3)
+  c.lvlTag:SetPoint("CENTER", c.dia, "CENTER", 0, -8)
   f.info:SetPoint("TOP", c.dia, "BOTTOM", 0, -5)
   f.info:SetJustifyH("CENTER")
   f.badges:SetPoint("TOP", f.info, "BOTTOM", 0, -3)
@@ -264,11 +280,26 @@ local function FantasyLayout(f)
   c.glow:SetSize(320, 170)
   c.glow:SetPoint("CENTER", f.name, "CENTER", 0, 10)
 end
-local function FantasySet(f)
+local function FantasySet(f, item)
   local c = f.kit.fantasy
   local r, g, b = f.r, f.g, f.b
-  local info = f.info:GetText() or ""
-  f.info:SetText(QualityWord(f.q) .. (info ~= "" and "  ·  " .. info or ""))
+  -- the info line keeps the rarity (in its color) and the type; the item level goes in the badge,
+  -- which takes the diamond's place (the diamond stays as the divider's anchor, sized to the badge)
+  c.hasLvl = ns.ShowsItemLevel(item)
+  local info = c.hasLvl and (item.typeText or "") or (f.info:GetText() or "")
+  local word = ("|cff%02x%02x%02x%s|r"):format(math.floor(math.min(1, r + 0.3) * 255), math.floor(math.min(1, g + 0.3) * 255),
+    math.floor(math.min(1, b + 0.3) * 255), QualityWord(f.q))
+  f.info:SetText(word .. (info ~= "" and "  ·  " .. info or ""))
+  if c.hasLvl then
+    c.dia:SetSize(BADGE, BADGE)
+    c.lvl:SetText(item.ilvl); c.lvlTag:SetText("ILVL")
+    c.badge:SetVertexColor(0.09, 0.065, 0.04, 1)
+    c.badgeRing:SetVertexColor(r, g, b, 1)
+    c.lvl:SetTextColor(1, 1, 1)
+    c.lvlTag:SetTextColor(math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35))
+  else
+    c.dia:SetSize(9, 9)
+  end
   Gradient(c.divL, r, g, b, 0, r, g, b, 1)
   Gradient(c.divR, r, g, b, 1, r, g, b, 0)
   c.dia:SetVertexColor(math.min(1, r + 0.35), math.min(1, g + 0.35), math.min(1, b + 0.35), 1)
@@ -283,7 +314,14 @@ end
 local function FantasyTail(f, fx, at)
   local c = f.kit.fantasy
   local u = OutCubic((fx - at) / 0.5)
-  c.dia:SetShown(u > 0); c.divL:SetShown(u > 0); c.divR:SetShown(u > 0)
+  c.dia:SetShown(u > 0 and not c.hasLvl); c.divL:SetShown(u > 0); c.divR:SetShown(u > 0)
+  -- the badge: big, a touch small, settled (with the divider)
+  local bt = Clamp01((fx - at) / 0.26)
+  local bs = bt < 0.6 and 1.15 * (bt / 0.6) or 1.15 - 0.15 * ((bt - 0.6) / 0.4)
+  local showBadge = c.hasLvl and bt > 0
+  for _, t in ipairs({ c.badge, c.badgeRing }) do t:SetSize(math.max(1, BADGE * bs), math.max(1, BADGE * bs)); t:SetShown(showBadge) end
+  c.lvl:SetShown(showBadge); c.lvlTag:SetShown(showBadge)
+  c.lvl:SetAlpha(bt); c.lvlTag:SetAlpha(bt)
   c.divL:SetWidth(math.max(1, 84 * u)); c.divR:SetWidth(math.max(1, 84 * u))
   local a = Clamp01((fx - at - 0.15) / 0.4)
   f.info:SetAlpha(a); f.badges:SetAlpha(a)
@@ -316,9 +354,9 @@ kits.runes = {
   end,
   Reset = function(f) HideAll(f, "runes") end,
   Layout = FantasyLayout,
-  Set = function(f)
+  Set = function(f, item)
     local c = f.kit.runes
-    FantasySet(f)
+    FantasySet(f, item)
     local fc = f.kit.fantasy
     fc.glowA = 0.22
     local lr, lg, lb = math.min(1, f.r + 0.4), math.min(1, f.g + 0.4), math.min(1, f.b + 0.4)
@@ -407,9 +445,9 @@ kits.forged = {
   end,
   Reset = function(f) HideAll(f, "forged") end,
   Layout = FantasyLayout,
-  Set = function(f)
+  Set = function(f, item)
     local c = f.kit.forged
-    FantasySet(f)
+    FantasySet(f, item)
     for _, t in ipairs(c.flashes) do t:SetVertexColor(1, 0.8, 0.5, 1) end
     -- sparks off every strike, more the rarer (Uncommon 1 a letter .. Legendary 4)
     local per, s = math.max(1, math.min(4, f.q - 1)), 0

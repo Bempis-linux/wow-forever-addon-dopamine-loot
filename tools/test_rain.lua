@@ -194,4 +194,22 @@ Check("the melody climbs the scale first", climbs)
 Check("past the top it keeps moving (no note twice in a row)", repeats == 0, repeats .. " repeats")
 Check("every note is in the scale", outside == 0)
 
+-- the neat row (Big bang, Quick burst): sides keep their order outward, gaps never overlap, a full
+-- side is squeezed onto the screen
+do
+  local list = { { x = 300, half = 20 }, { x = 700, half = 20 }, { x = 100, half = 20 }, { x = 520, half = 20, wide = true },
+                 { x = 560, half = 20, wide = true } }
+  local xs = C.NeatRow(list, 500, 25, 40, 960)
+  Check("neat row: left side in order", xs[1] > xs[3] and xs[1] < 500, ("%.0f %.0f"):format(xs[1], xs[3]))
+  Check("neat row: no overlap next to the best", xs[1] <= 500 - 45 and xs[4] >= 500 + 45)
+  Check("neat row: two names keep 150 apart", math.abs(xs[5] - xs[4]) >= 150 - 1e-6, ("%.0f"):format(xs[5] - xs[4]))
+  local many = {}
+  for i = 1, 40 do many[i] = { x = 600 + i, half = 20 } end
+  local named = C.NeatRow({ { x = 520, half = 20, wide = true } }, 500, 25, 40, 960, true)
+  Check("neat row: a named neighbor keeps 150 from a named best", named[1] - 500 >= 150 - 1e-6, ("%.0f"):format(named[1] - 500))
+  local ys, maxX = C.NeatRow(many, 500, 25, 40, 960), 0
+  for _, x in ipairs(ys) do maxX = math.max(maxX, x) end
+  Check("neat row: a long side fits the screen", maxX <= 960 + 1e-6, ("%.0f"):format(maxX))
+end
+
 print(fails == 0 and "all passed" or (fails .. " failed"))

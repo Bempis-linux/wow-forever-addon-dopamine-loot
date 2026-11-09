@@ -77,6 +77,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   bend, speed, spin and lift (the user: "Wayyy better"). Big bang's opening flash softened (flashA 1 -> 0.3, the
   big ring 0.9 -> 0.5: "a little too shocking"). **Brush stroke and Ember burn-in popup styles removed** by the
   user 2026-11-09 (a saved one falls back to Relic; Brush.tga deleted).
+  **Polish round (2026-11-09, untested in game):** Big bang (mockup rain-variants.html round 8): one colored ring
+  and a 0.07 s hit-stop (Hitstop switch) instead of a flash, the dim fades out, motes spiral in, loot on the
+  golden angle with speed by weight (Weight: coins 1.3 .. grays 0.76), soft walls (s.we 0.5) and air drag
+  (s.air), slow spin, the core collapses once 80% of the loot is down, then the neat row (Core.NeatRow, also
+  Quick burst, with Spread out on). Quick burst: even shuffled fan, speed by weight. Popups (achievement.html
+  round 18): Achievement gauge 13x6 and brighter, clearer rarity word, name 21; flat icons centered in the
+  emblem (cardY), the level badge text centered. Rune decode / Forged letters: 14 px more under the item, the
+  info line = colored rarity + type, the item level in a round badge on the divider. Proposed next (mockup
+  docs/mockups/info-line.html, the user to pick): the same badge for Relic, Beam, Aura, Banner, Splash.
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`

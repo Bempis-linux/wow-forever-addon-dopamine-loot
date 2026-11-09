@@ -22,8 +22,9 @@ function Core.LaunchSpeed(vy, y0, mid, k)
   return math.sqrt(vy * vy + 2 * -Core.GRAVITY * (k or 1) * rise)
 end
 
--- One physics step for a sprite {x, y, vx, vy, e (restitution), resting, bounces; gmul: a gravity
--- multiplier (a firework's item floating down)}.
+-- One physics step for a sprite {x, y, vx, vy, e (restitution), resting, bounces; we: how much of its
+-- speed a wall or the ceiling gives back (default 0.8 walls, 0.72 ceiling); air: drag per second
+-- until it first lands (the Big bang's loot drifts instead of rattling around)}.
 -- bounds = {left, right, floor, k; top: a ceiling it bounces off (the Big bang)}; k scales gravity
 -- and speeds with the screen height (UI scale) so the arc looks the same at any UI scale. Returns
 -- "bounce" when it hit the floor this step.
@@ -31,12 +32,15 @@ function Core.Step(s, dt, b)
   if s.resting then return nil end
   dt = math.min(dt, 1 / 30) -- a hitch can't tunnel a sprite through the floor
   local k = b.k or 1
-  s.vy = s.vy + Core.GRAVITY * k * (s.gmul or 1) * dt
+  s.vy = s.vy + Core.GRAVITY * k * dt
+  if s.air and (s.bounces or 0) == 0 then
+    s.vx, s.vy = s.vx * math.exp(-s.air * dt), s.vy * math.exp(-s.air * 0.4 * dt)
+  end
   s.x = s.x + s.vx * dt
   s.y = s.y + s.vy * dt
-  if s.x < b.left then s.x, s.vx = b.left, math.abs(s.vx) * 0.8
-  elseif s.x > b.right then s.x, s.vx = b.right, -math.abs(s.vx) * 0.8 end
-  if b.top and s.y > b.top and s.vy > 0 then s.y, s.vy = b.top, -s.vy * 0.72 end
+  if s.x < b.left then s.x, s.vx = b.left, math.abs(s.vx) * (s.we or 0.8)
+  elseif s.x > b.right then s.x, s.vx = b.right, -math.abs(s.vx) * (s.we or 0.8) end
+  if b.top and s.y > b.top and s.vy > 0 then s.y, s.vy = b.top, -s.vy * (s.we or 0.72) end
   if s.y <= b.floor and s.vy < 0 then
     s.y = b.floor
     s.bounces = (s.bounces or 0) + 1
@@ -192,6 +196,34 @@ end
 
 -- Where a resting sprite settles so it doesn't overlap the others: the nearest free x to x.
 -- me and each taken = {x (target), half (half width), wide (keeps a name's width)}.
+-- The neat row (Big bang, Quick burst): once everything has landed it slides into one even row,
+-- centered on `center` (the best's spot), each side keeping its order outward from the middle.
+-- list = { {x, half, wide}, ... } (not the best); returns their new x in the same order. Neighbors
+-- keep the gap Core.Slot keeps (wide = a name shown above: 150 between two, the best's too); a side that would run
+-- off the screen is squeezed to fit.
+function Core.NeatRow(list, center, bestHalf, left, right, bestWide)
+  local out = {}
+  for _, side in ipairs({ -1, 1 }) do
+    local idx = {}
+    for i, o in ipairs(list) do
+      if (side < 0) == (o.x < center) then idx[#idx + 1] = i end
+    end
+    table.sort(idx, function(a, b) return math.abs(list[a].x - center) < math.abs(list[b].x - center) end)
+    local pos, prev, prevHalf = {}, 0, bestHalf or 20
+    for n, i in ipairs(idx) do
+      local o = list[i]
+      local prevWide = n > 1 and list[idx[n - 1]].wide or (n == 1 and bestWide)
+      local gap = (o.wide and prevWide) and 150 or prevHalf + o.half + 6
+      prev = prev + gap
+      pos[n], prevHalf = prev, o.half
+    end
+    local room = side < 0 and center - left or right - center
+    local squeeze = (prev > room and prev > 0) and room / prev or 1
+    for n, i in ipairs(idx) do out[i] = center + side * pos[n] * squeeze end
+  end
+  return out
+end
+
 function Core.Slot(x, me, taken, left, right)
   local function Free(px)
     for _, o in ipairs(taken) do
