@@ -35,7 +35,12 @@ picked: themed skill bars, quiet routine skill-ups, rank-cap nudge as its own it
 profession (Petal.tga, Streak.tga from gen_textures.lua; star4 glints), the window's sections, pace, "worth" value,
 full-stack badge + shine + glints; Skill.lua unlock reveal (Reached / MaxRank via GetProfessions; "maxed: train X");
 sounds Strike00..02, Splash, Slash, Rare*, Unlock (tools/gen_gather_sounds.sh, not picked by ear). Test gathers count
-in the window until the next real gather takes them out. After testing: popups movable via Mover. Read this first
+in the window until the next real gather takes them out. **User test 2026-11-09:** mining and fishing (normal, rare,
+sounds) are "100%", keep as is (don't touch); herbalism and skinning rares need work (the herb bloom shows as a flat
+ring of small pink dots in game), and polish the herb and skin normal bursts. Mockup docs/mockups/gather-polish.html:
+herb normal Current/N1 leaves and petals/N2 gentle swirl, herb rare Current/R1 Blossom/R2 Petal storm/R3 Golden
+bloom; skin normal Current/N1 glint and scraps/N2 clean cut, skin rare Current/R1 Double slash/R2 Pelt sheen/R3
+Trophy. Waiting for picks. After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

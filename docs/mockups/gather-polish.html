@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gathering Polish</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p, p.lead { margin: 0; color: var(--muted); max-width: 980px; }
+  p.lead { margin: 0 18px 4px; }
+  p.lead b { color: #c9c2b0; }
+  h2 { font-size: 14px; margin: 18px 18px 2px; color: var(--gold); }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 300px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 40% 80%, #2d3b2a, #172015 60%, #0d120c); }
+  .stage.cave { background: radial-gradient(ellipse at 40% 80%, #3a2e22, #1c1610 60%, #0e0b08); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .char { position: absolute; bottom: 50px; left: 26%; font-size: 40px; transform: translateX(-50%); }
+  .node { position: absolute; left: 44%; bottom: 46px; font-size: 46px; transform-origin: 50% 100%; }
+  .note { position: absolute; right: 14px; top: 12px; max-width: 300px; font: 600 11.5px system-ui; color: #c9c2b0; text-align: right; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Gathering polish: Herbalism and Skinning</h1>
+  <p>Mining and Fishing stay as they are. For Herbalism and Skinning, pick a <b>normal</b> burst and a <b>rare</b> one: "Current" is what's in game now, the others are new. The play buttons use the option picked in that row. Sound is off; turn it on to hear the new touches (sounds here are rough sketches, the game uses our generated files).</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button></div>
+</header>
+
+<h2>1. Herbalism</h2>
+<p class="lead"><b>Normal</b>: Current (petals spiral, pollen drifts) · <b>N1 Leaves and petals</b>: green leaves mixed in, a wisp of breeze curling up, fewer but larger petals · <b>N2 Gentle swirl</b>: a slower, wider spiral of six big petals, and the pollen twinkles as it drifts.<br>
+<b>Rare</b>: Current (a ring of small petals) · <b>R1 Blossom</b>: a big five-petal flower opens from a bud with a glowing gold heart, then its petals let go and float off on the breeze · <b>R2 Petal storm</b>: a whirlwind of petals spins up into a tall column trailing gold pollen, and bursts at the top · <b>R3 Golden bloom</b>: soft light rays fan out behind a ring of leaves that grows open, and gold motes rain down.</p>
+<div class="bar">
+  <span>Normal</span><button data-hn="cur" class="on">Current</button><button data-hn="n1">N1 Leaves and petals</button><button data-hn="n2">N2 Gentle swirl</button>
+  <span>Rare</span><button data-hr="cur">Current</button><button data-hr="r1" class="on">R1 Blossom</button><button data-hr="r2">R2 Petal storm</button><button data-hr="r3">R3 Golden bloom</button>
+</div>
+<div class="bar"><button class="go" id="hPlay">🌿 Gather</button><button class="go" id="hRare">🌸 Rare find</button></div>
+<div class="stage" id="hStage"><div class="char">🧙</div><div class="node" id="hNode">🌿</div><div class="note" id="hNote"></div></div>
+
+<h2>2. Skinning</h2>
+<p class="lead"><b>Normal</b>: Current (a knife glint, fur tufts drift down) · <b>N1 Glint and scraps</b>: the glint leaves a short afterimage, a second quick flick follows, and small leather scraps tumble with the tufts · <b>N2 Clean cut</b>: one crisp glint with a bright tip that runs along the blade, softer, fluffier tufts.<br>
+<b>Rare</b>: Current (a long streak with glints) · <b>R1 Double slash</b>: two quick glints cross in an X, a flash where they meet, sparks along both · <b>R2 Pelt sheen</b>: a broad sheen of light sweeps across a soft hide-shaped glow, like light running over fine leather, with glints at its edge · <b>R3 Trophy</b>: the hide pops up big over the carcass with a gold rim and a shine sweep, holds a beat, then flies to the window.</p>
+<div class="bar">
+  <span>Normal</span><button data-sn="cur" class="on">Current</button><button data-sn="n1">N1 Glint and scraps</button><button data-sn="n2">N2 Clean cut</button>
+  <span>Rare</span><button data-sr="cur">Current</button><button data-sr="r1" class="on">R1 Double slash</button><button data-sr="r2">R2 Pelt sheen</button><button data-sr="r3">R3 Trophy</button>
+</div>
+<div class="bar"><button class="go" id="sPlay">🔪 Skin</button><button class="go" id="sRare">🟣 Rare find</button></div>
+<div class="stage cave" id="sStage"><div class="char">🧙</div><div class="node" id="sNode">🦌</div><div class="note" id="sNote"></div></div>
+
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id);
+let snd = false, actx;
+document.querySelectorAll('[data-snd]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-snd]').forEach(x => x.classList.toggle('on', x === b)); snd = b.dataset.snd === '1'; });
+function tone(f, t = 0, vol = .08, dec = .5, type = 'sine') {
+  if (!snd) return; actx = actx || new AudioContext();
+  const o = actx.createOscillator(), g = actx.createGain(), at = actx.currentTime + t; o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .008); g.gain.exponentialRampToValueAtTime(.0001, at + dec);
+  o.connect(g).connect(actx.destination); o.start(at); o.stop(at + dec + .05);
+}
+function noise(t = 0, dur = .2, vol = .05, hp = 2000) {
+  if (!snd) return; actx = actx || new AudioContext();
+  const n = actx.sampleRate * dur, buf = actx.createBuffer(1, n, actx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
+  const s = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(); s.buffer = buf; f.type = 'highpass'; f.frequency.value = hp; g.gain.value = vol;
+  s.connect(f).connect(g).connect(actx.destination); s.start(actx.currentTime + t);
+}
+let ST;
+function el(html, css, frames, dur, delay = 0, ease = 'linear') {
+  const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d);
+  d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d;
+}
+function pathEl(html, css, x, y, life, fn, delay = 0, n = 24) { // fn(u) -> [dx, dy(up), rotDeg, scale, alpha]
+  const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); }
+  return el(html, `left:${x}px;top:${y}px;` + css, fr, life * 1000, delay * 1000);
+}
+function ballistic(x, y, o) {
+  const fr = [], n = 14;
+  for (let i = 0; i <= n; i++) { const t = o.life * i / n; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * o.g * t * t)}px) rotate(${(o.spin || 0) * t}deg) scale(${o.grow ? 1 + (o.grow - 1) * i / n : 1})`, opacity: i === n ? 0 : (o.fade ? 1 - .7 * i / n : 1) }); }
+  el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.h || o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:${o.round === false ? '1px' : '50%'};box-shadow:0 0 ${o.glow || 0}px ${o.color}`, fr, o.life * 1000, (o.delay || 0) * 1000);
+}
+function ring(x, y, color, size, life, delay = 0, width = 2) {
+  el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${width}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`,
+    [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, 'ease-out');
+}
+function star(x, y, size, color, life, delay = 0) {
+  el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`,
+    `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`,
+    [{ transform: 'scale(0) rotate(0deg)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000);
+}
+const PETAL = (w, h, c) => `<div style="width:${w}px;height:${h}px;margin:${-h / 2}px ${-w / 2}px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;background:radial-gradient(ellipse at 50% 25%,#fff,${c} 75%);box-shadow:0 0 4px rgba(255,180,220,.5)"></div>`;
+const LEAF = (w, h) => `<div style="width:${w}px;height:${h}px;margin:${-h / 2}px ${-w / 2}px;border-radius:0 100% 0 100%;background:linear-gradient(135deg,#b8f070,#3f9a2a)"></div>`;
+const MOTE = (s, c) => `<div style="width:${s}px;height:${s}px;margin:${-s / 2}px;border-radius:50%;background:${c};box-shadow:0 0 ${s * 1.6}px ${c}"></div>`;
+function pos(node) { const n = $(node).getBoundingClientRect(), s = ST.getBoundingClientRect(); return [n.left - s.left + n.width / 2, n.top - s.top + n.height / 2]; }
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+
+// =================== Herbalism ===================
+let hn = 'cur', hr = 'r1';
+pick('hn', v => hn = v); pick('hr', v => hr = v);
+const HN = {
+  cur(x, y) {
+    const cs = ['#ffd6ec', '#ffffff', '#ff9ad0', '#c8f08a'];
+    for (let i = 0; i < 12; i++) { const a0 = i / 12 * Math.PI * 2; pathEl(PETAL(7, 9, cs[i % 4]), '', x, y, R(1, 1.4), u => { const a = a0 + u * 4.2, r = 6 + 34 * u; return [Math.cos(a) * r + 30 * u * u, 70 * u + 10 * Math.sin(a), a * 57]; }, i * .015); }
+    for (let i = 0; i < 9; i++) ballistic(x + R(-10, 10), y, { vx: R(20, 60), vy: R(20, 50), g: -8, life: R(1.4, 2), size: 3, color: '#fff2a0', glow: 6, fade: true, delay: .2 + i * .04 });
+  },
+  n1(x, y) { // leaves and petals, a wisp of breeze
+    for (let i = 0; i < 7; i++) { const a0 = i / 7 * Math.PI * 2, leaf = i % 2 === 0;
+      pathEl(leaf ? LEAF(10, 6) : PETAL(10, 13, ['#ffd6ec', '#ff9ad0', '#ffffff'][i % 3]), '', x, y, R(1.2, 1.6),
+        u => { const a = a0 + u * 3.6, r = 8 + 40 * u; return [Math.cos(a) * r + 40 * u * u, 80 * u + 12 * Math.sin(a), a * 57 + (leaf ? 200 * u : 0)]; }, i * .03); }
+    pathEl('<div style="width:60px;height:20px;margin:-10px -30px;border-top:2px solid rgba(220,255,200,.55);border-radius:50%"></div>', '', x, y - 10, 1.1,
+      u => [40 * u, 60 * u, -30 + 40 * u, .6 + .6 * u, Math.sin(Math.PI * u) * .8], .05);
+    for (let i = 0; i < 6; i++) ballistic(x + R(-8, 8), y, { vx: R(20, 60), vy: R(20, 50), g: -8, life: R(1.4, 2), size: 3, color: '#fff2a0', glow: 6, fade: true, delay: .25 + i * .05 });
+    tone(1046, .02, .03, .4); tone(1568, .12, .025, .5);
+  },
+  n2(x, y) { // a slower, wider swirl of six big petals; pollen twinkles
+    const cs = ['#ffd6ec', '#ff9ad0', '#ffffff'];
+    for (let i = 0; i < 6; i++) { const a0 = i / 6 * Math.PI * 2;
+      pathEl(PETAL(12, 15, cs[i % 3]), '', x, y, 1.8, u => { const a = a0 + u * 3, r = 12 + 46 * u; return [Math.cos(a) * r + 25 * u * u, 60 * u + 14 * Math.sin(a), a * 57 + 90]; }, i * .04); }
+    for (let i = 0; i < 8; i++) { const vx = R(15, 45), vy = R(15, 40), d = .3 + i * .06;
+      pathEl(MOTE(4, '#fff2a0'), '', x + R(-10, 10), y, 2, u => [vx * u * 2, vy * u * 2, 0, 1, (u > .7 ? (1 - u) / .3 : 1) * (.55 + .45 * Math.sin(u * 30 + i))], d); }
+  },
+};
+const HR = {
+  cur(x, y) {
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; pathEl(PETAL(7, 9, '#ff9ad0'), '', x, y - 10, 1.5, u => { const e = Math.min(1, u / .35), d = 15 * e; return [Math.sin(a) * d, Math.cos(a) * d, a * 57, .4 + 2 * e]; }, .1); }
+    for (let i = 0; i < 20; i++) ballistic(x, y - 10, { vx: R(-90, 90), vy: R(30, 120), g: 30, life: R(1, 1.6), size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .35 });
+    ring(x, y - 10, '#ffd34a', 120, .7, .3);
+  },
+  r1(x, y) { // Blossom: a big flower opens from a bud, a gold heart; then the petals let go on the breeze
+    const cx = x, cy = y - 40;
+    pathEl('<div style="width:14px;height:20px;margin:-10px -7px;border-radius:50% 50% 45% 45%;background:radial-gradient(#ffd6ec,#d0508a)"></div>', '', cx, cy, .35, u => [0, 0, 0, .4 + .8 * u, 1]);
+    for (let i = 0; i < 5; i++) { const a = i * 72, ar = a * Math.PI / 180;
+      pathEl(PETAL(22, 34, i % 2 ? '#ff9ad0' : '#ffb6dc'), 'transform-origin:50% 100%', cx, cy, 2.4, u => {
+        if (u < .3) { const e = 1 - Math.pow(1 - u / .3, 3); return [Math.sin(ar) * 14 * e, Math.cos(ar) * 14 * e, a, .2 + .8 * e, 1]; }
+        if (u < .55) { const w = Math.sin((u - .3) / .25 * Math.PI) * 3; return [Math.sin(ar) * 14, Math.cos(ar) * 14, a + w, 1, 1]; }
+        const v = (u - .55) / .45; return [Math.sin(ar) * 14 + 70 * v + 10 * Math.sin(v * 6 + i), Math.cos(ar) * 14 + 40 * v - 20 * v * v, a + 160 * v, 1 - .3 * v, 1 - v]; }, .3, 40); }
+    pathEl(MOTE(16, '#ffd34a'), '', cx, cy, 1.6, u => [0, 0, 0, u < .2 ? u / .2 : 1, u < .6 ? 1 : 1 - (u - .6) / .4], .55);
+    for (let i = 0; i < 16; i++) ballistic(cx, cy, { vx: R(-60, 60), vy: R(10, 90), g: 40, life: R(1, 1.6), size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .9 + i * .02 });
+    ring(cx, cy, '#ffd34a', 110, .7, .6);
+    [1046, 1318, 1568, 2093].forEach((f, i) => tone(f, .3 + i * .09, .06, 1.2));
+  },
+  r2(x, y) { // Petal storm: a spinning column of petals, gold pollen trail, a burst at the top
+    const cs = ['#ffd6ec', '#ff9ad0', '#ffffff', '#c8f08a'];
+    for (let i = 0; i < 26; i++) { const a0 = i * .9, h0 = R(0, .2);
+      pathEl(i % 4 === 3 ? LEAF(9, 5) : PETAL(9, 12, cs[i % 3]), '', x, y, 1.6, u => { const v = Math.min(1, u * 1.1 + h0), a = a0 + v * 9, r = 10 + 20 * v; return [Math.cos(a) * r, 150 * v, a * 57]; }, i * .025); }
+    for (let i = 0; i < 18; i++) { const t = i / 18; ballistic(x + R(-12, 12), y - 150 * t, { vx: R(-20, 20), vy: R(-10, 10), g: 0, life: .8, size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .2 + t * 1.1 }); }
+    setTimeout(() => { const tx = x, ty = y - 150; ring(tx, ty, '#ffd34a', 100, .6);
+      for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; pathEl(PETAL(9, 12, cs[i % 3]), '', tx, ty, 1.2, u => [Math.cos(a) * 70 * u, Math.sin(a) * 70 * u - 40 * u * u, a * 57 + 200 * u]); } }, 1500);
+    noise(0, 1.4, .025, 1500); [784, 988, 1175, 1568].forEach((f, i) => tone(f, 1.5 + i * .05, .05, .9));
+  },
+  r3(x, y) { // Golden bloom: light rays fan out behind a ring of leaves growing open, gold motes rain down
+    const cx = x, cy = y - 30;
+    for (let i = 0; i < 10; i++) { const a = i * 36;
+      el('', `left:${cx - 3}px;top:${cy - 90}px;width:6px;height:90px;transform-origin:50% 100%;background:linear-gradient(transparent,rgba(255,220,120,.55));filter:blur(1.5px)`,
+        [{ transform: `rotate(${a}deg) scaleY(0)`, opacity: 0 }, { transform: `rotate(${a + 8}deg) scaleY(1)`, opacity: 1, offset: .35 }, { transform: `rotate(${a + 20}deg) scaleY(1.1)`, opacity: 0 }], 1800, 100); }
+    for (let i = 0; i < 10; i++) { const a = i * 36, ar = a * Math.PI / 180;
+      pathEl(LEAF(16, 9), '', cx, cy, 1.8, u => { const e = 1 - Math.pow(1 - Math.min(1, u / .4), 3); return [Math.sin(ar) * 30 * e, Math.cos(ar) * 30 * e, -a + 45, .3 + .9 * e, u > .7 ? (1 - u) / .3 : 1]; }, .15); }
+    pathEl(MOTE(20, '#ffe48a'), '', cx, cy, 1.6, u => [0, 0, 0, u < .25 ? u / .25 * 1.3 : 1.3 - .3 * u, u > .6 ? (1 - u) / .4 : 1], .2);
+    for (let i = 0; i < 22; i++) ballistic(cx + R(-80, 80), cy - R(40, 90), { vx: R(-10, 10), vy: R(-10, 10), g: 60, life: R(1.2, 1.8), size: 3, color: '#ffd34a', glow: 8, fade: true, delay: .6 + i * .03 });
+    tone(523, .1, .05, 1.6); tone(659, .1, .04, 1.6); tone(784, .1, .04, 1.6); tone(1568, .4, .04, 1.2);
+  },
+};
+function herb(rare) {
+  ST = $('hStage'); const [x, y] = pos('hNode');
+  $('hNode').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1)' }], { duration: 260 });
+  HN[hn](x, y); if (rare) HR[hr](x, y);
+  $('hNote').textContent = rare ? `Normal: ${hn === 'cur' ? 'Current' : hn.toUpperCase()} · Rare: ${hr === 'cur' ? 'Current' : hr.toUpperCase()}` : `Normal: ${hn === 'cur' ? 'Current' : hn.toUpperCase()}`;
+}
+$('hPlay').onclick = () => herb(false);
+$('hRare').onclick = () => herb(true);
+
+// =================== Skinning ===================
+let sn = 'cur', sr = 'r1';
+pick('sn', v => sn = v); pick('sr', v => sr = v);
+function streak(x, y, w, angle, life = .36, delay = 0, tip = false) {
+  el(`<div style="width:${w}px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff,transparent);box-shadow:0 0 10px #fff"></div>`,
+    `left:${x - w / 2}px;top:${y}px;transform-origin:50% 50%`,
+    [{ transform: `rotate(${angle}deg) scaleX(0)`, opacity: 1 }, { transform: `rotate(${angle}deg) scaleX(1)`, opacity: 1, offset: .45 }, { transform: `rotate(${angle}deg) scaleX(1) translateX(10px)`, opacity: 0 }], life * 1000, delay * 1000, 'ease-out');
+  if (tip) { const ar = angle * Math.PI / 180; pathEl(MOTE(6, '#ffffff'), '', x, y, life, u => [(-w / 2 + w * u) * Math.cos(ar), -(-w / 2 + w * u) * Math.sin(ar), 0, 1, u > .8 ? (1 - u) * 5 : 1], delay); }
+}
+function tufts(x, y, n, soft) {
+  for (let i = 0; i < n; i++) { const dx = R(-50, 50), s = soft ? R(8, 12) : R(5, 8);
+    pathEl(`<div style="width:${s}px;height:${s}px;margin:${-s / 2}px;border-radius:50%;background:radial-gradient(#e8c8a0,#8a5a30 ${soft ? 55 : 70}%,transparent);filter:blur(${soft ? 1 : .4}px)"></div>`, '', x, y, R(1.1, 1.6),
+      u => [dx * u + 8 * Math.sin(u * 9 + i), 30 * Math.sin(Math.PI * Math.min(u * 1.6, 1)) - 50 * u * u, 0, 1, 1 - u], .08 + i * .02); }
+}
+const SN = {
+  cur(x, y) { streak(x, y - 6, 80, -28); tufts(x, y, 9); noise(0, .15, .04, 3000); },
+  n1(x, y) { // glint with an afterimage, a second quick flick, leather scraps
+    streak(x, y - 6, 90, -28, .4); streak(x - 6, y - 2, 90, -28, .5, .04); streak(x + 10, y - 14, 50, 32, .28, .18);
+    tufts(x, y, 7);
+    for (let i = 0; i < 4; i++) ballistic(x, y, { vx: R(-90, 90), vy: R(60, 140), g: 420, life: R(.6, .9), size: R(4, 7), h: R(3, 5), color: ['#8a5a30', '#a07850', '#6a4020'][i % 3], round: false, spin: R(-500, 500) });
+    noise(0, .12, .04, 3000); noise(.18, .08, .03, 4000);
+  },
+  n2(x, y) { // one crisp glint with a bright tip running along it, fluffier tufts
+    streak(x, y - 6, 100, -28, .42, 0, true); tufts(x, y, 7, true); noise(0, .14, .035, 3500); tone(3200, 0, .015, .15, 'triangle');
+  },
+};
+const SR = {
+  cur(x, y) { streak(x, y - 6, 220, -28); for (let i = 0; i < 6; i++) { const d = -110 + 44 * i; star(x + d * .88, y - 6 - d * .47, 14, '#fff', .45, .1 + i * .04); } },
+  r1(x, y) { // Double slash: two glints cross in an X, a flash where they meet, sparks along both
+    streak(x, y - 10, 170, -32, .4); streak(x, y - 10, 170, 32, .4, .12, false);
+    setTimeout(() => { ring(x, y - 10, '#fff', 70, .4); star(x, y - 10, 46, '#fff', .5); star(x, y - 10, 30, '#ffe0b0', .5, .05); }, 170);
+    for (let k = 0; k < 2; k++) for (let i = 0; i < 6; i++) { const d = R(-80, 80), ang = (k ? 32 : -32) * Math.PI / 180;
+      ballistic(x + d * Math.cos(ang), y - 10 + d * Math.sin(ang), { vx: R(-60, 60), vy: R(20, 90), g: 300, life: R(.35, .6), size: 3, color: '#ffe8c0', glow: 5, delay: .05 + k * .12 }); }
+    tufts(x, y, 6); noise(0, .12, .04, 3000); noise(.12, .12, .04, 3600); tone(2400, .17, .04, .5); tone(3600, .2, .03, .5);
+  },
+  r2(x, y) { // Pelt sheen: a broad sheen sweeps over a soft hide-shaped glow, glints at its edge
+    el('<div style="width:120px;height:80px;margin:-40px -60px;border-radius:45% 55% 50% 50% / 55% 50% 50% 45%;background:radial-gradient(ellipse,rgba(200,150,100,.55),rgba(140,90,50,.25) 60%,transparent 75%);filter:blur(2px)"></div>',
+      `left:${x}px;top:${y - 30}px`, [{ opacity: 0, transform: 'scale(.7)' }, { opacity: 1, transform: 'scale(1)', offset: .25 }, { opacity: 1, offset: .7 }, { opacity: 0, transform: 'scale(1.05)' }], 1500, 0, 'ease-out');
+    const sh = el('<div style="width:40px;height:110px;margin:-55px -20px;background:linear-gradient(90deg,transparent,rgba(255,240,210,.85),transparent);transform:skewX(-20deg);filter:blur(1px)"></div>',
+      `left:${x}px;top:${y - 30}px`, [{ transform: 'translateX(-80px)', opacity: 0 }, { opacity: 1, offset: .2 }, { opacity: 1, offset: .8 }, { transform: 'translateX(80px)', opacity: 0 }], 800, 250, 'ease-in-out');
+    for (let i = 0; i < 7; i++) star(x - 60 + i * 20 + R(-6, 6), y - 30 + R(-34, 34), R(10, 15), '#fff2d8', .45, .3 + i * .08);
+    tufts(x, y, 5, true); noise(0, .12, .035, 3000); tone(1760, .3, .03, .7); tone(2637, .5, .03, .7); tone(3520, .7, .025, .6);
+  },
+  r3(x, y) { // Trophy: the hide pops up big with a gold rim and a shine, holds, then flies off
+    streak(x, y - 6, 120, -28, .36);
+    pathEl('<div style="width:46px;height:46px;margin:-23px;border:2px solid #ffd34a;border-radius:3px;background:radial-gradient(#5a3a7a,#2a1a3a);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 14px rgba(255,210,80,.7);overflow:hidden">🟣<i style="position:absolute;top:0;bottom:0;width:16px;left:-20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);transform:skewX(-20deg);animation:sw .6s .45s ease-in-out"></i></div>',
+      '', x, y - 20, 1.5, u => { if (u < .2) { const e = u / .2; return [0, 50 * e, 0, .3 + .9 * e - .2 * Math.sin(e * Math.PI), 1]; } if (u < .7) return [0, 50 + 3 * Math.sin((u - .2) * 12), 0, 1, 1]; const v = (u - .7) / .3; return [260 * v * v, 50 + 60 * v, 0, 1 - .5 * v, 1 - v]; });
+    setTimeout(() => { ring(x, y - 70, '#ffd34a', 100, .5); for (let i = 0; i < 8; i++) star(x + R(-40, 40), y - 70 + R(-30, 30), R(10, 14), '#ffe48a', .5, i * .05); }, 280);
+    tufts(x, y, 6); noise(0, .12, .035, 3000); tone(1318, .3, .05, .6); tone(1976, .4, .05, .8);
+  },
+};
+const sty = document.createElement('style'); sty.textContent = '@keyframes sw { to { left: 60px; } }'; document.head.appendChild(sty);
+function skin(rare) {
+  ST = $('sStage'); const [x, y] = pos('sNode');
+  $('sNode').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.08,.94)' }, { transform: 'scale(1)' }], { duration: 220 });
+  if (rare) { if (sr !== 'r1') SN[sn](x, y); SR[sr](x, y); } else SN[sn](x, y);
+  $('sNote').textContent = rare ? `Normal: ${sn === 'cur' ? 'Current' : sn.toUpperCase()} · Rare: ${sr === 'cur' ? 'Current' : sr.toUpperCase()}` : `Normal: ${sn === 'cur' ? 'Current' : sn.toUpperCase()}`;
+}
+$('sPlay').onclick = () => skin(false);
+$('sRare').onclick = () => skin(true);
+</script>
+</body>
+</html>
