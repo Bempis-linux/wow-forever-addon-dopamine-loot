@@ -98,6 +98,15 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   Correction (same day): the user wanted the mockup picks kept to iterate on, so the Relic/Beam/Aura "iLvl" tag
   (D) and Splash's block (E) are back; only Rune decode, Forged letters and Banner stay as before. Next: iterate
   on the tag/block look in game (the user finds them a bit ugly in game).
+  Round 4 mockup (info-line.html, the user said "go with your suggestions"): Gem or Readout for the item level
+  (Relic, Beam, Aura), an upgrade arrow, a reworked Aura (heartbeat glow, sunbeam column with dust, framed
+  rarity word, bigger name), Splash's block slanted. Waiting for picks.
+  **Upgrade arrow API (researched 2026-11-09, works on Forever per Road to Sixty / Narcissus):**
+  GetInventoryItemLink("player", slot) (nil = empty, a plain read, no taint/secret); level via
+  (C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo)(link); our own equipLoc -> slot table (no
+  API): HEAD 1 .. HAND 10, FINGER {11,12}, TRINKET {13,14}, CLOAK 15, WEAPON {16,17}, WEAPONMAINHAND/2H 16,
+  OFFHAND/SHIELD/HOLDABLE 17, RANGED/RANGEDRIGHT/THROWN/RELIC 18 (Forever has slot 18); compare against the
+  lower slot (empty = 0). GetInventorySlotInfo is behind a deprecation setting: use the numbers.
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`
