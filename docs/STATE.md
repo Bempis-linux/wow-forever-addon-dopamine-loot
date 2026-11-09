@@ -12,7 +12,9 @@ widgets; not shown at 5+ free; full moment from UI_ERROR_MESSAGE (verify `/dump 
 and `/dump MainMenuBarBackpackButton.icon:GetAtlas(), MainMenuBarBackpackButton.icon:GetTexture()`). Known: the
 bag pumps when the loot arrives, before a loot rain's gather reaches it (maybe hold it until the gather). Version
 not bumped (bumped at release). **Gotcha (2026-11-09):** commit 055406a deleted all of DopamineLoot/Media by
-accident (restored in 947a51e from v1.2.1); check `git status` for mass deletions before committing. Next: the user
+accident (restored in 947a51e from v1.2.1); check `git status` for mass deletions before committing. The game was actually on the RELEASE copy (1.2.1), not dev;
+switched to dev 2026-11-09 for the bag test (the stale parked 1.1.0 renamed to Interface\DopamineLoot.old-1.1.0 so
+the script could park 1.2.1; delete it when the user agrees). Check `addon-mode.ps1 status` before each test. Next: the user
 tests the bag, then gathering (G2, G4, G5, G7). Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
