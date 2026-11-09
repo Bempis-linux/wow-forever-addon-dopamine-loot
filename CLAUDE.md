@@ -81,7 +81,8 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
 - 3+ shown items, quest money, or loot money from a setting (default 1g) → loot rain (Vampire-Survivors
   feel); deferred in combat. The loot flies up from the ground by default (setting `rainFrom`). Animations (setting
   `rainStyle`, 2026-11-08): Fountain (default), Quick burst, Big bang; Firework, Vortex, Meteor shower and Geyser
-  were dropped by the user (a removed choice moves to Quick burst). The chest
+  were dropped by the user (a removed choice moves to Quick burst). The gather into the bag is one by one or a
+  Vacuum (setting `rainGather`). The chest
   show (containers, shake, rarity tease) was set aside 2026-10-14: `deprecated/chest-show/`, not loaded.
 - Seen set and loot history per character; settings account-wide. No login toast.
 - **Settings layout** (0.4.15, from docs/mockups/settings.html): pages Dopamine Loot (3 main switches, quick

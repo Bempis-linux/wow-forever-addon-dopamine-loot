@@ -25,6 +25,9 @@ local FADE_T, SQUASH_T, SETTLE_HOLD = 0.6, 0.18, 0.7 -- (the squash: squashed on
 local GHOSTS, GHOST_EVERY, DUST = 6, 0.035, 7
 local BEST_PAUSE, STOP_T, SHAKE_T, PULSE_T = 0.55, 0.22, 0.3, 0.6
 local GATHER_T, JOIN_T, FLASH_T = 0.65, 0.32, 0.4 -- (the gather: each item's flight into the bag)
+-- The Vacuum gather (setting rainGather; docs/mockups/rain-variants.html, round 6): a short inhale, then
+-- everything is sucked into the bag together, farther ones a little longer, and the bag gulps it in one pop
+local INHALE_T, VAC_T, VAC_FAR = 0.28, 0.32, 0.12
 local WIND_T = 0.38 -- the wind-up before the burst
 -- The best item's drop by rarity (setting Hang): the rarer, the longer it hangs at the top, the harder
 -- it falls (a comet trail from Rare, longer for Epic and Legendary) and the bigger its landing.
@@ -743,11 +746,20 @@ local function Settle(st)
   table.sort(order, function(a, b) return a.x < b.x end)
   local pd, gd = 0, 0
   st.toGather = 0
+  st.vacuum = ns.settings.rainGather == "vacuum"
+  local W = layer:GetWidth()
+  local bx = BagPoint()
   for _, s in ipairs(order) do
     if not s.coin and Core.Stays(s.item, st.stayQuality) then
       s.leaving, s.leaveAt, pd = "popup", st.age + pd, pd + 0.15
     elseif On("Gather") then
-      s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.11, 2.8 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
+      if st.vacuum then -- all at once, after the inhale
+        s.leaving, s.leaveAt = "gather", st.age + INHALE_T
+        s.gatherT = VAC_T + VAC_FAR * math.min(1, math.abs(bx - s.x) / W)
+      else
+        s.leaving, s.leaveAt, gd = "gather", st.age + 0.35 + gd, gd + math.min(0.11, 2.8 / #order) * (1 - 0.2 * st.calm) -- one after another (big hauls closer)
+        s.gatherT = GATHER_T
+      end
       s.sx, s.sy = s.x, s.y
       st.toGather = st.toGather + 1
       if s.coin then st.coinsToBag = st.coinsToBag + 1 end
@@ -759,6 +771,7 @@ local function Settle(st)
       end
     end
   end
+  if st.vacuum and st.toGather > 0 and st.calm < 2 then ns:PlayGatherSound() end -- (the inhale; quiet on calm repeats)
   -- nothing gathers into the bag: the rain resolves on its chord now
   if st.toGather == 0 and st.landed >= 3 and st.calm < 2 and On("Escalate") then ns:PlayRainChord() end
 end
@@ -965,6 +978,16 @@ local function Update(_, dt)
     for _, s in ipairs(sprites) do
       if st.age < s.leaveAt then
         busy = true
+        if s.leaving == "gather" and st.vacuum then -- the inhale: it lifts a little and trembles; air rushes to the bag
+          local u = 1 - (s.leaveAt - st.age) / INHALE_T
+          s.x, s.y = s.sx + (math.random() - 0.5) * 5 * u * k, s.sy + 10 * k * u
+          if math.random() < dt * 14 then
+            if not bx then bx, by = BagPoint() end
+            local t = table.remove(sparkPool) or Tex(top, "ARTWORK", MEDIA .. "Mote", "ADD")
+            if s.coin then t:SetVertexColor(1, 0.85, 0.4, 1) else t:SetVertexColor(0.9, 0.94, 1, 1) end
+            live[#live + 1] = { t = t, spark = true, pull = true, x = s.x, y = s.y, x1 = bx, y1 = by, age = 0, life = 0.3, size = 3 + math.random() * 2 }
+          end
+        end
       else
         local t = st.age - s.leaveAt
         if s.leaving == "popup" then
@@ -980,19 +1003,32 @@ local function Update(_, dt)
           if t < 0.5 then busy = true end
         elseif s.leaving == "gather" then
           if not bx then bx, by = BagPoint() end
-          local u = math.min(1, t / GATHER_T)
-          local e = u * u
-          local cx, cy = (s.sx + bx) / 2, math.max(s.sy, by) + 220 * k
+          local u = math.min(1, t / s.gatherT)
+          local vac = st.vacuum
+          local e = vac and u * u * u or u * u -- (the vacuum: slow off the ground, then a rush)
+          local y0 = vac and s.sy + 10 * k or s.sy
+          local cx, cy = (s.sx + bx) / 2, math.max(y0, by) + (vac and 90 or 220) * k
           s.x = (1 - e) * (1 - e) * s.sx + 2 * (1 - e) * e * cx + e * e * bx
-          s.y = (1 - e) * (1 - e) * s.sy + 2 * (1 - e) * e * cy + e * e * by - s.size / 2
-          s.shrink = 1 - 0.6 * e
+          s.y = (1 - e) * (1 - e) * y0 + 2 * (1 - e) * e * cy + e * e * by - s.size / 2
+          s.shrink = 1 - (vac and 0.7 or 0.6) * e
+          if vac then s.rot = s.rot + 14 * dt end
           if u >= 1 and not s.inBag then
             s.inBag = true
-            st.gathered, st.bagBump = st.gathered + 1, 1
-            -- the bag takes it in: a small ring and a few sparks in its color
-            local r, g, b = Light(s.r, s.g, s.b)
-            Ring(bx, by, r, g, b, 34 * k, { flat = 1, life = 0.3 })
-            Spark(bx, by, r, g, b, 3, 140 * k, { up = true, grav = 400 * k })
+            st.gathered = st.gathered + 1
+            if not st.vacuum then
+              -- the bag takes it in: a small ring and a few sparks in its color
+              st.bagBump = 1
+              local r, g, b = Light(s.r, s.g, s.b)
+              Ring(bx, by, r, g, b, 34 * k, { flat = 1, life = 0.3 })
+              Spark(bx, by, r, g, b, 3, 140 * k, { up = true, grav = 400 * k })
+            elseif st.gathered == st.toGather then -- the gulp: one pop for everything
+              st.bagBump = 2
+              Ring(bx, by, 1, 0.9, 0.62, 90 * k, { life = 0.45 })
+              Ring(bx, by, 1, 1, 1, 50 * k, { life = 0.35, delay = 0.06 })
+              Spark(bx, by + 8, 1, 0.85, 0.3, 16, 300 * k, { up = true, grav = 500 * k, size = 5 })
+              Spark(bx, by + 8, 1, 1, 1, 6, 260 * k, { up = true, grav = 500 * k, size = 4 })
+              if st.calm < 2 then ns:PlayChestPop() end
+            end
             -- the tally counts it; a coin's glint zips up from the bag into the money
             if s.coin then
               st.coinsIn = st.coinsIn + 1
@@ -1000,7 +1036,8 @@ local function Update(_, dt)
             else
               st.itemsIn = st.itemsIn + 1
             end
-            if On("Escalate") then ns:PlayBagNote(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
+            if st.vacuum then -- (one gulp, not a note each)
+            elseif On("Escalate") then ns:PlayBagNote(st.gathered) elseif st.gathered % 3 == 1 then Tick(0) end
             -- the last one in: the rain resolves on a chord (not for calmer repeats)
             if st.gathered == st.toGather and st.calm < 2 and st.toGather >= 3 then ns:PlayRainChord() end
           end
@@ -1216,7 +1253,7 @@ local function Update(_, dt)
     layer.bagGlow:SetSize(70 + 50 * st.bagBump, 70 + 50 * st.bagBump)
     layer.bagGlow:ClearAllPoints()
     layer.bagGlow:SetPoint("CENTER", layer, "BOTTOMLEFT", bx, by)
-    layer.bagGlow:SetAlpha(st.bagBump)
+    layer.bagGlow:SetAlpha(math.min(1, st.bagBump))
     layer.bagGlow:Show()
   elseif layer.bagGlow:IsShown() then
     layer.bagGlow:Hide()

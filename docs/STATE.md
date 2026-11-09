@@ -70,6 +70,10 @@ switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
   slams). Firework, Vortex, Meteor shower and Geyser were built 2026-11-07 (fcfd311) and **dropped by the
   user 2026-11-08**; a saved removed choice moves to Quick burst. The switch key `Hang` is now "Finale for the
   best" and gates every animation's finale (Big bang's core too). Core.Step still reads `gmul` (unused now).
+  The user: Quick burst "looks pretty good" (2026-11-08). **Vacuum gather** (setting `rainGather` "one" default /
+  "vacuum", "How it gathers" under Afterwards; mockup round 6), untested in game: a 0.28 s inhale (lift, tremble,
+  motes rushing to the bag), then everything sucked in together on a tight cubic curve, one gulp (rings, sparks,
+  ChestPop) instead of a ring and note per item.
   Next after testing: mail / craft finales (verify APIs first).
   Player feedback: the scheduled task "Dopamine Loot daily feedback report" (daily ~6:00 a.m. Central; read-only;
   prompt in ~/.claude/scheduled-tasks/dopamine-loot-feedback-report/SKILL.md) writes `reports/feedback-*.md`

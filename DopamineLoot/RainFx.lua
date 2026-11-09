@@ -79,6 +79,9 @@ local function Create()
     { 2, "|cff1eff00Uncommon|r and up" }, { 3, "|cff0070ddRare|r and up (default)" }, { 4, "|cffa335eeEpic|r and up" },
   }, 3, "When the rain is over, items of this rarity and better become popups; the rest go into your bag.")
   FxToggle(cat, "Gather")
+  N.Choice(cat, "rainGather", "How it gathers", {
+    { "one", "One by one (default)" }, { "vacuum", "Vacuum" },
+  }, "one", "One by one: each item flies into your bag a beat after the last, with a note each. Vacuum: everything lifts and trembles for a moment, then it is all sucked into the bag together and the bag takes it in one gulp. Much quicker on big hauls.")
   N.Toggle(cat, "rainChord", "Chord at the end",
     "The rain ends on a soft chord once the last item is in your bag (off by default).")
   FxToggle(cat, "Escape")

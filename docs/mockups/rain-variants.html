@@ -24,8 +24,8 @@
 </head>
 <body>
 <header>
-  <h1>Loot rain variants, round 5: Fountain, Big bang and a Quick burst</h1>
-  <p>Firework, Vortex, Meteor shower and Geyser are gone. New: <b>Quick burst</b>, a short Fountain where everything blows up at once. <b>Finale</b> on/off is the proposed switch for the best item's finale in every animation (it would replace "Hang time for the best"). Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
+  <h1>Loot rain variants, round 6: a quick Vacuum into the bag</h1>
+  <p><b>Gather</b> compares the end of the rain: <b>One by one</b> (today: each item flies into the bag a beat after the last) or <b>Vacuum</b> (new: a short inhale, then everything is sucked into the bag together and it gulps it in one pop). Rare and better still rise into their popups. Round 5: New: <b>Quick burst</b>, a short Fountain where everything blows up at once. <b>Finale</b> on/off is the proposed switch for the best item's finale in every animation (it would replace "Hang time for the best"). Pick one, a haul size and the best rarity, then Play (or Space). No sound.</p>
 </header>
 <div class="bar">
   <span>Animation</span>
@@ -34,6 +34,8 @@
   <button data-n="8">8</button><button data-n="20" class="on">20</button><button data-n="40">40</button>
   <span>Best</span>
   <button data-best="3">Rare</button><button data-best="4" class="on">Epic</button><button data-best="5">Legendary</button>
+  <span>Gather</span>
+  <button data-gather="one">One by one (today)</button><button data-gather="vac" class="on">Vacuum (new)</button>
   <span>Finale</span>
   <button data-fin="1" class="on">On</button><button data-fin="0">Off</button>
   <button id="play">Play (Space)</button>
@@ -53,7 +55,7 @@ const COIN = { gold: ['#ffd84a', '#a8781a'], silver: ['#e8eef4', '#8a96a2'], cop
 const SIZE = 34, G = 1500;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 800, H = 520, DPR = 1;
-let mode = 'burst', haul = 20, best = 4, finale = true;
+let mode = 'burst', haul = 20, best = 4, finale = true, gather = 'vac';
 let sprites = [], parts = [], waves = [], t = 0, shake = 0, shakeMax = 0.35, flash = 0, scene = null;
 const R = (a, b) => a + Math.random() * (b - a);
 const BC = () => QC[best] === '#ffffff' ? '#fff4c0' : QC[best];
@@ -246,8 +248,54 @@ const MODES = {
 
 function start() {
   sprites = makeHaul().map(sprite); parts = []; waves = []; t = 0; shake = 0; flash = 0;
-  scene = { taken: {} };
+  scene = { taken: {}, gatherAt: null, gathering: false, toGo: 0, inBag: 0, bagBump: 0 };
   MODES[mode].start(sprites);
+}
+// The gather, after everything has landed: Rare+ items rise and fade into their popups; the rest
+// flies into the bag. One by one (today): each a beat after the last. Vacuum (new): a short inhale
+// (everything lifts and trembles, air rushes toward the bag), then all of it is sucked in together
+// and the bag gulps it in one pop.
+const BAG = () => [W - 46, H - 22];
+function gatherStep(dt) {
+  scene.bagBump = Math.max(0, scene.bagBump - dt * 4);
+  if (!scene.gathering) {
+    if (!scene.gatherAt && sprites.length && sprites.every(s => s.state === 'rest')) scene.gatherAt = t + 0.7;
+    if (!scene.gatherAt || t < scene.gatherAt) return;
+    scene.gathering = true;
+    const order = [...sprites].sort((a, b) => a.x - b.x), n = order.length;
+    let pd = 0, gd = 0;
+    for (const s of order) {
+      s.sx = s.x; s.sy = s.y; s.shrink = 1; s.alpha = 1;
+      if (!s.it.coin && s.it.q >= 3) { s.state = 'popup'; s.leaveAt = t + pd; pd += 0.15; continue; }
+      s.state = 'gather'; scene.toGo++;
+      if (gather === 'vac') { s.leaveAt = t + 0.28; s.dur = 0.32 + 0.12 * Math.min(1, Math.abs(BAG()[0] - s.x) / W); s.jit = R(0, 6); }
+      else { s.leaveAt = t + 0.35 + gd; s.dur = 0.65; gd += Math.min(0.11, 2.8 / n); }
+    }
+    return;
+  }
+  const [bx, by] = BAG();
+  for (const s of sprites) {
+    if (s.state === 'popup') { if (t >= s.leaveAt) { s.y -= dt * 500; s.alpha = Math.max(0, 1 - (t - s.leaveAt) / 0.5); } continue; }
+    if (s.state !== 'gather') continue;
+    if (t < s.leaveAt) { // (the vacuum's inhale: it lifts a little and trembles; air rushes to the bag)
+      if (gather === 'vac') { const u = 1 - (s.leaveAt - t) / 0.28; s.x = s.sx + R(-1, 1) * 2.5 * u; s.y = s.sy - 10 * u;
+        if (Math.random() < dt * 14) parts.push({ x: s.x, y: s.y, tx: bx, ty: by, pull: true, life: 0.3, age: 0, size: R(1.5, 2.5), color: s.it.coin ? COIN[s.it.coin][0] : '#e8f0ff' }); }
+      continue; }
+    if (s.done) continue;
+    const u = Math.min(1, (t - s.leaveAt) / s.dur), e = gather === 'vac' ? u * u * u : u * u;
+    const x0 = s.sx, y0 = gather === 'vac' ? s.sy - 10 : s.sy, cx = (x0 + bx) / 2, cy = Math.min(y0, by) - (gather === 'vac' ? 90 : 220);
+    s.x = (1 - e) * (1 - e) * x0 + 2 * (1 - e) * e * cx + e * e * bx; s.y = (1 - e) * (1 - e) * y0 + 2 * (1 - e) * e * cy + e * e * by;
+    s.shrink = 1 - 0.7 * e; s.rot += dt * (gather === 'vac' ? 14 : 0);
+    if (gather === 'vac' && u > 0.3) { s.trail.push([s.x, s.y]); if (s.trail.length > 5) s.trail.shift(); }
+    if (u >= 1) { s.done = true; s.alpha = 0; s.trail.length = 0; scene.inBag++;
+      const c = s.it.coin ? COIN[s.it.coin][0] : QC[s.it.q];
+      if (gather === 'one') { scene.bagBump = 1; waves.push({ x: bx, y: by, age: 0, life: 0.3, r: 34, color: c }); for (let i = 0; i < 3; i++) parts.push({ x: bx, y: by, vx: R(-80, 80), vy: R(-160, -60), life: 0.4, age: 0, size: 2, color: c, g: 400 }); }
+      if (scene.inBag === scene.toGo && gather === 'vac') { // the gulp: one pop for everything
+        scene.bagBump = 2.2; flash = Math.max(flash, 0.12);
+        waves.push({ x: bx, y: by, age: 0, life: 0.45, r: 90, color: '#ffe8a0' }); waves.push({ x: bx, y: by, age: -0.06, life: 0.35, r: 50, color: '#ffffff' });
+        for (let i = 0; i < 22; i++) { const a = -Math.PI / 2 + R(-1.2, 1.2), sp = R(120, 300); parts.push({ x: bx, y: by - 8, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: R(0.4, 0.7), age: 0, size: R(2, 3), color: i % 3 ? '#ffd84a' : '#ffffff', g: 500 }); } }
+    }
+  }
 }
 function update(dt) {
   t += dt;
@@ -258,6 +306,7 @@ function update(dt) {
     if (s.state === 'fly') M.tick.call(M, s, dt);
     else if (s.state === 'rest') { s.restT += dt; const k = Math.min(1, s.restT / 0.25); s.x += (s.tx - s.x) * k; s.y += (s.ty - s.y) * k; s.rot = s.rot0 * (1 - k); s.trail.length = 0; s.glow = Math.max(0, s.glow - dt); }
   }
+  gatherStep(dt);
   for (const p of parts) { p.age += dt; if (p.age < 0) continue;
     if (p.pull) { const k = Math.min(1, dt * 9); p.x += (p.tx - p.x) * k; p.y += (p.ty - p.y) * k; continue; }
     p.vy += (p.g || 0) * dt; if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; } p.x += p.vx * dt; p.y += p.vy * dt; }
@@ -267,7 +316,9 @@ function update(dt) {
 }
 
 function drawSprite(s) {
-  const sz = SIZE * s.s * (s.depth !== undefined ? 1 + 0.12 * (s.depth || 0) : 1);
+  if (s.done || s.alpha === 0) return;
+  const sz = SIZE * s.s * (s.shrink || 1);
+
   if (s.trail.length > 1) {
     const col = (s.meteor || (mode === 'meteor' && s.phase === 'big')) ? '#ff9a3a' : (s.it.coin ? COIN[s.it.coin][0] : QC[s.it.q]);
     const wide = mode === 'meteor' ? (s.phase === 'big' ? 22 : 10) : s.it.best ? 9 : 5;
@@ -280,7 +331,7 @@ function drawSprite(s) {
   }
   if (s.glow > 0) { const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, sz * 1.6); g.addColorStop(0, QC[s.it.q]); g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.globalAlpha = 0.7 * s.glow; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x, s.y, sz * 1.6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
-  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot);
+  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot); ctx.globalAlpha = s.alpha === undefined ? 1 : s.alpha;
   if (s.it.best || s.it.q >= 4) { ctx.shadowColor = QC[s.it.q]; ctx.shadowBlur = 18; }
   if (s.it.coin) {
     const [c1, c2] = COIN[s.it.coin], r = sz * 0.36;
@@ -320,6 +371,10 @@ function draw() {
   for (const p of parts) { if (p.age < 0) continue; const u = p.age / p.life; ctx.globalAlpha = (1 - u) * (p.soft ? 0.5 : 1); ctx.fillStyle = p.color;
     ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (p.soft ? 1 + u : 1 - u * 0.5), 0, Math.PI * 2); ctx.fill(); }
   ctx.globalAlpha = 1;
+  { const [bx, by] = BAG(), sc = 1 + 0.12 * scene.bagBump; ctx.save(); ctx.translate(bx, by); ctx.scale(sc, 1 / (1 + 0.04 * scene.bagBump));
+    ctx.font = '30px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🎒', 0, 0); ctx.restore();
+    if (scene.inBag) { ctx.font = '600 15px system-ui'; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'right'; ctx.fillText('+' + scene.inBag, bx - 26, by - 20); } }
+  ctx.globalAlpha = 1;
   ctx.restore();
   if (flash > 0) { ctx.fillStyle = `rgba(255,248,225,${flash * 0.55})`; ctx.fillRect(0, 0, W, H); }
 }
@@ -336,6 +391,7 @@ pick('mode', v => { mode = v; document.getElementById('desc').innerHTML = DESC[v
 pick('n', v => { haul = +v; });
 pick('best', v => { best = +v; });
 pick('fin', v => { finale = v === '1'; });
+pick('gather', v => { gather = v; });
 document.getElementById('play').onclick = start;
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); start(); } });
 addEventListener('resize', resize);
