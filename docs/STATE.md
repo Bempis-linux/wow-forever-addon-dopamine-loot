@@ -31,7 +31,11 @@ leap; skinning knife glint + fur tufts + the hide flops, rare a shine sweep), th
 profession, session pace ("17 in 1 min, ~1530/h"), vendor value, full-stack milestones (badge "x1" + shine + chime),
 and the unlock reveal for skill-ups ("You can now gather Briarthorn!"; at a rank cap "maxed: train Expert"). Not
 picked: themed skill bars, quiet routine skill-ups, rank-cap nudge as its own item. Waiting for the user's look.
-After that: popups movable via Mover. Read this first
+**Built 2026-11-09 (all of it, the user: "Build all of it"), untested in game:** Gather.lua BURST/RARE per
+profession (Petal.tga, Streak.tga from gen_textures.lua; star4 glints), the window's sections, pace, "worth" value,
+full-stack badge + shine + glints; Skill.lua unlock reveal (Reached / MaxRank via GetProfessions; "maxed: train X");
+sounds Strike00..02, Splash, Slash, Rare*, Unlock (tools/gen_gather_sounds.sh, not picked by ear). Test gathers count
+in the window until the next real gather takes them out. After testing: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

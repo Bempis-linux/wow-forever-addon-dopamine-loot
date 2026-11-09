@@ -12,7 +12,7 @@ local CAPS = { 75, 150, 225, 300 }
 
 -- The profession's color (bar, glow) and, for gatherers, what each skill level opens up: { level, item ID, name }
 local PROF = {
-  Herbalism = { color = { 0.18, 0.62, 0.23 }, light = { 0.56, 0.94, 0.48 }, unlocks = {
+  Herbalism = { icon = 2447, color = { 0.18, 0.62, 0.23 }, light = { 0.56, 0.94, 0.48 }, unlocks = {
     { 1, 2447, "Peacebloom" }, { 15, 2449, "Earthroot" }, { 50, 785, "Mageroyal" }, { 70, 2450, "Briarthorn" },
     { 85, 3820, "Stranglekelp" }, { 100, 2453, "Bruiseweed" }, { 115, 3355, "Wild Steelbloom" }, { 120, 3369, "Grave Moss" },
     { 125, 3356, "Kingsblood" }, { 150, 3357, "Liferoot" }, { 160, 3818, "Fadeleaf" }, { 170, 3821, "Goldthorn" },
@@ -20,12 +20,12 @@ local PROF = {
     { 220, 8836, "Arthas' Tears" }, { 230, 8838, "Sungrass" }, { 235, 8839, "Blindweed" }, { 245, 8845, "Ghost Mushroom" },
     { 250, 8846, "Gromsblood" }, { 260, 13464, "Golden Sansam" }, { 270, 13463, "Dreamfoil" }, { 280, 13465, "Mountain Silversage" },
     { 285, 13466, "Plaguebloom" }, { 290, 13467, "Icecap" }, { 300, 13468, "Black Lotus" } } },
-  Mining = { color = { 0.78, 0.39, 0.16 }, light = { 1, 0.69, 0.44 }, unlocks = {
+  Mining = { icon = 2770, color = { 0.78, 0.39, 0.16 }, light = { 1, 0.69, 0.44 }, unlocks = {
     { 1, 2770, "Copper Vein" }, { 65, 2771, "Tin Vein" }, { 75, 2775, "Silver Vein" }, { 125, 2772, "Iron Deposit" },
     { 155, 2776, "Gold Vein" }, { 175, 3858, "Mithril Deposit" }, { 230, 7911, "Truesilver Deposit" },
     { 245, 10620, "Small Thorium Vein" }, { 275, 10620, "Rich Thorium Vein" } } },
-  Fishing = { color = { 0.16, 0.49, 1 }, light = { 0.54, 0.78, 1 } },
-  Skinning = { color = { 0.6, 0.42, 0.23 }, light = { 0.88, 0.72, 0.5 } },
+  Fishing = { icon = 6291, color = { 0.16, 0.49, 1 }, light = { 0.54, 0.78, 1 } },
+  Skinning = { icon = 2318, color = { 0.6, 0.42, 0.23 }, light = { 0.88, 0.72, 0.5 } },
 }
 local DEFAULT = { color = { 0.85, 0.65, 0.13 }, light = { 1, 0.85, 0.4 } }
 -- Professions (other skills such as weapons don't get a banner); localized names are added at login
@@ -49,7 +49,8 @@ local function LearnNames()
   if not GetProfessions or not GetProfessionInfo then return end
   local ok, a, b, c, d, e, f = pcall(GetProfessions)
   if not ok then return end
-  for _, i in ipairs({ a, b, c, d, e, f }) do
+  for j = 1, 6 do -- (not ipairs: the list has holes, e.g. no archaeology)
+    local i = select(j, a, b, c, d, e, f)
     local ok2, name = pcall(GetProfessionInfo, i)
     if ok2 and type(name) == "string" and not ns.Secret(name) then IS_PROF[name] = true end
   end
@@ -73,6 +74,110 @@ local function Next(name, level)
     prev = cap
   end
   return level - 1, level, nil, "Mastered"
+end
+
+-- The unlock this level reaches, if any: a new herb or ore (its icon and name, and the span the bar fills)
+local function Reached(name, level)
+  local p = PROF[name]
+  if not (p and p.unlocks) then return nil end
+  local prev = 0
+  for _, u in ipairs(p.unlocks) do
+    if u[1] == level and level > 1 then return u, prev end
+    if u[1] < level then prev = u[1] end
+  end
+end
+
+-- The profession's current cap (the game's max for your rank), or nil if the client doesn't say
+local RANKS = { [75] = "Journeyman", [150] = "Expert", [225] = "Artisan" }
+local function MaxRank(name)
+  if not GetProfessions or not GetProfessionInfo then return nil end
+  local ok, a, b, c, d, e, f = pcall(GetProfessions)
+  if not ok then return nil end
+  for j = 1, 6 do -- (not ipairs: the list has holes, e.g. no archaeology)
+    local i = select(j, a, b, c, d, e, f)
+    local ok2, n, _, _, max = pcall(GetProfessionInfo, i)
+    if ok2 and n == name and type(max) == "number" and not ns.Secret(max) then return max end
+  end
+end
+
+---------------------------------------------------------------------------
+-- The unlock reveal (docs/mockups/gather-themes.html): under the banner, the new thing's icon drops in
+-- dark, lights up with rings and glints, and a line says what's new: "You can now gather Briarthorn!",
+-- or at a rank's cap "Fishing maxed: train Expert"
+---------------------------------------------------------------------------
+local reveal, revealIcon, revealBorder, revealLine, revealGlints, revealRings
+local revealing -- { t0, color }
+local REVEAL_AT, REVEAL_T = 0.95, 3.6
+local STAR = "Interface\\Cooldown\\star4"
+local RING = "Interface\\AddOns\\DopamineLoot\\Media\\Ring.tga"
+
+local function CreateReveal()
+  reveal = CreateFrame("Frame", nil, banner)
+  reveal:SetSize(320, 80)
+  reveal:SetPoint("TOP", banner, "BOTTOM", 0, -8)
+  reveal:Hide()
+  revealIcon = reveal:CreateTexture(nil, "ARTWORK")
+  revealIcon:SetSize(44, 44)
+  revealIcon:SetPoint("TOP", 0, 0)
+  revealBorder = reveal:CreateTexture(nil, "OVERLAY")
+  revealBorder:SetTexture(BORDER)
+  revealBorder:SetAllPoints(revealIcon)
+  revealLine = reveal:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  revealLine:SetPoint("TOP", revealIcon, "BOTTOM", 0, -8)
+  revealRings, revealGlints = {}, {}
+  for i = 1, 2 do
+    local r = reveal:CreateTexture(nil, "OVERLAY", nil, 1)
+    r:SetTexture(RING); r:SetBlendMode("ADD"); r:SetPoint("CENTER", revealIcon, "CENTER")
+    revealRings[i] = r
+  end
+  for i = 1, 10 do
+    local g = reveal:CreateTexture(nil, "OVERLAY", nil, 2)
+    g:SetTexture(STAR); g:SetBlendMode("ADD")
+    revealGlints[i] = { tex = g, dx = 0, dy = 0, d = 0 }
+  end
+end
+
+local function StartReveal(icon, line, color)
+  revealIcon:SetTexture(icon)
+  revealLine:SetText(line)
+  revealing = { color = color }
+  for i, g in ipairs(revealGlints) do
+    g.dx, g.dy, g.d = math.random(-55, 55), math.random(-30, 30), 0.5 + i * 0.04
+    g.tex:SetVertexColor(color[1], color[2], color[3])
+  end
+  revealRings[1]:SetVertexColor(color[1], color[2], color[3])
+  revealRings[2]:SetVertexColor(1, 0.96, 0.75)
+  reveal:SetAlpha(0)
+  reveal:Show()
+end
+
+-- t: seconds since the reveal began
+local function AnimateReveal(t)
+  if t < 0 then return end
+  local c = revealing.color
+  reveal:SetAlpha(math.min(1, t / 0.15, (REVEAL_T - t) / 0.4))
+  local drop = t < 0.15 and (1 - t / 0.15) or 0
+  revealIcon:ClearAllPoints()
+  revealIcon:SetPoint("TOP", 0, 30 * drop)
+  local pop = t < 0.15 and 0.6 + 0.48 * t / 0.15 or (t < 0.25 and 1.08 - 0.08 * (t - 0.15) / 0.1 or 1)
+  revealIcon:SetSize(44 * pop, 44 * pop)
+  local light = math.min(1, math.max(0, (t - 0.3) / 0.3)) -- dark, then lit
+  revealIcon:SetVertexColor(light, light, light)
+  revealBorder:SetVertexColor(c[1] * (0.3 + 0.7 * light), c[2] * (0.3 + 0.7 * light), c[3] * (0.3 + 0.7 * light))
+  for i, r in ipairs(revealRings) do
+    local u = (t - 0.6 - (i - 1) * 0.08) / (i == 1 and 0.7 or 0.5)
+    if u > 0 and u < 1 then r:SetSize((i == 1 and 130 or 80) * (0.15 + 0.85 * u), (i == 1 and 130 or 80) * (0.15 + 0.85 * u)); r:SetAlpha(1 - u); r:Show()
+    else r:Hide() end
+  end
+  for _, g in ipairs(revealGlints) do
+    local u = (t - g.d) / 0.6
+    if u > 0 and u < 1 then
+      local s = 16 * math.sin(math.pi * math.min(1, u * 1.4))
+      g.tex:ClearAllPoints(); g.tex:SetPoint("CENTER", revealIcon, "CENTER", g.dx, g.dy)
+      g.tex:SetSize(math.max(0.1, s), math.max(0.1, s)); g.tex:SetAlpha(1 - u); g.tex:Show()
+    else g.tex:Hide() end
+  end
+  if t >= REVEAL_T then reveal:Hide(); revealing = nil end
 end
 
 local function Create()
@@ -101,21 +206,28 @@ local function Create()
   note = banner:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   note:SetPoint("TOP", bar, "BOTTOM", 12, -4)
   note:SetTextColor(0.85, 0.82, 0.72)
+  CreateReveal()
   local function Animate(self, dt)
     showT = showT + dt
     local t = showT
-    self:SetAlpha(math.min(1, t / 0.3, (2.9 - t) / 0.4))
+    local life = revealing and REVEAL_AT + REVEAL_T or 2.9
+    -- (the banner's own fade leaves the reveal, a child, at full strength until its own fade)
+    self:SetAlpha(1)
+    local own = math.min(1, t / 0.3, (life - t) / 0.4)
+    title:SetAlpha(own); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own)
     if showing then
       local u = math.min(1, math.max(0, (t - 0.3) / 0.7))
       bar:SetValue(showing.v0 + (showing.v1 - showing.v0) * (1 - (1 - u) ^ 3))
     end
-    if t >= 2.9 then self:Hide() end
+    if revealing then AnimateReveal(t - REVEAL_AT) end
+    if t >= life then self:Hide(); reveal:Hide(); revealing = nil end
   end
   banner:SetScript("OnUpdate", Animate)
   ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 260, h = 56,
     preview = function(on)
       if on then -- a still sample while it's being placed
-        banner:SetScript("OnUpdate", nil); banner:SetAlpha(1); banner:Show()
+        banner:SetScript("OnUpdate", nil); banner:SetAlpha(1); banner:Show(); reveal:Hide(); revealing = nil
+        title:SetAlpha(1); bar:SetAlpha(1); note:SetAlpha(1); unlock:SetAlpha(1); unlockBorder:SetAlpha(1)
         local c = PROF.Herbalism.color
         title:SetText("Herbalism |cff8ef07a64|r"); note:SetText("6 to Briarthorn"); bar:SetValue(0.7)
         bar:SetStatusBarColor(c[1], c[2], c[3])
@@ -126,13 +238,29 @@ local function Create()
     end })
 end
 
--- Shows the banner: name (as the client says it), the new level
-function ns.ShowSkillUp(name, level)
+-- Shows the banner: name (as the client says it), the new level. capped: this level is the rank's cap
+-- (nil: ask the game). Reaching a new herb or ore, or a rank's cap, adds the unlock reveal.
+function ns.ShowSkillUp(name, level, capped)
   if ns.settings.noSkillUp or not banner then return end
   if ns.Mover.IsUnlocked() then return end
   local p = PROF[name] or DEFAULT
   local from, to, icon, text = Next(name, level)
   local c, l = p.color, p.light
+  revealing = nil
+  reveal:Hide()
+  local u, prev = Reached(name, level)
+  if u then -- the bar fills up to the new herb or ore, then it's revealed
+    from, to, icon = prev, level, GetIcon and GetIcon(u[2])
+    text = "Unlocked!"
+    StartReveal(icon, ("You can now gather |cffffffff%s|r!"):format(u[3]), l)
+  else
+    if capped == nil then local max = MaxRank(name); capped = max and max == level and max < 300 end
+    if capped and RANKS[level] then
+      from, to, text = level - 1, level, "Maxed for now"
+      StartReveal(p.icon and GetIcon and GetIcon(p.icon) or "Interface\\Icons\\INV_Misc_Book_09",
+        ("%s maxed: train |cffffffff%s|r"):format(name, RANKS[level]), l)
+    end
+  end
   title:SetText(("%s |cff%02x%02x%02x%d|r"):format(name, l[1] * 255, l[2] * 255, l[3] * 255, level))
   title:SetShadowColor(c[1], c[2], c[3], 0.9)
   fill:SetVertexColor(c[1], c[2], c[3])
@@ -149,6 +277,7 @@ function ns.ShowSkillUp(name, level)
   banner:SetAlpha(0)
   banner:Show()
   ns:PlaySkillUp()
+  if revealing then C_Timer.After(REVEAL_AT + 0.55, function() if revealing then ns:PlayGatherFx("Unlock") end end) end
 end
 
 function ns:CHAT_MSG_SKILL(text)
@@ -170,7 +299,16 @@ end)
 local NAMES = { herb = "Herbalism", ore = "Mining", fish = "Fishing", skin = "Skinning" }
 local testLevel = {}
 ns.AddAction("testskill", function(arg)
-  local name = NAMES[arg] or "Herbalism"
-  testLevel[name] = (testLevel[name] or 63) + 1
-  ns.ShowSkillUp(name, testLevel[name])
+  local k, mode = arg:match("^(%a*)%s*(%a*)$")
+  local name = NAMES[k] or "Herbalism"
+  local level = (testLevel[name] or 63) + 1
+  if mode == "unlock" then -- jump to the next unlock (or rank cap) and reach it
+    local _, to = Next(name, level - 1)
+    level = to
+    testLevel[name] = level
+    ns.ShowSkillUp(name, level, RANKS[level] ~= nil)
+    return
+  end
+  testLevel[name] = level
+  ns.ShowSkillUp(name, level, false)
 end)

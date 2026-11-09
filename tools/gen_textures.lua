@@ -267,3 +267,17 @@ Write("Rays", Fill(Canvas(256, 256), function(u, v)
   local spokes = math.max(0, math.cos(6 * ang)) ^ 10 + 0.5 * math.max(0, math.cos(6 * ang + math.pi)) ^ 16
   return spokes * (1 - r) ^ 0.9 * math.min(1, r / 0.12)
 end))
+
+DIR = root .. "DopamineLoot/Media/" -- (back from the chest show's folder above)
+-- Gathering (docs/mockups/gather-themes.html): square textures so SetRotation turns the shape itself.
+-- Petal: a teardrop, round end up (herb petals and the rare bloom). Streak: a thin bright line across
+-- the middle with a soft glow, fading at both ends (the skinning knife glint, rotated).
+Write("Petal", Fill(Canvas(64, 64), function(u, v)
+  local rx = 0.3 * (0.3 + 0.7 * math.min(1, v / 0.6))
+  local d = math.sqrt(((u - 0.5) / rx) ^ 2 + ((v - 0.58) / 0.38) ^ 2)
+  return math.max(0, math.min(1, (1 - d) / 0.12)) * (0.75 + 0.25 * v)
+end))
+Write("Streak", Fill(Canvas(128, 128), function(u, v)
+  local along = 1 - math.abs(2 * u - 1) ^ 2
+  return math.max(0, along) * (Bump(v, 0.5, 0.018) + 0.35 * Bump(v, 0.5, 0.07))
+end))

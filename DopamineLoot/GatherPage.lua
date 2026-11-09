@@ -38,8 +38,12 @@ local function Create()
     "Five quick gathers: hear the notes climb and see the +N add up.")
   N.Button(layout, "Find something rare", "Test rare", function() ns.RunAction("testgather", Kind() .. " rare") end,
     "A gather with an Uncommon find: the bigger burst and its popup.")
+  N.Button(layout, "Complete a stack", "Fill a stack", function() ns.RunAction("testgather", Kind() .. " stack") end,
+    "Tops an item up to just under a full stack and gathers into it: the gold stack badge, the shine and the chime.")
   N.Button(layout, "Skill up", "Test skill-up", function() ns.RunAction("testskill", Kind()) end,
     "A skill-up for the profession picked above.")
+  N.Button(layout, "Reach something new", "Test unlock", function() ns.RunAction("testskill", Kind() .. " unlock") end,
+    "A skill-up that reaches the next unlock: the new herb or ore to gather (or, for Fishing and Skinning, the rank to train next).")
 end
 
 ns.OnInit(function() if not sub then Create() end end)

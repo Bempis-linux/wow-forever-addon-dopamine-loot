@@ -149,6 +149,8 @@ function ns:PlayGatherNote(n)
 end
 function ns:PlayGatherStack() if not self.settings.noSound then PlaySoundFile(MEDIA .. "GatherStack.ogg", Channel()) end end
 function ns:PlaySkillUp() if not self.settings.noSound then PlaySoundFile(MEDIA .. "SkillUp.ogg", Channel()) end end
+-- A gathering touch by file name (Strike00..02, Splash, Slash, RareHerb/Ore/Fish/Skin, Unlock)
+function ns:PlayGatherFx(name) if not self.settings.noSound then PlaySoundFile(MEDIA .. name .. ".ogg", Channel()) end end
 
 -- Loot rain: one sound as the burst sprays out, a light coin tick on bounces
 local BURST = { "UI_STORE_UNWRAP", "UI_GARRISON_COMMAND_TABLE_CHEST_UNLOCK", "UI_BONUS_LOOT_ROLL_END", "IG_BACKPACK_OPEN" }
