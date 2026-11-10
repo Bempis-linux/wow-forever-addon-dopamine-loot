@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Final Polish</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  h2 { font-size: 14px; margin: 18px 18px 2px; color: var(--gold); }
+  header p, p.lead { margin: 0 0 4px; color: var(--muted); max-width: 1060px; } p.lead { margin: 0 18px 6px; }
+  header b, p b, li b { color: #c9c2b0; }
+  ul.lead { margin: 0 18px 6px 34px; padding: 0; color: var(--muted); max-width: 1020px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; min-width: 60px; }
+  .bar label { display: inline-flex; gap: 5px; align-items: center; margin-right: 10px; cursor: pointer; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  /* the ground behind the banners: bright (the screenshots' cobblestone) or dark */
+  .ground { margin: 6px 18px; padding: 18px 10px 26px; border: 1px solid #3a3426; border-radius: 6px; display: grid; grid-template-columns: repeat(auto-fill, 700px); gap: 26px 20px; max-width: 1440px;
+    background: repeating-linear-gradient(35deg, rgba(0,0,0,.06) 0 14px, transparent 14px 30px), radial-gradient(ellipse at 30% 40%, #e0a060, #c07838 60%, #9a5a28); }
+  .ground.dark { background: radial-gradient(ellipse at 40% 70%, #3a4a30, #1c2616 55%, #0e130b); }
+  .side { display: grid; grid-template-columns: 350px 350px; gap: 0; }
+  .side .lbl { font: 700 10px system-ui; letter-spacing: .1em; text-transform: uppercase; color: rgba(0,0,0,.55); text-align: center; margin-bottom: 4px; }
+  .ground.dark .side .lbl { color: #9a927e; }
+  /* the banner, as in game: title, bar (+ the next unlock's icon), the note */
+  .ban { position: relative; width: 310px; margin: 0 auto; text-align: center; transform: scale(.98); }
+  .ban .ttl { font: 600 17px "Friz Quadrata TT", Georgia, serif; color: #fff; text-shadow: 0 0 4px var(--pc), 0 1px 1px #000; }
+  .ban .ttl b { color: var(--pl); font-weight: 600; }
+  .ban .row { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 8px; transform: translateX(-12px); }
+  .ban .note { font: 600 11px system-ui; color: #d8d0b8; margin-top: 0; }
+  .ban.p-gap .note { margin-top: 4px; color: #f0eadc; text-shadow: 0 1px 1px #000, 0 0 3px #000; }
+  .ban.p-center.nou .row { transform: none; }
+  .ban.p-glow .ttl { text-shadow: 0 0 10px var(--pc), 0 0 3px var(--pc), 0 1px 1px #000; }
+  .ban.p-halo::before { content: ""; position: absolute; left: -10px; right: -10px; top: -12px; bottom: -12px; border-radius: 50%; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.5), rgba(0,0,0,.28) 45%, transparent 72%); z-index: -1; }
+  .ban { z-index: 0; }
+  .wrapT { position: relative; width: 260px; height: 12px; }
+  .track { position: absolute; inset: 0; background: rgba(0,0,0,.65); box-shadow: 0 0 0 1px #000; overflow: hidden; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 55%; overflow: hidden; transition: width .7s cubic-bezier(.2,.8,.3,1); }
+  .tool { position: absolute; transform: translate(-50%, -50%); transition: left .7s cubic-bezier(.2,.8,.3,1); filter: drop-shadow(0 1px 1px rgba(0,0,0,.8)); pointer-events: none; }
+  .tool svg { display: block; width: 100%; height: 100%; }
+  .unl { width: 20px; height: 20px; margin-left: 6px; border: 1.5px solid var(--pl); border-radius: 2px; background: #14100a; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  /* materials (as in game) */
+  .b-tailor .fill { background: linear-gradient(90deg, #a89870, #fff4d8); }
+  .b-tailor .track::after { content: ""; position: absolute; left: 3px; right: 3px; top: 5px; border-top: 2px dashed rgba(255,255,255,.75); z-index: 2; }
+  .b-leather .track { background: #2a1a0e; }
+  .b-leather .track::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, #0a0604 1.2px, transparent 1.6px) 0 1px / 8px 10px repeat-x, radial-gradient(circle, #0a0604 1.2px, transparent 1.6px) 4px 9px / 8px 10px repeat-x; z-index: 2; }
+  .b-leather .fill { background: linear-gradient(#c89060, #8a5a30); }
+  .b-leather .fill::after { content: ""; position: absolute; left: 2px; right: 2px; top: 5px; border-top: 2px dashed #f0d8a8; }
+  .b-alch .track { background: #1a1422; }
+  .b-alch .fill { background: linear-gradient(#d0a8ff, #7a3ad0); }
+  .b-eng .track { background: repeating-linear-gradient(90deg, #1a1e24 0 11px, #000 11px 13px); }
+  .b-eng .fill { background: repeating-linear-gradient(90deg, #c8e0f8 0 11px, transparent 11px 13px); }
+  .b-cook .track { background: #2a1c10; }
+  .b-cook .fill { background: repeating-linear-gradient(-55deg, #6a3410 0 3px, #c87a3a 3px 10px); }
+  .b-smith .track { background: #1a1a1c; }
+  .b-smith .fill { background: linear-gradient(90deg, #3a3a40, #6a3a2a 55%, #e0501a 82%, #ffe7a0); box-shadow: 0 0 10px rgba(255,120,40,.6); }
+  .b-ench .track { background: #120c22; }
+  .b-ench .fill { background: linear-gradient(90deg, #3a2a7a, #8a6aff); }
+  .b-aid .track { background: #2a2622; }
+  .b-aid .fill { background: #f2ede2; }
+  .b-aid .fill::after { content: "✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚"; position: absolute; left: 3px; top: -1px; font: 900 9px system-ui; color: #d03030; letter-spacing: 6px; white-space: nowrap; }
+  .b-herb .track { background: #10180c; }
+  .b-herb .fill { background: radial-gradient(ellipse 3px 2px, #c8ffb0 60%, transparent 70%) 3px 3px / 13px 12px repeat-x, radial-gradient(ellipse 3px 2px, #a8f090 60%, transparent 70%) 9px 8px / 13px 12px repeat-x, linear-gradient(90deg, #1e6a28, #4ab83a 70%, #8ef07a); }
+  .b-ore .track { background: #161412; }
+  .b-ore .fill { background: radial-gradient(circle, #f0a860 1px, transparent 1.6px) 2px 3px / 17px 12px, radial-gradient(circle, #ffe0b0 .8px, transparent 1.4px) 10px 8px / 23px 12px, repeating-linear-gradient(90deg, #4a4440 0 6px, #5a524c 6px 9px, #3e3a36 9px 14px); }
+  .b-fish .track { background: #08121c; }
+  .b-fish .fill { background: linear-gradient(#8ac8ff, #2a7ae0 60%, #1a4a9a); }
+  .b-skin .track { background: #1c130b; }
+  .b-skin .fill { background: repeating-linear-gradient(65deg, rgba(255,240,210,.18) 0 1px, transparent 1px 4px), linear-gradient(#d0a070, #8a5a30); }
+  /* polished materials (p-mat) */
+  .p-mat.b-ore .fill { background: radial-gradient(circle, #ffb070 1.4px, transparent 2px) 2px 3px / 17px 12px, radial-gradient(circle, #fff0d0 1px, transparent 1.6px) 10px 8px / 23px 12px, repeating-linear-gradient(90deg, #6a625a 0 6px, #7a7068 6px 9px, #55504a 9px 14px); }
+  .p-mat.b-skin .fill { background: repeating-linear-gradient(65deg, rgba(255,240,210,.42) 0 1px, transparent 1px 3px), linear-gradient(#d8aa78, #8a5a30); }
+  .p-mat.b-alch .fill::before, .p-mat.b-fish .fill::before { content: ""; position: absolute; left: 0; right: 0; top: 2px; height: 2px; background: rgba(255,255,255,.35); }
+  .p-mat.b-cook .fill { background: repeating-linear-gradient(-55deg, #6a3410 0 2px, #d08442 2px 9px); }
+  /* the tray (section 2) */
+  .screen { position: relative; margin: 6px 18px; width: 600px; height: 200px; border: 1px solid #3a3426; border-radius: 6px; background: #120e09; overflow: hidden; }
+  .tray { position: absolute; left: 20px; top: 20px; width: 540px; height: 130px; overflow: hidden; border: 3px solid #4a3c28; border-top: 0; border-radius: 0 0 8px 8px; background: linear-gradient(#1a130b, #0e0a06); box-shadow: 0 0 0 1px #000; }
+  .tray .lbl { position: absolute; left: 12px; top: 7px; font: 700 10px system-ui; letter-spacing: .14em; text-transform: uppercase; color: #d8c79a; }
+  .tray .cnt { position: absolute; right: 14px; top: 6px; font: 700 15px Georgia, serif; color: #ffd100; }
+  .tray .floor { position: absolute; left: 150px; width: 240px; bottom: 4px; height: 8px; border-radius: 50%; background: radial-gradient(rgba(0,0,0,.65), transparent); }
+  .it { position: absolute; width: 26px; height: 26px; box-sizing: border-box; border: 1.5px solid #fff; border-radius: 2px; background: radial-gradient(circle at 40% 35%, #e09a5a, #a85e2a 60%, #6a3814); box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), 0 2px 3px rgba(0,0,0,.6); }
+  .note2 { position: absolute; left: 20px; top: 160px; right: 20px; font: 600 12px system-ui; color: #c9c2b0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Final polish: skill-ups and the Create All heap</h1>
+  <p>Built from your in-game screenshots. Each banner shows <b>Now</b> (as the game draws it today) beside <b>Polished</b>, on the screenshots' bright ground or a dark one. Every change is a switch, so you can keep only the ones you like. "Skill up" fills the bar and plays the tool's motion; there's no sound on this page. Nothing here is in the game yet.</p>
+</header>
+
+<h2>1. Skill-up banners</h2>
+<ul class="lead">
+  <li><b>Centered bar</b>: with no next-herb icon at the end (every crafting profession, Fishing, Skinning), the bar sits under the title instead of 12 px to the left.</li>
+  <li><b>Room for the note</b>: a little gap under the bar and a dark outline on "13 to 150", so it doesn't touch the bar and reads on bright ground (on the Fishing one it was half hidden).</li>
+  <li><b>Soft shade</b>: a faint dark halo behind the banner, so the white title and the bar read on sunny ground (no box, no border).</li>
+  <li><b>Bigger tools</b>: the tools are about a third bigger; on the screenshots the pan, the paperclip, the pick and the knife were hard to make out.</li>
+  <li><b>Stronger glow</b>: the title's glow in the profession's color shows more (it barely showed).</li>
+  <li><b>Materials</b>: Mining's stone a bit lighter with bigger copper flecks, Skinning's fur grain stronger (it read as a plain tan bar), a shine line on Alchemy's and Fishing's liquid, Cooking's grill marks finer.</li>
+</ul>
+<div class="bar"><span>Polished</span>
+  <label><input type="checkbox" data-p="p-center" checked>Centered bar</label><label><input type="checkbox" data-p="p-gap" checked>Room for the note</label>
+  <label><input type="checkbox" data-p="p-halo" checked>Soft shade</label><label><input type="checkbox" data-p="p-tools" checked>Bigger tools</label>
+  <label><input type="checkbox" data-p="p-glow" checked>Stronger glow</label><label><input type="checkbox" data-p="p-mat" checked>Materials</label></div>
+<div class="bar"><span>Ground</span><button data-g="bright" class="on">Bright (like the screenshots)</button><button data-g="dark">Dark</button>
+  <span>Play</span><button class="go" id="all">All: skill up</button></div>
+<div class="ground" id="ground"></div>
+
+<h2>2. The Create All heap</h2>
+<p class="lead"><b>Now</b>: each item drops to a spot picked in advance, so it can stop in mid-air beside the others ("it slightly falls and just randomly sticks"). The new ones all land <b>on</b> what's already there. <b>H1 Pile up</b>: each item falls into the middle and slides down the slope until it rests on the floor or on other items, so the heap grows into a mound. <b>H2 Neat rows</b>: items stack in rows from the floor up, each row a little shorter, like goods stacked on a counter. <b>H3 Tumble</b>: like H1, but each item hits the heap with a little bounce and rolls a step down the slope before it settles, turning as it goes.</p>
+<div class="bar"><span>Heap</span><button data-h="now">Now</button><button data-h="h1" class="on">H1 Pile up</button><button data-h="h2">H2 Neat rows</button><button data-h="h3">H3 Tumble</button>
+  <span>Batch</span><button data-n="5">5</button><button data-n="18" class="on">18</button><button data-n="40">40</button><button class="go" id="go">Create All</button></div>
+<div class="screen"><div class="tray" id="tray"><div class="lbl">Leatherworking · Create All</div><div class="cnt" id="cnt"></div><div class="floor"></div></div><div class="note2" id="note2"></div></div>
+
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id);
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+// the game's tool drawings (copied from tools/render-media.html)
+const OL = 'stroke="#1a1410" stroke-width="2.2" stroke-linejoin="round"';
+const ART = {
+  ToolNeedle: `<g transform="translate(26,1) scale(2.75)"><path d="M4 0 L5.4 17 Q4 21.5 2.6 17 Z" fill="#e8e8f0" stroke="#606070" stroke-width=".6"/><ellipse cx="4" cy="4" rx="1" ry="2" fill="#0e130b"/></g>`,
+  ToolPin: `<line x1="30" y1="34" x2="12" y2="60" stroke="#8a8a96" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="34" x2="12" y2="60" stroke="#d8d8e0" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="38" cy="22" r="17" fill="#e0242a" ${OL}/><circle cx="32" cy="16" r="5.5" fill="#ff9a9a"/><circle cx="31" cy="15" r="2.5" fill="#fff"/>`,
+  ToolDrop: `<defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e4ff"/><stop offset=".55" stop-color="#c8a0ff"/><stop offset="1" stop-color="#8a50e0"/></linearGradient></defs>
+    <g transform="translate(13,3) scale(3.2)"><path d="M6 0 C6 0 11 7 11 10.5 A5 5 0 0 1 1 10.5 C1 7 6 0 6 0 Z" fill="url(#dg)" stroke="#3a1a6a" stroke-width=".7"/><ellipse cx="4.2" cy="10" rx="1.2" ry="1.8" fill="rgba(255,255,255,.6)"/></g>`,
+  ToolWrench: `<g transform="rotate(45 32 32)"><rect x="27" y="22" width="10" height="38" rx="5" fill="#9aa8b8" ${OL}/><path d="M20 4 h24 v14 a12 12 0 0 1 -24 0 Z" fill="#b8c4d0" ${OL}/><rect x="27" y="1" width="10" height="13" fill="#2a3a24" stroke="none"/><line x1="32" y1="28" x2="32" y2="54" stroke="#dde6f0" stroke-width="2.5" stroke-linecap="round"/></g>`,
+  ToolPan: `<rect x="40" y="27" width="22" height="9" rx="4" fill="#3a3430" ${OL} transform="rotate(-20 40 31)"/><circle cx="26" cy="34" r="22" fill="#2a2624" ${OL}/><circle cx="26" cy="34" r="17" fill="#3e3836"/>
+    <path d="M14 34 q2 -12 13 -11 q12 1 11 12 q-1 11 -13 10 q-12 -1 -11 -11 Z" fill="#fbfaf4"/><circle cx="27" cy="34" r="6.5" fill="#ffb81c"/><circle cx="25" cy="32" r="2" fill="#ffe7a0"/>`,
+  ToolHammer: `<g transform="rotate(-35 32 32)"><rect x="28" y="20" width="9" height="42" rx="3" fill="#a8672e" ${OL}/><line x1="31" y1="26" x2="31" y2="56" stroke="#d8955a" stroke-width="2"/><rect x="10" y="6" width="44" height="17" rx="3" fill="#8a96a4" ${OL}/><rect x="13" y="8" width="38" height="4" rx="2" fill="#c8d2dc"/></g>`,
+  ToolSparkle: `<path d="M30 6 L35 25 L54 30 L35 35 L30 54 L25 35 L6 30 L25 25 Z" fill="#ffd21c" stroke="#c88a00" stroke-width="1.6" stroke-linejoin="round"/><path d="M50 3 L52 10 L59 12 L52 14 L50 21 L48 14 L41 12 L48 10 Z" fill="#ffe36a" stroke="#c88a00" stroke-width="1.2"/><path d="M51 42 L53 48 L59 50 L53 52 L51 58 L49 52 L43 50 L49 48 Z" fill="#ffe36a" stroke="#c88a00" stroke-width="1.2"/>`,
+  ToolClip: `<g transform="rotate(30 32 32)"><path d="M26 50 V14 a8 8 0 0 1 16 0 V46 a5 5 0 0 1 -10 0 V18" fill="none" stroke="#3a4048" stroke-width="7" stroke-linecap="round"/><path d="M26 50 V14 a8 8 0 0 1 16 0 V46 a5 5 0 0 1 -10 0 V18" fill="none" stroke="#c8d0da" stroke-width="3.5" stroke-linecap="round"/></g>`,
+  ToolSprout: `<path d="M32 60 V30" stroke="#2e7a2a" stroke-width="5" stroke-linecap="round"/><path d="M32 34 C18 36 8 26 8 14 C22 12 32 20 32 34 Z" fill="#5ac83a" ${OL}/><path d="M32 30 C44 32 56 24 56 10 C42 8 32 16 32 30 Z" fill="#7ee04a" ${OL}/><path d="M12 16 C20 18 26 24 30 32" fill="none" stroke="#b8f090" stroke-width="2"/><path d="M52 12 C44 14 38 20 34 28" fill="none" stroke="#c8ff9a" stroke-width="2"/>`,
+  ToolPick: `<g transform="rotate(-30 32 32)"><rect x="28" y="16" width="8" height="46" rx="3" fill="#a8672e" ${OL}/><path d="M4 22 Q32 2 60 22 Q32 12 4 22 Z" fill="#9aa6b2" ${OL}/><rect x="26" y="9" width="12" height="12" rx="2" fill="#6a7684" ${OL}/></g>`,
+  ToolBobber: `<line x1="32" y1="2" x2="32" y2="20" stroke="#ddd" stroke-width="2.5"/><circle cx="32" cy="38" r="20" fill="#f4f4f4" ${OL}/><path d="M12 38 A20 20 0 0 1 52 38 Z" fill="#e03030" ${OL}/><circle cx="24" cy="30" r="4" fill="#ff9a9a"/>`,
+  ToolKnife: `<g transform="rotate(-40 32 32)"><path d="M29 4 Q44 10 38 38 H28 Z" fill="#dfe6ee" ${OL}/><path d="M31 8 Q39 14 35 34" fill="none" stroke="#ffffff" stroke-width="2"/><rect x="26" y="38" width="14" height="22" rx="4" fill="#5a3418" ${OL}/><circle cx="33" cy="45" r="1.8" fill="#d8b070"/><circle cx="33" cy="53" r="1.8" fill="#d8b070"/></g>`,
+};
+const svg = k => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${ART[k]}</svg>`;
+
+// key, name, color, light, tool, size in game, how far below the bar's top its middle is, next unlock (icon), note
+const P = [['tailor', 'Tailoring', '#d8c8a0', '#fff4d8', 'ToolNeedle', 24, 3, null, '6 to 75'], ['leather', 'Leatherworking', '#b07a46', '#e8c08a', 'ToolPin', 20, -2, null, '18 to 150'],
+  ['alch', 'Alchemy', '#9a5ae0', '#d0a8ff', 'ToolDrop', 20, -2, null, '56 to 150'], ['eng', 'Engineering', '#a0b4c8', '#e0ecf8', 'ToolWrench', 20, -1, null, '69 to 150'],
+  ['cook', 'Cooking', '#e0a050', '#ffd890', 'ToolPan', 20, -1, null, '13 to 75'], ['smith', 'Blacksmithing', '#e07a2a', '#ffb070', 'ToolHammer', 20, -1, null, '19 to 75'],
+  ['ench', 'Enchanting', '#8a6aff', '#c8b0ff', 'ToolSparkle', 18, -1, null, '33 to 150'], ['aid', 'First Aid', '#e05a5a', '#ffb0b0', 'ToolClip', 18, -2, null, '49 to 75'],
+  ['herb', 'Herbalism', '#2e9e3a', '#8ef07a', 'ToolSprout', 20, -2, '🌿', '16 to Briarthorn'], ['ore', 'Mining', '#c8642a', '#ffb070', 'ToolPick', 20, -2, '<span style="color:#c0c8d0">◆</span>', '4 to Iron Deposit'],
+  ['fish', 'Fishing', '#2a7aff', '#8ac8ff', 'ToolBobber', 18, -3, null, '12 to 75'], ['skin', 'Skinning', '#9a6a3a', '#e0b880', 'ToolKnife', 20, -1, null, '14 to 150']];
+const LV = { tailor: 69, leather: 132, alch: 94, eng: 81, cook: 62, smith: 56, ench: 117, aid: 26, herb: 54, ore: 121, fish: 63, skin: 136 };
+const MOTION = { tailor: [[0, 0, 0], [0, 5, 20], [0, 0, 0]], leather: [[0, 0], [0, 6], [0, 0]], alch: [[0, -6, 0, 1, 1], [0, 6, 0, 1, .2], [0, 0, 0, 1, 1]], eng: [[0, 0, 0], [0, 0, -40], [0, 0, 0]],
+  cook: [[0, 0, 0], [0, -6, -200], [0, 0, -360]], smith: [[0, -2, -30], [0, 2, 10], [0, 0, 0]], ench: [[0, 0, 0, 1], [0, 0, 0, 1.6], [0, 0, 0, 1]], aid: [[0, -6, 0], [0, 0, 0, 1.2], [0, 0, 0]],
+  herb: [[0, 4, 0, .6], [0, -4, 0, 1.25], [0, 0, 0, 1]], ore: [[0, -3, -35], [0, 2, 15], [0, 0, 0]], fish: [[0, 0], [0, 6], [0, -2], [0, 0]], skin: [[-.2, 0, -20], [.3, -2, 10], [0, 0, 0]] };
+const pol = new Set(['p-center', 'p-gap', 'p-halo', 'p-tools', 'p-glow', 'p-mat']);
+function banner(p, polished) { const [k, n, pc, pl, tool, size, below, unl, note] = p, cls = polished ? [...pol].join(' ') : '';
+  return `<div class="ban ${cls} ${unl ? '' : 'nou'}" style="--pc:${pc};--pl:${pl}"><div class="ttl">${n} <b>${LV[k]}</b></div>
+    <div class="row"><div class="wrapT b-${k} ${polished && pol.has('p-mat') ? 'p-mat' : ''}"><div class="track"><div class="fill"></div></div>
+      <div class="tool" data-k="${k}" data-size="${size}" data-below="${below}" style="left:55%"></div></div>${unl ? `<div class="unl">${unl}</div>` : ''}</div>
+    <div class="note">${note}</div></div>`; }
+function draw() { $('ground').innerHTML = P.map(p => `<div class="side"><div><div class="lbl">Now</div>${banner(p, false)}</div><div><div class="lbl">Polished</div>${banner(p, true)}</div></div>`).join('');
+  document.querySelectorAll('.tool').forEach(t => { const big = t.closest('.ban').classList.contains('p-tools'), s = +t.dataset.size * (big ? 1.3 : 1);
+    t.innerHTML = svg(P.find(p => p[0] === t.dataset.k)[4]); t.style.width = t.style.height = s + 'px'; t.style.top = (+t.dataset.below) + 'px'; }); }
+document.querySelectorAll('[data-p]').forEach(c => c.onchange = () => { c.checked ? pol.add(c.dataset.p) : pol.delete(c.dataset.p); draw(); });
+pick('g', v => $('ground').classList.toggle('dark', v === 'dark'));
+$('all').onclick = () => { document.querySelectorAll('.ban').forEach((b, i) => setTimeout(() => {
+  const f = b.querySelector('.fill'), t = b.querySelector('.tool'), k = t.dataset.k, w = Math.min(100, parseFloat(f.style.width || '55') + 6);
+  f.style.width = w + '%'; t.style.left = w + '%';
+  setTimeout(() => { const s = parseFloat(t.style.width); t.animate(MOTION[k].map(([dx, dy, deg, sc, al]) => ({ transform: `translate(calc(-50% + ${Math.abs(dx || 0) < 1 ? (dx || 0) * s : dx}px), calc(-50% + ${dy || 0}px)) rotate(${deg || 0}deg) scale(${sc == null ? 1 : sc})`, opacity: al == null ? 1 : al })), { duration: 380, easing: 'ease-out' }); }, 720);
+}, (i % 2) * 40 + Math.floor(i / 2) * 90)); };
+draw();
+
+// ---------------- 2. the heap ----------------
+const TW = 540, TH = 130, IC = 26, FLOOR = TH - 6; // (y grows down here; FLOOR: where an item's bottom rests)
+let hv = 'h1', N = 18, timers = [];
+const NOTE = { now: 'Now: each item drops to a spot picked in advance, whether or not anything is under it.', h1: 'H1 Pile up: lands in the middle, slides down the slope, rests on the floor or on items.', h2: 'H2 Neat rows: rows from the floor up, each a little shorter.', h3: 'H3 Tumble: lands on the heap, bounces, rolls a step down the slope, turning.' };
+pick('h', v => { hv = v; $('note2').textContent = NOTE[v]; }); pick('n', v => N = +v);
+$('note2').textContent = NOTE[hv];
+function spawn(x, y0, y1, rot0, rot1, extra) { const d = document.createElement('div'); d.className = 'it'; d.style.left = (x - IC / 2) + 'px'; d.style.top = '0px'; $('tray').appendChild(d);
+  const fr = [{ transform: `translateY(${y0}px) rotate(${rot0}deg)` }, { transform: `translateY(${y1}px) rotate(${rot1}deg)`, offset: .7, easing: 'ease-out' },
+    { transform: `translateY(${y1 - 5}px) rotate(${rot1 * .6}deg)`, offset: .85 }, { transform: `translateY(${y1}px) rotate(${rot1}deg)` }];
+  if (extra) fr.splice(3, 1, ...extra);
+  d.animate(fr, { duration: 560, easing: 'ease-in', fill: 'forwards' }); return d; }
+let cols, rows, items;
+function start() { timers.forEach(clearTimeout); timers = []; document.querySelectorAll('#tray .it').forEach(d => d.remove()); $('cnt').textContent = '';
+  cols = {}; rows = []; items = []; }
+const COLW = 18; // columns overlap a little, like real icons leaning on each other
+function heightAt(c) { return cols[c] || 0; }
+function settle(c) { // slide down the slope: move to a neighbour while it's two or more items lower
+  for (let s = 0; s < 12; s++) { const h = heightAt(c), l = heightAt(c - 1), r = heightAt(c + 1);
+    if (l <= h - 2 && (l <= r || r > h - 2)) c--; else if (r <= h - 2) c++; else break; }
+  return c; }
+function addItem(i) {
+  const cx = TW / 2;
+  if (hv === 'now') { const spread = .36 * TW * (1 - Math.min(.75, i / (N + 4))), x = cx + R(-spread, spread), y = FLOOR - IC - Math.min(TH - 52, Math.sqrt(i) * 11) + R(-3, 3); spawn(x, -30, y, R(-90, 90), R(-20, 20)); }
+  if (hv === 'h1' || hv === 'h3') { let c = Math.round(R(-1, 1)); const c0 = c; c = settle(c); const h = heightAt(c); cols[c] = h + 1;
+    const x = cx + c * COLW + R(-2, 2), y = FLOOR - IC - h * (IC - 6); const rot = R(-14, 14) + (c - c0) * 6;
+    if (hv === 'h1') spawn(x, -30, y, R(-60, 60), rot);
+    else { const dir = c === c0 ? (R(0, 1) < .5 ? -1 : 1) : Math.sign(c - c0), roll = dir * 10; // lands a step up-slope, then rolls into place
+      const d = document.createElement('div'); d.className = 'it'; d.style.left = (x - IC / 2 - roll) + 'px'; d.style.top = '0px'; $('tray').appendChild(d);
+      d.animate([{ transform: `translate(0,-30px) rotate(${R(-60, 60)}deg)` }, { transform: `translate(0,${y - 6}px) rotate(${rot - dir * 30}deg)`, offset: .55, easing: 'ease-out' },
+        { transform: `translate(${roll * .4}px,${y - 12}px) rotate(${rot - dir * 15}deg)`, offset: .7 }, { transform: `translate(${roll}px,${y}px) rotate(${rot}deg)`, offset: .9 }, { transform: `translate(${roll}px,${y}px) rotate(${rot}deg)` }], { duration: 700, easing: 'ease-in', fill: 'forwards' }); } }
+  if (hv === 'h2') { // rows from the floor: 9, 8, 7, ... wide, centered, filled from the middle out
+    let r = 0, used = 0; while (true) { const w = Math.max(1, 9 - r); if (i < used + w) break; used += w; r++; }
+    const w = Math.max(1, 9 - r), mid = (w - 1) / 2, slots = [...Array(w).keys()].sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b), s = slots[i - used];
+    const x = cx + (s - mid) * (IC + 2) + (r % 2) * 3, y = FLOOR - IC - r * (IC - 2); spawn(x, -30, y, R(-30, 30), R(-3, 3)); }
+  $('cnt').textContent = `${i + 1} / ${N}`; }
+function finale() { document.querySelectorAll('#tray .it').forEach(d => d.animate([{ translate: '0 0' }, { translate: '-3px -4px' }, { translate: '3px 0' }, { translate: '0 0' }], { duration: 320, composite: 'add' })); }
+$('go').onclick = () => { start(); const gap = N > 20 ? .35 : .6; for (let i = 0; i < N; i++) timers.push(setTimeout(() => addItem(i), i * gap * 1000)); timers.push(setTimeout(finale, N * gap * 1000 + 300)); };
+</script>
+</body>
+</html>
