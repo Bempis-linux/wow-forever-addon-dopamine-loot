@@ -72,7 +72,7 @@ function ns.PickedUp(d)
   if row then -- the same item again: it merges
     row.n = row.n + n
     CountText(row)
-    Tween(0.25, function(u) local w = 1 - u; row.count:SetTextColor(1, 0.82 + 0.18 * w, w) end)
+    Tween(0.25, function(u) local w = 1 - u; row.count:SetTextColor(1, 0.91 + 0.09 * w, 0.66 + 0.34 * w) end)
   else
     if #list >= MAX_ROWS then -- the oldest makes room
       local old = table.remove(list, 1)

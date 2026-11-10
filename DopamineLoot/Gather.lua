@@ -498,11 +498,18 @@ local function Section(k)
   local c = P.color
   local head = CreateFrame("Frame", nil, tally)
   head:SetSize(ROW_W, SEC_H)
+  -- a small glowing diamond in the profession's color (harvest-polish.html, S2 "color pip")
+  local glow = head:CreateTexture(nil, "BORDER")
+  glow:SetSize(16, 16)
+  glow:SetPoint("LEFT", 2, 0)
+  glow:SetTexture(MEDIA .. "Glow.tga")
+  glow:SetBlendMode("ADD")
+  glow:SetVertexColor(c[1], c[2], c[3], 0.6)
   local ic = head:CreateTexture(nil, "ARTWORK")
-  ic:SetSize(12, 12)
-  ic:SetPoint("LEFT", 4, 0)
-  ic:SetTexture(GetIcon and GetIcon(P.icon) or nil)
-  ic:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  ic:SetSize(8, 8)
+  ic:SetPoint("CENTER", glow, "CENTER")
+  ic:SetTexture(MEDIA .. "Diamond.tga")
+  ic:SetVertexColor(c[1], c[2], c[3])
   local text = head:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   text:SetPoint("LEFT", ic, "RIGHT", 4, 0)
   text:SetText(P.label:upper())
@@ -557,10 +564,13 @@ local function NewRow(d, color, parent)
   name:SetText(d.name)
   name:SetTextColor(QualityColor(d.quality))
   row.nameText = name
-  local count = row:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge") -- (kept if the font below fails)
-  count:SetFont(MORPHEUS, 16, "OUTLINE")
+  -- the count (docs/mockups/harvest-polish.html, C2 "quiet numbers"): the game's number font, pale gold,
+  -- right-aligned in a fixed column so every row lines up; the +N or the stack mark sits just before it
+  local count = row:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+  count:SetWidth(26)
+  count:SetJustifyH("RIGHT")
   count:SetPoint("RIGHT", -6, 0)
-  count:SetTextColor(1, 0.82, 0)
+  count:SetTextColor(1, 0.91, 0.66)
   row.count = count
   -- "+N" just left of the count, bold and outlined (the stack badge steps aside while it shows)
   local plus = row:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
@@ -571,21 +581,19 @@ local function NewRow(d, color, parent)
   plus:SetShadowOffset(1, -1)
   plus:SetAlpha(0)
   row.plus = plus
-  -- the full-stack badge: a small gold plate "×N"
+  -- the full-stack mark: a little stack (three gold bars) and how many stacks
   local badge = CreateFrame("Frame", nil, row)
-  badge:SetSize(26, 15)
+  badge:SetSize(26, 14)
   badge:SetPoint("RIGHT", count, "LEFT", -5, 0)
-  local plate = badge:CreateTexture(nil, "BACKGROUND")
-  plate:SetPoint("TOPLEFT", -1, 1); plate:SetPoint("BOTTOMRIGHT", 1, -1)
-  plate:SetColorTexture(0, 0, 0, 0.9)
-  local gold = badge:CreateTexture(nil, "BORDER")
-  gold:SetAllPoints()
-  gold:SetTexture(WHITE)
-  if not pcall(gold.SetGradient, gold, "VERTICAL", CreateColor(0.85, 0.65, 0.13, 1), CreateColor(1, 0.89, 0.54, 1)) then gold:SetVertexColor(1, 0.8, 0.3) end
+  for i = 0, 2 do
+    local b = badge:CreateTexture(nil, "ARTWORK")
+    b:SetColorTexture(1, 0.83, 0.29, 1)
+    b:SetSize(8, 2)
+    b:SetPoint("LEFT", 0, -4 + i * 4)
+  end
   local bt = badge:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  bt:SetPoint("CENTER", 0, 0)
-  bt:SetTextColor(0.1, 0.07, 0.02)
-  bt:SetShadowOffset(0, 0)
+  bt:SetPoint("LEFT", 11, 0)
+  bt:SetTextColor(1, 0.83, 0.29)
   badge.text = bt
   badge:Hide()
   row.badge = badge
@@ -616,7 +624,7 @@ function ns.SetLootRow(row, d)
   row.nameText:SetText(d.name)
   row.nameText:SetTextColor(QualityColor(d.quality))
   row.badge:Hide(); row.plus:SetAlpha(0); row.flash:SetAlpha(0)
-  row.count:SetTextColor(1, 0.82, 0)
+  row.count:SetTextColor(1, 0.91, 0.66)
   row.n = 0
 end
 
@@ -676,7 +684,7 @@ end
 local function Meta()
   if not sessionStart then return end
   local secs = math.max(1, GetTime() - sessionStart)
-  local text = ("%d in %d min"):format(sum, math.max(1, math.ceil(secs / 60)))
+  local text = ("%d min"):format(math.max(1, math.ceil(secs / 60))) -- (the total is in the header)
   if secs >= 120 then text = text .. (" · ~%d/h"):format(math.floor(sum * 3600 / secs + 0.5)) end
   paceText:SetText(text)
   valueText:SetText(value > 0 and ("worth " .. Money(value)) or "")
@@ -687,7 +695,7 @@ local function Milestone(row, stacks)
   row.plusAt = nil -- the "+N" steps aside at once so the stamp is seen
   row.plus:SetAlpha(0)
   row.badge.text:SetText("×" .. stacks)
-  row.badge:SetWidth(row.badge.text:GetStringWidth() + 10)
+  row.badge:SetWidth(row.badge.text:GetStringWidth() + 12)
   row.badge:Show()
   Tween(0.42, function(u)
     local s = u < 0.6 and 2.2 - 1.3 * u / 0.6 or 0.9 + 0.1 * (u - 0.6) / 0.4
@@ -720,7 +728,7 @@ local function Count(row, add, test)
   row.count:SetText(row.n)
   total:SetText(sum)
   Meta()
-  Tween(0.22, function(u) local w = 1 - u; row.count:SetTextColor(1, 0.82 + 0.18 * w, w) end)
+  Tween(0.22, function(u) local w = 1 - u; row.count:SetTextColor(1, 0.91 + 0.09 * w, 0.66 + 0.34 * w) end)
   local size = row.maxStack or 1
   if size > 1 and math.floor(row.n / size) > math.floor(before / size) then Milestone(row, math.floor(row.n / size)) end
 end
