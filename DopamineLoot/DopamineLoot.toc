@@ -22,6 +22,7 @@ Rain.lua
 LootFeed.lua
 Bag.lua
 Gather.lua
+Feed.lua
 Skill.lua
 Settings.lua
 Look.lua

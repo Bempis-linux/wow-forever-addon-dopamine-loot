@@ -71,6 +71,7 @@ local function Handle(d)
     end
     Mover.Apply(d.key)
     Mover.Fit(d.key)
+    if d.moved then pcall(d.moved) end
   end)
   h:SetScript("OnMouseUp", function(_, button)
     if button == "RightButton" then Mover.Reset(d.key) end
@@ -106,14 +107,19 @@ local function Bar()
   bar:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
     edgeSize = 14, insets = { left = 3, right = 3, top = 3, bottom = 3 } })
   bar:SetBackdropColor(0.04, 0.04, 0.06, 0.92)
+  -- two lines (a title and how it works), the bar sized to fit them and the Done button
   local t = bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  t:SetPoint("LEFT", 14, 0)
-  t:SetText(ns.TITLE .. ": drag the blue boxes. Right-click resets one.")
+  t:SetPoint("TOPLEFT", 14, -8)
+  t:SetText(ns.TITLE .. ": move frames")
+  local how = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  how:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 0, -3)
+  how:SetText("Drag a blue box to move it. Right-click a box to put it back.")
   local done = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
   done:SetSize(70, 22)
   done:SetPoint("RIGHT", -10, 0)
   done:SetText("Done")
   done:SetScript("OnClick", function() Mover.Lock() end)
+  bar:SetSize(math.max(t:GetStringWidth(), how:GetStringWidth()) + 14 + 24 + 70 + 10, 46)
   return bar
 end
 
@@ -148,13 +154,14 @@ function Mover.Reset(key)
     if not key or k == key then
       pos[k] = nil
       Mover.Apply(k)
+      if list[k].reset then pcall(list[k].reset) end
       if unlocked then Mover.Fit(k) end
     end
   end
 end
 
 -- def: key, frame, label, point (default "CENTER"), x, y, w, h (the box's size when the frame has
--- none yet), preview(on)
+-- none yet), preview(on), moved() (after a drag), reset() (put back)
 function Mover.Register(def)
   def.point = def.point or "CENTER"
   if not list[def.key] then order[#order + 1] = def.key end

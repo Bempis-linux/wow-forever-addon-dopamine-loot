@@ -36,6 +36,7 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
                            preview}; "Move frames" (Unlock) / Done (Lock) / Reset; saved in settings.pos
   Gather.lua               gathering: detect at LOOT_READY (fishing, node herb/ore, all-leather skinning), node
                            burst, harvest tally (movable), merging +N, climbing notes (GatherNote*), calm
+  Feed.lua                 "Picked up" list: compact popups become harvest-style rows at the top of the loot column
   Skill.lua                skill-up banner (CHAT_MSG_SKILL): bar in the profession's color to the next unlock
   GatherPage.lua           "Gathering" page (native): switches, calm, placement, tests
   Settings.lua             first page + helpers: ns.Native (plain pages on our own frames: Toggle, Slider, Choice, Button),

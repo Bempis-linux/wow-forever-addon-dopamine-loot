@@ -50,6 +50,14 @@ local PROF = {
 }
 
 local layer, tally, header, total, paceText, valueText
+local column -- the loot column's anchor (movable); the harvest window hangs under the Picked up list
+
+-- The Picked up list's height (Feed.lua tells us as it grows and fades): the harvest window sits under it
+function ns.SetFeedHeight(h)
+  if not (tally and column) then return end
+  tally:ClearAllPoints()
+  tally:SetPoint("TOPRIGHT", column, "TOPRIGHT", 0, -(h > 0 and h + 8 or 0))
+end
 local rows, rowList = {}, {}       -- rows by item; every row in display order
 local sections, sectionOrder = {}, {}
 local fx, tweens = {}, {}
@@ -513,8 +521,11 @@ local function Section(k)
   return s
 end
 
-local function NewRow(d, s)
-  local row = CreateFrame("Frame", nil, tally)
+-- One row in the game's look: the item's icon with its quality border, its name in the quality color, a
+-- gold count, a colored stripe on the left (color: {r, g, b}, nil for none). Shared with the Picked up
+-- list (Feed.lua) as ns.NewLootRow, so everything small on screen looks the same.
+local function NewRow(d, color, parent)
+  local row = CreateFrame("Frame", nil, parent or tally)
   row:SetSize(ROW_W, ROW_H)
   if row.SetClipsChildren then row:SetClipsChildren(true) end -- (the shine stays inside)
   local bg = row:CreateTexture(nil, "BACKGROUND")
@@ -524,7 +535,7 @@ local function NewRow(d, s)
   local stripe = row:CreateTexture(nil, "BORDER")
   stripe:SetPoint("TOPLEFT"); stripe:SetPoint("BOTTOMLEFT")
   stripe:SetWidth(2)
-  stripe:SetColorTexture(s.color[1], s.color[2], s.color[3], 0.9)
+  if color then stripe:SetColorTexture(color[1], color[2], color[3], 0.9) else stripe:Hide() end
   row.flash = row:CreateTexture(nil, "BORDER", nil, 1)
   row.flash:SetAllPoints()
   row.flash:SetColorTexture(1, 0.83, 0.29, 0)
@@ -536,6 +547,7 @@ local function NewRow(d, s)
   border:SetTexture(BORDER)
   border:SetAllPoints(icon)
   border:SetVertexColor(QualityColor(d.quality))
+  row.border = border
   row.icon = icon
   local name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   name:SetPoint("LEFT", icon, "RIGHT", 7, 0)
@@ -544,6 +556,7 @@ local function NewRow(d, s)
   if name.SetWordWrap then name:SetWordWrap(false) end
   name:SetText(d.name)
   name:SetTextColor(QualityColor(d.quality))
+  row.nameText = name
   local count = row:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge") -- (kept if the font below fails)
   count:SetFont(MORPHEUS, 16, "OUTLINE")
   count:SetPoint("RIGHT", -6, 0)
@@ -595,6 +608,18 @@ local function NewRow(d, s)
   row.used = GetTime()
   return row
 end
+ns.NewLootRow = NewRow
+-- Reuses a row for another item (the Picked up list keeps a pool): its icon, border, name and count
+function ns.SetLootRow(row, d)
+  row.icon:SetTexture(d.icon)
+  row.border:SetVertexColor(QualityColor(d.quality))
+  row.nameText:SetText(d.name)
+  row.nameText:SetTextColor(QualityColor(d.quality))
+  row.badge:Hide(); row.plus:SetAlpha(0); row.flash:SetAlpha(0)
+  row.count:SetTextColor(1, 0.82, 0)
+  row.n = 0
+end
+
 local function RemoveRow(row)
   row.dead = true -- (a piece still flying to it counts into a fresh row instead)
   row:Hide()
@@ -615,7 +640,7 @@ local function Row(d, k)
     RemoveRow(old)
   end
   local s = Section(k)
-  row = NewRow(d, s)
+  row = NewRow(d, s.color, tally)
   rows[key] = row
   rowList[#rowList + 1] = row
   s.rows[#s.rows + 1] = row
@@ -827,10 +852,16 @@ local function Create()
   flash:SetColorTexture(1, 1, 1, 1)
   flash:SetAlpha(0)
   layer:SetScript("OnUpdate", Step)
+  -- the loot column (docs/mockups/cohesion.html, V1): one movable spot on the right for everything
+  -- small: the Picked up list (Feed.lua) on top, the harvest window under it
+  column = CreateFrame("Frame", nil, UIParent)
+  column:SetSize(ROW_W, 120)
+  ns.LootColumn = column
   tally = CreateFrame("Frame", nil, UIParent)
   tally:SetFrameStrata("MEDIUM")
   tally:SetSize(ROW_W, TOP_H)
   tally:Hide()
+  ns.SetFeedHeight(0)
   -- right-click sends it away until the next gather (only clicks on it are caught; it's small)
   tally:EnableMouse(true)
   tally:SetScript("OnMouseUp", function(_, button) if button == "RightButton" then Dismiss() end end)
@@ -853,8 +884,8 @@ local function Create()
   valueText = tally:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   valueText:SetPoint("TOPRIGHT", -6, -15)
   local wantSample, sampleRow
-  ns.Mover.Register({ key = "tally", frame = tally, label = "Harvest window", point = "TOPRIGHT", x = -18, y = -230,
-    w = ROW_W, h = 90, preview = function(on)
+  ns.Mover.Register({ key = "tally", frame = column, label = "Loot column", point = "TOPRIGHT", x = -18, y = -230,
+    w = ROW_W, h = 120, preview = function(on)
       if ns.settings.noGatherTally then return end
       if on then -- a sample row while it's being placed (when the window is empty)
         if #rowList == 0 and not wantSample then

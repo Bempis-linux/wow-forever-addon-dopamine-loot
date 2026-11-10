@@ -346,6 +346,8 @@ local function CreateGeneral()
     "Shows a card beside your character for each item you loot, with the item turning in 3D. More settings on the Popups page.", true)
   N.Toggle(cat, "noRain", "Loot rain",
     "When you loot several items at once (or a lot of money), they spray up and bounce down at the bottom of the screen; the best item lands last and becomes a popup. In combat it waits until the fight is over. More settings on the Loot rain page.", true)
+  N.Toggle(cat, "noFeed", "Small loot in the side column",
+    "Small finds (gray and white items, an Uncommon that isn't the best of its loot, and everything during a fight) list as rows under \"Picked up\" in the loot column on the right, above the harvest window, instead of one-line popups. Big finds keep their popup.", true)
   N.Toggle(cat, "noBag", "Bulging bag",
     "When your bags are nearly full (4 slots or fewer), the backpack button puffs up a notch with each item and strains at the seams; when they're full, the loot spills out and is sucked back in. Herb, mining and other special bags don't count.", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noBagCount", "Slots-left number",

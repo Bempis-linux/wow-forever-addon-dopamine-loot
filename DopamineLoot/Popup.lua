@@ -19,15 +19,34 @@ local MOMENT_HIT, MOMENT_T, SLOW_T, SLOW = 0.55, 2.2, 0.75, 0.4
 -- Where the stack starts, as fractions of the screen from the anchor point, and which way it grows
 -- (1 = down, -1 = up). The popup is anchored by the same point.
 ns.POPUP_POSITIONS = {
-  { key = "midright", label = "Right of you (default)", point = "TOPLEFT", x = 0.63, y = -0.25, dir = 1 },
+  -- (0.55 across, was 0.63: clear of the loot column on the right, docs/mockups/cohesion.html)
+  { key = "midright", label = "Right of you (default)", point = "TOPLEFT", x = 0.55, y = -0.25, dir = 1 },
   { key = "upleft", label = "Upper left", point = "TOPLEFT", x = 0.14, y = -0.18, dir = 1 },
   { key = "upper", label = "Upper middle", point = "TOP", x = 0, y = -0.2, dir = 1 },
   { key = "top", label = "Top of the screen", point = "TOP", x = 0, y = -0.11, dir = 1 },
   { key = "bottom", label = "Above the action bars", point = "BOTTOM", x = -0.12, y = 0.12, dir = -1 },
+  { key = "custom", label = "Where you put it (Move frames)" },
 }
 local POS = {}
 for _, p in ipairs(ns.POPUP_POSITIONS) do POS[p.key] = p end
-local function Position() return POS[ns.settings.popupPos or "midright"] or POS.midright end
+
+-- "custom": where the player dragged the Popups box (Mover.lua). The stack starts at the box's top-left
+-- and grows down, or from its bottom-left up when it sits in the lower part of the screen.
+local anchor
+local custom = { point = "TOPLEFT", x = 0, y = 0, dir = 1 }
+local function Custom()
+  local l, t, b = anchor:GetLeft(), anchor:GetTop(), anchor:GetBottom()
+  local W, H = UIParent:GetWidth(), UIParent:GetHeight()
+  if not l then return POS.midright end
+  if t < H * 0.4 then custom.point, custom.x, custom.y, custom.dir = "BOTTOMLEFT", l / W, b / H, -1
+  else custom.point, custom.x, custom.y, custom.dir = "TOPLEFT", l / W, (t - H) / H, 1 end
+  return custom
+end
+local function Position()
+  local key = ns.settings.popupPos or "midright"
+  if key == "custom" then return anchor and Custom() or POS.midright end
+  return POS[key] or POS.midright
+end
 function ns.PopupMax() return ns.settings.popupMax or 2 end
 local function ClickThrough() return (ns.settings.popupMouse or "through") == "through" end
 
@@ -352,7 +371,8 @@ end
 function ShowWaiting() -- the local declared at the top
   while waiting[1] and Active() < MaxShown() do
     local w = table.remove(waiting, 1)
-    Pop(w.item, w.onModel)
+    -- (a fight may have started while it waited: then it's small and goes to the Picked up list)
+    if not (ns.FeedOn and ns.FeedOn() and Compact(w.item) and ns.PickedUp(w.item)) then Pop(w.item, w.onModel) end
   end
 end
 
@@ -368,6 +388,8 @@ function ns:ShowLoot(item, onModel)
     afterCombat[#afterCombat + 1] = { item = item, onModel = onModel }
     return
   end
+  -- a small find goes to the Picked up list in the loot column instead of a one-line popup (Feed.lua)
+  if ns.FeedOn and ns.FeedOn() and Compact(item) and ns.PickedUp(item) then return end
   local n, oldest = Active()
   if n >= MaxShown() and oldest then
     local q, oq = item.quality or 1, oldest.item and oldest.item.quality or 1
@@ -387,3 +409,24 @@ function ns.PopupsAfterCombat()
   afterCombat = {}
   for i, w in ipairs(list) do C_Timer.After(0.3 + (i - 1) * 0.2, function() ns:ShowLoot(w.item, w.onModel) end) end
 end
+
+-- Popups in Move frames (Mover.lua): a box where the stack starts. Dragging it makes the position
+-- "custom" (Popups page: "Where you put it"); right-click (reset) goes back to the default.
+ns.OnInit(function()
+  if not ns.Mover then return end
+  local W, H = UIParent:GetWidth(), UIParent:GetHeight()
+  anchor = CreateFrame("Frame", nil, UIParent)
+  anchor:SetSize(300, 110)
+  ns.Mover.Register({ key = "popups", frame = anchor, label = "Popups", point = "TOPLEFT",
+    x = math.floor(POS.midright.x * W), y = math.floor(POS.midright.y * H), w = 300, h = 110,
+    preview = function(on) -- the box starts where popups show now (a preset, until it's dragged)
+      if not on then ns.Mover.Apply("popups"); return end -- (back to the saved spot for "custom")
+      local key = ns.settings.popupPos or "midright"
+      if key == "custom" or not POS[key] then return end
+      local p = POS[key]
+      anchor:ClearAllPoints()
+      anchor:SetPoint(p.point, UIParent, p.point, p.x * UIParent:GetWidth(), p.y * UIParent:GetHeight())
+    end,
+    moved = function() ns.settings.popupPos = "custom" end,
+    reset = function() if ns.settings.popupPos == "custom" then ns.settings.popupPos = nil end end })
+end)

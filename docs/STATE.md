@@ -63,6 +63,13 @@ name in its color, gold count, x2 merging) in a "Picked up" feed in the right-ha
 Mockup docs/mockups/cohesion.html (in game units, 1366x768): V1 Picked up above Harvest / V2 one window, two
 sections / V3 below; small items of a big loot in the column or "With it" under the card. Finding: at the default
 63% a 300-wide card overlaps a right column (ends 1160, column starts 1118): move the default to ~55%. Waiting for picks.
+**Built 2026-11-09 (picked V1 + in the column; untested in game):** Feed.lua "Picked up" list (ns.PickedUp; compact
+popups route there from ShowLoot and the waiting queue; setting noFeed; rows pooled via ns.SetLootRow), Gather.lua
+loot column anchor (Mover key "tally", label "Loot column"; the harvest window hangs under the list via
+ns.SetFeedHeight), shared row ns.NewLootRow; popups draggable (Mover key "popups", position "custom"; default
+midright 0.63 -> 0.55); Move frames bar text fixed (two lines). Next: harvest window polish (the pace line repeats
+the total, tiny section icons, ragged counts; max 3 sections in real play: 2 gathering professions + fishing), then
+release 1.3.0.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
