@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crafting Round 4</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  h2 { font-size: 14px; margin: 16px 18px 2px; color: var(--gold); }
+  header p, p.lead { margin: 0 0 4px; color: var(--muted); max-width: 1000px; }
+  p.lead { margin: 0 18px 4px; }
+  p b, header b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; min-width: 54px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 240px; max-width: 900px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 40% 70%, #3a4a30, #1c2616 55%, #0e130b); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .char { position: absolute; left: 28%; top: 55%; transform: translate(-50%, -50%); font-size: 56px; }
+  .count { position: absolute; left: 14px; top: 10px; font: 700 13px Georgia, serif; color: #ffd100; }
+  .note { position: absolute; right: 14px; top: 10px; max-width: 380px; text-align: right; font: 600 11.5px system-ui; color: #c9c2b0; }
+  /* skill bars (round 3) + the tool riding the fill's tip */
+  .sb { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; border: 1px solid #2a2418; border-radius: 6px; background: radial-gradient(ellipse at 50% 0%, #1c2616, #0e130b); }
+  .sb .tt { font: 700 15px Georgia, serif; color: #fff; text-shadow: 0 0 8px var(--pc), 0 1px 0 #000; } .sb .tt b { color: var(--pl); }
+  .sb .tt button { float: right; padding: 1px 8px; font-size: 11px; }
+  .sb .desc { font: 600 11px system-ui; color: #9a927e; }
+  .wrapT { position: relative; width: 260px; height: 22px; display: flex; align-items: center; }
+  .track { position: relative; width: 260px; height: 12px; border-radius: 4px; background: rgba(0,0,0,.65); box-shadow: 0 0 0 1px #000; overflow: hidden; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 40%; overflow: hidden; transition: width .7s cubic-bezier(.2,.8,.3,1); }
+  .tool { position: absolute; top: -4px; font-size: 13px; transform: translateX(-50%); transition: left .7s cubic-bezier(.2,.8,.3,1); filter: drop-shadow(0 1px 1px #000); }
+  .b-tailor .fill { background: linear-gradient(90deg, #a89870, #fff4d8); }
+  .b-tailor .track::after { content: ""; position: absolute; left: 3px; right: 3px; top: 5px; border-top: 2px dashed rgba(255,255,255,.75); }
+  .b-leather .track { background: #2a1a0e; }
+  .b-leather .track::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, #0a0604 1.2px, transparent 1.6px) 0 1px / 8px 10px repeat-x, radial-gradient(circle, #0a0604 1.2px, transparent 1.6px) 4px 9px / 8px 10px repeat-x; z-index: 2; }
+  .b-leather .fill { background: linear-gradient(#c89060, #8a5a30); }
+  .b-leather .fill::after { content: ""; position: absolute; left: 2px; right: 2px; top: 5px; border-top: 2px dashed #f0d8a8; }
+  .b-alch .track { border-radius: 6px; background: linear-gradient(rgba(255,255,255,.12), rgba(0,0,0,.6)); box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.25); }
+  .b-alch .fill { background: linear-gradient(#d0a8ff, #7a3ad0); border-radius: 6px 0 0 6px; overflow: visible; }
+  .b-alch .fill::after { content: ""; position: absolute; right: -5px; top: 0; bottom: 0; width: 10px; border-radius: 50%; background: #b88aff; animation: wob 1.1s ease-in-out infinite; }
+  @keyframes wob { 0%,100% { transform: scaleX(.6) } 50% { transform: scaleX(1) } }
+  .b-eng .track { background: repeating-linear-gradient(90deg, #1a1e24 0 11px, #000 11px 13px); }
+  .b-eng .fill { background: repeating-linear-gradient(90deg, #c8e0f8 0 11px, transparent 11px 13px); box-shadow: 0 0 6px rgba(200,224,248,.5); }
+  .b-cook .track { background: #2a1c10; }
+  .b-cook .fill { background: repeating-linear-gradient(-55deg, #6a3410 0 3px, #c87a3a 3px 10px); }
+  .b-smith .track { background: #1a1a1c; }
+  .b-smith .fill { background: linear-gradient(90deg, #3a3a40, #6a3a2a 55%, #e0501a 82%, #ffe7a0); box-shadow: 0 0 10px rgba(255,120,40,.6); }
+  .b-ench .track { background: #120c22; }
+  .b-ench .fill { background: linear-gradient(90deg, #3a2a7a, #8a6aff); }
+  .b-ench .runes { position: absolute; inset: 0; display: flex; justify-content: space-around; align-items: center; font: 700 10px Georgia, serif; color: rgba(255,255,255,.2); z-index: 2; }
+  .b-ench .runes i { font-style: normal; transition: color .4s, text-shadow .4s; } .b-ench .runes i.lit { color: #fff; text-shadow: 0 0 5px #c8b0ff; }
+  .b-aid .track { background: #2a2622; }
+  .b-aid .fill { background: repeating-linear-gradient(45deg, rgba(0,0,0,.06) 0 1px, transparent 1px 3px), #f2ede2; }
+  .b-aid .fill::after { content: "✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚ ✚"; position: absolute; left: 4px; top: -2px; font: 900 9px system-ui; color: #d03030; letter-spacing: 6px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Crafting, round 4</h1>
+  <p><b>1</b> Alchemy, three versions with new <b>glass and liquid sounds</b> (a clink, a low glug, a round hollow cork "thoonk"). <b>2</b> Engineering and Blacksmithing keep their motion; each gets <b>two new sound directions</b> beside the current one. <b>3</b> A tidy pass on Leatherworking, Tailoring, Cooking and Enchanting (same length, same size, the payoff at the same spot); First Aid kept. <b>4</b> The skill bars get a <b>tool riding the fill's tip</b>. Sound is on.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button></div>
+</header>
+
+<h2>1. Alchemy</h2>
+<p class="lead"><b>A Round 2 restored</b>: the big swirl spiraling in and the full boil-up you liked, tidied, keeping the color changing each time. <b>B Pour and mix</b>: a vial tips and pours a stream into the flask, a quick stir swirl, the cork pops. <b>C Boil-over</b>: the flask bubbles harder and harder, a small foam burst over the top, the cork pops. Sounds: <b>New</b> (glass clink, glug, hollow cork) or <b>Round 3</b>.</p>
+<div class="bar"><span>Version</span><button data-a="A" class="on">A Round 2 restored</button><button data-a="B">B Pour and mix</button><button data-a="C">C Boil-over</button>
+  <span>Sound</span><button data-as="new" class="on">New</button><button data-as="old">Round 3</button>
+  <button class="go" id="aOne">Craft once</button><button class="go" id="a12">Batch ×12</button><button class="go" id="a30">×30 fast</button></div>
+<div class="stage" id="aSt"><div class="count"></div><div class="char">🧙</div><div class="note"></div></div>
+
+<h2>2. Engineering and Blacksmithing sounds</h2>
+<p class="lead"><b>Engineering</b>: <b>Current</b> (square-wave clicks, a sine ping) · <b>E1 Metal ratchet</b>: short clicks with a metallic ring, a warm springy boing · <b>E2 Clockwork</b>: a fine clock tick-tick-tick, then a small bell "ding". <b>Blacksmithing</b>: <b>Current</b> (triangle tings) · <b>S1 Anvil ring</b>: real ringing metal (several partials that don't line up, like the skinning "shing"), each strike brighter · <b>S2 Heavy hammer</b>: a duller clank with a body, a long ring after the last, then the hiss.</p>
+<div class="bar"><span>Craft</span><button data-es="eng" class="on">⚙️ Engineering</button><button data-es="smith">🔨 Blacksmithing</button>
+  <span>Sound</span><button data-sv="cur">Current</button><button data-sv="1" class="on">E1 / S1</button><button data-sv="2">E2 / S2</button>
+  <button class="go" id="eOne">Craft once</button><button class="go" id="e12">Batch ×12</button><button class="go" id="e30">×30 fast</button></div>
+<div class="stage" id="eSt"><div class="count"></div><div class="char">🧙</div><div class="note"></div></div>
+
+<h2>3. Tidied: Leatherworking, Tailoring, Cooking, Enchanting (and First Aid, kept)</h2>
+<p class="lead">All about one second, the same size, and the payoff landing at the same spot right of the work; nothing new added.</p>
+<div class="bar"><span>Craft</span><button data-t="leather" class="on">🪡 Leatherworking</button><button data-t="tailor">🧵 Tailoring</button><button data-t="cook">🍳 Cooking</button><button data-t="ench">🔮 Enchanting</button><button data-t="aid">🩹 First Aid</button>
+  <button class="go" id="tOne">Craft once</button><button class="go" id="t12">Batch ×12</button><button class="go" id="t30">×30 fast</button></div>
+<div class="stage" id="tSt"><div class="count"></div><div class="char">🧙</div><div class="note"></div></div>
+
+<h2>4. Skill bars with a tool at the tip</h2>
+<p class="lead">A small tool rides the end of the fill and does one little motion on a skill-up: a needle dips, the awl punches the next hole, a dropper drips, a wrench clicks the next cell on, a spatula flips, a hammer taps (sparks), a wand lights the next rune, a pin clips the bandage.</p>
+<div class="bar"><button class="go" id="fillAll">All: skill up</button><button id="resetBars">Reset</button></div>
+<div id="bars" style="margin:4px 18px 30px;display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:14px 26px;max-width:1000px"></div>
+
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id);
+let snd = true, actx, ST;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1');
+function ac() { return actx = actx || new AudioContext(); }
+const now = t => ac().currentTime + Math.max(0, t || 0);
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2, att = .006) { if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + att); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass') { if (!snd) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+function click(t = 0, vol = .05, f = 3000, q = 6) { noise(t, .012, vol, f, q); } // a very short tick
+// ringing metal: partials that don't line up, each decaying at its own rate
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine', null, .002)); }
+const semi = n => Math.pow(2, n / 12), PENTA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+const walk = i => semi(PENTA[Math.min(i, 10)] + (i > 10 ? [0, -3, -5, -2][i % 4] : 0));
+function el(html, css, frames, dur, delay = 0, ease = 'linear') { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d); d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function pathEl(html, x, y, life, fn, delay = 0, n = 22) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000); }
+function dot(x, y, o) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px) scale(${o.grow ? 1 + (o.grow - 1) * i / 14 : 1})`, opacity: i === 14 ? 0 : (o.fade ? 1 - .7 * i / 14 : 1) }); } el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%;box-shadow:0 0 ${o.glow || 0}px ${o.color};filter:${o.blur ? 'blur(' + o.blur + 'px)' : 'none'}`, fr, o.life * 1000, (o.delay || 0) * 1000); }
+function ring(x, y, color, size, life, delay = 0, w = 2) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, 'ease-out'); }
+function star(x, y, size, color, life, delay = 0) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0) rotate(0deg)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000); }
+function glyph(ch, x, y, size, color, life, fn, delay = 0) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay); }
+const at = (t, fn) => setTimeout(fn, t * 1000);
+const POT = ['#c08aff', '#9dff8a', '#ff7a8a', '#7ac8ff', '#ffd34a'];
+const fade = c => c + '59';
+function pos(st) { const c = st.querySelector('.char').getBoundingClientRect(), s = st.getBoundingClientRect(); return [c.left - s.left + c.width / 2 + 90, c.top - s.top + c.height / 2 - 6]; }
+function runBatch(st, n, gap, fn) { if (st.busy) return; st.busy = true; ST = st; const [x, y] = pos(st), cnt = st.querySelector('.count');
+  for (let i = 0; i < n; i++) at(i * gap, () => { ST = st; fn(x + R(-4, 4), y + R(-3, 3), i); cnt.textContent = `${i + 1} / ${n}`; if (i === n - 1) at(.4, () => st.busy = false); }); }
+
+// ---------------- 1. alchemy ----------------
+let av = 'A', as = 'new';
+pick('a', v => { av = v; aNote(); }); pick('as', v => { as = v; aNote(); });
+const ASND = {
+  new: { clink(t, k = 1) { metal(t, 2300 * k, .025, .35, [1, 2.32, 4.25], [1, .5, .25]); }, glug(t) { tone(R(240, 300), t, .07, .12, 'sine', R(130, 160)); noise(t, .05, .015, 600, 1, 'lowpass'); },
+    cork(t, k = 1) { tone(190 * k, t, .09, .16, 'sine', 120 * k); click(t, .04, 1800, 2); tone(700 * k, t + .02, .015, .05, 'sine'); }, pour(t, d) { noise(t, d, .02, 2500, .6); } },
+  old: { clink() {}, glug(t) { tone(R(520, 640), t, .03, .08, 'sine', 1000); }, cork(t, k = 1) { tone(950 * k, t, .06, .08, 'sine', 420 * k); }, pour() {} },
+};
+function aNote() { $('aSt').querySelector('.note').textContent = { A: 'A: the big swirl in, the full boil-up, the cork', B: 'B: a vial pours, a stir, the cork', C: 'C: bubbling harder and harder, a foam burst, the cork' }[av] + (as === 'new' ? ' · new glass sounds' : ' · round 3 sounds'); }
+const ALCH = {
+  A(x, y, k) { const S = ASND[as], c = POT[Math.floor(R(0, POT.length))]; S.clink(0, k);
+    for (let i = 0; i < 14; i++) { const a0 = i / 14 * Math.PI * 2; pathEl(`<div style="width:7px;height:7px;margin:-3.5px;border-radius:50%;background:${c};box-shadow:0 0 6px ${c}"></div>`, x, y, .6, u => { const a = a0 + u * 7, r = 46 * (1 - u); return [Math.cos(a) * r, Math.sin(a) * r * .6, 0, 1, u > .9 ? (1 - u) * 10 : 1]; }); }
+    at(.58, () => { for (let i = 0; i < 12; i++) dot(x + R(-8, 8), y, { vx: R(-12, 12), vy: R(50, 115), g: -20, life: R(.5, .8), size: R(4, 8), color: i % 3 ? c : '#ffffff', fade: true, delay: i * .025 }); S.glug(0); S.glug(.11); });
+    at(.92, () => { pathEl('<div style="width:10px;height:12px;margin:-6px -5px;border-radius:2px;background:#a07040"></div>', x, y - 10, .65, u => [18 * u, 66 * Math.sin(Math.PI * u * .9), 500 * u, 1, 1 - u]); dot(x, y - 10, { vx: 0, vy: 30, g: -10, life: .9, size: 18, color: fade(c), grow: 2, fade: true, blur: 2 }); S.cork(0, k); }); },
+  B(x, y, k) { const S = ASND[as], c = POT[Math.floor(R(0, POT.length))];
+    pathEl(`<div style="width:12px;height:22px;margin:-11px -6px;border-radius:3px 3px 6px 6px;background:linear-gradient(transparent 30%,${c} 30%);border:1px solid rgba(255,255,255,.6)"></div>`, x - 22, y - 34, .75, u => [0, 0, u < .3 ? 120 * u / .3 : 120, 1, u > .85 ? (1 - u) / .15 : 1]);
+    at(.22, () => { el('', `left:${x - 13}px;top:${y - 30}px;width:3px;height:24px;border-radius:2px;background:${c};box-shadow:0 0 4px ${c};transform-origin:50% 0`, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)', offset: .25 }, { transform: 'scaleY(1)', offset: .8 }, { transform: 'scaleY(0) translateY(24px)' }], 480); S.pour(0, .45); S.clink(0, k * 1.1); });
+    at(.6, () => { for (let i = 0; i < 10; i++) { const a0 = i / 10 * Math.PI * 2; pathEl(`<div style="width:5px;height:5px;margin:-2.5px;border-radius:50%;background:${c}"></div>`, x, y, .35, u => { const a = a0 + u * 6; return [Math.cos(a) * 16, Math.sin(a) * 6, 0, 1, 1 - u * .5]; }); } S.glug(0); });
+    at(.92, () => { pathEl('<div style="width:10px;height:12px;margin:-6px -5px;border-radius:2px;background:#a07040"></div>', x, y - 10, .65, u => [18 * u, 66 * Math.sin(Math.PI * u * .9), 500 * u, 1, 1 - u]); S.cork(0, k); }); },
+  C(x, y, k) { const S = ASND[as], c = POT[Math.floor(R(0, POT.length))];
+    for (let w = 0; w < 4; w++) at(w * .17, () => { for (let i = 0; i < 2 + w * 2; i++) dot(x + R(-8, 8), y, { vx: R(-8, 8), vy: R(30 + w * 15, 60 + w * 20), g: -20, life: R(.4, .6), size: R(3, 5 + w), color: i % 3 ? c : '#ffffff', fade: true }); S.glug(0); });
+    at(.7, () => { for (let i = 0; i < 10; i++) dot(x + R(-12, 12), y - 18, { vx: R(-40, 40), vy: R(20, 60), g: 60, life: R(.5, .8), size: R(8, 12), color: 'rgba(255,255,255,.75)', fade: true, blur: 1 }); ring(x, y - 18, c, 46, .35); noise(0, .2, .025, 3000, .7); });
+    at(.92, () => { pathEl('<div style="width:10px;height:12px;margin:-6px -5px;border-radius:2px;background:#a07040"></div>', x, y - 10, .65, u => [18 * u, 66 * Math.sin(Math.PI * u * .9), 500 * u, 1, 1 - u]); S.cork(0, k); }); },
+};
+const aTouch = (x, y, i) => { const S = ASND[as], c = POT[i % POT.length]; for (let j = 0; j < 4; j++) dot(x + R(-5, 5), y, { vx: R(-8, 8), vy: R(40, 80), g: -20, life: .45, size: 5, color: c, fade: true });
+  pathEl('<div style="width:7px;height:8px;margin:-4px -3.5px;border-radius:2px;background:#a07040"></div>', x, y - 6, .45, u => [10 * u, 40 * Math.sin(Math.PI * u * .9), 360 * u, 1, 1 - u]); S.cork(0, walk(i) * (as === 'new' ? 1 : 1)); };
+$('aOne').onclick = () => { ST = $('aSt'); const [x, y] = pos(ST); ALCH[av](x, y, R(.97, 1.03)); };
+$('a12').onclick = () => runBatch($('aSt'), 12, .36, aTouch);
+$('a30').onclick = () => runBatch($('aSt'), 30, .2, aTouch);
+aNote();
+
+// ---------------- 2. engineering and blacksmithing sounds ----------------
+let es = 'eng', sv = '1';
+pick('es', v => { es = v; eNote(); }); pick('sv', v => { sv = v; eNote(); });
+const ENG = {
+  cur: { tick(i) { tone(2400 + i * 120, 0, .025, .04, 'square'); }, pay(k) { tone(500 * k, 0, .05, .25, 'sine', 900 * k); } },
+  1: { tick(i) { click(0, .07, 3200 + i * 200, 8); metal(0, 3400 + i * 150, .012, .08, [1, 1.9], [1, .4]); }, pay(k) { const a = ac(), o = a.createOscillator(), g = a.createGain(), l = a.createOscillator(), lg = a.createGain(), t = now(0);
+      if (!snd) return; o.frequency.setValueAtTime(320 * k, t); o.frequency.exponentialRampToValueAtTime(520 * k, t + .15); l.frequency.value = 22; lg.gain.value = 30; l.connect(lg).connect(o.frequency);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.06, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .45); o.connect(g).connect(a.destination); o.start(t); l.start(t); o.stop(t + .5); l.stop(t + .5); } },
+  2: { tick(i) { click(0, .05, 5200, 10); click(.03, .025, 4200, 10); }, pay(k) { metal(0, 1760 * k, .045, .7, [1, 2.0, 3.0, 4.2], [1, .35, .2, .1]); } },
+};
+const SMITH = {
+  cur: { strike(i, k) { tone((1700 + i * 260) * (i === 2 ? k : 1), 0, .04 + i * .015, .16 + i * .1, 'triangle'); }, after() {} },
+  1: { strike(i, k) { click(0, .06, 2500, 2); metal(0, (880 + i * 140) * (i === 2 ? k : 1), .03 + i * .012, .5 + i * .35); }, after() { noise(.05, .35, .02, 5000, .6, 'highpass'); } },
+  2: { strike(i, k) { tone(140, 0, .09, .08, 'sine', 90); noise(0, .04, .05, 900, 1.5); metal(0, (620 + i * 90) * (i === 2 ? k : 1), .02 + i * .01, .4 + i * .6, [1, 2.76, 5.4], [1, .4, .2]); }, after() { noise(.25, .45, .025, 5000, .6, 'highpass'); } },
+};
+function eNote() { $('eSt').querySelector('.note').textContent = (es === 'eng' ? 'Engineering: ' + { cur: 'current', 1: 'E1 metal ratchet + springy boing', 2: 'E2 clockwork tick + bell ding' }[sv] : 'Blacksmithing: ' + { cur: 'current', 1: 'S1 anvil ring, brighter each strike', 2: 'S2 heavy hammer: clank, long ring, hiss' }[sv]); }
+function engCraft(x, y, k) { const S = ENG[sv];
+  glyph('⚙', x - 10, y, 30, '#c8d4e0', .9, u => [0, 0, 90 * Math.min(3, Math.floor(u / .13)), 1, u > .8 ? (1 - u) / .2 : 1]);
+  glyph('⚙', x + 13, y - 13, 20, '#a8b8c8', .9, u => [0, 0, -135 * Math.min(3, Math.floor(u / .13)), 1, u > .8 ? (1 - u) / .2 : 1]);
+  for (let i = 0; i < 3; i++) at(i * .12, () => S.tick(i));
+  at(.45, () => { glyph('〰', x + 30, y - 10, 16, '#e0ecf8', .45, u => [10 * u, 14 * u, 0, 1, 1 - u]); dot(x + 28, y - 10, { vx: 8, vy: 30, g: -10, life: .8, size: 14, color: 'rgba(220,220,220,.4)', grow: 2, fade: true, blur: 2 }); S.pay(k); }); }
+function smithCraft(x, y, k) { const S = SMITH[sv];
+  [0, .17, .34].forEach((t, i) => at(t, () => { star(x + R(-5, 5), y, 16 + i * 6, '#ffd27a', .25); for (let j = 0; j < 4 + i * 3; j++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: R(.3, .5), size: 3, color: '#ffb040', glow: 5 }); S.strike(i, k); }));
+  at(.5, () => { dot(x, y, { vx: 0, vy: 0, life: .6, size: 26, color: 'rgba(255,90,30,.5)', grow: .6, fade: true, blur: 4 }); dot(x, y - 6, { vx: 0, vy: 40, g: -10, life: .7, size: 16, color: 'rgba(235,235,235,.35)', grow: 2, fade: true, blur: 2 }); S.after(); }); }
+const eTouch = (x, y, i) => { if (es === 'eng') { glyph('⚙', x, y, 16, '#c8d4e0', .4, u => [0, 0, 90 * u, 1, 1 - u]); ENG[sv].tick(0); at(.06, () => ENG[sv].pay(walk(i) * .9)); }
+  else { star(x, y, 14, '#ffd27a', .2); for (let j = 0; j < 4; j++) dot(x, y, { vx: R(-100, 100), vy: R(60, 160), g: 700, life: .35, size: 3, color: '#ffb040', glow: 4 }); SMITH[sv].strike(sv === 'cur' ? 0 : 1, walk(i)); } };
+$('eOne').onclick = () => { ST = $('eSt'); const [x, y] = pos(ST); (es === 'eng' ? engCraft : smithCraft)(x, y, R(.97, 1.03)); };
+$('e12').onclick = () => runBatch($('eSt'), 12, .36, eTouch);
+$('e30').onclick = () => runBatch($('eSt'), 30, .2, eTouch);
+eNote();
+
+// ---------------- 3. tidied ----------------
+let tp = 'leather';
+pick('t', v => tp = v);
+function hole(x, y) { el('', `left:${x - 2.5}px;top:${y - 2.5}px;width:5px;height:5px;border-radius:50%;background:#140c06;box-shadow:0 0 0 1px #e8c08a`, [{ opacity: 1, transform: 'scale(1.7)' }, { opacity: 1, transform: 'scale(1)', offset: .12 }, { opacity: 1, offset: .82 }, { opacity: 0 }], 1300); }
+function thok(t, p = 1) { tone(240 * p, t, .06, .06, 'square', 160 * p); noise(t, .03, .03, 1200, 2); }
+const PAY = 44; // the payoff lands this far right of the work, for every craft
+const TIDY = {
+  leather(x, y, k) { const n = 4, gap = 20, x0 = x - (n - 1) * gap / 2;
+    for (let i = 0; i < n; i++) at(i * .09, () => { hole(x0 + i * gap, y); thok(0, R(.97, 1.03)); });
+    for (let i = 0; i < n - 1; i++) at(.42 + i * .07, () => { el('', `left:${x0 + i * gap + 4}px;top:${y - 1}px;width:${gap - 8}px;height:2px;border-radius:1px;background:#e8c08a;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], 880); noise(0, .06, .025, 3000 + i * 300, 3); });
+    at(.72, () => { star(x + PAY, y, 14, '#fff', .35); tone(520 * k, 0, .04, .12, 'triangle', 880 * k); }); },
+  tailor(x, y, k) { const n = 4, gap = 18, x0 = x - (n - 1) * gap / 2 - 4;
+    for (let i = 0; i < n; i++) at(i * .11, () => { el('', `left:${x0 + i * gap}px;top:${y - 1}px;width:10px;height:2px;border-radius:1px;background:#f4ead2`, [{ transform: 'scaleX(0)', opacity: 1 }, { transform: 'scaleX(1)', offset: .2 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 950); noise(0, .05, .02, 5000 + i * 400, 4); });
+    at(.6, () => { glyph('✂', x + PAY, y, 16, '#fff', .4, u => [3 * u, 0, -25 + 50 * Math.min(1, u * 3), 1, 1 - u]); tone(3300 * k, 0, .03, .06, 'triangle'); tone(3700 * k, .05, .03, .06, 'triangle'); }); },
+  cook(x, y, k) { for (let s = 0; s < 2; s++) at(s * .15, () => { for (let i = 0; i < 4; i++) dot(x + R(-10, 10), y + 8, { vx: R(-60, 60), vy: R(60, 120), g: 500, life: .35, size: 3, color: '#ffe0a0', glow: 3 }); noise(0, .12, .025, 6000, .6, 'highpass'); });
+    at(.32, () => { pathEl('<div style="font-size:20px;margin:-10px">🍖</div>', x, y, .45, u => [PAY * u, 50 * Math.sin(Math.PI * u), 360 * u, 1, 1]); noise(0, .2, .02, 900, .8); });
+    at(.78, () => { noise(0, .3, .03, 6000, .5, 'highpass'); tone(260 * k, 0, .03, .08, 'triangle'); for (let i = 0; i < 3; i++) pathEl('<div style="width:5px;height:20px;margin:-10px -2.5px;border-radius:3px;background:linear-gradient(transparent,rgba(240,240,240,.5),transparent);filter:blur(1px)"></div>', x + PAY - 8 + i * 8, y - 6, .8, u => [4 * Math.sin(u * 6 + i), 30 * u, 0, 1, Math.sin(Math.PI * u) * .9], i * .06); }); },
+  ench(x, y, k) { const runes = 'ᚠᚱᚲᚨᚦᚢ'; for (let i = 0; i < 3; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / 3, rx = Math.cos(a) * 30, ry = Math.sin(a) * 30;
+      glyph(runes[Math.floor(R(0, 6))], x + rx, y + ry, 15, '#d8c8ff', .85, u => { if (u < .55) return [0, 0, 0, u < .08 ? 1.6 - 7 * u : 1, 1]; const v = (u - .55) / .45; return [(PAY - rx) * v, ry * v, 0, 1 - .6 * v, 1 - v * .5]; }, i * .14);
+      at(i * .14, () => tone(1046 * semi(PENTA[i * 2]), 0, .03, .35)); }
+    at(.72, () => { star(x + PAY, y, 30, '#fff', .35); ring(x + PAY, y, '#c8b0ff', 36, .3); tone(1568 * k, 0, .05, .6); tone(2093 * k, .02, .03, .5); }); },
+  aid(x, y, k) { pathEl('<div style="width:18px;height:18px;margin:-9px;border-radius:50%;background:radial-gradient(#fff,#e8e0d0 60%,#c8c0b0)"></div>', x - 40, y, .3, u => [40 * u, 0, 360 * u, 1, 1]);
+    for (let i = 0; i < 3; i++) at(.25 + i * .14, () => { el('', `left:${x - 13}px;top:${y - 10 + i * 6}px;width:26px;height:5px;border-radius:3px;background:#f4f0e4;box-shadow:0 1px 0 #b8b0a0`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .85 }, { opacity: 0 }], 900); noise(0, .1, .02, 1800, .8); });
+    at(.72, () => { glyph('✚', x, y - 2, 18, '#7dff8a', .55, u => [0, 12 * u, 0, u < .15 ? .5 + 4 * u : 1, 1 - u]); tone(700 * k, 0, .04, .05, 'triangle'); tone(1046 * k, .04, .04, .25); }); },
+};
+const TT = {
+  leather(x, y, i) { hole(x, y); thok(0, .9 + i * .02); at(.08, () => tone(440 * walk(i), 0, .025, .1, 'triangle')); },
+  tailor(x, y, i) { el('', `left:${x - 8}px;top:${y - 1}px;width:16px;height:2px;background:#f4ead2`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .3 }, { opacity: 0 }], 500); noise(0, .04, .02, 5000, 4); tone(1300 * walk(i), .04, .02, .05, 'triangle'); },
+  cook(x, y, i) { for (let j = 0; j < 3; j++) dot(x + R(-8, 8), y, { vx: R(-40, 40), vy: R(50, 100), g: 400, life: .3, size: 3, color: '#ffe0a0' }); noise(0, .1, .02, 6000, .6, 'highpass'); tone(330 * walk(i), .02, .025, .08, 'triangle'); },
+  ench(x, y, i) { glyph('ᚠᚱᚲᚨ'[i % 4], x, y, 14, '#d8c8ff', .5, u => [0, 10 * u, 0, 1, 1 - u]); tone(880 * walk(i), 0, .03, .3); },
+  aid(x, y, i) { el('', `left:${x - 10}px;top:${y - 2}px;width:20px;height:4px;border-radius:2px;background:#f4f0e4`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .3 }, { opacity: 0 }], 500); noise(0, .07, .02, 1800, .8); tone(500 * walk(i), .05, .03, .15); },
+};
+$('tOne').onclick = () => { ST = $('tSt'); const [x, y] = pos(ST); TIDY[tp](x, y, R(.97, 1.03)); };
+$('t12').onclick = () => runBatch($('tSt'), 12, .36, (x, y, i) => TT[tp](x, y, i));
+$('t30').onclick = () => runBatch($('tSt'), 30, .2, (x, y, i) => TT[tp](x, y, i));
+
+// ---------------- 4. skill bars with a tool at the tip ----------------
+const BARS = [['tailor', 'Tailoring', '#d8c8a0', '#fff4d8', '🪡', 'a needle dips'], ['leather', 'Leatherworking', '#b07a46', '#e8c08a', '📍', 'the awl punches the next hole'],
+  ['alch', 'Alchemy', '#9a5ae0', '#d0a8ff', '💧', 'a drop falls in'], ['eng', 'Engineering', '#a0b4c8', '#e0ecf8', '🔧', 'the wrench clicks the next cell on'],
+  ['cook', 'Cooking', '#e0a050', '#ffd890', '🍳', 'a spatula flips'], ['smith', 'Blacksmithing', '#e07a2a', '#ffb070', '🔨', 'the hammer taps, sparks'],
+  ['ench', 'Enchanting', '#8a6aff', '#c8b0ff', '✨', 'the wand lights the next rune'], ['aid', 'First Aid', '#e05a5a', '#ffb0b0', '📎', 'a pin clips the bandage']];
+const lvl = {};
+$('bars').innerHTML = BARS.map(([k, n, pc, pl, t, d]) => `<div class="sb b-${k}" style="--pc:${pc};--pl:${pl}"><div class="tt">${n} <b id="lv-${k}">140</b><button data-fill="${k}">Skill up</button></div>
+  <div class="wrapT"><div class="track"><div class="fill" id="fl-${k}"></div>${k === 'ench' ? '<div class="runes">' + 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾ'.split('').map(r => `<i>${r}</i>`).join('') + '</div>' : ''}</div><div class="tool" id="tl-${k}" style="left:40%">${t}</div></div><div class="desc">The tool: ${d}.</div></div>`).join('');
+function lightRunes(p) { const rs = document.querySelectorAll('.b-ench .runes i'); rs.forEach((r, i) => r.classList.toggle('lit', (i + .5) / rs.length < p)); }
+const MOTION = { tailor: [{ transform: 'translate(-50%,0)' }, { transform: 'translate(-50%,5px) rotate(20deg)' }, { transform: 'translate(-50%,0)' }],
+  leather: [{ transform: 'translate(-50%,0)' }, { transform: 'translate(-50%,6px)' }, { transform: 'translate(-50%,0)' }],
+  alch: [{ transform: 'translate(-50%,-6px)', opacity: 1 }, { transform: 'translate(-50%,6px)', opacity: .2 }, { transform: 'translate(-50%,0)', opacity: 1 }],
+  eng: [{ transform: 'translate(-50%,0) rotate(0)' }, { transform: 'translate(-50%,0) rotate(-40deg)' }, { transform: 'translate(-50%,0) rotate(0)' }],
+  cook: [{ transform: 'translate(-50%,0) rotate(0)' }, { transform: 'translate(-50%,-6px) rotate(-200deg)' }, { transform: 'translate(-50%,0) rotate(-360deg)' }],
+  smith: [{ transform: 'translate(-50%,-2px) rotate(-30deg)' }, { transform: 'translate(-50%,2px) rotate(10deg)' }, { transform: 'translate(-50%,0) rotate(0)' }],
+  ench: [{ transform: 'translate(-50%,0) scale(1)' }, { transform: 'translate(-50%,0) scale(1.6)', filter: 'drop-shadow(0 0 6px #c8b0ff)' }, { transform: 'translate(-50%,0) scale(1)' }],
+  aid: [{ transform: 'translate(-50%,-6px)' }, { transform: 'translate(-50%,0) scale(1.2,.8)' }, { transform: 'translate(-50%,0)' }] };
+const MSND = { tailor: () => noise(0, .05, .02, 5000, 4), leather: () => thok(0), alch: () => { tone(300, 0, .04, .15, 'sine', 180); }, eng: () => { click(0, .06, 3200, 8); }, cook: () => noise(0, .2, .02, 6000, .5, 'highpass'),
+  smith: () => { click(0, .05, 2500, 2); metal(0, 1100, .025, .5); }, ench: () => tone(1318, 0, .03, .5), aid: () => click(0, .04, 2200, 4) };
+function fillBar(k) { lvl[k] = (lvl[k] || 40) + 5; const p = Math.min(100, lvl[k]); $('fl-' + k).style.width = p + '%'; $('lv-' + k).textContent = 100 + lvl[k];
+  const tool = $('tl-' + k); tool.style.left = p + '%';
+  at(.72, () => { tool.animate(MOTION[k], { duration: 380, easing: 'ease-out' }); MSND[k](); if (k === 'ench') lightRunes(p / 100);
+    if (k === 'smith') { const r = tool.getBoundingClientRect(); for (let i = 0; i < 5; i++) { const d = document.createElement('div'); d.style.cssText = `position:absolute;left:${r.left + window.scrollX + 4}px;top:${r.bottom + window.scrollY}px;width:2px;height:2px;border-radius:50%;background:#ffd27a;box-shadow:0 0 3px #ffb040;pointer-events:none`; document.body.appendChild(d); d.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${R(-14, 14)}px,${R(-16, -4)}px)`, opacity: 0 }], 450).onfinish = () => d.remove(); } } }); }
+document.querySelectorAll('[data-fill]').forEach(b => b.onclick = () => fillBar(b.dataset.fill));
+$('fillAll').onclick = () => BARS.forEach(([k], i) => setTimeout(() => fillBar(k), i * 120));
+$('resetBars').onclick = () => BARS.forEach(([k]) => { lvl[k] = 40; $('fl-' + k).style.width = '40%'; $('tl-' + k).style.left = '40%'; $('lv-' + k).textContent = 140; if (k === 'ench') lightRunes(.4); });
+lightRunes(.4);
+</script>
+</body>
+</html>

@@ -109,7 +109,14 @@ rest equal and less unique. Round 3 mockup docs/mockups/crafting-feel.html: ever
 (~1 s, slight randomness), leather with a straight running stitch; a separate "batch touch" per item (the payoff only,
 pitch walking up; x12 and x30 fast to test fatigue); skill bars where the material IS the bar (leather strip with
 holes + stitch, alchemy glass tube, engineering gauge cells, cooking grill marks, blacksmith white-hot iron, enchanting
-runes lighting, first aid bandage with red crosses). Waiting for the verdict.
+runes lighting, first aid bandage with red crosses).
+**Round 3 verdict:** skill bars "much better" (asked about a tiny icon: proposed a tool riding the fill tip). Animations:
+really like leather, tailoring, cooking, enchanting (tidy a little); like engineering, blacksmithing; first aid much
+better; alchemy least favorite. Sounds: really like leather; like tailoring, cooking, enchanting; engineering and
+blacksmithing "going the right way, not there yet"; alchemy least favorite. Round 4 mockup docs/mockups/crafting-r4.html:
+alchemy A (round 2 restored) / B pour and mix / C boil-over with new glass sounds (clink, glug, hollow cork); engineering
+E1 metal ratchet + springy boing / E2 clockwork + bell; blacksmithing S1 anvil ring / S2 heavy hammer + long ring + hiss;
+tidied leather, tailoring, cooking, enchanting (payoff at one spot); skill bars with a tool at the tip. Waiting.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
