@@ -47,7 +47,9 @@ const SOUNDS = {
   SmithTap: [.15, () => H2.strike(0, 1)], SmithClang: [.5, () => H2.strike(2, 1)], SmithHiss: [.5, () => H2.after()],
   EnchChime1: [.45, () => tone(1046 * semi(PENTA[0]), 0, .03, .35)], EnchChime2: [.45, () => tone(1046 * semi(PENTA[2]), 0, .03, .35)], EnchChime3: [.45, () => tone(1046 * semi(PENTA[4]), 0, .03, .35)],
   EnchPing: [.7, () => { tone(1568, 0, .05, .6); tone(2093, .02, .03, .5); }],
-  AidWrap: [.15, () => noise(0, .1, .02, 1800, .8)], AidDone: [.35, () => { tone(700, 0, .04, .05, 'triangle'); tone(1046, .04, .04, .25); }],
+  // First Aid: firstaid-r7.html P2 Plus draws
+  AidTapA: [.1, () => { tone(200, 0, .045, .06, 'sine', 140); noise(0, .04, .02, 1600, 2); }], AidTapB: [.1, () => { tone(230, 0, .045, .06, 'sine', 160); noise(0, .04, .02, 1800, 2); }],
+  AidDone: [.45, () => { tone(880, 0, .035, .3); tone(1318, .03, .025, .35); }],
   CraftDone: [.9, () => { tone(880, .1, .05, .7); tone(1318, .2, .04, .7); }],
   // the skill bar's tool, on a skill-up (round 4 bars; gathering from crafting-picks.html)
   ToolTailoring: [.1, () => noise(0, .05, .02, 5000, 4)], ToolLeatherworking: [.15, () => thok(0)], ToolAlchemy: [.2, () => tone(300, 0, .04, .15, 'sine', 180)],

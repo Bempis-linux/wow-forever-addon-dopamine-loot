@@ -44,7 +44,7 @@ local function Fx(o)
   layer:Show()
   p.x, p.y, p.w, p.h = o.x, o.y, o.w or o.size, o.h or o.size
   p.vx, p.vy, p.g, p.grow, p.life, p.a, p.path, p.rot = o.vx or 0, o.vy or 0, o.g or 0, o.grow or 1, o.life, o.a or 1, o.path, o.rot or 0
-  p.fade = o.fade
+  p.fade, p.axis = o.fade, o.axis
   p.tex:SetTexture(o.file)
   if o.coords then p.tex:SetTexCoord(o.coords[1], o.coords[2], o.coords[3], o.coords[4]) else p.tex:SetTexCoord(0, 1, 0, 1) end
   p.tex:SetVertexColor(o.r or 1, o.gg or 1, o.b or 1)
@@ -72,7 +72,8 @@ local function Step(self, dt)
         end
         p.tex:ClearAllPoints()
         p.tex:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
-        p.tex:SetSize(math.max(0.1, p.w * s), math.max(0.1, p.h * s))
+        local sx, sy = (p.axis == "y") and 1 or s, (p.axis == "x") and 1 or s -- (axis: scale along one side only)
+        p.tex:SetSize(math.max(0.1, p.w * sx), math.max(0.1, p.h * sy))
         p.tex:SetRotation(rot)
         p.tex:SetAlpha(math.max(0, math.min(1, p.a * a)))
         p.tex:Show()
@@ -253,20 +254,23 @@ P.Enchanting = { -- three runes stamp around it on rising chimes, then they're d
   payoff = function(x, y, s, quiet) Glint(x + 44 * s, y, 26 * s, 0.35, 0, 1, 1, 1); Ring(x + 44 * s, y, 36 * s, 0.3, 0, 0.78, 0.69, 1); Sound(quiet and "EnchPingQ" or "EnchPing") end,
 }
 
-P["First Aid"] = { -- (round 4, the user's pick back) the roll rolls in, three wraps, and the green cross rises
+-- First Aid (docs/mockups/firstaid-r7.html, P2 "Plus draws"): the plus's upright bar grows, then its crossbar,
+-- a soft tap each; when the item is made, a flash and glints at its four tips
+local function PlusBar(x, y, w, h, axis, life, s)
+  local grow = function(u) -- grows over the first quarter, holds, fades at the end
+    return 0, 0, math.min(1, u / 0.25), u > 0.9 and (1 - u) / 0.1 or 1 end
+  Fx({ file = MEDIA .. "Glow.tga", x = x, y = y, w = (w + 14) * s, h = (h + 14) * s, life = life, add = true, r = 0.49, gg = 1, b = 0.54, a = 0.7, axis = axis, path = grow })
+  Fx({ file = WHITE, x = x, y = y, w = w * s, h = h * s, life = life, r = 0.49, gg = 1, b = 0.54, axis = axis, path = grow })
+end
+P["First Aid"] = {
   work = function(x, y, T, guid, s, loud)
-    Fx({ file = MEDIA .. "Circle.tga", x = x - 40 * s, y = y, size = 18 * s, life = T * 0.3, r = 0.95, gg = 0.93, b = 0.88,
-      path = function(u) return 40 * u * s, 0, 1, 1 - math.max(0, u - 0.85) / 0.15, -2 * math.pi * u end })
-    for i = 0, 2 do
-      After(T * (0.3 + i * 0.17), guid, function()
-        Mark({ file = WHITE, x = x, y = y + (5 - i * 6) * s, w = 26 * s, h = 5 * s, life = T * (0.7 - i * 0.17) + 0.3, r = 0.96, gg = 0.94, b = 0.89, pop = 1 })
-        if loud then Sound("AidWrap") end
-      end)
-    end
+    local hold = T * 0.5 + 0.5
+    After(T * 0.4, guid, function() PlusBar(x, y, 7, 24, "y", hold, s); if loud then Sound("AidTapA") end end)
+    After(T * 0.62, guid, function() PlusBar(x, y, 24, 7, "x", hold - T * 0.22, s); if loud then Sound("AidTapB") end end)
   end,
   payoff = function(x, y, s, quiet)
-    Fx({ file = MEDIA .. "FxCross.tga", x = x, y = y + 2 * s, size = 26 * s, life = 0.55, r = 0.49, gg = 1, b = 0.54,
-      path = function(u) return 0, 12 * u * s, u < 0.15 and 0.5 + 4 * u or 1, 1 - u end })
+    Dot({ file = MEDIA .. "Glow.tga", x = x, y = y, size = 44 * s, grow = 1.3, life = 0.35, add = true, r = 0.78, gg = 1, b = 0.78, a = 0.7 })
+    for i, t in ipairs({ { 0, 15 }, { 15, 0 }, { 0, -15 }, { -15, 0 } }) do Glint(x + t[1] * s, y + t[2] * s, 10 * s, 0.4, (i - 1) * 0.03, 0.88, 1, 0.88) end
     Sound(quiet and "AidDoneQ" or "AidDone")
   end,
 }

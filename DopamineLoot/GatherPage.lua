@@ -29,7 +29,7 @@ local function Create()
 
   N.Header(layout, "Crafting")
   N.Toggle(cat, "noCraft", "Crafting effects",
-    "While a craft casts, a small touch of your profession plays beside your cast bar (punches and a stitch, bubbles boiling over, stitches and a snip, gears and a boing, a sizzle and a flip, hammer taps, runes, a bandage and a green cross), and lands when the item is made. Crafted items go to the loot column instead of popping up or raining.", true)
+    "While a craft casts, a small touch of your profession plays beside your cast bar (punches and a stitch, bubbles boiling over, stitches and a snip, gears and a boing, a sizzle and a flip, hammer taps, runes, a green plus drawn in two strokes), and lands when the item is made. Crafted items go to the loot column instead of popping up or raining.", true)
   N.Toggle(cat, "noCraftTray", "Create All tray",
     "During a Create All, a tray slides out under the profession window and every item made tumbles into a growing heap; at the end it shakes and sparkles.", true)
   N.Choice(cat, "testCraft", "Test crafting", {
