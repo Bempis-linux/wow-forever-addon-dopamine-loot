@@ -380,7 +380,7 @@ local function Start(guid, T, icon, test, profName)
   if rem then batch.total = batch.n + rem end
   craft = { guid = guid, prof = p, t0 = now, T = T, icon = icon, test = test }
   local x, y = Spot()
-  local full = batch.n <= FULL_ITEMS
+  local full = true -- (every item at full size: shrinking from the 4th looked awkward, 2026-11-10; only the sounds step down)
   -- the beats: full on the 1st item, quieter on the 2nd and 3rd, silent after (the game plays its own craft
   -- sounds; ours step down instead of stopping all at once). loud: "" (full), "Q" (the quiet copies) or false
   local loud = (batch.n == 1 and "") or (batch.n <= FULL_ITEMS and "Q") or false
@@ -494,7 +494,7 @@ ns.OnInit(function()
   end
 end)
 
--- Tests (Gathering page): one craft or a short Create All of the profession picked, with a fake cast
+-- Tests (Professions page): one craft or a short Create All of the profession picked, with a fake cast
 local testN = 0
 ns.AddAction("testcraft", function(arg)
   if not On() then return end

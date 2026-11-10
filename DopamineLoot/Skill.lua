@@ -50,6 +50,7 @@ local IS_PROF = { Herbalism = true, Mining = true, Skinning = true, Fishing = tr
 
 local banner, shade, title, titleGlow, bar, unlock, unlockBorder, note, recipeLine
 local Layout
+local flair = 1 -- (0 with the Simple bar look: no title glow, no shade)
 local pattern
 local showT, showing
 local shown = 0 -- (counts banners: a late recipe check only writes into its own)
@@ -249,7 +250,7 @@ local function Create()
     -- (the banner's own fade leaves the reveal, a child, at full strength until its own fade)
     self:SetAlpha(1)
     local own = math.min(1, t / 0.3, (life - t) / 0.4)
-    shade:SetAlpha(own * 0.55); title:SetAlpha(own); titleGlow:SetAlpha(own * 0.8); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
+    shade:SetAlpha(own * flair * 0.55); title:SetAlpha(own); titleGlow:SetAlpha(own * flair * 0.8); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
     if showing then
       local u = math.min(1, math.max(0, (t - 0.3) / 0.7))
       bar:SetValue(showing.v0 + (showing.v1 - showing.v0) * (1 - (1 - u) ^ 3))
@@ -301,7 +302,12 @@ function ns.ShowSkillUp(name, level, capped, recipeColor)
   title:SetText(("%s |cff%02x%02x%02x%d|r"):format(name, l[1] * 255, l[2] * 255, l[3] * 255, level))
   title:SetShadowColor(0, 0, 0, 1)
   titleGlow:SetVertexColor(c[1], c[2], c[3])
-  bar:SetProfession(name, c, l)
+  -- the bar look (Professions page): Crafted, its material and tool, or Simple, a plain bar in its color with
+  -- no glow, shade or next-unlock icon (a new herb or ore reached still gets its reveal)
+  local simple = ns.settings.skillBarLook == "simple"
+  flair = simple and 0 or 1
+  bar:SetProfession(simple and "" or name, c, l)
+  if simple and not u then icon = nil end
   note:SetText(text)
   recipeLine:SetText("")
   if p.craft then -- did the recipe just crafted change color? (it may update a moment after the skill)
@@ -368,7 +374,7 @@ ns.AddAction("testskill", function(arg)
   ns.ShowSkillUp(name, level, false)
 end)
 
--- Test (Gathering page, crafting): a skill-up for the crafting profession picked there; every other
+-- Test (Professions page, crafting): a skill-up for the crafting profession picked there; every other
 -- press the recipe just crafted turns yellow, then green, then gray
 local testRecipe = 0
 local CRAFTS = { "Tailoring", "Leatherworking", "Alchemy", "Engineering", "Cooking", "Blacksmithing", "Enchanting", "First Aid",

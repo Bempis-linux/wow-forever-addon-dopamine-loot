@@ -348,6 +348,12 @@ local function CreateGeneral()
     "When you loot several items at once (or a lot of money), they spray up and bounce down at the bottom of the screen; the best item lands last and becomes a popup. In combat it waits until the fight is over. More settings on the Loot rain page.", true)
   N.Toggle(cat, "noFeed", "Small loot in the side column",
     "Small finds (gray and white items, an Uncommon that isn't the best of its loot, and everything during a fight) list as rows under \"Picked up\" in the loot column on the right, above the harvest window, instead of one-line popups. Big finds keep their popup.", true)
+  N.Toggle(cat, "noGather", "Gathering effects",
+    "Each herb, ore, fish or skin you gather bursts where you clicked, with its own sound, and flies into the harvest window. Gathered items don't start a loot rain. More settings on the Professions page.", true)
+  N.Toggle(cat, "noCraft", "Crafting effects",
+    "While you craft, a small touch of your profession plays beside your cast bar and lands when the item is made. Crafted items list in the side column instead of popping up. More settings on the Professions page.", true)
+  N.Toggle(cat, "noSkillUp", "Skill-up banner",
+    "When a profession's skill goes up, a banner shows your new skill and a bar toward what's next. Its look (crafted or simple) is on the Professions page.", true)
   N.Toggle(cat, "noBag", "Bulging bag",
     "When your bags are nearly full (4 slots or fewer), the backpack button gulps down each item and puffs up, sitting heavier and creaking as it fills; when they're full, the item bounces off and a padlock snaps shut, and freeing space lets it breathe out. Herb, mining and other special bags don't count.", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noBagCount", "Slots-left number",
@@ -356,7 +362,7 @@ local function CreateGeneral()
     "Turns every Dopamine Loot sound on or off at once. The game's own sounds are not affected. More settings on the Sounds page.", true)
   N.Header(layout, "Placement")
   N.Button(layout, "Drag frames into place", "Move frames", function() ns.Mover.Unlock() end,
-    "Shows a box over each Dopamine Loot frame you can move (the harvest tally, the skill-up bar): drag them where you want them, then click Done. Close this window to see them.")
+    "Shows a box over each Dopamine Loot frame you can move (the popups, the side column with the harvest window, the skill-up banner): drag them where you want them, then click Done. Close this window to see them.")
   N.Button(layout, "Put them back", "Reset positions", function() ns.Mover.Reset() end,
     "Moves every movable Dopamine Loot frame back to where it started.")
   N.Header(layout, "Try it")

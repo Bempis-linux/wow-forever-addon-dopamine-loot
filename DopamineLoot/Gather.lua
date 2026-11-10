@@ -436,7 +436,7 @@ local function Flurry(x, y, quiet)
   Sound("FlurryFinal", fin, quiet)
 end
 
--- The rare skinning find: the Double slash (default) or the Flurry (setting skinRare, Gathering page)
+-- The rare skinning find: the Double slash (default) or the Flurry (setting skinRare, Professions page)
 function RARE.skin(x, y, quiet)
   if ns.settings.skinRare == "flurry" then return Flurry(x, y, quiet) end
   -- R1 "Double slash": two glints cross in an X, a flash where they meet, sparks

@@ -42,7 +42,7 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
                            the payoff when made; batches; crafted items -> Crafted rows (tools/gen_craft_sounds.sh)
   Skill.lua                skill-up banner (CHAT_MSG_SKILL): bar in the profession's color to the next unlock
   SkillBar.lua             skill bars: crafting ones made of the material with a tool at the tip (ns.MakeSkillBar)
-  GatherPage.lua           "Gathering" page (native): switches, calm, placement, tests
+  GatherPage.lua           "Professions" page (native): gathering, crafting, skill-up look, tests
   Settings.lua             first page + helpers: ns.Native (plain pages on our own frames: Toggle, Slider, Choice, Button),
                            ns.UI (custom controls incl. Dropdown)
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check
