@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leatherworking Round 3</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 1000px; } header b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 200px; max-width: 760px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  .stage.dark { background: radial-gradient(ellipse at 60% 40%, #3a2c1e, #1a120a 55%, #0a0604); }
+  .stage.bright { background: radial-gradient(ellipse at 30% 40%, #e0a060, #c07838 60%, #9a5a28); }
+  .stage.dirt { background: repeating-linear-gradient(20deg, rgba(90,50,20,.08) 0 18px, transparent 18px 40px), radial-gradient(ellipse at 40% 45%, #dcae70, #c48c4c 55%, #a8743c); }
+  .stage.grass { background: radial-gradient(ellipse at 40% 70%, #6a8a40, #3a5a24 60%, #22341a); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .cast { position: absolute; left: 90px; top: 110px; width: 240px; height: 16px; border: 2px solid #8a7a5a; border-radius: 3px; background: #000; }
+  .cast b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(#ffd34a, #c08a10); }
+  .cast span { position: absolute; inset: 0; text-align: center; font: 600 11px system-ui; color: #fff; line-height: 16px; text-shadow: 0 1px 1px #000; }
+  .note { position: absolute; right: 14px; top: 10px; max-width: 360px; text-align: right; font: 600 11.5px system-ui; color: #fff; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Leatherworking, round 3: readable on dirt too</h1>
+  <p>B (now in game) blends into dirt and sand: a tan strip on tan ground. Same timing and sounds in each; pick a ground to compare. <b>D Dark strip</b>: the strip is dark leather with a crisp edge, the holes are light rings and the stitch cream, so it stands out on dirt, sand and grass, and its lit top edge keeps it visible in the dark. <b>E Framed strip</b>: the tan strip kept, but with a dark outline, a shadow and a soft dark halo so it lifts off any ground. Still here from round 2: <b>A Bold and lit</b> (no strip: big glowing cream rings, a ring burst per punch) and <b>C Light dots and sparks</b> (no strip: glowing warm dots and sparks). Sound is on.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button>
+    <span>Ground</span><button data-g="dirt" class="on">Dirt (your new screenshot)</button><button data-g="dark">Dark</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button></div>
+</header>
+<div class="bar"><span>Version</span><button data-v="now">Now</button><button data-v="a">A Bold and lit</button><button data-v="b">B Leather strip (now in game)</button><button data-v="c">C Light dots and sparks</button><button data-v="d" class="on">D Dark strip</button><button data-v="e">E Framed strip</button></div>
+<div class="bar"><span>Play</span><button class="go" id="one">Craft once (with the cast)</button><button class="go" id="five">×5 in a row</button></div>
+<div class="stage dirt" id="st"><div class="cast" id="cast"><b id="castb"></b><span>Light Leather</span></div><div class="note" id="note"></div></div>
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), ST = $('st');
+let snd = true, actx, gain = 1; // (gain: the batch step-down, as in game)
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1'); pick('g', v => ST.className = 'stage ' + v);
+function ac() { return actx = actx || new AudioContext(); }
+const now = t => ac().currentTime + Math.max(0, t || 0);
+const muted = () => !snd || gain <= 0;
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (muted()) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol * gain, at + .004); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1) { if (muted()) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol * gain; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+function el(html, css, frames, dur, delay = 0) { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d); d.animate(frames, { duration: dur, delay, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function star(x, y, size, color, life) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000); }
+const at = (t, fn) => setTimeout(fn, t * 1000);
+const thok = () => { tone(240, 0, .06, .06, 'square', 160); noise(0, .03, .03, 1200, 2); };
+const zip = i => noise(0, .06, .025, 3000 + i * 300, 3);
+const tug = () => tone(520, 0, .04, .12, 'triangle', 880);
+function ring(x, y, color, size, life, w = 2) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 6px ${color}`, [{ transform: 'scale(.15)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000); }
+function mote(x, y, color) { const dx = R(-14, 14), dy = R(-16, -4); el('', `left:${x - 1.5}px;top:${y - 1.5}px;width:3px;height:3px;border-radius:50%;background:${color};box-shadow:0 0 4px ${color}`, [{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${dx}px,${dy}px)`, opacity: 0 }], 380); }
+// each version: work(x, y, T) over the cast, payoff(x, y) when the item is made. Same four punches, the stitch and the tug.
+const V = {
+  now: { note: 'Now: as in game (dark holes, a thin tan ring)', gap: 20,
+    hole(x, y, life) { el('', `left:${x - 2.5}px;top:${y - 2.5}px;width:5px;height:5px;border-radius:50%;background:#140c06;box-shadow:0 0 0 1px #e8c08a`, [{ opacity: 1, transform: 'scale(1.7)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], life); },
+    thread(x, y, w, life) { el('', `left:${x}px;top:${y - 1}px;width:${w}px;height:2px;border-radius:1px;background:#e8c08a;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], life); },
+    payoff(x, y) { star(x + 44, y, 14, '#fff', .35); } },
+  // A: everything bigger and lit: bright cream holes ringed in gold, a ring bursts out of each punch, a thick glowing thread
+  a: { note: 'A Bold and lit: bigger cream holes, a ring bursts from each punch, a thick glowing thread', gap: 28,
+    hole(x, y, life) { el('', `left:${x - 5}px;top:${y - 5}px;width:10px;height:10px;border-radius:50%;background:radial-gradient(#3a2412 35%, #f6dcae 40%, #f6dcae 60%, transparent 66%);filter:drop-shadow(0 0 4px #ffcf8a)`, [{ opacity: 1, transform: 'scale(1.8)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], life); ring(x, y, '#ffd8a0', 26, .3); },
+    thread(x, y, w, life) { el('', `left:${x}px;top:${y - 1.5}px;width:${w}px;height:3px;border-radius:2px;background:#ffe8c0;box-shadow:0 0 6px #ffcf8a;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], life); },
+    payoff(x, y) { star(x + 58, y, 22, '#fff', .4); ring(x + 58, y, '#ffe0b0', 34, .35); } },
+  // B: a strip of leather (a plain rounded band) slides in first; the holes are punched into it, so they show on any ground
+  b: { note: 'B Leather strip: a tan band slides in under the work; dark holes punched into it; a cream stitch', gap: 22, strip: true,
+    hole(x, y, life) { el('', `left:${x - 3}px;top:${y - 3}px;width:6px;height:6px;border-radius:50%;background:#1a0e06;box-shadow:inset 0 1px 1px #000, 0 1px 0 rgba(255,230,190,.5)`, [{ opacity: 1, transform: 'scale(1.8)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], life); for (let i = 0; i < 3; i++) mote(x, y, '#c8a070'); },
+    thread(x, y, w, life) { el('', `left:${x}px;top:${y - 1}px;width:${w}px;height:2.5px;border-radius:2px;background:#fff2d8;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], life); },
+    payoff(x, y) { star(x + 46, y, 18, '#fff', .4); } },
+  // C: light instead of dark: each punch leaves a glowing warm dot and throws a few sparks; the thread lights up dot to dot
+  c: { note: 'C Light dots and sparks: each punch leaves a glowing warm dot and throws sparks; the thread lights dot to dot', gap: 24,
+    hole(x, y, life) { el('', `left:${x - 6}px;top:${y - 6}px;width:12px;height:12px;border-radius:50%;background:radial-gradient(#fff4dc, #ffc070 45%, transparent 70%)`, [{ opacity: 1, transform: 'scale(1.9)' }, { opacity: 1, transform: 'scale(1)', offset: .12 }, { opacity: .85, offset: .85 }, { opacity: 0 }], life); for (let i = 0; i < 4; i++) mote(x, y, '#ffd08a'); },
+    thread(x, y, w, life) { el('', `left:${x}px;top:${y - 1}px;width:${w}px;height:2px;border-radius:1px;background:#fff0d0;box-shadow:0 0 5px #ffc070, 0 0 10px #ff9a40;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], life); },
+    payoff(x, y) { star(x + 50, y, 20, '#fff4dc', .4); for (let i = 0; i < 5; i++) mote(x + 50, y, '#ffd08a'); } },
+  // D: B, but the strip is dark leather with a crisp dark edge; the holes are light rings and the stitch cream, so it stands out on dirt, sand and grass, and its lit edge keeps it visible in the dark
+  d: { note: 'D Dark strip: dark leather with a crisp edge; light rings for holes, a cream stitch', gap: 22, strip: true,
+    stripCss: 'background:linear-gradient(#5a3418, #2e1a0c);box-shadow:0 0 0 1.5px #140a04, 0 2px 4px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,210,150,.45)',
+    hole(x, y, life) { el('', `left:${x - 3.5}px;top:${y - 3.5}px;width:7px;height:7px;border-radius:50%;background:#0a0502;box-shadow:0 0 0 1.5px #f6dcae`, [{ opacity: 1, transform: 'scale(1.8)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], life); for (let i = 0; i < 3; i++) mote(x, y, '#e8c898'); },
+    thread(x, y, w, life) { el('', `left:${x}px;top:${y - 1.25}px;width:${w}px;height:2.5px;border-radius:2px;background:#fff2d8;box-shadow:0 0 3px rgba(255,230,190,.6);transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], life); },
+    payoff(x, y) { star(x + 46, y, 20, '#fff', .4); } },
+  // E: the B strip kept tan, but framed: a dark outline, a shadow under it, and a soft dark halo around the whole strip, so it lifts off any ground
+  e: { note: 'E Framed strip: the tan strip with a dark outline, a shadow and a soft dark halo', gap: 22, strip: true,
+    stripCss: 'background:linear-gradient(#d49a66, #8a5a30);box-shadow:0 0 0 2px #24140a, 0 3px 6px rgba(0,0,0,.85), 0 0 14px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,230,190,.5)',
+    hole(x, y, life) { el('', `left:${x - 3}px;top:${y - 3}px;width:6px;height:6px;border-radius:50%;background:#1a0e06;box-shadow:inset 0 1px 1px #000, 0 1px 0 rgba(255,230,190,.5)`, [{ opacity: 1, transform: 'scale(1.8)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], life); for (let i = 0; i < 3; i++) mote(x, y, '#f0d8b0'); },
+    thread(x, y, w, life) { el('', `left:${x}px;top:${y - 1}px;width:${w}px;height:2.5px;border-radius:2px;background:#fff2d8;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], life); },
+    payoff(x, y) { star(x + 46, y, 20, '#fff', .4); } },
+};
+let v = 'd';
+pick('v', x => { v = x; $('note').textContent = V[x].note; });
+function work(x, y, T) { const L = V[v], gap = L.gap, x0 = x - gap * 1.5;
+  if (L.strip) el('', `left:${x0 - 14}px;top:${y - 9}px;width:${gap * 3 + 28}px;height:18px;border-radius:5px;${L.stripCss || 'background:linear-gradient(#c89060, #8a5a30);box-shadow:0 1px 3px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,230,190,.4)'}`,
+    [{ transform: 'translateX(-30px) scaleX(.6)', opacity: 0 }, { transform: 'translateX(0) scaleX(1)', opacity: 1, offset: .1 }, { opacity: 1, offset: .88 }, { opacity: 0 }], (T + .55) * 1000);
+  for (let i = 0; i < 4; i++) at(T * (.18 + i * .16), () => { L.hole(x0 + i * gap, y, (T * (.82 - i * .16) + .5) * 1000); thok(); });
+  for (let i = 0; i < 3; i++) at(T * (.8 + i * .05), () => { L.thread(x0 + i * gap + 4, y, gap - 8, (T * .2 + .5) * 1000); zip(i); }); }
+function payoff(x, y) { V[v].payoff(x, y); tug(); }
+function spot() { const c = $('cast').getBoundingClientRect(), s = ST.getBoundingClientRect(); return [c.right - s.left + 62, c.top - s.top + c.height / 2]; }
+const T = 1.6;
+function craft(i) { const [x, y] = spot(); $('castb').animate([{ width: '0' }, { width: '100%' }], { duration: T * 1000, fill: 'forwards' });
+  // as in game: the beats full on the 1st item, quieter on the 2nd and 3rd, silent after; the payoff full for 3, then quieter
+  gain = i === 0 ? 1 : i < 3 ? .45 : 0; work(x, y, T); at(T, () => { gain = i < 3 ? 1 : .45; payoff(x, y); }); }
+$('one').onclick = () => craft(0);
+$('five').onclick = () => { for (let i = 0; i < 5; i++) at(i * (T + .15), () => craft(i)); };
+$('note').textContent = V[v].note;
+</script>
+</body>
+</html>
