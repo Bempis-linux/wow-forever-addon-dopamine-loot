@@ -108,37 +108,37 @@ end
 ---------------------------------------------------------------------------
 local P = {}
 
--- Leatherworking (docs/mockups/leather-r2.html, B "Leather strip", picked 2026-11-10 so it reads on dark
--- ground): a plain tan band slides in under the work, four holes are punched into it (a little dust each),
--- a cream stitch runs through them, a tug and a glint
+-- Leatherworking (docs/mockups/leather-r3.html, A "Bold and lit", picked 2026-11-10 after the tan strip
+-- blended into dirt): four big holes, each a glowing cream ring with a ring bursting out of the punch; a
+-- thick glowing thread runs through them; a tug, a big glint and a ring
 P.Leatherworking = {
   work = function(x, y, T, guid, s, loud)
-    local gap = 22 * s
+    local gap = 28 * s
     local x0 = x - gap * 1.5
-    local bw, life = gap * 3 + 28 * s, T + 0.55
-    local slide = function(u) -- slides in from the left as it stretches out, holds, fades
-      local k = math.min(1, u / 0.1)
-      return -30 * s * (1 - k), 0, 0.6 + 0.4 * k, u < 0.1 and k or (u > 0.88 and (1 - u) / 0.12 or 1)
-    end
-    Fx({ file = WHITE, x = x, y = y, w = bw, h = 18 * s, life = life, r = 0.66, gg = 0.44, b = 0.24, axis = "x", sub = -3, path = slide })
-    Fx({ file = WHITE, x = x, y = y - 6 * s, w = bw, h = 6 * s, life = life, r = 0.54, gg = 0.35, b = 0.19, axis = "x", sub = -2, path = slide }) -- (its darker lower edge)
-    Fx({ file = WHITE, x = x, y = y + 8 * s, w = bw - 4, h = 1, life = life, r = 1, gg = 0.9, b = 0.75, a = 0.4, axis = "x", sub = -2, path = slide }) -- (its lit top edge)
     for i = 0, 3 do
       After(T * (0.18 + i * 0.16), guid, function()
-        local hx = x0 + i * gap
-        Mark({ file = MEDIA .. "Circle.tga", x = hx, y = y, size = 6 * s, life = T * (0.82 - i * 0.16) + 0.5, r = 0.1, gg = 0.055, b = 0.024, pop = 1.8 })
-        for _ = 1, 3 do Dot({ x = hx, y = y, vx = R(-37, 37), vy = R(10, 42), size = 3, life = 0.38, r = 0.78, gg = 0.63, b = 0.44 }) end
+        local hx, life = x0 + i * gap, T * (0.82 - i * 0.16) + 0.5
+        Mark({ file = MEDIA .. "Glow.tga", x = hx, y = y, size = 20 * s, life = life, r = 1, gg = 0.81, b = 0.54, a = 0.6, add = true, pop = 1.8, sub = -1 }) -- (the glow)
+        Mark({ file = MEDIA .. "Ring.tga", x = hx, y = y, size = 11 * s, life = life, r = 0.96, gg = 0.86, b = 0.68, pop = 1.8 }) -- (the cream ring)
+        Mark({ file = MEDIA .. "Circle.tga", x = hx, y = y, size = 5 * s, life = life, r = 0.23, gg = 0.14, b = 0.07, pop = 1.8, sub = 1 }) -- (the hole)
+        Ring(hx, y, 26 * s, 0.3, 0, 1, 0.85, 0.63)
         if loud then Sound("LeatherThok" .. loud) end
       end)
     end
     for i = 0, 2 do
       After(T * (0.8 + i * 0.05), guid, function()
-        Mark({ file = WHITE, x = x0 + i * gap + gap / 2, y = y, w = gap - 8 * s, h = 2.5, life = T * 0.2 + 0.5, r = 1, gg = 0.95, b = 0.85, pop = 1 })
+        local tx, life = x0 + i * gap + gap / 2, T * 0.2 + 0.5
+        Mark({ file = MEDIA .. "Glow.tga", x = tx, y = y, w = gap, h = 12 * s, life = life, r = 1, gg = 0.81, b = 0.54, a = 0.5, add = true, pop = 1, sub = -1 })
+        Mark({ file = WHITE, x = tx, y = y, w = gap - 8 * s, h = 3 * s, life = life, r = 1, gg = 0.91, b = 0.75, pop = 1 })
         if loud then Sound("LeatherZip" .. loud) end
       end)
     end
   end,
-  payoff = function(x, y, s, quiet) Glint(x + 46 * s, y, 18 * s, 0.4); Sound(quiet and "LeatherTugQ" or "LeatherTug") end,
+  payoff = function(x, y, s, quiet)
+    Glint(x + 58 * s, y, 22 * s, 0.4)
+    Ring(x + 58 * s, y, 34 * s, 0.35, 0, 1, 0.88, 0.69)
+    Sound(quiet and "LeatherTugQ" or "LeatherTug")
+  end,
 }
 
 local POTION = { { 0.75, 0.54, 1 }, { 0.62, 1, 0.54 }, { 1, 0.48, 0.54 }, { 0.48, 0.78, 1 }, { 1, 0.83, 0.29 } }

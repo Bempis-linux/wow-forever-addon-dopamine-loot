@@ -1,5 +1,11 @@
 # Dopamine Loot
 
+## 1.3.1 (2026-11-10)
+
+- Leatherworking: the craft effect is now easy to see on any ground. Each punch leaves a big glowing cream
+  ring with a ring bursting out of it, and a thick glowing thread runs through them (the tan leather strip
+  blended into dirt and sand).
+
 ## 1.3.0 (2026-11-10)
 
 The professions release: gathering, crafting and skill-ups get their own effects, plus a bag that
