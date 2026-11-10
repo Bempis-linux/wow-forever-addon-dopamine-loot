@@ -151,7 +151,18 @@ unverified) -> ns.lastRecipe; 0.3 s after a skill-up of the same profession C_Tr
 .relativeDifficulty is compared ("X is now yellow/green/gray"). Test: Gathering page, Crafting, "Test skill-up"
 (every other press shows a recipe line). **Next:** the user does ONE FULL RESTART (new files) and tests stages A-C;
 verify in game `/dump ProfessionsFrame.CraftingPage.SchematicForm:GetRecipeInfo().relativeDifficulty`. Then the
-release checklist: /dl in combat opens after combat, version + CHANGELOG, release 1.3.0. Read this first
+release checklist: /dl in combat opens after combat, version + CHANGELOG, release 1.3.0.
+**2026-11-10 (3bba180, untested in game):** the user found the game "nothing like the mockups" (bars, motions,
+sounds). docs/mockups/crafting-picks.html now holds every pick in one page (the reference). Rebuilt to match:
+sounds are RENDERED from the mockups' own WebAudio code (tools/render-media.html served by tools/render-media.ps1,
+OfflineAudioContext, silent; the user allowed this scripted pane run) and converted by tools/convert-media.sh;
+tools are our own emoji-style SVG drawings (Tool*.tga, colored, not tinted) + FxGear/FxScissors/FxCross (white with
+baked glow). gen_craft_sounds.sh is superseded (would overwrite). SkillBar.lua: 260x12, gradients stretch with the
+fill, the mockup's keyframe motions + bits + Tool<Prof>.ogg; gathering bars (Herbalism stem+sprout, Mining stone+
+pick, Fishing water+bobber, Skinning hide+knife) picked by the user. Craft effects now play right of the cast bar
+(user's note). First Aid back to round 4 (roll, wraps, green cross) by the user's pick. In game the user liked
+Blacksmithing, Leatherworking, Enchanting; Engineering looked weak (now glowing gears), Tailoring lacked the snip
+(now FxScissors). "Show all" plays every skill bar. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 

@@ -352,7 +352,8 @@ end)
 -- Test (Gathering page, crafting): a skill-up for the crafting profession picked there; every other
 -- press the recipe just crafted turns yellow, then green, then gray
 local testRecipe = 0
-local CRAFTS = { "Tailoring", "Leatherworking", "Alchemy", "Engineering", "Cooking", "Blacksmithing", "Enchanting", "First Aid" }
+local CRAFTS = { "Tailoring", "Leatherworking", "Alchemy", "Engineering", "Cooking", "Blacksmithing", "Enchanting", "First Aid",
+  "Herbalism", "Mining", "Fishing", "Skinning" } -- (Show all: the gathering bars too)
 ns.AddAction("testcraftskill", function(arg)
   if arg == "all" then -- every crafting bar in turn, each at a different level
     for i, n in ipairs(CRAFTS) do

@@ -42,8 +42,8 @@ local function Create()
     "Six crafts in a row, the way Create All plays: from the 4th item it gets smaller and quieter.")
   N.Button(layout, "Skill up", "Test skill-up", function() ns.RunAction("testcraftskill", ns.settings.testCraft or "Tailoring") end,
     "A skill-up for the profession picked above: its bar made of the craft's material and its tool at the end. Every other press also shows a recipe changing color.")
-  N.Button(layout, "Every crafting bar", "Show all", function() ns.RunAction("testcraftskill", "all") end,
-    "Plays a skill-up for each crafting profession in turn, about 3 seconds apart, so you can compare their bars.")
+  N.Button(layout, "Every skill bar", "Show all", function() ns.RunAction("testcraftskill", "all") end,
+    "Plays a skill-up for each profession in turn (crafting, then gathering), about 3 seconds apart, so you can compare their bars.")
 
   N.Header(layout, "Placement")
   N.Button(layout, "Drag frames into place", "Move frames", function() ns.Mover.Unlock() end,
