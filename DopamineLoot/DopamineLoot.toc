@@ -25,6 +25,7 @@ Gather.lua
 Feed.lua
 Craft.lua
 CraftTray.lua
+SkillBar.lua
 Skill.lua
 Settings.lua
 Look.lua

@@ -40,6 +40,8 @@ local function Create()
     "One craft of the profession picked above, with a pretend cast.")
   N.Button(layout, "Create All", "Test Create All", function() ns.RunAction("testcraft", (ns.settings.testCraft or "Tailoring") .. " 6") end,
     "Six crafts in a row, the way Create All plays: from the 4th item it gets smaller and quieter.")
+  N.Button(layout, "Skill up", "Test skill-up", function() ns.RunAction("testcraftskill", ns.settings.testCraft or "Tailoring") end,
+    "A skill-up for the profession picked above: its bar made of the craft's material and its tool at the end. Every other press also shows a recipe changing color.")
 
   N.Header(layout, "Placement")
   N.Button(layout, "Drag frames into place", "Move frames", function() ns.Mover.Unlock() end,

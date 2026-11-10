@@ -26,6 +26,21 @@ local PROF = {
     { 245, 10620, "Small Thorium Vein" }, { 275, 10620, "Rich Thorium Vein" } } },
   Fishing = { icon = 6291, color = { 0.16, 0.49, 1 }, light = { 0.54, 0.78, 1 } },
   Skinning = { icon = 2318, color = { 0.6, 0.42, 0.23 }, light = { 0.88, 0.72, 0.5 } },
+  -- crafting (docs/mockups/crafting-r5.html): the bar is made of the craft's material (SkillBar.lua)
+  Leatherworking = { craft = true, color = { 0.69, 0.48, 0.27 }, light = { 0.9, 0.72, 0.5 } },
+  Alchemy = { craft = true, color = { 0.6, 0.35, 0.88 }, light = { 0.82, 0.66, 1 } },
+  Tailoring = { craft = true, color = { 0.85, 0.78, 0.63 }, light = { 1, 0.96, 0.85 } },
+  Engineering = { craft = true, color = { 0.63, 0.71, 0.78 }, light = { 0.85, 0.92, 1 } },
+  Cooking = { craft = true, color = { 0.88, 0.63, 0.31 }, light = { 1, 0.82, 0.55 } },
+  Blacksmithing = { craft = true, color = { 0.88, 0.48, 0.16 }, light = { 1, 0.75, 0.45 } },
+  Enchanting = { craft = true, color = { 0.54, 0.42, 1 }, light = { 0.78, 0.7, 1 } },
+  ["First Aid"] = { craft = true, color = { 0.88, 0.35, 0.35 }, light = { 1, 0.62, 0.62 } },
+}
+-- the recipe line under a crafting skill-up, when the recipe just crafted changed color
+local RECIPE = {
+  [1] = "|cffffff40yellow|r: skill-ups from it come slower",
+  [2] = "|cff40c040green|r: skill-ups from it are rare now",
+  [3] = "|cff9d9d9dgray|r: no more skill-ups from it",
 }
 local DEFAULT = { color = { 0.85, 0.65, 0.13 }, light = { 1, 0.85, 0.4 } }
 -- Professions (other skills such as weapons don't get a banner); localized names are added at login
@@ -33,9 +48,10 @@ local IS_PROF = { Herbalism = true, Mining = true, Skinning = true, Fishing = tr
   Enchanting = true, Engineering = true, Leatherworking = true, Tailoring = true, Cooking = true, ["First Aid"] = true,
   Jewelcrafting = true, Inscription = true }
 
-local banner, title, bar, fill, unlock, unlockBorder, note
+local banner, title, bar, unlock, unlockBorder, note, recipeLine
 local pattern
 local showT, showing
+local shown = 0 -- (counts banners: a late recipe check only writes into its own)
 
 local function Pattern()
   local s = _G.SKILL_RANK_UP
@@ -182,30 +198,25 @@ end
 
 local function Create()
   banner = CreateFrame("Frame", nil, UIParent)
-  banner:SetSize(260, 56)
+  banner:SetSize(260, 70)
   banner:SetFrameStrata("FULLSCREEN_DIALOG") -- (a short banner; above the settings window for the test)
   banner:Hide()
   title = banner:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   title:SetPoint("TOP", 0, 0)
-  bar = CreateFrame("StatusBar", nil, banner)
-  bar:SetSize(200, 7)
-  bar:SetPoint("TOP", title, "BOTTOM", -12, -6)
-  bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-  bar:SetMinMaxValues(0, 1)
-  local bg = bar:CreateTexture(nil, "BACKGROUND")
-  bg:SetPoint("TOPLEFT", -1, 1)
-  bg:SetPoint("BOTTOMRIGHT", 1, -1)
-  bg:SetColorTexture(0, 0, 0, 0.6)
-  fill = bar:GetStatusBarTexture()
+  bar = ns.MakeSkillBar(banner) -- (its track sits 6 below the title; the tool rides above it)
+  bar:SetPoint("TOP", title, "BOTTOM", -12, 10)
   unlock = banner:CreateTexture(nil, "ARTWORK")
   unlock:SetSize(20, 20)
-  unlock:SetPoint("LEFT", bar, "RIGHT", 6, 0)
+  unlock:SetPoint("LEFT", bar.track, "RIGHT", 6, 0)
   unlockBorder = banner:CreateTexture(nil, "OVERLAY")
   unlockBorder:SetTexture(BORDER)
   unlockBorder:SetAllPoints(unlock)
   note = banner:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  note:SetPoint("TOP", bar, "BOTTOM", 12, -4)
+  note:SetPoint("TOP", bar, "BOTTOM", 12, 0)
   note:SetTextColor(0.85, 0.82, 0.72)
+  recipeLine = banner:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  recipeLine:SetPoint("TOP", note, "BOTTOM", 0, -3)
+  recipeLine:SetTextColor(0.85, 0.82, 0.72)
   CreateReveal()
   local function Animate(self, dt)
     showT = showT + dt
@@ -214,23 +225,24 @@ local function Create()
     -- (the banner's own fade leaves the reveal, a child, at full strength until its own fade)
     self:SetAlpha(1)
     local own = math.min(1, t / 0.3, (life - t) / 0.4)
-    title:SetAlpha(own); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own)
+    title:SetAlpha(own); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
     if showing then
       local u = math.min(1, math.max(0, (t - 0.3) / 0.7))
       bar:SetValue(showing.v0 + (showing.v1 - showing.v0) * (1 - (1 - u) ^ 3))
+      if u >= 1 and not showing.tooled then showing.tooled = true; bar:PlayTool() end -- (the tool's motion as the fill lands)
     end
     if revealing then AnimateReveal(t - REVEAL_AT) end
     if t >= life then self:Hide(); reveal:Hide(); revealing = nil end
   end
   banner:SetScript("OnUpdate", Animate)
-  ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 260, h = 56,
+  ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 260, h = 70,
     preview = function(on)
       if on then -- a still sample while it's being placed
         banner:SetScript("OnUpdate", nil); banner:SetAlpha(1); banner:Show(); reveal:Hide(); revealing = nil
         title:SetAlpha(1); bar:SetAlpha(1); note:SetAlpha(1); unlock:SetAlpha(1); unlockBorder:SetAlpha(1)
-        local c = PROF.Herbalism.color
-        title:SetText("Herbalism |cff8ef07a64|r"); note:SetText("6 to Briarthorn"); bar:SetValue(0.7)
-        bar:SetStatusBarColor(c[1], c[2], c[3])
+        local p = PROF.Herbalism
+        title:SetText("Herbalism |cff8ef07a64|r"); note:SetText("6 to Briarthorn"); recipeLine:SetText("")
+        bar:SetProfession("Herbalism", p.color, p.light); bar:SetValue(0.7)
         if GetIcon then unlock:SetTexture(GetIcon(2450)); unlock:Show(); unlockBorder:Show() end
       else
         banner:Hide(); banner:SetScript("OnUpdate", Animate)
@@ -240,7 +252,7 @@ end
 
 -- Shows the banner: name (as the client says it), the new level. capped: this level is the rank's cap
 -- (nil: ask the game). Reaching a new herb or ore, or a rank's cap, adds the unlock reveal.
-function ns.ShowSkillUp(name, level, capped)
+function ns.ShowSkillUp(name, level, capped, recipeColor)
   if ns.settings.noSkillUp or not banner then return end
   if ns.Mover.IsUnlocked() then return end
   local p = PROF[name] or DEFAULT
@@ -263,9 +275,23 @@ function ns.ShowSkillUp(name, level, capped)
   end
   title:SetText(("%s |cff%02x%02x%02x%d|r"):format(name, l[1] * 255, l[2] * 255, l[3] * 255, level))
   title:SetShadowColor(c[1], c[2], c[3], 0.9)
-  fill:SetVertexColor(c[1], c[2], c[3])
-  bar:SetStatusBarColor(c[1], c[2], c[3])
+  bar:SetProfession(name, c, l)
   note:SetText(text)
+  recipeLine:SetText("")
+  if p.craft then -- did the recipe just crafted change color? (it may update a moment after the skill)
+    local r = ns.lastRecipe
+    if recipeColor then recipeLine:SetText(recipeColor) -- (a test)
+    elseif r and GetTime() - r.t < 15 and r.color and (not r.prof or r.prof == name) then
+      local mine = shown + 1 -- (this banner, counted below)
+      C_Timer.After(0.3, function()
+        local now = ns.RecipeColor and ns.RecipeColor(r.id)
+        if now and now > r.color and RECIPE[now] and banner:IsShown() and shown == mine then
+          recipeLine:SetText(("|cffffffff%s|r is now %s"):format(r.name, RECIPE[now]))
+        end
+        r.color = now or r.color
+      end)
+    end
+  end
   if icon then
     unlock:SetTexture(icon); unlock:Show()
     unlockBorder:SetVertexColor(l[1], l[2], l[3]); unlockBorder:Show()
@@ -274,6 +300,7 @@ function ns.ShowSkillUp(name, level, capped)
   showing = { v0 = math.max(0, (level - 1 - from) / span), v1 = math.min(1, (level - from) / span) }
   bar:SetValue(showing.v0)
   showT = 0
+  shown = shown + 1
   banner:SetAlpha(0)
   banner:Show()
   ns:PlaySkillUp()
@@ -311,4 +338,16 @@ ns.AddAction("testskill", function(arg)
   end
   testLevel[name] = level
   ns.ShowSkillUp(name, level, false)
+end)
+
+-- Test (Gathering page, crafting): a skill-up for the crafting profession picked there; every other
+-- press the recipe just crafted turns yellow, then green, then gray
+local testRecipe = 0
+ns.AddAction("testcraftskill", function(arg)
+  local name = PROF[arg] and PROF[arg].craft and arg or "Tailoring"
+  local level = (testLevel[name] or 63) + 1
+  testLevel[name] = level
+  testRecipe = testRecipe % 6 + 1
+  local line = testRecipe % 2 == 0 and ("|cffffffffTest recipe|r is now " .. RECIPE[testRecipe / 2]) or nil
+  ns.ShowSkillUp(name, level, false, line)
 end)

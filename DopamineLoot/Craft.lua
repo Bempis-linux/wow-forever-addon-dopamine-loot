@@ -401,6 +401,27 @@ function ns.CraftTakes(d)
   return true
 end
 
+-- The recipe being crafted and its color (0 orange, 1 yellow, 2 green, 3 gray), read from the game (read
+-- only): Skill.lua compares it after a skill-up and says when the recipe changed color. nil if unknown.
+local function Clean(v) if v ~= nil and not ns.Secret(v) then return v end end
+function ns.RecipeColor(id)
+  if not (C_TradeSkillUI and C_TradeSkillUI.GetRecipeInfo) or not id then return nil end
+  local ok, info = pcall(C_TradeSkillUI.GetRecipeInfo, id)
+  if not ok or type(info) ~= "table" then return nil end
+  local d = Clean(info.relativeDifficulty)
+  return type(d) == "number" and d or nil
+end
+local function NoteRecipe()
+  local w = _G.ProfessionsFrame
+  local form = w and w.CraftingPage and w.CraftingPage.SchematicForm
+  if not (form and form.GetRecipeInfo) then return end
+  local ok, info = pcall(form.GetRecipeInfo, form)
+  if not ok or type(info) ~= "table" then return end
+  local id, name = Clean(info.recipeID), Clean(info.name)
+  if type(id) ~= "number" or type(name) ~= "string" then return end
+  ns.lastRecipe = { id = id, name = name, prof = Profession(), color = ns.RecipeColor(id), t = GetTime() }
+end
+
 ---------------------------------------------------------------------------
 -- Events: the player's casts
 ---------------------------------------------------------------------------
@@ -408,9 +429,11 @@ local ev = CreateFrame("Frame")
 ev:SetScript("OnEvent", function(_, event, unit, guid)
   if unit ~= "player" or ns.Secret(guid) then return end
   if event == "UNIT_SPELLCAST_START" then
-    if not On() or not WindowOpen() then return end
+    if not WindowOpen() then return end
     local ok, _, _, tex, startMs, endMs, isTrade = pcall(UnitCastingInfo, "player")
     if not ok or ns.Secret(isTrade) or not isTrade or ns.Secret(startMs) or ns.Secret(endMs) or not startMs or not endMs then return end
+    NoteRecipe() -- (for the skill-up's recipe line, even with the craft effects off)
+    if not On() then return end
     local T = math.max(0.4, (endMs - startMs) / 1000)
     Start(guid, T, (not ns.Secret(tex)) and tex or nil)
   elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
