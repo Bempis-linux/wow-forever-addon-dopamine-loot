@@ -38,14 +38,14 @@
 <script>
 'use strict';
 const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), ST = $('st');
-let snd = true, actx, muteUntil = 0;
+let snd = true, actx, gain = 1; // (gain: the batch step-down, as in game)
 function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
 pick('snd', v => snd = v === '1'); pick('g', v => ST.className = 'stage ' + v);
 function ac() { return actx = actx || new AudioContext(); }
 const now = t => ac().currentTime + Math.max(0, t || 0);
-const muted = () => !snd || performance.now() < muteUntil;
-function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (muted()) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .004); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
-function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1) { if (muted()) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+const muted = () => !snd || gain <= 0;
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (muted()) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol * gain, at + .004); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1) { if (muted()) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol * gain; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
 function el(html, css, frames, dur, delay = 0) { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d); d.animate(frames, { duration: dur, delay, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
 function star(x, y, size, color, life) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000); }
 const at = (t, fn) => setTimeout(fn, t * 1000);
@@ -86,10 +86,11 @@ function work(x, y, T) { const L = V[v], gap = L.gap, x0 = x - gap * 1.5;
 function payoff(x, y) { V[v].payoff(x, y); tug(); }
 function spot() { const c = $('cast').getBoundingClientRect(), s = ST.getBoundingClientRect(); return [c.right - s.left + 62, c.top - s.top + c.height / 2]; }
 const T = 1.6;
-function craft(quiet) { const [x, y] = spot(); $('castb').animate([{ width: '0' }, { width: '100%' }], { duration: T * 1000, fill: 'forwards' });
-  if (quiet) muteUntil = performance.now() + T * 1000 - 30; work(x, y, T); at(T, () => payoff(x, y)); }
-$('one').onclick = () => craft(false);
-$('five').onclick = () => { for (let i = 0; i < 5; i++) at(i * (T + .15), () => craft(i > 0)); };
+function craft(i) { const [x, y] = spot(); $('castb').animate([{ width: '0' }, { width: '100%' }], { duration: T * 1000, fill: 'forwards' });
+  // as in game: the beats full on the 1st item, quieter on the 2nd and 3rd, silent after; the payoff full for 3, then quieter
+  gain = i === 0 ? 1 : i < 3 ? .45 : 0; work(x, y, T); at(T, () => { gain = i < 3 ? 1 : .45; payoff(x, y); }); }
+$('one').onclick = () => craft(0);
+$('five').onclick = () => { for (let i = 0; i < 5; i++) at(i * (T + .15), () => craft(i)); };
 $('note').textContent = V[v].note;
 </script>
 </body>
