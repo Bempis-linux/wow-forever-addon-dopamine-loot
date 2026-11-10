@@ -143,9 +143,15 @@ Create All, `/dump C_TradeSkillUI.GetBaseProfessionInfo()` with the window open,
 isTradeskill. **Verified in game 2026-11-09:** UnitCastingInfo 6th = true while crafting (Heavy Linen Bandage);
 GetRemainingRecasts() = 7 during a Create All; GetBaseProfessionInfo() = { professionName = "First Aid", profession = 0,
 professionID = 129, skillLevel = 76, maxSkillLevel = 150 }. **Stage B done** (CraftTray.lua, reviewed: 8 fixes; no goto:
-Lua 5.1). Next: stage C (material skill bars + tools, the recipe
-color line via SchematicForm:GetRecipeInfo + C_TradeSkillUI.GetRecipeInfo(id).relativeDifficulty).
-After that: popups movable via Mover. Read this first
+Lua 5.1). **Stage C done (cece78f, untested in game):** SkillBar.lua (ns.MakeSkillBar: each crafting profession's
+bar made of its material, styles built once and reused; tools Needle/Awl/Hammer/Wrench/Spatula/Pin.tga from
+gen_textures.lua, the drop = Petal, the wand = star4; the tool moves once as the fill lands); Skill.lua uses it
+(gathering keeps a plain gradient bar); recipe line: Craft.lua NoteRecipe at cast start (SchematicForm:GetRecipeInfo,
+unverified) -> ns.lastRecipe; 0.3 s after a skill-up of the same profession C_TradeSkillUI.GetRecipeInfo(id)
+.relativeDifficulty is compared ("X is now yellow/green/gray"). Test: Gathering page, Crafting, "Test skill-up"
+(every other press shows a recipe line). **Next:** the user does ONE FULL RESTART (new files) and tests stages A-C;
+verify in game `/dump ProfessionsFrame.CraftingPage.SchematicForm:GetRecipeInfo().relativeDifficulty`. Then the
+release checklist: /dl in combat opens after combat, version + CHANGELOG, release 1.3.0. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
 
