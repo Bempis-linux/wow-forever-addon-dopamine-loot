@@ -123,7 +123,9 @@ ideas; skill bars "awesome" (fix: the needle emoji showed as a square -> a drawn
 drop too blue -> the bar's purple). The batch touches are "awkward", and the Create All tray is "a decent start but not
 what I'm looking for": brainstorm + mockup both together next. Round 5 mockup docs/mockups/crafting-r5.html: hammer
 sounds H1 forge hammer / H2 tap, tap, CLANG / H3 dull iron; first aid F1 salve and wrap / F2 stitch a cross / F3 roll
-toss / F4 pulse; the two bar fixes. Waiting.
+toss / F4 pulse; the two bar fixes. **Verdict:** blacksmithing = H2 tap, tap, CLANG; skill bar fixes "much better";
+first aid not there yet (sound: F2 best; animation: F1 best). Round 6: docs/mockups/firstaid-r6.html (A F1 with F2-style
+taps / B + a safety pin / C a gauze patch and crossed tape). Next: the Create All batch brainstorm.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
