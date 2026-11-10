@@ -69,7 +69,9 @@ loot column anchor (Mover key "tally", label "Loot column"; the harvest window h
 ns.SetFeedHeight), shared row ns.NewLootRow; popups draggable (Mover key "popups", position "custom"; default
 midright 0.63 -> 0.55); Move frames bar text fixed (two lines). Next: harvest window polish (the pace line repeats
 the total, tiny section icons, ragged counts; max 3 sections in real play: 2 gathering professions + fishing), then
-release 1.3.0.
+release 1.3.0. Mockup docs/mockups/harvest-polish.html (now vs. picks): header H1 time and rate / H2 one line / H3 rate
+only; sections S1 plain words / S2 color pip / S3 pip + section total; counts C1 fixed column / C2 quiet numbers.
+Waiting for picks.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

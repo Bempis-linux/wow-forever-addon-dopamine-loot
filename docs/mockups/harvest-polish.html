@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harvest Window Polish</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0; color: var(--muted); max-width: 980px; }
+  header p b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; min-width: 70px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .wrap { display: flex; gap: 28px; flex-wrap: wrap; margin: 8px 18px; }
+  .scene { position: relative; width: 300px; padding: 16px 14px 18px 56px; border-radius: 6px; border: 1px solid #3a3426;
+    background: radial-gradient(ellipse at 30% 40%, #5a4636, #2c2219 60%, #17120d); }
+  .scene h3 { position: absolute; left: 10px; top: -10px; margin: 0; font: 600 11px system-ui; color: var(--muted); background: #0b0b10; padding: 0 6px; }
+  .col { width: 230px; display: flex; flex-direction: column; gap: 2px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; font: 700 13px Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000; }
+  .meta { display: flex; justify-content: space-between; padding: 0 4px 2px; font: 600 10.5px system-ui; color: #b9b09a; text-shadow: 0 1px 0 #000; }
+  .coin { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 2px 0 1px; } .s { background: #c9ced6; } .c { background: #c27a3a; }
+  .sec { display: flex; align-items: center; gap: 6px; margin: 4px 0 1px; padding: 0 4px; font: 700 10px system-ui; letter-spacing: .08em; text-transform: uppercase; color: var(--pc); text-shadow: 0 1px 0 #000; }
+  .sec::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--pc), transparent); opacity: .6; }
+  .sec .mini { width: 13px; height: 13px; border-radius: 2px; font-size: 10px; display: flex; align-items: center; justify-content: center; background: #241c12; box-shadow: inset 0 0 0 1px #000; }
+  .sec .pip { width: 7px; height: 7px; transform: rotate(45deg); background: var(--pc); box-shadow: 0 0 5px var(--pc); margin: 0 2px; }
+  .sec .sum { margin-left: auto; order: 3; font: 700 10px system-ui; letter-spacing: 0; color: #c9c2b0; }
+  .sec.sum-on::after { order: 2; }
+  .row { position: relative; display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 6px 0 4px; border-radius: 2px;
+    background: linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.04)); border-left: 2px solid var(--pc); }
+  .icon { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--qc); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 6px rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+  .row .nm { flex: 1; min-width: 0; font: 600 12px "Friz Quadrata TT", Georgia, serif; color: var(--qc); text-shadow: 0 1px 1px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .plus { font: 700 12.5px Georgia, serif; color: #73ff59; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; }
+  .row .n { font: 700 15px Georgia, serif; color: #ffd100; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; }
+  .badge { display: inline-flex; align-items: center; padding: 0 4px; height: 14px; border-radius: 3px; font: 800 9.5px system-ui; color: #1a1205;
+    background: linear-gradient(#ffe48a, #d9a520); box-shadow: 0 0 0 1px #000; }
+  /* counts C0: as now (each sits where its text ends) */
+  .c0 .n { margin-left: 4px; }
+  /* C1: a fixed right column for the count, a fixed slot before it for +N or the stack badge */
+  .c1 .slot { width: 30px; display: flex; justify-content: flex-end; } .c1 .n { width: 26px; text-align: right; font-variant-numeric: tabular-nums; }
+  /* C2: the count small and quiet ("28"), the stack as a little stack icon with its number */
+  .c2 .slot { width: 30px; display: flex; justify-content: flex-end; } .c2 .n { width: 24px; text-align: right; font: 700 13px system-ui; color: #ffe9a8; font-variant-numeric: tabular-nums; }
+  .c2 .badge { background: none; box-shadow: none; color: #ffd34a; font-size: 10px; padding: 0; } .c2 .badge::before { content: "▤"; margin-right: 2px; }
+  .picked .row { border-left-color: transparent; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Harvest window polish</h1>
+  <p>Your real window (3 sections at most: 2 gathering professions + fishing), with the Picked up list above it for context. Pick a <b>header</b>, <b>section headers</b> and <b>counts</b>; the left is how it is now, the right your picks. One row has a full stack (the gold badge) and two have a "+N" showing, to check alignment.</p>
+</header>
+<div class="bar"><span>Header</span><button data-h="h1" class="on">H1 Time and rate</button><button data-h="h2">H2 All on one line</button><button data-h="h3">H3 Rate only</button></div>
+<div class="bar"><span>Sections</span><button data-s="s1" class="on">S1 Plain words</button><button data-s="s2">S2 Color pip</button><button data-s="s3">S3 Pip + section total</button></div>
+<div class="bar"><span>Counts</span><button data-c="c1" class="on">C1 Fixed column</button><button data-c="c2">C2 Quiet numbers</button></div>
+<div class="bar"><span>Show</span><button data-p="1" class="on">With Picked up above</button><button data-p="0">Harvest alone</button></div>
+<div class="wrap">
+  <div class="scene"><h3>Now</h3><div class="col" id="now"></div></div>
+  <div class="scene"><h3>Your picks</h3><div class="col" id="new"></div></div>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const SECS = [
+  { k: 'Ore', pc: '#d07a3a', mini: '🪨', rows: [['🪨', 'Rough Stone', '#fff', 5, '+5'], ['🟫', 'Copper Ore', '#fff', 22, '', 1]] },
+  { k: 'Leather', pc: '#b07a46', mini: '🟫', rows: [['🦴', 'Ruined Leather Scraps', '#9d9d9d', 7], ['🟤', 'Light Leather', '#fff', 4, '+1']] },
+  { k: 'Fish', pc: '#3a8cff', mini: '🐟', rows: [['🐟', 'Raw Brilliant Smallfish', '#fff', 6]] },
+];
+const PICKED = [['🧤', 'Scouting Gloves', '#1eff00', 1], ['🦴', 'Broken Fang', '#9d9d9d', 2]];
+const total = SECS.reduce((s, x) => s + x.rows.reduce((a, r) => a + r[3], 0), 0);
+let H = 'h1', S = 's1', C = 'c1', P = true;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); draw(); }); }
+pick('h', v => H = v); pick('s', v => S = v); pick('c', v => C = v); pick('p', v => P = v === '1');
+const worth = '1<i class="coin s"></i> 75<i class="coin c"></i>';
+function head(style) {
+  if (style === 'now') return `<div class="head"><span>Harvest</span><span>${total}</span></div><div class="meta"><span>${total} in 18 min · ~98/h</span><span>worth ${worth}</span></div>`;
+  if (style === 'h1') return `<div class="head"><span>Harvest</span><span>${total}</span></div><div class="meta"><span>18 min · ~98/h</span><span>worth ${worth}</span></div>`;
+  if (style === 'h2') return `<div class="head"><span>Harvest <small style="font:600 10.5px system-ui;color:#b9b09a">· 18 min · ~98/h</small></span><span>${total}</span></div><div class="meta"><span></span><span>worth ${worth}</span></div>`;
+  return `<div class="head"><span>Harvest</span><span>${total}</span></div><div class="meta"><span>~98 an hour</span><span>worth ${worth}</span></div>`;
+}
+function sec(s, style) {
+  const sum = s.rows.reduce((a, r) => a + r[3], 0);
+  if (style === 'now') return `<div class="sec" style="--pc:${s.pc}"><span class="mini">${s.mini}</span>${s.k}</div>`;
+  if (style === 's1') return `<div class="sec" style="--pc:${s.pc}">${s.k}</div>`;
+  if (style === 's2') return `<div class="sec" style="--pc:${s.pc}"><i class="pip"></i>${s.k}</div>`;
+  return `<div class="sec sum-on" style="--pc:${s.pc}"><i class="pip"></i>${s.k}<span class="sum">${sum}</span></div>`;
+}
+function row(r, pc, cstyle) {
+  const [g, name, qc, n, plus, stacks] = r;
+  const extra = plus ? `<span class="plus">${plus}</span>` : stacks ? `<span class="badge">×${stacks}</span>` : '';
+  if (cstyle === 'now') return `<div class="row c0" style="--pc:${pc};--qc:${qc}"><div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span>${extra}<span class="n">${n}</span></div>`;
+  return `<div class="row ${cstyle}" style="--pc:${pc};--qc:${qc}"><div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="slot">${extra}</span><span class="n">${n}</span></div>`;
+}
+function picked(cstyle) {
+  if (!P) return '';
+  return `<div class="picked"><div class="head"><span>Picked up</span></div>${PICKED.map(r => row([r[0], r[1], r[2], r[3] > 1 ? '×' + r[3] : '', '', 0], 'transparent', cstyle)).join('')}</div><div style="height:8px"></div>`;
+}
+function draw() {
+  $('now').innerHTML = picked('now') + head('now') + SECS.map(s => sec(s, 'now') + s.rows.map(r => row(r, s.pc, 'now')).join('')).join('');
+  $('new').innerHTML = picked(C) + head(H) + SECS.map(s => sec(s, S) + s.rows.map(r => row(r, s.pc, C)).join('')).join('');
+}
+draw();
+</script>
+</body>
+</html>
