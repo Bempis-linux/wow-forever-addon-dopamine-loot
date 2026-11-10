@@ -198,7 +198,7 @@ end
 
 local function Create()
   banner = CreateFrame("Frame", nil, UIParent)
-  banner:SetSize(260, 70)
+  banner:SetSize(290, 72)
   banner:SetFrameStrata("FULLSCREEN_DIALOG") -- (a short banner; above the settings window for the test)
   banner:Hide()
   title = banner:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -235,7 +235,7 @@ local function Create()
     if t >= life then self:Hide(); reveal:Hide(); revealing = nil end
   end
   banner:SetScript("OnUpdate", Animate)
-  ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 260, h = 70,
+  ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 290, h = 72,
     preview = function(on)
       if on then -- a still sample while it's being placed
         banner:SetScript("OnUpdate", nil); banner:SetAlpha(1); banner:Show(); reveal:Hide(); revealing = nil
@@ -296,6 +296,7 @@ function ns.ShowSkillUp(name, level, capped, recipeColor)
     unlock:SetTexture(icon); unlock:Show()
     unlockBorder:SetVertexColor(l[1], l[2], l[3]); unlockBorder:Show()
   else unlock:Hide(); unlockBorder:Hide() end
+  if p.craft and not u then from = 0 end -- (a crafting bar reads like the game's own: 78 / 150, not 3 / 75)
   local span = math.max(1, to - from)
   showing = { v0 = math.max(0, (level - 1 - from) / span), v1 = math.min(1, (level - from) / span) }
   bar:SetValue(showing.v0)
@@ -343,7 +344,14 @@ end)
 -- Test (Gathering page, crafting): a skill-up for the crafting profession picked there; every other
 -- press the recipe just crafted turns yellow, then green, then gray
 local testRecipe = 0
+local CRAFTS = { "Tailoring", "Leatherworking", "Alchemy", "Engineering", "Cooking", "Blacksmithing", "Enchanting", "First Aid" }
 ns.AddAction("testcraftskill", function(arg)
+  if arg == "all" then -- every crafting bar in turn, each at a different level
+    for i, n in ipairs(CRAFTS) do
+      C_Timer.After((i - 1) * 3.2, function() testLevel[n] = math.random(20, 140); ns.ShowSkillUp(n, testLevel[n], false) end)
+    end
+    return
+  end
   local name = PROF[arg] and PROF[arg].craft and arg or "Tailoring"
   local level = (testLevel[name] or 63) + 1
   testLevel[name] = level

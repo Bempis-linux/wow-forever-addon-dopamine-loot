@@ -363,7 +363,7 @@ local function Done(guid)
   local p, n = craft.prof, batch and batch.n or 1
   local x, y = Spot()
   p.payoff(x, y, n <= FULL_ITEMS and 1 or 0.65, n > FULL_ITEMS, craft.icon)
-  if ns.CraftItemDone and batch then ns.CraftItemDone(batch, craft.icon) end
+  if ns.CraftItemDone and batch then ns.CraftItemDone(batch, batch.itemIcon or craft.icon) end
   craft = nil
   lastDone = GetTime()
   local my = batch
@@ -398,6 +398,7 @@ function ns.CraftTakes(d)
   if b.items[key] then b.items[key].count = (b.items[key].count or 1) + (d.count or 1)
   else b.items[key] = d; b.order[#b.order + 1] = key end
   if not b.icon then b.icon = d.icon end
+  if d.icon then b.itemIcon = d.icon end -- (the made item's own icon, for the next ones in the tray)
   return true
 end
 
@@ -419,7 +420,10 @@ local function NoteRecipe()
   if not ok or type(info) ~= "table" then return end
   local id, name = Clean(info.recipeID), Clean(info.name)
   if type(id) ~= "number" or type(name) ~= "string" then return end
-  ns.lastRecipe = { id = id, name = name, prof = Profession(), color = ns.RecipeColor(id), t = GetTime() }
+  local icon = Clean(info.icon)
+  ns.lastRecipe = { id = id, name = name, prof = Profession(), color = ns.RecipeColor(id), t = GetTime(),
+    icon = (type(icon) == "number" or type(icon) == "string") and icon or nil }
+  return ns.lastRecipe.icon
 end
 
 ---------------------------------------------------------------------------
@@ -432,10 +436,10 @@ ev:SetScript("OnEvent", function(_, event, unit, guid)
     if not WindowOpen() then return end
     local ok, _, _, tex, startMs, endMs, isTrade = pcall(UnitCastingInfo, "player")
     if not ok or ns.Secret(isTrade) or not isTrade or ns.Secret(startMs) or ns.Secret(endMs) or not startMs or not endMs then return end
-    NoteRecipe() -- (for the skill-up's recipe line, even with the craft effects off)
+    local recipeIcon = NoteRecipe() -- (for the skill-up's recipe line, even with the craft effects off)
     if not On() then return end
     local T = math.max(0.4, (endMs - startMs) / 1000)
-    Start(guid, T, (not ns.Secret(tex)) and tex or nil)
+    Start(guid, T, recipeIcon or ((not ns.Secret(tex)) and tex or nil)) -- (the item's icon; the cast's can be a placeholder)
   elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
     Done(guid) -- (also when switched off mid-cast: the batch still ends)
   else -- interrupted, failed, stopped

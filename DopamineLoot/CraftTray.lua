@@ -13,11 +13,6 @@ local STAR = "Interface\\Cooldown\\star4"
 local TRAY_H, ICON, FALL_T, OPEN_T = 112, 26, 0.5, 0.3
 local MAX_SHOWN = 40
 
--- each profession's color (as on its skill bar and harvest rows)
-local COLOR = {
-  Leatherworking = { 0.69, 0.48, 0.27 }, Alchemy = { 0.6, 0.35, 0.88 }, Tailoring = { 0.85, 0.78, 0.63 }, Engineering = { 0.63, 0.71, 0.78 },
-  Cooking = { 0.88, 0.63, 0.31 }, Blacksmithing = { 0.88, 0.48, 0.16 }, Enchanting = { 0.54, 0.42, 1 }, ["First Aid"] = { 0.88, 0.35, 0.35 },
-}
 
 local tray, label, count, heap
 local items = {}      -- the pile: { tex, border, x, y, t, rot, delay }
@@ -167,9 +162,9 @@ end
 local function Open(b)
   if not tray then Create() end
   Clear()
-  local c = COLOR[b.prof or ""] or { 1, 0.82, 0 }
+
   label:SetText(((b.prof or "Crafting") .. " · Create All"):upper())
-  label:SetTextColor(c[1], c[2], c[3])
+  label:SetTextColor(0.85, 0.78, 0.6) -- (a quiet header, as on the harvest window; not the profession color)
   count:SetText("")
   state = { b = b, openT = 0, closeT = 0, shown = 0 }
   Anchor()

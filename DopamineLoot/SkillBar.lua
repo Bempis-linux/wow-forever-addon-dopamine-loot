@@ -16,7 +16,7 @@ local _, ns = ...
 local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local STAR = "Interface\\Cooldown\\star4"
-local W, H = 200, 10
+local W, H = 240, 12
 
 local function Grad(tex, dir, r1, g1, b1, r2, g2, b2, a1, a2)
   tex:SetTexture(WHITE)
@@ -28,11 +28,11 @@ local STYLE = {}
 
 STYLE.Tailoring = { tool = "Needle", toolColor = { 0.9, 0.9, 0.95 },
   build = function(b, again) Grad(b.fillTex, "HORIZONTAL", 0.66, 0.6, 0.44, 1, 0.96, 0.85); if again then return end
-    for i = 0, 24 do local d = b:Over("ARTWORK"); d:SetColorTexture(1, 1, 1, 0.75); d:SetSize(5, 2); d:SetPoint("LEFT", b.track, "LEFT", 3 + i * 8, 0) end end }
+    for i = 0, math.floor((W - 8) / 8) do local d = b:Over("ARTWORK"); d:SetColorTexture(1, 1, 1, 0.75); d:SetSize(5, 2); d:SetPoint("LEFT", b.track, "LEFT", 3 + i * 8, 0) end end }
 STYLE.Leatherworking = { tool = "Awl", toolColor = { 0.85, 0.82, 0.78 }, back = { 0.16, 0.1, 0.05 },
   build = function(b, again) Grad(b.fillTex, "VERTICAL", 0.54, 0.35, 0.19, 0.78, 0.56, 0.38); if again then return end
-    for i = 0, 24 do
-      for _, y in ipairs({ 3, -3 }) do local h = b:Over("OVERLAY"); h:SetTexture(MEDIA .. "Circle.tga"); h:SetVertexColor(0.04, 0.02, 0.01); h:SetSize(3, 3); h:SetPoint("CENTER", b.track, "LEFT", 4 + i * 8 + (y > 0 and 0 or 4), y) end
+    for i = 0, math.floor((W - 8) / 8) do
+      for _, y in ipairs({ 4, -4 }) do local h = b:Over("OVERLAY"); h:SetTexture(MEDIA .. "Circle.tga"); h:SetVertexColor(0.04, 0.02, 0.01); h:SetSize(3, 3); h:SetPoint("CENTER", b.track, "LEFT", 4 + i * 8 + (y > 0 and 0 or 4), y) end
       local s = b:Inner("ARTWORK"); s:SetColorTexture(0.94, 0.85, 0.66, 1); s:SetSize(5, 2); s:SetPoint("LEFT", b.inner, "LEFT", 2 + i * 8, 0)
     end end }
 STYLE.Alchemy = { tool = "Petal", toolRot = math.pi, toolColor = { 0.78, 0.62, 1 },
@@ -42,23 +42,23 @@ STYLE.Alchemy = { tool = "Petal", toolRot = math.pi, toolColor = { 0.78, 0.62, 1
   refresh = function(b, v, t) if b.surface then b.surface:ClearAllPoints(); b.surface:SetPoint("CENTER", b.track, "LEFT", W * v, 0); b.surface:SetWidth(4 + 4 * (0.5 + 0.5 * math.sin(t * 6))) end end }
 STYLE.Engineering = { tool = "Wrench", toolColor = { 0.8, 0.85, 0.9 },
   build = function(b, again) b.fillTex:SetColorTexture(0, 0, 0, 0); b.cells = {}; if again then return end
-    for i = 0, 14 do local c = b:Over("ARTWORK"); c:SetSize(11.3, H - 2); c:SetPoint("LEFT", b.track, "LEFT", 1 + i * 13.3, 0); b.cells[i + 1] = c end end,
+    for i = 0, 14 do local c = b:Over("ARTWORK"); c:SetSize((W - 2) / 15 - 2, H - 2); c:SetPoint("LEFT", b.track, "LEFT", 2 + i * (W - 2) / 15, 0); b.cells[i + 1] = c end end,
   refresh = function(b, v) for i, c in ipairs(b.cells or {}) do if (i - 0.5) / #b.cells <= v then c:SetColorTexture(0.78, 0.88, 0.97, 1) else c:SetColorTexture(0.1, 0.12, 0.14, 1) end end end }
 STYLE.Cooking = { tool = "Spatula", toolColor = { 0.85, 0.85, 0.85 }, back = { 0.16, 0.11, 0.06 },
   build = function(b, again) b.fillTex:SetColorTexture(0.78, 0.48, 0.23, 1); if again then return end
-    for i = 0, 30 do local m = b:Inner("ARTWORK"); m:SetTexture(MEDIA .. "Streak.tga"); m:SetVertexColor(0.3, 0.13, 0.03); m:SetSize(16, 16); m:SetRotation(-0.96); m:SetPoint("CENTER", b.inner, "LEFT", 4 + i * 7, 0) end end }
+    for i = 0, math.floor(W / 7) do local m = b:Inner("ARTWORK"); m:SetTexture(MEDIA .. "Streak.tga"); m:SetVertexColor(0.3, 0.13, 0.03); m:SetSize(16, 16); m:SetRotation(-0.96); m:SetPoint("CENTER", b.inner, "LEFT", 4 + i * 7, 0) end end }
 STYLE.Blacksmithing = { tool = "Hammer", toolColor = { 0.75, 0.75, 0.78 }, back = { 0.1, 0.1, 0.11 },
   build = function(b, again) Grad(b.fillTex, "HORIZONTAL", 0.23, 0.23, 0.25, 0.88, 0.31, 0.1); if again then return end
     b.hot = b:Inner("ARTWORK", 1); Grad(b.hot, "HORIZONTAL", 0.88, 0.31, 0.1, 1, 0.9, 0.63) end,
   refresh = function(b, v) if b.hot then local w = math.max(1, W * v * 0.3); b.hot:ClearAllPoints(); b.hot:SetPoint("TOPLEFT", b.inner, "TOPLEFT", W * v - w, 0); b.hot:SetSize(w, H) end end }
 STYLE.Enchanting = { tool = "Star", toolColor = { 0.85, 0.78, 1 }, back = { 0.07, 0.05, 0.13 },
   build = function(b, again) Grad(b.fillTex, "HORIZONTAL", 0.23, 0.16, 0.48, 0.54, 0.42, 1); b.runes = {}; if again then return end
-    for i = 0, 9 do local r = b:Over("OVERLAY"); local n = (i * 7) % 16; r:SetTexture(MEDIA .. "Runes.tga")
+    for i = 0, math.floor((W - 10) / 20) do local r = b:Over("OVERLAY"); local n = (i * 7) % 16; r:SetTexture(MEDIA .. "Runes.tga")
       r:SetTexCoord((n % 4) / 4, (n % 4 + 1) / 4, math.floor(n / 4) / 4, (math.floor(n / 4) + 1) / 4); r:SetSize(10, 10); r:SetPoint("CENTER", b.track, "LEFT", 10 + i * 20, 0); r:SetBlendMode("ADD"); b.runes[i + 1] = r end end,
   refresh = function(b, v) for i, r in ipairs(b.runes or {}) do local lit = (i - 0.5) / #b.runes <= v; r:SetVertexColor(lit and 1 or 0.6, lit and 1 or 0.55, 1); r:SetAlpha(lit and 1 or 0.22) end end }
 STYLE["First Aid"] = { tool = "Pin", toolColor = { 0.85, 0.85, 0.9 }, back = { 0.16, 0.15, 0.13 },
   build = function(b, again) b.fillTex:SetColorTexture(0.95, 0.93, 0.89, 1); if again then return end
-    for i = 0, 14 do
+    for i = 0, math.floor((W - 6) / 14) do
       local x = 6 + i * 14
       local h1 = b:Inner("ARTWORK"); h1:SetColorTexture(0.82, 0.19, 0.19, 1); h1:SetSize(6, 2); h1:SetPoint("CENTER", b.inner, "LEFT", x, 0)
       local h2 = b:Inner("ARTWORK"); h2:SetColorTexture(0.82, 0.19, 0.19, 1); h2:SetSize(2, 6); h2:SetPoint("CENTER", b.inner, "LEFT", x, 0)
@@ -102,7 +102,7 @@ function ns.MakeSkillBar(parent)
   b.top:SetAllPoints(b)
   b.top:SetFrameLevel(b.clip:GetFrameLevel() + 2)
   b.tool = b.top:CreateTexture(nil, "OVERLAY", nil, 3)
-  b.tool:SetSize(14, 14)
+  b.tool:SetSize(16, 16)
   b.made = {} -- the textures the current style made
   b.sets = {} -- each style's textures and parts, built once: [name] = { made, cells, runes, hot, surface }
   function b:Over(layer, sub) local t = self.top:CreateTexture(nil, layer, nil, sub); self.made[#self.made + 1] = t; return t end
@@ -155,7 +155,7 @@ function ns.MakeSkillBar(parent)
     if u > 0 then dx, dy, rot, sc, al = MOTION[self.style.tool](u) end
     self.tool:ClearAllPoints()
     self.tool:SetPoint("BOTTOM", self.track, "LEFT", W * self.value + dx, 2 + dy)
-    self.tool:SetSize(14 * sc, 14 * sc)
+    self.tool:SetSize(16 * sc, 16 * sc)
     self.tool:SetRotation((self.style.toolRot or 0) + rot)
     self.tool:SetAlpha(al)
   end
