@@ -102,6 +102,14 @@ rack: alchemy, blacksmithing; conveyor: engineering; orbit: enchanting; clothesl
 (ribbon + bow, cloche + steam ding, quench steam + glints, belt + firework, sigil, red-cross seal + green pulse, corks
 popping, maker's stamps), bar touches per profession, reworked singles for the bottom four. Waiting for the verdict.
 In game: verify the profession window's frame name on Forever before anchoring the tray.
+**Round 2 verdict:** alchemy and leatherworking "way better" (leather sounds liked; the zigzag thread not). New ranking
+of single crafts: leather, alchemy, tailoring, engineering, cooking, blacksmithing, enchanting, first aid. Wanted:
+improve all, simple and satisfying for hundreds of crafts. Skill bars: tailoring (the stitched line) best by far, the
+rest equal and less unique. Round 3 mockup docs/mockups/crafting-feel.html: every single = 2-4 work beats + one payoff
+(~1 s, slight randomness), leather with a straight running stitch; a separate "batch touch" per item (the payoff only,
+pitch walking up; x12 and x30 fast to test fatigue); skill bars where the material IS the bar (leather strip with
+holes + stitch, alchemy glass tube, engineering gauge cells, cooking grill marks, blacksmith white-hot iron, enchanting
+runes lighting, first aid bandage with red crosses). Waiting for the verdict.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
