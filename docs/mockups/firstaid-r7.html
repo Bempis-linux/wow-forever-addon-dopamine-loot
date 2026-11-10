@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>First Aid Round 7</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 1000px; } header b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 260px; max-width: 900px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 40% 70%, #3a4a30, #1c2616 55%, #0e130b); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .cast { position: absolute; left: 90px; top: 150px; width: 240px; height: 16px; border: 2px solid #8a7a5a; border-radius: 3px; background: #000; }
+  .cast b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(#ffd34a, #c08a10); }
+  .cast span { position: absolute; inset: 0; text-align: center; font: 600 11px system-ui; color: #fff; line-height: 16px; text-shadow: 0 1px 1px #000; }
+  .note { position: absolute; right: 14px; top: 10px; max-width: 420px; text-align: right; font: 600 11.5px system-ui; color: #c9c2b0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>First Aid, round 7: the plus</h1>
+  <p>Every First Aid version so far that ends in the <b>green plus</b>, plus three new ones built only around the plus (simple shapes: two bars, a glow, a ring). It plays where the game now puts craft effects: <b>right of the cast bar</b>. <b>Now in game</b> is round 4 (the roll, three wraps, a small plus rising). <b>Round 1 Heartbeat</b>: a ribbon unrolls, wraps once, the plus beats twice. <b>R5 F2 Stitch a cross</b>: four strokes stitch a plus, then it glows. <b>R5 F4 Pulse</b>: two heartbeats light the plus from dim to bright, a wrap, a green ring. New: <b>P1 Plus pop</b>: just the plus popping in with a soft glow and one ring. <b>P2 Plus draws</b>: the upright bar grows, then the crossbar (a soft tap each), a flash and glints at its four tips. <b>P3 Plus heartbeat</b>: the plus beats twice, brighter each time, then one ring. Sound is on.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button></div>
+</header>
+<div class="bar"><span>Version</span><button data-f="now">Now in game</button><button data-f="r1">Round 1 Heartbeat</button><button data-f="f2">R5 F2 Stitch a cross</button><button data-f="f4">R5 F4 Pulse</button>
+  <button data-f="p1" class="on">P1 Plus pop</button><button data-f="p2">P2 Plus draws</button><button data-f="p3">P3 Plus heartbeat</button></div>
+<div class="bar"><span>Play</span><button class="go" id="one">Craft once (with the cast)</button><button class="go" id="five">×5 in a row</button></div>
+<div class="stage" id="st"><div class="cast" id="cast"><b id="castb"></b><span>Heavy Linen Bandage</span></div><div class="note" id="note"></div></div>
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), ST = $('st');
+let snd = true, actx, muteUntil = 0;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1');
+function ac() { return actx = actx || new AudioContext(); }
+const now = t => ac().currentTime + Math.max(0, t || 0);
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2, att = .004) { if (!snd || performance.now() < muteUntil) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + att); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass') { if (!snd || performance.now() < muteUntil) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+function el(html, css, frames, dur, delay = 0) { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d); d.animate(frames, { duration: dur, delay, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function pathEl(html, x, y, life, fn, delay = 0, n = 22) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000); }
+function dot(x, y, o) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px)`, opacity: i === 14 ? 0 : 1 }); } el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%`, fr, o.life * 1000); }
+function ring(x, y, color, size, life, delay = 0) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:2px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000); }
+function star(x, y, size, color, life, delay = 0) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000); }
+function glyph(ch, x, y, size, color, life, fn, delay = 0) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay); }
+const at = (t, fn) => setTimeout(fn, t * 1000);
+const cloth = (t, f = 1800, d = .1) => noise(t, d, .022, f, .8);
+const glowDot = (x, y, s, c, life, grow = 1.3) => el('', `left:${x - s / 2}px;top:${y - s / 2}px;width:${s}px;height:${s}px;border-radius:50%;background:radial-gradient(${c},transparent 70%)`, [{ transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: .25 }, { transform: `scale(${grow})`, opacity: 0 }], life * 1000);
+// a plus made of two rounded bars (simple shapes; in game two textures)
+function bar(x, y, w, h, color, frames, dur, delay = 0) { return el('', `left:${x - w / 2}px;top:${y - h / 2}px;width:${w}px;height:${h}px;border-radius:${Math.min(w, h) / 2}px;background:${color};box-shadow:0 0 8px ${color}`, frames, dur, delay); }
+
+// each: work(x, y, T) over the cast (silent in a Create All after the first), payoff(x, y) when the item is made
+const V = {
+  now: { note: 'Now in game (round 4): the roll rolls in, three wraps, a small plus rises',
+    work(x, y, T) { pathEl('<div style="width:18px;height:18px;margin:-9px;border-radius:50%;background:radial-gradient(#fff,#e8e0d0 60%,#c8c0b0)"></div>', x - 40, y, T * .3, u => [40 * u, 0, 360 * u, 1, 1]);
+      for (let i = 0; i < 3; i++) at(T * (.3 + i * .17), () => { el('', `left:${x - 13}px;top:${y - 10 + i * 6}px;width:26px;height:5px;border-radius:3px;background:#f4f0e4;box-shadow:0 1px 0 #b8b0a0`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .85 }, { opacity: 0 }], (T * (.7 - i * .17) + .3) * 1000); cloth(0); }); },
+    payoff(x, y) { glyph('✚', x, y - 2, 18, '#7dff8a', .55, u => [0, 12 * u, 0, u < .15 ? .5 + 4 * u : 1, 1 - u]); tone(700, 0, .04, .05, 'triangle'); tone(1046, .04, .04, .25); } },
+  r1: { note: 'Round 1 Heartbeat: a ribbon unrolls, wraps once, the plus beats twice',
+    work(x, y, T) { el('<svg width="140" height="60" viewBox="0 0 140 60"><path d="M10 40 C40 10, 70 50, 100 20 S130 30, 130 30" fill="none" stroke="#f4f0e4" stroke-width="7" stroke-linecap="round" stroke-dasharray="190" stroke-dashoffset="190"><animate attributeName="stroke-dashoffset" from="190" to="0" dur=".45s" fill="freeze"/></path></svg>', `left:${x - 70}px;top:${y - 30}px`, [{ opacity: 1 }, { opacity: 1, offset: .5 }, { opacity: 0, transform: 'scale(.5)' }], 1000, T * .3 * 1000);
+      at(T * .3 + .45, () => pathEl('<div style="width:36px;height:36px;margin:-18px;border-radius:50%;border:5px solid #f4f0e4;border-left-color:transparent"></div>', x, y, .5, u => [0, 0, 540 * u, .7 + .3 * u, 1 - u])); },
+    payoff(x, y) { [0, .28].forEach(t => at(t, () => { glyph('✚', x, y, 26, '#7dff8a', .45, u => [0, 0, 0, .8 + .5 * Math.sin(Math.PI * u), 1 - u]); tone(330, 0, .06, .18); })); } },
+  f2: { note: 'R5 F2 Stitch a cross: four strokes stitch a plus (tactile taps), a knot, it glows',
+    work(x, y, T) { const st = (x1, y1, x2, y2, t) => at(t, () => { const len = Math.hypot(x2 - x1, y2 - y1), a = Math.atan2(y2 - y1, x2 - x1) * 57.3;
+        el('', `left:${x1}px;top:${y1 - 1}px;width:${len}px;height:3px;border-radius:2px;background:#f8f4ea;box-shadow:0 0 3px #fff;transform-origin:0 50%`, [{ transform: `rotate(${a}deg) scaleX(0)` }, { transform: `rotate(${a}deg) scaleX(1)`, offset: .2 }, { transform: `rotate(${a}deg) scaleX(1)`, offset: .85 }, { transform: `rotate(${a}deg) scaleX(1)`, opacity: 0 }], (T * .7 + .4) * 1000);
+        tone(260, 0, .05, .05, 'square', 180); noise(0, .05, .025, 3000, 3); });
+      st(x - 12, y, x, y, T * .3); st(x, y, x + 12, y, T * .42); st(x, y - 12, x, y, T * .55); st(x, y, x, y + 12, T * .67);
+      at(T * .82, () => { dot(x + 14, y + 12, { vx: 0, vy: 0, life: .3, size: 5, color: '#f8f4ea' }); tone(500, 0, .03, .06, 'triangle'); }); },
+    payoff(x, y) { glyph('✚', x, y, 28, '#7dff8a', .5, u => [0, 0, 0, 1, u < .2 ? u * 5 * .9 : .9 * (1 - u)]); tone(880, 0, .04, .3); tone(1318, .04, .03, .3); } },
+  f4: { note: 'R5 F4 Pulse: two heartbeats light the plus from dim to bright, a wrap, a green ring',
+    work(x, y, T) { [.35, .6].forEach((f, i) => at(T * f, () => { glyph('✚', x, y, 26, i ? '#7dff8a' : '#3a7a3a', .3, u => [0, 0, 0, 1 + .25 * Math.sin(Math.PI * u), i ? 1 - u * .3 : 1 - u]); tone(i ? 90 : 75, 0, .1, .14, 'sine', 50); tone(i ? 90 : 75, .1, .06, .1, 'sine', 50); }));
+      at(T * .8, () => { glyph('✚', x, y, 26, '#a8ffb0', .6, u => [0, 0, 0, 1, 1 - u]); el('<div style="width:40px;height:40px;margin:-20px;border-radius:50%;border:4px solid #f4f0e4;border-left-color:transparent"></div>', `left:${x}px;top:${y}px`, [{ transform: 'rotate(0) scale(.7)', opacity: 1 }, { transform: 'rotate(360deg) scale(1)', opacity: 1, offset: .6 }, { transform: 'rotate(420deg) scale(1)', opacity: 0 }], 500); cloth(0); }); },
+    payoff(x, y) { ring(x, y, '#7dff8a', 50, .45); tone(660, 0, .035, .5); tone(990, .03, .025, .5); } },
+  p1: { note: 'P1 Plus pop: a soft green glow gathers over the cast, the plus pops in, one ring',
+    work(x, y, T) { at(T * .4, () => glowDot(x, y, 34, 'rgba(125,255,138,.55)', T * .6 + .1, 1)); },
+    payoff(x, y) { const fr = [{ transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1.18)', opacity: 1, offset: .18 }, { transform: 'scale(1)', opacity: 1, offset: .32 }, { transform: 'scale(1)', opacity: 1, offset: .75 }, { transform: 'scale(1.05)', opacity: 0 }];
+      bar(x, y, 7, 24, '#7dff8a', fr, 700); bar(x, y, 24, 7, '#7dff8a', fr, 700); ring(x, y, '#7dff8a', 52, .5, .06); glowDot(x, y, 48, 'rgba(125,255,138,.5)', .5);
+      tone(660, 0, .045, .35); tone(990, .04, .03, .4); } },
+  p2: { note: 'P2 Plus draws: the upright bar grows, then the crossbar (a soft tap each), a flash, glints at the four tips',
+    work(x, y, T) { const hold = (T * .5 + .5) * 1000;
+      at(T * .4, () => { el('', `left:${x - 3.5}px;top:${y - 12}px;width:7px;height:24px;border-radius:3.5px;background:#7dff8a;box-shadow:0 0 8px #7dff8a;transform-origin:50% 50%`, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)', offset: .25 }, { transform: 'scaleY(1)', offset: .9 }, { transform: 'scaleY(1)', opacity: 0 }], hold); tone(200, 0, .045, .06, 'sine', 140); noise(0, .04, .02, 1600, 2); });
+      at(T * .62, () => { el('', `left:${x - 12}px;top:${y - 3.5}px;width:24px;height:7px;border-radius:3.5px;background:#7dff8a;box-shadow:0 0 8px #7dff8a;transform-origin:50% 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .3 }, { transform: 'scaleX(1)', offset: .9 }, { transform: 'scaleX(1)', opacity: 0 }], hold - T * 220); tone(230, 0, .045, .06, 'sine', 160); noise(0, .04, .02, 1800, 2); }); },
+    payoff(x, y) { glowDot(x, y, 44, 'rgba(200,255,200,.7)', .35); [[0, -15], [15, 0], [0, 15], [-15, 0]].forEach(([dx, dy], i) => star(x + dx, y + dy, 10, '#e0ffe0', .4, i * .03));
+      tone(880, 0, .035, .3); tone(1318, .03, .025, .35); } },
+  p3: { note: 'P3 Plus heartbeat: the plus beats twice, brighter each time, then one ring',
+    work(x, y, T) { const beat = (f, c, k) => at(T * f, () => { const fr = [{ transform: 'scale(.85)', opacity: 0 }, { transform: `scale(${k})`, opacity: 1, offset: .25 }, { transform: 'scale(1)', opacity: .9, offset: .6 }, { opacity: 0 }];
+        bar(x, y, 7, 24, c, fr, 420); bar(x, y, 24, 7, c, fr, 420); tone(80, 0, .1, .14, 'sine', 50); tone(80, .1, .05, .1, 'sine', 50); });
+      beat(.45, '#3f8a46', 1.15); beat(.72, '#5ad066', 1.22); },
+    payoff(x, y) { const fr = [{ transform: 'scale(.9)', opacity: 0 }, { transform: 'scale(1.25)', opacity: 1, offset: .2 }, { transform: 'scale(1)', opacity: 1, offset: .45 }, { opacity: 0 }];
+      bar(x, y, 7, 24, '#9dff9a', fr, 650); bar(x, y, 24, 7, '#9dff9a', fr, 650); ring(x, y, '#7dff8a', 54, .5); tone(660, 0, .04, .45); tone(990, .03, .025, .45); } },
+};
+let fv = 'p1';
+pick('f', v => { fv = v; $('note').textContent = V[v].note; });
+function spot() { const c = $('cast').getBoundingClientRect(), s = ST.getBoundingClientRect(); return [c.right - s.left + 62, c.top - s.top + c.height / 2]; }
+const T = 1.6;
+function craft(quiet) { const [x, y] = spot(), v = V[fv]; const b = $('castb'); b.animate([{ width: '0' }, { width: '100%' }], { duration: T * 1000, fill: 'forwards' });
+  if (quiet) muteUntil = performance.now() + T * 1000 - 30; v.work(x, y, T); at(T, () => v.payoff(x, y)); } // (a Create All: the beats are silent after the first item, as in game)
+$('one').onclick = () => craft(false);
+$('five').onclick = () => { for (let i = 0; i < 5; i++) at(i * (T + .15), () => craft(i > 0)); };
+$('note').textContent = V[fv].note;
+</script>
+</body>
+</html>
