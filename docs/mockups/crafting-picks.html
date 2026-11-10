@@ -187,9 +187,11 @@ const ONE = {
       glyph(runes[Math.floor(R(0, 6))], x + rx, y + ry, 15, '#d8c8ff', .85, u => { if (u < .55) return [0, 0, 0, u < .08 ? 1.6 - 7 * u : 1, 1]; const v = (u - .55) / .45; return [(PAY - rx) * v, ry * v, 0, 1 - .6 * v, 1 - v * .5]; }, i * .14);
       at(i * .14, () => tone(1046 * semi(PENTA[i * 2]), 0, .03, .35)); }
     at(.72, () => { star(x + PAY, y, 30, '#fff', .35); ring(x + PAY, y, '#c8b0ff', 36, .3); tone(1568 * k, 0, .05, .6); tone(2093 * k, .02, .03, .5); }); },
-  aid(x, y, k) { pathEl('<div style="width:18px;height:18px;margin:-9px;border-radius:50%;background:radial-gradient(#fff,#e8e0d0 60%,#c8c0b0)"></div>', x - 40, y, .3, u => [40 * u, 0, 360 * u, 1, 1]);
-    for (let i = 0; i < 3; i++) at(.25 + i * .14, () => { el('', `left:${x - 13}px;top:${y - 10 + i * 6}px;width:26px;height:5px;border-radius:3px;background:#f4f0e4;box-shadow:0 1px 0 #b8b0a0`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .85 }, { opacity: 0 }], 900); noise(0, .1, .02, 1800, .8); });
-    at(.72, () => { glyph('✚', x, y - 2, 18, '#7dff8a', .55, u => [0, 12 * u, 0, u < .15 ? .5 + 4 * u : 1, 1 - u]); tone(700 * k, 0, .04, .05, 'triangle'); tone(1046 * k, .04, .04, .25); }); },
+  aid(x, y) { const T = 1, hold = (T * .5 + .5) * 1000; // firstaid-r7.html P2 Plus draws (a 1 s craft here)
+    at(T * .4, () => { el('', `left:${x - 3.5}px;top:${y - 12}px;width:7px;height:24px;border-radius:3.5px;background:#7dff8a;box-shadow:0 0 8px #7dff8a;transform-origin:50% 50%`, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)', offset: .25 }, { transform: 'scaleY(1)', offset: .9 }, { transform: 'scaleY(1)', opacity: 0 }], hold); tone(200, 0, .045, .06, 'sine', 140); noise(0, .04, .02, 1600, 2); });
+    at(T * .62, () => { el('', `left:${x - 12}px;top:${y - 3.5}px;width:24px;height:7px;border-radius:3.5px;background:#7dff8a;box-shadow:0 0 8px #7dff8a;transform-origin:50% 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .3 }, { transform: 'scaleX(1)', offset: .9 }, { transform: 'scaleX(1)', opacity: 0 }], hold - T * 220); tone(230, 0, .045, .06, 'sine', 160); noise(0, .04, .02, 1800, 2); });
+    at(T, () => { el('', `left:${x - 22}px;top:${y - 22}px;width:44px;height:44px;border-radius:50%;background:radial-gradient(rgba(200,255,200,.7),transparent 70%)`, [{ transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: .25 }, { transform: 'scale(1.3)', opacity: 0 }], 350);
+      [[0, -15], [15, 0], [0, 15], [-15, 0]].forEach(([dx, dy], i) => star(x + dx, y + dy, 10, '#e0ffe0', .4, i * .03)); tone(880, 0, .035, .3); tone(1318, .03, .025, .35); }); },
 };
 
 // ================= Create All (the batch page): work beats over the cast, silent; the payoff sounds =================
@@ -216,7 +218,7 @@ const PROF = {
     payoff(x, y, i, s, vol, par) { star(x, y, 22 * s, '#ffd27a', .3, 0, par); for (let j = 0; j < Math.round(8 * s); j++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: .45, size: 3, color: '#ffb040', glow: 5 }, par); tone(85, 0, .15 * vol, .12, 'sine', 50); noise(0, .08, .12 * vol, 1800 * walk(i) / 2, 2.5, 'bandpass', true); metal(0, 470 * walk(i) / 1.4, .02 * vol, .3, [1, 2.76, 5.4], [1, .35, .15]); },
     game(t) { metal(t, 1300, .015, .15, [1, 2.76, 5.4], [1, .35, .15]); } },
   ench: { name: 'Enchanting', pc: '#8a6aff', item: ['✨', 'Enchanted Thorium', '#1eff00'], pick: 'Round 4 tidied: three runes gather into a star', solo: true, game(t) { tone(900, t, .01, .3); } },
-  aid: { name: 'First Aid', pc: '#e05a5a', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'], pick: 'Round 4 (your pick again, 2026-11-09): the roll rolls in, three wraps, the green cross rises', solo: true, game(t) { noise(t, .1, .01, 1800, .8); } },
+  aid: { name: 'First Aid', pc: '#e05a5a', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'], pick: 'Round 7 P2 Plus draws: the upright bar grows, then the crossbar, a flash and glints at the tips', solo: true, game(t) { noise(t, .1, .01, 1800, .8); } },
 };
 $('picks').innerHTML = Object.values(PROF).map(p => `<tr><td>${p.name}</td><td>${p.pick}</td></tr>`).join('') + '<tr><td>Create All</td><td>Batch page: the craft spread over each cast, only the payoff sounds, from the 4th item smaller and softer; tray: Satisfying heap</td></tr><tr><td>Skill bars</td><td>Round 4 bars with a tool at the tip, round 5 needle and drop</td></tr>';
 
