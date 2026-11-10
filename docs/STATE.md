@@ -125,7 +125,14 @@ what I'm looking for": brainstorm + mockup both together next. Round 5 mockup do
 sounds H1 forge hammer / H2 tap, tap, CLANG / H3 dull iron; first aid F1 salve and wrap / F2 stitch a cross / F3 roll
 toss / F4 pulse; the two bar fixes. **Verdict:** blacksmithing = H2 tap, tap, CLANG; skill bar fixes "much better";
 first aid not there yet (sound: F2 best; animation: F1 best). Round 6: docs/mockups/firstaid-r6.html (A F1 with F2-style
-taps / B + a safety pin / C a gauze patch and crossed tape). Next: the Create All batch brainstorm.
+taps / B + a safety pin / C a gauze patch and crossed tape). The user likes B and C's direction, cleaned up: added "B
+clean" and "C clean" (simple shapes only). **Preference (2026-11-09):** avoid drawing complex objects (pins, pads,
+tools): they're generated and hard to make clean; use lines, dots, rings, glints and the real item icons.
+**Create All batch:** in game each item has a cast (~1.5 s+); the game already plays its own craft sounds (bubbling,
+hammer tinks): our per-item = the single craft spread over the cast, work beats silent, only the payoff sounds, smaller
+and softer from the 4th item (the user: make sure it doesn't get annoying). Tray directions all to try: slot shelf,
+workbench, satisfying heap, big counter. Mockup docs/mockups/batch.html (4 sample professions, a cast bar, a stand-in for
+the game's craft sound). Waiting for picks.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

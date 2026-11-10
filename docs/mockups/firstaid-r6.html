@@ -26,7 +26,7 @@
   <p>From your picks: <b>F1's look</b> (salve, a wrap, a neat finish) with <b>F2's sound</b> (short, tactile taps, like stitching). <b>R5 F1</b> and <b>R5 F2</b> are there to compare. <b>A Salve and wrap, tactile</b>: F1 as it was, every beat now a tap: the salve pats on, two wraps tick on, a tuck. <b>B Salve, wrap, pin</b>: the same, finished by a little safety pin that clicks shut with a glint. <b>C Patch</b>: a gauze pad pats down over the salve, two strips of tape cross over it (tick, tick), a green cross pulses once. Sound is on.</p>
   <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button></div>
 </header>
-<div class="bar"><span>Version</span><button data-f="r1">R5 F1</button><button data-f="r2">R5 F2</button><button data-f="A" class="on">A Salve and wrap, tactile</button><button data-f="B">B Salve, wrap, pin</button><button data-f="C">C Patch</button>
+<div class="bar"><span>Version</span><button data-f="r1">R5 F1</button><button data-f="r2">R5 F2</button><button data-f="A" class="on">A Salve and wrap, tactile</button><button data-f="B">B Salve, wrap, pin</button><button data-f="C">C Patch</button><button data-f="B2">B clean</button><button data-f="C2">C clean</button>
   <button class="go" id="one">Craft once</button><button class="go" id="five">×5 in a row</button></div>
 <div class="stage" id="st"><div class="char">🧙</div><div class="note" id="note"></div></div>
 <script>
@@ -72,8 +72,22 @@ const AID = {
     [0, 1].forEach(i => at(.42 + i * .15, () => { el('', `left:${x - 20}px;top:${y - 2}px;width:40px;height:5px;border-radius:1px;background:#e8dcc0;box-shadow:0 1px 0 #a89870`, [{ transform: `rotate(${i ? -35 : 35}deg) scaleX(0)` }, { transform: `rotate(${i ? -35 : 35}deg) scaleX(1)`, offset: .2 }, { transform: `rotate(${i ? -35 : 35}deg) scaleX(1)`, offset: .85 }, { opacity: 0 }], 800); tap(0, 1.05 + i * .07); noise(0, .05, .02, 4000, 2); }));
     at(.78, () => { glyph('✚', x, y, 18, '#7dff8a', .5, u => [0, 0, 0, 1 + .3 * Math.sin(Math.PI * u), 1 - u]); ring(x, y, '#7dff8a', 44, .4); tone(880, 0, .035, .25); tone(1318, .03, .025, .25); }); },
 };
+// ---- the clean versions: only simple shapes (a glow, strokes, a ring, a glint), same taps ----
+const glow = (x, y, c = '#7dff8a', s = 20) => el('', `left:${x - s / 2}px;top:${y - s / 2}px;width:${s}px;height:${s}px;border-radius:50%;background:radial-gradient(${c},transparent 70%)`, [{ transform: 'scale(.3)', opacity: 0 }, { transform: 'scale(1.1)', opacity: 1, offset: .25 }, { transform: 'scale(1)', opacity: .9, offset: .6 }, { opacity: 0 }], 950);
+const stroke = (x, y, w, ang, life = 750) => el('', `left:${x - w / 2}px;top:${y - 1.5}px;width:${w}px;height:3px;border-radius:2px;background:#f8f4ea;box-shadow:0 0 4px rgba(255,255,255,.6);transform-origin:50% 50%`, [{ transform: `rotate(${ang}deg) scaleX(0)` }, { transform: `rotate(${ang}deg) scaleX(1)`, offset: .2 }, { transform: `rotate(${ang}deg) scaleX(1)`, offset: .82 }, { transform: `rotate(${ang}deg) scaleX(1)`, opacity: 0 }], life);
+AID.B2 = function (x, y) { // B clean: a green glow, two white strokes wrap across, a click and a glint
+  glow(x, y); softTap(0, .9);
+  stroke(x, y - 3, 30, 0, 900); at(.0, () => {}); at(.3, () => { tap(0, 1); });
+  at(.48, () => { stroke(x, y + 3, 30, 0, 700); tap(0, 1.06); });
+  at(.72, () => { tone(2600, 0, .035, .03, 'square'); noise(0, .02, .03, 5000, 4); star(x + 18, y, 12, '#fff', .35); tone(1046, .03, .03, .25); }); };
+AID.C2 = function (x, y) { // C clean: a green glow, a soft square outline settles, two strokes cross over it, one green ring
+  glow(x, y); softTap(0, .9);
+  at(.22, () => { el('', `left:${x - 13}px;top:${y - 13}px;width:26px;height:26px;border-radius:4px;border:2px solid rgba(248,244,234,.85)`, [{ transform: 'scale(1.3)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: .2 }, { opacity: 1, offset: .85 }, { opacity: 0 }], 1000); tap(0, .95); });
+  at(.42, () => { stroke(x, y, 34, 45, 700); tap(0, 1.05); });
+  at(.56, () => { stroke(x, y, 34, -45, 600); tap(0, 1.12); });
+  at(.78, () => { ring(x, y, '#7dff8a', 44, .4); tone(880, 0, .035, .25); tone(1318, .03, .025, .25); }); };
 let fv = 'A';
-const NOTE = { r1: 'Round 5 F1 (the animation you picked)', r2: 'Round 5 F2 (the sound you liked)', A: 'A: F1 with every beat a tactile tap', B: 'B: salve, two wraps, a safety pin clicks shut', C: 'C: salve, a gauze pad, two tape strips cross, a green pulse' };
+const NOTE = { B2: 'B clean: a green glow, two white strokes, a click and a glint (no drawn pin)', C2: 'C clean: a green glow, a soft square outline, two strokes cross, a green ring (no drawn pad or tape)', r1: 'Round 5 F1 (the animation you picked)', r2: 'Round 5 F2 (the sound you liked)', A: 'A: F1 with every beat a tactile tap', B: 'B: salve, two wraps, a safety pin clicks shut', C: 'C: salve, a gauze pad, two tape strips cross, a green pulse' };
 pick('f', v => { fv = v; $('note').textContent = NOTE[v]; });
 function pos() { const c = ST.querySelector('.char').getBoundingClientRect(), s = ST.getBoundingClientRect(); return [c.left - s.left + c.width / 2 + 90, c.top - s.top + c.height / 2 - 6]; }
 $('one').onclick = () => { const [x, y] = pos(); AID[fv](x, y); };

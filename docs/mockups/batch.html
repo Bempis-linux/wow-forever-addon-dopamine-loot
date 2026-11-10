@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create All Batch</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 1060px; } header b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; min-width: 60px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .screen { position: relative; margin: 6px 18px; width: 1366px; height: 768px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 60% 70%, #3a4a30, #1c2616 55%, #0e130b); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .char { position: absolute; left: 52%; top: 52%; transform: translate(-50%, -50%); font-size: 64px; }
+  .icon { width: 26px; height: 26px; box-sizing: border-box; border: 1.5px solid var(--qc, #fff); border-radius: 2px; background: radial-gradient(#3a3226, #14100a); box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 6px rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; font-size: 15px; flex: none; }
+  /* the profession window (stand-in) */
+  .win { position: absolute; left: 30px; top: 40px; width: 560px; height: 420px; border: 3px solid #4a3c28; border-radius: 6px; background: #120e09; box-shadow: 0 0 0 1px #000; }
+  .win .ttl { height: 26px; text-align: center; font: 600 14px Georgia, serif; color: #ffd100; background: linear-gradient(#2a2016, #1a140c); line-height: 26px; }
+  .win .rec { margin: 8px 14px; font: 600 13px Georgia, serif; color: #ffff40; }
+  .win .btns { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; justify-content: space-between; }
+  .win .btns div { padding: 3px 14px; font: 12px Georgia, serif; color: #ffd100; background: linear-gradient(#5a4a3a, #2a1e14); border: 1px solid #8a7a5a; border-radius: 3px; }
+  .tabs { position: absolute; left: 594px; top: 80px; display: flex; flex-direction: column; gap: 4px; }
+  .tabs i { width: 40px; height: 40px; border: 2px solid #6a5a36; border-radius: 4px; background: #1a140c; font-style: normal; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  /* the game's cast bar (stand-in) */
+  .cast { position: absolute; left: 50%; bottom: 120px; width: 240px; height: 16px; transform: translateX(-50%); border: 2px solid #8a7a5a; border-radius: 3px; background: #000; opacity: 0; }
+  .cast b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(#ffd34a, #c08a10); }
+  .cast span { position: absolute; inset: 0; text-align: center; font: 600 11px system-ui; color: #fff; line-height: 16px; text-shadow: 0 1px 1px #000; }
+  /* the tray */
+  .tray { position: absolute; left: 40px; top: 463px; width: 540px; height: 0; overflow: hidden; border: 3px solid #4a3c28; border-top: 0; border-radius: 0 0 8px 8px; background: linear-gradient(#1a130b, #0e0a06); box-shadow: 0 0 0 1px #000, 0 6px 14px rgba(0,0,0,.6); transition: height .35s cubic-bezier(.3,1.4,.5,1); }
+  .tray.open { height: 130px; }
+  .tray .lbl { position: absolute; left: 12px; top: 7px; font: 700 10px system-ui; letter-spacing: .14em; text-transform: uppercase; color: var(--pc); }
+  .tray .stage { position: absolute; inset: 0; }
+  .slot { position: absolute; width: 30px; height: 30px; border: 1px solid #3a2e1e; border-radius: 3px; background: rgba(0,0,0,.45); box-shadow: inset 0 0 6px #000; }
+  .big { font: 800 36px Georgia, serif; color: #fff; text-shadow: 0 0 10px rgba(255,220,120,.6), 0 2px 0 #000; }
+  .note { position: absolute; left: 640px; top: 40px; width: 440px; font: 600 12px system-ui; color: #c9c2b0; }
+  .note b { color: var(--gold); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Create All: the batch</h1>
+  <p>Each item has its own <b>cast</b> (the bar at the bottom): the profession's single craft plays <b>spread over the cast</b>, its work beats silent (the game already makes its own craft sounds), and only the <b>payoff</b> makes a quiet sound exactly when the item is made. After the 3rd item it gets smaller and softer, so a long batch stays easy. "Game's sound" plays a stand-in for the game's own craft sound, to hear ours on top. Pick a <b>tray</b> direction for under the window.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button>
+    <span>Game's sound</span><button data-gs="1" class="on">On (stand-in)</button><button data-gs="0">Off</button></div>
+</header>
+<div class="bar"><span>Profession</span><button data-p="leather" class="on">🪡 Leatherworking</button><button data-p="alch">⚗️ Alchemy</button><button data-p="smith">🔨 Blacksmithing</button><button data-p="tailor">🧵 Tailoring</button></div>
+<div class="bar"><span>Tray</span><button data-t="shelf" class="on">Slot shelf</button><button data-t="bench">Workbench</button><button data-t="heap">Satisfying heap</button><button data-t="counter">Big counter</button></div>
+<div class="bar"><span>Batch</span><button data-n="8">8</button><button data-n="20" class="on">20</button><span>Cast</span><button data-c="1.6" class="on">1.6 s (game-like)</button><button data-c=".7">0.7 s (quick preview)</button>
+  <button class="go" id="go">Create All</button><button id="stop">Stop</button></div>
+<div class="screen" id="scr">
+  <div class="char" id="char">🧙</div>
+  <div class="win"><div class="ttl" id="wttl"></div><div class="rec" id="wrec"></div><div class="btns"><div id="ball">Create All</div><div>Create</div></div></div>
+  <div class="tabs"><i>🪡</i><i>⚗️</i><i>🔨</i><i>🧵</i></div>
+  <div class="tray" id="tray"><div class="lbl" id="tlbl"></div><div class="stage" id="tst"></div></div>
+  <div class="cast" id="cast"><b id="castb"></b><span id="castt"></span></div>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), scr = $('scr');
+let snd = true, gs = true, actx;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1'); pick('gs', v => gs = v === '1');
+function ac() { return actx = actx || new AudioContext(); }
+const now = t => ac().currentTime + Math.max(0, t || 0);
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .004); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', hit) { if (!snd) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (hit ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n)); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.4], amps = [1, .35, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6))); }
+function el(html, css, frames, dur, delay = 0, parent = scr) { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; parent.appendChild(d); d.animate(frames, { duration: dur, delay, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function pathEl(html, x, y, life, fn, delay = 0, parent = scr, n = 22) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000, parent); }
+function dot(x, y, o, parent = scr) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px) scale(${o.grow ? 1 + (o.grow - 1) * i / 14 : 1})`, opacity: i === 14 ? 0 : (o.fade ? 1 - .7 * i / 14 : 1) }); } el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%;box-shadow:0 0 ${o.glow || 0}px ${o.color};filter:${o.blur ? 'blur(' + o.blur + 'px)' : 'none'}`, fr, o.life * 1000, (o.delay || 0) * 1000, parent); }
+function ring(x, y, color, size, life, delay = 0, parent = scr, w = 2) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, parent); }
+function star(x, y, size, color, life, delay = 0, parent = scr) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000, parent); }
+function glyph(ch, x, y, size, color, life, fn, delay = 0, parent = scr) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay, parent); }
+const timers = []; const at = (t, fn) => timers.push(setTimeout(fn, t * 1000));
+const semi = n => Math.pow(2, n / 12), PENTA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+const walk = i => semi(PENTA[Math.min(i, 10)] + (i > 10 ? [0, -3, -5, -2][i % 4] : 0));
+
+// ---------- the professions: work beats over the cast (silent), the payoff with its sound ----------
+// work(x, y, T, s, P): s = size (1 first items, .65 later); payoff(x, y, i, s, vol, P)
+const P = {
+  leather: { name: 'Leatherworking', pc: '#b07a46', item: ['🧥', 'Embossed Leather Vest', '#1eff00'], bench: '🟫',
+    work(x, y, T, s, par) { const n = 4, gap = 18 * s; for (let i = 0; i < n; i++) at(T * (.18 + i * .16), () => el('', `left:${x - 30 * s + i * gap}px;top:${y - 2}px;width:${5 * s}px;height:${5 * s}px;border-radius:50%;background:#140c06;box-shadow:0 0 0 1px #e8c08a`, [{ opacity: 1, transform: 'scale(1.6)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], T * 1000 * .9, 0, par)); },
+    payoff(x, y, i, s, vol, par) { el('', `left:${x - 30 * s}px;top:${y - 1}px;width:${56 * s}px;height:2px;background:#e8c08a;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .3 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 600, 0, par); star(x + 34 * s, y, 13 * s, '#fff', .35, 0, par); tone(260, 0, .05 * vol, .05, 'square', 180); tone(520 * walk(i) / 1.6, .05, .035 * vol, .12, 'triangle'); },
+    game(t) { tone(220, t, .02, .05, 'square', 150); } },
+  alch: { name: 'Alchemy', pc: '#9a5ae0', item: ['🧪', 'Swiftness Potion', '#ffffff'], bench: '⚗️',
+    work(x, y, T, s, par) { const c = ['#c08aff', '#9dff8a', '#ff7a8a', '#7ac8ff'][Math.floor(R(0, 4))]; for (let w = 0; w < 4; w++) at(T * (.15 + w * .17), () => { for (let i = 0; i < 2 + w; i++) dot(x + R(-7, 7) * s, y, { vx: R(-6, 6), vy: R(25 + w * 12, 50 + w * 15) * s, g: -20, life: .5, size: R(3, 5) * s, color: c, fade: true }, par); });
+      at(T * .86, () => { for (let i = 0; i < 6; i++) dot(x + R(-10, 10) * s, y - 14 * s, { vx: R(-30, 30), vy: R(15, 45), g: 60, life: .55, size: R(6, 10) * s, color: 'rgba(255,255,255,.7)', fade: true, blur: 1 }, par); }); },
+    payoff(x, y, i, s, vol, par) { pathEl('<div style="width:9px;height:11px;margin:-5px -4.5px;border-radius:2px;background:#a07040"></div>', x, y - 10 * s, .55, u => [14 * u * s, 55 * Math.sin(Math.PI * u * .9) * s, 480 * u, s, 1 - u], 0, par); tone(190 * walk(i) / 1.3, 0, .08 * vol, .15, 'sine', 120); noise(0, .012, .04 * vol, 1800, 2); },
+    game(t) { tone(R(250, 350), t, .025, .1, 'sine', 160); tone(R(250, 350), t + .25, .02, .1, 'sine', 160); } },
+  smith: { name: 'Blacksmithing', pc: '#e07a2a', item: ['⚔️', 'Heavy Copper Broadaxe', '#1eff00'], bench: '🪨',
+    work(x, y, T, s, par) { [.35, .62].forEach(f => at(T * f, () => { star(x, y, 13 * s, '#ffd27a', .2, 0, par); for (let j = 0; j < 3; j++) dot(x, y, { vx: R(-90, 90), vy: R(50, 140), g: 700, life: .35, size: 3, color: '#ffb040', glow: 4 }, par); })); },
+    payoff(x, y, i, s, vol, par) { star(x, y, 22 * s, '#ffd27a', .3, 0, par); for (let j = 0; j < Math.round(8 * s); j++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: .45, size: 3, color: '#ffb040', glow: 5 }, par); tone(85, 0, .15 * vol, .12, 'sine', 50); noise(0, .08, .12 * vol, 1800 * walk(i) / 2, 2.5, 'bandpass', true); metal(0, 470 * walk(i) / 1.4, .02 * vol, .3); },
+    game(t) { metal(t, 1300, .015, .15); } },
+  tailor: { name: 'Tailoring', pc: '#d8c8a0', item: ['🧣', 'Azure Silk Gloves', '#1eff00'], bench: '🧶',
+    work(x, y, T, s, par) { for (let i = 0; i < 4; i++) at(T * (.2 + i * .16), () => el('', `left:${x - 30 * s + i * 16 * s}px;top:${y - 1}px;width:${9 * s}px;height:2px;border-radius:1px;background:#f4ead2`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], T * 900, 0, par)); },
+    payoff(x, y, i, s, vol, par) { glyph('✂', x + 34 * s, y, 16 * s, '#fff', .4, u => [3 * u, 0, -25 + 50 * Math.min(1, u * 3), 1, 1 - u], 0, par); tone(3300 * walk(i) / 3, 0, .03 * vol, .06, 'triangle'); tone(3700 * walk(i) / 3, .05, .03 * vol, .06, 'triangle'); },
+    game(t) { noise(t, .1, .01, 3000, 1); } },
+};
+let prof = 'leather', tray = 'shelf', N = 20, CAST = 1.6, running = false;
+pick('p', v => { if (!running) { prof = v; drawWin(); } }); pick('t', v => { if (!running) { tray = v; noteT(); } });
+pick('n', v => { if (!running) N = +v; }); pick('c', v => CAST = +v);
+function drawWin() { const p = P[prof]; $('wttl').textContent = p.name; $('wrec').textContent = p.item[1]; }
+const TNOTE = { shelf: '<b>Slot shelf</b>: a row of slots like a bag row; each item pops into the next one; the count in the corner; the finale sweeps a shine across the shelf.',
+  bench: '<b>Workbench</b>: the tray is the work surface: the work beats happen <b>there</b> (not at your character) and each finished item slides off onto a stack that grows; the finale glints the stack.',
+  heap: '<b>Satisfying heap</b>: items tumble in and pile up with a bounce and a settle; the heap grows; the finale gives it a shake and a sparkle.',
+  counter: '<b>Big counter</b>: the item and a big number that punches up with each one, a progress line, and a stamp at the end.' };
+function noteT() { $('note').innerHTML = TNOTE[tray] + '<br><br>At your character: the single craft spread over each cast, the payoff the only sound; from the 4th item smaller and softer.'; }
+
+// ---------- the tray directions ----------
+const T = {};
+function trayStart() { const t = $('tray'), st = $('tst'), p = P[prof]; st.innerHTML = ''; t.style.setProperty('--pc', p.pc); $('tlbl').textContent = `${p.name} · Create All`; t.classList.add('open'); T.st = st; T.n = 0; T.stack = [];
+  if (tray === 'shelf') { const cols = Math.min(N, 14), rows = Math.ceil(N / cols); for (let i = 0; i < N; i++) st.insertAdjacentHTML('beforeend', `<div class="slot" style="left:${16 + (i % cols) * 34}px;top:${28 + Math.floor(i / cols) * 34}px"></div>`);
+    st.insertAdjacentHTML('beforeend', `<div class="big" id="sc" style="position:absolute;right:14px;top:40px;font-size:22px">0</div>`); }
+  if (tray === 'bench') st.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:30px;top:30px;width:120px;height:80px;border-radius:6px;background:radial-gradient(#3a2a18,#1a120a);box-shadow:inset 0 0 10px #000;font-size:40px;display:flex;align-items:center;justify-content:center">${p.bench}</div><div style="position:absolute;left:170px;right:20px;top:100px;height:4px;background:#5a4226"></div>`);
+  if (tray === 'heap') st.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:150px;width:240px;bottom:6px;height:6px;border-radius:50%;background:radial-gradient(rgba(0,0,0,.6),transparent)"></div>`);
+  if (tray === 'counter') st.insertAdjacentHTML('beforeend', `<div class="icon" style="position:absolute;left:30px;top:34px;width:56px;height:56px;font-size:32px;border-width:2px;--qc:${p.item[2]}">${p.item[0]}</div><div class="big" id="cnum" style="position:absolute;left:104px;top:34px">0 <span style="font-size:20px;color:#c9c2b0">/ ${N}</span></div><div style="position:absolute;left:104px;top:86px;width:300px;height:6px;background:rgba(0,0,0,.6);border:1px solid #000"><b id="cbar" style="display:block;height:100%;width:0;background:${p.pc};transition:width .3s"></b></div>`); }
+function trayItem(i, s) { const p = P[prof], st = T.st, it = `<div class="icon" style="--qc:${p.item[2]}">${p.item[0]}</div>`;
+  if (tray === 'shelf') { const cols = Math.min(N, 14), x = 16 + (i % cols) * 34 + 2, y = 28 + Math.floor(i / cols) * 34 + 2; const d = document.createElement('div'); d.style.cssText = `position:absolute;left:${x}px;top:${y}px`; d.innerHTML = it; st.appendChild(d);
+    d.animate([{ transform: 'scale(1.6)', opacity: 0 }, { transform: 'scale(.9)', opacity: 1, offset: .6 }, { transform: 'scale(1)' }], { duration: 260 }); $('sc').textContent = i + 1; $('sc').animate([{ transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 200 }); }
+  if (tray === 'bench') { const d = document.createElement('div'), x = 180 + (i % 10) * 4, y = 70 - Math.floor(i / 1) * 2.4; d.style.cssText = `position:absolute;left:150px;top:56px;z-index:${i}`; d.innerHTML = it; st.appendChild(d);
+    d.animate([{ transform: 'translate(0,0)' }, { transform: `translate(${x - 150 + 30}px,${Math.max(-40, y - 56)}px)` }], { duration: 350, easing: 'ease-out', fill: 'forwards' }); }
+  if (tray === 'heap') { const d = document.createElement('div'), cx = 270 + R(-60, 60) * (1 - i / (N + 4)), y = 96 - Math.min(60, Math.sqrt(i) * 14) + R(-4, 4); d.style.cssText = `position:absolute;left:${cx}px;top:-30px;z-index:${i}`; d.innerHTML = it; st.appendChild(d); T.stack.push(d);
+    d.animate([{ transform: `translateY(0) rotate(${R(-90, 90)}deg)` }, { transform: `translateY(${y + 30}px) rotate(${R(-20, 20)}deg)`, offset: .7 }, { transform: `translateY(${y + 22}px) rotate(${R(-10, 10)}deg)`, offset: .85 }, { transform: `translateY(${y + 30}px) rotate(${R(-12, 12)}deg)` }], { duration: 520, easing: 'ease-in', fill: 'forwards' }); }
+  if (tray === 'counter') { $('cnum').firstChild.textContent = (i + 1) + ' '; $('cnum').animate([{ transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 220, easing: 'ease-out' }); $('cbar').style.width = ((i + 1) / N * 100) + '%'; } }
+function trayFinale() { const st = T.st, p = P[prof];
+  if (tray === 'shelf') { el('', 'left:-80px;top:20px;width:60px;height:100px;background:linear-gradient(90deg,transparent,rgba(255,240,200,.7),transparent);transform:skewX(-20deg)', [{ transform: 'translateX(0) skewX(-20deg)' }, { transform: 'translateX(640px) skewX(-20deg)' }], 800, 0, st); tone(1318, 0, .05, .8); tone(1760, .1, .04, .8); }
+  if (tray === 'bench') { for (let i = 0; i < 8; i++) star(220 + R(-30, 60), R(20, 80), 12, '#fff', .5, i * .05, st); tone(1046, 0, .05, .8); tone(1568, .1, .04, .8); }
+  if (tray === 'heap') { T.stack.forEach(d => d.animate([{ translate: '0 0' }, { translate: '-3px -4px' }, { translate: '3px 0' }, { translate: '0 0' }], { duration: 320, composite: 'add' })); for (let i = 0; i < 10; i++) star(270 + R(-80, 80), R(40, 110), 12, '#fff', .5, .2 + i * .04, st); tone(880, .1, .05, .7); tone(1318, .2, .04, .7); }
+  if (tray === 'counter') { el(`<div style="padding:4px 12px;border:3px solid ${p.pc};border-radius:4px;font:800 18px Georgia,serif;color:${p.pc};background:rgba(0,0,0,.4);transform:rotate(-8deg)">${N} crafted</div>`, 'left:380px;top:28px', [{ transform: 'scale(2.2)', opacity: 0 }, { transform: 'scale(.95)', opacity: 1, offset: .5 }, { transform: 'scale(1)', opacity: 1, offset: .65 }, { opacity: 1 }], 1600, 0, st); at(.3, () => { tone(130, 0, .1, .15, 'square', 90); noise(0, .05, .05, 1200, 2); }); } }
+
+// ---------- the batch ----------
+function cpos() { const c = $('char').getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1); return [(c.left - s.left) / z + c.width / z / 2 + 70, (c.top - s.top) / z + c.height / z / 2 - 10]; }
+$('go').onclick = () => { if (running) return; running = true; const p = P[prof]; trayStart();
+  const cast = $('cast'); cast.style.opacity = 1;
+  const gap = .15; // the game's short pause between casts
+  for (let i = 0; i < N; i++) { const t0 = .45 + i * (CAST + gap);
+    at(t0, () => { $('castt').textContent = `${p.item[1]} (${N - i})`; $('castb').animate([{ width: '0' }, { width: '100%' }], { duration: CAST * 1000, fill: 'forwards' });
+      const s = i < 3 ? 1 : .65, vol = i < 3 ? 1 : .45;
+      if (gs) for (let g = 0; g < Math.floor(CAST / .45); g++) p.game(g * .45);
+      if (tray === 'bench') { const par = T.st; p.work(90, 70, CAST, s, par); }
+      else { const [x, y] = cpos(); p.work(x, y, CAST, s, scr); } });
+    at(t0 + CAST, () => { const s = i < 3 ? 1 : .65, vol = i < 3 ? 1 : .45;
+      if (tray === 'bench') p.payoff(90, 70, i, s, vol, T.st); else { const [x, y] = cpos(); p.payoff(x, y, i, s, vol, scr); }
+      trayItem(i, s); if (i === N - 1) at(.4, () => { cast.style.opacity = 0; trayFinale(); at(2.2, () => { $('tray').classList.remove('open'); running = false; }); }); }); }
+};
+$('stop').onclick = () => { timers.forEach(clearTimeout); timers.length = 0; running = false; $('cast').style.opacity = 0; $('tray').classList.remove('open'); };
+function fit() { $('scr').style.zoom = Math.min(1, (window.innerWidth - 40) / 1368); }
+window.addEventListener('resize', fit); fit(); drawWin(); noteT();
+</script>
+</body>
+</html>
