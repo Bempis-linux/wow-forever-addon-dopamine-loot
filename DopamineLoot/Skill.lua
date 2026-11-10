@@ -48,7 +48,8 @@ local IS_PROF = { Herbalism = true, Mining = true, Skinning = true, Fishing = tr
   Enchanting = true, Engineering = true, Leatherworking = true, Tailoring = true, Cooking = true, ["First Aid"] = true,
   Jewelcrafting = true, Inscription = true }
 
-local banner, title, titleGlow, bar, unlock, unlockBorder, note, recipeLine
+local banner, shade, title, titleGlow, bar, unlock, unlockBorder, note, recipeLine
+local Layout
 local pattern
 local showT, showing
 local shown = 0 -- (counts banners: a late recipe check only writes into its own)
@@ -196,21 +197,36 @@ local function AnimateReveal(t)
   if t >= REVEAL_T then reveal:Hide(); revealing = nil end
 end
 
+-- The bar sits under the title, moved left to make room when the next unlock's icon is at its end; the
+-- note stays centered under the title, a little below the bar
+function Layout(withIcon)
+  local dx = withIcon and -13 or 0
+  bar:ClearAllPoints(); bar:SetPoint("TOP", title, "BOTTOM", dx, 10)
+  note:ClearAllPoints(); note:SetPoint("TOP", bar, "BOTTOM", -dx, -3)
+end
+
 local function Create()
   banner = CreateFrame("Frame", nil, UIParent)
   banner:SetSize(310, 74)
   banner:SetFrameStrata("FULLSCREEN_DIALOG") -- (a short banner; above the settings window for the test)
   banner:Hide()
+  -- (docs/mockups/polish-r1.html, all six picked 2026-11-10: a soft shade so it reads on sunny ground,
+  -- a stronger title glow, the bar centered unless the next unlock's icon sits at its end, room and an
+  -- outline for the note; the bigger tools and the material touches are in SkillBar.lua)
+  shade = banner:CreateTexture(nil, "BACKGROUND", nil, -8)
+  shade:SetTexture("Interface\\AddOns\\DopamineLoot\\Media\\Glow.tga")
+  shade:SetVertexColor(0, 0, 0)
+  shade:SetPoint("CENTER", banner, "CENTER", 0, 2)
+  shade:SetSize(400, 130)
   title = banner:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   title:SetPoint("TOP", 0, 0)
   title:SetTextColor(1, 1, 1) -- (the mockup: white, glowing in the profession's color)
   titleGlow = banner:CreateTexture(nil, "ARTWORK")
   titleGlow:SetTexture("Interface\\AddOns\\DopamineLoot\\Media\\Glow.tga")
   titleGlow:SetBlendMode("ADD")
-  titleGlow:SetPoint("TOPLEFT", title, "TOPLEFT", -18, 10)
-  titleGlow:SetPoint("BOTTOMRIGHT", title, "BOTTOMRIGHT", 18, -10)
-  bar = ns.MakeSkillBar(banner) -- (its track sits 6 below the title; the tool rides above it)
-  bar:SetPoint("TOP", title, "BOTTOM", -12, 10)
+  titleGlow:SetPoint("TOPLEFT", title, "TOPLEFT", -24, 12)
+  titleGlow:SetPoint("BOTTOMRIGHT", title, "BOTTOMRIGHT", 24, -12)
+  bar = ns.MakeSkillBar(banner) -- (its track sits 6 below the title; the tool rides above it; placed by Layout)
   unlock = banner:CreateTexture(nil, "ARTWORK")
   unlock:SetSize(20, 20)
   unlock:SetPoint("LEFT", bar.track, "RIGHT", 6, 0)
@@ -218,8 +234,10 @@ local function Create()
   unlockBorder:SetTexture(BORDER)
   unlockBorder:SetAllPoints(unlock)
   note = banner:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  note:SetPoint("TOP", bar, "BOTTOM", 12, 0)
-  note:SetTextColor(0.85, 0.82, 0.72)
+  local font, size = note:GetFont()
+  if font then note:SetFont(font, size, "OUTLINE") end
+  note:SetTextColor(0.94, 0.92, 0.86)
+  Layout(false)
   recipeLine = banner:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   recipeLine:SetPoint("TOP", note, "BOTTOM", 0, -3)
   recipeLine:SetTextColor(0.85, 0.82, 0.72)
@@ -231,7 +249,7 @@ local function Create()
     -- (the banner's own fade leaves the reveal, a child, at full strength until its own fade)
     self:SetAlpha(1)
     local own = math.min(1, t / 0.3, (life - t) / 0.4)
-    title:SetAlpha(own); titleGlow:SetAlpha(own * 0.45); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
+    shade:SetAlpha(own * 0.55); title:SetAlpha(own); titleGlow:SetAlpha(own * 0.8); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
     if showing then
       local u = math.min(1, math.max(0, (t - 0.3) / 0.7))
       bar:SetValue(showing.v0 + (showing.v1 - showing.v0) * (1 - (1 - u) ^ 3))
@@ -246,7 +264,7 @@ local function Create()
       if on then -- a still sample while it's being placed
         banner:SetScript("OnUpdate", nil); banner:SetAlpha(1); banner:Show(); reveal:Hide(); revealing = nil
         title:SetAlpha(1); bar:SetAlpha(1); note:SetAlpha(1); unlock:SetAlpha(1); unlockBorder:SetAlpha(1)
-        titleGlow:SetVertexColor(PROF.Herbalism.color[1], PROF.Herbalism.color[2], PROF.Herbalism.color[3]); titleGlow:SetAlpha(0.45)
+        titleGlow:SetVertexColor(PROF.Herbalism.color[1], PROF.Herbalism.color[2], PROF.Herbalism.color[3]); titleGlow:SetAlpha(0.8); shade:SetAlpha(0.55); Layout(true)
         local p = PROF.Herbalism
         title:SetText("Herbalism |cff8ef07a64|r"); note:SetText("6 to Briarthorn"); recipeLine:SetText("")
         bar:SetProfession("Herbalism", p.color, p.light); bar:SetValue(0.7)
@@ -304,6 +322,7 @@ function ns.ShowSkillUp(name, level, capped, recipeColor)
     unlock:SetTexture(icon); unlock:Show()
     unlockBorder:SetVertexColor(l[1], l[2], l[3]); unlockBorder:Show()
   else unlock:Hide(); unlockBorder:Hide() end
+  Layout(icon ~= nil)
   if p.craft and not u then from = 0 end -- (a crafting bar reads like the game's own: 78 / 150, not 3 / 75)
   local span = math.max(1, to - from)
   showing = { v0 = math.max(0, (level - 1 - from) / span), v1 = math.min(1, (level - from) / span) }

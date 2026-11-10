@@ -54,22 +54,24 @@ end
 local CIRCLE, STREAK = MEDIA .. "Circle.tga", MEDIA .. "Streak.tga"
 
 STYLE.Tailoring = { track = "000000", trackA = 0.65, stops = { { 0, 1, "a89870", "fff4d8" } },
-  tool = { "ToolNeedle", 24, 3 }, motion = { { 0, 0, 0 }, { 0, 5, 20 }, { 0, 0, 0 } },
+  tool = { "ToolNeedle", 31, 3 }, motion = { { 0, 0, 0 }, { 0, 5, 20 }, { 0, 0, 0 } },
   build = function(b) Dashes(b, "over", 5, 6, 10, "ffffff", 0.75) end }
 STYLE.Leatherworking = { track = "2a1a0e", vstops = { "c89060", "8a5a30" },
-  tool = { "ToolPin", 20, -2 }, motion = { { 0, 0 }, { 0, 6 }, { 0, 0 } },
+  tool = { "ToolPin", 26, -2 }, motion = { { 0, 0 }, { 0, 6 }, { 0, 0 } },
   build = function(b)
     for x = 4, W - 4, 8 do Spot(b, "over", CIRCLE, "0a0604", 3, 3, x, 2); Spot(b, "over", CIRCLE, "0a0604", 3, 3, x + 4, 10) end
     Dashes(b, "inner", 5, 6, 10, "f0d8a8", 1, 2)
   end }
 STYLE.Alchemy = { track = "1a1422", vstops = { "d0a8ff", "7a3ad0" }, wobble = "b88aff",
-  tool = { "ToolDrop", 20, -2 }, motion = { { 0, -6, 0, 1, 1, 1 }, { 0, 6, 0, 1, 1, 0.2 }, { 0, 0, 0, 1, 1, 1 } },
+  tool = { "ToolDrop", 26, -2 }, motion = { { 0, -6, 0, 1, 1, 1 }, { 0, 6, 0, 1, 1, 0.2 }, { 0, 0, 0, 1, 1, 1 } },
   build = function(b)
     local hi = b:Over("OVERLAY"); hi:SetColorTexture(1, 1, 1, 0.22); hi:SetHeight(1)
     hi:SetPoint("TOPLEFT", b.track, "TOPLEFT", 2, -1); hi:SetPoint("TOPRIGHT", b.track, "TOPRIGHT", -2, -1)
+    local shine = b:Inner("ARTWORK"); shine:SetColorTexture(1, 1, 1, 0.35); shine:SetHeight(2) -- (the liquid's shine)
+    shine:SetPoint("TOPLEFT", b.inner, "TOPLEFT", 0, -2); shine:SetPoint("TOPRIGHT", b.inner, "TOPRIGHT", 0, -2)
   end }
 STYLE.Engineering = { track = "000000", stops = {}, glow = "c8e0f8",
-  tool = { "ToolWrench", 20, -1 }, motion = { { 0, 0, 0 }, { 0, 0, -40 }, { 0, 0, 0 } },
+  tool = { "ToolWrench", 26, -1 }, motion = { { 0, 0, 0 }, { 0, 0, -40 }, { 0, 0, 0 } },
   build = function(b) b.cells = {}
     for i = 0, math.floor(W / 13) - 1 do
       local c = b:Over("ARTWORK"); c:SetSize(11, H); c:SetPoint("TOPLEFT", b.track, "TOPLEFT", i * 13, 0); b.cells[#b.cells + 1] = c
@@ -80,13 +82,13 @@ STYLE.Engineering = { track = "000000", stops = {}, glow = "c8e0f8",
       if (i - 1) * 13 + 6 <= W * v then c:SetColorTexture(Hex("c8e0f8")) else c:SetColorTexture(Hex("1a1e24")) end
     end
   end }
-STYLE.Cooking = { track = "2a1c10", stops = { { 0, 1, "c87a3a", "c87a3a" } },
-  tool = { "ToolPan", 20, -1 }, motion = { { 0, 0, 0 }, { 0, -6, -200 }, { 0, 0, -360 } },
-  build = function(b) for x = -6, W + 6, 10 do Spot(b, "inner", STREAK, "6a3410", 20, 20, x, H / 2, -35) end end }
+STYLE.Cooking = { track = "2a1c10", stops = { { 0, 1, "d08442", "d08442" } },
+  tool = { "ToolPan", 26, -1 }, motion = { { 0, 0, 0 }, { 0, -6, -200 }, { 0, 0, -360 } },
+  build = function(b) for x = -6, W + 6, 9 do Spot(b, "inner", STREAK, "6a3410", 18, 18, x, H / 2, -35) end end }
 STYLE.Blacksmithing = { track = "1a1a1c", stops = { { 0, 0.55, "3a3a40", "6a3a2a" }, { 0.55, 0.82, "6a3a2a", "e0501a" }, { 0.82, 1, "e0501a", "ffe7a0" } }, glow = "ff7828",
-  tool = { "ToolHammer", 20, -1 }, motion = { { 0, -2, -30 }, { 0, 2, 10 }, { 0, 0, 0 } }, bits = { n = 5, color = "ffd27a", size = 2, up = true, spread = 14 } }
+  tool = { "ToolHammer", 26, -1 }, motion = { { 0, -2, -30 }, { 0, 2, 10 }, { 0, 0, 0 } }, bits = { n = 5, color = "ffd27a", size = 2, up = true, spread = 14 } }
 STYLE.Enchanting = { track = "120c22", stops = { { 0, 1, "3a2a7a", "8a6aff" } },
-  tool = { "ToolSparkle", 18, -1 }, motion = { { 0, 0, 0, 1 }, { 0, 0, 0, 1.6 }, { 0, 0, 0, 1 } }, toolGlow = true,
+  tool = { "ToolSparkle", 23, -1 }, motion = { { 0, 0, 0, 1 }, { 0, 0, 0, 1.6 }, { 0, 0, 0, 1 } }, toolGlow = true,
   build = function(b) b.runes = {}
     for i = 0, 9 do
       local r = b:Over("OVERLAY"); local n = (i * 7) % 16
@@ -96,34 +98,34 @@ STYLE.Enchanting = { track = "120c22", stops = { { 0, 1, "3a2a7a", "8a6aff" } },
   end,
   refresh = function(b, v) for i, r in ipairs(b.runes or {}) do local lit = (i - 0.5) / #b.runes < v; r:SetBlendMode(lit and "ADD" or "BLEND"); r:SetAlpha(lit and 1 or 0.2) end end }
 STYLE["First Aid"] = { track = "2a2622", stops = { { 0, 1, "f2ede2", "f2ede2" } },
-  tool = { "ToolClip", 18, -2 }, motion = { { 0, -6, 0 }, { 0, 0, 0, 1.2, 0.8 }, { 0, 0, 0 } },
+  tool = { "ToolClip", 23, -2 }, motion = { { 0, -6, 0 }, { 0, 0, 0, 1.2, 0.8 }, { 0, 0, 0 } },
   build = function(b) for x = 7, W - 4, 15 do Spot(b, "inner", WHITE, "d03030", 7, 2, x, H / 2); Spot(b, "inner", WHITE, "d03030", 2, 7, x, H / 2) end end }
 -- gathering (proposed in crafting-picks.html, picked 2026-11-09)
 STYLE.Herbalism = { track = "10180c", stops = { { 0, 0.7, "1e6a28", "4ab83a" }, { 0.7, 1, "4ab83a", "8ef07a" } },
-  tool = { "ToolSprout", 20, -2 }, motion = { { 0, 4, 0, 0.6 }, { 0, -4, 0, 1.25 }, { 0, 0, 0, 1 } }, bits = { n = 6, color = "f0ff90", size = 2, up = true, spread = 12 },
+  tool = { "ToolSprout", 26, -2 }, motion = { { 0, 4, 0, 0.6 }, { 0, -4, 0, 1.25 }, { 0, 0, 0, 1 } }, bits = { n = 6, color = "f0ff90", size = 2, up = true, spread = 12 },
   build = function(b) for x = 3, W, 13 do Spot(b, "inner", CIRCLE, "c8ffb0", 6, 4, x + 3, 4); Spot(b, "inner", CIRCLE, "a8f090", 6, 4, x + 9, 9) end end }
 STYLE.Mining = { track = "161412", stops = {},
-  tool = { "ToolPick", 20, -2 }, motion = { { 0, -3, -35 }, { 0, 2, 15 }, { 0, 0, 0 } }, bits = { n = 5, color = "a89a8a", size = 3, up = true, spread = 14 },
+  tool = { "ToolPick", 26, -2 }, motion = { { 0, -3, -35 }, { 0, 2, 15 }, { 0, 0, 0 } }, bits = { n = 5, color = "a89a8a", size = 3, up = true, spread = 14 },
   build = function(b)
-    local bands = { { 6, "4a4440" }, { 3, "5a524c" }, { 5, "3e3a36" } }
+    local bands = { { 6, "6a625a" }, { 3, "7a7068" }, { 5, "55504a" } }
     local x, i = 0, 0
     while x < W do
       local band = bands[i % 3 + 1]
       local t = b:Inner("BACKGROUND", 1); t:SetColorTexture(Hex(band[2])); t:SetSize(band[1], H); t:SetPoint("TOPLEFT", b.inner, "TOPLEFT", x, 0)
       x, i = x + band[1], i + 1
     end
-    for fx = 2, W, 17 do Spot(b, "inner", CIRCLE, "f0a860", 2.5, 2.5, fx, 3) end
-    for fx = 10, W, 23 do Spot(b, "inner", CIRCLE, "ffe0b0", 2, 2, fx, 8) end
+    for fx = 2, W, 17 do Spot(b, "inner", CIRCLE, "ffb070", 3.5, 3.5, fx, 3) end
+    for fx = 10, W, 23 do Spot(b, "inner", CIRCLE, "fff0d0", 2.5, 2.5, fx, 8) end
   end }
 STYLE.Fishing = { track = "08121c", vstops = { "8ac8ff", "2a7ae0", "1a4a9a" }, wobble = "6ab0ff",
-  tool = { "ToolBobber", 18, -3 }, motion = { { 0, 0 }, { 0, 6 }, { 0, -2 }, { 0, 0 } }, ripple = true,
+  tool = { "ToolBobber", 23, -3 }, motion = { { 0, 0 }, { 0, 6 }, { 0, -2 }, { 0, 0 } }, ripple = true,
   build = function(b)
-    local hi = b:Inner("ARTWORK"); hi:SetColorTexture(1, 1, 1, 0.5); hi:SetHeight(1)
+    local hi = b:Inner("ARTWORK"); hi:SetColorTexture(1, 1, 1, 0.4); hi:SetHeight(2) -- (the liquid's shine)
     hi:SetPoint("TOPLEFT", b.inner, "TOPLEFT", 0, -2); hi:SetPoint("TOPRIGHT", b.inner, "TOPRIGHT", 0, -2)
   end }
-STYLE.Skinning = { track = "1c130b", vstops = { "d0a070", "8a5a30" },
-  tool = { "ToolKnife", 20, -1 }, motion = { { -0.2, 0, -20, 1, 1, 1, 0 }, { 0.3, -2, 10, 1, 1, 1, 1 }, { 0, 0, 0, 1, 1, 1, 0 } }, bits = { n = 3, color = "ffffff", size = 2, spread = 16 },
-  build = function(b) for x = -4, W + 4, 4 do Spot(b, "inner", STREAK, "fff0d2", 14, 14, x, H / 2, 25):SetAlpha(0.3) end end }
+STYLE.Skinning = { track = "1c130b", vstops = { "d8aa78", "8a5a30" },
+  tool = { "ToolKnife", 26, -1 }, motion = { { -0.2, 0, -20, 1, 1, 1, 0 }, { 0.3, -2, 10, 1, 1, 1, 1 }, { 0, 0, 0, 1, 1, 1, 0 } }, bits = { n = 3, color = "ffffff", size = 2, spread = 16 },
+  build = function(b) for x = -4, W + 4, 3 do Spot(b, "inner", STREAK, "fff0d2", 14, 14, x, H / 2, 25):SetAlpha(0.55) end end }
 
 -- A motion keyframe: { dx, dy, degrees, scale x, scale y, alpha, flash } in the mockup's CSS terms (y down,
 -- degrees clockwise; a dx under 1 is a fraction of the tool's width, as the knife's translateX(-70%))
