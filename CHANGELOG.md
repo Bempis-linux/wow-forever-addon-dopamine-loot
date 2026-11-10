@@ -1,5 +1,43 @@
 # Dopamine Loot
 
+## 1.3.0 (2026-11-10)
+
+The professions release: gathering, crafting and skill-ups get their own effects, plus a bag that
+bulges when it fills up and a tidier way to show small loot.
+
+- **Gathering**: every herb, ore, fish or skin bursts where you gathered it, each with its own look and
+  sound (a leaf pop, rock strikes, a splash, a knife glint), and flies into the new **harvest window**.
+  - The harvest window lists the session by profession, with how fast you're gathering, what it's worth,
+    and a gold badge when a stack fills up. It fades after you stop, hides in combat, and right-click
+    closes it.
+  - Rare finds get their own moment (a golden seed that bursts open, a gem flare, a leaping fish, a double
+    slash or a flurry for skinning, your pick).
+  - Soft notes climb with each gather. After 40 gathers in 10 minutes it all calms down by itself
+    (Calm after, on the Professions page).
+- **Crafting**: while you craft, a small touch of your profession plays by your cast bar and lands when the
+  item is made: punches in a leather strip, a potion boiling over, stitches and a snip, gears and a boing, a
+  sizzle and a flip, hammer taps, runes, a green plus. Crafted items list in the side column.
+  - **Create All** drops every item into a pile in a tray under the profession window, with a count. Long
+    batches sink as they fill, and it shakes and sparkles at the end. Sounds step down after the first
+    item, so a long batch stays calm.
+- **Skill-ups**: a banner with your new skill and a bar toward what's next.
+  - The bar is made of your profession's material (stitched cloth, punched leather, a glass tube, glowing
+    runes, stone, water...) with a small tool that moves on each point. Or pick **Simple** for a plain bar.
+  - Reaching a new herb or ore shows what you can gather now; reaching a rank's cap tells you to train.
+  - After a crafting skill-up, a line tells you when the recipe you made changed color.
+- **Bulging bag**: with 4 or fewer free slots, the backpack button swells with each item, sags and creaks,
+  and shows the slots left. When full, items bounce off and a padlock snaps shut; freeing space lets it
+  breathe out.
+- **Side column**: small loot (and everything during a fight) lists as rows under "Picked up" instead of
+  one-line popups, above the harvest window. Each row leaves a few seconds after it arrives.
+- **Move frames** (first settings page): drag the popups, the side column and the skill-up banner where you
+  want them.
+- **Settings**: the first page now has a switch for every feature. The new **Professions** page has the
+  details and Test buttons for gathering, crafting and skill-ups.
+- `/dl` during a fight now opens the settings as soon as the fight ends (the game blocks it in combat).
+- Popups now sit a little more to the left by default (55% across the screen instead of 63%) to make room
+  for the side column.
+
 ## 1.2.1 (2026-11-09)
 
 - Loot rain: after a Big bang or Quick burst settles, the items stay where they landed instead of shuffling

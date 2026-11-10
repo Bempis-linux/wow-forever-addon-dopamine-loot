@@ -55,16 +55,28 @@ Every drop gets its moment. Items pop up beside you **turning in 3D**, and a big
 - A sound per rarity, picked **by ear** from the game's own sounds.
 - Coins, launches and landings **climb in pitch** as the loot keeps coming.
 
+## ⛏️ Professions
+
+- 🌿 **Gathering:** every herb, ore, fish or skin bursts where you gathered it, with its own sound, and flies into a **harvest window** that tallies your session (pace, worth, full stacks). Rare finds get their own moment.
+- 🔨 **Crafting:** a small touch of your profession plays by your cast bar and lands when the item is made. **Create All** drops every item into a growing pile under the profession window.
+- 📈 **Skill-ups:** a bar made of your profession's material, with a little tool that moves on each point, and a reveal when you can gather something new. Prefer it plain? There's a simple bar too.
+
+## 🎒 Bags and the side column
+
+- 🎒 **Bulging bag:** nearly full, your backpack swells and creaks; full, items bounce off a padlock.
+- 📋 **Small loot** lists as rows in a side column instead of popping up. Drag the popups, the column and the skill-up banner wherever you like.
+
 ## ⚙️ Settings
 
 Type **`/dl`** (or Options › AddOns › Dopamine Loot). Every effect is its own switch, and every page has **Test buttons**, so you can see it all without looting a thing.
 
 | Page | What's there |
 |---|---|
-| **Dopamine Loot** | popups, rain and sounds on or off; quick tests |
+| **Dopamine Loot** | every feature on or off, move frames, quick tests |
 | **Popups** | style, size, placement, with a live preview |
 | **Loot rain** | when it rains, where it flies from, every effect |
 | **Sounds** | the sound for each rarity |
+| **Professions** | gathering, the Create All pile, the skill-up bar look |
 
 ---
 

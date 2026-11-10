@@ -92,8 +92,6 @@ const ART = {
     <g filter="url(#g)" transform="translate(32 32)"><path d="${gearPath(8, 17, 22, 6.5)}" fill="#fff" fill-rule="evenodd"/></g>`,
   FxScissors: `<defs><filter id="g" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
     <g filter="url(#g)" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><circle cx="16" cy="44" r="7"/><circle cx="16" cy="20" r="7"/><path d="M22 40 L54 22"/><path d="M22 24 L54 42"/></g>`,
-  FxCross: `<defs><filter id="g" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-    <path filter="url(#g)" d="M26 10 h12 v16 h16 v12 h-16 v16 h-12 v-16 h-16 v-12 h16 Z" fill="#fff"/>`,
 };
 function gearPath(teeth, r1, r2, hole) { let d = ''; for (let i = 0; i < teeth * 2; i++) { const r = i % 2 ? r1 : r2, a0 = (i - .3) / (teeth * 2) * Math.PI * 2, a1 = (i + .3) / (teeth * 2) * Math.PI * 2;
     d += `${i ? 'L' : 'M'}${(Math.cos(a0) * r).toFixed(2)} ${(Math.sin(a0) * r).toFixed(2)} L${(Math.cos(a1) * r).toFixed(2)} ${(Math.sin(a1) * r).toFixed(2)} `; }

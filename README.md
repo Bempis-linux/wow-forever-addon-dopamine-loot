@@ -14,6 +14,20 @@ Loot that feels like loot. A World of Warcraft addon for **WoW: Forever** (Inter
   up above the bag.
 - **Sounds**: a sound per rarity (the game's own, picked by ear) plus soft thuds, a pouch and coins for the
   rain, moving gently in pitch as the loot keeps coming.
+- **Gathering**: every herb, ore, fish or skin bursts where you gathered it, with its own sound, and flies
+  into a harvest window that tallies the session by profession (pace, worth, full stacks). Rare finds get
+  their own moment. It calms down by itself on long farming runs.
+- **Crafting**: while you craft, a small touch of your profession plays by your cast bar (punches in a
+  leather strip, a potion boiling over, stitches and a snip, gears, a sizzle and a flip, hammer taps, runes,
+  a green plus) and lands when the item is made. A Create All drops every item into a growing pile under the
+  profession window.
+- **Skill-ups**: a banner with your new skill and a bar toward what's next, made of the profession's
+  material with a little tool that moves (or a simple bar, if you prefer), and a reveal when you can gather
+  something new.
+- **Bulging bag**: when your bags are nearly full, the backpack button swells with each item and creaks;
+  when full, items bounce off a padlock.
+- **Side column**: small loot lists as rows under "Picked up" instead of popping up. Popups, the column and
+  the skill-up banner can be dragged where you want them (Move frames).
 
 It stays out of the way: common loot and loot in combat come as one compact line, clicks pass through
 the popups, and the rain waits until the fight is over.
@@ -32,11 +46,12 @@ with Test buttons:
 
 | Page | What's there |
 |---|---|
-| Dopamine Loot | switch popups, the rain and sounds on or off; quick tests |
+| Dopamine Loot | switch each feature on or off (popups, rain, side column, gathering, crafting, skill-ups, bag, sounds); move frames; quick tests |
 | Popups | when they show, style, size, placement, the 3D item, the Legendary moment, with a live preview |
 | Arrivals | how each rarity arrives, with a Test button for each |
 | Loot rain | when it rains and what rains, where the loot flies from, every effect as its own switch, tests |
 | Sounds | the sound for each rarity (Play to hear it), our chime for Rare and up |
+| Professions | the harvest window, notes and calm for gathering; the Create All pile; the skill-up bar look; tests for all of it |
 
 ## Bugs and ideas
 

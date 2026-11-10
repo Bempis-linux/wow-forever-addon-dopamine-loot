@@ -172,6 +172,7 @@ local function FlushBurst()
 end
 
 function ns:PLAYER_REGEN_ENABLED()
+  if ns.openAfterCombat then ns.openAfterCombat = nil; ns:OpenSettings() end -- (/dl during the fight)
   if ns.PopupsAfterCombat then ns.PopupsAfterCombat() end
   if #afterCombat == 0 and not afterCombat.copper then return end
   local items = afterCombat

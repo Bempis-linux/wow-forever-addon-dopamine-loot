@@ -98,9 +98,11 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   Vacuum (setting `rainGather`). The chest
   show (containers, shake, rarity tease) was set aside 2026-10-14: `deprecated/chest-show/`, not loaded.
 - Seen set and loot history per character; settings account-wide. No login toast.
-- **Settings layout** (0.4.15, from docs/mockups/settings.html): pages Dopamine Loot (3 main switches, quick
-  tests), Popups (custom), Loot rain, Sounds (native); Advanced and Blizzard assets removed for 1.0. One topic
-  per page: on/off, when, look, test. Native unless a page needs a live preview.
+- **Settings layout** (0.4.15, from docs/mockups/settings.html; 1.3.0): pages Dopamine Loot (a main switch
+  for every feature, Move frames, quick tests), Popups (custom), Arrivals, Loot rain, Sounds, Professions
+  (native: gathering details, Create All pile, skill-up bar look Crafted/Simple, tests); Advanced and Blizzard
+  assets removed for 1.0. Main on/off switches live on the first page only; a feature's page holds its details.
+  Native unless a page needs a live preview.
 - **Settings pages only** (user, 2026-11-04; overrides the kit's command/page parity): `/dl` opens the
   settings and there are no other commands. Every setting and test is a control on a page (number field
   or drag slider, choice, Test button); visual settings update a live preview on the page. Test buttons

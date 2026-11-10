@@ -382,7 +382,9 @@ local function CreateGeneral()
     "An item and some money rained together, the way finishing a quest plays.")
 end
 
+-- (the game blocks opening the settings during a fight: /dl then opens them as soon as it ends)
 function ns:OpenSettings()
+  if InCombatLockdown() then ns.openAfterCombat = true; return end
   if not category then CreateGeneral() end
   Settings.OpenToCategory(category:GetID())
 end

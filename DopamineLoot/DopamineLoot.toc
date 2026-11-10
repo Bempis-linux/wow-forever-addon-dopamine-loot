@@ -1,8 +1,8 @@
 ## Interface: 16001
 ## Title: Dopamine Loot
-## Notes: Loot that feels like loot: 3D item popups and a loot rain with coins, beams and sounds.
+## Notes: Loot that feels like loot: 3D item popups, a loot rain, and effects for gathering, crafting and skill-ups.
 ## Author: Bempis
-## Version: 1.2.1
+## Version: 1.3.0
 ## SavedVariables: DopamineLootDB
 ## SavedVariablesPerCharacter: DopamineLootCharDB
 ## IconTexture: Interface\Icons\INV_Misc_Bag_10_Green
