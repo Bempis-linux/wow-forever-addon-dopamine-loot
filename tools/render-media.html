@@ -58,7 +58,9 @@ const SOUNDS = {
   ToolHerbalism: [.12, () => { tone(620, 0, .04, .08, 'sine', 980); noise(0, .06, .015, 4000, 1); }], ToolMining: [.2, () => { noise(0, .03, .06, 2400, 3, 'bandpass', true); metal(0, 900, .012, .15, [1, 2.76], [1, .3]); }],
   ToolFishing: [.15, () => { tone(420, 0, .05, .12, 'sine', 210); noise(0, .08, .02, 700, 1, 'lowpass'); }], ToolSkinning: [.22, () => { metal(0, 3200, .012, .18, [1, 1.5, 2.3], [1, .5, .3]); noise(0, .08, .02, 7000, .7, 'highpass'); }],
 };
-const QUIET = ['LeatherTug', 'AlchCork', 'TailorSnip', 'EngBoing', 'CookTss', 'SmithClang', 'EnchPing', 'AidDone', 'CraftDone'];
+const QUIET = ['LeatherTug', 'AlchCork', 'TailorSnip', 'EngBoing', 'CookTss', 'SmithClang', 'EnchPing', 'AidDone', 'CraftDone',
+  // the work beats too: full on a Create All's 1st item, these quiet copies on the 2nd and 3rd
+  'LeatherThok', 'LeatherZip', 'AlchClink', 'AlchGlug', 'AlchFoam', 'TailorFwip', 'EngTick', 'CookSizzle', 'CookWhoosh', 'SmithTap', 'EnchChime1', 'EnchChime2', 'EnchChime3', 'AidTapA', 'AidTapB'];
 const GAIN = 5; // one gain for all, so they keep the mockup's levels between each other (the game's sounds are louder than a page's)
 
 function wav(buf) { const d = buf.getChannelData(0), n = d.length, b = new DataView(new ArrayBuffer(44 + n * 2)), w = (o, s) => [...s].forEach((c, i) => b.setUint8(o + i, c.charCodeAt(0)));

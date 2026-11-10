@@ -13,7 +13,7 @@ local BORDER = "Interface\\COMMON\\WhiteIconFrame"
 local STAR = "Interface\\Cooldown\\star4"
 local TRAY_H, ICON, OPEN_T = 130, 26, 0.3
 local FALL_T = 0.7                   -- one item's fall, bounce and roll
-local ROW, COLW, TALL = ICON - 6, 18, 4 -- one item raises its column this much; columns overlap; rows before it sinks
+local ROW, COLW, TALL = ICON - 2, ICON + 2, 4 -- one item raises its column this much; column width (icons side by side, not overlapping); rows before it sinks
 local FLOOR_Y = 2 + ICON / 2         -- an item's middle when it rests on the floor (heap coordinates, y up)
 
 local tray, label, count, heap

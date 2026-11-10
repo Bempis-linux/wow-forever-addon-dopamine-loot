@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leatherworking Visibility</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 1000px; } header b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 200px; max-width: 760px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  .stage.dark { background: radial-gradient(ellipse at 60% 40%, #3a2c1e, #1a120a 55%, #0a0604); }
+  .stage.bright { background: radial-gradient(ellipse at 30% 40%, #e0a060, #c07838 60%, #9a5a28); }
+  .stage.grass { background: radial-gradient(ellipse at 40% 70%, #6a8a40, #3a5a24 60%, #22341a); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .cast { position: absolute; left: 90px; top: 110px; width: 240px; height: 16px; border: 2px solid #8a7a5a; border-radius: 3px; background: #000; }
+  .cast b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(#ffd34a, #c08a10); }
+  .cast span { position: absolute; inset: 0; text-align: center; font: 600 11px system-ui; color: #fff; line-height: 16px; text-shadow: 0 1px 1px #000; }
+  .note { position: absolute; right: 14px; top: 10px; max-width: 360px; text-align: right; font: 600 11.5px system-ui; color: #fff; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Leatherworking: easier to see in the dark</h1>
+  <p>In a dark place the punched holes are dark dots with a thin tan ring, so you hear the punches before you see anything ("a thok before the animation"). Same timing and sounds in each; only how it looks changes. <b>Now</b>: as in game. <b>L1 Light rings</b>: each hole gets a thicker, lighter ring (the hole stays dark inside) and the thread is a shade brighter. <b>L2 Punch flash</b>: L1, plus a small warm flash right when each hole is punched, so every sound has something you see at that moment. <b>L3 Glowing stitch</b>: L2, and the thread draws through with a soft glow, and the final glint is a bit bigger. Sound is on.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button>
+    <span>Ground</span><button data-g="dark" class="on">Dark (your screenshot)</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button></div>
+</header>
+<div class="bar"><span>Version</span><button data-v="now">Now</button><button data-v="l1">L1 Light rings</button><button data-v="l2" class="on">L2 Punch flash</button><button data-v="l3">L3 Glowing stitch</button></div>
+<div class="bar"><span>Play</span><button class="go" id="one">Craft once (with the cast)</button><button class="go" id="five">×5 in a row</button></div>
+<div class="stage dark" id="st"><div class="cast" id="cast"><b id="castb"></b><span>Light Leather</span></div><div class="note" id="note"></div></div>
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), ST = $('st');
+let snd = true, actx, muteUntil = 0;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1'); pick('g', v => ST.className = 'stage ' + v);
+function ac() { return actx = actx || new AudioContext(); }
+const now = t => ac().currentTime + Math.max(0, t || 0);
+const muted = () => !snd || performance.now() < muteUntil;
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (muted()) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .004); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1) { if (muted()) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+function el(html, css, frames, dur, delay = 0) { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d); d.animate(frames, { duration: dur, delay, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function star(x, y, size, color, life) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000); }
+const at = (t, fn) => setTimeout(fn, t * 1000);
+const thok = () => { tone(240, 0, .06, .06, 'square', 160); noise(0, .03, .03, 1200, 2); };
+const zip = i => noise(0, .06, .025, 3000 + i * 300, 3);
+const tug = () => tone(520, 0, .04, .12, 'triangle', 880);
+// the look per version: hole(x, y, life), flash(x, y), thread(x, y, w, life), the glint's size
+const LOOK = {
+  now: { ring: 'box-shadow:0 0 0 1px #e8c08a', thread: '#e8c08a', glow: '', flash: false, glint: 14 },
+  l1: { ring: 'box-shadow:0 0 0 2px #f6dcae, 0 0 3px 2px rgba(0,0,0,.6)', thread: '#f6dcae', glow: '', flash: false, glint: 14 },
+  l2: { ring: 'box-shadow:0 0 0 2px #f6dcae, 0 0 3px 2px rgba(0,0,0,.6)', thread: '#f6dcae', glow: '', flash: true, glint: 14 },
+  l3: { ring: 'box-shadow:0 0 0 2px #f6dcae, 0 0 3px 2px rgba(0,0,0,.6)', thread: '#ffe8c0', glow: ';box-shadow:0 0 6px #ffcf8a', flash: true, glint: 18 },
+};
+let v = 'l2';
+const NOTE = { now: 'Now: dark holes with a thin tan ring', l1: 'L1: thicker, lighter rings; a brighter thread', l2: 'L2: L1 + a warm flash on each punch', l3: 'L3: L2 + a glowing thread and a bigger glint' };
+pick('v', x => { v = x; $('note').textContent = NOTE[x]; });
+function work(x, y, T) { const L = LOOK[v], gap = 20, x0 = x - 30;
+  for (let i = 0; i < 4; i++) at(T * (.18 + i * .16), () => { const life = (T * (.82 - i * .16) + .5) * 1000;
+    el('', `left:${x0 + i * gap - 2.5}px;top:${y - 2.5}px;width:5px;height:5px;border-radius:50%;background:#140c06;${L.ring}`, [{ opacity: 1, transform: 'scale(1.7)' }, { opacity: 1, transform: 'scale(1)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], life);
+    if (L.flash) el('', `left:${x0 + i * gap - 7}px;top:${y - 7}px;width:14px;height:14px;border-radius:50%;background:radial-gradient(rgba(255,224,170,.95),rgba(255,190,110,.4) 45%,transparent 70%)`, [{ transform: 'scale(.4)', opacity: 1 }, { transform: 'scale(1.2)', opacity: 0 }], 220);
+    thok(); });
+  for (let i = 0; i < 3; i++) at(T * (.8 + i * .05), () => { el('', `left:${x0 + i * gap + 4}px;top:${y - 1}px;width:${gap - 8}px;height:2px;border-radius:1px;background:${L.thread}${L.glow};transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .8 }, { opacity: 0 }], (T * .2 + .5) * 1000); zip(i); }); }
+function payoff(x, y) { star(x + 44, y, LOOK[v].glint, '#fff', .35); tug(); }
+function spot() { const c = $('cast').getBoundingClientRect(), s = ST.getBoundingClientRect(); return [c.right - s.left + 62, c.top - s.top + c.height / 2]; }
+const T = 1.6;
+function craft(quiet) { const [x, y] = spot(); $('castb').animate([{ width: '0' }, { width: '100%' }], { duration: T * 1000, fill: 'forwards' });
+  if (quiet) muteUntil = performance.now() + T * 1000 - 30; work(x, y, T); at(T, () => payoff(x, y)); }
+$('one').onclick = () => craft(false);
+$('five').onclick = () => { for (let i = 0; i < 5; i++) at(i * (T + .15), () => craft(i > 0)); };
+$('note').textContent = NOTE[v];
+</script>
+</body>
+</html>

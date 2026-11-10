@@ -102,7 +102,7 @@ local function After(t, guid, fn)
 end
 
 ---------------------------------------------------------------------------
--- The professions. work(x, y, T, guid, s, loud): the beats over the cast (s: size; loud: beats make sound);
+-- The professions. work(x, y, T, guid, s, loud): the beats over the cast (s: size; loud: "" full sound, "Q" quiet, false none);
 -- payoff(x, y, s, quiet, icon)
 ---------------------------------------------------------------------------
 local P = {}
@@ -115,13 +115,13 @@ P.Leatherworking = { -- four punches, the thread runs straight through the holes
       After(T * (0.18 + i * 0.16), guid, function()
         Mark({ file = MEDIA .. "Circle.tga", x = x0 + i * gap, y = y, size = 5 * s, life = T * (0.82 - i * 0.16) + 0.5, r = 0.08, gg = 0.05, b = 0.02, pop = 1.7 })
         Mark({ file = MEDIA .. "Ring.tga", x = x0 + i * gap, y = y, size = 7 * s, life = T * (0.82 - i * 0.16) + 0.5, r = 0.91, gg = 0.75, b = 0.54, pop = 1.7 })
-        if loud then Sound("LeatherThok") end
+        if loud then Sound("LeatherThok" .. loud) end
       end)
     end
     for i = 0, 2 do
       After(T * (0.8 + i * 0.05), guid, function()
         Mark({ file = WHITE, x = x0 + i * gap + gap / 2, y = y, w = gap - 8 * s, h = 2, life = T * 0.2 + 0.5, r = 0.91, gg = 0.75, b = 0.54, pop = 1 })
-        if loud then Sound("LeatherZip") end
+        if loud then Sound("LeatherZip" .. loud) end
       end)
     end
   end,
@@ -132,20 +132,20 @@ local POTION = { { 0.75, 0.54, 1 }, { 0.62, 1, 0.54 }, { 1, 0.48, 0.54 }, { 0.48
 P.Alchemy = { -- bubbles boil harder and harder (a new color each time), a foam burst, the cork pops
   work = function(x, y, T, guid, s, loud)
     local c = POTION[math.random(#POTION)]
-    if loud then Sound("AlchClink") end
+    if loud then Sound("AlchClink" .. loud) end
     for w = 0, 3 do
       After(T * (0.15 + w * 0.17), guid, function()
         for _ = 1, 2 + w * 2 do
           Dot({ x = x + R(-8, 8) * s, y = y, vx = R(-8, 8), vy = R(30 + w * 15, 60 + w * 20) * s, g = -20, size = R(3, 5 + w) * s, life = R(0.4, 0.6),
             r = c[1], gg = c[2], b = c[3] })
         end
-        if loud then Sound("AlchGlug") end
+        if loud then Sound("AlchGlug" .. loud) end
       end)
     end
     After(T * 0.86, guid, function()
       for _ = 1, 8 do Dot({ x = x + R(-12, 12) * s, y = y + 18 * s, vx = R(-40, 40), vy = R(20, 60), g = 60, size = R(8, 12) * s, life = R(0.5, 0.8), a = 0.75 }) end
       Ring(x, y + 18 * s, 46 * s, 0.35, 0, c[1], c[2], c[3])
-      if loud then Sound("AlchFoam") end
+      if loud then Sound("AlchFoam" .. loud) end
     end)
   end,
   payoff = function(x, y, s, quiet)
@@ -161,7 +161,7 @@ P.Tailoring = { -- the needle dips in and out four times, each stitch appearing,
     for i = 0, 3 do
       After(T * (0.2 + i * 0.16), guid, function()
         Mark({ file = WHITE, x = x0 + i * 18 * s, y = y, w = 10 * s, h = 2, life = T * (0.8 - i * 0.16) + 0.45, r = 0.96, gg = 0.92, b = 0.82, pop = 1 })
-        if loud then Sound("TailorFwip") end
+        if loud then Sound("TailorFwip" .. loud) end
       end)
     end
   end,
@@ -181,7 +181,7 @@ P.Engineering = { -- two gears ratchet in steps (click, click, click), then a sp
         path = function(u) local t = u * (T + 0.4); local k = (t >= T * 0.3 and 1 or 0) + (t >= T * 0.45 and 1 or 0) + (t >= T * 0.6 and 1 or 0)
           return 0, 0, 1, u > 0.9 and (1 - u) * 10 or 1, (big and 1 or -1.5) * k * 0.4 end })
     end
-    for i = 0, 2 do After(T * (0.3 + i * 0.15), guid, function() if loud then Sound("EngTick") end end) end
+    for i = 0, 2 do After(T * (0.3 + i * 0.15), guid, function() if loud then Sound("EngTick" .. loud) end end) end
   end,
   payoff = function(x, y, s, quiet)
     Dot({ x = x + 26 * s, y = y + 12 * s, vx = 8, vy = 30, g = -10, size = 14 * s, grow = 2, life = 0.8, a = 0.4 })
@@ -195,13 +195,13 @@ P.Cooking = { -- two sizzle spatters, a flip with a whoosh, it lands with a "tss
     for k = 0, 1 do
       After(T * (0.3 + k * 0.15), guid, function()
         for _ = 1, 4 do Dot({ x = x + R(-10, 10) * s, y = y - 8 * s, vx = R(-60, 60), vy = R(60, 120), g = 500, size = 3 * s, life = 0.35, r = 1, gg = 0.88, b = 0.63, add = true }) end
-        if loud then Sound("CookSizzle") end
+        if loud then Sound("CookSizzle" .. loud) end
       end)
     end
     After(T * 0.62, guid, function()
       Fx({ file = icon or MEDIA .. "Circle.tga", x = x, y = y, size = 22 * s, life = T * 0.38,
         path = function(u) return 44 * u * s, 50 * math.sin(math.pi * u) * s, 1, 1, -2 * math.pi * u end })
-      if loud then Sound("CookWhoosh") end
+      if loud then Sound("CookWhoosh" .. loud) end
     end)
   end,
   payoff = function(x, y, s, quiet)
@@ -220,7 +220,7 @@ P.Blacksmithing = { -- tap, tap with sparks, then the heavy CLANG with a glow an
       After(T * (0.35 + k * 0.27), guid, function()
         Glint(x, y, 14 * s, 0.22, 0, 1, 0.82, 0.48)
         for _ = 1, 3 do Dot({ file = MEDIA .. "Mote.tga", x = x, y = y, vx = R(-90, 90), vy = R(50, 140), g = 700, size = 4, life = 0.35, add = true, r = 1, gg = 0.7, b = 0.25, fade = false }) end
-        if loud then Sound("SmithTap") end
+        if loud then Sound("SmithTap" .. loud) end
       end)
     end
   end,
@@ -247,7 +247,7 @@ P.Enchanting = { -- three runes stamp around it on rising chimes, then they're d
         Fx({ file = MEDIA .. "Runes.tga", coords = c, x = x + rx, y = y + ry, size = 16 * s, life = left, add = true, r = 0.85, gg = 0.78, b = 1,
           path = function(u) local k = u; if k < 0.7 then return 0, 0, k < 0.08 and 1.6 - 7.5 * k or 1, 1 end
             local v = (k - 0.7) / 0.3; return (44 * s - rx) * v, -ry * v, 1 - 0.6 * v, 1 - 0.5 * v end })
-        if loud then Sound("EnchChime" .. (i + 1)) end
+        if loud then Sound("EnchChime" .. (i + 1) .. loud) end
       end)
     end
   end,
@@ -265,8 +265,8 @@ end
 P["First Aid"] = {
   work = function(x, y, T, guid, s, loud)
     local hold = T * 0.5 + 0.5
-    After(T * 0.4, guid, function() PlusBar(x, y, 7, 24, "y", hold, s); if loud then Sound("AidTapA") end end)
-    After(T * 0.62, guid, function() PlusBar(x, y, 24, 7, "x", hold - T * 0.22, s); if loud then Sound("AidTapB") end end)
+    After(T * 0.4, guid, function() PlusBar(x, y, 7, 24, "y", hold, s); if loud then Sound("AidTapA" .. loud) end end)
+    After(T * 0.62, guid, function() PlusBar(x, y, 24, 7, "x", hold - T * 0.22, s); if loud then Sound("AidTapB" .. loud) end end)
   end,
   payoff = function(x, y, s, quiet)
     Dot({ file = MEDIA .. "Glow.tga", x = x, y = y, size = 44 * s, grow = 1.3, life = 0.35, add = true, r = 0.78, gg = 1, b = 0.78, a = 0.7 })
@@ -368,7 +368,10 @@ local function Start(guid, T, icon, test, profName)
   craft = { guid = guid, prof = p, t0 = now, T = T, icon = icon, test = test }
   local x, y = Spot()
   local full = batch.n <= FULL_ITEMS
-  p.work(x, y, T, guid, full and 1 or 0.65, batch.n == 1, icon)
+  -- the beats: full on the 1st item, quieter on the 2nd and 3rd, silent after (the game plays its own craft
+  -- sounds; ours step down instead of stopping all at once). loud: "" (full), "Q" (the quiet copies) or false
+  local loud = (batch.n == 1 and "") or (batch.n <= FULL_ITEMS and "Q") or false
+  p.work(x, y, T, guid, full and 1 or 0.65, loud, icon)
   -- a safety: if this cast never ends by an event we hear (a loading screen...), close it anyway
   local my = batch
   C_Timer.After(T + GAP_END + 1, function()
