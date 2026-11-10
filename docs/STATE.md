@@ -73,7 +73,8 @@ release 1.3.0. Mockup docs/mockups/harvest-polish.html (now vs. picks): header H
 only; sections S1 plain words / S2 color pip / S3 pip + section total; counts C1 fixed column / C2 quiet numbers.
 **Picked H1 + S2 + C2, built** (pace "18 min · ~98/h"; Diamond.tga pip with a glow per section; counts in
 NumberFontNormal pale gold, fixed 26 wide right-aligned; the stack mark = three gold bars + the number). The user on
-Picked up: it must not linger ("that's what the dungeon recap is for"); now 6 s after the last item, renewed by each.
+Picked up: it must not linger ("that's what the dungeon recap is for"): **each row leaves on its own 4 s after it came
+(or last merged)**, sliding out, the rows below close the gap; the list hides when empty (built, untested).
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

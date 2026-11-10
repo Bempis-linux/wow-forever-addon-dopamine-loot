@@ -2,16 +2,16 @@
 -- finds that used to come as one-line popups (gray and white items, an Uncommon that isn't the best of its
 -- loot, everything during a fight) list here instead, as rows in the harvest window's look, at the top of
 -- the loot column on the right (the harvest window hangs under it). The same item again merges ("×2").
--- The list fades a few seconds after the last item. Big finds keep their popup right of your character.
--- Setting noFeed: off brings the one-line popups back.
+-- Each row leaves on its own, ROW_LIFE seconds after it came (or last merged): the list only shows what
+-- you just picked up, never a log (the dungeon recap is for that). Big finds keep their popup right of
+-- your character. Setting noFeed: off brings the one-line popups back.
 local _, ns = ...
 
-local MAX_ROWS, HOLD, FADE_T, ROW_H, ROW_GAP, HEAD_H = 6, 6, 0.5, 26, 2, 18
+local MAX_ROWS, ROW_LIFE, ROW_OUT, ROW_H, ROW_GAP, HEAD_H = 6, 4, 0.4, 26, 2, 18
 
 local feed, head
 local rows, list = {}, {}   -- by item; in display order (oldest on top)
 local spare = {}            -- rows put away, reused for the next items
-local lastAdd = -999
 local tweens = {}
 
 function ns.FeedOn() return not ns.settings.noFeed end
@@ -49,12 +49,25 @@ local function OnUpdate(_, dt)
     w.fn(u)
     if u >= 1 then table.remove(tweens, i) end
   end
-  if #list > 0 then -- the list fades a few seconds after the last item
-    local idle = GetTime() - lastAdd
-    if idle > HOLD then
-      local a = 1 - (idle - HOLD) / FADE_T
-      if a <= 0 then Clear() else feed:SetAlpha(a) end
+  -- each row slides away on its own once its time is up; the rows under it close the gap
+  local now, gone = GetTime(), false
+  for i = #list, 1, -1 do
+    local row = list[i]
+    local u = (now - row.at - ROW_LIFE) / ROW_OUT
+    if u >= 1 then
+      row:Hide()
+      table.remove(list, i)
+      rows[row.key] = nil
+      spare[#spare + 1] = row
+      gone = true
+    elseif u > 0 then
+      row:SetAlpha(1 - u)
+      row:ClearAllPoints()
+      row:SetPoint("TOPRIGHT", feed, "TOPRIGHT", 18 * u * u, -HEAD_H - (i - 1) * (ROW_H + ROW_GAP))
     end
+  end
+  if gone then
+    if #list == 0 then Clear() else Layout() end
   end
 end
 
@@ -62,15 +75,17 @@ end
 function ns.PickedUp(d)
   if not feed or not ns.FeedOn() or not ns.NewLootRow or not d.icon then return false end
   if ns.Mover and ns.Mover.IsUnlocked() then return false end
-  lastAdd = GetTime()
   feed:SetAlpha(1)
   if d.test then feed:SetFrameStrata("FULLSCREEN_DIALOG") end -- a test shows above the settings window
   feed:Show()
   local key = d.id or d.name
   local row = rows[key]
   local n = d.count or 1
-  if row then -- the same item again: it merges
+  if row then -- the same item again: it merges (and its time starts over)
     row.n = row.n + n
+    row.at = GetTime()
+    row:SetAlpha(1)
+    Layout()
     CountText(row)
     Tween(0.25, function(u) local w = 1 - u; row.count:SetTextColor(1, 0.91 + 0.09 * w, 0.66 + 0.34 * w) end)
   else
@@ -78,11 +93,11 @@ function ns.PickedUp(d)
       local old = table.remove(list, 1)
       old:Hide()
       spare[#spare + 1] = old
-      for k, r in pairs(rows) do if r == old then rows[k] = nil end end
+      rows[old.key] = nil
     end
     row = table.remove(spare)
     if row and ns.SetLootRow then ns.SetLootRow(row, d); row:Show() else row = ns.NewLootRow(d, nil, feed) end
-    row.n = n
+    row.n, row.key, row.at = n, key, GetTime()
     CountText(row)
     rows[key] = row
     list[#list + 1] = row
