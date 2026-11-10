@@ -361,6 +361,10 @@ local function Start(guid, T, icon, test, profName)
   end
   batch.n = batch.n + 1
   batch.testLeft = test and test.left or nil
+  -- the total, asked again at every cast: a second Create All right after one (within GAP_END) joins the
+  -- same batch, and the count it began with no longer holds ("2 / 5" on a Create All of 3)
+  local rem = batch.n > 1 and (test and test.left or Remaining()) or nil
+  if rem then batch.total = batch.n + rem end
   craft = { guid = guid, prof = p, t0 = now, T = T, icon = icon, test = test }
   local x, y = Spot()
   local full = batch.n <= FULL_ITEMS
@@ -481,7 +485,7 @@ ns.AddAction("testcraft", function(arg)
   local name, count = arg:match("^(.-)%s*(%d*)$")
   count = tonumber(count) or 1
   if not P[name] then name = "Tailoring" end
-  local T = 1.4
+  local T = count > 12 and 0.35 or 1.4 -- (a big test batch goes fast, to see the heap fill and sink)
   local icon = "Interface\\Icons\\INV_Fabric_Linen_01"
   for i = 0, count - 1 do
     C_Timer.After(i * (T + 0.15), function()

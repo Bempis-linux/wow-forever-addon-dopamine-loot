@@ -1,23 +1,25 @@
--- Dopamine Loot Create All tray (docs/mockups/batch.html, "Satisfying heap"): during a Create All a tray
--- slides out under the profession window (its right side has the profession tabs) and every item made
--- tumbles into it and piles up with a bounce and a settle, so the heap visibly grows with the batch; a
--- count shows how far along it is. When the batch is done the heap gives a little shake and a sparkle,
--- then the tray slides back (the items go on to the Crafted row, Craft.lua).
--- Only for Create All (two items or more); anchored to ProfessionsFrame (read only), or the screen's left
--- side if the window is closed.
+-- Dopamine Loot Create All tray (docs/mockups/batch.html "Satisfying heap"; the heap itself from
+-- docs/mockups/polish-r1.html, H3 Tumble, picked 2026-11-10): during a Create All a tray slides out under the
+-- profession window and every item made falls in, lands ON the heap (the floor or the items already there),
+-- bounces, and rolls a step down the slope as it settles, so the heap grows into a mound. Once the heap is
+-- as tall as the tray, it sinks a little with each new item (its bottom slides out of view under the
+-- tray's floor), so a batch of hundreds stays full and moving. A count shows how far along it is. When the
+-- batch is done the heap shakes and sparkles, then the tray slides back (the items go on to the Crafted
+-- row, Craft.lua). Only for Create All (two items or more); anchored to ProfessionsFrame (read only), or the
+-- screen's left side if the window is closed (the tests).
 local _, ns = ...
 
-local MEDIA = "Interface\\AddOns\\DopamineLoot\\Media\\"
 local BORDER = "Interface\\COMMON\\WhiteIconFrame"
 local STAR = "Interface\\Cooldown\\star4"
-local TRAY_H, ICON, FALL_T, OPEN_T = 112, 26, 0.5, 0.3
-local MAX_SHOWN = 40
-
+local TRAY_H, ICON, OPEN_T = 130, 26, 0.3
+local FALL_T = 0.7                   -- one item's fall, bounce and roll
+local ROW, COLW, TALL = ICON - 6, 18, 4 -- one item raises its column this much; columns overlap; rows before it sinks
+local FLOOR_Y = 2 + ICON / 2         -- an item's middle when it rests on the floor (heap coordinates, y up)
 
 local tray, label, count, heap
-local items = {}      -- the pile: { tex, border, x, y, t, rot, delay }
+local items = {}      -- the heap: { tex, border, x, y (its resting middle, heap content), roll, dir, rot, t }
 local glints = {}
-local state           -- { b (the batch), openT, closing, finaleT, shown }
+local state           -- { b (the batch), openT, closing, finaleT, shown, cols, sink, sinkShown }
 local spare = {}
 
 local function On() return not ns.settings.noCraft and not ns.settings.noCraftTray and ns.settings.enabled ~= false end
@@ -34,7 +36,6 @@ local function Anchor()
     tray:SetPoint("TOPLEFT", UIParent, "LEFT", 40, -60) -- (a test from the settings window: above it)
     tray:SetWidth(520)
     tray:SetFrameStrata("FULLSCREEN_DIALOG")
-    return
   end
 end
 
@@ -49,9 +50,10 @@ local function Item()
   it.tex:Show(); it.border:Show()
   return it
 end
+local function Drop(it) it.tex:Hide(); it.border:Hide(); spare[#spare + 1] = it end
 
 local function Clear()
-  for _, it in ipairs(items) do it.tex:Hide(); it.border:Hide(); spare[#spare + 1] = it end
+  for _, it in ipairs(items) do Drop(it) end
   wipe(items)
   for _, g in ipairs(glints) do g.on = false; g.tex:Hide() end
 end
@@ -63,11 +65,19 @@ local function Width()
   return w
 end
 
--- Where the n-th item settles: around the middle, the heap rising and narrowing as it grows
-local function Spot(n, total)
-  local w = Width()
-  local spread = 0.36 * w * (1 - math.min(0.75, n / (total + 4)))
-  return w / 2 + R(-spread, spread), 10 + math.min(TRAY_H - 52, math.sqrt(n) * 11) + R(-3, 3)
+-- The heap's columns: how many items each holds. An item lands near the middle and slides down the slope
+-- (to a neighbour two or more items lower) until it rests.
+local function HeightAt(c) return state.cols[c] or 0 end
+local function Settle(c)
+  for _ = 1, 12 do
+    local h, l, r = HeightAt(c), HeightAt(c - 1), HeightAt(c + 1)
+    if l <= h - 2 and (l <= r or r > h - 2) then c = c - 1 elseif r <= h - 2 then c = c + 1 else break end
+  end
+  return c
+end
+local function SinkRow() -- the full heap sinks one row
+  state.sink = state.sink + ROW
+  for k, v in pairs(state.cols) do state.cols[k] = math.max(0, v - 1) end
 end
 
 local function Glint(x, y, size, delay)
@@ -76,6 +86,16 @@ local function Glint(x, y, size, delay)
   if not g then g = { tex = heap:CreateTexture(nil, "OVERLAY", nil, 2) }; g.tex:SetTexture(STAR); g.tex:SetBlendMode("ADD"); glints[#glints + 1] = g end
   g.on, g.t, g.x, g.y, g.size = true, -(delay or 0), x, y, size
   g.tex:Hide()
+end
+
+-- An item's fall (mockup H3): u 0..1 -> x offset, height above its rest, rotation (degrees, clockwise).
+-- It drops in, lands a step up the slope with a bounce, then rolls down into place turning.
+local function Fall(it, u)
+  local top = TRAY_H + 15 - it.y + state.sinkShown -- (from above the tray, in its own terms)
+  if u < 0.55 then local k = (u / 0.55) ^ 2; return 0, top + (6 - top) * k, it.rot0 + (it.rot - it.dir * 30 - it.rot0) * k end
+  if u < 0.7 then local k = (u - 0.55) / 0.15; return it.roll * 0.4 * k, 6 + 6 * k, it.rot - it.dir * (30 - 15 * k) end
+  if u < 0.9 then local k = (u - 0.7) / 0.2; return it.roll * (0.4 + 0.6 * k), 12 * (1 - k), it.rot - it.dir * 15 * (1 - k) end
+  return it.roll, 0, it.rot
 end
 
 local function OnUpdate(_, dt)
@@ -94,41 +114,47 @@ local function OnUpdate(_, dt)
     h = TRAY_H * (1 - (1 - u) ^ 3) * (u < 1 and (1 + 0.06 * math.sin(math.pi * u)) or 1)
   end
   tray:SetHeight(math.max(1, h))
-  -- items falling in: ease in, a small bounce, settle
+  -- the profession window closed mid-batch: the tray goes with it
+  if s.anchored and not s.closing and not (_G.ProfessionsFrame and _G.ProfessionsFrame:IsShown()) then s.closing = true end
+  -- the heap sinking (smoothly) as it fills
+  local sinking = s.sinkShown < s.sink
+  if sinking then s.sinkShown = math.min(s.sink, s.sinkShown + dt * ROW / 0.3) end
   local shake = 0
   if s.finaleT then
     s.finaleT = s.finaleT + dt
     if s.finaleT < 0.32 then shake = 3 * math.sin(s.finaleT * 60) * (1 - s.finaleT / 0.32) end
   end
-  -- the profession window closed mid-batch: the tray goes with it
-  if s.anchored and not s.closing and not (_G.ProfessionsFrame and _G.ProfessionsFrame:IsShown()) then s.closing = true end
   local half = Width() / 2
-  for _, it in ipairs(items) do
+  local i = 1
+  while i <= #items do
+    local it = items[i]
     it.t = it.t + dt
-    local u = math.max(0, it.t / FALL_T)
-    -- (a settled item is placed already: skip it, except while the finale shakes the heap)
-    if not (u >= 1 and it.done and not (s.finaleT and s.finaleT < 0.35)) then
-      it.done = u >= 1
-      local y
-      if u < 0.7 then local k = u / 0.7; y = TRAY_H + 10 - (TRAY_H + 10 - it.y) * k * k
-      elseif u < 0.85 then y = it.y + 6 * math.sin(math.pi * (u - 0.7) / 0.15)
-      else y = it.y end
-      it.tex:ClearAllPoints()
-      it.tex:SetPoint("CENTER", heap, "BOTTOMLEFT", it.x + shake * (it.x > half and 1 or -1), y)
-      local r = it.rot * math.min(1, u)
-      it.tex:SetRotation(r); it.border:SetRotation(r)
-      it.tex:SetAlpha(it.t < 0 and 0 or 1); it.border:SetAlpha(it.t < 0 and 0 or 1)
+    local u = it.t / FALL_T
+    local y = it.y - s.sinkShown
+    if u >= 1 and y < -ICON then table.remove(items, i); Drop(it) -- (sunk out of view under the floor)
+    else
+      -- (a settled item only moves while the heap sinks or shakes)
+      if u < 1 or not it.done or sinking or (s.finaleT and s.finaleT < 0.35) then
+        local dx, up, deg = Fall(it, math.min(1, u))
+        it.done = u >= 1
+        it.tex:ClearAllPoints()
+        it.tex:SetPoint("CENTER", heap, "BOTTOMLEFT", it.x - it.roll + dx + shake * (it.x > half and 1 or -1), y + up)
+        local r = -math.rad(deg)
+        it.tex:SetRotation(r); it.border:SetRotation(r)
+        it.tex:SetAlpha(1); it.border:SetAlpha(1)
+      end
+      i = i + 1
     end
   end
   for _, g in ipairs(glints) do
     if g.on then
       g.t = g.t + dt
-      local u = g.t / 0.5
-      if u >= 1 then g.on = false; g.tex:Hide()
-      elseif u >= 0 then
-        local k = g.size * math.sin(math.pi * math.min(1, u * 1.4))
+      local gu = g.t / 0.5
+      if gu >= 1 then g.on = false; g.tex:Hide()
+      elseif gu >= 0 then
+        local k = g.size * math.sin(math.pi * math.min(1, gu * 1.4))
         g.tex:ClearAllPoints(); g.tex:SetPoint("CENTER", heap, "BOTTOMLEFT", g.x, g.y)
-        g.tex:SetSize(math.max(0.1, k), math.max(0.1, k)); g.tex:SetRotation(u); g.tex:SetAlpha(1 - u); g.tex:Show()
+        g.tex:SetSize(math.max(0.1, k), math.max(0.1, k)); g.tex:SetRotation(gu); g.tex:SetAlpha(1 - gu); g.tex:Show()
       end
     end
   end
@@ -151,7 +177,7 @@ local function Create()
   heap:SetPoint("TOPLEFT", 6, -4)
   heap:SetPoint("BOTTOMRIGHT", -6, 4)
   local floor = heap:CreateTexture(nil, "BACKGROUND")
-  floor:SetTexture(MEDIA .. "Glow.tga")
+  floor:SetTexture("Interface\\AddOns\\DopamineLoot\\Media\\Glow.tga")
   floor:SetVertexColor(0, 0, 0)
   floor:SetAlpha(0.6)
   floor:SetPoint("BOTTOM", 0, -6)
@@ -162,11 +188,10 @@ end
 local function Open(b)
   if not tray then Create() end
   Clear()
-
   label:SetText(((b.prof or "Crafting") .. " · Create All"):upper())
   label:SetTextColor(0.85, 0.78, 0.6) -- (a quiet header, as on the harvest window; not the profession color)
   count:SetText("")
-  state = { b = b, openT = 0, closeT = 0, shown = 0 }
+  state = { b = b, openT = 0, closeT = 0, shown = 0, cols = {}, sink = 0, sinkShown = 0 }
   Anchor()
   state.anchored = _G.ProfessionsFrame ~= nil and _G.ProfessionsFrame:IsShown() -- (follows the window closing)
   tray:SetHeight(1)
@@ -178,14 +203,22 @@ local function Add(b, icon)
   state.shown = state.shown + 1
   local n = state.shown
   if b.total and n <= b.total then count:SetText(("%d / %d"):format(n, b.total)) else count:SetText(n) end
-  if #items >= MAX_SHOWN then -- (a very long batch: the oldest at the bottom makes room)
-    local old = table.remove(items, 1); old.tex:Hide(); old.border:Hide(); spare[#spare + 1] = old
-  end
+  -- where it rests: a column near the middle, then down the slope; a full heap sinks a row first
+  local c0 = math.random(-1, 1)
+  local c = Settle(c0)
+  if HeightAt(c) >= TALL then SinkRow() end
+  local h = HeightAt(c)
+  state.cols[c] = h + 1
   local it = Item()
   it.tex:SetTexture(icon or b.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
   it.border:SetVertexColor(1, 1, 1)
-  it.x, it.y = Spot(n, math.max(n, b.total or n))
-  it.t, it.rot = 0, R(-0.35, 0.35)
+  it.dir = (c == c0) and (math.random() < 0.5 and -1 or 1) or (c > c0 and 1 or -1)
+  it.roll = it.dir * 10
+  it.x = Width() / 2 + c * COLW + R(-2, 2)
+  it.y = FLOOR_Y + h * ROW + state.sink
+  it.rot = R(-14, 14) + (c - c0) * 6
+  it.rot0 = R(-60, 60)
+  it.t, it.done = 0, false
   items[#items + 1] = it
 end
 
@@ -202,9 +235,10 @@ end
 function ns.CraftBatchDone(b)
   if not state or state.b ~= b then return end
   if #items == 0 then state.closing = true; return end -- (cancelled before anything was made)
+  count:SetText(("%d / %d"):format(state.shown, state.shown)) -- (the final count, whatever the game said it would be)
   state.finaleT = 0
   local w = Width()
-  for i = 1, 10 do Glint(w / 2 + R(-90, 90), R(20, TRAY_H - 30), R(10, 16), 0.15 + i * 0.04) end
+  for i = 1, 10 do Glint(w / 2 + R(-90, 90), R(20, TRAY_H - 40), R(10, 16), 0.15 + i * 0.04) end
   ns:PlayGatherFx("CraftDone")
   C_Timer.After(1.6, function() if state and state.b == b then state.closing = true end end)
 end
