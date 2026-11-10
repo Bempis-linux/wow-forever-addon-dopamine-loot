@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crafting</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0; color: var(--muted); max-width: 1040px; }
+  header p b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .screen { position: relative; margin: 6px 18px; width: 1366px; height: 768px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 70%, #3e3226, #201911 55%, #0f0c08); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .char { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 64px; }
+  .minimap { position: absolute; right: 18px; top: 14px; width: 140px; height: 140px; border-radius: 50%; border: 3px solid #6a5a36; background: radial-gradient(#4a5a3a, #2a3524 70%); box-shadow: 0 0 0 1px #000, inset 0 0 12px #000; }
+  .bars { position: absolute; left: 30%; right: 30%; bottom: 10px; height: 44px; display: flex; gap: 4px; justify-content: center; }
+  .bars i { width: 40px; height: 40px; border: 1px solid #5a4a2a; border-radius: 3px; background: #15110b; }
+  /* the trade skill window (the game's, a stand-in) */
+  .trade { position: absolute; left: 40px; top: 110px; width: 330px; height: 420px; border: 2px solid #6a5a36; border-radius: 6px; background: rgba(12,10,7,.94); box-shadow: 0 0 0 1px #000; }
+  .trade .t { padding: 8px 12px; font: 700 14px Georgia, serif; color: #ffd100; border-bottom: 1px solid #3a3020; }
+  .trade .rk { padding: 6px 12px; font: 600 11px system-ui; color: #c9c2b0; }
+  .trade .rk i { display: inline-block; width: 150px; height: 8px; margin-left: 8px; background: #222; border: 1px solid #000; vertical-align: middle; }
+  .trade .rk i b { display: block; height: 100%; background: linear-gradient(#3a7ad8, #1a4a98); }
+  .trade .rec { margin: 2px 12px; padding: 3px 8px; font: 600 12px Georgia, serif; color: var(--rc); }
+  .trade .rec.sel { background: rgba(255,255,255,.08); }
+  .trade .btns { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 6px; }
+  .trade .btns div { flex: 1; text-align: center; padding: 4px; font: 12px Georgia, serif; color: #ffd100; background: linear-gradient(#8a1a10, #4a0a06); border: 1px solid #c8a050; border-radius: 3px; }
+  .icon { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--qc); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 6px rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+  /* the pile card (big-moments spot) */
+  .pile { position: absolute; left: 55%; top: 26%; width: 300px; box-sizing: border-box; padding: 12px 14px 12px 96px; min-height: 92px; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(0,0,0,.8), rgba(0,0,0,.3)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 55%, transparent), 0 0 22px color-mix(in srgb, var(--pc) 25%, transparent); opacity: 0; }
+  .pile .stack { position: absolute; left: 16px; top: 50%; width: 66px; height: 66px; transform: translateY(-50%); }
+  .pile .stack .icon { position: absolute; left: 13px; top: 13px; width: 40px; height: 40px; font-size: 24px; border-width: 2px; }
+  .pile .w { font: 700 10px system-ui; letter-spacing: .14em; text-transform: uppercase; color: var(--pc); }
+  .pile .cnt { font: 800 26px Georgia, serif; color: #fff; text-shadow: 0 0 8px rgba(255,220,120,.7), 0 1px 0 #000; line-height: 1.1; }
+  .pile .nm { font: 700 14px Georgia, serif; color: var(--qc); text-shadow: 0 1px 0 #000; }
+  .pile .close { font: 600 11px system-ui; color: #c9c2b0; opacity: 0; }
+  /* the loot column */
+  .col { position: absolute; right: 18px; top: 200px; width: 230px; display: flex; flex-direction: column; gap: 2px; }
+  .head { display: flex; justify-content: space-between; padding: 0 4px; font: 700 12px Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000; }
+  .row { position: relative; display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 6px 0 4px; border-radius: 2px; background: linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.04)); border-left: 2px solid var(--pc); }
+  .row .nm { flex: 1; min-width: 0; font: 600 12px "Friz Quadrata TT", Georgia, serif; color: var(--qc); text-shadow: 0 1px 1px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .plus { width: 30px; text-align: right; font: 700 12.5px Georgia, serif; color: #73ff59; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; opacity: 0; }
+  .row .n { width: 26px; text-align: right; font: 700 13px system-ui; color: #ffe9a8; text-shadow: 0 1px 1px #000; }
+  /* the skill-up banner, with the recipe heads-up under it */
+  .skill { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0; }
+  .skill .tt { font: 700 17px Georgia, serif; color: #fff; text-shadow: 0 0 8px var(--pc), 0 1px 0 #000; }
+  .skill .tt b { color: var(--pl); }
+  .skill .barw { width: 200px; height: 7px; border-radius: 3px; background: rgba(0,0,0,.6); overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.7); }
+  .skill .barw i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pc), var(--pl)); }
+  .skill small { font: 600 11px system-ui; color: #d8d2c0; }
+  .skill .heads { margin-top: 3px; padding: 3px 10px; border-radius: 3px; background: rgba(0,0,0,.6); font: 600 11.5px system-ui; color: #e8e2d0; display: none; }
+  .skill .heads b { color: var(--rc); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Crafting</h1>
+  <p>Your picks. <b>Create All</b>: each item comes out with a small themed touch at your character and hops onto a <b>pile card</b> in the big-moments spot that counts up; the batch ends on the profession's <b>closing flourish</b> and one line ("×12 Silk Bandage · Tailoring +4"), then a <b>Crafted</b> row stays briefly in the loot column. <b>A single craft</b>: its own themed animation (a little bigger than one item of a batch) and a row, no popup. <b>Skill-ups</b> use the same bar; when a recipe changes color, a line under the bar says so. Pick a profession; sound is off (rough sketches when on).</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button></div>
+</header>
+<div class="bar"><span>Profession</span>
+  <button data-p="smith" class="on">🔨 Blacksmithing</button><button data-p="alch">⚗️ Alchemy</button><button data-p="tailor">🧵 Tailoring</button><button data-p="leather">🪡 Leatherworking</button>
+  <button data-p="eng">⚙️ Engineering</button><button data-p="ench">🔮 Enchanting</button><button data-p="cook">🍳 Cooking</button><button data-p="aid">🩹 First Aid</button></div>
+<div class="bar"><span>Craft</span><button class="go" id="one">Create (one)</button><button class="go" id="all">Create All ×12</button><button id="reset">Reset skill</button></div>
+<div class="screen" id="scr">
+  <div class="minimap"></div>
+  <div class="char" id="char">🧙</div>
+  <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="trade" id="trade"><div class="t" id="tname"></div><div class="rk"><span id="trank"></span><i><b id="trankb"></b></i></div><div id="recs"></div>
+    <div class="btns"><div>Create All</div><div>Create</div></div></div>
+  <div class="pile" id="pile"><div class="stack" id="stack"></div><div class="w" id="pw"></div><div class="cnt" id="pcnt"></div><div class="nm" id="pnm"></div><div class="close" id="pclose"></div></div>
+  <div class="col" id="col"></div>
+  <div class="skill" id="skill"><div class="tt"></div><div class="barw"><i></i></div><small></small><div class="heads" id="heads"></div></div>
+</div>
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), scr = $('scr');
+let snd = false, actx;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1');
+function ac() { return actx = actx || new AudioContext(); }
+function tone(f, t = 0, vol = .07, dec = .4, type = 'sine', f2) {
+  if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = a.currentTime + t; o.type = type; o.frequency.setValueAtTime(f, at);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8);
+  g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .01); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05);
+}
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass') {
+  if (!snd) return; const a = ac(), n = a.sampleRate * dur, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
+  const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(a.currentTime + t);
+}
+function el(html, css, frames, dur, delay = 0, ease = 'linear') {
+  const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; scr.appendChild(d);
+  d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d;
+}
+function pathEl(html, x, y, life, fn, delay = 0, n = 22) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000); }
+function dot(x, y, o) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px) scale(${o.grow ? 1 + (o.grow - 1) * i / 14 : 1})`, opacity: i === 14 ? 0 : (o.fade ? 1 - .7 * i / 14 : 1) }); }
+  el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%;box-shadow:0 0 ${o.glow || 0}px ${o.color};filter:${o.blur ? 'blur(' + o.blur + 'px)' : 'none'}`, fr, o.life * 1000, (o.delay || 0) * 1000); }
+function ring(x, y, color, size, life, delay = 0, w = 2) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, 'ease-out'); }
+function star(x, y, size, color, life, delay = 0) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0) rotate(0deg)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000); }
+function glyph(ch, x, y, size, color, life, fn, delay = 0) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay); }
+
+// each profession: color, an item, the touch per item (small), the single-craft animation, the closing flourish
+const P = {
+  smith: { name: 'Blacksmithing', pc: '#e07a2a', pl: '#ffb070', item: ['⚔️', 'Heavy Copper Broadaxe', '#1eff00'],
+    touch(x, y) { star(x, y, 18, '#ffd27a', .25); for (let i = 0; i < 6; i++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: R(.3, .5), size: 3, color: '#ffb040', glow: 5 }); tone(1900, 0, .04, .12, 'triangle'); },
+    single(x, y) { [0, .16, .32].forEach((t, k) => { setTimeout(() => P.smith.touch(x + R(-6, 6), y + R(-4, 4)), t * 1000); });
+      dot(x, y, { vx: 0, vy: 0, life: 1.1, size: 30, color: 'rgba(255,90,30,.55)', grow: .6, fade: true, blur: 4, delay: .35 }); tone(1500, .35, .03, .6, 'sine', 900); },
+    close(x, y) { ring(x, y, '#ffd27a', 160, .6, 0, 3); ring(x, y, '#fff', 90, .45, .05); for (let i = 0; i < 30; i++) dot(x, y, { vx: R(-160, 160), vy: R(120, 320), g: 600, life: R(.6, 1), size: 3, color: i % 3 ? '#ffb040' : '#fff0c0', glow: 6 }); tone(1046, 0, .08, 1.4, 'triangle'); tone(1568, .02, .05, 1.2); } },
+  alch: { name: 'Alchemy', pc: '#9a5ae0', pl: '#d0a8ff', item: ['🧪', 'Healing Potion', '#ffffff'],
+    touch(x, y) { for (let i = 0; i < 6; i++) dot(x + R(-8, 8), y, { vx: R(-15, 15), vy: R(50, 110), g: -20, life: R(.6, 1), size: R(4, 8), color: ['#9dff8a', '#c08aff', '#ff8ad0'][i % 3], fade: true }); tone(R(600, 900), 0, .03, .1, 'sine', 1200); },
+    single(x, y) { for (let i = 0; i < 14; i++) dot(x + R(-10, 10), y, { vx: R(-20, 20), vy: R(60, 140), g: -20, life: R(.8, 1.3), size: R(5, 10), color: ['#9dff8a', '#c08aff'][i % 2], fade: true, delay: i * .03 });
+      setTimeout(() => { ring(x, y - 40, '#c08aff', 70, .4); for (let i = 0; i < 6; i++) dot(x, y - 40, { vx: R(-40, 40), vy: R(10, 50), g: -10, life: 1.2, size: 18, color: 'rgba(190,140,255,.35)', grow: 2, fade: true, blur: 2 }); tone(700, 0, .05, .15, 'sine', 1400); noise(0, .2, .03, 3000); }, 500); },
+    close(x, y) { for (let i = 0; i < 12; i++) dot(x + R(-20, 20), y, { vx: R(-30, 30), vy: R(60, 140), g: -10, life: R(1.2, 1.8), size: R(18, 28), color: ['rgba(157,255,138,.35)', 'rgba(192,138,255,.35)'][i % 2], grow: 2, fade: true, blur: 3 });
+      for (let i = 0; i < 20; i++) dot(x, y, { vx: R(-120, 120), vy: R(40, 200), g: 200, life: R(.6, 1), size: R(4, 7), color: ['#9dff8a', '#c08aff', '#ff8ad0'][i % 3], fade: true }); ring(x, y, '#c08aff', 140, .6); tone(880, 0, .05, .9); tone(1320, .08, .05, .9); } },
+  tailor: { name: 'Tailoring', pc: '#d8c8a0', pl: '#fff4d8', item: ['🩹', 'Silk Bandage', '#ffffff'],
+    touch(x, y) { pathEl('<div style="width:60px;height:12px;margin:-6px -30px;border-top:2px dashed #f0e6d0;border-radius:50%"></div>', x, y, .5, u => [20 * u, 10 * u, -10 + 20 * u, .6 + .5 * u, 1 - u]); noise(0, .08, .02, 5000); },
+    single(x, y) { const fr = []; for (let i = 0; i < 6; i++) setTimeout(() => star(x - 30 + i * 12, y + (i % 2 ? -8 : 8), 8, '#fff4d8', .4), i * 70);
+      pathEl('<svg width="80" height="24" viewBox="0 0 80 24"><path d="M0 12 Q10 0 20 12 T40 12 T60 12 T80 12" fill="none" stroke="#f0e6d0" stroke-width="2" stroke-dasharray="4 3"/></svg>', x - 40, y - 12, .9, u => [0, 0, 0, 1, u > .7 ? (1 - u) / .3 : Math.min(1, u * 4)]);
+      setTimeout(() => { glyph('✂', x + 46, y, 18, '#fff', .5, u => [6 * u, 0, -20 + 40 * u, 1, 1 - u]); tone(3200, 0, .03, .08, 'triangle'); tone(3600, .06, .03, .08, 'triangle'); }, 450); },
+    close(x, y) { for (let k = 0; k < 2; k++) pathEl(`<div style="width:${180}px;height:${180}px;margin:-90px;border:3px solid ${k ? '#fff4d8' : '#d8b878'};border-radius:50%;border-left-color:transparent;border-bottom-color:transparent"></div>`, x, y, 1, u => [0, 0, (k ? -1 : 1) * 300 * u, .2 + .9 * u, 1 - u]);
+      for (let i = 0; i < 10; i++) star(x + R(-60, 60), y + R(-50, 50), R(8, 12), '#fff4d8', .5, i * .05); tone(1175, 0, .05, .9); tone(1568, .1, .05, .9); } },
+  leather: { name: 'Leatherworking', pc: '#b07a46', pl: '#e8c08a', item: ['🧥', 'Embossed Leather Vest', '#1eff00'],
+    touch(x, y) { for (let i = 0; i < 4; i++) el('', `left:${x - 16 + i * 10}px;top:${y + (i % 2 ? -3 : 3)}px;width:7px;height:2px;background:#e8c08a;transform:rotate(${i % 2 ? 30 : -30}deg)`, [{ opacity: 0 }, { opacity: 1, offset: .2 }, { opacity: 0 }], 600, i * 50); tone(1300, 0, .02, .06, 'triangle'); },
+    single(x, y) { for (let i = 0; i < 9; i++) el('', `left:${x - 45 + i * 10}px;top:${y + (i % 2 ? -4 : 4)}px;width:8px;height:2px;background:#e8c08a;box-shadow:0 0 4px #e8c08a;transform:rotate(${i % 2 ? 30 : -30}deg)`, [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .7 }, { opacity: 0 }], 1100, i * 60);
+      setTimeout(() => { ring(x, y, '#e8c08a', 50, .3); tone(160, 0, .08, .15, 'square', 100); }, 600); },
+    close(x, y) { pathEl('<div style="width:70px;height:70px;margin:-35px;border-radius:50%;border:3px double #e8c08a;box-shadow:0 0 14px rgba(232,192,138,.6), inset 0 0 10px rgba(232,192,138,.4)"></div>', x, y, 1.2, u => [0, 0, 0, u < .15 ? 1.6 - 4 * u : 1, u > .7 ? (1 - u) / .3 : 1]);
+      setTimeout(() => { star(x + 18, y - 18, 22, '#fff', .5); tone(140, 0, .1, .2, 'square', 90); }, 180); for (let i = 0; i < 8; i++) dot(x, y, { vx: R(-80, 80), vy: R(20, 80), g: 120, life: .8, size: 6, color: 'rgba(200,160,110,.6)', fade: true, blur: 1 }); } },
+  eng: { name: 'Engineering', pc: '#a0b4c8', pl: '#e0ecf8', item: ['💣', 'Rough Boom Stick', '#ffffff'],
+    touch(x, y) { glyph('⚙', x, y, 22, '#c8d4e0', .6, u => [0, 0, 180 * u, 1, 1 - u]); dot(x + 10, y - 6, { vx: 10, vy: 40, g: -10, life: .7, size: 10, color: 'rgba(220,220,220,.4)', grow: 2, fade: true, blur: 1 }); tone(2400, 0, .02, .05, 'square'); },
+    single(x, y) { glyph('⚙', x - 10, y, 30, '#c8d4e0', 1.1, u => [0, 0, 270 * u, 1, 1 - u]); glyph('⚙', x + 14, y - 14, 20, '#a8b8c8', 1.1, u => [0, 0, -360 * u, 1, 1 - u]);
+      for (let i = 0; i < 4; i++) setTimeout(() => tone(2600, 0, .02, .04, 'square'), i * 110);
+      setTimeout(() => { star(x, y, 30, '#fff8c0', .3); for (let i = 0; i < 6; i++) dot(x, y, { vx: R(-30, 30), vy: R(20, 60), g: -10, life: 1, size: 16, color: 'rgba(200,200,200,.4)', grow: 2, fade: true, blur: 2 }); tone(300, 0, .08, .15, 'square', 120); }, 520); },
+    close(x, y) { dot(x, y, { vx: 0, vy: 260, g: 0, life: .45, size: 5, color: '#fff8c0', glow: 8 });
+      setTimeout(() => { const cy = y - 117; for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 2; dot(x, cy, { vx: Math.cos(a) * R(90, 140), vy: Math.sin(a) * R(90, 140), g: 160, life: R(.7, 1), size: 3, color: ['#ff6a6a', '#ffd34a', '#6ac8ff'][i % 3], glow: 6 }); } ring(x, cy, '#fff', 60, .3); tone(200, 0, .1, .3, 'square', 80); noise(0, .3, .05, 1500); }, 450); } },
+  ench: { name: 'Enchanting', pc: '#8a6aff', pl: '#c8b0ff', item: ['🔮', 'Lesser Magic Wand', '#1eff00'],
+    touch(x, y) { const runes = 'ᚠᚢᚦᚨᚱᚲ'; for (let i = 0; i < 3; i++) { const a0 = i * 2.1; glyph(runes[Math.floor(R(0, 6))], x, y, 14, '#c8b0ff', .9, u => { const a = a0 + u * 4; return [Math.cos(a) * 22, Math.sin(a) * 22 + 20 * u, 0, 1, 1 - u]; }); } tone(1568, 0, .03, .4); },
+    single(x, y) { const runes = 'ᚠᚢᚦᚨᚱᚲᚷᚹ'; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; glyph(runes[i], x + Math.cos(a) * 34, y - Math.sin(a) * 34, 15, '#c8b0ff', 1.2, u => [0, 0, 0, 1, u < .2 ? u * 5 : (u > .7 ? (1 - u) / .3 : 1)], i * .05); }
+      setTimeout(() => { ring(x, y, '#c8b0ff', 90, .5); star(x, y, 36, '#fff', .4); tone(1046, 0, .05, .8); tone(1568, .05, .04, .8); }, 650); },
+    close(x, y) { pathEl('<div style="width:200px;height:200px;margin:-100px;border-radius:50%;border:2px solid rgba(200,176,255,.8);box-shadow:0 0 16px rgba(138,106,255,.6), inset 0 0 16px rgba(138,106,255,.4)"></div>', x, y, 1.2, u => [0, 0, 90 * u, .2 + .9 * u, 1 - u]);
+      for (let i = 0; i < 14; i++) star(x + R(-80, 80), y + R(-70, 70), R(8, 14), '#c8b0ff', .5, i * .04); tone(784, 0, .05, 1.2); tone(1175, .1, .05, 1.2); tone(1568, .2, .05, 1.2); } },
+  cook: { name: 'Cooking', pc: '#e0a050', pl: '#ffd890', item: ['🍖', 'Spiced Wolf Meat', '#ffffff'],
+    touch(x, y) { for (let i = 0; i < 3; i++) pathEl('<div style="width:6px;height:26px;margin:-13px -3px;border-radius:3px;background:linear-gradient(transparent,rgba(240,240,240,.5),transparent);filter:blur(1px)"></div>', x - 10 + i * 10, y, 1, u => [6 * Math.sin(u * 6 + i), 40 * u, 0, 1, Math.sin(Math.PI * u) * .9], i * .08); noise(0, .2, .015, 6000, .5, 'highpass'); },
+    single(x, y) { pathEl('<div style="font-size:24px;margin:-12px">🍖</div>', x, y, .7, u => [0, 60 * Math.sin(Math.PI * u), 360 * u, 1, 1]); setTimeout(() => P.cook.touch(x, y), 650); noise(0, .7, .02, 5000, .5, 'highpass'); },
+    close(x, y) { for (let i = 0; i < 10; i++) dot(x + R(-30, 30), y, { vx: R(-15, 15), vy: R(50, 100), g: -10, life: R(1.2, 1.8), size: R(18, 30), color: 'rgba(235,235,235,.35)', grow: 2, fade: true, blur: 3 });
+      for (let i = 0; i < 8; i++) star(x + R(-50, 50), y + R(-40, 20), R(8, 12), '#ffd890', .5, .2 + i * .05); tone(2093, .25, .06, 1.2); } },
+  aid: { name: 'First Aid', pc: '#e05a5a', pl: '#ffb0b0', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'],
+    touch(x, y) { pathEl('<div style="width:30px;height:30px;margin:-15px;border-radius:50%;border:3px solid #f0ece0;border-left-color:transparent"></div>', x, y, .5, u => [0, 0, 360 * u, .6 + .4 * u, 1 - u]); },
+    single(x, y) { pathEl('<div style="width:40px;height:40px;margin:-20px;border-radius:50%;border:4px solid #f0ece0;border-left-color:transparent;border-bottom-color:transparent"></div>', x, y, .8, u => [0, 0, 540 * u, .5 + .6 * u, 1 - u]);
+      setTimeout(() => { glyph('✚', x, y, 30, '#7dff8a', .8, u => [0, 20 * u, 0, .6 + .6 * Math.min(1, u * 4), 1 - u]); tone(1318, 0, .05, .6); }, 450); },
+    close(x, y) { for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; glyph('✚', x, y, 16, '#7dff8a', .9, u => [Math.cos(a) * 80 * u, Math.sin(a) * 80 * u, 0, 1, 1 - u]); } ring(x, y, '#7dff8a', 140, .6); tone(1318, 0, .05, 1); tone(1760, .1, .05, 1); } },
+};
+let prof = 'smith', busy = false;
+const RC = [['#ff8040', 'orange'], ['#ffff40', 'yellow'], ['#40c040', 'green'], ['#9d9d9d', 'gray']];
+const SKILL = {}; Object.keys(P).forEach(k => SKILL[k] = { lvl: 140, recipe: 0 });
+function bump(k) { return SKILL[k].lvl >= 150 ? (SKILL[k].lvl >= 160 ? (SKILL[k].lvl >= 175 ? 3 : 2) : 1) : 0; }
+function trade() {
+  const p = P[prof], s = SKILL[prof]; $('tname').textContent = p.name; $('trank').textContent = `${s.lvl} / 225`; $('trankb').style.width = (s.lvl / 225 * 100) + '%';
+  $('recs').innerHTML = [[p.item[1], RC[bump(prof)][0], true], ['(another recipe)', '#40c040'], ['(another recipe)', '#9d9d9d']].map(r => `<div class="rec ${r[2] ? 'sel' : ''}" style="--rc:${r[1]}">${r[0]}</div>`).join('');
+}
+pick('p', v => { prof = v; trade(); });
+$('reset').onclick = () => { SKILL[prof].lvl = 140; trade(); };
+function cpos() { const c = $('char').getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1); return [(c.left - s.left) / z + c.width / z / 2 + 40, (c.top - s.top) / z + c.height / z / 2 - 10]; }
+function skillUp() {
+  const s = SKILL[prof], chance = [1, .6, .25, 0][bump(prof)]; if (Math.random() > chance) return 0;
+  const before = bump(prof); s.lvl += 1; trade();
+  const p = P[prof], sk = $('skill'); sk.style.setProperty('--pc', p.pc); sk.style.setProperty('--pl', p.pl);
+  sk.querySelector('.tt').innerHTML = `${p.name} <b>${s.lvl}</b>`; sk.querySelector('small').textContent = `${225 - s.lvl} to 225`;
+  sk.querySelector('i').style.width = (s.lvl / 225 * 100) + '%';
+  const after = bump(prof), h = $('heads');
+  if (after !== before) { h.style.display = 'block'; h.style.setProperty('--rc', RC[after][0]); h.innerHTML = `<b>${p.item[1]}</b> is now ${RC[after][1]}: ${after === 3 ? 'no more skill-ups from it' : 'skill-ups from it come slower'}`; }
+  else h.style.display = 'none';
+  sk.getAnimations().forEach(a => a.cancel());
+  sk.animate([{ opacity: 0, transform: 'translate(-50%,8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: after !== before ? 4200 : 2600 });
+  tone(784, 0, .04, .4); tone(1175, .07, .04, .4); return 1;
+}
+// the loot column: a Crafted row (same look as Picked up), fading after a few seconds
+let crafted, craftedTimer;
+function craftedRow(n) {
+  const p = P[prof], [g, name, qc] = p.item;
+  if (!crafted) { crafted = document.createElement('div'); crafted.innerHTML = `<div class="head"><span>Crafted</span></div><div class="row" style="--pc:${p.pc};--qc:${qc}"><div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="plus"></span><span class="n"></span></div>`; $('col').appendChild(crafted); crafted.r = crafted.querySelector('.row'); crafted.total = 0; crafted.r.animate([{ opacity: 0, transform: 'translateX(14px)' }, { opacity: 1, transform: 'none' }], { duration: 260 }); }
+  crafted.total += n; crafted.r.querySelector('.n').textContent = crafted.total > 1 ? '×' + crafted.total : '';
+  const pl = crafted.r.querySelector('.plus'); pl.textContent = '+' + n; pl.animate([{ opacity: 1 }, { opacity: 1, offset: .7 }, { opacity: 0 }], { duration: 1600 });
+  clearTimeout(craftedTimer); craftedTimer = setTimeout(() => { const c = crafted; crafted = null; c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(18px)' }], { duration: 400 }).onfinish = () => c.remove(); }, 4000);
+}
+function fly(html, x0, y0, x1, y1, dur, onEnd) { const fr = []; for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u); fr.push({ transform: `translate(${(x1 - x0) * e}px,${(y1 - y0) * e - 60 * Math.sin(Math.PI * u)}px) scale(${1 - .3 * u})` }); } const d = el(html, `left:${x0}px;top:${y0}px`, fr, dur); d.getAnimations()[0].onfinish = () => { d.remove(); onEnd && onEnd(); }; }
+function colPos() { const c = $('col').getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1); return [(c.left - s.left) / z + 14, (c.top - s.top) / z + 30]; }
+$('one').onclick = () => { if (busy) return; const p = P[prof], [x, y] = cpos(); p.single(x, y); const got = skillUp();
+  setTimeout(() => { const [cx, cy] = colPos(); fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, x, y, cx, cy, 550, () => craftedRow(1)); }, 750); };
+$('all').onclick = () => { if (busy) return; busy = true;
+  const p = P[prof], [x, y] = cpos(), pile = $('pile'), N = 12; let ups = 0;
+  pile.style.setProperty('--pc', p.pc); pile.style.setProperty('--qc', p.item[2]); $('stack').innerHTML = ''; $('pw').textContent = p.name; $('pcnt').textContent = ''; $('pnm').textContent = p.item[1]; $('pclose').style.opacity = 0;
+  pile.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 250, fill: 'forwards' });
+  const pr = pile.getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1), px = (pr.left - s.left) / z + 49, py = (pr.top - s.top) / z + pr.height / z / 2;
+  for (let i = 0; i < N; i++) setTimeout(() => {
+    p.touch(x, y); ups += skillUp();
+    fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, x, y, px, py, 420, () => {
+      const it = document.createElement('div'); it.className = 'icon'; const a = (i - 5.5) * 3.2;
+      it.style.cssText = `--qc:${p.item[2]};position:absolute;left:${13 + (i - 5.5) * 1.6}px;top:${13 - Math.min(i, 6)}px;transform:rotate(${a}deg);width:40px;height:40px;font-size:24px;border-width:2px;z-index:${i}`; it.textContent = p.item[0];
+      $('stack').appendChild(it); $('pcnt').textContent = '×' + (i + 1); $('pcnt').animate([{ transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 180 });
+      tone(523 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26][i] / 12), 0, .03, .3);
+      if (i === N - 1) setTimeout(() => { p.close(px, py); $('pclose').textContent = `×${N} ${p.item[1]}` + (ups ? ` · ${p.name} +${ups}` : ''); $('pclose').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'forwards' });
+        setTimeout(() => { pile.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(20px)' }], { duration: 450, fill: 'forwards' }).onfinish = () => { busy = false; };
+          const [cx, cy] = colPos(); fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, px, py, cx, cy, 550, () => craftedRow(N)); }, 2200); }, 250);
+    });
+  }, i * 380);
+};
+function fit() { $('scr').style.zoom = Math.min(1, (window.innerWidth - 40) / 1368); }
+window.addEventListener('resize', fit); fit(); trade();
+</script>
+</body>
+</html>

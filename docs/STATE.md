@@ -86,6 +86,13 @@ sag, Gulp/Wobble/Relief steps, Lumps, heartbeat border at <=2, bounce-off, Padlo
 tries -> shake / harder / slump, glint around the border, "+N", dust; sounds Bag* from gen_gather_sounds.sh; the
 looted icon from LootFeed (ns.lastLootIcon, GetItemInfoInstant)). Reviewed, 9 fixes (a gen counter stops late timers;
 the dark backing follows the icon). Untested in game. Next: crafting for 1.3.0.
+**Crafting (2026-11-09):** picks: Create All = a pile card in the big-moments spot counting up, the profession's closing
+flourish and a line "x12 Silk Bandage · Tailoring +4", then a "Crafted" row in the loot column; themes per profession
+(smith sparks, alchemy bubbles, tailoring thread + snip, leather stitches, engineering gears + puff, enchanting runes,
+cooking steam, first aid wrap + green cross); a single craft = its own themed animation + a row (no popup); the
+recipe color heads-up as a line under the skill-up bar. Mockup docs/mockups/crafting.html (game units). The user:
+keep considering cohesiveness of all elements while building (pile card in the popup style; Crafted joins the
+Picked up list; one profession color everywhere).
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
