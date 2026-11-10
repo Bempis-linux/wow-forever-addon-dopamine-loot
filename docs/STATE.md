@@ -132,7 +132,16 @@ tools): they're generated and hard to make clean; use lines, dots, rings, glints
 hammer tinks): our per-item = the single craft spread over the cast, work beats silent, only the payoff sounds, smaller
 and softer from the 4th item (the user: make sure it doesn't get annoying). Tray directions all to try: slot shelf,
 workbench, satisfying heap, big counter. Mockup docs/mockups/batch.html (4 sample professions, a cast bar, a stand-in for
-the game's craft sound). Waiting for picks.
+the game's craft sound). **Picks: first aid B clean, tray = satisfying heap.**
+**Crafting build, stage A done 2026-11-09 (untested in game):** Craft.lua (cast-synced work + payoff for 8
+professions, quieter from item 4, beats silent after item 1 of a batch; a craft = isTradeskill cast with
+ProfessionsFrame open; batch end by GetRemainingRecasts/a 1.6 s gap; crafted -> Crafted rows, else popup);
+sounds tools/gen_craft_sounds.sh; Gear.tga; Crafting section on the Gathering page (noCraft, tests). No Blizzard
+hooks (the researcher suggested hooksecurefunc on CraftingPage.CreateInternal: refused, taint). To verify in game:
+`/dump UnitCastingInfo("player")` while crafting (6th = true), `/dump C_TradeSkillUI.GetRemainingRecasts()` during a
+Create All, `/dump C_TradeSkillUI.GetBaseProfessionInfo()` with the window open, whether gathering casts are
+isTradeskill. Next: stage B (the heap tray under ProfessionsFrame), stage C (material skill bars + tools, the recipe
+color line via SchematicForm:GetRecipeInfo + C_TradeSkillUI.GetRecipeInfo(id).relativeDifficulty).
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

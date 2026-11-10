@@ -93,6 +93,14 @@ function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
     end)
     return
   end
+  -- something you crafted (Craft.lua): no popup, no rain; it joins the Crafted row once the batch is done
+  -- (before the check below: the list still shows crafts with popups and rain both off)
+  if src == "created" and ns.CraftTakes and self.settings.enabled ~= false then
+    ns.ItemData(link, count, src, function(d)
+      if not ns.CraftTakes(d) and not (self.settings.noPopup and self.settings.noRain) then ns.Collect(d) end
+    end)
+    return
+  end
   if (self.settings.noPopup and self.settings.noRain) or self.settings.enabled == false or src == "bought" then return end
   ns.ItemData(link, count, src, function(d)
     local q = d.quality or 0

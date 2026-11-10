@@ -23,6 +23,7 @@ LootFeed.lua
 Bag.lua
 Gather.lua
 Feed.lua
+Craft.lua
 Skill.lua
 Settings.lua
 Look.lua

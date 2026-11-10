@@ -27,6 +27,18 @@ local function Create()
   N.Toggle(cat, "noSkillUp", "Skill-up bar",
     "When a profession's skill goes up: your new skill and a bar in the profession's color toward what's next (the next herb or ore you can gather, or the next rank).", true)
 
+  N.Header(layout, "Crafting")
+  N.Toggle(cat, "noCraft", "Crafting effects",
+    "While a craft casts, a small touch of your profession plays beside your character (punches and a stitch, bubbles boiling over, stitches, a ratchet, a sizzle and a flip, hammer taps, runes, a salve and wraps), and lands when the item is made. Crafted items go to the loot column instead of popping up or raining.", true)
+  N.Choice(cat, "testCraft", "Test crafting", {
+    { "Leatherworking", "Leatherworking" }, { "Alchemy", "Alchemy" }, { "Tailoring", "Tailoring" }, { "Engineering", "Engineering" },
+    { "Cooking", "Cooking" }, { "Blacksmithing", "Blacksmithing" }, { "Enchanting", "Enchanting" }, { "First Aid", "First Aid" },
+  }, "Tailoring", "Which profession the craft tests below show.")
+  N.Button(layout, "Craft one", "Test craft", function() ns.RunAction("testcraft", (ns.settings.testCraft or "Tailoring") .. " 1") end,
+    "One craft of the profession picked above, with a pretend cast.")
+  N.Button(layout, "Create All", "Test Create All", function() ns.RunAction("testcraft", (ns.settings.testCraft or "Tailoring") .. " 6") end,
+    "Six crafts in a row, the way Create All plays: from the 4th item it gets smaller and quieter.")
+
   N.Header(layout, "Placement")
   N.Button(layout, "Drag frames into place", "Move frames", function() ns.Mover.Unlock() end,
     "Shows a box over the harvest tally and the skill-up bar: drag them where you want them, then click Done. Close this window to see them.")

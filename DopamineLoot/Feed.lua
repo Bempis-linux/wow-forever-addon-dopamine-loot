@@ -29,6 +29,10 @@ local function Layout()
   end
   feed:SetHeight(math.max(1, Height()))
   ns.SetFeedHeight(Height())
+  -- the header says what's in it: "Crafted" when it's only things you made (Craft.lua)
+  local allCrafted = #list > 0
+  for _, row in ipairs(list) do if not row.crafted then allCrafted = false end end
+  if head then head:SetText(allCrafted and "Crafted" or "Picked up") end
 end
 
 local function Clear()
@@ -97,7 +101,7 @@ function ns.PickedUp(d)
     end
     row = table.remove(spare)
     if row and ns.SetLootRow then ns.SetLootRow(row, d); row:Show() else row = ns.NewLootRow(d, nil, feed) end
-    row.n, row.key, row.at = n, key, GetTime()
+    row.n, row.key, row.at, row.crafted = n, key, GetTime(), d.crafted
     CountText(row)
     rows[key] = row
     list[#list + 1] = row

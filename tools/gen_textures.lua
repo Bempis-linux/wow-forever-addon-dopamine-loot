@@ -291,3 +291,13 @@ Write("Lock", Fill(Canvas(64, 64), function(u, v)
   local hole = math.max(InEllipse(u, v, 0.5, 0.34, 0.065, 0.065), InRect(u, v, 0.475, 0.525, 0.17, 0.34))
   return math.max(body * (1 - hole), shackle)
 end))
+
+-- Crafting (Engineering): a simple gear: a ring with eight square teeth and a hole
+Write("Gear", Fill(Canvas(64, 64), function(u, v)
+  local r = R(u, v)
+  local a = math.atan(v - 0.5, u - 0.5)
+  local tooth = (math.cos(8 * a) > 0.3) and 0.92 or 0.74
+  local body = math.max(0, math.min(1, (tooth - r) / 0.04 + 0.5))
+  local hole = math.max(0, math.min(1, (r - 0.24) / 0.04 + 0.5))
+  return body * hole
+end))
