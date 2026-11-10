@@ -111,7 +111,7 @@
 <h2>2. The Create All heap</h2>
 <p class="lead"><b>Now</b>: each item drops to a spot picked in advance, so it can stop in mid-air beside the others ("it slightly falls and just randomly sticks"). The new ones all land <b>on</b> what's already there. <b>H1 Pile up</b>: each item falls into the middle and slides down the slope until it rests on the floor or on other items, so the heap grows into a mound. <b>H2 Neat rows</b>: items stack in rows from the floor up, each row a little shorter, like goods stacked on a counter. <b>H3 Tumble</b>: like H1, but each item hits the heap with a little bounce and rolls a step down the slope before it settles, turning as it goes.</p>
 <div class="bar"><span>Heap</span><button data-h="now">Now</button><button data-h="h1" class="on">H1 Pile up</button><button data-h="h2">H2 Neat rows</button><button data-h="h3">H3 Tumble</button>
-  <span>Batch</span><button data-n="5">5</button><button data-n="18" class="on">18</button><button data-n="40">40</button><button class="go" id="go">Create All</button></div>
+  <span>Batch</span><button data-n="5">5</button><button data-n="18" class="on">18</button><button data-n="40">40</button><button data-n="120">120 (fast)</button><button class="go" id="go">Create All</button></div>
 <div class="screen"><div class="tray" id="tray"><div class="lbl">Leatherworking · Create All</div><div class="cnt" id="cnt"></div><div class="floor"></div></div><div class="note2" id="note2"></div></div>
 
 <script>
@@ -169,42 +169,59 @@ $('all').onclick = () => { document.querySelectorAll('.ban').forEach((b, i) => s
 draw();
 
 // ---------------- 2. the heap ----------------
-const TW = 540, TH = 130, IC = 26, FLOOR = TH - 6; // (y grows down here; FLOOR: where an item's bottom rests)
+// (y grows down here; FLOOR: where an item's bottom rests; ROW: how much one item raises the heap)
+const TW = 540, TH = 130, IC = 26, FLOOR = TH - 6, ROW = IC - 6, TALL = 4, PACK = 30;
 let hv = 'h1', N = 18, timers = [];
-const NOTE = { now: 'Now: each item drops to a spot picked in advance, whether or not anything is under it.', h1: 'H1 Pile up: lands in the middle, slides down the slope, rests on the floor or on items.', h2: 'H2 Neat rows: rows from the floor up, each a little shorter.', h3: 'H3 Tumble: lands on the heap, bounces, rolls a step down the slope, turning.' };
+const NOTE = { now: 'Now: each item drops to a spot picked in advance, whether or not anything is under it. Past 40 the oldest disappear.',
+  h1: 'H1 Pile up: lands in the middle, slides down the slope, rests on the floor or on items. Full: the heap sinks a little with each new item.',
+  h2: 'H2 Neat rows: rows from the floor up, each a little shorter. Full (30): the rows pack into one stack "×30" at the side and start again.',
+  h3: 'H3 Tumble: lands on the heap, bounces, rolls a step down the slope, turning. Full: the heap sinks a little with each new item.' };
 pick('h', v => { hv = v; $('note2').textContent = NOTE[v]; }); pick('n', v => N = +v);
 $('note2').textContent = NOTE[hv];
-function spawn(x, y0, y1, rot0, rot1, extra) { const d = document.createElement('div'); d.className = 'it'; d.style.left = (x - IC / 2) + 'px'; d.style.top = '0px'; $('tray').appendChild(d);
-  const fr = [{ transform: `translateY(${y0}px) rotate(${rot0}deg)` }, { transform: `translateY(${y1}px) rotate(${rot1}deg)`, offset: .7, easing: 'ease-out' },
-    { transform: `translateY(${y1 - 5}px) rotate(${rot1 * .6}deg)`, offset: .85 }, { transform: `translateY(${y1}px) rotate(${rot1}deg)` }];
-  if (extra) fr.splice(3, 1, ...extra);
-  d.animate(fr, { duration: 560, easing: 'ease-in', fill: 'forwards' }); return d; }
-let cols, rows, items;
-function start() { timers.forEach(clearTimeout); timers = []; document.querySelectorAll('#tray .it').forEach(d => d.remove()); $('cnt').textContent = '';
-  cols = {}; rows = []; items = []; }
+let heap, cols, sink, shown, packs, packed;
+function start() { timers.forEach(clearTimeout); timers = []; document.querySelectorAll('#tray .heap, #tray .it').forEach(d => d.remove()); $('cnt').textContent = '';
+  heap = document.createElement('div'); heap.className = 'heap'; heap.style.cssText = 'position:absolute;inset:0;transition:transform .3s ease-out'; $('tray').appendChild(heap);
+  cols = {}; sink = 0; shown = []; packs = 0; packed = 0; }
+function item(x) { const d = document.createElement('div'); d.className = 'it'; d.style.left = (x - IC / 2) + 'px'; d.style.top = '0px'; heap.appendChild(d); shown.push(d); return d; }
+function drop(x, y, rot0, rot) { item(x).animate([{ transform: `translateY(${-30 - sink}px) rotate(${rot0}deg)` }, { transform: `translateY(${y}px) rotate(${rot}deg)`, offset: .7, easing: 'ease-out' },
+  { transform: `translateY(${y - 5}px) rotate(${rot * .6}deg)`, offset: .85 }, { transform: `translateY(${y}px) rotate(${rot}deg)` }], { duration: 560, easing: 'ease-in', fill: 'forwards' }); }
 const COLW = 18; // columns overlap a little, like real icons leaning on each other
-function heightAt(c) { return cols[c] || 0; }
+const heightAt = c => cols[c] || 0;
 function settle(c) { // slide down the slope: move to a neighbour while it's two or more items lower
   for (let s = 0; s < 12; s++) { const h = heightAt(c), l = heightAt(c - 1), r = heightAt(c + 1);
     if (l <= h - 2 && (l <= r || r > h - 2)) c--; else if (r <= h - 2) c++; else break; }
   return c; }
+function sinkRow() { // the full heap sinks one row: its bottom slides out of view under the tray's floor
+  sink += ROW; heap.style.transform = `translateY(${sink}px)`; for (const k in cols) cols[k] = Math.max(0, cols[k] - 1);
+  shown = shown.filter(d => { const gone = d.getBoundingClientRect().top - $('tray').getBoundingClientRect().top > TH + 40; if (gone) d.remove(); return !gone; }); }
 function addItem(i) {
   const cx = TW / 2;
-  if (hv === 'now') { const spread = .36 * TW * (1 - Math.min(.75, i / (N + 4))), x = cx + R(-spread, spread), y = FLOOR - IC - Math.min(TH - 52, Math.sqrt(i) * 11) + R(-3, 3); spawn(x, -30, y, R(-90, 90), R(-20, 20)); }
-  if (hv === 'h1' || hv === 'h3') { let c = Math.round(R(-1, 1)); const c0 = c; c = settle(c); const h = heightAt(c); cols[c] = h + 1;
-    const x = cx + c * COLW + R(-2, 2), y = FLOOR - IC - h * (IC - 6); const rot = R(-14, 14) + (c - c0) * 6;
-    if (hv === 'h1') spawn(x, -30, y, R(-60, 60), rot);
+  if (hv === 'now') { if (shown.length >= 40) shown.shift().remove();
+    const spread = .36 * TW * (1 - Math.min(.75, i / (N + 4))), y = FLOOR - IC - Math.min(TH - 52, Math.sqrt(Math.min(i, 40)) * 11) + R(-3, 3); drop(cx + R(-spread, spread), y, R(-90, 90), R(-20, 20)); }
+  if (hv === 'h1' || hv === 'h3') { let c = Math.round(R(-1, 1)); const c0 = c; c = settle(c);
+    if (heightAt(c) >= TALL) sinkRow();
+    const h = heightAt(c); cols[c] = h + 1;
+    const x = cx + c * COLW + R(-2, 2), y = FLOOR - IC - h * ROW - sink, rot = R(-14, 14) + (c - c0) * 6;
+    if (hv === 'h1') drop(x, y, R(-60, 60), rot);
     else { const dir = c === c0 ? (R(0, 1) < .5 ? -1 : 1) : Math.sign(c - c0), roll = dir * 10; // lands a step up-slope, then rolls into place
-      const d = document.createElement('div'); d.className = 'it'; d.style.left = (x - IC / 2 - roll) + 'px'; d.style.top = '0px'; $('tray').appendChild(d);
-      d.animate([{ transform: `translate(0,-30px) rotate(${R(-60, 60)}deg)` }, { transform: `translate(0,${y - 6}px) rotate(${rot - dir * 30}deg)`, offset: .55, easing: 'ease-out' },
+      item(x - roll).animate([{ transform: `translate(0,${-30 - sink}px) rotate(${R(-60, 60)}deg)` }, { transform: `translate(0,${y - 6}px) rotate(${rot - dir * 30}deg)`, offset: .55, easing: 'ease-out' },
         { transform: `translate(${roll * .4}px,${y - 12}px) rotate(${rot - dir * 15}deg)`, offset: .7 }, { transform: `translate(${roll}px,${y}px) rotate(${rot}deg)`, offset: .9 }, { transform: `translate(${roll}px,${y}px) rotate(${rot}deg)` }], { duration: 700, easing: 'ease-in', fill: 'forwards' }); } }
-  if (hv === 'h2') { // rows from the floor: 9, 8, 7, ... wide, centered, filled from the middle out
-    let r = 0, used = 0; while (true) { const w = Math.max(1, 9 - r); if (i < used + w) break; used += w; r++; }
-    const w = Math.max(1, 9 - r), mid = (w - 1) / 2, slots = [...Array(w).keys()].sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b), s = slots[i - used];
-    const x = cx + (s - mid) * (IC + 2) + (r % 2) * 3, y = FLOOR - IC - r * (IC - 2); spawn(x, -30, y, R(-30, 30), R(-3, 3)); }
+  if (hv === 'h2') { // rows from the floor: 9, 8, 7, 6 wide, centered, filled from the middle out; full: pack into a stack
+    const k = i - packed, ox = cx + 30;
+    let r = 0, used = 0; while (true) { const w = 9 - r; if (k < used + w) break; used += w; r++; }
+    const w = 9 - r, mid = (w - 1) / 2, slots = [...Array(w).keys()].sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b), s = slots[k - used];
+    drop(ox + (s - mid) * (IC + 2) + (r % 2) * 3, FLOOR - IC - r * (IC - 2), R(-30, 30), R(-3, 3));
+    if (k === PACK - 1) timers.push(setTimeout(pack, 650)); }
   $('cnt').textContent = `${i + 1} / ${N}`; }
+function pack() { // the rows fly into one stack at the side; a "×30" badge on it
+  const x = 30 + (packs % 4) * 34, y = FLOOR - IC - Math.floor(packs / 4) * (IC + 4);
+  shown.forEach((d, j) => d.animate([{ transform: getComputedStyle(d).transform }, { transform: `translate(${x - IC / 2 - parseFloat(d.style.left)}px,${y}px) scale(.9)`, opacity: .2 }], { duration: 380, delay: j * 6, easing: 'ease-in', fill: 'forwards' }));
+  const old = shown; shown = []; timers.push(setTimeout(() => old.forEach(d => d.remove()), 380 + PACK * 6));
+  timers.push(setTimeout(() => { const b = document.createElement('div'); b.className = 'it'; b.style.cssText = `left:${x - IC / 2}px;top:${y}px`; b.innerHTML = `<span style="position:absolute;right:-6px;bottom:-7px;font:800 11px system-ui;color:#fff;text-shadow:0 0 2px #000,0 1px 1px #000">×${PACK}</span>`;
+    $('tray').appendChild(b); b.animate([{ transform: 'scale(1.5)' }, { transform: 'scale(.9)', offset: .6 }, { transform: 'scale(1)' }], { duration: 260 }); }, 400));
+  packs++; packed += PACK; }
 function finale() { document.querySelectorAll('#tray .it').forEach(d => d.animate([{ translate: '0 0' }, { translate: '-3px -4px' }, { translate: '3px 0' }, { translate: '0 0' }], { duration: 320, composite: 'add' })); }
-$('go').onclick = () => { start(); const gap = N > 20 ? .35 : .6; for (let i = 0; i < N; i++) timers.push(setTimeout(() => addItem(i), i * gap * 1000)); timers.push(setTimeout(finale, N * gap * 1000 + 300)); };
+$('go').onclick = () => { start(); const gap = N > 60 ? .12 : N > 20 ? .3 : .6; for (let i = 0; i < N; i++) timers.push(setTimeout(() => addItem(i), i * gap * 1000)); timers.push(setTimeout(finale, N * gap * 1000 + 700)); };
 </script>
 </body>
 </html>
