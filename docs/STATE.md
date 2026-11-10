@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-09, after 1.2.1 (released and on CurseForge; the game stays on dev). **Mockup round 3**
+_Last checkpoint: 2026-11-10. **1.3.0 is prepared and pushed (version, CHANGELOG, README, curseforge.md; release-check clean) but NOT tagged: the user does a final in-game test of the exact commit, then says go; tag with `git tag -a v1.3.0 -m "Dopamine Loot 1.3.0"` + push, watch the run, check the zip, paste the new curseforge.md Professions section into CurseForge.** Latest 2026-11-10: settings reorganized (main switches incl. Gathering effects / Crafting effects / Skill-up banner on the first page; the Gathering page is now Professions with Harvest window, notes, calm, rare skinning, Create All pile, skill-up Bar look Crafted/Simple, tests); Create All items stay full size (only sounds step down); Leatherworking = leather-r2 B strip; heap = H3 Tumble with sinking; skill-up polish all six; /dl in combat opens after combat. Earlier (1.2.1 era): **Mockup round 3**
 of docs/mockups/gathering.html is up (the user took Claude's shortlist): bag B1 (Game art: the backpack icon in our
 splitting ring, vs. the leather bag), B2 squash and stretch + settle wobble (vs. Straight), B4 drawstring whip + pop
 ring, B5 sigh vs. big exhale, B6 herb bag no strain, B7 full moment at most every 4 s, B9 switch + Test bag; gathering
