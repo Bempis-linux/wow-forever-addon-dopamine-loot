@@ -164,12 +164,9 @@ P.Tailoring = { -- the needle dips in and out four times, each stitch appearing,
       end)
     end
   end,
-  payoff = function(x, y, s, quiet)
-    for k = -1, 1, 2 do -- two short strokes closing, like a snip (Streak.tga: a thin line through a square, so it turns)
-      Fx({ file = MEDIA .. "Streak.tga", x = x + 44 * s, y = y, size = 16 * s, life = 0.35, add = true, rot = k * 0.5,
-        path = function(u) return 0, 0, 1, 1 - u, k * 0.5 * (1 - math.min(1, u * 3)) end })
-    end
-    Glint(x + 44 * s, y, 12 * s, 0.3)
+  payoff = function(x, y, s, quiet) -- the scissors snip shut (the mockup's ✂: turns from -25 to +25 degrees)
+    Fx({ file = MEDIA .. "FxScissors.tga", x = x + 44 * s, y = y, size = 24 * s, life = 0.4,
+      path = function(u) return 3 * u * s, 0, 1, 1 - u, -math.rad(-25 + 50 * math.min(1, u * 3)) end })
     Sound(quiet and "TailorSnipQ" or "TailorSnip")
   end,
 }
@@ -178,8 +175,8 @@ P.Engineering = { -- two gears ratchet in steps (click, click, click), then a sp
   work = function(x, y, T, guid, s, loud)
     for g = 0, 1 do
       local big = g == 0
-      Fx({ file = MEDIA .. "Gear.tga", x = x + (big and -8 or 13) * s, y = y + (big and 0 or 13) * s, size = (big and 28 or 18) * s, life = T + 0.4,
-        r = 0.78, gg = 0.83, b = 0.88,
+      Fx({ file = MEDIA .. "FxGear.tga", x = x + (big and -10 or 13) * s, y = y + (big and 0 or 13) * s, size = (big and 40 or 27) * s, life = T + 0.4,
+        r = big and 0.78 or 0.66, gg = big and 0.83 or 0.72, b = big and 0.88 or 0.78, -- (the mockup's ⚙ with its glow: a glowing gear)
         path = function(u) local t = u * (T + 0.4); local k = (t >= T * 0.3 and 1 or 0) + (t >= T * 0.45 and 1 or 0) + (t >= T * 0.6 and 1 or 0)
           return 0, 0, 1, u > 0.9 and (1 - u) * 10 or 1, (big and 1 or -1.5) * k * 0.4 end })
     end
@@ -256,20 +253,22 @@ P.Enchanting = { -- three runes stamp around it on rising chimes, then they're d
   payoff = function(x, y, s, quiet) Glint(x + 44 * s, y, 26 * s, 0.35, 0, 1, 1, 1); Ring(x + 44 * s, y, 36 * s, 0.3, 0, 0.78, 0.69, 1); Sound(quiet and "EnchPingQ" or "EnchPing") end,
 }
 
-P["First Aid"] = { -- a soft green glow, two white strokes wrap across, a click and a glint
+P["First Aid"] = { -- (round 4, the user's pick back) the roll rolls in, three wraps, and the green cross rises
   work = function(x, y, T, guid, s, loud)
-    After(T * 0.3, guid, function()
-      Mark({ file = MEDIA .. "Glow.tga", x = x, y = y, size = 22 * s, life = T * 0.7 + 0.4, r = 0.49, gg = 1, b = 0.54, add = true, a = 0.9 })
-      if loud then Sound("AidPat") end
-    end)
-    for i = 0, 1 do
-      After(T * (0.52 + i * 0.18), guid, function()
-        Mark({ file = WHITE, x = x, y = y + (i == 0 and 3 or -3) * s, w = 30 * s, h = 3, life = T * (0.48 - i * 0.18) + 0.45, r = 0.97, gg = 0.96, b = 0.92, pop = 1 })
-        if loud then Sound("AidTap") end
+    Fx({ file = MEDIA .. "Circle.tga", x = x - 40 * s, y = y, size = 18 * s, life = T * 0.3, r = 0.95, gg = 0.93, b = 0.88,
+      path = function(u) return 40 * u * s, 0, 1, 1 - math.max(0, u - 0.85) / 0.15, -2 * math.pi * u end })
+    for i = 0, 2 do
+      After(T * (0.3 + i * 0.17), guid, function()
+        Mark({ file = WHITE, x = x, y = y + (5 - i * 6) * s, w = 26 * s, h = 5 * s, life = T * (0.7 - i * 0.17) + 0.3, r = 0.96, gg = 0.94, b = 0.89, pop = 1 })
+        if loud then Sound("AidWrap") end
       end)
     end
   end,
-  payoff = function(x, y, s, quiet) Glint(x + 18 * s, y, 12 * s, 0.35); Sound(quiet and "AidClickQ" or "AidClick") end,
+  payoff = function(x, y, s, quiet)
+    Fx({ file = MEDIA .. "FxCross.tga", x = x, y = y + 2 * s, size = 26 * s, life = 0.55, r = 0.49, gg = 1, b = 0.54,
+      path = function(u) return 0, 12 * u * s, u < 0.15 and 0.5 + 4 * u or 1, 1 - u end })
+    Sound(quiet and "AidDoneQ" or "AidDone")
+  end,
 }
 
 local DEFAULT = { -- any other profession: a glint and a ring
@@ -308,7 +307,19 @@ end
 function ns.CraftProfession(name) return P[name] or DEFAULT end
 
 -- Where it plays: just right of your character (the middle of the screen, a little below)
-local function Spot() return UIParent:GetWidth() / 2 + 70, UIParent:GetHeight() * 0.46 end
+-- Where the effects play: just right of the game's cast bar (where it is, also when moved in Edit Mode;
+-- read only), else right of the character
+local function Spot()
+  local bar = _G.PlayerCastingBarFrame or _G.CastingBarFrame
+  if bar and bar.GetRight then
+    local ok, right, cy = pcall(function() local _, y = bar:GetCenter(); return bar:GetRight(), y end)
+    if ok and type(right) == "number" and type(cy) == "number" and not ns.Secret(right) and not ns.Secret(cy) then
+      local k = bar:GetEffectiveScale() / UIParent:GetEffectiveScale()
+      return math.min(right * k + 62, UIParent:GetWidth() - 60), cy * k -- (a bar at the right edge: kept on screen)
+    end
+  end
+  return UIParent:GetWidth() / 2 + 70, UIParent:GetHeight() * 0.46
+end
 
 local function Remaining()
   if C_TradeSkillUI and C_TradeSkillUI.GetRemainingRecasts then

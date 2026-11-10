@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# NOTE (2026-11-09): the crafting sounds now come from tools/render-media.html (the mockups' own sound code,
+# rendered offline) + tools/convert-media.sh. Running this script would overwrite them with the older hand-made ones.
 # Synthesizes Dopamine Loot's crafting sounds into DopamineLoot/Media/ as OGG (original audio: sine waves and
 # noise, nothing copied). Picked by ear in docs/mockups/crafting-r4.html, crafting-r5.html, firstaid-r6.html.
 # Each profession: its work beats (played during the cast) and its payoff (when the item is made); a payoff

@@ -48,7 +48,7 @@ local IS_PROF = { Herbalism = true, Mining = true, Skinning = true, Fishing = tr
   Enchanting = true, Engineering = true, Leatherworking = true, Tailoring = true, Cooking = true, ["First Aid"] = true,
   Jewelcrafting = true, Inscription = true }
 
-local banner, title, bar, unlock, unlockBorder, note, recipeLine
+local banner, title, titleGlow, bar, unlock, unlockBorder, note, recipeLine
 local pattern
 local showT, showing
 local shown = 0 -- (counts banners: a late recipe check only writes into its own)
@@ -198,11 +198,17 @@ end
 
 local function Create()
   banner = CreateFrame("Frame", nil, UIParent)
-  banner:SetSize(290, 72)
+  banner:SetSize(310, 74)
   banner:SetFrameStrata("FULLSCREEN_DIALOG") -- (a short banner; above the settings window for the test)
   banner:Hide()
   title = banner:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   title:SetPoint("TOP", 0, 0)
+  title:SetTextColor(1, 1, 1) -- (the mockup: white, glowing in the profession's color)
+  titleGlow = banner:CreateTexture(nil, "ARTWORK")
+  titleGlow:SetTexture("Interface\\AddOns\\DopamineLoot\\Media\\Glow.tga")
+  titleGlow:SetBlendMode("ADD")
+  titleGlow:SetPoint("TOPLEFT", title, "TOPLEFT", -18, 10)
+  titleGlow:SetPoint("BOTTOMRIGHT", title, "BOTTOMRIGHT", 18, -10)
   bar = ns.MakeSkillBar(banner) -- (its track sits 6 below the title; the tool rides above it)
   bar:SetPoint("TOP", title, "BOTTOM", -12, 10)
   unlock = banner:CreateTexture(nil, "ARTWORK")
@@ -225,7 +231,7 @@ local function Create()
     -- (the banner's own fade leaves the reveal, a child, at full strength until its own fade)
     self:SetAlpha(1)
     local own = math.min(1, t / 0.3, (life - t) / 0.4)
-    title:SetAlpha(own); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
+    title:SetAlpha(own); titleGlow:SetAlpha(own * 0.45); bar:SetAlpha(own); note:SetAlpha(own); unlock:SetAlpha(own); unlockBorder:SetAlpha(own); recipeLine:SetAlpha(own)
     if showing then
       local u = math.min(1, math.max(0, (t - 0.3) / 0.7))
       bar:SetValue(showing.v0 + (showing.v1 - showing.v0) * (1 - (1 - u) ^ 3))
@@ -235,11 +241,12 @@ local function Create()
     if t >= life then self:Hide(); reveal:Hide(); revealing = nil end
   end
   banner:SetScript("OnUpdate", Animate)
-  ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 290, h = 72,
+  ns.Mover.Register({ key = "skill", frame = banner, label = "Skill-ups", point = "TOP", x = 0, y = -150, w = 310, h = 74,
     preview = function(on)
       if on then -- a still sample while it's being placed
         banner:SetScript("OnUpdate", nil); banner:SetAlpha(1); banner:Show(); reveal:Hide(); revealing = nil
         title:SetAlpha(1); bar:SetAlpha(1); note:SetAlpha(1); unlock:SetAlpha(1); unlockBorder:SetAlpha(1)
+        titleGlow:SetVertexColor(PROF.Herbalism.color[1], PROF.Herbalism.color[2], PROF.Herbalism.color[3]); titleGlow:SetAlpha(0.45)
         local p = PROF.Herbalism
         title:SetText("Herbalism |cff8ef07a64|r"); note:SetText("6 to Briarthorn"); recipeLine:SetText("")
         bar:SetProfession("Herbalism", p.color, p.light); bar:SetValue(0.7)
@@ -274,7 +281,8 @@ function ns.ShowSkillUp(name, level, capped, recipeColor)
     end
   end
   title:SetText(("%s |cff%02x%02x%02x%d|r"):format(name, l[1] * 255, l[2] * 255, l[3] * 255, level))
-  title:SetShadowColor(c[1], c[2], c[3], 0.9)
+  title:SetShadowColor(0, 0, 0, 1)
+  titleGlow:SetVertexColor(c[1], c[2], c[3])
   bar:SetProfession(name, c, l)
   note:SetText(text)
   recipeLine:SetText("")

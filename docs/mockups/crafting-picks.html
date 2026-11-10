@@ -187,10 +187,9 @@ const ONE = {
       glyph(runes[Math.floor(R(0, 6))], x + rx, y + ry, 15, '#d8c8ff', .85, u => { if (u < .55) return [0, 0, 0, u < .08 ? 1.6 - 7 * u : 1, 1]; const v = (u - .55) / .45; return [(PAY - rx) * v, ry * v, 0, 1 - .6 * v, 1 - v * .5]; }, i * .14);
       at(i * .14, () => tone(1046 * semi(PENTA[i * 2]), 0, .03, .35)); }
     at(.72, () => { star(x + PAY, y, 30, '#fff', .35); ring(x + PAY, y, '#c8b0ff', 36, .3); tone(1568 * k, 0, .05, .6); tone(2093 * k, .02, .03, .5); }); },
-  aid(x, y) { glow(x, y); softTap(0, .9);
-    stroke(x, y - 3, 30, 0, 900); at(.3, () => { tap(0, 1); });
-    at(.48, () => { stroke(x, y + 3, 30, 0, 700); tap(0, 1.06); });
-    at(.72, () => { tone(2600, 0, .035, .03, 'square'); noise(0, .02, .03, 5000, 4); star(x + 18, y, 12, '#fff', .35); tone(1046, .03, .03, .25); }); },
+  aid(x, y, k) { pathEl('<div style="width:18px;height:18px;margin:-9px;border-radius:50%;background:radial-gradient(#fff,#e8e0d0 60%,#c8c0b0)"></div>', x - 40, y, .3, u => [40 * u, 0, 360 * u, 1, 1]);
+    for (let i = 0; i < 3; i++) at(.25 + i * .14, () => { el('', `left:${x - 13}px;top:${y - 10 + i * 6}px;width:26px;height:5px;border-radius:3px;background:#f4f0e4;box-shadow:0 1px 0 #b8b0a0`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .85 }, { opacity: 0 }], 900); noise(0, .1, .02, 1800, .8); });
+    at(.72, () => { glyph('✚', x, y - 2, 18, '#7dff8a', .55, u => [0, 12 * u, 0, u < .15 ? .5 + 4 * u : 1, 1 - u]); tone(700 * k, 0, .04, .05, 'triangle'); tone(1046 * k, .04, .04, .25); }); },
 };
 
 // ================= Create All (the batch page): work beats over the cast, silent; the payoff sounds =================
@@ -217,7 +216,7 @@ const PROF = {
     payoff(x, y, i, s, vol, par) { star(x, y, 22 * s, '#ffd27a', .3, 0, par); for (let j = 0; j < Math.round(8 * s); j++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: .45, size: 3, color: '#ffb040', glow: 5 }, par); tone(85, 0, .15 * vol, .12, 'sine', 50); noise(0, .08, .12 * vol, 1800 * walk(i) / 2, 2.5, 'bandpass', true); metal(0, 470 * walk(i) / 1.4, .02 * vol, .3, [1, 2.76, 5.4], [1, .35, .15]); },
     game(t) { metal(t, 1300, .015, .15, [1, 2.76, 5.4], [1, .35, .15]); } },
   ench: { name: 'Enchanting', pc: '#8a6aff', item: ['✨', 'Enchanted Thorium', '#1eff00'], pick: 'Round 4 tidied: three runes gather into a star', solo: true, game(t) { tone(900, t, .01, .3); } },
-  aid: { name: 'First Aid', pc: '#e05a5a', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'], pick: 'Round 6 B clean: a green glow, two strokes, a click and a glint; F2\'s taps', solo: true, game(t) { noise(t, .1, .01, 1800, .8); } },
+  aid: { name: 'First Aid', pc: '#e05a5a', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'], pick: 'Round 4 (your pick again, 2026-11-09): the roll rolls in, three wraps, the green cross rises', solo: true, game(t) { noise(t, .1, .01, 1800, .8); } },
 };
 $('picks').innerHTML = Object.values(PROF).map(p => `<tr><td>${p.name}</td><td>${p.pick}</td></tr>`).join('') + '<tr><td>Create All</td><td>Batch page: the craft spread over each cast, only the payoff sounds, from the 4th item smaller and softer; tray: Satisfying heap</td></tr><tr><td>Skill bars</td><td>Round 4 bars with a tool at the tip, round 5 needle and drop</td></tr>';
 

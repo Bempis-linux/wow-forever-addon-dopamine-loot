@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Render Media</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 16px; background: #0b0b10; color: #e8e2d0; font: 13px system-ui, sans-serif; }
+  .art { display: flex; flex-wrap: wrap; gap: 10px; } .art div { text-align: center; font-size: 10px; color: #9a927e; }
+  .art img { width: 64px; height: 64px; background: #2a3a24; display: block; }
+</style>
+</head>
+<body>
+<h3>Dopamine Loot: render the mockups' sounds and our tool art</h3>
+<p>Served by tools/render-media.ps1. <b>renderAll()</b> renders every sound offline (silent: an OfflineAudioContext, nothing plays) and every
+picture to a 64x64 PNG, and posts each to the receiver, which saves it into tools/out/. tools/convert-media.sh turns them into the
+addon's OGG and TGA files. The sound code is copied from docs/mockups/crafting-picks.html; the pictures are our own drawings.</p>
+<div class="art" id="art"></div>
+<pre id="log"></pre>
+<script>
+'use strict';
+// ---------------- sound: the mockup's helpers, aimed at an offline context ----------------
+let A, OUT, rnd = 1;
+const R = (a, b) => { rnd = (rnd * 16807) % 2147483647; return a + (rnd / 2147483647) * (b - a); }; // (seeded: the same files each run)
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2, att = .004) { const o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dec * .8); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dec); o.connect(g).connect(OUT); o.start(t); o.stop(t + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', hit) { const n = Math.floor(A.sampleRate * dur), buf = A.createBuffer(1, n, A.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (R(0, 1) * 2 - 1) * (hit ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n)); const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(OUT); s.start(t); }
+function click(t = 0, vol = .05, f = 3000, q = 6) { noise(t, .012, vol, f, q); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine', null, .002)); }
+const semi = n => Math.pow(2, n / 12), PENTA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+function thok(t, p = 1) { tone(240 * p, t, .06, .06, 'square', 160 * p); noise(t, .03, .03, 1200, 2); }
+const AS = { clink(t, k = 1) { metal(t, 2300 * k, .025, .35, [1, 2.32, 4.25], [1, .5, .25]); }, glug(t) { tone(270, t, .07, .12, 'sine', 145); noise(t, .05, .015, 600, 1, 'lowpass'); },
+  cork(t, k = 1) { tone(190 * k, t, .09, .16, 'sine', 120 * k); click(t, .04, 1800, 2); tone(700 * k, t + .02, .015, .05, 'sine'); } };
+const E1 = { tick(i) { click(0, .07, 3200 + i * 200, 8); metal(0, 3400 + i * 150, .012, .08, [1, 1.9], [1, .4]); }, pay(k) { const o = A.createOscillator(), g = A.createGain(), l = A.createOscillator(), lg = A.createGain(), t = 0;
+    o.frequency.setValueAtTime(320 * k, t); o.frequency.exponentialRampToValueAtTime(520 * k, t + .15); l.frequency.value = 22; lg.gain.value = 30; l.connect(lg).connect(o.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.06, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .45); o.connect(g).connect(OUT); o.start(t); l.start(t); o.stop(t + .5); l.stop(t + .5); } };
+const H2 = { strike(i, k) { if (i < 2) { noise(0, .02, .06, 3800, 4, 'bandpass', true); metal(0, 1250 + i * 120, .01, .08, [1, 2.76], [1, .3]); return; }
+    tone(85, 0, .18, .12, 'sine', 50); noise(0, .08, .14, 1800 * k, 2.5, 'bandpass', true); metal(0, 470 * k, .024, .35, [1, 2.76, 5.4], [1, .35, .15]); }, after() { noise(0, .4, .022, 5000, .6, 'highpass'); } };
+
+// name -> [seconds, fn]; a "Q" copy of each payoff is rendered quieter (from the 4th item of a Create All)
+const SOUNDS = {
+  // the single crafts (crafting-picks.html), beat by beat as the game plays them
+  LeatherThok: [.2, () => thok(0, 1)], LeatherZip: [.15, () => noise(0, .06, .025, 3300, 3)], LeatherTug: [.3, () => tone(520, 0, .04, .12, 'triangle', 880)],
+  AlchClink: [.5, () => AS.clink(0)], AlchGlug: [.25, () => AS.glug(0)], AlchFoam: [.3, () => noise(0, .2, .025, 3000, .7)], AlchCork: [.3, () => AS.cork(0)],
+  TailorFwip: [.12, () => noise(0, .05, .02, 5400, 4)], TailorSnip: [.2, () => { tone(3300, 0, .03, .06, 'triangle'); tone(3700, .05, .03, .06, 'triangle'); }],
+  EngTick: [.15, () => E1.tick(1)], EngBoing: [.6, () => E1.pay(1)],
+  CookSizzle: [.2, () => noise(0, .12, .025, 6000, .6, 'highpass')], CookWhoosh: [.3, () => noise(0, .2, .02, 900, .8)], CookTss: [.45, () => { noise(0, .3, .03, 6000, .5, 'highpass'); tone(260, 0, .03, .08, 'triangle'); }],
+  SmithTap: [.15, () => H2.strike(0, 1)], SmithClang: [.5, () => H2.strike(2, 1)], SmithHiss: [.5, () => H2.after()],
+  EnchChime1: [.45, () => tone(1046 * semi(PENTA[0]), 0, .03, .35)], EnchChime2: [.45, () => tone(1046 * semi(PENTA[2]), 0, .03, .35)], EnchChime3: [.45, () => tone(1046 * semi(PENTA[4]), 0, .03, .35)],
+  EnchPing: [.7, () => { tone(1568, 0, .05, .6); tone(2093, .02, .03, .5); }],
+  AidWrap: [.15, () => noise(0, .1, .02, 1800, .8)], AidDone: [.35, () => { tone(700, 0, .04, .05, 'triangle'); tone(1046, .04, .04, .25); }],
+  CraftDone: [.9, () => { tone(880, .1, .05, .7); tone(1318, .2, .04, .7); }],
+  // the skill bar's tool, on a skill-up (round 4 bars; gathering from crafting-picks.html)
+  ToolTailoring: [.1, () => noise(0, .05, .02, 5000, 4)], ToolLeatherworking: [.15, () => thok(0)], ToolAlchemy: [.2, () => tone(300, 0, .04, .15, 'sine', 180)],
+  ToolEngineering: [.05, () => click(0, .06, 3200, 8)], ToolCooking: [.25, () => noise(0, .2, .02, 6000, .5, 'highpass')],
+  ToolBlacksmithing: [.55, () => { click(0, .05, 2500, 2); metal(0, 1100, .025, .5); }], ToolEnchanting: [.55, () => tone(1318, 0, .03, .5)], ToolFirstAid: [.05, () => click(0, .04, 2200, 4)],
+  ToolHerbalism: [.12, () => { tone(620, 0, .04, .08, 'sine', 980); noise(0, .06, .015, 4000, 1); }], ToolMining: [.2, () => { noise(0, .03, .06, 2400, 3, 'bandpass', true); metal(0, 900, .012, .15, [1, 2.76], [1, .3]); }],
+  ToolFishing: [.15, () => { tone(420, 0, .05, .12, 'sine', 210); noise(0, .08, .02, 700, 1, 'lowpass'); }], ToolSkinning: [.22, () => { metal(0, 3200, .012, .18, [1, 1.5, 2.3], [1, .5, .3]); noise(0, .08, .02, 7000, .7, 'highpass'); }],
+};
+const QUIET = ['LeatherTug', 'AlchCork', 'TailorSnip', 'EngBoing', 'CookTss', 'SmithClang', 'EnchPing', 'AidDone', 'CraftDone'];
+const GAIN = 5; // one gain for all, so they keep the mockup's levels between each other (the game's sounds are louder than a page's)
+
+function wav(buf) { const d = buf.getChannelData(0), n = d.length, b = new DataView(new ArrayBuffer(44 + n * 2)), w = (o, s) => [...s].forEach((c, i) => b.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); b.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); b.setUint32(16, 16, true); b.setUint16(20, 1, true); b.setUint16(22, 1, true); b.setUint32(24, buf.sampleRate, true); b.setUint32(28, buf.sampleRate * 2, true); b.setUint16(32, 2, true); b.setUint16(34, 16, true); w(36, 'data'); b.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) b.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i])) * 32767, true); return b.buffer; }
+async function renderSound(name, secs, fn, gain) { rnd = 1 + name.length * 977; A = new OfflineAudioContext(1, Math.ceil(44100 * (secs + .15)), 44100); OUT = A.createGain(); OUT.gain.value = gain; OUT.connect(A.destination); fn(); return wav(await A.startRendering()); }
+
+// ---------------- art: our own drawings, 64 x 64 ----------------
+// colored tools (no tint in game) in the mockup's emoji style, and white glow shapes for the crafts (tinted in game)
+const OL = 'stroke="#1a1410" stroke-width="2.2" stroke-linejoin="round"';
+const ART = {
+  ToolNeedle: `<g transform="translate(26,1) scale(2.75)"><path d="M4 0 L5.4 17 Q4 21.5 2.6 17 Z" fill="#e8e8f0" stroke="#606070" stroke-width=".6"/><ellipse cx="4" cy="4" rx="1" ry="2" fill="#0e130b"/></g>`,
+  ToolPin: `<line x1="30" y1="34" x2="12" y2="60" stroke="#8a8a96" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="34" x2="12" y2="60" stroke="#d8d8e0" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="38" cy="22" r="17" fill="#e0242a" ${OL}/><circle cx="32" cy="16" r="5.5" fill="#ff9a9a"/><circle cx="31" cy="15" r="2.5" fill="#fff"/>`,
+  ToolDrop: `<defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e4ff"/><stop offset=".55" stop-color="#c8a0ff"/><stop offset="1" stop-color="#8a50e0"/></linearGradient></defs>
+    <g transform="translate(13,3) scale(3.2)"><path d="M6 0 C6 0 11 7 11 10.5 A5 5 0 0 1 1 10.5 C1 7 6 0 6 0 Z" fill="url(#dg)" stroke="#3a1a6a" stroke-width=".7"/><ellipse cx="4.2" cy="10" rx="1.2" ry="1.8" fill="rgba(255,255,255,.6)"/></g>`,
+  ToolWrench: `<g transform="rotate(45 32 32)"><rect x="27" y="22" width="10" height="38" rx="5" fill="#9aa8b8" ${OL}/><path d="M20 4 h24 v14 a12 12 0 0 1 -24 0 Z" fill="#b8c4d0" ${OL}/><rect x="27" y="1" width="10" height="13" fill="#2a3a24" stroke="none"/><line x1="32" y1="28" x2="32" y2="54" stroke="#dde6f0" stroke-width="2.5" stroke-linecap="round"/></g>`,
+  ToolPan: `<rect x="40" y="27" width="22" height="9" rx="4" fill="#3a3430" ${OL} transform="rotate(-20 40 31)"/><circle cx="26" cy="34" r="22" fill="#2a2624" ${OL}/><circle cx="26" cy="34" r="17" fill="#3e3836"/>
+    <path d="M14 34 q2 -12 13 -11 q12 1 11 12 q-1 11 -13 10 q-12 -1 -11 -11 Z" fill="#fbfaf4"/><circle cx="27" cy="34" r="6.5" fill="#ffb81c"/><circle cx="25" cy="32" r="2" fill="#ffe7a0"/>`,
+  ToolHammer: `<g transform="rotate(-35 32 32)"><rect x="28" y="20" width="9" height="42" rx="3" fill="#a8672e" ${OL}/><line x1="31" y1="26" x2="31" y2="56" stroke="#d8955a" stroke-width="2"/><rect x="10" y="6" width="44" height="17" rx="3" fill="#8a96a4" ${OL}/><rect x="13" y="8" width="38" height="4" rx="2" fill="#c8d2dc"/></g>`,
+  ToolSparkle: `<path d="M30 6 L35 25 L54 30 L35 35 L30 54 L25 35 L6 30 L25 25 Z" fill="#ffd21c" stroke="#c88a00" stroke-width="1.6" stroke-linejoin="round"/><path d="M50 3 L52 10 L59 12 L52 14 L50 21 L48 14 L41 12 L48 10 Z" fill="#ffe36a" stroke="#c88a00" stroke-width="1.2"/><path d="M51 42 L53 48 L59 50 L53 52 L51 58 L49 52 L43 50 L49 48 Z" fill="#ffe36a" stroke="#c88a00" stroke-width="1.2"/>`,
+  ToolClip: `<g transform="rotate(30 32 32)"><path d="M26 50 V14 a8 8 0 0 1 16 0 V46 a5 5 0 0 1 -10 0 V18" fill="none" stroke="#3a4048" stroke-width="7" stroke-linecap="round"/><path d="M26 50 V14 a8 8 0 0 1 16 0 V46 a5 5 0 0 1 -10 0 V18" fill="none" stroke="#c8d0da" stroke-width="3.5" stroke-linecap="round"/></g>`,
+  ToolSprout: `<path d="M32 60 V30" stroke="#2e7a2a" stroke-width="5" stroke-linecap="round"/><path d="M32 34 C18 36 8 26 8 14 C22 12 32 20 32 34 Z" fill="#5ac83a" ${OL}/><path d="M32 30 C44 32 56 24 56 10 C42 8 32 16 32 30 Z" fill="#7ee04a" ${OL}/><path d="M12 16 C20 18 26 24 30 32" fill="none" stroke="#b8f090" stroke-width="2"/><path d="M52 12 C44 14 38 20 34 28" fill="none" stroke="#c8ff9a" stroke-width="2"/>`,
+  ToolPick: `<g transform="rotate(-30 32 32)"><rect x="28" y="16" width="8" height="46" rx="3" fill="#a8672e" ${OL}/><path d="M4 22 Q32 2 60 22 Q32 12 4 22 Z" fill="#9aa6b2" ${OL}/><rect x="26" y="9" width="12" height="12" rx="2" fill="#6a7684" ${OL}/></g>`,
+  ToolBobber: `<line x1="32" y1="2" x2="32" y2="20" stroke="#ddd" stroke-width="2.5"/><circle cx="32" cy="38" r="20" fill="#f4f4f4" ${OL}/><path d="M12 38 A20 20 0 0 1 52 38 Z" fill="#e03030" ${OL}/><circle cx="24" cy="30" r="4" fill="#ff9a9a"/>`,
+  ToolKnife: `<g transform="rotate(-40 32 32)"><path d="M29 4 Q44 10 38 38 H28 Z" fill="#dfe6ee" ${OL}/><path d="M31 8 Q39 14 35 34" fill="none" stroke="#ffffff" stroke-width="2"/><rect x="26" y="38" width="14" height="22" rx="4" fill="#5a3418" ${OL}/><circle cx="33" cy="45" r="1.8" fill="#d8b070"/><circle cx="33" cy="53" r="1.8" fill="#d8b070"/></g>`,
+  // white shapes with a soft glow baked in (tinted in game), for the craft effects
+  FxGear: `<defs><filter id="g" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <g filter="url(#g)" transform="translate(32 32)"><path d="${gearPath(8, 17, 22, 6.5)}" fill="#fff" fill-rule="evenodd"/></g>`,
+  FxScissors: `<defs><filter id="g" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <g filter="url(#g)" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><circle cx="16" cy="44" r="7"/><circle cx="16" cy="20" r="7"/><path d="M22 40 L54 22"/><path d="M22 24 L54 42"/></g>`,
+  FxCross: `<defs><filter id="g" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <path filter="url(#g)" d="M26 10 h12 v16 h16 v12 h-16 v16 h-12 v-16 h-16 v-12 h16 Z" fill="#fff"/>`,
+};
+function gearPath(teeth, r1, r2, hole) { let d = ''; for (let i = 0; i < teeth * 2; i++) { const r = i % 2 ? r1 : r2, a0 = (i - .3) / (teeth * 2) * Math.PI * 2, a1 = (i + .3) / (teeth * 2) * Math.PI * 2;
+    d += `${i ? 'L' : 'M'}${(Math.cos(a0) * r).toFixed(2)} ${(Math.sin(a0) * r).toFixed(2)} L${(Math.cos(a1) * r).toFixed(2)} ${(Math.sin(a1) * r).toFixed(2)} `; }
+  return d + `Z M${hole} 0 A${hole} ${hole} 0 1 0 ${-hole} 0 A${hole} ${hole} 0 1 0 ${hole} 0 Z`; }
+function svg(body) { return `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">${body}</svg>`; }
+async function renderArt(body) { const img = new Image(); img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg(body)))); await img.decode();
+  const c = document.createElement('canvas'); c.width = c.height = 64; c.getContext('2d').drawImage(img, 0, 0, 64, 64); return await new Promise(r => c.toBlob(b => b.arrayBuffer().then(r), 'image/png')); }
+
+// the preview strip
+document.getElementById('art').innerHTML = Object.entries(ART).map(([k, b]) => `<div><img src="data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg(b))))}">${k}</div>`).join('');
+
+async function post(name, buf) { await fetch('/save/' + name, { method: 'POST', body: buf }); }
+async function renderAll() { const log = document.getElementById('log'); let n = 0;
+  for (const [k, [s, fn]] of Object.entries(SOUNDS)) { await post(k + '.wav', await renderSound(k, s, fn, GAIN)); n++; if (QUIET.includes(k)) { await post(k + 'Q.wav', await renderSound(k, s, fn, GAIN * .45)); n++; } }
+  for (const [k, b] of Object.entries(ART)) { await post(k + '.png', await renderArt(b)); n++; }
+  await fetch('/done', { method: 'POST' }); log.textContent = 'saved ' + n + ' files'; return n; }
+</script>
+</body>
+</html>
