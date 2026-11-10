@@ -9,77 +9,105 @@
   html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
   header { padding: 14px 18px 4px; }
   h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
-  header p { margin: 0; color: var(--muted); max-width: 1040px; }
+  header p { margin: 0 0 4px; color: var(--muted); max-width: 1060px; }
   header p b { color: #c9c2b0; }
   .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
   .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
   button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
   button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
   .screen { position: relative; margin: 6px 18px; width: 1366px; height: 768px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
-    background: radial-gradient(ellipse at 50% 70%, #3e3226, #201911 55%, #0f0c08); }
+    background: radial-gradient(ellipse at 60% 70%, #3a4a30, #1c2616 55%, #0e130b); }
   .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
-  .char { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 64px; }
+  .char { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); font-size: 64px; }
   .minimap { position: absolute; right: 18px; top: 14px; width: 140px; height: 140px; border-radius: 50%; border: 3px solid #6a5a36; background: radial-gradient(#4a5a3a, #2a3524 70%); box-shadow: 0 0 0 1px #000, inset 0 0 12px #000; }
-  .bars { position: absolute; left: 30%; right: 30%; bottom: 10px; height: 44px; display: flex; gap: 4px; justify-content: center; }
+  .bars { position: absolute; left: 33%; right: 27%; bottom: 10px; height: 44px; display: flex; gap: 4px; justify-content: center; }
   .bars i { width: 40px; height: 40px; border: 1px solid #5a4a2a; border-radius: 3px; background: #15110b; }
-  /* the trade skill window (the game's, a stand-in) */
-  .trade { position: absolute; left: 40px; top: 110px; width: 330px; height: 420px; border: 2px solid #6a5a36; border-radius: 6px; background: rgba(12,10,7,.94); box-shadow: 0 0 0 1px #000; }
-  .trade .t { padding: 8px 12px; font: 700 14px Georgia, serif; color: #ffd100; border-bottom: 1px solid #3a3020; }
-  .trade .rk { padding: 6px 12px; font: 600 11px system-ui; color: #c9c2b0; }
-  .trade .rk i { display: inline-block; width: 150px; height: 8px; margin-left: 8px; background: #222; border: 1px solid #000; vertical-align: middle; }
-  .trade .rk i b { display: block; height: 100%; background: linear-gradient(#3a7ad8, #1a4a98); }
-  .trade .rec { margin: 2px 12px; padding: 3px 8px; font: 600 12px Georgia, serif; color: var(--rc); }
-  .trade .rec.sel { background: rgba(255,255,255,.08); }
-  .trade .btns { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 6px; }
-  .trade .btns div { flex: 1; text-align: center; padding: 4px; font: 12px Georgia, serif; color: #ffd100; background: linear-gradient(#8a1a10, #4a0a06); border: 1px solid #c8a050; border-radius: 3px; }
-  .icon { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--qc); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
+  .icon { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--qc, #fff); border-radius: 2px; background: radial-gradient(#3a3226, #14100a);
     box-shadow: inset 0 0 0 1px rgba(0,0,0,.85), inset 0 0 6px rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
-  /* the pile card (big-moments spot) */
-  .pile { position: absolute; left: 55%; top: 26%; width: 300px; box-sizing: border-box; padding: 12px 14px 12px 96px; min-height: 92px; border-radius: 6px;
-    background: linear-gradient(90deg, rgba(0,0,0,.8), rgba(0,0,0,.3)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 55%, transparent), 0 0 22px color-mix(in srgb, var(--pc) 25%, transparent); opacity: 0; }
-  .pile .stack { position: absolute; left: 16px; top: 50%; width: 66px; height: 66px; transform: translateY(-50%); }
-  .pile .stack .icon { position: absolute; left: 13px; top: 13px; width: 40px; height: 40px; font-size: 24px; border-width: 2px; }
-  .pile .w { font: 700 10px system-ui; letter-spacing: .14em; text-transform: uppercase; color: var(--pc); }
-  .pile .cnt { font: 800 26px Georgia, serif; color: #fff; text-shadow: 0 0 8px rgba(255,220,120,.7), 0 1px 0 #000; line-height: 1.1; }
-  .pile .nm { font: 700 14px Georgia, serif; color: var(--qc); text-shadow: 0 1px 0 #000; }
-  .pile .close { font: 600 11px system-ui; color: #c9c2b0; opacity: 0; }
+
+  /* the profession window (the game's, a stand-in drawn from the screenshot) */
+  .win { position: absolute; left: 30px; top: 40px; width: 560px; height: 440px; border: 3px solid #4a3c28; border-radius: 6px; background: #120e09; box-shadow: 0 0 0 1px #000, 0 6px 18px rgba(0,0,0,.6); }
+  .win .ttl { height: 26px; text-align: center; font: 600 14px Georgia, serif; color: #ffd100; background: linear-gradient(#2a2016, #1a140c); border-bottom: 1px solid #000; line-height: 26px; }
+  .win .crest { position: absolute; left: -18px; top: -18px; width: 58px; height: 58px; border-radius: 50%; border: 3px solid #8a6a2a; background: radial-gradient(#5a3a1a, #2a1a0a); font-size: 30px; display: flex; align-items: center; justify-content: center; }
+  .win .rk { margin: 10px 80px 6px; height: 16px; border: 1px solid #6a5a36; background: #000; position: relative; font: 600 11px system-ui; color: #fff; text-align: center; line-height: 16px; }
+  .win .rk b { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(#e8c890, #a07840); opacity: .9; }
+  .win .rk span { position: relative; }
+  .win .list { position: absolute; left: 10px; top: 72px; width: 255px; bottom: 40px; }
+  .win .cat { margin-top: 6px; padding: 2px 8px; font: 600 13px Georgia, serif; color: #ffd100; background: linear-gradient(90deg, #3a2a10, #1a1208); border: 1px solid #5a4210; }
+  .win .rec { padding: 2px 16px; font: 600 12px system-ui; color: var(--rc); }
+  .win .rec.sel { background: linear-gradient(90deg, rgba(255,210,80,.25), transparent); }
+  .win .det { position: absolute; left: 275px; right: 10px; top: 72px; bottom: 40px; border: 1px solid #2a2016; background: #0c0906; padding: 12px; }
+  .win .det .big { width: 44px; height: 44px; font-size: 26px; border-width: 2px; float: left; margin-right: 10px; }
+  .win .det .n { font: 600 14px Georgia, serif; color: #fff; }
+  .win .btns { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; justify-content: space-between; }
+  .win .btns div { padding: 3px 14px; font: 12px Georgia, serif; color: #ffd100; background: linear-gradient(#5a4a3a, #2a1e14); border: 1px solid #8a7a5a; border-radius: 3px; }
+  .win .btns div.hot { box-shadow: 0 0 8px #ffd100; }
+  .tabs { position: absolute; left: 594px; top: 80px; display: flex; flex-direction: column; gap: 4px; }
+  .tabs i { width: 40px; height: 40px; border: 2px solid #6a5a36; border-radius: 4px; background: #1a140c; font-style: normal; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  .tabs i.on { border-color: #ffd100; box-shadow: 0 0 6px #ffd100; }
+
+  /* the tray hanging under the window */
+  .tray { position: absolute; left: 40px; top: 483px; width: 540px; height: 0; overflow: hidden; border: 3px solid #4a3c28; border-top: 0; border-radius: 0 0 8px 8px;
+    background: linear-gradient(#1a130b, #0e0a06); box-shadow: 0 0 0 1px #000, 0 6px 14px rgba(0,0,0,.6); transition: height .35s cubic-bezier(.3,1.4,.5,1); }
+  .tray.open { height: 112px; }
+  .tray .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: linear-gradient(#3a2a18, #2a1c0e); border-top: 1px solid #5a4226; }
+  .tray .cnt { position: absolute; right: 12px; top: 8px; font: 700 13px Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000; }
+  .tray .pg { position: absolute; right: 12px; top: 28px; width: 90px; height: 5px; background: rgba(0,0,0,.6); border: 1px solid #000; }
+  .tray .pg b { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pc), var(--pl)); transition: width .25s; }
+  .tray .lbl { position: absolute; left: 12px; top: 7px; font: 700 10px system-ui; letter-spacing: .14em; text-transform: uppercase; color: var(--pc); }
+  .tray .stage { position: absolute; left: 0; right: 110px; top: 0; bottom: 0; }
+  .titem { position: absolute; width: 26px; height: 26px; font-size: 16px; }
+
   /* the loot column */
   .col { position: absolute; right: 18px; top: 200px; width: 230px; display: flex; flex-direction: column; gap: 2px; }
   .head { display: flex; justify-content: space-between; padding: 0 4px; font: 700 12px Georgia, serif; color: #ffd100; text-shadow: 0 1px 0 #000; }
   .row { position: relative; display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 6px 0 4px; border-radius: 2px; background: linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.04)); border-left: 2px solid var(--pc); }
   .row .nm { flex: 1; min-width: 0; font: 600 12px "Friz Quadrata TT", Georgia, serif; color: var(--qc); text-shadow: 0 1px 1px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row .plus { width: 30px; text-align: right; font: 700 12.5px Georgia, serif; color: #73ff59; text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; opacity: 0; }
   .row .n { width: 26px; text-align: right; font: 700 13px system-ui; color: #ffe9a8; text-shadow: 0 1px 1px #000; }
-  /* the skill-up banner, with the recipe heads-up under it */
+
+  /* the skill-up banner with its profession touch */
   .skill { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0; }
   .skill .tt { font: 700 17px Georgia, serif; color: #fff; text-shadow: 0 0 8px var(--pc), 0 1px 0 #000; }
   .skill .tt b { color: var(--pl); }
-  .skill .barw { width: 200px; height: 7px; border-radius: 3px; background: rgba(0,0,0,.6); overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.7); }
-  .skill .barw i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pc), var(--pl)); }
+  .skill .sb { position: relative; display: flex; align-items: center; gap: 6px; }
+  .skill .barw { position: relative; width: 200px; height: 8px; border-radius: 3px; background: rgba(0,0,0,.6); overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.7); }
+  .skill .barw i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, var(--pc), var(--pl)); }
+  .skill .cap { width: 18px; height: 18px; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--pl); text-shadow: 0 0 6px var(--pc); }
   .skill small { font: 600 11px system-ui; color: #d8d2c0; }
   .skill .heads { margin-top: 3px; padding: 3px 10px; border-radius: 3px; background: rgba(0,0,0,.6); font: 600 11.5px system-ui; color: #e8e2d0; display: none; }
   .skill .heads b { color: var(--rc); }
+  /* bar touches */
+  .t-tailor .barw::after { content: ""; position: absolute; left: 0; right: 0; top: 3px; border-top: 1px dashed rgba(255,255,255,.7); }
+  .t-smith .barw i { box-shadow: 0 0 10px #ff8030; background: linear-gradient(90deg, #a0300a, #ff8030 70%, #ffe090); }
+  .t-alch .barw i { background: linear-gradient(90deg, #6a3ab0, #c08aff); }
+  .t-leather .barw { box-shadow: 0 0 0 1px #000, 0 0 0 2px #8a5a30; }
+  .t-leather .barw::after { content: ""; position: absolute; left: 2px; right: 2px; top: -1px; bottom: -1px; border-top: 1px dashed #e8c08a; border-bottom: 1px dashed #e8c08a; }
+  .t-ench .barw i::after { content: ""; position: absolute; top: 0; bottom: 0; width: 30px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.8), transparent); animation: shim 1.2s linear infinite; }
+  @keyframes shim { from { left: -30px; } to { left: 100%; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Crafting</h1>
-  <p>Your picks. <b>Create All</b>: each item comes out with a small themed touch at your character and hops onto a <b>pile card</b> in the big-moments spot that counts up; the batch ends on the profession's <b>closing flourish</b> and one line ("×12 Silk Bandage · Tailoring +4"), then a <b>Crafted</b> row stays briefly in the loot column. <b>A single craft</b>: its own themed animation (a little bigger than one item of a batch) and a row, no popup. <b>Skill-ups</b> use the same bar; when a recipe changes color, a line under the bar says so. Pick a profession; sound is off (rough sketches when on).</p>
+  <h1>Crafting, round 2</h1>
+  <p><b>Create All</b>: a <b>tray slides out under the profession window</b> (the window's right side has its tabs), separate from the loot popups. Each item drops out of the Create button into it, and every profession fills it its own way: <b>stacks</b> (Tailoring cloth, Cooking plates, First Aid rolls), a <b>rack</b> (Alchemy bottles, Blacksmithing blades), a <b>conveyor belt</b> (Engineering), <b>floating in a slow circle</b> (Enchanting), a <b>clothesline</b> (Leatherworking hides). A counter fills as the batch goes. The batch ends on the profession's <b>finale</b> on the tray, then the items fly to a "Crafted" row in the Picked up list and the tray slides back.</p>
+  <p><b>Skill-ups</b>: the same banner with one quiet touch per profession on the bar (stitched, glowing hot, a gear, liquid, runes shimmering...). <b>Single crafts</b>: your top four kept; Enchanting, First Aid, Alchemy and Leatherworking reworked. Sound is off (sketches when on).</p>
   <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button></div>
 </header>
 <div class="bar"><span>Profession</span>
-  <button data-p="smith" class="on">🔨 Blacksmithing</button><button data-p="alch">⚗️ Alchemy</button><button data-p="tailor">🧵 Tailoring</button><button data-p="leather">🪡 Leatherworking</button>
-  <button data-p="eng">⚙️ Engineering</button><button data-p="ench">🔮 Enchanting</button><button data-p="cook">🍳 Cooking</button><button data-p="aid">🩹 First Aid</button></div>
-<div class="bar"><span>Craft</span><button class="go" id="one">Create (one)</button><button class="go" id="all">Create All ×12</button><button id="reset">Reset skill</button></div>
+  <button data-p="tailor" class="on">🧵 Tailoring</button><button data-p="eng">⚙️ Engineering</button><button data-p="cook">🍳 Cooking</button><button data-p="smith">🔨 Blacksmithing</button>
+  <button data-p="ench">🔮 Enchanting</button><button data-p="aid">🩹 First Aid</button><button data-p="alch">⚗️ Alchemy</button><button data-p="leather">🪡 Leatherworking</button></div>
+<div class="bar"><span>Craft</span><button class="go" id="one">Create (one)</button><button class="go" id="all">Create All ×12</button><button id="sk">Skill up</button><button id="color">Skill up to a recipe color change</button></div>
 <div class="screen" id="scr">
   <div class="minimap"></div>
   <div class="char" id="char">🧙</div>
   <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="trade" id="trade"><div class="t" id="tname"></div><div class="rk"><span id="trank"></span><i><b id="trankb"></b></i></div><div id="recs"></div>
-    <div class="btns"><div>Create All</div><div>Create</div></div></div>
-  <div class="pile" id="pile"><div class="stack" id="stack"></div><div class="w" id="pw"></div><div class="cnt" id="pcnt"></div><div class="nm" id="pnm"></div><div class="close" id="pclose"></div></div>
+  <div class="win" id="win"><div class="crest" id="crest"></div><div class="ttl" id="wttl"></div><div class="rk"><b id="rkb"></b><span id="rkt"></span></div>
+    <div class="list" id="list"></div><div class="det"><div class="icon big" id="dicon"></div><div class="n" id="dname"></div><div style="font:600 11px system-ui;color:#c9c2b0;margin-top:3px">Reagents: …</div></div>
+    <div class="btns"><div id="ball">Create All [12]</div><div id="bone">Create</div></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="tray" id="tray"><div class="floor"></div><div class="lbl" id="tlbl"></div><div class="cnt" id="tcnt"></div><div class="pg"><b id="tpg"></b></div><div class="stage" id="tstage"></div></div>
   <div class="col" id="col"></div>
-  <div class="skill" id="skill"><div class="tt"></div><div class="barw"><i></i></div><small></small><div class="heads" id="heads"></div></div>
+  <div class="skill" id="skill"><div class="tt"></div><div class="sb"><div class="barw"><i></i></div><div class="cap"></div></div><small></small><div class="heads" id="heads"></div></div>
 </div>
 <script>
 'use strict';
@@ -88,134 +116,197 @@ let snd = false, actx;
 function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
 pick('snd', v => snd = v === '1');
 function ac() { return actx = actx || new AudioContext(); }
-function tone(f, t = 0, vol = .07, dec = .4, type = 'sine', f2) {
-  if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = a.currentTime + t; o.type = type; o.frequency.setValueAtTime(f, at);
-  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8);
-  g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .01); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05);
-}
-function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass') {
-  if (!snd) return; const a = ac(), n = a.sampleRate * dur, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
-  const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(a.currentTime + t);
-}
-function el(html, css, frames, dur, delay = 0, ease = 'linear') {
-  const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; scr.appendChild(d);
-  d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d;
-}
-function pathEl(html, x, y, life, fn, delay = 0, n = 22) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000); }
-function dot(x, y, o) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px) scale(${o.grow ? 1 + (o.grow - 1) * i / 14 : 1})`, opacity: i === 14 ? 0 : (o.fade ? 1 - .7 * i / 14 : 1) }); }
-  el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%;box-shadow:0 0 ${o.glow || 0}px ${o.color};filter:${o.blur ? 'blur(' + o.blur + 'px)' : 'none'}`, fr, o.life * 1000, (o.delay || 0) * 1000); }
-function ring(x, y, color, size, life, delay = 0, w = 2) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, 'ease-out'); }
-function star(x, y, size, color, life, delay = 0) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0) rotate(0deg)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000); }
-function glyph(ch, x, y, size, color, life, fn, delay = 0) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay); }
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = a.currentTime + t; o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .01); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass') { if (!snd) return; const a = ac(), n = a.sampleRate * dur, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(a.currentTime + t); }
+function el(html, css, frames, dur, delay = 0, ease = 'linear', parent = scr) { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; parent.appendChild(d); d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function pathEl(html, x, y, life, fn, delay = 0, n = 22, parent = scr) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000, 'linear', parent); }
+function dot(x, y, o, parent = scr) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px) scale(${o.grow ? 1 + (o.grow - 1) * i / 14 : 1})`, opacity: i === 14 ? 0 : (o.fade ? 1 - .7 * i / 14 : 1) }); } el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%;box-shadow:0 0 ${o.glow || 0}px ${o.color};filter:${o.blur ? 'blur(' + o.blur + 'px)' : 'none'}`, fr, o.life * 1000, (o.delay || 0) * 1000, 'linear', parent); }
+function ring(x, y, color, size, life, delay = 0, w = 2, parent = scr) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, 'ease-out', parent); }
+function star(x, y, size, color, life, delay = 0, parent = scr) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0) rotate(0deg)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000, 'linear', parent); }
+function glyph(ch, x, y, size, color, life, fn, delay = 0, parent = scr) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay, 22, parent); }
 
-// each profession: color, an item, the touch per item (small), the single-craft animation, the closing flourish
+// ---------------- the professions ----------------
 const P = {
-  smith: { name: 'Blacksmithing', pc: '#e07a2a', pl: '#ffb070', item: ['⚔️', 'Heavy Copper Broadaxe', '#1eff00'],
-    touch(x, y) { star(x, y, 18, '#ffd27a', .25); for (let i = 0; i < 6; i++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: R(.3, .5), size: 3, color: '#ffb040', glow: 5 }); tone(1900, 0, .04, .12, 'triangle'); },
-    single(x, y) { [0, .16, .32].forEach((t, k) => { setTimeout(() => P.smith.touch(x + R(-6, 6), y + R(-4, 4)), t * 1000); });
-      dot(x, y, { vx: 0, vy: 0, life: 1.1, size: 30, color: 'rgba(255,90,30,.55)', grow: .6, fade: true, blur: 4, delay: .35 }); tone(1500, .35, .03, .6, 'sine', 900); },
-    close(x, y) { ring(x, y, '#ffd27a', 160, .6, 0, 3); ring(x, y, '#fff', 90, .45, .05); for (let i = 0; i < 30; i++) dot(x, y, { vx: R(-160, 160), vy: R(120, 320), g: 600, life: R(.6, 1), size: 3, color: i % 3 ? '#ffb040' : '#fff0c0', glow: 6 }); tone(1046, 0, .08, 1.4, 'triangle'); tone(1568, .02, .05, 1.2); } },
-  alch: { name: 'Alchemy', pc: '#9a5ae0', pl: '#d0a8ff', item: ['🧪', 'Healing Potion', '#ffffff'],
-    touch(x, y) { for (let i = 0; i < 6; i++) dot(x + R(-8, 8), y, { vx: R(-15, 15), vy: R(50, 110), g: -20, life: R(.6, 1), size: R(4, 8), color: ['#9dff8a', '#c08aff', '#ff8ad0'][i % 3], fade: true }); tone(R(600, 900), 0, .03, .1, 'sine', 1200); },
-    single(x, y) { for (let i = 0; i < 14; i++) dot(x + R(-10, 10), y, { vx: R(-20, 20), vy: R(60, 140), g: -20, life: R(.8, 1.3), size: R(5, 10), color: ['#9dff8a', '#c08aff'][i % 2], fade: true, delay: i * .03 });
-      setTimeout(() => { ring(x, y - 40, '#c08aff', 70, .4); for (let i = 0; i < 6; i++) dot(x, y - 40, { vx: R(-40, 40), vy: R(10, 50), g: -10, life: 1.2, size: 18, color: 'rgba(190,140,255,.35)', grow: 2, fade: true, blur: 2 }); tone(700, 0, .05, .15, 'sine', 1400); noise(0, .2, .03, 3000); }, 500); },
-    close(x, y) { for (let i = 0; i < 12; i++) dot(x + R(-20, 20), y, { vx: R(-30, 30), vy: R(60, 140), g: -10, life: R(1.2, 1.8), size: R(18, 28), color: ['rgba(157,255,138,.35)', 'rgba(192,138,255,.35)'][i % 2], grow: 2, fade: true, blur: 3 });
-      for (let i = 0; i < 20; i++) dot(x, y, { vx: R(-120, 120), vy: R(40, 200), g: 200, life: R(.6, 1), size: R(4, 7), color: ['#9dff8a', '#c08aff', '#ff8ad0'][i % 3], fade: true }); ring(x, y, '#c08aff', 140, .6); tone(880, 0, .05, .9); tone(1320, .08, .05, .9); } },
-  tailor: { name: 'Tailoring', pc: '#d8c8a0', pl: '#fff4d8', item: ['🩹', 'Silk Bandage', '#ffffff'],
-    touch(x, y) { pathEl('<div style="width:60px;height:12px;margin:-6px -30px;border-top:2px dashed #f0e6d0;border-radius:50%"></div>', x, y, .5, u => [20 * u, 10 * u, -10 + 20 * u, .6 + .5 * u, 1 - u]); noise(0, .08, .02, 5000); },
-    single(x, y) { const fr = []; for (let i = 0; i < 6; i++) setTimeout(() => star(x - 30 + i * 12, y + (i % 2 ? -8 : 8), 8, '#fff4d8', .4), i * 70);
+  tailor: { name: 'Tailoring', crest: '🧵', pc: '#d8c8a0', pl: '#fff4d8', cap: '✂', item: ['🧣', 'Bolt of Silk Cloth', '#ffffff'], tray: 'stack', recs: ['Bolt of Silk Cloth', 'Silk Headband', 'Azure Silk Gloves'],
+    single(x, y) { for (let i = 0; i < 6; i++) setTimeout(() => star(x - 30 + i * 12, y + (i % 2 ? -8 : 8), 8, '#fff4d8', .4), i * 70);
       pathEl('<svg width="80" height="24" viewBox="0 0 80 24"><path d="M0 12 Q10 0 20 12 T40 12 T60 12 T80 12" fill="none" stroke="#f0e6d0" stroke-width="2" stroke-dasharray="4 3"/></svg>', x - 40, y - 12, .9, u => [0, 0, 0, 1, u > .7 ? (1 - u) / .3 : Math.min(1, u * 4)]);
       setTimeout(() => { glyph('✂', x + 46, y, 18, '#fff', .5, u => [6 * u, 0, -20 + 40 * u, 1, 1 - u]); tone(3200, 0, .03, .08, 'triangle'); tone(3600, .06, .03, .08, 'triangle'); }, 450); },
-    close(x, y) { for (let k = 0; k < 2; k++) pathEl(`<div style="width:${180}px;height:${180}px;margin:-90px;border:3px solid ${k ? '#fff4d8' : '#d8b878'};border-radius:50%;border-left-color:transparent;border-bottom-color:transparent"></div>`, x, y, 1, u => [0, 0, (k ? -1 : 1) * 300 * u, .2 + .9 * u, 1 - u]);
-      for (let i = 0; i < 10; i++) star(x + R(-60, 60), y + R(-50, 50), R(8, 12), '#fff4d8', .5, i * .05); tone(1175, 0, .05, .9); tone(1568, .1, .05, .9); } },
-  leather: { name: 'Leatherworking', pc: '#b07a46', pl: '#e8c08a', item: ['🧥', 'Embossed Leather Vest', '#1eff00'],
-    touch(x, y) { for (let i = 0; i < 4; i++) el('', `left:${x - 16 + i * 10}px;top:${y + (i % 2 ? -3 : 3)}px;width:7px;height:2px;background:#e8c08a;transform:rotate(${i % 2 ? 30 : -30}deg)`, [{ opacity: 0 }, { opacity: 1, offset: .2 }, { opacity: 0 }], 600, i * 50); tone(1300, 0, .02, .06, 'triangle'); },
-    single(x, y) { for (let i = 0; i < 9; i++) el('', `left:${x - 45 + i * 10}px;top:${y + (i % 2 ? -4 : 4)}px;width:8px;height:2px;background:#e8c08a;box-shadow:0 0 4px #e8c08a;transform:rotate(${i % 2 ? 30 : -30}deg)`, [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .7 }, { opacity: 0 }], 1100, i * 60);
-      setTimeout(() => { ring(x, y, '#e8c08a', 50, .3); tone(160, 0, .08, .15, 'square', 100); }, 600); },
-    close(x, y) { pathEl('<div style="width:70px;height:70px;margin:-35px;border-radius:50%;border:3px double #e8c08a;box-shadow:0 0 14px rgba(232,192,138,.6), inset 0 0 10px rgba(232,192,138,.4)"></div>', x, y, 1.2, u => [0, 0, 0, u < .15 ? 1.6 - 4 * u : 1, u > .7 ? (1 - u) / .3 : 1]);
-      setTimeout(() => { star(x + 18, y - 18, 22, '#fff', .5); tone(140, 0, .1, .2, 'square', 90); }, 180); for (let i = 0; i < 8; i++) dot(x, y, { vx: R(-80, 80), vy: R(20, 80), g: 120, life: .8, size: 6, color: 'rgba(200,160,110,.6)', fade: true, blur: 1 }); } },
-  eng: { name: 'Engineering', pc: '#a0b4c8', pl: '#e0ecf8', item: ['💣', 'Rough Boom Stick', '#ffffff'],
-    touch(x, y) { glyph('⚙', x, y, 22, '#c8d4e0', .6, u => [0, 0, 180 * u, 1, 1 - u]); dot(x + 10, y - 6, { vx: 10, vy: 40, g: -10, life: .7, size: 10, color: 'rgba(220,220,220,.4)', grow: 2, fade: true, blur: 1 }); tone(2400, 0, .02, .05, 'square'); },
+    finale(T) { // a ribbon wraps the stacks and a bow pops on top
+      const w = T.w, y = T.h - 40;
+      el('', `left:16px;top:${y}px;width:${T.used}px;height:4px;background:linear-gradient(#ff6a8a,#c0304a);box-shadow:0 0 6px #ff6a8a;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .5 }, { transform: 'scaleX(1)' }], 1600, 0, 'ease-out', T.stage);
+      setTimeout(() => { glyph('🎀', 16 + T.used / 2, y - 6, 28, '#ff6a8a', 1.2, u => [0, 4 * Math.sin(u * 12) * (1 - u), 0, u < .2 ? 1.5 - 2.5 * u : 1, u > .8 ? (1 - u) / .2 : 1], 0, T.stage); for (let i = 0; i < 8; i++) star(16 + R(0, T.used), y + R(-30, 10), 10, '#fff4d8', .5, i * .04, T.stage); tone(1175, 0, .05, .9); tone(1568, .1, .05, .9); }, 600); } },
+  eng: { name: 'Engineering', crest: '⚙️', pc: '#a0b4c8', pl: '#e0ecf8', cap: '⚙', item: ['💣', 'Rough Boom Stick', '#ffffff'], tray: 'belt', recs: ['Rough Boom Stick', 'Copper Modulator', 'Handful of Copper Bolts'],
     single(x, y) { glyph('⚙', x - 10, y, 30, '#c8d4e0', 1.1, u => [0, 0, 270 * u, 1, 1 - u]); glyph('⚙', x + 14, y - 14, 20, '#a8b8c8', 1.1, u => [0, 0, -360 * u, 1, 1 - u]);
       for (let i = 0; i < 4; i++) setTimeout(() => tone(2600, 0, .02, .04, 'square'), i * 110);
       setTimeout(() => { star(x, y, 30, '#fff8c0', .3); for (let i = 0; i < 6; i++) dot(x, y, { vx: R(-30, 30), vy: R(20, 60), g: -10, life: 1, size: 16, color: 'rgba(200,200,200,.4)', grow: 2, fade: true, blur: 2 }); tone(300, 0, .08, .15, 'square', 120); }, 520); },
-    close(x, y) { dot(x, y, { vx: 0, vy: 260, g: 0, life: .45, size: 5, color: '#fff8c0', glow: 8 });
-      setTimeout(() => { const cy = y - 117; for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 2; dot(x, cy, { vx: Math.cos(a) * R(90, 140), vy: Math.sin(a) * R(90, 140), g: 160, life: R(.7, 1), size: 3, color: ['#ff6a6a', '#ffd34a', '#6ac8ff'][i % 3], glow: 6 }); } ring(x, cy, '#fff', 60, .3); tone(200, 0, .1, .3, 'square', 80); noise(0, .3, .05, 1500); }, 450); } },
-  ench: { name: 'Enchanting', pc: '#8a6aff', pl: '#c8b0ff', item: ['🔮', 'Lesser Magic Wand', '#1eff00'],
-    touch(x, y) { const runes = 'ᚠᚢᚦᚨᚱᚲ'; for (let i = 0; i < 3; i++) { const a0 = i * 2.1; glyph(runes[Math.floor(R(0, 6))], x, y, 14, '#c8b0ff', .9, u => { const a = a0 + u * 4; return [Math.cos(a) * 22, Math.sin(a) * 22 + 20 * u, 0, 1, 1 - u]; }); } tone(1568, 0, .03, .4); },
-    single(x, y) { const runes = 'ᚠᚢᚦᚨᚱᚲᚷᚹ'; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; glyph(runes[i], x + Math.cos(a) * 34, y - Math.sin(a) * 34, 15, '#c8b0ff', 1.2, u => [0, 0, 0, 1, u < .2 ? u * 5 : (u > .7 ? (1 - u) / .3 : 1)], i * .05); }
-      setTimeout(() => { ring(x, y, '#c8b0ff', 90, .5); star(x, y, 36, '#fff', .4); tone(1046, 0, .05, .8); tone(1568, .05, .04, .8); }, 650); },
-    close(x, y) { pathEl('<div style="width:200px;height:200px;margin:-100px;border-radius:50%;border:2px solid rgba(200,176,255,.8);box-shadow:0 0 16px rgba(138,106,255,.6), inset 0 0 16px rgba(138,106,255,.4)"></div>', x, y, 1.2, u => [0, 0, 90 * u, .2 + .9 * u, 1 - u]);
-      for (let i = 0; i < 14; i++) star(x + R(-80, 80), y + R(-70, 70), R(8, 14), '#c8b0ff', .5, i * .04); tone(784, 0, .05, 1.2); tone(1175, .1, .05, 1.2); tone(1568, .2, .05, 1.2); } },
-  cook: { name: 'Cooking', pc: '#e0a050', pl: '#ffd890', item: ['🍖', 'Spiced Wolf Meat', '#ffffff'],
-    touch(x, y) { for (let i = 0; i < 3; i++) pathEl('<div style="width:6px;height:26px;margin:-13px -3px;border-radius:3px;background:linear-gradient(transparent,rgba(240,240,240,.5),transparent);filter:blur(1px)"></div>', x - 10 + i * 10, y, 1, u => [6 * Math.sin(u * 6 + i), 40 * u, 0, 1, Math.sin(Math.PI * u) * .9], i * .08); noise(0, .2, .015, 6000, .5, 'highpass'); },
-    single(x, y) { pathEl('<div style="font-size:24px;margin:-12px">🍖</div>', x, y, .7, u => [0, 60 * Math.sin(Math.PI * u), 360 * u, 1, 1]); setTimeout(() => P.cook.touch(x, y), 650); noise(0, .7, .02, 5000, .5, 'highpass'); },
-    close(x, y) { for (let i = 0; i < 10; i++) dot(x + R(-30, 30), y, { vx: R(-15, 15), vy: R(50, 100), g: -10, life: R(1.2, 1.8), size: R(18, 30), color: 'rgba(235,235,235,.35)', grow: 2, fade: true, blur: 3 });
-      for (let i = 0; i < 8; i++) star(x + R(-50, 50), y + R(-40, 20), R(8, 12), '#ffd890', .5, .2 + i * .05); tone(2093, .25, .06, 1.2); } },
-  aid: { name: 'First Aid', pc: '#e05a5a', pl: '#ffb0b0', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'],
-    touch(x, y) { pathEl('<div style="width:30px;height:30px;margin:-15px;border-radius:50%;border:3px solid #f0ece0;border-left-color:transparent"></div>', x, y, .5, u => [0, 0, 360 * u, .6 + .4 * u, 1 - u]); },
-    single(x, y) { pathEl('<div style="width:40px;height:40px;margin:-20px;border-radius:50%;border:4px solid #f0ece0;border-left-color:transparent;border-bottom-color:transparent"></div>', x, y, .8, u => [0, 0, 540 * u, .5 + .6 * u, 1 - u]);
-      setTimeout(() => { glyph('✚', x, y, 30, '#7dff8a', .8, u => [0, 20 * u, 0, .6 + .6 * Math.min(1, u * 4), 1 - u]); tone(1318, 0, .05, .6); }, 450); },
-    close(x, y) { for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; glyph('✚', x, y, 16, '#7dff8a', .9, u => [Math.cos(a) * 80 * u, Math.sin(a) * 80 * u, 0, 1, 1 - u]); } ring(x, y, '#7dff8a', 140, .6); tone(1318, 0, .05, 1); tone(1760, .1, .05, 1); } },
+    finale(T) { // the belt speeds up, gears whirl, a little firework pops over the tray
+      T.stage.querySelectorAll('.gear').forEach(g => g.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(720deg)' }], { duration: 900, easing: 'ease-in' }));
+      setTimeout(() => { const x = T.used / 2 + 20, y = 20; for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; dot(x, y, { vx: Math.cos(a) * R(70, 110), vy: Math.sin(a) * R(70, 110), g: 120, life: R(.6, .9), size: 3, color: ['#ff6a6a', '#ffd34a', '#6ac8ff'][i % 3], glow: 6 }, T.stage); } ring(x, y, '#fff', 50, .3, 0, 2, T.stage); tone(200, 0, .08, .25, 'square', 80); noise(0, .25, .04, 1500); }, 800); } },
+  cook: { name: 'Cooking', crest: '🍳', pc: '#e0a050', pl: '#ffd890', cap: '♨', item: ['🍖', 'Spiced Wolf Meat', '#ffffff'], tray: 'stack', recs: ['Spiced Wolf Meat', 'Charred Wolf Meat', 'Herb Baked Egg'],
+    single(x, y) { pathEl('<div style="font-size:24px;margin:-12px">🍖</div>', x, y, .7, u => [0, 60 * Math.sin(Math.PI * u), 360 * u, 1, 1]);
+      setTimeout(() => { for (let i = 0; i < 3; i++) pathEl('<div style="width:6px;height:26px;margin:-13px -3px;border-radius:3px;background:linear-gradient(transparent,rgba(240,240,240,.5),transparent);filter:blur(1px)"></div>', x - 10 + i * 10, y, 1, u => [6 * Math.sin(u * 6 + i), 40 * u, 0, 1, Math.sin(Math.PI * u) * .9], i * .08); }, 650); noise(0, .7, .02, 5000, .5, 'highpass'); },
+    finale(T) { // a cloche drops over the plates, then lifts in a puff of steam: ding
+      const cx = 16 + T.used / 2;
+      pathEl('<div style="width:120px;height:60px;margin:-60px -60px 0;border-radius:60px 60px 4px 4px;background:radial-gradient(ellipse at 40% 30%,#f8f8f8,#a0a0a8 70%);box-shadow:0 2px 0 #555"><div style="position:absolute;left:52px;top:-10px;width:16px;height:12px;border-radius:50%;background:#d8d8e0"></div></div>', cx, T.h - 18, 1.6,
+        u => u < .25 ? [0, 60 * (1 - u / .25), 0, 1, 1] : u < .6 ? [0, 0, 0, 1, 1] : [0, 90 * (u - .6) / .4, 0, 1, 1 - (u - .6) / .4], 0, 22, T.stage);
+      setTimeout(() => { for (let i = 0; i < 10; i++) dot(cx + R(-40, 40), T.h - 40, { vx: R(-15, 15), vy: R(40, 90), g: -10, life: R(1, 1.6), size: R(18, 28), color: 'rgba(240,240,240,.35)', grow: 2, fade: true, blur: 3 }, T.stage); for (let i = 0; i < 6; i++) star(cx + R(-50, 50), T.h - 50 + R(-20, 10), 10, '#ffd890', .5, i * .05, T.stage); tone(2093, 0, .07, 1.4); tone(160, -.6 > 0 ? 0 : 0, .05, .12, 'square'); }, 950);
+      setTimeout(() => tone(140, 0, .06, .12, 'square', 90), 380); } },
+  smith: { name: 'Blacksmithing', crest: '🔨', pc: '#e07a2a', pl: '#ffb070', cap: '🔥', item: ['⚔️', 'Heavy Copper Broadaxe', '#1eff00'], tray: 'rack', recs: ['Heavy Copper Broadaxe', 'Rough Bronze Leggings', 'Coarse Sharpening Stone'],
+    single(x, y) { [0, .16, .32].forEach(t => setTimeout(() => { star(x + R(-6, 6), y, 18, '#ffd27a', .25); for (let i = 0; i < 6; i++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: R(.3, .5), size: 3, color: '#ffb040', glow: 5 }); tone(1900, 0, .04, .12, 'triangle'); }, t * 1000));
+      dot(x, y, { vx: 0, vy: 0, life: 1.1, size: 30, color: 'rgba(255,90,30,.55)', grow: .6, fade: true, blur: 4, delay: .35 }); },
+    finale(T) { // the rack glows red-hot, then a hiss of quenching steam and sparks; every blade glints
+      T.stage.querySelectorAll('.titem').forEach((it, i) => it.animate([{ filter: 'drop-shadow(0 0 0 transparent)' }, { filter: 'drop-shadow(0 0 8px #ff6020) brightness(1.4)', offset: .4 }, { filter: 'drop-shadow(0 0 0 transparent)' }], { duration: 1400 }));
+      setTimeout(() => { for (let i = 0; i < 14; i++) dot(16 + R(0, T.used), T.h - 30, { vx: R(-10, 10), vy: R(40, 80), g: -10, life: R(1, 1.5), size: R(18, 26), color: 'rgba(235,235,235,.35)', grow: 2, fade: true, blur: 3 }, T.stage);
+        for (let i = 0; i < 16; i++) dot(16 + R(0, T.used), T.h - 30, { vx: R(-80, 80), vy: R(60, 160), g: 500, life: R(.4, .7), size: 3, color: '#ffb040', glow: 5 }, T.stage); noise(0, .9, .05, 4000, .6, 'highpass'); }, 600);
+      setTimeout(() => { T.stage.querySelectorAll('.titem').forEach((it, i) => star(parseFloat(it.style.left) + 13, parseFloat(it.style.top) + 4, 12, '#fff', .4, i * .04, T.stage)); tone(1568, 0, .04, .8); }, 1300); } },
+  ench: { name: 'Enchanting', crest: '🔮', pc: '#8a6aff', pl: '#c8b0ff', cap: '✦', item: ['🔮', 'Lesser Magic Wand', '#1eff00'], tray: 'orbit', recs: ['Lesser Magic Wand', 'Runed Copper Rod', 'Lesser Mana Oil'],
+    single(x, y) { // reworked: a rune circle draws itself stroke by stroke, runes light up in turn, then the circle pulses inward
+      el(`<svg width="110" height="110" viewBox="-55 -55 110 110"><circle r="40" fill="none" stroke="#c8b0ff" stroke-width="2" stroke-dasharray="252" stroke-dashoffset="252" style="filter:drop-shadow(0 0 4px #8a6aff)"><animate attributeName="stroke-dashoffset" from="252" to="0" dur=".55s" fill="freeze"/></circle><circle r="28" fill="none" stroke="#8a6aff" stroke-width="1" stroke-dasharray="3 4"/></svg>`,
+        `left:${x - 55}px;top:${y - 55}px`, [{ opacity: 1, transform: 'rotate(0)' }, { opacity: 1, transform: 'rotate(40deg)', offset: .75 }, { opacity: 0, transform: 'rotate(60deg) scale(.4)' }], 1500);
+      const runes = 'ᚠᚢᚦᚨᚱᚲ'; for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 - Math.PI / 2; glyph(runes[i], x + Math.cos(a) * 40, y + Math.sin(a) * 40, 13, '#fff', 1, u => [0, 0, 0, 1, u < .1 ? 0 : (u > .7 ? (1 - u) / .3 : 1)], .5 + i * .07); setTimeout(() => tone(1046 * Math.pow(2, i / 12 * 2), 0, .025, .3), (500 + i * 70)); }
+      setTimeout(() => { ring(x, y, '#c8b0ff', 30, .4); star(x, y, 30, '#fff', .45); tone(1568, 0, .05, .8); }, 1200); },
+    finale(T) { // the orbit tightens into a glowing sigil that flashes
+      const cx = 16 + 160, cy = 50;
+      T.stage.querySelectorAll('.titem').forEach(it => it.animate([{ opacity: 1 }, { opacity: 1, transform: 'scale(1)', offset: .5 }, { opacity: 0, transform: 'scale(.3)' }], { duration: 1000, fill: 'forwards' }));
+      setTimeout(() => { el(`<svg width="120" height="120" viewBox="-60 -60 120 120"><circle r="44" fill="none" stroke="#c8b0ff" stroke-width="2"/><polygon points="0,-40 35,20 -35,20" fill="none" stroke="#c8b0ff" stroke-width="1.5"/><polygon points="0,40 35,-20 -35,-20" fill="none" stroke="#8a6aff" stroke-width="1.5"/></svg>`,
+        `left:${cx - 60}px;top:${cy - 60}px;filter:drop-shadow(0 0 8px #8a6aff)`, [{ opacity: 0, transform: 'scale(.3) rotate(0)' }, { opacity: 1, transform: 'scale(1.05) rotate(60deg)', offset: .4 }, { opacity: 1, transform: 'scale(1) rotate(90deg)', offset: .7 }, { opacity: 0, transform: 'scale(1.3) rotate(120deg)' }], 1300, 0, 'ease-out', T.stage);
+        for (let i = 0; i < 12; i++) star(cx + R(-60, 60), cy + R(-40, 40), R(8, 13), '#c8b0ff', .5, .3 + i * .04, T.stage); tone(784, 0, .05, 1.2); tone(1175, .1, .05, 1.2); tone(1568, .2, .05, 1.2); }, 700); } },
+  aid: { name: 'First Aid', crest: '🩹', pc: '#e05a5a', pl: '#ffb0b0', cap: '✚', item: ['🩹', 'Heavy Linen Bandage', '#ffffff'], tray: 'stack', recs: ['Heavy Linen Bandage', 'Linen Bandage', 'Anti-Venom'],
+    single(x, y) { // reworked: a bandage unrolls as a ribbon, wraps once around, a soft green heartbeat
+      el('<svg width="140" height="60" viewBox="0 0 140 60"><path d="M10 40 C40 10, 70 50, 100 20 S130 30, 130 30" fill="none" stroke="#f4f0e4" stroke-width="7" stroke-linecap="round" stroke-dasharray="190" stroke-dashoffset="190"><animate attributeName="stroke-dashoffset" from="190" to="0" dur=".45s" fill="freeze"/></path></svg>',
+        `left:${x - 70}px;top:${y - 30}px`, [{ opacity: 1 }, { opacity: 1, offset: .5 }, { opacity: 0, transform: 'scale(.5)' }], 1000);
+      setTimeout(() => { pathEl('<div style="width:36px;height:36px;margin:-18px;border-radius:50%;border:5px solid #f4f0e4;border-left-color:transparent"></div>', x, y, .5, u => [0, 0, 540 * u, .7 + .3 * u, 1 - u]); }, 450);
+      setTimeout(() => { [0, .28].forEach(t => setTimeout(() => { glyph('✚', x, y, 26, '#7dff8a', .45, u => [0, 0, 0, .8 + .5 * Math.sin(Math.PI * u), 1 - u]); tone(330, 0, .06, .18); }, t * 1000)); }, 800); },
+    finale(T) { // a red-cross seal stamps onto the stacks, then a soft green pulse runs across them
+      const cx = 16 + T.used / 2;
+      pathEl('<div style="width:44px;height:44px;margin:-22px;border-radius:50%;background:#f8f4ea;border:3px solid #c03030;display:flex;align-items:center;justify-content:center;color:#d02020;font:900 30px Georgia,serif;box-shadow:0 2px 6px #000">✚</div>',
+        cx, T.h - 50, 1.6, u => [0, u < .2 ? 40 * (1 - u / .2) : 0, u < .2 ? -20 : 0, u < .2 ? 1.6 - 3 * u : 1, u > .8 ? (1 - u) / .2 : 1], 0, 22, T.stage);
+      setTimeout(() => { tone(150, 0, .1, .15, 'square', 100); el('', `left:16px;top:20px;width:${T.used}px;height:70px;background:linear-gradient(90deg,transparent,rgba(125,255,138,.35),transparent);filter:blur(4px)`, [{ transform: 'translateX(-100%)', opacity: 0 }, { opacity: 1, offset: .3 }, { transform: 'translateX(100%)', opacity: 0 }], 900, 0, 'linear', T.stage); tone(660, .2, .05, .7); tone(880, .3, .05, .7); }, 330); } },
+  alch: { name: 'Alchemy', crest: '⚗️', pc: '#9a5ae0', pl: '#d0a8ff', cap: '💧', item: ['🧪', 'Healing Potion', '#ffffff'], tray: 'rack', recs: ['Healing Potion', 'Elixir of Minor Agility', 'Swiftness Potion'],
+    single(x, y) { // reworked: a liquid swirl spirals down into a point, bubbles boil up, then a cork pops off with a colored puff
+      for (let i = 0; i < 14; i++) { const a0 = i / 14 * Math.PI * 2; pathEl(`<div style="width:7px;height:7px;margin:-3.5px;border-radius:50%;background:${i % 2 ? '#c08aff' : '#9dff8a'};box-shadow:0 0 6px ${i % 2 ? '#c08aff' : '#9dff8a'}"></div>`, x, y, .6, u => { const a = a0 + u * 7, r = 46 * (1 - u); return [Math.cos(a) * r, Math.sin(a) * r * .6, 0, 1, u > .9 ? (1 - u) * 10 : 1]; }); }
+      setTimeout(() => { for (let i = 0; i < 10; i++) dot(x + R(-8, 8), y, { vx: R(-12, 12), vy: R(50, 110), g: -20, life: R(.5, .8), size: R(4, 8), color: ['#9dff8a', '#c08aff'][i % 2], fade: true, delay: i * .03 }); tone(R(500, 700), 0, .03, .1, 'sine', 1100); tone(R(700, 900), .1, .03, .1, 'sine', 1300); }, 600);
+      setTimeout(() => { pathEl('<div style="width:10px;height:12px;margin:-6px -5px;border-radius:2px;background:#a07040"></div>', x, y - 10, .7, u => [20 * u, 70 * Math.sin(Math.PI * u * .9), 500 * u, 1, 1 - u]); for (let i = 0; i < 5; i++) dot(x, y - 10, { vx: R(-30, 30), vy: R(20, 60), g: -10, life: 1, size: 18, color: 'rgba(192,138,255,.35)', grow: 2, fade: true, blur: 2 }); tone(900, 0, .06, .08, 'sine', 400); }, 1000); },
+    finale(T) { // the corks pop off along the rack, left to right, each with a little colored puff
+      T.stage.querySelectorAll('.titem').forEach((it, i) => setTimeout(() => { const x = parseFloat(it.style.left) + 13, y = parseFloat(it.style.top);
+        pathEl('<div style="width:7px;height:8px;margin:-4px -3.5px;border-radius:2px;background:#a07040"></div>', x, y, .6, u => [8 * u, 40 * Math.sin(Math.PI * u * .9), 400 * u, 1, 1 - u], 0, 22, T.stage);
+        dot(x, y, { vx: R(-10, 10), vy: 30, g: -10, life: .8, size: 14, color: i % 2 ? 'rgba(157,255,138,.4)' : 'rgba(192,138,255,.4)', grow: 2, fade: true, blur: 2 }, T.stage); tone(900 + i * 60, 0, .04, .07, 'sine', 400); }, i * 90)); } },
+  leather: { name: 'Leatherworking', crest: '🪡', pc: '#b07a46', pl: '#e8c08a', cap: '🪡', item: ['🟤', 'Light Armor Kit', '#ffffff'], tray: 'line', recs: ['Light Armor Kit', 'Embossed Leather Vest', 'Handstitched Leather Boots'],
+    single(x, y) { // reworked: the awl punches a row of holes (thok thok), the thread pulls through them tight, a final tug
+      for (let i = 0; i < 5; i++) setTimeout(() => { el('', `left:${x - 40 + i * 20 - 2}px;top:${y - 2}px;width:4px;height:4px;border-radius:50%;background:#000;box-shadow:0 0 0 1px #e8c08a`, [{ opacity: 1, transform: 'scale(1.6)' }, { opacity: 1, transform: 'scale(1)', offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 1400); tone(240, 0, .06, .06, 'square', 160); }, i * 90);
+      setTimeout(() => { el('<svg width="100" height="20" viewBox="0 0 100 20"><path d="M10 10 L30 4 L50 16 L70 4 L90 10" fill="none" stroke="#e8c08a" stroke-width="2" stroke-dasharray="100" stroke-dashoffset="100"><animate attributeName="stroke-dashoffset" from="100" to="0" dur=".35s" fill="freeze"/></path></svg>', `left:${x - 50}px;top:${y - 10}px;filter:drop-shadow(0 0 3px #e8c08a)`, [{ opacity: 1 }, { opacity: 1, offset: .7 }, { opacity: 0 }], 1000); noise(0, .3, .03, 2500, 2); }, 480);
+      setTimeout(() => { el('', `left:${x - 50}px;top:${y - 10}px;width:100px;height:20px`, [{ transform: 'scaleY(1)' }, { transform: 'scaleY(.6)' }, { transform: 'scaleY(1)' }], 200); star(x + 42, y, 14, '#fff', .4); tone(500, 0, .04, .1, 'triangle', 900); }, 900); },
+    finale(T) { // a stamp thumps each hide on the line, leaving a glinting maker's mark
+      T.stage.querySelectorAll('.titem').forEach((it, i) => setTimeout(() => { const x = parseFloat(it.style.left) + 13, y = parseFloat(it.style.top) + 13;
+        el('<div style="width:14px;height:14px;margin:-7px;border-radius:50%;border:2px double #ffd890;box-shadow:0 0 6px #ffd890"></div>', `left:${x}px;top:${y}px`, [{ opacity: 0, transform: 'scale(2)' }, { opacity: 1, transform: 'scale(1)', offset: .2 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 1400, 0, 'linear', T.stage);
+        it.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.15,.85)' }, { transform: 'scale(1)' }], { duration: 200 }); tone(130, 0, .08, .12, 'square', 90); }, i * 110));
+      setTimeout(() => { for (let i = 0; i < 8; i++) star(16 + R(0, T.used), R(30, 70), 11, '#ffd890', .5, i * .05, T.stage); tone(1318, 0, .05, .8); }, T.n * 110 + 100); } },
 };
-let prof = 'smith', busy = false;
+
+// ---------------- the window, the tray ----------------
+let prof = 'tailor', busy = false;
 const RC = [['#ff8040', 'orange'], ['#ffff40', 'yellow'], ['#40c040', 'green'], ['#9d9d9d', 'gray']];
-const SKILL = {}; Object.keys(P).forEach(k => SKILL[k] = { lvl: 140, recipe: 0 });
-function bump(k) { return SKILL[k].lvl >= 150 ? (SKILL[k].lvl >= 160 ? (SKILL[k].lvl >= 175 ? 3 : 2) : 1) : 0; }
-function trade() {
-  const p = P[prof], s = SKILL[prof]; $('tname').textContent = p.name; $('trank').textContent = `${s.lvl} / 225`; $('trankb').style.width = (s.lvl / 225 * 100) + '%';
-  $('recs').innerHTML = [[p.item[1], RC[bump(prof)][0], true], ['(another recipe)', '#40c040'], ['(another recipe)', '#9d9d9d']].map(r => `<div class="rec ${r[2] ? 'sel' : ''}" style="--rc:${r[1]}">${r[0]}</div>`).join('');
+const SK = {}; Object.keys(P).forEach(k => SK[k] = 140);
+const tier = k => SK[k] >= 175 ? 3 : SK[k] >= 160 ? 2 : SK[k] >= 150 ? 1 : 0;
+function drawWin() {
+  const p = P[prof]; $('crest').textContent = p.crest; $('wttl').textContent = p.name; $('rkt').textContent = `${p.name} ${SK[prof]}/225`; $('rkb').style.width = (SK[prof] / 225 * 100) + '%';
+  $('list').innerHTML = `<div class="cat">Recipes</div>` + p.recs.map((r, i) => `<div class="rec ${i === 0 ? 'sel' : ''}" style="--rc:${i === 0 ? RC[tier(prof)][0] : RC[i + 1][0]}">${r}</div>`).join('');
+  $('dicon').textContent = p.item[0]; $('dicon').style.setProperty('--qc', p.item[2]); $('dname').textContent = p.item[1];
+  $('tabs').innerHTML = Object.keys(P).slice(0, 6).map(k => `<i class="${k === prof ? 'on' : ''}">${P[k].crest}</i>`).join('');
 }
-pick('p', v => { prof = v; trade(); });
-$('reset').onclick = () => { SKILL[prof].lvl = 140; trade(); };
-function cpos() { const c = $('char').getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1); return [(c.left - s.left) / z + c.width / z / 2 + 40, (c.top - s.top) / z + c.height / z / 2 - 10]; }
-function skillUp() {
-  const s = SKILL[prof], chance = [1, .6, .25, 0][bump(prof)]; if (Math.random() > chance) return 0;
-  const before = bump(prof); s.lvl += 1; trade();
-  const p = P[prof], sk = $('skill'); sk.style.setProperty('--pc', p.pc); sk.style.setProperty('--pl', p.pl);
-  sk.querySelector('.tt').innerHTML = `${p.name} <b>${s.lvl}</b>`; sk.querySelector('small').textContent = `${225 - s.lvl} to 225`;
-  sk.querySelector('i').style.width = (s.lvl / 225 * 100) + '%';
-  const after = bump(prof), h = $('heads');
-  if (after !== before) { h.style.display = 'block'; h.style.setProperty('--rc', RC[after][0]); h.innerHTML = `<b>${p.item[1]}</b> is now ${RC[after][1]}: ${after === 3 ? 'no more skill-ups from it' : 'skill-ups from it come slower'}`; }
-  else h.style.display = 'none';
+pick('p', v => { if (busy) return; prof = v; drawWin(); });
+function scrPos(elm) { const r = elm.getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1); return [(r.left - s.left) / z + r.width / z / 2, (r.top - s.top) / z + r.height / z / 2]; }
+
+// the skill-up banner, with the profession's touch on its bar
+function skillUp(force) {
+  const before = tier(prof);
+  if (!force && Math.random() > [1, .6, .25, 0][before]) return 0;
+  SK[prof] = force === 'color' ? [150, 160, 175, 175][before] : SK[prof] + 1; drawWin();
+  const p = P[prof], sk = $('skill'); sk.className = 'skill t-' + prof; sk.style.setProperty('--pc', p.pc); sk.style.setProperty('--pl', p.pl);
+  sk.querySelector('.tt').innerHTML = `${p.name} <b>${SK[prof]}</b>`; sk.querySelector('small').textContent = `${225 - SK[prof]} to 225`;
+  const fill = sk.querySelector('.barw i'); fill.animate([{ width: ((SK[prof] - 1) / 225 * 100) + '%' }, { width: (SK[prof] / 225 * 100) + '%' }], { duration: 700, delay: 250, fill: 'forwards' });
+  const cap = sk.querySelector('.cap'); cap.textContent = p.cap; cap.getAnimations().forEach(a => a.cancel());
+  if (prof === 'eng') cap.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(360deg)' }], { duration: 1000, delay: 250 });
+  else cap.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.4)' }, { transform: 'scale(1)' }], { duration: 500, delay: 800 });
+  // the small extra on the bar: cooking steam, alchemy bubbles, smithing sparks
+  const br = sk.querySelector('.barw');
+  if (prof === 'cook') for (let i = 0; i < 3; i++) pathEl('<div style="width:5px;height:18px;margin:-9px -2.5px;border-radius:3px;background:linear-gradient(transparent,rgba(240,240,240,.5),transparent);filter:blur(1px)"></div>', 100 + (SK[prof] / 225) * 200 - 30 + i * 10, 0, 1.2, u => [4 * Math.sin(u * 6 + i), 26 * u, 0, 1, Math.sin(Math.PI * u)], .5 + i * .1, 22, br);
+  if (prof === 'alch') for (let i = 0; i < 5; i++) dot(R(10, (SK[prof] / 225) * 200), 6, { vx: 0, vy: R(8, 16), g: 0, life: .9, size: 3, color: 'rgba(255,255,255,.7)', fade: true, delay: .4 + i * .1 }, br);
+  if (prof === 'smith') for (let i = 0; i < 6; i++) dot((SK[prof] / 225) * 200, 4, { vx: R(-20, 20), vy: R(20, 50), g: 120, life: .5, size: 2, color: '#ffd27a', glow: 4, delay: .7 + i * .05 }, sk);
+  const after = tier(prof), h = $('heads');
+  if (after !== before) { h.style.display = 'block'; h.style.setProperty('--rc', RC[after][0]); h.innerHTML = `<b>${p.item[1]}</b> is now ${RC[after][1]}: ${after === 3 ? 'no more skill-ups from it' : 'skill-ups from it come slower'}`; } else h.style.display = 'none';
   sk.getAnimations().forEach(a => a.cancel());
   sk.animate([{ opacity: 0, transform: 'translate(-50%,8px)' }, { opacity: 1, transform: 'translate(-50%,0)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: after !== before ? 4200 : 2600 });
   tone(784, 0, .04, .4); tone(1175, .07, .04, .4); return 1;
 }
-// the loot column: a Crafted row (same look as Picked up), fading after a few seconds
-let crafted, craftedTimer;
+$('sk').onclick = () => skillUp(true);
+$('color').onclick = () => skillUp('color');
+
+// the Crafted rows join the Picked up list (one list, its header says what's in it)
+let list, listTimer;
 function craftedRow(n) {
   const p = P[prof], [g, name, qc] = p.item;
-  if (!crafted) { crafted = document.createElement('div'); crafted.innerHTML = `<div class="head"><span>Crafted</span></div><div class="row" style="--pc:${p.pc};--qc:${qc}"><div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="plus"></span><span class="n"></span></div>`; $('col').appendChild(crafted); crafted.r = crafted.querySelector('.row'); crafted.total = 0; crafted.r.animate([{ opacity: 0, transform: 'translateX(14px)' }, { opacity: 1, transform: 'none' }], { duration: 260 }); }
-  crafted.total += n; crafted.r.querySelector('.n').textContent = crafted.total > 1 ? '×' + crafted.total : '';
-  const pl = crafted.r.querySelector('.plus'); pl.textContent = '+' + n; pl.animate([{ opacity: 1 }, { opacity: 1, offset: .7 }, { opacity: 0 }], { duration: 1600 });
-  clearTimeout(craftedTimer); craftedTimer = setTimeout(() => { const c = crafted; crafted = null; c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(18px)' }], { duration: 400 }).onfinish = () => c.remove(); }, 4000);
+  if (!list) { list = document.createElement('div'); list.innerHTML = `<div class="head"><span>Crafted</span></div>`; $('col').appendChild(list); }
+  const r = document.createElement('div'); r.className = 'row'; r.style.setProperty('--pc', p.pc); r.style.setProperty('--qc', qc);
+  r.innerHTML = `<div class="icon" style="--qc:${qc}">${g}</div><span class="nm">${name}</span><span class="n">${n > 1 ? '×' + n : ''}</span>`; list.appendChild(r);
+  r.animate([{ opacity: 0, transform: 'translateX(14px)' }, { opacity: 1, transform: 'none' }], { duration: 260 });
+  clearTimeout(listTimer); listTimer = setTimeout(() => { const l = list; list = null; l.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(18px)' }], { duration: 400 }).onfinish = () => l.remove(); }, 4000);
 }
-function fly(html, x0, y0, x1, y1, dur, onEnd) { const fr = []; for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u); fr.push({ transform: `translate(${(x1 - x0) * e}px,${(y1 - y0) * e - 60 * Math.sin(Math.PI * u)}px) scale(${1 - .3 * u})` }); } const d = el(html, `left:${x0}px;top:${y0}px`, fr, dur); d.getAnimations()[0].onfinish = () => { d.remove(); onEnd && onEnd(); }; }
-function colPos() { const c = $('col').getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1); return [(c.left - s.left) / z + 14, (c.top - s.top) / z + 30]; }
-$('one').onclick = () => { if (busy) return; const p = P[prof], [x, y] = cpos(); p.single(x, y); const got = skillUp();
-  setTimeout(() => { const [cx, cy] = colPos(); fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, x, y, cx, cy, 550, () => craftedRow(1)); }, 750); };
+function fly(html, x0, y0, x1, y1, dur, arc, onEnd) { const fr = []; for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u * (3 - 2 * u); fr.push({ transform: `translate(${(x1 - x0) * e}px,${(y1 - y0) * e - arc * Math.sin(Math.PI * u)}px) scale(${1 - .25 * u})` }); } const d = el(html, `left:${x0}px;top:${y0}px`, fr, dur); d.getAnimations()[0].onfinish = () => { d.remove(); onEnd && onEnd(); }; }
+
+$('one').onclick = () => { if (busy) return; const p = P[prof], [x, y] = scrPos($('char')); p.single(x + 50, y - 10); skillUp();
+  setTimeout(() => { const [cx, cy] = scrPos($('col')); fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, x + 50, y - 10, cx - 100, 214, 550, 60, () => craftedRow(1)); }, 1100); };
+
+// where the n-th item lands in the tray, by how the profession fills it; returns [x, y, rot, extra]
+function slot(kind, i, T) {
+  if (kind === 'stack') { const col = Math.floor(i / 6), k = i % 6; return [20 + col * 40 + (k % 2) * 3, T.h - 46 - k * 10, R(-6, 6)]; }
+  if (kind === 'rack') return [18 + i * 30, T.h - 50, 0];
+  if (kind === 'belt') return [16 + i * 30, T.h - 46, 0];
+  if (kind === 'line') return [18 + i * 32, 30 + (i % 2) * 3, 0];
+  return null; // orbit: placed by its loop
+}
 $('all').onclick = () => { if (busy) return; busy = true;
-  const p = P[prof], [x, y] = cpos(), pile = $('pile'), N = 12; let ups = 0;
-  pile.style.setProperty('--pc', p.pc); pile.style.setProperty('--qc', p.item[2]); $('stack').innerHTML = ''; $('pw').textContent = p.name; $('pcnt').textContent = ''; $('pnm').textContent = p.item[1]; $('pclose').style.opacity = 0;
-  pile.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 250, fill: 'forwards' });
-  const pr = pile.getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1), px = (pr.left - s.left) / z + 49, py = (pr.top - s.top) / z + pr.height / z / 2;
+  const p = P[prof], N = 12, tray = $('tray'), stage = $('tstage'); stage.innerHTML = '';
+  tray.style.setProperty('--pc', p.pc); tray.style.setProperty('--pl', p.pl); $('tlbl').textContent = p.name; $('tcnt').textContent = `0 / ${N}`; $('tpg').style.width = '0';
+  tray.classList.add('open');
+  const T = { stage, h: 112, w: 430, n: 0, used: 0 };
+  // the tray's dressing: a shelf lip for racks, a belt with gears, a clothesline
+  if (p.tray === 'rack') stage.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:10px;right:0;top:${T.h - 26}px;height:5px;background:#6a4a26;border-top:1px solid #9a7a46"></div>`);
+  if (p.tray === 'belt') { stage.insertAdjacentHTML('beforeend', `<div class="beltline" style="position:absolute;left:8px;right:0;top:${T.h - 30}px;height:10px;border-radius:5px;background:repeating-linear-gradient(90deg,#3a3a40 0 8px,#555 8px 10px);border:1px solid #000"></div>` +
+    [0, 1, 2, 3].map(i => `<div class="gear" style="position:absolute;left:${20 + i * 110}px;top:${T.h - 28}px;font-size:16px;color:#a8b8c8">⚙</div>`).join(''));
+    stage.querySelector('.beltline').animate([{ backgroundPosition: '0 0' }, { backgroundPosition: '20px 0' }], { duration: 400, iterations: Infinity }); stage.querySelectorAll('.gear').forEach(g => g.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(360deg)' }], { duration: 2000, iterations: Infinity })); }
+  if (p.tray === 'line') stage.insertAdjacentHTML('beforeend', `<svg style="position:absolute;left:8px;top:22px" width="420" height="20"><path d="M0 4 Q210 18 420 4" fill="none" stroke="#b09070" stroke-width="1.5"/></svg>`);
+  const [bx, by] = scrPos($('ball')), trayR = tray.getBoundingClientRect(), s = scr.getBoundingClientRect(), z = parseFloat(scr.style.zoom || 1), tx = (trayR.left - s.left) / z, ty = (trayR.top - s.top) / z;
+  let ups = 0, orbitItems = [];
   for (let i = 0; i < N; i++) setTimeout(() => {
-    p.touch(x, y); ups += skillUp();
-    fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, x, y, px, py, 420, () => {
-      const it = document.createElement('div'); it.className = 'icon'; const a = (i - 5.5) * 3.2;
-      it.style.cssText = `--qc:${p.item[2]};position:absolute;left:${13 + (i - 5.5) * 1.6}px;top:${13 - Math.min(i, 6)}px;transform:rotate(${a}deg);width:40px;height:40px;font-size:24px;border-width:2px;z-index:${i}`; it.textContent = p.item[0];
-      $('stack').appendChild(it); $('pcnt').textContent = '×' + (i + 1); $('pcnt').animate([{ transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 180 });
-      tone(523 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26][i] / 12), 0, .03, .3);
-      if (i === N - 1) setTimeout(() => { p.close(px, py); $('pclose').textContent = `×${N} ${p.item[1]}` + (ups ? ` · ${p.name} +${ups}` : ''); $('pclose').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'forwards' });
-        setTimeout(() => { pile.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(20px)' }], { duration: 450, fill: 'forwards' }).onfinish = () => { busy = false; };
-          const [cx, cy] = colPos(); fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, px, py, cx, cy, 550, () => craftedRow(N)); }, 2200); }, 250);
+    ups += skillUp();
+    const target = slot(p.tray, i, T) || [180 + Math.cos(i) * 60, 45, 0];
+    fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, bx, by, tx + target[0] + 13, ty + target[1] + 13, 380, 30, () => {
+      const it = document.createElement('div'); it.className = 'titem icon'; it.style.setProperty('--qc', p.item[2]); it.textContent = p.item[0];
+      it.style.left = target[0] + 'px'; it.style.top = target[1] + 'px'; it.style.transform = `rotate(${target[2]}deg)`; it.style.zIndex = i; stage.appendChild(it);
+      T.n = i + 1; T.used = Math.max(T.used, target[0] + 26 - 16);
+      if (p.tray === 'stack') { it.animate([{ transform: `translateY(-10px) rotate(${target[2]}deg)` }, { transform: `translateY(0) scale(1.15,.85) rotate(${target[2]}deg)`, offset: .5 }, { transform: `rotate(${target[2]}deg)` }], { duration: 260 });
+        stage.querySelectorAll('.titem').forEach(o => { if (o !== it && Math.abs(parseFloat(o.style.left) - target[0]) < 6) o.animate([{ transform: o.style.transform }, { transform: o.style.transform + ' translateX(2px)' }, { transform: o.style.transform }], { duration: 300 }); }); tone(400 + i * 30, 0, .03, .1, 'triangle'); }
+      if (p.tray === 'rack') { it.animate([{ transform: 'translateY(-14px)' }, { transform: 'translateY(0)' }, { transform: 'translateY(-3px)' }, { transform: 'translateY(0)' }], { duration: 300 }); tone(2200 + i * 40, 0, .03, .12, 'triangle'); }
+      if (p.tray === 'belt') { it.style.left = '-20px'; it.animate([{ left: '-20px' }, { left: target[0] + 'px' }], { duration: 500, easing: 'ease-out', fill: 'forwards' }); setTimeout(() => it.style.left = target[0] + 'px', 500); tone(1800, 0, .02, .05, 'square'); }
+      if (p.tray === 'line') { it.style.transformOrigin = '50% 0'; it.animate([{ transform: 'rotate(18deg)' }, { transform: 'rotate(-10deg)' }, { transform: 'rotate(5deg)' }, { transform: 'rotate(0)' }], { duration: 700 }); el('', `left:${target[0] + 11}px;top:${target[1] - 4}px;width:4px;height:8px;background:#c8a070;border-radius:1px`, [{ opacity: 1 }, { opacity: 1 }], 99999, 0, 'linear', stage); tone(300, 0, .03, .08, 'triangle'); }
+      if (p.tray === 'orbit') { orbitItems.push(it); }
+      $('tcnt').textContent = `${i + 1} / ${N}`; $('tpg').style.width = ((i + 1) / N * 100) + '%';
+      if (i === N - 1) setTimeout(() => {
+        if (p.tray === 'orbit') T.used = 330;
+        p.finale(T);
+        setTimeout(() => { // everything flies to the Crafted row, the tray slides back
+          const [cx] = scrPos($('col')); fly(`<div class="icon" style="--qc:${p.item[2]};margin:-11px">${p.item[0]}</div>`, tx + 100, ty + 40, cx - 100, 214, 600, 80, () => craftedRow(N));
+          tray.classList.remove('open'); setTimeout(() => { stage.innerHTML = ''; busy = false; }, 400); }, 2400);
+      }, 300);
     });
-  }, i * 380);
+  }, i * 360);
+  if (p.tray === 'orbit') { const t0 = performance.now(); (function spin() { if (!busy) return; const t = (performance.now() - t0) / 1000;
+    orbitItems.forEach((it, i) => { const a = t * 1.2 + i / Math.max(orbitItems.length, 1) * Math.PI * 2; it.style.left = (160 + Math.cos(a) * 130) + 'px'; it.style.top = (40 + Math.sin(a) * 26) + 'px'; it.style.boxShadow = '0 0 10px #8a6aff'; });
+    requestAnimationFrame(spin); })(); }
 };
 function fit() { $('scr').style.zoom = Math.min(1, (window.innerWidth - 40) / 1368); }
-window.addEventListener('resize', fit); fit(); trade();
+window.addEventListener('resize', fit); fit(); drawWin();
 </script>
 </body>
 </html>

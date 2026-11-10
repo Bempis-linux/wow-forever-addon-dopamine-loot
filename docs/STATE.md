@@ -93,6 +93,15 @@ cooking steam, first aid wrap + green cross); a single craft = its own themed an
 recipe color heads-up as a line under the skill-up bar. Mockup docs/mockups/crafting.html (game units). The user:
 keep considering cohesiveness of all elements while building (pile card in the popup style; Crafted joins the
 Picked up list; one profession color everywhere).
+**Round 2 feedback:** crafting stays separate from the popups; Create All was "a little boring": more whimsy, attached to
+the profession window (under it: its right side has tabs), a profession finale; 2 (Crafted joins Picked up) and 3 (one
+color per profession) agreed; profession-specific skill-up touches, not ornate. Ranking of the round 1 single-craft
+animations, best first: tailoring, engineering, cooking, blacksmithing, enchanting, first aid, alchemy, leatherworking.
+Round 2 mockup (crafting.html): a tray under the window filled per profession (stack: tailoring, cooking, first aid;
+rack: alchemy, blacksmithing; conveyor: engineering; orbit: enchanting; clothesline: leatherworking), a counter, finales
+(ribbon + bow, cloche + steam ding, quench steam + glints, belt + firework, sigil, red-cross seal + green pulse, corks
+popping, maker's stamps), bar touches per profession, reworked singles for the bottom four. Waiting for the verdict.
+In game: verify the profession window's frame name on Forever before anchoring the tray.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
