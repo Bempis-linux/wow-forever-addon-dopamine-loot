@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulging Bag Final</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  header p { margin: 0; color: var(--muted); max-width: 1000px; }
+  header p b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; min-width: 64px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .tog { opacity: .55; } .tog.on { opacity: 1; }
+  .stage { position: relative; margin: 6px 18px; height: 320px; max-width: 900px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 40% 60%, #34442f, #1a2417 55%, #0d120c); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .actionbar { position: absolute; right: 0; bottom: 0; left: 0; height: 52px; background: linear-gradient(#1a1610, #0c0a07); border-top: 1px solid #3a3020; }
+  .slot { position: absolute; bottom: 7px; width: 38px; height: 38px; border: 1px solid #5a4a2a; border-radius: 3px; background: #15110b; }
+  .bagbox { position: absolute; right: 40px; bottom: 7px; width: 38px; height: 38px; }
+  .bag { position: absolute; inset: 0; transform-origin: 50% 100%; }
+  .icon { position: absolute; inset: 0; border-radius: 3px; background: radial-gradient(circle at 40% 35%, #c08a48, #5a3816 75%); box-shadow: inset 0 0 0 1px #000;
+    display: flex; align-items: center; justify-content: center; font-size: 23px; overflow: visible; }
+  .border { position: absolute; inset: -1px; border-radius: 3px; pointer-events: none;
+    box-shadow: inset 0 0 0 2px var(--c), inset 0 0 0 3px rgba(0,0,0,.5), inset 0 0 6px 2px color-mix(in srgb, var(--c) 45%, transparent); }
+  .lump { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(color-mix(in srgb, var(--c) 70%, white 30%), transparent 65%); opacity: 0; mix-blend-mode: screen; }
+  .count { position: absolute; right: 2px; bottom: 0; font: 700 14px "Arial Narrow", Arial, sans-serif; color: var(--tc); text-shadow: -1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000; }
+  .note { position: absolute; left: 14px; top: 10px; font: 600 11.5px system-ui; color: #c9c2b0; max-width: 520px; }
+  .loot { position: absolute; left: 34%; top: 40%; padding: 6px 8px; border: 1px solid #6a5a36; border-radius: 4px; background: rgba(10,8,6,.85); font: 600 11px Georgia, serif; color: #ffd100; }
+  .loot .ic { display: inline-block; width: 20px; height: 20px; vertical-align: middle; margin-right: 5px; border: 1.5px solid #1eff00; border-radius: 2px; background: #241c12; text-align: center; line-height: 18px; font-size: 12px; }
+  .err { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); font: 700 16px Georgia, serif; color: #ff2020; text-shadow: 0 1px 0 #000; opacity: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>The bulging bag: final version</h1>
+  <p>Built from what's in game (the backpack icon with the game's quality border, breathing amber to red, the slots left in the corner). Every idea you picked is a switch: turn one off to compare. <b>Swelling</b> (4 slots left to 1): the item drops in and the bag gulps, it sags heavier, lumps press out, it creaks at 2 and 1 left with a faster heartbeat. <b>Full</b>: the item bounces off back to the loot window, a padlock clunks shut, and trying again soon gets a bigger reaction (a harder shake, then a tired slump). <b>Release</b>: a relief settle with a gold glint around the border, a green "+N", a dust puff. Sound is off; turn it on for the gulp, creak, clunk and sigh sketches.</p>
+</header>
+<div class="bar"><span>Sound</span><button data-snd="0" class="on">Off</button><button data-snd="1">On</button>
+  <span>Free slots</span><button data-free="16">16</button><button data-free="4" class="on">4</button><button data-free="2">2</button><button data-free="1">1</button><button data-free="0">0</button></div>
+<div class="bar"><span>Swelling</span><button class="tog on" data-t="gulp">Item drops in, gulp</button><button class="tog on" data-t="sag">Heavy sag</button><button class="tog on" data-t="lumps">Bulging lumps</button><button class="tog on" data-t="creak">Creaks + heartbeat</button></div>
+<div class="bar"><span>Full</span><button class="tog on" data-t="bounce">Item bounces off</button><button class="tog on" data-t="lock">Padlock clunk</button><button class="tog on" data-t="esc">Escalating tries</button></div>
+<div class="bar"><span>Release</span><button class="tog on" data-t="relief">Relief settle</button><button class="tog on" data-t="plus">+N freed</button><button class="tog on" data-t="dust">Dust puff</button></div>
+<div class="bar"><span>Try it</span><button class="go" id="loot">Loot an item</button><button class="go" id="loot3">Loot 3 fast</button><button class="go" id="full">Try to loot (full)</button><button id="f1">Free 1</button><button id="f6">Free 6</button></div>
+<div class="stage" id="st">
+  <div class="note" id="note"></div>
+  <div class="loot" id="lootwin"><span class="ic">🧤</span>Scouting Gloves</div>
+  <div class="err" id="err">Inventory is full.</div>
+  <div class="actionbar">
+    <div class="slot" style="left:20px"></div><div class="slot" style="left:62px"></div><div class="slot" style="left:104px"></div>
+    <div class="slot" style="right:212px"></div><div class="slot" style="right:170px"></div><div class="slot" style="right:128px"></div><div class="slot" style="right:86px"></div>
+  </div>
+  <div class="bagbox" id="box"><div class="bag" id="bag"><div class="icon">🎒</div><div class="border" id="border"></div></div><div class="count" id="count"></div></div>
+</div>
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id), st = $('st');
+const on = {}; document.querySelectorAll('[data-t]').forEach(b => { on[b.dataset.t] = true; b.onclick = () => { on[b.dataset.t] = !on[b.dataset.t]; b.classList.toggle('on', on[b.dataset.t]); }; });
+let snd = false, actx;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1');
+function ac() { return actx = actx || new AudioContext(); }
+function tone(f, t = 0, vol = .08, dec = .4, type = 'sine', f2) {
+  if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = a.currentTime + t; o.type = type; o.frequency.setValueAtTime(f, at);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8);
+  g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .01); g.gain.exponentialRampToValueAtTime(.0001, at + dec);
+  o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05);
+}
+function noise(t = 0, dur = .2, vol = .05, f = 1500, q = 1, type = 'bandpass') {
+  if (!snd) return; const a = ac(), n = a.sampleRate * dur, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
+  const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol;
+  s.connect(fl).connect(g).connect(a.destination); s.start(a.currentTime + t);
+}
+const S = { gulp() { tone(160, 0, .1, .18, 'sine', 90); noise(0, .08, .02, 800); },
+  creak() { const a = R(140, 190); tone(a, 0, .035, .35, 'sawtooth', a * .82); noise(0, .3, .02, 600, 4); },
+  clunk() { tone(90, 0, .14, .3, 'square', 60); noise(0, .06, .06, 2500, 2); tone(1400, .02, .03, .1, 'triangle'); },
+  boing() { tone(300, 0, .06, .3, 'sine', 520); },
+  sigh(big) { noise(0, big ? .9 : .5, big ? .05 : .03, 900, .7, 'lowpass'); tone(big ? 260 : 300, .05, .025, big ? .8 : .45, 'sine', big ? 180 : 230); },
+  shake() { noise(0, .25, .04, 400, 2); },
+  slump() { tone(220, 0, .04, .7, 'sine', 120); } };
+
+function el(html, css, frames, dur, delay = 0, ease = 'linear') {
+  const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; st.appendChild(d);
+  d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d;
+}
+function bagPos() { const b = $('box').getBoundingClientRect(), s = st.getBoundingClientRect(); return [b.left - s.left + b.width / 2, b.top - s.top + b.height / 2, b.width]; }
+
+// ---- state ----
+let free = 4, held = 0, beatT = 0, tries = [], lockShown = false;
+const P = n => n > 4 ? 0 : (5 - n) / 5;
+const rest = n => P(n) * .9;
+function colors() { const p = P(free); return free === 0 ? ['#ff4632', '#ff5a46'] : p > 0 ? ['#ffbe50', '#ffd27a'] : ['#b08a3a', '#d8b878']; }
+function sync() {
+  document.querySelectorAll('[data-free]').forEach(x => x.classList.toggle('on', +x.dataset.free === free));
+  const [c, tc] = colors(); $('bag').style.setProperty('--c', c); $('box').style.setProperty('--tc', tc);
+  $('count').textContent = free <= 4 ? free : ''; $('border').style.display = free <= 4 ? '' : 'none';
+  $('note').textContent = free > 4 ? 'Plenty of room: the game\'s own button, nothing drawn.' : free === 0 ? 'Full.' : `${free} left` + (free <= 2 && on.creak ? ': creaks and a faster heartbeat' : '');
+}
+// the resting shape: a puff by fullness; heavy sag makes it sit low and wide
+function restXf(h = held) {
+  const s = 1 + .14 * h;
+  return on.sag ? [s * (1 + .1 * h), s * (1 - .06 * h)] : [s, s];
+}
+function setRest() { const [sx, sy] = restXf(); $('bag').style.transform = `scale(${sx},${sy})`; }
+// the border breathes; at 2 and 1 left (creak on) it beats faster like a heart
+(function breathe() {
+  const t = performance.now() / 1000, p = P(free);
+  const fast = on.creak && free <= 2 && free >= 0, period = fast ? (free === 0 ? .55 : .75) : 2.4;
+  let a = .65 + .35 * (.5 + .5 * Math.sin(t * 2 * Math.PI / period));
+  if (fast) { const ph = (t % period) / period; a = .55 + .45 * Math.max(Math.exp(-ph * 14), .8 * Math.exp(-Math.abs(ph - .22) * 14)); }
+  $('border').style.opacity = p > 0 || free === 0 ? a : .7;
+  requestAnimationFrame(breathe);
+})();
+
+function squash(from, to, amp, dur, wobbleSlow) {
+  const fr = [], [fx, fy] = from, [tx, ty] = to;
+  for (let i = 0; i <= 36; i++) { const u = i / 36, e = 1 - Math.pow(1 - u, 3), w = wobbleSlow ? 3.2 : 5.5, a = amp * Math.exp(-(wobbleSlow ? 3.2 : 4.2) * u) * Math.cos(u * Math.PI * w);
+    const sx = fx + (tx - fx) * e, sy = fy + (ty - fy) * e; fr.push({ transform: `scale(${sx * (1 + a)},${sy / (1 + a)})` }); }
+  $('bag').animate(fr, { duration: wobbleSlow ? 1150 : 900 });
+}
+function lumps(n) {
+  const bag = $('bag');
+  for (let i = 0; i < n; i++) { const L = document.createElement('div'); L.className = 'lump';
+    const side = i % 4, k = R(.2, .8); L.style.left = (side === 0 ? -6 : side === 1 ? 28 : k * 30) + 'px'; L.style.top = (side === 2 ? -6 : side === 3 ? 26 : k * 28) + 'px';
+    bag.appendChild(L); L.animate([{ opacity: 0, transform: 'scale(.4)' }, { opacity: .95, transform: 'scale(1.15)', offset: .3 }, { opacity: 0, transform: 'scale(.8)' }], { duration: 650, delay: 120 + i * 40 }).onfinish = () => L.remove(); }
+}
+// an item flies from the loot window to the bag; onIn when it gets there
+function flyIn(onIn) {
+  const s = st.getBoundingClientRect(), lw = $('lootwin').getBoundingClientRect(), x0 = lw.left - s.left + 14, y0 = lw.top - s.top + 14, [bx, by] = bagPos(), fr = [];
+  for (let i = 0; i <= 20; i++) { const u = i / 20, e = u * u * (3 - 2 * u); fr.push({ transform: `translate(${(bx - x0) * e}px,${(by - 26 - y0) * e - 90 * Math.sin(Math.PI * u)}px) scale(${1 - .3 * u})` }); }
+  if (on.gulp) { fr.push({ transform: `translate(${bx - x0}px,${by - 14 - y0}px) scale(.25)`, opacity: .2 }); }
+  const d = el('<div style="width:22px;height:22px;margin:-11px;border:1.5px solid #1eff00;border-radius:2px;background:#241c12;display:flex;align-items:center;justify-content:center;font-size:13px">🧤</div>', `left:${x0}px;top:${y0}px`, fr, on.gulp ? 720 : 600);
+  setTimeout(onIn, on.gulp ? 720 : 600);
+}
+function loot() {
+  if (free === 0) return tryFull();
+  flyIn(() => {
+    free -= 1; const before = held, p = P(free); held = rest(free); sync();
+    if (p === 0) { squash(restXf(before), restXf(held), .1, 500); setRest(); return; }
+    const from = restXf(before), to = restXf(held);
+    if (on.gulp) { // a swallow: dips down, then bulges up
+      $('bag').animate([{ transform: `scale(${from[0]},${from[1]})` }, { transform: `scale(${from[0] * 1.08},${from[1] * .84})`, offset: .25 }, { transform: `scale(${to[0] * .94},${to[1] * 1.12})`, offset: .55 }, { transform: `scale(${to[0]},${to[1]})` }],
+        { duration: 420, easing: 'ease-out' }).onfinish = () => squash(to, to, .12 + .08 * p, 800, on.sag);
+      S.gulp();
+    } else squash(from, to, .2 + .1 * p, 950, on.sag);
+    setRest();
+    if (on.lumps) lumps(Math.max(1, 5 - free));
+    if (on.creak && free <= 2) S.creak();
+  });
+}
+function shake(amp, dur) {
+  const fr = []; for (let i = 0; i <= 12; i++) { const u = i / 12; fr.push({ transform: `translateX(${amp * Math.sin(u * Math.PI * 6) * (1 - u)}px)` }); }
+  $('box').animate(fr, { duration: dur });
+}
+function tryFull() {
+  const now = performance.now(); tries = tries.filter(t => now - t < 4000); tries.push(now);
+  const level = on.esc ? Math.min(3, tries.length) : 1;
+  $('err').animate([{ opacity: 0 }, { opacity: 1, offset: .1 }, { opacity: 1, offset: .7 }, { opacity: 0 }], { duration: 2200 });
+  const [bx, by] = bagPos();
+  if (on.bounce) { // the item flies at the bag, bounces off the top, tumbles back to the loot window
+    const s = st.getBoundingClientRect(), lw = $('lootwin').getBoundingClientRect(), x0 = lw.left - s.left + 14, y0 = lw.top - s.top + 14, fr = [];
+    for (let i = 0; i <= 16; i++) { const u = i / 16, e = u * u; fr.push({ transform: `translate(${(bx - x0) * e}px,${(by - 34 - y0) * e - 70 * Math.sin(Math.PI * u)}px) rotate(0deg)` }); }
+    for (let i = 1; i <= 16; i++) { const u = i / 16, e = 1 - Math.pow(1 - u, 2); fr.push({ transform: `translate(${(bx - x0) * (1 - e)}px,${(by - 34 - y0) * (1 - e) - 120 * Math.sin(Math.PI * u)}px) rotate(${-540 * u}deg)`, opacity: u > .85 ? (1 - u) / .15 : 1 }); }
+    el('<div style="width:22px;height:22px;margin:-11px;border:1.5px solid #1eff00;border-radius:2px;background:#241c12;display:flex;align-items:center;justify-content:center;font-size:13px">🧤</div>', `left:${x0}px;top:${y0}px`, fr, 1100);
+    setTimeout(() => { S.boing(); $('bag').animate([{ transform: $('bag').style.transform }, { transform: `scale(${restXf()[0] * 1.06},${restXf()[1] * .86})` }, { transform: $('bag').style.transform }], { duration: 220 }); }, 330);
+  }
+  const hit = on.bounce ? 330 : 0;
+  setTimeout(() => {
+    if (level === 3) { // a tired slump: it sinks, tilts, dims, sighs
+      $('bag').animate([{ transform: $('bag').style.transform }, { transform: `translateY(4px) rotate(-8deg) scale(${restXf()[0] * 1.06},${restXf()[1] * .9})`, offset: .4 },
+        { transform: `translateY(4px) rotate(-8deg) scale(${restXf()[0] * 1.06},${restXf()[1] * .9})`, offset: .8 }, { transform: $('bag').style.transform }], { duration: 1600, easing: 'ease-in-out' });
+      $('border').animate([{ filter: 'brightness(1)' }, { filter: 'brightness(.45)', offset: .4 }, { filter: 'brightness(.45)', offset: .8 }, { filter: 'brightness(1)' }], { duration: 1600 });
+      S.slump(); return;
+    }
+    shake(level === 2 ? 7 : 3.5, level === 2 ? 520 : 380); S.shake();
+    if (on.lock && !lockShown) { // the padlock snaps shut over the bag
+      lockShown = true;
+      el('<svg width="26" height="30" viewBox="0 0 26 30"><path d="M6 13 V9 a7 7 0 0 1 14 0 V13" fill="none" stroke="#d8d0c0" stroke-width="3"/><rect x="2" y="12" width="22" height="16" rx="3" fill="#c9a24a" stroke="#5a4210" stroke-width="1.5"/><circle cx="13" cy="19" r="2.4" fill="#3a2a08"/><rect x="12" y="20" width="2" height="5" fill="#3a2a08"/></svg>',
+        `left:${bx - 13}px;top:${by - 34}px;filter:drop-shadow(0 2px 2px #000)`,
+        [{ transform: 'translateY(-26px) scale(.7)', opacity: 0 }, { transform: 'translateY(2px) scale(1.08)', opacity: 1, offset: .22 }, { transform: 'translateY(0) scale(1)', offset: .32 }, { opacity: 1, offset: .78 }, { opacity: 0, transform: 'translateY(0) scale(.95)' }], 1500);
+      setTimeout(S.clunk, 300); setTimeout(() => lockShown = false, 1500);
+    }
+  }, hit);
+}
+function release(n) {
+  const before = held, wasFull = free <= 4; free = Math.min(16, free + n); held = rest(free); sync();
+  if (!wasFull) return;
+  const k = Math.min(n, 6) / 6, [bx, by] = bagPos(), from = restXf(before), to = restXf(held);
+  if (on.relief) { // a breath out, a satisfied settle, a gold glint around the border
+    const fr = []; for (let i = 0; i <= 36; i++) { const u = i / 36, dip = Math.sin(Math.PI * Math.min(u / .5, 1)) * (.05 + .1 * k), sx = from[0] + (to[0] - from[0]) * Math.min(u / .4, 1) - dip, sy = from[1] + (to[1] - from[1]) * Math.min(u / .4, 1) - dip * .6, a = .05 * Math.exp(-3 * u) * Math.sin(u * Math.PI * 4);
+      fr.push({ transform: `scale(${sx * (1 + a)},${sy / (1 + a)})` }); }
+    $('bag').animate(fr, { duration: 800 + 400 * k });
+    const g = el('<div style="width:9px;height:9px;margin:-4.5px;border-radius:50%;background:#fff6c0;box-shadow:0 0 8px 3px #ffd34a"></div>', '', (() => { const f = [], W = 38, x0 = bx - 19, y0 = by - 19;
+      for (let i = 0; i <= 24; i++) { const u = i / 24, d = u * 4 * W, side = Math.floor(d / W), o = d % W; const [x, y] = side === 0 ? [o, 0] : side === 1 ? [W, o] : side === 2 ? [W - o, W] : [0, W - o]; f.push({ transform: `translate(${x0 + x}px,${y0 + y}px)`, opacity: u > .85 ? (1 - u) / .15 : 1 }); } return f; })(), 700, 250);
+    S.sigh(k > .5);
+  } else { squash(from, to, .08, 700); }
+  setRest();
+  if (on.plus) el(`<div style="font:800 15px Georgia,serif;color:#73ff59;text-shadow:-1px 0 #000,1px 0 #000,0 -1px #000,0 1px #000">+${n}</div>`, `left:${bx - 8}px;top:${by - 40}px`,
+    [{ transform: 'translateY(6px) scale(.6)', opacity: 0 }, { transform: 'translateY(-4px) scale(1.15)', opacity: 1, offset: .2 }, { transform: 'translateY(-22px) scale(1)', opacity: 0 }], 1400, 100, 'ease-out');
+  if (on.dust) for (let i = 0; i < 4 + Math.round(10 * k); i++) { const vx = R(-30, 30), vy = R(-60, -30) * (1 + k), s = R(6, 10) + 6 * k;
+    el(`<div style="width:${s}px;height:${s}px;margin:${-s / 2}px;border-radius:50%;background:rgba(220,210,190,.4);filter:blur(1.5px)"></div>`, `left:${bx}px;top:${by - 20}px`,
+      [{ transform: 'translate(0,0) scale(.6)', opacity: .9 }, { transform: `translate(${vx}px,${vy}px) scale(${1.8 + k})`, opacity: 0 }], R(700, 1100) + 300 * k, R(0, 120), 'ease-out');
+    if (i < 2) el('<div style="width:4px;height:4px;margin:-2px;border-radius:50%;background:#ffe9a8;box-shadow:0 0 6px #ffd34a"></div>', `left:${bx + R(-6, 6)}px;top:${by - 22}px`,
+      [{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${R(-20, 20)}px,${R(-70, -40)}px)`, opacity: 0 }], 1300, 150); }
+}
+pick('free', v => { free = +v; held = rest(free); sync(); setRest(); });
+$('loot').onclick = loot;
+$('loot3').onclick = () => { for (let i = 0; i < 3; i++) setTimeout(loot, i * 380); };
+$('full').onclick = () => { if (free !== 0) { free = 0; held = rest(0); sync(); setRest(); } tryFull(); };
+$('f1').onclick = () => release(1);
+$('f6').onclick = () => release(6);
+held = rest(free); sync(); setRest();
+</script>
+</body>
+</html>

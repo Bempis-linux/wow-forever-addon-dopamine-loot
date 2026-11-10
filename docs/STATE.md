@@ -75,6 +75,13 @@ only; sections S1 plain words / S2 color pip / S3 pip + section total; counts C1
 NumberFontNormal pale gold, fixed 26 wide right-aligned; the stack mark = three gold bars + the number). The user on
 Picked up: it must not linger ("that's what the dungeon recap is for"): **each row leaves on its own 4 s after it came
 (or last merged)**, sliding out, the rows below close the gap; the list hides when empty (built, untested).
+**2026-11-09 evening:** the user tested the 1.3.0 set (BugGrabber: no new errors; old ones from Nov 5 / Nov 8 only).
+Release checklist addition: `/dl` in combat is blocked (OpenToCategory is protected, Nov 8 error): open after combat.
+1.3.0 = the professions release: **crafting goes in too** (round 2 mockup: Create All pile, skill bar, recipe colors).
+First: a final bulging bag. Picks: swelling = item drops in + gulp, heavy sag, bulging lumps, creaks + heartbeat border
+at 2/1 left; full = item bounces off back to the loot window, padlock clunk, escalating tries (harder shake, then a
+tired slump); release = relief settle with a gold glint around the border, "+N" freed, dust puff. Mockup
+docs/mockups/bag-final.html (each idea a switch), waiting for the verdict.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._
