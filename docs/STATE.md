@@ -117,6 +117,13 @@ blacksmithing "going the right way, not there yet"; alchemy least favorite. Roun
 alchemy A (round 2 restored) / B pour and mix / C boil-over with new glass sounds (clink, glug, hollow cork); engineering
 E1 metal ratchet + springy boing / E2 clockwork + bell; blacksmithing S1 anvil ring / S2 heavy hammer + long ring + hiss;
 tidied leather, tailoring, cooking, enchanting (payoff at one spot); skill bars with a tool at the tip. Waiting.
+**Round 4 verdict:** alchemy = C Boil-over (with the glass sounds); engineering = E1 metal ratchet (the user wrote "S1"
+under Engineering, read as E1: confirm); blacksmithing sounds "more like a bell than a hammer"; first aid wants more
+ideas; skill bars "awesome" (fix: the needle emoji showed as a square -> a drawn needle / texture in game; the alchemy
+drop too blue -> the bar's purple). The batch touches are "awkward", and the Create All tray is "a decent start but not
+what I'm looking for": brainstorm + mockup both together next. Round 5 mockup docs/mockups/crafting-r5.html: hammer
+sounds H1 forge hammer / H2 tap, tap, CLANG / H3 dull iron; first aid F1 salve and wrap / F2 stitch a cross / F3 roll
+toss / F4 pulse; the two bar fixes. Waiting.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

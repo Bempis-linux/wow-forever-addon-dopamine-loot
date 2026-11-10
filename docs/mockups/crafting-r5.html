@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crafting Round 5</title>
+<style>
+  :root { --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; background: #0b0b10; color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  header { padding: 14px 18px 4px; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  h2 { font-size: 14px; margin: 16px 18px 2px; color: var(--gold); }
+  header p, p.lead { margin: 0 0 4px; color: var(--muted); max-width: 1000px; }
+  p.lead { margin: 0 18px 4px; }
+  p b, header b { color: #c9c2b0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 5px 18px; }
+  .bar span { color: var(--muted); margin: 0 4px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; min-width: 54px; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; } button.go { background: #4a3c1c; border-color: #d0a040; font-weight: 600; }
+  .stage { position: relative; margin: 6px 18px; height: 240px; max-width: 900px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden;
+    background: radial-gradient(ellipse at 40% 70%, #3a4a30, #1c2616 55%, #0e130b); }
+  .fx { position: absolute; pointer-events: none; left: 0; top: 0; }
+  .char { position: absolute; left: 28%; top: 55%; transform: translate(-50%, -50%); font-size: 56px; }
+  .note { position: absolute; right: 14px; top: 10px; max-width: 380px; text-align: right; font: 600 11.5px system-ui; color: #c9c2b0; }
+  .sb { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; border: 1px solid #2a2418; border-radius: 6px; background: radial-gradient(ellipse at 50% 0%, #1c2616, #0e130b); width: 300px; }
+  .sb .tt { font: 700 15px Georgia, serif; color: #fff; text-shadow: 0 0 8px var(--pc), 0 1px 0 #000; } .sb .tt b { color: var(--pl); }
+  .sb .tt button { float: right; padding: 1px 8px; font-size: 11px; }
+  .wrapT { position: relative; width: 260px; height: 24px; display: flex; align-items: center; }
+  .track { position: relative; width: 260px; height: 12px; border-radius: 4px; background: rgba(0,0,0,.65); box-shadow: 0 0 0 1px #000; overflow: hidden; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 40%; overflow: hidden; transition: width .7s cubic-bezier(.2,.8,.3,1); }
+  .tool { position: absolute; top: -2px; transform: translateX(-50%); transition: left .7s cubic-bezier(.2,.8,.3,1); filter: drop-shadow(0 1px 1px #000); }
+  .b-tailor .fill { background: linear-gradient(90deg, #a89870, #fff4d8); }
+  .b-tailor .track::after { content: ""; position: absolute; left: 3px; right: 3px; top: 5px; border-top: 2px dashed rgba(255,255,255,.75); }
+  .b-alch .track { border-radius: 6px; background: linear-gradient(rgba(255,255,255,.12), rgba(0,0,0,.6)); box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.25); }
+  .b-alch .fill { background: linear-gradient(#d0a8ff, #7a3ad0); border-radius: 6px 0 0 6px; overflow: visible; }
+  .b-alch .fill::after { content: ""; position: absolute; right: -5px; top: 0; bottom: 0; width: 10px; border-radius: 50%; background: #b88aff; animation: wob 1.1s ease-in-out infinite; }
+  @keyframes wob { 0%,100% { transform: scaleX(.6) } 50% { transform: scaleX(1) } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Crafting, round 5</h1>
+  <p><b>1</b> Blacksmithing sounds built from a <b>hammer hitting metal</b> (a thud with weight and a short clank) instead of a bell. <b>2</b> First Aid: four new directions beside the current one. <b>3</b> The two skill-bar fixes. (Picked so far: Alchemy C Boil-over with the glass sounds, Engineering E1 Metal ratchet.) Sound is on.</p>
+  <div class="bar" style="padding-left:0"><span style="margin-left:0">Sound</span><button data-snd="1" class="on">On</button><button data-snd="0">Off</button></div>
+</header>
+
+<h2>1. Blacksmithing: a hammer, not a bell</h2>
+<p class="lead"><b>Round 4 S1</b> for comparison (it rang like a bell). <b>H1 Forge hammer</b>: each strike a low thud with a hard clank on top and only a short ring, the last one heavier. <b>H2 Tap, tap, CLANG</b>: two light taps (a dry click and a tiny ring), then one heavy hit with weight and a quick ring that dies fast. <b>H3 Dull iron</b>: muffled, chunky hits (hammering hot, soft iron: more body, almost no ring), then the hiss. The animation is the same for all.</p>
+<div class="bar"><span>Sound</span><button data-h="s1">Round 4 S1</button><button data-h="h1" class="on">H1 Forge hammer</button><button data-h="h2">H2 Tap, tap, CLANG</button><button data-h="h3">H3 Dull iron</button>
+  <button class="go" id="hOne">Craft once</button><button class="go" id="h5">×5 in a row</button></div>
+<div class="stage" id="hSt"><div class="char">🧙</div><div class="note"></div></div>
+
+<h2>2. First Aid: new directions</h2>
+<p class="lead"><b>Current</b>: the roll unrolls, three wraps, a knot and a green cross. <b>F1 Salve and wrap</b>: a dab of green salve glows on, the bandage wraps over it twice, a neat tuck. <b>F2 Stitch a cross</b>: a needle stitches two strokes that form a cross (the leatherworking feel: short tactile beats), a knot, the cross glows. <b>F3 Roll toss</b>: the roll bounces in, unrolls flat with a flick, folds over itself twice, a tiny sparkle on the fold. <b>F4 Pulse</b>: two soft heartbeats light a cross from dim to bright, the bandage wraps once around it, a calm green ring.</p>
+<div class="bar"><span>Version</span><button data-f="cur">Current</button><button data-f="f1" class="on">F1 Salve and wrap</button><button data-f="f2">F2 Stitch a cross</button><button data-f="f3">F3 Roll toss</button><button data-f="f4">F4 Pulse</button>
+  <button class="go" id="fOne">Craft once</button><button class="go" id="f5">×5 in a row</button></div>
+<div class="stage" id="fSt"><div class="char">🧙</div><div class="note"></div></div>
+
+<h2>3. Skill-bar fixes</h2>
+<p class="lead"><b>Tailoring</b>: the needle is now drawn (the emoji showed as a square on your screen; in game it's a small texture anyway). <b>Alchemy</b>: the drop takes the bar's own purple, pale at the top.</p>
+<div style="display:flex;gap:20px;margin:6px 18px 30px;flex-wrap:wrap">
+  <div class="sb b-tailor" style="--pc:#d8c8a0;--pl:#fff4d8"><div class="tt">Tailoring <b id="lv-tailor">170</b><button data-fill="tailor">Skill up</button></div><div class="wrapT"><div class="track"><div class="fill" id="fl-tailor" style="width:70%"></div></div>
+    <div class="tool" id="tl-tailor" style="left:70%"><svg width="8" height="22" viewBox="0 0 8 22"><path d="M4 0 L5.4 17 Q4 21.5 2.6 17 Z" fill="#e8e8f0" stroke="#606070" stroke-width=".6"/><ellipse cx="4" cy="4" rx="1" ry="2" fill="#0e130b"/></svg></div></div></div>
+  <div class="sb b-alch" style="--pc:#9a5ae0;--pl:#d0a8ff"><div class="tt">Alchemy <b id="lv-alch">170</b><button data-fill="alch">Skill up</button></div><div class="wrapT"><div class="track"><div class="fill" id="fl-alch" style="width:70%"></div></div>
+    <div class="tool" id="tl-alch" style="left:70%;top:-4px"><svg width="12" height="16" viewBox="0 0 12 16"><defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e4ff"/><stop offset=".55" stop-color="#c8a0ff"/><stop offset="1" stop-color="#8a50e0"/></linearGradient></defs><path d="M6 0 C6 0 11 7 11 10.5 A5 5 0 0 1 1 10.5 C1 7 6 0 6 0 Z" fill="url(#dg)" stroke="#3a1a6a" stroke-width=".7"/><ellipse cx="4.2" cy="10" rx="1.2" ry="1.8" fill="rgba(255,255,255,.6)"/></svg></div></div></div>
+</div>
+
+<script>
+'use strict';
+const R = (a, b) => a + Math.random() * (b - a), $ = id => document.getElementById(id);
+let snd = true, actx, ST;
+function pick(attr, cb) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[attr]); }); }
+pick('snd', v => snd = v === '1');
+function ac() { return actx = actx || new AudioContext(); }
+const now = t => ac().currentTime + Math.max(0, t || 0);
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2, att = .004) { if (!snd) return; const a = ac(), o = a.createOscillator(), g = a.createGain(), at = now(t); o.type = type; o.frequency.setValueAtTime(f, at); if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dec * .8); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + att); g.gain.exponentialRampToValueAtTime(.0001, at + dec); o.connect(g).connect(a.destination); o.start(at); o.stop(at + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', shape = 'swell') { if (!snd) return; const a = ac(), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (shape === 'hit' ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n));
+  const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(a.destination); s.start(now(t)); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine', null, .002)); }
+function el(html, css, frames, dur, delay = 0, ease = 'linear') { const d = document.createElement('div'); d.className = 'fx'; d.innerHTML = html || ''; d.style.cssText = css; ST.appendChild(d); d.animate(frames, { duration: dur, delay, easing: ease, fill: 'backwards' }).onfinish = () => d.remove(); return d; }
+function pathEl(html, x, y, life, fn, delay = 0, n = 22) { const fr = []; for (let i = 0; i <= n; i++) { const u = i / n, [dx, dy, r, s, a] = fn(u); fr.push({ transform: `translate(${dx}px,${-dy}px) rotate(${r || 0}deg) scale(${s == null ? 1 : s})`, opacity: a == null ? (u > .75 ? (1 - u) * 4 : 1) : a }); } return el(html, `left:${x}px;top:${y}px`, fr, life * 1000, delay * 1000); }
+function dot(x, y, o) { const fr = []; for (let i = 0; i <= 14; i++) { const t = o.life * i / 14; fr.push({ transform: `translate(${o.vx * t}px,${-(o.vy * t - .5 * (o.g || 0) * t * t)}px) scale(${o.grow ? 1 + (o.grow - 1) * i / 14 : 1})`, opacity: i === 14 ? 0 : (o.fade ? 1 - .7 * i / 14 : 1) }); } el('', `left:${x}px;top:${y}px;width:${o.size}px;height:${o.size}px;margin:${-o.size / 2}px;background:${o.color};border-radius:50%;box-shadow:0 0 ${o.glow || 0}px ${o.color};filter:${o.blur ? 'blur(' + o.blur + 'px)' : 'none'}`, fr, o.life * 1000, (o.delay || 0) * 1000); }
+function ring(x, y, color, size, life, delay = 0, w = 2) { el('', `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;border:${w}px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color}`, [{ transform: 'scale(.12)', opacity: 1 }, { transform: 'scale(1)', opacity: 0 }], life * 1000, delay * 1000, 'ease-out'); }
+function star(x, y, size, color, life, delay = 0) { el(`<svg width="${size}" height="${size}" viewBox="-10 -10 20 20"><path d="M0-10 L1.6-1.6 L10 0 L1.6 1.6 L0 10 L-1.6 1.6 L-10 0 L-1.6-1.6Z" fill="${color}"/></svg>`, `left:${x - size / 2}px;top:${y - size / 2}px;filter:drop-shadow(0 0 4px ${color})`, [{ transform: 'scale(0) rotate(0deg)', opacity: 1 }, { transform: 'scale(1) rotate(30deg)', opacity: 1, offset: .3 }, { transform: 'scale(.5) rotate(60deg)', opacity: 0 }], life * 1000, delay * 1000); }
+function glyph(ch, x, y, size, color, life, fn, delay = 0) { return pathEl(`<div style="font:700 ${size}px Georgia,serif;color:${color};text-shadow:0 0 6px ${color};margin:-${size / 2}px">${ch}</div>`, x, y, life, fn, delay); }
+const at = (t, fn) => setTimeout(fn, t * 1000);
+function pos(st) { const c = st.querySelector('.char').getBoundingClientRect(), s = st.getBoundingClientRect(); return [c.left - s.left + c.width / 2 + 90, c.top - s.top + c.height / 2 - 6]; }
+
+// ---------- 1. blacksmithing hammer sounds ----------
+let hv = 'h1';
+const HAMMER = {
+  s1: { strike(i, k) { noise(0, .012, .06, 2500, 2); metal(0, (880 + i * 140) * (i === 2 ? k : 1), .03 + i * .012, .5 + i * .35); }, after() { noise(.05, .35, .02, 5000, .6, 'highpass'); } },
+  // a low thud with weight, a hard clank on top (a noise burst through a metal-ish band), a short ring
+  h1: { strike(i, k) { const heavy = i === 2; tone(heavy ? 95 : 120, 0, heavy ? .16 : .1, .09, 'sine', heavy ? 55 : 75); noise(0, .06, heavy ? .12 : .08, 2200 * k, 3, 'bandpass', 'hit');
+      metal(0, (520 + i * 60) * k, heavy ? .022 : .014, heavy ? .28 : .16, [1, 2.76, 5.4], [1, .35, .15]); }, after() { noise(.08, .35, .02, 5000, .6, 'highpass'); } },
+  // two light taps, then one heavy hit
+  h2: { strike(i, k) { if (i < 2) { noise(0, .02, .06, 3800, 4, 'bandpass', 'hit'); metal(0, 1250 + i * 120, .01, .08, [1, 2.76], [1, .3]); return; }
+      tone(85, 0, .18, .12, 'sine', 50); noise(0, .08, .14, 1800 * k, 2.5, 'bandpass', 'hit'); metal(0, 470 * k, .024, .35, [1, 2.76, 5.4], [1, .35, .15]); }, after() { noise(.08, .4, .022, 5000, .6, 'highpass'); } },
+  // muffled, chunky: hammering hot soft iron
+  h3: { strike(i, k) { tone(110 - i * 8, 0, .14, .1, 'sine', 70); noise(0, .07, .1, 900 * k, 1.2, 'lowpass', 'hit'); noise(0, .03, .03, 2400, 2, 'bandpass', 'hit'); }, after() { noise(.05, .5, .03, 4500, .6, 'highpass'); } },
+};
+function hNote() { $('hSt').querySelector('.note').textContent = { s1: 'Round 4 S1 (bell-like)', h1: 'H1 Forge hammer: thud + clank, short ring', h2: 'H2 Tap, tap, CLANG', h3: 'H3 Dull iron: muffled, chunky' }[hv]; }
+pick('h', v => { hv = v; hNote(); });
+function smith(x, y, k) { const S = HAMMER[hv];
+  [0, .17, .34].forEach((t, i) => at(t, () => { star(x + R(-5, 5), y, 16 + i * 6, '#ffd27a', .25); for (let j = 0; j < 4 + i * 3; j++) dot(x, y, { vx: R(-120, 120), vy: R(60, 200), g: 700, life: R(.3, .5), size: 3, color: '#ffb040', glow: 5 }); S.strike(i, k); }));
+  at(.5, () => { dot(x, y, { vx: 0, vy: 0, life: .6, size: 26, color: 'rgba(255,90,30,.5)', grow: .6, fade: true, blur: 4 }); dot(x, y - 6, { vx: 0, vy: 40, g: -10, life: .7, size: 16, color: 'rgba(235,235,235,.35)', grow: 2, fade: true, blur: 2 }); S.after(); }); }
+$('hOne').onclick = () => { ST = $('hSt'); const [x, y] = pos(ST); smith(x, y, R(.97, 1.03)); };
+$('h5').onclick = () => { for (let i = 0; i < 5; i++) at(i * 1.05, () => { ST = $('hSt'); const [x, y] = pos(ST); smith(x, y, R(.96, 1.04)); }); };
+hNote();
+
+// ---------- 2. first aid ----------
+let fv = 'f1';
+const cloth = (t, f = 1800, d = .1) => noise(t, d, .022, f, .8);
+const AID = {
+  cur(x, y) { pathEl('<div style="width:18px;height:18px;margin:-9px;border-radius:50%;background:radial-gradient(#fff,#e8e0d0 60%,#c8c0b0)"></div>', x - 40, y, .3, u => [40 * u, 0, 360 * u, 1, 1]);
+    for (let i = 0; i < 3; i++) at(.25 + i * .14, () => { el('', `left:${x - 13}px;top:${y - 10 + i * 6}px;width:26px;height:5px;border-radius:3px;background:#f4f0e4;box-shadow:0 1px 0 #b8b0a0`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .85 }, { opacity: 0 }], 900); cloth(0); });
+    at(.72, () => { glyph('✚', x, y - 2, 18, '#7dff8a', .55, u => [0, 12 * u, 0, u < .15 ? .5 + 4 * u : 1, 1 - u]); tone(700, 0, .04, .05, 'triangle'); tone(1046, .04, .04, .25); }); },
+  // a dab of green salve glows on, the bandage wraps over it twice, a neat tuck
+  f1(x, y) { el('', `left:${x - 9}px;top:${y - 6}px;width:18px;height:12px;border-radius:50%;background:radial-gradient(#c8ffb0,#4ac04a 70%);box-shadow:0 0 10px #7dff8a`, [{ transform: 'scale(.2)', opacity: 0 }, { transform: 'scale(1.15)', opacity: 1, offset: .2 }, { transform: 'scale(1)', opacity: 1, offset: .5 }, { opacity: 0 }], 900);
+    tone(220, 0, .04, .15, 'sine', 330); noise(0, .1, .015, 900, 1, 'lowpass');
+    for (let i = 0; i < 2; i++) at(.3 + i * .18, () => { el('', `left:${x - 15}px;top:${y - 5 + i * 4}px;width:30px;height:6px;border-radius:3px;background:linear-gradient(#fff,#e8e2d2);box-shadow:0 1px 0 #a8a090`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(1)', offset: .85 }, { opacity: 0 }], 700); cloth(0, 1600, .12); });
+    at(.72, () => { el('', `left:${x + 12}px;top:${y - 6}px;width:6px;height:10px;border-radius:2px;background:#f4f0e4`, [{ transform: 'translateX(-6px) scaleX(.3)' }, { transform: 'translateX(0) scaleX(1)', offset: .3 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 500); star(x + 18, y - 4, 10, '#fff', .35); tone(880, 0, .035, .2); }); },
+  // a needle stitches two strokes into a cross, a knot, the cross glows
+  f2(x, y) { const st = (x1, y1, x2, y2, t) => at(t, () => { const len = Math.hypot(x2 - x1, y2 - y1), a = Math.atan2(y2 - y1, x2 - x1) * 57.3;
+      el('', `left:${x1}px;top:${y1 - 1}px;width:${len}px;height:3px;border-radius:2px;background:#f8f4ea;box-shadow:0 0 3px #fff;transform-origin:0 50%;transform:rotate(${a}deg)`, [{ transform: `rotate(${a}deg) scaleX(0)` }, { transform: `rotate(${a}deg) scaleX(1)`, offset: .2 }, { transform: `rotate(${a}deg) scaleX(1)`, offset: .8 }, { opacity: 0 }], 900);
+      tone(260, 0, .05, .05, 'square', 180); noise(0, .05, .025, 3000, 3); });
+    st(x - 12, y, x, y, 0); st(x, y, x + 12, y, .1); st(x, y - 12, x, y, .22); st(x, y, x, y + 12, .32);
+    at(.52, () => { dot(x + 14, y + 12, { vx: 0, vy: 0, life: .3, size: 5, color: '#f8f4ea' }); tone(500, 0, .03, .06, 'triangle'); });
+    at(.66, () => { glyph('✚', x, y, 28, '#7dff8a', .5, u => [0, 0, 0, 1, u < .2 ? u * 5 * .9 : .9 * (1 - u)]); tone(880, 0, .04, .3); tone(1318, .04, .03, .3); }); },
+  // the roll bounces in, unrolls flat with a flick, folds over itself twice, a sparkle on the fold
+  f3(x, y) { pathEl('<div style="width:16px;height:16px;margin:-8px;border-radius:50%;background:radial-gradient(#fff,#e8e0d0 60%,#c8c0b0)"></div>', x - 50, y, .4, u => [36 * u, 18 * Math.abs(Math.sin(u * Math.PI * 2)) * (1 - u), 400 * u, 1, 1]);
+    at(.08, () => tone(300, 0, .03, .05, 'triangle')); at(.22, () => tone(330, 0, .025, .05, 'triangle'));
+    at(.4, () => { el('', `left:${x - 16}px;top:${y - 4}px;width:48px;height:8px;border-radius:2px;background:linear-gradient(#fff,#e8e2d2);box-shadow:0 1px 0 #a8a090;transform-origin:0 50%`, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)', offset: .25 }, { transform: 'scaleX(.5)', offset: .55 }, { transform: 'scaleX(.25)', offset: .8 }, { transform: 'scaleX(.25)', opacity: 0 }], 900); noise(0, .1, .03, 2200, .8); });
+    at(.72, () => cloth(0, 1500, .07)); at(.88, () => { cloth(0, 1400, .07); star(x - 4, y - 4, 12, '#fff', .4); tone(1046, .02, .035, .25); }); },
+  // two soft heartbeats light a cross from dim to bright, a wrap around it, a calm green ring
+  f4(x, y) { [0, .26].forEach((t, i) => at(t, () => { glyph('✚', x, y, 26, i ? '#7dff8a' : '#3a7a3a', .3, u => [0, 0, 0, 1 + .25 * Math.sin(Math.PI * u), i ? 1 - u * .3 : 1 - u]); tone(i ? 90 : 75, 0, .1, .14, 'sine', 50); tone(i ? 90 : 75, .1, .06, .1, 'sine', 50); }));
+    at(.55, () => { glyph('✚', x, y, 26, '#a8ffb0', .6, u => [0, 0, 0, 1, 1 - u]); el('<div style="width:40px;height:40px;margin:-20px;border-radius:50%;border:4px solid #f4f0e4;border-left-color:transparent"></div>', `left:${x}px;top:${y}px`, [{ transform: 'rotate(0) scale(.7)', opacity: 1 }, { transform: 'rotate(360deg) scale(1)', opacity: 1, offset: .6 }, { transform: 'rotate(420deg) scale(1)', opacity: 0 }], 500); cloth(0); });
+    at(.9, () => { ring(x, y, '#7dff8a', 50, .45); tone(660, 0, .035, .5); tone(990, .03, .025, .5); }); },
+};
+function fNote() { $('fSt').querySelector('.note').textContent = { cur: 'Current: unroll, three wraps, knot + cross', f1: 'F1 Salve and wrap', f2: 'F2 Stitch a cross', f3: 'F3 Roll toss', f4: 'F4 Pulse' }[fv]; }
+pick('f', v => { fv = v; fNote(); });
+$('fOne').onclick = () => { ST = $('fSt'); const [x, y] = pos(ST); AID[fv](x, y); };
+$('f5').onclick = () => { for (let i = 0; i < 5; i++) at(i * 1.1, () => { ST = $('fSt'); const [x, y] = pos(ST); AID[fv](x, y); }); };
+fNote();
+
+// ---------- 3. skill bar fixes ----------
+const lvl = { tailor: 70, alch: 70 };
+document.querySelectorAll('[data-fill]').forEach(b => b.onclick = () => { const k = b.dataset.fill; lvl[k] = Math.min(100, lvl[k] + 5); $('fl-' + k).style.width = lvl[k] + '%'; $('tl-' + k).style.left = lvl[k] + '%'; $('lv-' + k).textContent = 100 + lvl[k];
+  at(.72, () => { $('tl-' + k).animate(k === 'tailor' ? [{ transform: 'translate(-50%,0)' }, { transform: 'translate(-50%,5px) rotate(20deg)' }, { transform: 'translate(-50%,0)' }] : [{ transform: 'translate(-50%,-6px)', opacity: 1 }, { transform: 'translate(-50%,6px)', opacity: .2 }, { transform: 'translate(-50%,0)', opacity: 1 }], { duration: 380, easing: 'ease-out' });
+    if (k === 'tailor') noise(0, .05, .02, 5000, 4); else tone(300, 0, .04, .15, 'sine', 180); }); });
+</script>
+</body>
+</html>
