@@ -81,7 +81,11 @@ Release checklist addition: `/dl` in combat is blocked (OpenToCategory is protec
 First: a final bulging bag. Picks: swelling = item drops in + gulp, heavy sag, bulging lumps, creaks + heartbeat border
 at 2/1 left; full = item bounces off back to the loot window, padlock clunk, escalating tries (harder shake, then a
 tired slump); release = relief settle with a gold glint around the border, "+N" freed, dust puff. Mockup
-docs/mockups/bag-final.html (each idea a switch), waiting for the verdict.
+docs/mockups/bag-final.html (each idea a switch). **The user: "Build all of them": built** (Bag.lua rewritten: Shape()
+sag, Gulp/Wobble/Relief steps, Lumps, heartbeat border at <=2, bounce-off, Padlock (Lock.tga from gen_textures.lua),
+tries -> shake / harder / slump, glint around the border, "+N", dust; sounds Bag* from gen_gather_sounds.sh; the
+looted icon from LootFeed (ns.lastLootIcon, GetItemInfoInstant)). Reviewed, 9 fixes (a gen counter stops late timers;
+the dark backing follows the icon). Untested in game. Next: crafting for 1.3.0.
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release
 switch), `docs/plan.md` (roadmap) and `docs/curseforge.md` (listing)._

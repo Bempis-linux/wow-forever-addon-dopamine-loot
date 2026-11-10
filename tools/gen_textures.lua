@@ -281,3 +281,13 @@ Write("Streak", Fill(Canvas(128, 128), function(u, v)
   local along = 1 - math.abs(2 * u - 1) ^ 2
   return math.max(0, along) * (Bump(v, 0.5, 0.018) + 0.35 * Bump(v, 0.5, 0.07))
 end))
+
+-- The bulging bag's padlock (docs/mockups/bag-final.html, "Padlock clunk"): a shackle over a body with a
+-- keyhole cut out; tinted gold in game
+Write("Lock", Fill(Canvas(64, 64), function(u, v)
+  local body = InRect(u, v, 0.18, 0.82, 0.08, 0.56)
+  local r = math.sqrt((u - 0.5) ^ 2 + (v - 0.56) ^ 2)
+  local shackle = (v > 0.5) and math.max(0, math.min(1, (0.055 - math.abs(r - 0.2)) / 0.02 + 0.5)) or 0
+  local hole = math.max(InEllipse(u, v, 0.5, 0.34, 0.065, 0.065), InRect(u, v, 0.475, 0.525, 0.17, 0.34))
+  return math.max(body * (1 - hole), shackle)
+end))

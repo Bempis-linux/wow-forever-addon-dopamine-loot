@@ -17,10 +17,10 @@ pluck() {
   local s=$1 f=$2 d=$3 u="(t-$1)"
   echo "gte(t,$s)*min(1,$u*250)*((sin(2*PI*$f*$u)+0.4*sin(2*PI*$f*1.003*$u))*exp(-$d*$u)+0.18*sin(2*PI*$f*2*$u)*exp(-2.5*$d*$u))"
 }
-render() { # NAME SECONDS GAIN EXPR
+render() { # NAME SECONDS GAIN EXPR [FILTERS]
   local fl fade; fl=$(awk "BEGIN{d = $2 / 3; print (d < 0.3 ? d : 0.3)}"); fade=$(awk "BEGIN{print $2 - $fl}")
   "$FF" -y -loglevel error -f lavfi -i "aevalsrc=exprs='$3*($4)':s=44100:d=$2" \
-    -af "aecho=0.8:0.5:60|120:0.2|0.1,afade=t=out:st=$fade:d=$fl,alimiter=limit=0.8" -c:a libvorbis -q:a 5 "$OUT/$1.ogg"
+    -af "${5:+$5,}aecho=0.8:0.5:60|120:0.2|0.1,afade=t=out:st=$fade:d=$fl,alimiter=limit=0.8" -c:a libvorbis -q:a 5 "$OUT/$1.ogg"
   echo "wrote $OUT/$1.ogg"
 }
 semis() { local p=(0 2 4 7 9); echo $(( ${p[$1 % 5]} + 12 * ($1 / 5) )); }
@@ -65,3 +65,21 @@ render Unlock 1.8 0.18 "$(pluck 0 523.25 3)+$(pluck 0.1 659.25 3)+$(pluck 0.2 78
 render HerbPop 0.3 0.2 "sin(2*PI*880*t)*exp(-40*t)*min(1,t*400)+0.5*sin(2*PI*1320*t)*exp(-60*t)+0.15*(random(0)*2-1)*exp(-50*t)"
 render FlurryHit 0.15 0.14 "(random(0)*2-1)*exp(-45*t)*(0.4+0.6*sin(2*PI*3200*t))+0.4*sin(2*PI*2800*t)*exp(-60*t)"
 render FlurryFinal 1.3 0.22 "sin(2*PI*(55*t+40*(1-exp(-8*t))))*exp(-5*t)+0.35*(random(0)*2-1)*exp(-9*t)+0.35*$(pluck 0.02 1760 4)+0.3*$(pluck 0.06 2637 4)"
+
+# The final bulging bag (docs/mockups/bag-final.html):
+#   BagGulp     an item swallowed: a soft low gulp
+#   BagCreak    strained leather at 2 and 1 slots left (two variants, picked at random)
+#   BagClunk    the padlock snapping shut: a heavy clunk and a small metal tick
+#   BagBoing    the item bouncing off the full bag
+#   BagShake    the full bag shaking "no": a short low rattle
+#   BagSlump    the third try: a tired falling note
+#   BagSigh     space freed: a soft breath out (BagExhale: the big one)
+render BagGulp 0.3 0.24 "$(glide 0 170 85 0.16 9)+0.15*(random(0)*2-1)*exp(-30*t)" 
+render BagCreak1 0.45 0.12 "(sin(2*PI*(160*t-12*t*t))+0.5*sin(2*PI*2*(160*t-12*t*t))+0.33*sin(2*PI*3*(160*t-12*t*t)))*(0.6+0.4*sin(2*PI*31*t))*sin(PI*min(t/0.38,1))"
+render BagCreak2 0.45 0.12 "(sin(2*PI*(185*t-18*t*t))+0.5*sin(2*PI*2*(185*t-18*t*t))+0.33*sin(2*PI*3*(185*t-18*t*t)))*(0.6+0.4*sin(2*PI*27*t))*sin(PI*min(t/0.38,1))"
+render BagClunk 0.45 0.26 "$(glide 0 95 60 0.2 14)+0.25*(random(0)*2-1)*exp(-60*t)+0.35*sin(2*PI*1400*t)*exp(-40*t)"
+render BagBoing 0.4 0.18 "$(glide 0 300 520 0.25 7)"
+render BagShake 0.35 0.2 "(random(0)*2-1)*(0.5+0.5*sin(2*PI*22*t))*sin(PI*min(t/0.3,1))*exp(-3*t)" "lowpass=f=700"
+render BagSlump 0.9 0.16 "$(glide 0 220 120 0.6 3)"
+render BagSigh 0.7 0.18 "(random(0)*2-1)*sin(PI*min(t/0.5,1))*exp(-2*t)*0.6+0.4*$(glide 0.05 300 230 0.4 4)" "lowpass=f=1000"
+render BagExhale 1.1 0.2 "(random(0)*2-1)*sin(PI*min(t/0.9,1))*exp(-1.5*t)*0.7+0.4*$(glide 0.05 260 180 0.8 2.5)" "lowpass=f=900"

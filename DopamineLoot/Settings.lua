@@ -349,7 +349,7 @@ local function CreateGeneral()
   N.Toggle(cat, "noFeed", "Small loot in the side column",
     "Small finds (gray and white items, an Uncommon that isn't the best of its loot, and everything during a fight) list as rows under \"Picked up\" in the loot column on the right, above the harvest window, instead of one-line popups. Big finds keep their popup.", true)
   N.Toggle(cat, "noBag", "Bulging bag",
-    "When your bags are nearly full (4 slots or fewer), the backpack button puffs up a notch with each item and strains at the seams; when they're full, the loot spills out and is sucked back in. Herb, mining and other special bags don't count.", true, function() if ns.SyncBag then ns.SyncBag() end end)
+    "When your bags are nearly full (4 slots or fewer), the backpack button gulps down each item and puffs up, sitting heavier and creaking as it fills; when they're full, the item bounces off and a padlock snaps shut, and freeing space lets it breathe out. Herb, mining and other special bags don't count.", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noBagCount", "Slots-left number",
     "The number of free slots in the bulging bag's corner, like a stack count (a red 0 when there's no room).", true, function() if ns.SyncBag then ns.SyncBag() end end)
   N.Toggle(cat, "noSound", "Sounds",
@@ -371,7 +371,7 @@ local function CreateGeneral()
   N.Button(layout, "Start a loot rain", "Test rain", function() ns.RunAction("rain", tostring(ns.settings.testRain or 8)) end,
     "Rains test loot taken from your bags, with better items mixed in. How many items: Test rain size, on the Loot rain page.")
   N.Button(layout, "Fill the bag to bursting", "Test bag", function() ns.RunAction("testbag") end,
-    "Plays the bulging bag: four items to full, the full-bag moment, then a big release. Your bags aren't touched.")
+    "Plays the bulging bag: four items to full, three tries at the full bag, then a big release. Your bags aren't touched.")
   N.Button(layout, "Simulate a quest reward", "Test reward", function() ns.RunAction("testquest") end,
     "An item and some money rained together, the way finishing a quest plays.")
 end

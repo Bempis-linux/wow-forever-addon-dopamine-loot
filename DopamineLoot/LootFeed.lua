@@ -76,6 +76,9 @@ function ns:CHAT_MSG_LOOT(text, _, _, _, _, _, _, _, _, _, _, guid)
   local link, count, src = M.Parse(text, patterns, isSelf)
   if not link then return end
   if src == "pushed" and merchantOpen then src = "bought" end
+  -- the item going into your bags, for the bulging bag's drop-in (Bag.lua): known at once from the link
+  local icon = GetInfoInstant and select(5, GetInfoInstant(link))
+  if icon then ns.lastLootIcon, ns.lastLootT = icon, GetTime() end
   -- a gather (Gather.lua) goes to the harvest tally instead of the rain; Uncommon+ finds still pop up
   if self.settings.enabled == false then return end
   local gather, gatherId, gx, gy
