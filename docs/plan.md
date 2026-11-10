@@ -487,12 +487,46 @@ No existing addon named "Dopamine Loot" was found.
 | **0.4** done | **0.4.7-0.4.14 popup polish** (picked in `docs/mockups/popups.html`): arrival by rarity (Rare burst; Epic + star4 glints; Legendary more + 2 shockwaves + embers), sway (Epic+ turn once first), cards tilt, Beam motes Rare+ only, Halo lens dropped; a **Toast** style (the game's loot-toast art) was tried and set aside (`deprecated/toast/`). 0.4.8: weapons face you, long names fit. 0.4.15: settings rebuilt by topic (native pages, custom Popups) with the per-rarity sound picker. Next: with the game's own sounds (Play buttons; the user found our synthesized ones artificial), then **popup placement** (less in the way; mockup first), then body armor in 3D on a mannequin (probed in 0.4.22-0.4.23, **dropped 2026-11-04**: `deprecated/asset-check/`). **Set aside 2026-10-14: the chest show** (the user: "a bit much"; code and media in `deprecated/chest-show/`, README there). **0.4.6 loot flies from the ground** (setting `rainFrom`: ground fountain = default, spread along the ground, from below the bottom edge, or the middle of the screen; launched faster so it peaks as high), then **0.4.7+ popup polish** (styles, arrivals, more dramatic but short sounds; mockup first). History of the chest show: (mocked up and picked in `docs/mockups/rain.html`, "Chest show" section). 0.4.0 **containers**: loot pouch for small hauls, treasure chest (medium: quick pop; big: shake + rarity tease white→…→best + lid burst with rays), golden chest for a Legendary; layered generated art (Chest*, Pouch*, Rays) and sounds (ChestRattle, Tease, ChestBurst(Gold), PouchPop); switches Chest/Shake/Tease/Burst. 0.4.3 **game containers**: sack 200442, Strongbox 219372, large ornate chest 200953 (gold) as PlayerModels with their own lid animations (0 shut, 148 opens, 149 held open), shake/hop by hand, our tease glow behind and the light in front; switch "Game chests (3D)", drawn ones as fallback. 0.4.1 **asset check** (`/dl assets`, "Blizzard assets" page: chest/sack models with animation scan, textures/atlases, sounds, fonts; results in DopamineLootDB.assetCheck; see docs/design-review.md), then the picked Blizzard assets wired in with ours as fallback. 0.4.6 **hooks**: loot streak (30 s window; x2, x3… each step bigger: small hauls get the chest from x3, more shake/tease; x5 fanfare; "streak ended" summary), session tally, personal records banners. 0.4.7 **card flip (click)**, off by default: Rare+ fly out as "?" and land as face-down cards you click to flip (auto after 8 s), then popups. Lucky drops skipped for now (idea: Questie drop rate under ~5% → golden chest). Also: reduced-motion and no-screen-flash switches. 0.4.8 **settings cleanup** (requested 2026-10-12): reorganize the main page and sub-pages so each page has one clear topic instead of a mix; better controls than what we have; go through every setting with the user (keep, improve, merge, drop) before building, mockup first. (The empty settings fields bug was fixed in 0.4.2.) |
 | **1.0** done | **First release** (2026-11-04): the dev tools (asset check, armor probe) moved to `deprecated/asset-check/`; README for players, CHANGELOG, MIT LICENSE; BigWigs packager (`.pkgmeta`, `.github/workflows/release.yml`: a `v*` tag builds the GitHub release zip; CurseForge/Wago once the .toc has their project IDs and the repo their secrets) |
 | **1.1** next (order set 2026-11-06) | **Flair pass first** (accessibility tabled the same day). **Accessibility**: reduce-motion and no-flash switches. Then **drag-to-move popups**, the **NEW badge** (seen set, from the Filters row) and the **bag sparkle** on new items. Then a **flair pass** on the rain and popups (mockups first): the Legendary moment plus new ideas (visual flair, explosiveness, cleaner visual design and sound; a marvel every time, never tiring). **Shelved 2026-11-06**: hooks (streak, tally, records), the streak jackpot, card flip; the rows below are pushed back. |
+| **1.3** done | **The professions release** (2026-11-10): gathering effects + harvest window, crafting effects by the cast bar + the Create All pile (H3 Tumble, sinks when full), skill-up banner with material bars and tools (or Simple), bulging bag, the side column ("Picked up"), Move frames, settings reorganized (main switches on the first page, a Professions page). Sounds rendered from the mockups' own code (tools/render-media.html). |
+| **1.4** next (set 2026-11-10) | **Dungeons**: the **dice roll** and the **dungeon recap**. See "1.4.0: Dungeons" below. |
 | **next** (order set 2026-11-07) | 1. **New animations** (mockups first): **loot rain variants** (built 2026-11-07/08, `rainStyle`, docs/mockups/rain-variants.html round 5: Fountain (default), **Quick burst** (a short Fountain, everything at once; a friend found the Fountain overstimulating) and **Big bang**; Firework, Vortex, Meteor shower and Geyser were built and then dropped by the user 2026-11-08; the switch "Finale for the best" (key Hang) covers every animation) and **finales for Open All mail and Create All crafting**, something other than the rain or popups (APIs to verify first). 2. **Edit mode**: drag to place the popups and the money tally. 3. **Stats** (separate from milestones): loot streak, session tally (un-shelved from the hooks). Also on the list: the **dungeon recap** show. |
 | after 1.0 | **Inspector**: recent loot list, Alt+Right-click hook, drag/zoom/pan, turntable, lighting presets, tooltip + typed description, mannequin "Try on", spinning card for non-model items, share to chat; minimap button |
 | after 1.0 | (swapped with 0.4 on 2026-10-11: the user can test the chest show with Test buttons, filters need real play) **Filters**: seen set (seed + NEW badge), ignore/always-show/whitelist/blacklist, sources, money threshold, instances-only; ilvl **upgrade badge** + upgrades-only filter; per-tier sound picker. NEW/UPGRADE should count as "big" for the chest. Offline: `test_filters.lua`, `test_upgrade.lua` |
 | after 1.0 | **Stats & milestones**: dopamine meter, session/lifetime stats, best drop, first-of-kind celebrations, dry-streak and combo counters, `/dl stats` |
 | after 1.0 | **Smarter upgrades**: usability via `C_PlayerInfo.CanUseItem`/tooltip, per-class stat weights (editable), Pawn when present; "upgrade at level N" |
 | later | Popup position (drag to move, like the rain landing height); per-style default zoom/tilt presets; dungeon recap show, screenshot mode, mail attachments, account-wide "never seen" view, sound packs, 3D props for non-model items, localization |
+
+### 1.4.0: Dungeons (set by the user 2026-11-10; brainstorm + mockups first, then build)
+
+Process as always: brainstorm with the user (a few questions with recommended picks), mockups
+(docs/mockups/), the user picks, then build. Simple shapes and real item icons, not drawn objects.
+
+**1. The dice roll** (group loot: Need / Greed / Pass on a dropped item)
+- Idea so far (STATE ideas list 2026-11-09): dice tumble when the roll resolves, the numbers come up, a
+  **WON** stamp and the item's popup when you win; a gentle, short miss when you lose. Other players' rolls
+  shown small (who rolled what), the winner highlighted. Must not get in the way in a pull.
+- To verify on Forever first (wow-api-researcher agent, then `/dump` in a group): `START_LOOT_ROLL(rollID,
+  rollTime, lootHandle)`, `CANCEL_LOOT_ROLL`, `GetLootRollItemInfo(rollID)`, `GetLootRollItemLink(rollID)`,
+  the roll result chat lines (`CHAT_MSG_LOOT` with the globals `LOOT_ROLL_ROLLED_NEED`, `LOOT_ROLL_ROLLED_GREED`,
+  `LOOT_ROLL_YOU_WON`, `LOOT_ROLL_WON`, `LOOT_ROLL_ALL_PASSED`, ...), `LOOT_ROLLS_COMPLETE` (retail?), and
+  whether chat text is a secret value in an instance (12.x restriction; plan.md risks table).
+- A won item already arrives as a "You receive loot" line: the popup must not show twice (the roll show
+  hands its item to the popup, or the popup waits for it).
+- Test buttons on a settings page (a pretend roll: won, lost, all passed), as for everything else.
+
+**2. The dungeon recap** (the side column's rows leave in 4 s on purpose: "that's what the dungeon recap is
+for", the user 2026-11-09)
+- When you leave an instance (or the run completes), a recap of the run: time, bosses killed, the best drop
+  (a popup-like moment), every item you got (icons in quality borders, counts), money looted + vendor value,
+  rolls won, maybe XP and reputation gained. Ideas to brainstorm: a card vs. the loot-rain style "gather it
+  all again"; a chest/tally count-up (the slot-machine idea, plan.md "Chest show" notes); reopening the last
+  recaps from the settings (saved per character: a short history).
+- To verify: instance enter/leave (`PLAYER_ENTERING_WORLD` + `IsInInstance()` / `GetInstanceInfo()`,
+  `ZONE_CHANGED_NEW_AREA`), boss kills (`ENCOUNTER_END(encounterID, name, difficulty, size, success)`,
+  `BOSS_KILL`), XP (`PLAYER_XP_UPDATE`), reputation (`CHAT_MSG_COMBAT_FACTION_CHANGE`), the LFG completion
+  event if Forever has the dungeon finder, and what a disconnect / hearth mid-run should do.
+- Data: a run record in DopamineLootCharDB (start time, instance name, items, money, bosses), started on
+  entering, closed on leaving; must survive /reload inside the dungeon.
 
 ### Rain ideas (picked with the user 2026-10-10)
 
