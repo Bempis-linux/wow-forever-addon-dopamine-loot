@@ -30,6 +30,8 @@ local function Create()
   N.Header(layout, "Crafting")
   N.Toggle(cat, "noCraft", "Crafting effects",
     "While a craft casts, a small touch of your profession plays beside your character (punches and a stitch, bubbles boiling over, stitches, a ratchet, a sizzle and a flip, hammer taps, runes, a salve and wraps), and lands when the item is made. Crafted items go to the loot column instead of popping up or raining.", true)
+  N.Toggle(cat, "noCraftTray", "Create All tray",
+    "During a Create All, a tray slides out under the profession window and every item made tumbles into a growing heap; at the end it shakes and sparkles.", true)
   N.Choice(cat, "testCraft", "Test crafting", {
     { "Leatherworking", "Leatherworking" }, { "Alchemy", "Alchemy" }, { "Tailoring", "Tailoring" }, { "Engineering", "Engineering" },
     { "Cooking", "Cooking" }, { "Blacksmithing", "Blacksmithing" }, { "Enchanting", "Enchanting" }, { "First Aid", "First Aid" },

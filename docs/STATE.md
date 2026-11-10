@@ -140,7 +140,10 @@ sounds tools/gen_craft_sounds.sh; Gear.tga; Crafting section on the Gathering pa
 hooks (the researcher suggested hooksecurefunc on CraftingPage.CreateInternal: refused, taint). To verify in game:
 `/dump UnitCastingInfo("player")` while crafting (6th = true), `/dump C_TradeSkillUI.GetRemainingRecasts()` during a
 Create All, `/dump C_TradeSkillUI.GetBaseProfessionInfo()` with the window open, whether gathering casts are
-isTradeskill. Next: stage B (the heap tray under ProfessionsFrame), stage C (material skill bars + tools, the recipe
+isTradeskill. **Verified in game 2026-11-09:** UnitCastingInfo 6th = true while crafting (Heavy Linen Bandage);
+GetRemainingRecasts() = 7 during a Create All; GetBaseProfessionInfo() = { professionName = "First Aid", profession = 0,
+professionID = 129, skillLevel = 76, maxSkillLevel = 150 }. **Stage B done** (CraftTray.lua, reviewed: 8 fixes; no goto:
+Lua 5.1). Next: stage C (material skill bars + tools, the recipe
 color line via SchematicForm:GetRecipeInfo + C_TradeSkillUI.GetRecipeInfo(id).relativeDifficulty).
 After that: popups movable via Mover. Read this first
 in a new session (the kit's `session-resume` skill does), then CLAUDE.md (layout, decisions, the dev/release

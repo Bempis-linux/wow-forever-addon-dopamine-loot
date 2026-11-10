@@ -37,6 +37,7 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Gather.lua               gathering: detect at LOOT_READY (fishing, node herb/ore, all-leather skinning), node
                            burst, harvest tally (movable), merging +N, climbing notes (GatherNote*), calm
   Feed.lua                 "Picked up" list: compact popups become harvest-style rows at the top of the loot column
+  CraftTray.lua            Create All tray under ProfessionsFrame: items tumble into a heap, count, shake + sparkle
   Craft.lua                crafting: trade-skill casts (window open) play the profession's work beats over the cast,
                            the payoff when made; batches; crafted items -> Crafted rows (tools/gen_craft_sounds.sh)
   Skill.lua                skill-up banner (CHAT_MSG_SKILL): bar in the profession's color to the next unlock

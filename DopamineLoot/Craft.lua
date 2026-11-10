@@ -297,7 +297,7 @@ local function Profession()
       if v == id and BYNORM[Norm(key)] then return BYNORM[Norm(key)] end
     end
   end
-  return name
+  return (type(name) == "string" and not ns.Secret(name)) and name or nil
 end
 
 -- A craft is a trade skill cast while a profession window is open (gathering casts don't count)
@@ -341,7 +341,7 @@ local function Start(guid, T, icon, test, profName)
   if not batch or now - lastDone > GAP_END then
     if batch then EndBatch() end
     local rem = test and test.left or Remaining()
-    batch = { n = 0, total = (rem or 0) + 1, items = {}, order = {}, prof = name, icon = icon }
+    batch = { n = 0, total = rem and rem + 1 or nil, items = {}, order = {}, prof = name, icon = icon }
     if ns.CraftBatchStart then ns.CraftBatchStart(batch) end
   end
   batch.n = batch.n + 1
