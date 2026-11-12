@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill-up Round 3</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  #fdesc { margin-top: 4px; min-height: 44px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: 30%; top: 50%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .note { position: absolute; left: 12px; bottom: 10px; right: 12px; color: rgba(255,255,255,.6); font-size: 12px; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Skill-up, round 3</h1>
+  <small>Ring (the cleanest) and Constellation (the milestone icons) from round 2, and two that join them: Ring +
+  road and Milestone ring. Try Herbalism and Mining for the milestones; crafters have only the rank cap.
+  Space replays; keys 1-4 switch the family, Q-T the profession.</small>
+
+  <h2>Family</h2>
+  <div id="fams"></div>
+  <small id="fdesc"></small>
+
+  <h2>Profession</h2>
+  <div id="profs"></div>
+
+  <h2>Moment</h2>
+  <button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button>
+  <small>"Five in a row": a run of crafts or gathers, one banner climbing, the tool's sound a step higher each time.
+  "Next unlock": a new herb or ore for gatherers, the rank cap for crafters.</small>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+
+  <h2>Options</h2>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>The tool's sound on each strike (as in game now) and the family's payoff at an unlock.</small></label>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const eOut = t => 1 - Math.pow(1 - t, 3), eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function hex(h) { return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function mix(a, b, t) { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], t))).join(',')})`; }
+function grad3(stops, t) { // stops: [[pos, hex]...]
+  for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) return mix(stops[i - 1][1], stops[i][1], (t - stops[i - 1][0]) / (stops[i][0] - stops[i - 1][0]));
+  return stops[stops.length - 1][1]; }
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) {
+  ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = o.glow || 'rgba(0,0,0,.95)'; ctx.shadowBlur = o.glow ? 10 : 4; ctx.shadowOffsetY = o.glow ? 0 : 1; ctx.fillStyle = col; ctx.fillText(str, x, y);
+  const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function measure(str, font, ls = '0px') { ctx.save(); ctx.font = font; ctx.letterSpacing = ls; const w = ctx.measureText(str).width; ctx.restore(); return w; }
+// an item icon stand-in: an emoji in a white (item quality) border; lit 0..1 (dark until reached)
+function icon(x, y, s, emo, lit = 1, glow = null) {
+  ctx.save(); const base = ctx.globalAlpha; if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 12; }
+  const g = ctx.createRadialGradient(x, y, 0, x, y, s * .7); g.addColorStop(0, '#3a3226'); g.addColorStop(1, '#14100a');
+  ctx.fillStyle = g; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.shadowBlur = 0;
+  ctx.globalAlpha *= lerp(.35, 1, lit); ctx.font = `${Math.round(s * .66)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emo, x, y + 1);
+  ctx.globalAlpha = base; ctx.strokeStyle = lit > .5 ? '#f0f0f0' : '#6a6a6a'; ctx.lineWidth = 1.5; ctx.strokeRect(x - s / 2 + .75, y - s / 2 + .75, s - 1.5, s - 1.5);
+  if (lit < 1) { ctx.fillStyle = `rgba(0,0,0,${.5 * (1 - lit)})`; ctx.fillRect(x - s / 2, y - s / 2, s, s); } ctx.restore(); }
+
+// ---------- sound: the mockups' helpers (tools/render-media.html), live ----------
+let AC = null, OUT = null;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+const on = () => document.getElementById('snd').checked;
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2, att = .004) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.exponentialRampToValueAtTime(f2, T + dec * .8); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + att); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', hit) { if (!on()) return; const A = ac(), T = A.currentTime + t, n = Math.floor(A.sampleRate * dur), buf = A.createBuffer(1, n, A.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (hit ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n)); const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(OUT); s.start(T); }
+function click(t = 0, vol = .05, f = 3000, q = 6) { noise(t, .012, vol, f, q); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine', null, .002)); }
+const semi = n => Math.pow(2, n / 12);
+
+// ---------- the tools: the same drawings as in game (tools/render-media.html) ----------
+const OL = 'stroke="#1a1410" stroke-width="2.2" stroke-linejoin="round"';
+const ART = {
+  ToolNeedle: `<g transform="translate(26,1) scale(2.75)"><path d="M4 0 L5.4 17 Q4 21.5 2.6 17 Z" fill="#e8e8f0" stroke="#606070" stroke-width=".6"/><ellipse cx="4" cy="4" rx="1" ry="2" fill="#0e130b"/></g>`,
+  ToolDrop: `<defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e4ff"/><stop offset=".55" stop-color="#c8a0ff"/><stop offset="1" stop-color="#8a50e0"/></linearGradient></defs>
+    <g transform="translate(13,3) scale(3.2)"><path d="M6 0 C6 0 11 7 11 10.5 A5 5 0 0 1 1 10.5 C1 7 6 0 6 0 Z" fill="url(#dg)" stroke="#3a1a6a" stroke-width=".7"/><ellipse cx="4.2" cy="10" rx="1.2" ry="1.8" fill="rgba(255,255,255,.6)"/></g>`,
+  ToolHammer: `<g transform="rotate(-35 32 32)"><rect x="28" y="20" width="9" height="42" rx="3" fill="#a8672e" ${OL}/><line x1="31" y1="26" x2="31" y2="56" stroke="#d8955a" stroke-width="2"/><rect x="10" y="6" width="44" height="17" rx="3" fill="#8a96a4" ${OL}/><rect x="13" y="8" width="38" height="4" rx="2" fill="#c8d2dc"/></g>`,
+  ToolSprout: `<path d="M32 60 V30" stroke="#2e7a2a" stroke-width="5" stroke-linecap="round"/><path d="M32 34 C18 36 8 26 8 14 C22 12 32 20 32 34 Z" fill="#5ac83a" ${OL}/><path d="M32 30 C44 32 56 24 56 10 C42 8 32 16 32 30 Z" fill="#7ee04a" ${OL}/><path d="M12 16 C20 18 26 24 30 32" fill="none" stroke="#b8f090" stroke-width="2"/><path d="M52 12 C44 14 38 20 34 28" fill="none" stroke="#c8ff9a" stroke-width="2"/>`,
+  ToolPick: `<g transform="rotate(-30 32 32)"><rect x="28" y="16" width="8" height="46" rx="3" fill="#a8672e" ${OL}/><path d="M4 22 Q32 2 60 22 Q32 12 4 22 Z" fill="#9aa6b2" ${OL}/><rect x="26" y="9" width="12" height="12" rx="2" fill="#6a7684" ${OL}/></g>`,
+};
+const IMG = {}; for (const k in ART) { const i = new Image(); i.src = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">${ART[k]}</svg>`); IMG[k] = i; }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0, vr: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'sq') { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    else if (p.shape === 'leaf') { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.beginPath(); ctx.ellipse(0, 0, p.size * 1.8, p.size * .8, 0, 0, 7); ctx.fill(); }
+    ctx.restore(); } }
+
+// ---------- professions: material, tool and its motion, what's next ----------
+// span: what Ring and Segments fill (gatherers: last unlock -> next; crafters: the rank); cspan: Constellation's (the whole rank)
+const PROF = {
+  Blacksmithing: { col: '#e0883a', light: '#ffc890', tool: 'ToolHammer', motion: 'swing', mat: 'iron', span: [75, 150], cspan: [75, 150], v: 137, five: 140, unlockV: 149,
+    caps: [[150, 'Expert']], snd: k => { click(0, .05, 2500 * k, 2); metal(0, 1100 * k, .025, .5); },
+    hit(x, y) { for (let i = 0; i < 10; i++) spawn({ x, y, vx: (Math.random() - .5) * 160, vy: -60 - Math.random() * 90, g: 380, life: .5, size: 1.3, col: i % 2 ? '#ffd070' : '#ff8a30' }); } },
+  Alchemy: { col: '#9a5ae0', light: '#d0a8ff', tool: 'ToolDrop', motion: 'drip', mat: 'liquid', span: [75, 150], cspan: [75, 150], v: 112, five: 120, unlockV: 149,
+    caps: [[150, 'Expert']], snd: k => tone(300 * k, 0, .04, .15, 'sine', 180 * k),
+    hit(x, y) { spawn({ x, y, size: 2, shape: 'ring', grow: 14, life: .5, col: '#d0a8ff' }); for (let i = 0; i < 5; i++) spawn({ x, y, vx: (Math.random() - .5) * 70, vy: -50 - Math.random() * 50, g: 300, life: .5, size: 1.5, col: '#e8d8ff' }); } },
+  Tailoring: { col: '#c8b88a', light: '#fff4d8', tool: 'ToolNeedle', motion: 'stitch', mat: 'thread', span: [75, 150], cspan: [75, 150], v: 131, five: 131, unlockV: 149,
+    caps: [[150, 'Expert']], snd: k => noise(0, .05, .02, 5000 * k, 4),
+    hit(x, y) { for (let i = 0; i < 4; i++) spawn({ x, y, vx: (Math.random() - .5) * 50, vy: -20 - Math.random() * 30, g: 60, life: .6, size: 1, col: '#fff4d8' }); } },
+  Herbalism: { col: '#3fa83a', light: '#9ff08a', tool: 'ToolSprout', motion: 'pop', mat: 'stem', span: [100, 115], cspan: [75, 150], v: 108, five: 108, unlockV: 114, verb: 'gather',
+    unlocks: [[85, 'Stranglekelp', '🌾'], [100, 'Bruiseweed', '🌿'], [115, 'Wild Steelbloom', '🌼'], [120, 'Grave Moss', '🍀'], [125, 'Kingsblood', '🌺'], [150, 'Liferoot', '🌱']],
+    snd: k => { tone(620 * k, 0, .04, .08, 'sine', 980 * k); noise(0, .06, .015, 4000, 1); },
+    hit(x, y) { for (let i = 0; i < 7; i++) spawn({ x, y, vx: (Math.random() - .5) * 50, vy: -15 - Math.random() * 25, life: 1, size: 1.3, col: '#fff27a' }); } },
+  Mining: { col: '#c86a2a', light: '#ffb070', tool: 'ToolPick', motion: 'swing', mat: 'stone', span: [75, 125], cspan: [75, 150], v: 101, five: 110, unlockV: 124, verb: 'mine',
+    unlocks: [[125, 'Iron Ore', '🌑']], caps: [[150, 'Expert']],
+    snd: k => { noise(0, .03, .06, 2400 * k, 3, 'bandpass', true); metal(0, 900 * k, .012, .15, [1, 2.76], [1, .3]); },
+    hit(x, y) { for (let i = 0; i < 8; i++) spawn({ x, y, vx: (Math.random() - .5) * 140, vy: -50 - Math.random() * 80, g: 420, life: .6, size: 1.5, shape: 'sq', vr: 9, col: i % 3 ? '#8a7e72' : '#ffb070' }); } },
+};
+function nextOf(p, v) { // the next thing to reach: { lv, name, emo, cap }
+  if (p.unlocks) for (const u of p.unlocks) if (u[0] > v) return { lv: u[0], name: u[1], emo: u[2] };
+  const c = (p.caps || [[150, 'Expert']]).find(c => c[0] >= v) || [150, 'Expert']; return { lv: c[0], name: c[1], emo: '⭐', cap: true }; }
+
+// the tool's motion: t seconds since the strike began (it lands at HIT); returns dx, dy, rot, sx, sy
+const HIT = .15;
+function motion(kind, t) { const u = t < HIT ? t / HIT : 0, r = t >= HIT ? clamp((t - HIT) / .3) : 1;
+  if (t > HIT + .3 || t < 0) return { dx: 0, dy: 0, rot: 0, sx: 1, sy: 1 };
+  if (kind === 'swing') return t < HIT ? { dx: 0, dy: -3 * u, rot: -.7 * eOut(u), sx: 1, sy: 1 } : { dx: 0, dy: 0, rot: .25 * (1 - eOut(r)), sx: 1, sy: 1 };
+  if (kind === 'drip') return t < HIT ? { dx: 0, dy: -9 * eOut(u), rot: 0, sx: 1, sy: 1 } : { dx: 0, dy: 0, rot: 0, sx: 1 + .25 * (1 - r), sy: 1 - .3 * (1 - r) };
+  if (kind === 'stitch') return t < HIT ? { dx: 0, dy: -8 * eOut(u), rot: 0, sx: 1, sy: 1 } : { dx: 0, dy: 5 * Math.sin(Math.PI * r), rot: 0, sx: 1, sy: 1 };
+  if (kind === 'pop') { const s = t < HIT ? lerp(1, .6, u) : lerp(.6, 1, eBack(r)); return { dx: 0, dy: 0, rot: 0, sx: s, sy: s }; } }
+function drawTool(p, x, y, size, since, fadeAt) { const m = motion(p.motion, since), img = IMG[p.tool]; if (!img.complete) return;
+  const fa = fadeAt === undefined ? 1 : clamp(1 - (S.age - fadeAt) / .3); if (fa <= 0) return; // (it steps aside for the unlock)
+  ctx.save(); ctx.globalAlpha *= fa; ctx.translate(x + m.dx, y + m.dy); ctx.rotate(m.rot); ctx.scale(m.sx, m.sy); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+  ctx.drawImage(img, -size / 2, -size, size, size); ctx.restore(); }
+
+// ---------- materials along a path (Ring's arc, Constellation's line) ----------
+// path: s (0..1) -> { x, y, a (tangent) }; L: its length in px
+function track(path, L, w) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath();
+  for (let i = 0, n = Math.ceil(L / 3); i <= n; i++) { const q = path(i / n); ctx.lineTo(q.x, q.y); } ctx.stroke(); ctx.restore(); }
+function poly(path, s0, s1, L) { ctx.beginPath(); const n = Math.max(2, Math.ceil(L * (s1 - s0) / 2)); for (let i = 0; i <= n; i++) { const q = path(lerp(s0, s1, i / n)); ctx.lineTo(q.x, q.y); } }
+function material(p, path, L, f, w, now, hitAge) {
+  if (f <= 0) return; ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const fresh = clamp(1 - hitAge / .8); // just struck: the tip glows
+  if (p.mat === 'iron') { // iron heating toward the tip: dark red, orange, then white-hot where the hammer just struck
+    const n = Math.max(2, Math.ceil(L * f / 3)); ctx.lineWidth = w;
+    for (let i = 0; i < n; i++) { const s0 = f * i / n, s1 = f * (i + 1) / n, d = (f - s1) * L, heat = clamp(1 - d / (50 + 40 * fresh));
+      ctx.strokeStyle = grad3([[0, '#4a1408'], [.45, '#c8401a'], [.8, '#ffb040'], [1, fresh > .2 ? '#fff6e0' : '#ffd890']], heat);
+      if (heat > .7) { ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 8; } else ctx.shadowBlur = 0; poly(path, s0, s1 + .002, L); ctx.stroke(); } }
+  else if (p.mat === 'liquid') { // glowing liquid in a glass tube, bubbles drifting along
+    ctx.strokeStyle = 'rgba(200,170,255,.18)'; ctx.lineWidth = w + 4; poly(path, 0, 1, L); ctx.stroke();
+    ctx.strokeStyle = p.col; ctx.lineWidth = w; ctx.shadowColor = p.col; ctx.shadowBlur = 8 + 8 * fresh; poly(path, 0, f, L); ctx.stroke(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.2; poly(path, 0, f, L); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; for (let k = 0; k < Math.ceil(L * f / 20); k++) { const s = ((k * .137 + now * .06) % 1) * f, q = path(s), o = Math.sin(k * 2.3 + now * 3) * w * .25; ctx.beginPath(); ctx.arc(q.x - Math.sin(q.a) * o, q.y + Math.cos(q.a) * o, .9 + (k % 3) * .4, 0, 7); ctx.fill(); } }
+  else if (p.mat === 'thread') { // a running stitch in cream thread
+    ctx.strokeStyle = 'rgba(255,244,216,.22)'; ctx.lineWidth = 1; poly(path, 0, f, L); ctx.stroke();
+    ctx.strokeStyle = '#fff4d8'; ctx.lineWidth = 2.6; ctx.setLineDash([6, 4]); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 2; poly(path, 0, f, L); ctx.stroke(); ctx.setLineDash([]);
+    if (fresh > 0) { ctx.strokeStyle = `rgba(255,255,255,${fresh})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; poly(path, Math.max(0, f - 14 / L), f, L); ctx.stroke(); } }
+  else if (p.mat === 'stem') { // a green stem growing, leaves along it (the newest unfurls)
+    ctx.strokeStyle = '#2e7a2a'; ctx.lineWidth = 3; poly(path, 0, f, L); ctx.stroke();
+    const step = 13 / L; let i = 0; for (let s = step; s < f; s += step, i++) { const q = path(s), side = i % 2 ? 1 : -1, grow = clamp((f - s) * L / 10);
+      ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.a + side * .7 + Math.sin(now * 2 + i) * .08); ctx.scale(grow, grow);
+      ctx.fillStyle = i % 3 ? '#5ac83a' : '#7ee04a'; ctx.beginPath(); ctx.ellipse(side * 0 + 5, 0, 5, 2.2, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#b8f090'; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(1, 0); ctx.lineTo(9, 0); ctx.stroke(); ctx.restore(); } }
+  else if (p.mat === 'stone') { // layered stone with flecks of ore
+    ctx.strokeStyle = '#5a5048'; ctx.lineWidth = w; poly(path, 0, f, L); ctx.stroke();
+    ctx.strokeStyle = '#8a7e72'; ctx.lineWidth = w * .4; poly(path, 0, f, L); ctx.stroke();
+    ctx.fillStyle = '#ffb070'; let i = 0; for (let s = 6 / L; s < f; s += 9 / L, i++) { const q = path(s), o = (i % 2 ? 1 : -1) * w * .28; ctx.shadowColor = '#ff9040'; ctx.shadowBlur = fresh > 0 && (f - s) * L < 20 ? 6 : 0; ctx.fillRect(q.x - Math.sin(q.a) * o - 1, q.y + Math.cos(q.a) * o - 1, 2, 2); }
+    if (fresh > 0) { ctx.strokeStyle = `rgba(255,200,140,${fresh * .8})`; ctx.lineWidth = w; poly(path, Math.max(0, f - 10 / L), f, L); ctx.stroke(); } }
+  ctx.restore(); }
+
+// a Segments cell drawn in the material: lit 0..1 (left to right), age since it was lit
+function cell(p, x, y, w, h, lit, age, now, i) {
+  const flash = clamp(1 - age / .4); ctx.save();
+  const shape = () => { ctx.beginPath();
+    if (p.mat === 'iron') { ctx.moveTo(x + 1.5, y); ctx.lineTo(x + w - 1.5, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); }
+    else if (p.mat === 'liquid') ctx.roundRect(x + .5, y, w - 1, h, [2, 2, w / 2, w / 2]);
+    else if (p.mat === 'stem') ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, 7);
+    else if (p.mat === 'stone') { const j = (i * 37 % 5) / 5; ctx.moveTo(x + w * .2, y + j); ctx.lineTo(x + w * .85, y + 1); ctx.lineTo(x + w, y + h * .55); ctx.lineTo(x + w * .75, y + h); ctx.lineTo(x + w * .1, y + h - j); ctx.lineTo(x, y + h * .4); ctx.closePath(); }
+    else ctx.rect(x, y, w, h); };
+  // empty
+  if (p.mat === 'thread') { ctx.strokeStyle = 'rgba(255,244,216,.2)'; ctx.lineWidth = 1; ctx.setLineDash([1.5, 2]); ctx.beginPath(); ctx.moveTo(x + 1, y + 1); ctx.lineTo(x + w - 1, y + h - 1); ctx.moveTo(x + w - 1, y + 1); ctx.lineTo(x + 1, y + h - 1); ctx.stroke(); ctx.setLineDash([]); }
+  else { shape(); ctx.fillStyle = p.mat === 'liquid' ? 'rgba(200,170,255,.08)' : p.mat === 'stem' ? 'rgba(20,50,20,.6)' : 'rgba(40,34,30,.85)'; ctx.fill(); ctx.strokeStyle = p.mat === 'liquid' ? 'rgba(220,200,255,.4)' : 'rgba(255,255,255,.12)'; ctx.lineWidth = 1; ctx.stroke(); }
+  if (lit > 0) { ctx.save(); ctx.beginPath(); ctx.rect(x - 2, y - 4, (w + 4) * lit, h + 8); ctx.clip();
+    if (p.mat === 'iron') { const heat = clamp(1 - age / 2.5); shape(); ctx.fillStyle = grad3([[0, '#a03818'], [.5, '#ff9a3a'], [1, '#fff4d8']], heat * .9 + .1); if (heat > .3) { ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 10 * heat; } ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x + 2, y + 1, w - 4, 1.5); }
+    else if (p.mat === 'liquid') { const lv = y + h * .25; ctx.beginPath(); ctx.roundRect(x + 1.5, lv, w - 3, y + h - lv - 1, [0, 0, w / 2, w / 2]); ctx.fillStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(x + 2, lv, w - 4, 1);
+      ctx.beginPath(); ctx.arc(x + w / 2 + Math.sin(now * 3 + i) * 1.5, y + h - 3 - ((now * 6 + i * 3) % (h * .6)), .8, 0, 7); ctx.fill(); }
+    else if (p.mat === 'thread') { ctx.strokeStyle = '#fff4d8'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 2; ctx.beginPath(); ctx.moveTo(x + 1.5, y + 1.5); ctx.lineTo(x + w - 1.5, y + h - 1.5); ctx.moveTo(x + w - 1.5, y + 1.5); ctx.lineTo(x + 1.5, y + h - 1.5); ctx.stroke(); }
+    else if (p.mat === 'stem') { ctx.translate(x + w / 2, y + h / 2); ctx.rotate(Math.sin(now * 2 + i) * .08 * clamp(1 - age / 2)); ctx.translate(-(x + w / 2), -(y + h / 2)); shape(); ctx.fillStyle = i % 2 ? '#5ac83a' : '#7ee04a'; ctx.fill(); ctx.strokeStyle = '#b8f090'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x + 1, y + h / 2); ctx.lineTo(x + w - 1, y + h / 2); ctx.stroke(); }
+    else if (p.mat === 'stone') { shape(); ctx.fillStyle = '#7a6e62'; ctx.fill(); ctx.fillStyle = '#9a8e82'; ctx.fillRect(x + w * .3, y + 2, w * .4, 1.5); ctx.fillStyle = '#ffb070'; ctx.shadowColor = '#ff9040'; ctx.shadowBlur = 4; ctx.fillRect(x + w * .55, y + h * .55, 2, 2); }
+    ctx.restore(); }
+  if (flash > 0 && lit >= 1) { shape(); ctx.fillStyle = `rgba(255,255,255,${flash * .9})`; ctx.fill(); }
+  ctx.restore(); }
+
+// ---------- scene ----------
+let S = null, fam = 'R', profName = 'Herbalism', moment = 'up';
+function build() { const p = PROF[profName], hits = []; let v0;
+  if (moment === 'up') { v0 = p.v; hits.push(.35); }
+  else if (moment === 'five') { v0 = p.five; for (let k = 0; k < 5; k++) hits.push(.35 + k * .75); }
+  else { v0 = p.unlockV; hits.push(.35); }
+  const end = hits[hits.length - 1], nx = nextOf(p, v0 + hits.length - 1), reaches = v0 + hits.length >= nx.lv;
+  return { p, v0, hits, reaches, nx: nextOf(p, v0), age: 0, fired: {}, nums: {}, lit: {}, dur: end + (reaches ? 4.4 : 2.6) }; }
+function play() { S = build(); P = []; document.getElementById('note').textContent = FAM[fam].name + ', ' + profName + ': ' + FAM[fam].note; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+// the skill value now (float while filling) and the time since the last strike began
+function state() { let v = S.v0, last = -9, k = 0;
+  S.hits.forEach((h, i) => { if (S.age >= h) { last = h; k = i; const t = clamp((S.age - h - HIT) / .45); v = S.v0 + i + eOut(t); } });
+  return { v, shown: Math.floor(v + 1e-6), since: S.age - last, hitAge: S.age - last - HIT, k }; }
+// strikes: the tool's sound (a step higher each in a row) and its particles, once per hit
+function strikes(tipFn) { S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('hit' + i, () => { S.p.snd(semi(i * 2)); const t = tipFn(); S.p.hit(t.x, t.y); }); }); }
+function drawNum(key, s, x, y, size, col, align, style) {
+  const n = S.nums[key] || (S.nums[key] = { v: s, prev: s, t: -9 }); if (n.v !== s) { n.prev = n.v; n.v = s; n.t = S.age; }
+  const since = S.age - n.t;
+  if (style === 'roll') { const t = eOut(clamp(since / .4)), font = `700 ${size}px system-ui`; const w = measure(s, font), pp = n.prev.padStart(s.length, ' '); let sx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+    ctx.save(); ctx.beginPath(); ctx.rect(sx - 3, y - size, w + 6, size * 1.3); ctx.clip();
+    for (let i = 0; i < s.length; i++) { const cw = measure(s[i], font); if (pp[i] !== s[i] && t < 1) { text(pp[i], sx, y - t * size, font, col); text(s[i], sx, y + (1 - t) * size, font, '#fff'); } else text(s[i], sx, y, font, col); sx += cw; }
+    ctx.restore(); return w; }
+  if (style === 'glint') { const font = `400 ${size}px Georgia, serif`, w = text(s, x, y, font, col, align, { ls: '2px' }), fl = clamp(1 - since / .6);
+    if (fl > 0) { const gx = align === 'center' ? x + w / 2 : align === 'right' ? x : x + w; ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 10; ctx.globalAlpha = fl; star4(gx - 2, y - size * .8, 4 + fl * 7, since * 3); ctx.restore(); } return w; }
+  const pop = since < .25 ? 1 - since / .25 : 0; ctx.save(); ctx.translate(x, y); ctx.scale(1 + pop * .35, 1 + pop * .35);
+  const w = text(s, 0, 0, `800 ${size}px system-ui`, pop > .3 ? '#fff' : col, align, { ls: '1px' }); ctx.restore(); return w; }
+
+// the reveal under the banner (shared): the new herb or ore drops in dark, lights with rings and glints
+function reveal(x, y, at, font, upper) {
+  const t = S.age - at; if (t < 0) return; const p = S.p, nx = S.nx, a = clamp(t / .2) * clamp((S.dur - S.age) / .4);
+  const drop = eOut(clamp(t / .35)), lit = clamp((t - .35) / .3);
+  once('rv', () => { tone(880, .35, .04, .5); tone(1318, .4, .03, .6); });
+  if (t > .35) once('rv2', () => { spawn({ x, y: y + 12, size: 10, shape: 'ring', grow: 30, life: .6, col: '#fff' }); for (let i = 0; i < 6; i++) spawn({ x: x + (Math.random() - .5) * 34, y: y + 12 + (Math.random() - .5) * 34, life: .8, size: 3, shape: 'star', vr: 3, col: '#fff' }); });
+  ctx.save(); ctx.globalAlpha = a; icon(x, lerp(y - 14, y + 12, drop), 30, nx.emo, lit, lit > 0 ? p.light : null);
+  const line = nx.cap ? `${profName} ${nx.lv}: train ${nx.name}` : `You can now ${p.verb} ${nx.name}!`;
+  text(upper ? line.toUpperCase() : line, x, y + 46, font, '#ffd36a', 'center', { alpha: lit, ls: upper ? '1px' : '0.5px' }); ctx.restore(); }
+
+// ---------- the families ----------
+const FAM = {
+  R: { name: 'Ring', desc: 'The skill in a dial. The ring is drawn in the profession\'s material; its tool rides the head of the arc and strikes; the next herb or ore waits at the top where the ring closes, and closing it sends out a shockwave.',
+    note: 'the arc is the material, the tool rides its head, the next unlock waits at the seam.',
+    draw(top, road) {
+      const p = S.p, st = state(), [lo, hi] = p.span, f = clamp((st.v - lo) / (hi - lo)), pw = 330, ph = road && p.unlocks ? 86 : 78, px = W / 2 - pw / 2, py = top;
+      const a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), cx = px + 44, cy = py + ph / 2, r = 27;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.82)'; ctx.beginPath(); ctx.roundRect(px + 34, py + 12, pw - 34, ph - 24, (ph - 24) / 2); ctx.fill();
+      ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(cx, cy, r + 9, 0, 7); ctx.fill();
+      const path = s => { const ang = -Math.PI / 2 + s * Math.PI * 2; return { x: cx + Math.cos(ang) * r, y: cy + Math.sin(ang) * r, a: ang + Math.PI / 2 }; }, L = Math.PI * 2 * r;
+      track(path, L, 6); material(p, path, L, f, 6, S.age, st.hitAge);
+      // closing: flash + shockwave
+      if (S.reaches && f >= 1) once('close', () => { S.closeAt = S.age; spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 60, life: .7, col: '#fff' }); spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 34, life: .9, col: p.light });
+        for (let i = 0; i < 12; i++) { const an = Math.random() * 7; spawn({ x: cx + Math.cos(an) * r, y: cy + Math.sin(an) * r, vx: Math.cos(an) * 80, vy: Math.sin(an) * 80, life: .6, size: 1.6, col: p.light }); }
+        [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), i * .05, .04, .5)); });
+      if (S.closeAt !== undefined) { const t = S.age - S.closeAt; if (t < .4) { ctx.strokeStyle = `rgba(255,255,255,${1 - t / .4})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke(); } }
+      drawNum('n', String(st.shown), cx, cy + 6, 16, '#fff', 'center', 'roll');
+      // the tool at the head, outside the ring (under the seam's icon)
+      const hp = path(Math.max(f, .001)), dir = Math.atan2(hp.y - cy, hp.x - cx); const tx = cx + Math.cos(dir) * (r + 4), ty = cy + Math.sin(dir) * (r + 4);
+      strikes(() => ({ x: hp.x, y: hp.y })); drawTool(p, tx, ty + 6, 26, st.since, S.closeAt);
+      // the seam: the next unlock waits where the ring closes
+      const nx = S.nx, seamPop = S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0;
+      icon(cx, cy - r - 1, 15 + seamPop * 5, nx.emo, f >= 1 ? 1 : .45 + .15 * Math.sin(S.age * 4), f >= 1 ? p.light : null);
+      if (road && p.unlocks) { // the road: the next unlocks in a row, the nearest first, their levels under them
+        text(profName, px + 90, py + 32, '600 16px system-ui', p.light, 'left');
+        const list = p.unlocks.filter(u => u[0] > S.v0).slice(0, 4), ry = py + 52, gap = 34;
+        ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px + 98, ry); ctx.lineTo(px + 98 + gap * (list.length - 1), ry); ctx.stroke();
+        list.forEach((u, i) => { const x = px + 98 + i * gap, got = st.v >= u[0] - 1e-6, isNext = i === 0 && !got, pop = got && S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0;
+          if (isNext) { ctx.save(); ctx.fillStyle = p.light; ctx.globalAlpha *= .25 + .2 * Math.sin(S.age * 4); ctx.beginPath(); ctx.arc(x, ry, 12, 0, 7); ctx.fill(); ctx.restore(); }
+          icon(x, ry, 16 + pop * 4, u[2], got ? 1 : isNext ? .65 : .3, got ? p.light : null);
+          text(String(u[0]), x, ry + 21, '600 9px system-ui', got || isNext ? '#cfc6b0' : '#7a7262', 'center'); });
+      } else {
+        text(profName, px + 90, py + 35, '600 16px system-ui', p.light, 'left');
+        const nt = nx.cap ? `${nx.name} at ${nx.lv}` : `Next: ${nx.name} at ${nx.lv}`; text(nt, px + 90, py + 54, '400 12px system-ui', '#cfc6b0', 'left');
+      }
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 12, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  B: { name: 'Ring + road', desc: 'The clean Ring as in round 2, and beside it the road: the next few herbs or ores in a row with their levels, the nearest one glowing. Reaching it closes the ring and that icon pops. Crafters have no unlocks to show, so they keep the text line.',
+    note: 'the Ring, plus the next unlocks in a row beside it (gatherers).',
+    draw(top) { FAM.R.draw(top, true); } },
+  M: { name: 'Milestone ring', desc: 'One ring for the whole rank, with the unlocks sitting on the ring at their levels like Constellation\'s stars. The material fills around, the tool rides the head, each unlock ignites as the arc reaches it, and the rank cap closes the ring.',
+    note: 'the whole rank around the ring, the unlocks on it at their levels.',
+    draw(top) {
+      const p = S.p, st = state(), [lo, hi] = p.cspan, f = clamp((st.v - lo) / (hi - lo)), pw = 340, ph = 92, px = W / 2 - pw / 2, py = top;
+      const a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), cx = px + 50, cy = py + ph / 2, r = 34;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.82)'; ctx.beginPath(); ctx.roundRect(px + 40, py + 18, pw - 40, ph - 36, (ph - 36) / 2); ctx.fill();
+      ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(cx, cy, r + 11, 0, 7); ctx.fill();
+      const path = s => { const ang = -Math.PI / 2 + s * Math.PI * 2; return { x: cx + Math.cos(ang) * r, y: cy + Math.sin(ang) * r, a: ang + Math.PI / 2 }; }, L = Math.PI * 2 * r;
+      track(path, L, 6); material(p, path, L, f, 6, S.age, st.hitAge);
+      drawNum('n', String(st.shown), cx, cy + 6, 17, '#fff', 'center', 'roll');
+      const hp = path(Math.max(f, .001)), dir = Math.atan2(hp.y - cy, hp.x - cx);
+      strikes(() => ({ x: hp.x, y: hp.y })); drawTool(p, cx + Math.cos(dir) * (r + 5), cy + Math.sin(dir) * (r + 5) + 6, 24, st.since, S.ignAt);
+      // the milestones on the ring
+      const nodes = (p.unlocks || []).filter(u => u[0] > lo && u[0] <= hi).map(u => ({ lv: u[0], emo: u[2] }));
+      if (!p.unlocks || !nodes.find(n => n.lv === hi)) { if (!p.unlocks) [100, 125].forEach(lv => nodes.push({ lv, dot: true })); nodes.push({ lv: hi, emo: '⭐', cap: true }); }
+      nodes.forEach((n, i) => { const q = path((n.lv - lo) / (hi - lo)), reached = st.v >= n.lv - 1e-6;
+        if (reached && S.v0 < n.lv) once('ign' + i, () => { S.ignAt = S.age; for (let k = 0; k < 10; k++) spawn({ x: q.x, y: q.y, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 90, life: .9, size: 3.5, shape: 'star', vr: 3, col: k % 2 ? '#fff' : p.light });
+          if (n.lv === hi) { spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 60, life: .7, col: '#fff' }); spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 34, life: .9, col: p.light }); }
+          [0, 7, 12, 19].forEach((m, j) => tone(523 * semi(m), j * .05, .04, .5)); });
+        if (n.dot) { ctx.fillStyle = reached ? '#fff' : 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(q.x, q.y, 2, 0, 7); ctx.fill(); return; }
+        const ign = reached && S.ignAt !== undefined && S.v0 < n.lv ? clamp(1 - (S.age - S.ignAt) / .7) : 0, isNext = n.lv === S.nx.lv && !reached;
+        if (ign > 0 || isNext) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = p.light; ctx.shadowBlur = 10; ctx.globalAlpha *= ign > 0 ? ign : .3 + .25 * Math.sin(S.age * 4); star4(q.x, q.y, 11 + ign * 12, S.age * .4); ctx.restore(); }
+        icon(q.x, q.y, 14 + ign * 6, n.emo, reached ? 1 : isNext ? .65 : .3, reached ? p.light : null); });
+      text(profName, px + 102, py + 41, '600 16px system-ui', p.light, 'left');
+      const nt = S.nx.cap ? `${S.nx.name} at ${S.nx.lv}` : `Next: ${S.nx.name} at ${S.nx.lv}`; text(nt, px + 102, py + 60, '400 12px system-ui', '#cfc6b0', 'left');
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 10, (S.ignAt ?? 99) + .3, '600 13px system-ui', false);
+    } },
+  C: { name: 'Constellation', desc: 'A line across the whole rank with the herbs and ores you\'ll unlock as stars along it, so you see the road ahead. The line is drawn in the profession\'s material, the tool travels at its tip, and reaching an unlock ignites its star.',
+    note: 'the whole rank as a line in the material; every unlock on the road is a star.',
+    draw(top) {
+      const p = S.p, st = state(), [lo, hi] = p.cspan, f = clamp((st.v - lo) / (hi - lo)), pw = 380, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      ctx.save(); ctx.globalAlpha = a;
+      const g = ctx.createRadialGradient(W / 2, py + 44, 0, W / 2, py + 44, pw * .6); g.addColorStop(0, 'rgba(0,0,8,.72)'); g.addColorStop(1, 'rgba(0,0,8,0)'); ctx.fillStyle = g; ctx.fillRect(px - 60, py - 30, pw + 120, 150);
+      const tw = measure(profName, '400 17px Georgia, serif', '2px') + 10 + measure(String(st.shown), '400 18px Georgia, serif', '2px'), tx0 = W / 2 - tw / 2;
+      const w1 = text(profName, tx0, py + 22, '400 17px Georgia, serif', p.light, 'left', { ls: '2px' }); drawNum('n', String(st.shown), tx0 + w1 + 10, py + 22, 18, '#fff', 'left', 'glint');
+      const lx = px + 26, lw = pw - 52, ly = py + 54, path = s => ({ x: lx + lw * s, y: ly, a: 0 });
+      track(path, lw, 2); material(p, path, lw, f, 6, S.age, st.hitAge);
+      // the stars: every unlock in the rank (crafters: milestones and the rank cap)
+      const nodes = (p.unlocks || []).filter(u => u[0] > lo && u[0] <= hi).map(u => ({ lv: u[0], emo: u[2] }));
+      if (!p.unlocks || !nodes.find(n => n.lv === hi)) { if (!p.unlocks) [100, 125].forEach(lv => nodes.push({ lv, dot: true })); nodes.push({ lv: hi, emo: '⭐', cap: true }); }
+      nodes.forEach((n, i) => { const x = lx + lw * (n.lv - lo) / (hi - lo), reached = st.v >= n.lv - 1e-6;
+        if (reached && S.v0 < n.lv) once('ign' + i, () => { S.ignAt = S.age; for (let k = 0; k < 10; k++) spawn({ x, y: ly, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 90, life: 1, size: 3.5, shape: 'star', vr: 3, col: k % 2 ? '#fff' : p.light });
+          [0, 4, 7, 11, 14].forEach((m, j) => { tone(1046 * semi(m), j * .07, .035, 1); tone(2093 * semi(m), j * .07, .01, .5); }); });
+        if (n.dot) { ctx.fillStyle = reached ? '#fff' : 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(x, ly, 2, 0, 7); ctx.fill(); return; }
+        const ign = reached && S.ignAt !== undefined && S.v0 < n.lv ? clamp(1 - (S.age - S.ignAt) / .7) : 0, isNext = n.lv === S.nx.lv && !reached;
+        if (reached || isNext) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = p.light; ctx.shadowBlur = 12; ctx.globalAlpha *= reached ? .9 : .35 + .25 * Math.sin(S.age * 4); star4(x, ly, 13 + ign * 16, S.age * .4); ctx.restore(); }
+        icon(x, ly, 18 + ign * 6, n.emo, reached ? 1 : isNext ? .6 : .3, reached ? p.light : null); });
+      text(String(lo), lx, ly + 22, '400 10px Georgia, serif', '#9a927e', 'center'); text(String(hi), lx + lw, ly + 22, '400 10px Georgia, serif', '#9a927e', 'center');
+      const nt = S.nx.cap ? `${S.nx.name} at ${S.nx.lv}` : `Next: ${S.nx.name} at ${S.nx.lv}`; text(nt, W / 2, ly + 26, '400 12px Georgia, serif', '#cfc6b0', 'center', { ls: '1px' });
+      const tip = path(f); strikes(() => tip); drawTool(p, tip.x, ly - 7, 24, st.since, S.ignAt);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + 96, (S.ignAt ?? 99) + .3, '400 14px Georgia, serif', false);
+    } },
+  S: { name: 'Segments', desc: 'A row of cells, one per skill point, each one a piece of the material: little ingots that glow white-hot and cool, vials, cross-stitches, leaves, chunks of ore. The tool strikes the cell it fills; the next unlock sits at the end of the row.',
+    note: 'one cell per skill point, each made of the material; the tool strikes the cell it fills.',
+    draw(top) {
+      const p = S.p, st = state(), [lo, hi] = p.span, span = hi - lo, per = Math.ceil(span / 25), N = Math.ceil(span / per), pw = 360, ph = 74, px = W / 2 - pw / 2, py = top;
+      const a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4); ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(8,8,12,.88)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 4); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.stroke(); ctx.fillStyle = p.col; ctx.fillRect(px, py, 3, ph);
+      const t1 = text(profName.toUpperCase(), px + 16, py + 22, '700 14px system-ui', p.light, 'left', { ls: '1.5px' }); drawNum('n', String(st.shown), px + 16 + t1 + 8, py + 22, 15, '#fff', 'left', 'pop');
+      const nx = S.nx, nt = (nx.cap ? `${nx.name} at ${nx.lv}` : `Next: ${nx.name} ${nx.lv}`).toUpperCase(); text(nt, px + pw - 44, py + 22, '700 10px system-ui', '#cfc6b0', 'right', { ls: '1px' });
+      const gx = px + 16, gw = pw - 16 - 44, gap = 2, cw = (gw - gap * (N - 1)) / N, cy = py + 48, ch = 16;
+      let cur = { x: gx, y: cy };
+      for (let i = 0; i < N; i++) { const x = gx + i * (cw + gap), amt = clamp((st.v - lo - i * per) / per);
+        if (amt >= 1 && S.lit[i] === undefined) S.lit[i] = S.v0 - lo >= (i + 1) * per ? -9 : S.age;
+        if (S.fullAt !== undefined) { const w = S.age - S.fullAt - i * .025; if (w > 0 && w < .25 && S.lit[i] < S.age - .3) S.lit[i] = S.age; }
+        cell(p, x, cy, cw, ch, amt, S.lit[i] !== undefined ? S.age - S.lit[i] : 9, S.age, i);
+        if (amt > 0 && amt <= 1 && (st.v - lo) <= (i + 1) * per + 1e-6) cur = { x: x + cw / 2, y: cy }; }
+      if (st.v - lo <= 0) cur = { x: gx + cw / 2, y: cy };
+      if (S.reaches && st.v >= hi - 1e-6) once('full', () => { S.fullAt = S.age + .05; [0, 2, 4, 7, 9, 12].forEach((n, i) => tone(660 * semi(n), i * .045, .03, .12, 'square'));
+        for (let i = 0; i < 14; i++) spawn({ x: gx + Math.random() * gw, y: cy + ch / 2, vx: (Math.random() - .5) * 60, vy: -40 - Math.random() * 70, g: 200, life: .7, size: 1.6, shape: 'sq', vr: 8, col: i % 2 ? '#fff' : p.light }); });
+      const endPop = S.fullAt !== undefined ? eBack(clamp((S.age - S.fullAt - N * .025) / .3)) : 0, done = st.v >= nx.lv - 1e-6;
+      icon(px + pw - 22, cy + ch / 2, 22 + endPop * 5, nx.emo, done ? 1 : .5, done ? p.light : null);
+      strikes(() => ({ x: cur.x, y: cur.y })); drawTool(p, cur.x, cy - 1, 20, st.since);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.fullAt ?? 99) + .45, '700 12px system-ui', true);
+    } },
+};
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; FAM[fam].draw(Math.max(20, H * .14)); stepP(dt); if (S.age > S.dur + .5 && document.getElementById('loop').checked) play(); }
+  requestAnimationFrame(frame); }
+
+// ---------- panel ----------
+const fEl = document.getElementById('fams'), pEl = document.getElementById('profs');
+['R', 'B', 'M', 'C'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
+Object.keys(PROF).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.dataset.p = k; b.onclick = () => setProf(k); pEl.appendChild(b); });
+function sync() { document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam)); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
+  document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('fdesc').textContent = FAM[fam].desc; }
+function setFam(k) { fam = k; sync(); play(); } function setProf(k) { profName = k; sync(); play(); }
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); }
+  const i = '1234'.indexOf(e.key); if (i >= 0) setFam('RBMC'[i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

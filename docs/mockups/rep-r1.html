@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reputation Round 1</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  .desc { margin-top: 4px; min-height: 30px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: calc(50% - 28px); top: 42%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .note { position: absolute; left: 12px; top: 10px; right: 12px; color: rgba(255,255,255,.6); font-size: 12px; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Reputation, round 1</h1>
+  <small>Any faction's gain reacts. The game's rep bar shows your watched faction; we draw on it only while it's
+  shown. Other factions (or a hidden bar) need another place: three choices below. A new standing gets the
+  Ring + road banner. Space replays.</small>
+
+  <h2>Moment</h2>
+  <button data-m="single" class="on">Quest: watched faction</button><button data-m="quest">Quest: two factions + XP</button><button data-m="other">Other faction</button>
+  <button data-m="grindW">Kill rep, watched</button><button data-m="grindO">Kill rep, other</button>
+  <button data-m="standing">New standing</button><button data-m="exalted">Exalted</button>
+  <small>Kill rep: +5 Timbermaw a kill, 7 kills; the gains add up in one counter instead of seven.</small>
+
+  <h2>On the game's rep bar (watched faction)</h2>
+  <button data-w="stream" class="on">Stream (like XP)</button><button data-w="sweep">Sweep</button>
+  <small id="wdesc" class="desc"></small>
+
+  <h2>Other factions, or the bar hidden</h2>
+  <button data-n="chip" class="on">Faction rings</button><button data-n="column">Picked-up rows</button><button data-n="float">Over your head</button>
+  <small id="ndesc" class="desc"></small>
+
+  <h2>Game UI</h2>
+  <label class="fx"><input type="checkbox" id="barOn" checked><b>Rep bar shown</b><small>Off: the game's rep bar is hidden (no faction watched); then the watched faction's gains go to the choice above too.</small></label>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>A soft wooden tick for rep gains (quiet for kill rep), a chime for a new standing. Skipped when another chime just played.</small></label>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="char" id="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function measure(s, font) { ctx.save(); ctx.font = font; const w = ctx.measureText(s).width; ctx.restore(); return w; }
+const fmt = n => Math.round(n).toLocaleString('en-US');
+function emoji(x, y, s, e, a = 1) { ctx.save(); ctx.globalAlpha *= a; ctx.font = `${Math.round(s)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e, x, y + 1); ctx.restore(); }
+
+// ---------- sound ----------
+let AC = null, OUT = null; const on = () => document.getElementById('snd').checked;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+function tone(f, t = 0, vol = .05, dec = .4, type = 'sine') { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .004); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+const semi = n => Math.pow(2, n / 12); let lastChime = -99;
+function repTick(quiet) { tone(420, 0, quiet ? .02 : .045, .12, 'triangle'); tone(840, .01, quiet ? .006 : .015, .08); }
+function repChime() { if (S.age - lastChime < 1.5) return; lastChime = S.age; tone(392, 0, .035, .7, 'triangle'); tone(587, .07, .03, .8, 'triangle'); }
+function xpChime() { lastChime = S.age; [0, 4, 7].forEach((n, i) => tone(1046 * semi(n), i * .04, .03, .9)); }
+
+// ---------- factions and standings ----------
+const STAND = [['Neutral', 3000, '#e6c200'], ['Friendly', 6000, '#3fc04f'], ['Honored', 12000, '#2fc08a'], ['Revered', 21000, '#2fb0c8'], ['Exalted', 1000, '#e8c050']];
+const PERK = { Honored: '10% off at their vendors', Revered: 'Revered recipes and rewards', Exalted: 'Their mounts are yours to buy' };
+const FAC = { Stormwind: '🦁', Ironforge: '⛰️', Darnassus: '🌙', 'Timbermaw Hold': '🐻' };
+let rep = {};
+function resetRep(m) { rep = { Stormwind: { s: 1, v: 2750 }, Ironforge: { s: 1, v: 1200 }, Darnassus: { s: 2, v: 4100 }, 'Timbermaw Hold': { s: 0, v: 1850 } }; Object.assign(rep, JSON.parse(JSON.stringify(m.start || {}))); }
+const frac = r => clamp(r.v / STAND[r.s][1]);
+
+// ---------- the game's bars ----------
+function bars() { const w = Math.min(W * .66, 760), x = (W - w) / 2; return { xp: { x, y: H - 44, w, h: 11 }, rep: { x, y: H - 58, w, h: 8 } }; }
+function gameUI() { const g = bars(), b = g.xp; ctx.save();
+  for (let i = 0; i < 12; i++) { const s = 32, x = W / 2 - 6 * (s + 3) + i * (s + 3); ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(x, H - 30, s, 26); ctx.strokeStyle = '#4a4234'; ctx.strokeRect(x + .5, H - 29.5, s - 1, 25); }
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4); ctx.fillStyle = '#1a1424'; ctx.fillRect(b.x, b.y, b.w, b.h);
+  const gr = ctx.createLinearGradient(0, b.y, 0, b.y + b.h); gr.addColorStop(0, '#b070f0'); gr.addColorStop(1, '#5a22a0'); ctx.fillStyle = gr; ctx.fillRect(b.x, b.y, b.w * S.xpShown, b.h);
+  ctx.fillStyle = '#0a0a0a'; for (let i = 1; i < 20; i++) ctx.fillRect(b.x + b.w * i / 20 - .5, b.y, 1, b.h);
+  if (barOn()) { const r = g.rep, wr = rep[S.m.watched], st = STAND[wr.s]; ctx.fillStyle = '#0a0a0a'; ctx.fillRect(r.x - 2, r.y - 2, r.w + 4, r.h + 3); ctx.fillStyle = '#122014'; ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.fillStyle = st[2]; ctx.globalAlpha = .85; ctx.fillRect(r.x, r.y, r.w * S.repShown, r.h); ctx.globalAlpha = 1;
+    text(`${S.m.watched}  ·  ${st[0]}  ${fmt(S.repShown * st[1])} / ${fmt(st[1])}`, r.x + r.w / 2, r.y + 7, '600 8px system-ui', 'rgba(255,255,255,.75)', 'center'); }
+  ctx.restore(); return g; }
+const barOn = () => document.getElementById('barOn').checked;
+function charPos() { const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(); return { x: c.left - s.left + c.width / 2, y: c.top - s.top + c.height * .3, top: c.top - s.top, right: c.right - s.left }; }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += (p.vr || 0) * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    ctx.restore(); } }
+
+// ---------- moments ----------
+// gains: [at, faction, amount]; xp: a quest's XP stream too
+const MOMENTS = {
+  single: { watched: 'Stormwind', gains: [[.2, 'Stormwind', 250]], dur: 3, note: 'A quest gives +250 Stormwind, your watched faction.' },
+  quest: { watched: 'Stormwind', xp: .06, gains: [[.2, 'Stormwind', 250], [.2, 'Ironforge', 62]], dur: 3.4, note: 'A quest turn-in: XP, +250 Stormwind (watched) and +62 Ironforge (not watched), all at once.' },
+  other: { watched: 'Stormwind', gains: [[.2, 'Darnassus', 250]], dur: 3, note: '+250 Darnassus, a faction you aren\'t watching.' },
+  grindW: { watched: 'Timbermaw Hold', gains: [0, 1, 2, 3, 4, 5, 6].map(i => [.2 + i * 1.3, 'Timbermaw Hold', 5]), kill: true, dur: 10.5, note: 'Kill rep, watched: +5 Timbermaw a kill. One counter climbs.' },
+  grindO: { watched: 'Stormwind', gains: [0, 1, 2, 3, 4, 5, 6].map(i => [.2 + i * 1.3, 'Timbermaw Hold', 5]), kill: true, dur: 10.5, note: 'Kill rep, not watched: +5 Timbermaw a kill.' },
+  standing: { watched: 'Stormwind', start: { Stormwind: { s: 1, v: 5900 } }, gains: [[.2, 'Stormwind', 250]], dur: 6.5, note: 'A quest pushes Stormwind from Friendly to Honored.' },
+  exalted: { watched: 'Stormwind', start: { Stormwind: { s: 3, v: 20900 } }, gains: [[.2, 'Stormwind', 250]], dur: 7, note: 'Exalted with Stormwind: the biggest standing moment.' },
+};
+let S = null, wStyle = 'stream', nStyle = 'chip', moment = 'single';
+function play() { const m = MOMENTS[moment]; resetRep(m); S = { m, age: 0, fired: {}, xpShown: .62, repShown: frac(rep[m.watched]), items: {}, streams: [], banner: null }; P = []; lastChime = -99;
+  document.getElementById('note').textContent = m.note; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+
+// a gain arrives: the standing may go up; it shows on the bar (watched, shown) or in the chosen place; same-faction gains within 3 s add up
+function gain(fac, amt) { const r = rep[fac], before = { s: r.s, v: r.v }; r.v += amt; let up = false; if (r.v >= STAND[r.s][1] && r.s < 4) { r.v -= STAND[r.s][1]; r.s++; up = true; }
+  const onBar = fac === S.m.watched && barOn(), key = (onBar ? 'bar:' : 'n:') + fac, it = S.items[key];
+  if (it && S.age - it.last < 3 && !up) { it.amt += amt; it.last = S.age; it.to = frac(r); it.pop = S.age; }
+  else S.items[key] = { fac, amt, at: S.age, last: S.age, from: before.s === r.s ? before.v / STAND[r.s][1] : 0, fromFull: up, to: frac(r), onBar, pop: S.age, landed: 0 };
+  if (onBar) { if (up) { S.repShown = 0; } if (wStyle === 'stream') startStream(S.items[key]); }
+  repTick(S.m.kill); if (up) S.banner = { fac, at: S.age + .7, from: before.s, to: r.s }; }
+
+// ---------- watched faction, on the game's bar ----------
+function startStream(it) { const c = charPos(), n = Math.round(clamp(it.amt / 12, 6, 26)); it.motes = []; it.side = Math.random() > .5 ? 1 : -1;
+  for (let i = 0; i < n; i++) it.motes.push({ t: -.32 * i / n, j: rnd(-1, 1), share: (i + 1) / n }); it.c = c; it.start = S.repShown; it.target = it.fromFull ? it.to : it.to; }
+function drawBarItem(it, dt) { const b = bars().rep, col = STAND[rep[it.fac].s][2];
+  if (wStyle === 'stream' && it.motes) { const dur = .45;
+    for (const m of it.motes) { if (m.done) continue; m.t += dt; if (m.t < 0) continue; const u = eInOut(clamp(m.t / dur)), tx = b.x + b.w * S.repShown, ty = b.y + b.h / 2, cx = it.c.x + it.side * 90, cy = it.c.y - 70, w = Math.sin(Math.PI * u) * 10 * m.j;
+      const x = (1 - u) ** 2 * it.c.x + 2 * (1 - u) * u * cx + u * u * tx + w, y = (1 - u) ** 2 * it.c.y + 2 * (1 - u) * u * cy + u * u * ty + w * .5;
+      ctx.save(); ctx.fillStyle = '#c8ffd0'; ctx.shadowColor = col; ctx.shadowBlur = 6; ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); ctx.restore();
+      if (u >= 1) { m.done = true; S.repShown = lerp(it.start, it.target, m.share); it.landed = m.share; } }
+    if (it.motes.every(m => m.done)) it.motes = null; }
+  else if (wStyle === 'sweep' || !it.motes) { const t = clamp((S.age - it.pop) / .35); if (wStyle === 'sweep') { S.repShown = lerp(S.repShown, it.to, t); it.landed = 1; const x0 = b.x + b.w * it.from, x1 = b.x + b.w * S.repShown;
+      if (S.age - it.pop < .8) { const a = 1 - (S.age - it.pop) / .8, sx = lerp(x0, x1 + 30, eOut(t)), g = ctx.createLinearGradient(sx - 40, 0, sx, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, `rgba(255,255,255,${.9 * a})`); ctx.fillStyle = g; ctx.fillRect(Math.max(b.x, sx - 40), b.y - 1, Math.min(40, sx - b.x), b.h + 2); } } else it.landed = 1; }
+  // the counter at the bar's head
+  const t = S.age - it.last; if (t > 2.4 || it.landed <= 0) return; const pop = clamp(1 - (S.age - it.pop) / .25), a = clamp(2.4 - t) * clamp((S.age - it.at) / .15), x = b.x + b.w * S.repShown + 8;
+  ctx.save(); ctx.translate(x, b.y - 3); ctx.scale(1 + pop * .25, 1 + pop * .25); text(`+${fmt(it.amt * Math.min(1, it.landed))} ${it.fac}`, 0, 0, '700 12px system-ui', pop > .5 ? '#fff' : '#9ff0a8', 'left', { alpha: a }); ctx.restore(); }
+
+// ---------- other factions (or the bar hidden): the three choices ----------
+const NDESC = { chip: 'A small ring per faction pops up above the bars: its icon in the middle, the arc (in the standing\'s color) filling to the new amount, "+250" beside it. Two factions, two rings side by side. Same Ring look as the skill-ups.',
+  column: 'A row in the side column ("Picked up"), like the harvest rows: icon, faction, a thin bar in the standing\'s color that fills, "+250". Keeps rep with your loot and gathering, out of the middle.',
+  float: '"+250 Darnassus" rises over your head with a tiny ring, like the game\'s combat text but in our look. Right where you look; gone in two seconds.' };
+const WDESC = { stream: 'Motes stream from you into the rep bar\'s fill, like XP (Snappier, with the counter).', sweep: 'No motes: a light sweeps across the new part and the counter pops at its head. Calmer, since rep often arrives together with XP.' };
+function miniRing(x, y, r, f0, f, col, emo, pop) { ctx.save(); ctx.fillStyle = 'rgba(6,8,12,.9)'; ctx.beginPath(); ctx.arc(x, y, r + 4, 0, 7); ctx.fill();
+  ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke();
+  ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.shadowBlur = 0;
+  if (f > f0) { ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2 + Math.PI * 2 * f0, -Math.PI / 2 + Math.PI * 2 * f); ctx.globalAlpha *= .5 * pop + .2; ctx.stroke(); ctx.globalAlpha = 1; }
+  emoji(x, y, r * 1.15, emo); ctx.restore(); }
+function drawOther(list) {
+  const c = charPos(), g = bars();
+  list.forEach((it, i) => { const t = S.age - it.at, life = (S.age - it.last) < 2.6, a = clamp(t / .15) * clamp((2.6 - (S.age - it.last)) / .4); if (a <= 0) return;
+    const r = rep[it.fac], col = STAND[r.s][2], p = eOut(clamp((S.age - it.pop) / .5)), f = lerp(it.from, it.to, p), pop = clamp(1 - (S.age - it.pop) / .3), sc = 1 + pop * .12;
+    ctx.save(); ctx.globalAlpha = a;
+    if (nStyle === 'chip') { const n = list.length, x = W / 2 - (n - 1) * 70 + i * 140 - 40, y = (barOn() ? g.rep.y : g.xp.y) - 38;
+      ctx.translate(x, y); ctx.scale(sc, sc); miniRing(0, 0, 15, it.from, f, col, FAC[it.fac], pop);
+      text(`+${fmt(it.amt)}`, 24, -1, '700 14px system-ui', pop > .5 ? '#fff' : '#9ff0a8', 'left'); text(it.fac, 24, 12, '600 10px system-ui', '#cfc6b0', 'left'); }
+    else if (nStyle === 'column') { const w = 190, x = Math.min(c.right + 110, W - w - 14), y = c.top - 40 + i * 30, slide = eOut(clamp(t / .25));
+      ctx.translate((1 - slide) * 30, 0); ctx.fillStyle = 'rgba(8,8,12,.78)'; ctx.fillRect(x, y - 13, w, 26); ctx.fillStyle = col; ctx.fillRect(x, y - 13, 2, 26);
+      emoji(x + 14, y - 1, 15, FAC[it.fac]); text(it.fac, x + 28, y + 1, '600 12px system-ui', '#e8e2d0', 'left'); ctx.save(); ctx.translate(x + w - 8, y + 1); ctx.scale(sc, sc); text(`+${fmt(it.amt)}`, 0, 0, '700 12px system-ui', pop > .5 ? '#fff' : '#9ff0a8', 'right'); ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(x + 28, y + 6, w - 40, 2.5); ctx.fillStyle = col; ctx.fillRect(x + 28, y + 6, (w - 40) * f, 2.5); if (pop > 0) { ctx.fillStyle = `rgba(255,255,255,${pop})`; ctx.fillRect(x + 28 + (w - 40) * it.from, y + 6, (w - 40) * (f - it.from), 2.5); } }
+    else { const x = c.x + (i - (list.length - 1) / 2) * 120, y = c.top - 18 - i * 4 - eOut(clamp(t / .5)) * 22 - Math.max(0, S.age - it.last) * 8;
+      ctx.translate(x, y); ctx.scale(sc, sc); miniRing(-42, -5, 9, it.from, f, col, FAC[it.fac], pop);
+      text(`+${fmt(it.amt)} ${it.fac}`, -28, 0, '700 13px system-ui', pop > .5 ? '#fff' : '#9ff0a8', 'left'); }
+    ctx.restore(); }); }
+
+// ---------- the new standing: Ring + road ----------
+function banner(bn) { const t = S.age - bn.at; if (t < 0) return; const ex = bn.to === 4, dur = ex ? 5.5 : 4.6; if (t > dur) return;
+  const pw = 380, ph = 92, px = W / 2 - pw / 2, py = H * .13, cx = px + 50, cy = py + ph / 2, r = 32, a = clamp(t / .2) * clamp((dur - t) / .4);
+  const oldC = STAND[bn.from][2], newC = STAND[bn.to][2];
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = 'rgba(6,8,12,.84)'; ctx.beginPath(); ctx.roundRect(px + 40, py + 14, pw - 40, ph - 28, (ph - 28) / 2); ctx.fill();
+  if (ex) { ctx.strokeStyle = 'rgba(232,192,80,.6)'; ctx.lineWidth = 1; ctx.stroke(); }
+  ctx.fillStyle = 'rgba(6,8,12,.96)'; ctx.beginPath(); ctx.arc(cx, cy, r + 10, 0, 7); ctx.fill();
+  // the ring: the old standing fills to full, closes, then the new standing's color starts
+  const fill = eInOut(clamp((t - .1) / .5)), closed = t > .6;
+  ctx.lineCap = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke();
+  ctx.strokeStyle = closed ? newC : oldC; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (closed ? (ex ? 1 : .05 + .03 * clamp((t - .9) / .5)) : lerp(.92, 1, fill))); ctx.stroke(); ctx.shadowBlur = 0;
+  if (closed) once('close', () => { spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: ex ? 110 : 70, life: ex ? 1 : .7, col: '#fff' }); spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 40, life: .9, col: newC });
+    if (ex) { spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 80, life: 1.3, col: '#ffe9a8' }); for (let i = 0; i < 22; i++) { const an = rnd(0, 7); spawn({ x: cx, y: cy, vx: Math.cos(an) * rnd(60, 160), vy: Math.sin(an) * rnd(60, 160), life: 1.1, size: 4, shape: 'star', vr: 3, col: i % 2 ? '#fff' : '#ffe9a8' }); } }
+    else for (let i = 0; i < 12; i++) { const an = rnd(0, 7); spawn({ x: cx + Math.cos(an) * r, y: cy + Math.sin(an) * r, vx: Math.cos(an) * 80, vy: Math.sin(an) * 80, life: .6, size: 1.6, col: newC }); }
+    repChime(); if (ex) tone(784, .2, .03, 1.2, 'triangle'); });
+  if (closed && t < 1.05) { ctx.strokeStyle = `rgba(255,255,255,${1 - (t - .6) / .45})`; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke(); }
+  emoji(cx, cy, 30, FAC[bn.fac]);
+  // title and the standing that rolls over
+  text(bn.fac, px + 100, py + 38, '600 16px system-ui', '#e8e2d0', 'left'); const s0 = STAND[bn.from][0], s1 = STAND[bn.to][0], rt = eOut(clamp((t - .6) / .35));
+  ctx.save(); ctx.beginPath(); ctx.rect(px + 98, py + 40, 160, 22); ctx.clip(); text(s0, px + 100, py + 56 - rt * 18, '700 14px system-ui', oldC, 'left'); text(s1, px + 100, py + 56 + (1 - rt) * 18, '700 14px system-ui', newC, 'left', { alpha: rt }); ctx.restore();
+  // the road: the standings in a row, the new one pops
+  const rx = px + 200, ry = py + 50; ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 4 * 38, ry); ctx.stroke();
+  STAND.forEach(([nm, , c], i) => { const x = rx + i * 38, got = i < bn.to || (i === bn.to && closed), isNew = i === bn.to, pop = isNew && closed ? eBack(clamp((t - .65) / .3)) : 0;
+    ctx.fillStyle = got ? c : 'rgba(255,255,255,.18)'; ctx.shadowColor = c; ctx.shadowBlur = got ? 6 + pop * 8 : 0; ctx.beginPath(); ctx.arc(x, ry, 4 + pop * 3, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    text(nm, x, ry + 17, `${isNew ? 700 : 500} 9px system-ui`, got ? (isNew ? '#fff' : '#cfc6b0') : '#6a6252', 'center'); });
+  const perk = PERK[s1]; if (perk) text(perk, px + 100, py + ph - 6, '500 11px system-ui', '#ffd36a', 'left', { alpha: clamp((t - 1.1) / .3) });
+  ctx.restore(); }
+
+// ---------- XP for the quest moment (Stream, as picked) ----------
+function xpStream(t) { if (!S.m.xp || t < 0) return; const b = bars().xp, c = charPos();
+  if (!S.xpMotes) { S.xpMotes = []; for (let i = 0; i < 40; i++) S.xpMotes.push({ t: -.4 * i / 40, j: rnd(-1, 1), share: (i + 1) / 40 }); S.xp0 = S.xpShown; }
+  for (const m of S.xpMotes) { if (m.done) continue; m.t += S.dt; if (m.t < 0) continue; const u = eInOut(clamp(m.t / .45)), tx = b.x + b.w * S.xpShown, ty = b.y + b.h / 2, cx = c.x - 90, cy = c.y - 70, w = Math.sin(Math.PI * u) * 10 * m.j;
+    const x = (1 - u) ** 2 * c.x + 2 * (1 - u) * u * cx + u * u * tx + w, y = (1 - u) ** 2 * c.y + 2 * (1 - u) * u * cy + u * u * ty;
+    ctx.save(); ctx.fillStyle = '#dcb8ff'; ctx.shadowColor = '#a35cf0'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); ctx.restore();
+    if (u >= 1) { m.done = true; S.xpShown = S.xp0 + S.m.xp * m.share; if (m.share === 1) xpChime(); } }
+  if (S.xpShown > S.xp0) text('+1,320 XP', b.x + b.w * S.xpShown + 8, b.y + 9, '700 12px system-ui', '#dcb8ff', 'left', { alpha: clamp(3 - t) }); }
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; S.dt = dt; const m = S.m;
+    m.gains.forEach(([at, fac, amt], i) => { if (S.age >= at) once('g' + i, () => gain(fac, amt)); });
+    gameUI(); xpStream(S.age - .2);
+    const items = Object.values(S.items); items.filter(i => i.onBar).forEach(i => drawBarItem(i, dt)); drawOther(items.filter(i => !i.onBar));
+    if (S.banner) banner(S.banner);
+    stepP(dt); if (S.age > m.dur + .4 && document.getElementById('loop').checked) play();
+  }
+  requestAnimationFrame(frame); }
+
+// ---------- panel ----------
+function sync() { document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.querySelectorAll('[data-w]').forEach(b => b.classList.toggle('on', b.dataset.w === wStyle));
+  document.querySelectorAll('[data-n]').forEach(b => b.classList.toggle('on', b.dataset.n === nStyle)); document.getElementById('wdesc').textContent = WDESC[wStyle]; document.getElementById('ndesc').textContent = NDESC[nStyle]; }
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { wStyle = b.dataset.w; sync(); play(); });
+document.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { nStyle = b.dataset.n; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+document.getElementById('barOn').onchange = () => play();
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -46,6 +46,7 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Settings.lua             first page + helpers: ns.Native (plain pages on our own frames: Toggle, Slider, Choice, Button),
                            ns.UI (custom controls incl. Dropdown)
   Look.lua                 "Popups" page (custom: live preview): when, style, size, the 3D item, item ID check
+  Arrivals.lua             popup arrivals per rarity (ns.ARRIVALS, ns.ArrivalFor) and the "Arrivals" page
   RainFx.lua               "Loot rain" page (native): when, where, afterwards, effects by group, tests
   Pages.lua                "Sounds" page (native): popup sound picker
   Media/*.tga, *.ogg       original art (tools/gen_textures.lua, white, tinted in game) and sounds

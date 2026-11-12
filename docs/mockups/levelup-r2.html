@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Level-up Round 2</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  .desc { margin-top: 4px; min-height: 44px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: calc(50% - 28px); top: 52%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .note { position: absolute; left: 12px; bottom: 112px; right: 12px; color: rgba(255,255,255,.6); font-size: 12px; text-shadow: 0 1px 2px #000; text-align: center; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Level-up, round 2</h1>
+  <small>Your two from round 1 (Grand ring, Ledger) and two that grow out of them (Medallion, Ringed ledger),
+  plus how it leaves. Silent, as before. Space replays; keys 1-4.</small>
+
+  <h2>Layout</h2>
+  <div id="lays"></div>
+  <small class="desc" id="ldesc"></small>
+
+  <h2>Moment</h2>
+  <button data-m="quest" class="on">Level 24 (a quest)</button><button data-m="combat">Level 24 mid-fight</button><button data-m="ten">Level 10 (talents)</button><button data-m="forty">Level 40 (riding)</button>
+  <small>Mid-fight: a small ring with the new level only; the full screen waits until the fight is over. Level 10
+  and 40 show a bigger unlock (talents, riding).</small>
+
+  <h2>How it leaves</h2>
+  <button data-exit="gather" class="on">The stats fly into you</button><button data-exit="fade">Fade out</button>
+  <small>Fly into you: each number breaks into motes that stream down into your character, and a soft ring
+  rises from you as they land. (In game, hovering it holds it and a click closes it, like the popups.)</small>
+
+  <h2>Options</h2>
+  <label class="fx"><input type="checkbox" id="dim"><b>Dim the world</b><small>Darken the screen behind it a little, like the Legendary moment.</small></label>
+  <label class="fx"><input type="checkbox" id="ticks"><b>Stat tick sounds</b><small>Off: silent as you asked (the game's own sound plays). On to hear soft ticks.</small></label>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="char" id="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function measure(s, font) { ctx.save(); ctx.font = font; const w = ctx.measureText(s).width; ctx.restore(); return w; }
+const fmt = n => Math.round(n).toLocaleString('en-US');
+function emoji(x, y, s, e, a = 1) { ctx.save(); ctx.globalAlpha *= a; ctx.font = `${Math.round(s)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e, x, y + 1); ctx.restore(); }
+const XP = '#a35cf0', XPL = '#dcb8ff', GOLD = '#ffd36a';
+
+// ---------- sound: only the optional stat ticks ----------
+let AC = null, OUT = null, lastTick = 0;
+function tick() { if (!document.getElementById('ticks').checked) return; const now = performance.now(); if (now - lastTick < 40) return; lastTick = now;
+  if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.4; OUT.connect(AC.destination); } const T = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+  o.frequency.value = 1700 + Math.random() * 200; g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(.012, T + .003); g.gain.exponentialRampToValueAtTime(.0001, T + .05); o.connect(g).connect(OUT); o.start(T); o.stop(T + .06); }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0 }, o)); }
+function stepP(dt) { for (const p of P) if (p.home) { p.age += dt; const u = eInOut(clamp(p.age / p.life)); p.x = (1 - u) ** 2 * p.x0 + 2 * (1 - u) * u * p.cx + u * u * p.tx; p.y = (1 - u) ** 2 * p.y0 + 2 * (1 - u) * u * p.cy + u * u * p.ty; p.age -= dt; }
+  for (const p of P) { p.age += dt; if (p.home) continue; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.pow(.3, dt); p.vy *= Math.pow(.3, dt); p.rot += (p.vr || 0) * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = p.home ? .95 : 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
+    else { ctx.lineWidth = 2.5 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); } ctx.restore(); } }
+function shock(x, y, r, big) { spawn({ x, y, size: r, shape: 'ring', grow: big ? 120 : 80, life: .8, col: '#fff' }); spawn({ x, y, size: r, shape: 'ring', grow: big ? 70 : 45, life: 1, col: XPL });
+  for (let i = 0; i < (big ? 26 : 16); i++) { const an = rnd(0, 7), sp = rnd(80, 200); spawn({ x: x + Math.cos(an) * r, y: y + Math.sin(an) * r, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, life: rnd(.6, 1.1), size: i % 3 ? 1.8 : 3.5, shape: i % 3 ? 'dot' : 'star', vr: 3, col: i % 2 ? '#fff' : XPL }); } }
+
+// ---------- the pieces every layout uses ----------
+// a ring in the XP purple with sparkles running round it; f: 0..1
+function ring(cx, cy, r, f, w, age) { ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = w; ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke();
+  ctx.strokeStyle = XP; ctx.shadowColor = XP; ctx.shadowBlur = 14; ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = Math.max(1, w * .2); ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke();
+  for (let k = 0; k < 12; k++) { const s = ((k / 12 + age * .05) % 1) * f, an = -Math.PI / 2 + s * Math.PI * 2; ctx.fillStyle = '#fff'; ctx.globalAlpha = .3 + .4 * Math.sin(age * 6 + k); ctx.beginPath(); ctx.arc(cx + Math.cos(an) * r, cy + Math.sin(an) * r, 1, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1; if (f > 0 && f < 1) { const an = -Math.PI / 2 + Math.PI * 2 * f; ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(cx + Math.cos(an) * r, cy + Math.sin(an) * r, w * .6, 0, 7); ctx.fill(); }
+  ctx.restore(); }
+// a rolling number (digits that change roll up)
+function roll(key, s, x, y, size, col, align, font = 'system-ui', weight = 700) { const n = S.nums[key] || (S.nums[key] = { v: s, prev: s, t: -9 }); if (n.v !== s) { n.prev = n.v; n.v = s; n.t = S.age; tick(); }
+  const t = eOut(clamp((S.age - n.t) / .3)), f = `${weight} ${size}px ${font}`, w = measure(s, f), pp = n.prev.padStart(s.length, ' '); let sx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  if (key[0] === 's' && S.spots) S.spots.push({ x: align === 'right' ? x - w / 2 : align === 'center' ? x : x + w / 2, y: y - size / 2 });
+  ctx.save(); ctx.beginPath(); ctx.rect(sx - 3, y - size, w + 6, size * 1.3); ctx.clip();
+  for (let i = 0; i < s.length; i++) { const cw = measure(s[i], f); if (pp[i] !== s[i] && t < 1) { text(pp[i], sx, y - t * size, f, col); text(s[i], sx, y + (1 - t) * size, f, '#fff'); } else text(s[i], sx, y, f, col); sx += cw; }
+  ctx.restore(); return w; }
+// the level's numbers
+const LV = { quest: [23, 24], combat: [23, 24], ten: [9, 10], forty: [39, 40] };
+const STATS = { 24: [['Health', 'HP', 1042, 1101], ['Mana', 'MP', 890, 925], ['Strength', 'STR', 48, 50], ['Agility', 'AGI', 41, 42], ['Stamina', 'STA', 52, 54], ['Intellect', 'INT', 70, 73], ['Spirit', 'SPI', 66, 68], ['Talent points', 'TP', 0, 1]],
+  10: [['Health', 'HP', 312, 341], ['Mana', 'MP', 290, 315], ['Strength', 'STR', 24, 25], ['Agility', 'AGI', 22, 23], ['Stamina', 'STA', 26, 27], ['Intellect', 'INT', 35, 37], ['Spirit', 'SPI', 33, 35], ['Talent points', 'TP', 0, 1]],
+  40: [['Health', 'HP', 1720, 1790], ['Mana', 'MP', 1610, 1655], ['Strength', 'STR', 71, 73], ['Agility', 'AGI', 60, 61], ['Stamina', 'STA', 80, 82], ['Intellect', 'INT', 118, 121], ['Spirit', 'SPI', 104, 106], ['Talent points', 'TP', 0, 1]] };
+const UNLOCK = { 24: [['✨', 'New spells at your trainer']], 10: [['🌟', 'Talents are open: your first point'], ['✨', 'New spells at your trainer']], 40: [['🐎', 'Riding: train it, buy your first mount'], ['✨', 'New spells at your trainer']] };
+const stats = () => STATS[S.lv[1] === 10 ? 10 : S.lv[1] === 40 ? 40 : 24], unlocks = () => UNLOCK[S.lv[1] === 10 ? 10 : S.lv[1] === 40 ? 40 : 24];
+const big = () => S.lv[1] === 10 || S.lv[1] === 40;
+
+// ---------- the four layouts (t: seconds since the screen began) ----------
+const LAY = {
+  A: { name: 'Ring + road', desc: 'Round 1\'s screen: the ring closes around the level on the left, the stats tick up in two columns beside it, the unlock under them. Compact, a wide banner.',
+    draw(t, a) { const pw = 460, ph = 176, px = W / 2 - pw / 2, py = H * .1, cx = px + 80, cy = py + ph / 2, r = 52;
+      ctx.fillStyle = 'rgba(6,8,12,.86)'; ctx.beginPath(); ctx.roundRect(px + 60, py + 12, pw - 60, ph - 24, 28); ctx.fill(); ctx.fillStyle = 'rgba(6,8,12,.96)'; ctx.beginPath(); ctx.arc(cx, cy, r + 14, 0, 7); ctx.fill();
+      const f = eInOut(clamp(t / .8)); ring(cx, cy, r, f, 7, t); if (f >= 1) once('close', () => shock(cx, cy, r, big()));
+      text('LEVEL', cx, cy - 18, '700 10px system-ui', '#cfc6b0', 'center', { ls: '3px' }); roll('lv', String(f >= 1 ? S.lv[1] : S.lv[0]), cx, cy + 16, 36, XPL, 'center');
+      text(`Level ${S.lv[1]}`, px + 156, py + 44, '600 18px system-ui', XPL, 'left', { alpha: clamp((t - .9) / .3) });
+      stats().forEach(([lab, , v0, v1], i) => { const col = i % 2, row = Math.floor(i / 2), rt = t - 1.05 - i * .13; if (rt < 0) return; const x = px + 156 + col * 140, y = py + 70 + row * 19, p = eOut(clamp((rt - .1) / .5));
+        ctx.save(); ctx.globalAlpha *= clamp(rt / .2); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.beginPath(); ctx.arc(x + 4, y - 4, 4, 0, 7); ctx.stroke(); ctx.strokeStyle = XPL; ctx.beginPath(); ctx.arc(x + 4, y - 4, 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p); ctx.stroke();
+        text(lab, x + 14, y, '500 11px system-ui', '#cfc6b0'); roll('s' + i, fmt(lerp(v0, v1, p)), x + 104, y, 12, '#fff', 'right'); if (p >= 1) text('+' + (v1 - v0), x + 108, y, '600 10px system-ui', XPL, 'left', { alpha: clamp((rt - .6) / .2) }); ctx.restore(); });
+      unlocks().forEach(([e, s], i) => { const ua = clamp((t - 2.3 - i * .2) / .3); emoji(px + 162, py + ph - 26 + i * 0 - (unlocks().length - 1 - i) * 16, 12, e, ua); text(s, px + 174, py + ph - 22 - (unlocks().length - 1 - i) * 16, '500 11px system-ui', GOLD, 'left', { alpha: ua }); }); } },
+  B: { name: 'Grand ring', desc: 'One big ring high in the middle of the screen with a huge number; when it closes, each stat pops out as a small ring of its own around it, filling as it ticks. The most ceremonial: a halo of your stats.',
+    draw(t, a) { const cx = W / 2, cy = H * .3, r = 64; const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 190); g.addColorStop(0, 'rgba(6,8,12,.85)'); g.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = g; ctx.fillRect(cx - 200, cy - 200, 400, 400);
+      const f = eInOut(clamp(t / .9)); ring(cx, cy, r, f, 9, t); if (f >= 1) once('close', () => shock(cx, cy, r, true));
+      text('LEVEL', cx, cy - 26, '700 11px system-ui', '#cfc6b0', 'center', { ls: '4px' }); roll('lv', String(f >= 1 ? S.lv[1] : S.lv[0]), cx, cy + 22, 52, XPL, 'center');
+      const st = stats(), n = st.length; st.forEach(([lab, ab, v0, v1], i) => { const rt = t - 1.1 - i * .12; if (rt < 0) return; const an = Math.PI * (1.1 - 1.2 * i / (n - 1)), out = eBack(clamp(rt / .35)), R = 118;
+        const x = cx + Math.cos(an) * R * out * 1.15, y = cy + Math.sin(an) * R * out * .78, p = eOut(clamp((rt - .2) / .5));
+        ctx.save(); ctx.globalAlpha *= clamp(rt / .2); ctx.fillStyle = 'rgba(6,8,12,.9)'; ctx.beginPath(); ctx.arc(x, y, 21, 0, 7); ctx.fill();
+        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(x, y, 17, 0, 7); ctx.stroke(); ctx.strokeStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, 17, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p); ctx.stroke(); ctx.shadowBlur = 0;
+        text(ab, x, y - 2, '700 9px system-ui', '#cfc6b0', 'center', { ls: '1px' }); text('+' + (v1 - v0), x, y + 10, '700 11px system-ui', p >= 1 ? '#fff' : XPL, 'center');
+        roll('s' + i, fmt(lerp(v0, v1, p)), x, y + 36, 10, '#cfc6b0', 'center'); ctx.restore(); });
+      unlocks().forEach(([e, s], i) => { const ua = clamp((t - 2.4 - i * .2) / .3), y = cy + 150 + i * 18; emoji(cx - measure(s, '500 12px system-ui') / 2 - 12, y - 4, 13, e, ua); text(s, cx, y, '500 12px system-ui', GOLD, 'center', { alpha: ua }); }); } },
+  C: { name: 'Ledger', desc: 'The RPG summary: a small ring with the level on top, then a list, one row per stat with the old value, an arrow and the new one rolling up, the gain in purple; a light sweeps along each row as it fills. The most readable.',
+    draw(t, a) { const pw = 300, rowH = 22, n = stats().length, ph = 96 + n * rowH + 20 + unlocks().length * 18, px = W / 2 - pw / 2, py = H * .06, cx = W / 2, cy = py + 40;
+      ctx.fillStyle = 'rgba(6,8,12,.88)'; ctx.beginPath(); ctx.roundRect(px, py + 10, pw, ph, 14); ctx.fill(); ctx.strokeStyle = 'rgba(220,184,255,.25)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = 'rgba(6,8,12,.96)'; ctx.beginPath(); ctx.arc(cx, cy, 38, 0, 7); ctx.fill(); const f = eInOut(clamp(t / .7)); ring(cx, cy, 30, f, 5, t); if (f >= 1) once('close', () => shock(cx, cy, 30, big()));
+      roll('lv', String(f >= 1 ? S.lv[1] : S.lv[0]), cx, cy + 9, 24, XPL, 'center'); text('LEVEL UP', cx, py + 96, '400 15px Georgia, serif', '#e8e2d0', 'center', { ls: '4px', alpha: clamp((t - .7) / .3) });
+      stats().forEach(([lab, , v0, v1], i) => { const rt = t - 1 - i * .16; if (rt < 0) return; const y = py + 124 + i * rowH, p = eOut(clamp((rt - .1) / .45)), ra = clamp(rt / .15);
+        ctx.save(); ctx.globalAlpha *= ra; if (rt < .5) { const sx = px + 14 + (pw - 28) * eOut(rt / .5), g = ctx.createLinearGradient(sx - 60, 0, sx, 0); g.addColorStop(0, 'rgba(220,184,255,0)'); g.addColorStop(1, `rgba(220,184,255,${.25 * (1 - rt / .5)})`); ctx.fillStyle = g; ctx.fillRect(px + 14, y - 15, sx - px - 14, 20); }
+        ctx.fillStyle = 'rgba(255,255,255,.05)'; if (i % 2) ctx.fillRect(px + 14, y - 15, pw - 28, 20);
+        text(lab, px + 24, y, '400 13px Georgia, serif', '#cfc6b0'); text(fmt(v0), px + 170, y, '500 12px system-ui', '#8a8270', 'right'); text('→', px + 184, y, '500 12px system-ui', '#8a8270', 'center');
+        roll('s' + i, fmt(lerp(v0, v1, p)), px + 238, y, 13, '#fff', 'right'); if (p >= 1) text('+' + (v1 - v0), px + pw - 22, y, '700 12px system-ui', XPL, 'right', { alpha: clamp((rt - .55) / .2) }); ctx.restore(); });
+      unlocks().forEach(([e, s], i) => { const ua = clamp((t - 2.6 - i * .2) / .3), y = py + 124 + n * rowH + 14 + i * 18; emoji(px + 30, y - 4, 13, e, ua); text(s, px + 44, y, '500 12px system-ui', GOLD, 'left', { alpha: ua }); }); } },
+  E: { name: 'Medallion', desc: 'Grand ring meets Ledger: the big ring with the huge number sits like a medallion on the top edge of the Ledger card, closes with the big shockwave, and the rows fill in below it. Ceremony on top, readable underneath.',
+    draw(t, a) { const pw = 320, rowH = 22, n = stats().length, r = 54, cx = W / 2, cy = H * .06 + r + 14, top = cy + 8, ph = 64 + n * rowH + unlocks().length * 18 + 10, px = cx - pw / 2;
+      ctx.fillStyle = 'rgba(6,8,12,.88)'; ctx.beginPath(); ctx.roundRect(px, top, pw, ph, 14); ctx.fill(); ctx.strokeStyle = 'rgba(220,184,255,.25)'; ctx.lineWidth = 1; ctx.stroke();
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r + 40); g.addColorStop(0, 'rgba(6,8,12,.97)'); g.addColorStop(.7, 'rgba(6,8,12,.9)'); g.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r + 40, 0, 7); ctx.fill();
+      const f = eInOut(clamp(t / .85)); ring(cx, cy, r, f, 8, t); if (f >= 1) once('close', () => shock(cx, cy, r, true));
+      text('LEVEL', cx, cy - 22, '700 10px system-ui', '#cfc6b0', 'center', { ls: '4px' }); roll('lv', String(f >= 1 ? S.lv[1] : S.lv[0]), cx, cy + 18, 44, XPL, 'center');
+      ledgerRows(t, px, cy + r + 34, pw, rowH, false); } },
+  F: { name: 'Ringed ledger', desc: 'The Ledger in the Ring look: a bigger glowing level ring on top, and every row starts with a small ring that fills as its number rolls up; the gain pops in when the ring closes. The rows feel like little skill-ups.',
+    draw(t, a) { const pw = 310, rowH = 24, n = stats().length, ph = 118 + n * rowH + 16 + unlocks().length * 18, px = W / 2 - pw / 2, py = H * .05, cx = W / 2, cy = py + 52;
+      ctx.fillStyle = 'rgba(6,8,12,.88)'; ctx.beginPath(); ctx.roundRect(px, py + 10, pw, ph, 14); ctx.fill(); ctx.strokeStyle = 'rgba(220,184,255,.25)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = 'rgba(6,8,12,.96)'; ctx.beginPath(); ctx.arc(cx, cy, 48, 0, 7); ctx.fill(); const f = eInOut(clamp(t / .75)); ring(cx, cy, 40, f, 6, t); if (f >= 1) once('close', () => shock(cx, cy, 40, big()));
+      roll('lv', String(f >= 1 ? S.lv[1] : S.lv[0]), cx, cy + 11, 30, XPL, 'center'); text('LEVEL UP', cx, py + 122, '400 14px Georgia, serif', '#e8e2d0', 'center', { ls: '4px', alpha: clamp((t - .75) / .3) });
+      ledgerRows(t, px, py + 150, pw, rowH, true); } },
+  D: { name: 'Road of levels', desc: 'Your levels as a road across the top: past levels lit, the ring rolls from the old level\'s stop to the new one and closes there; ahead, the next big stops (talents at 10, riding at 40, 60). The stats run in one strip under it.',
+    draw(t, a) { const L0 = S.lv[1] - 5, L1 = S.lv[1] + 5, rx = W / 2 - Math.min(W * .4, 300), rw = Math.min(W * .8, 600), ry = H * .16, step = rw / (L1 - L0), at = lv => rx + (lv - L0) * step;
+      ctx.fillStyle = 'rgba(6,8,12,.8)'; ctx.beginPath(); ctx.roundRect(rx - 30, ry - 56, rw + 60, 150, 20); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + rw, ry); ctx.stroke();
+      const move = eInOut(clamp((t - .1) / .7)), hx = lerp(at(S.lv[0]), at(S.lv[1]), move);
+      ctx.strokeStyle = XP; ctx.shadowColor = XP; ctx.shadowBlur = 10; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(hx, ry); ctx.stroke(); ctx.shadowBlur = 0;
+      const marks = { 10: '🌟', 20: '', 30: '', 40: '🐎', 60: '👑' };
+      for (let lv = L0; lv <= L1; lv++) { const x = at(lv), got = lv < S.lv[1] || (lv === S.lv[1] && move >= 1); ctx.fillStyle = got ? XPL : 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(x, ry, lv % 5 ? 2.5 : 4, 0, 7); ctx.fill();
+        if (lv % 5 === 0 || lv === S.lv[1]) text(String(lv), x, ry + 20, `${lv === S.lv[1] ? 700 : 500} 10px system-ui`, got ? '#cfc6b0' : '#6a6252', 'center'); if (marks[lv]) emoji(x, ry - 22, 15, marks[lv], got ? 1 : .55); }
+      const nextBig = [10, 40, 60].find(l => l > S.lv[1]); if (nextBig && nextBig > L1) { text(`→ ${nextBig} ${marks[nextBig]}`, rx + rw + 14, ry + 4, '600 11px system-ui', '#cfc6b0', 'left'); }
+      ctx.fillStyle = 'rgba(6,8,12,.96)'; ctx.beginPath(); ctx.arc(hx, ry, 30, 0, 7); ctx.fill(); const f = move >= 1 ? eInOut(clamp((t - .8) / .4)) : 0; ring(hx, ry, 23, f, 4.5, t); if (f >= 1) once('close', () => shock(hx, ry, 23, big()));
+      roll('lv', String(f >= 1 ? S.lv[1] : S.lv[0]), hx, ry + 8, 20, XPL, 'center');
+      const st = stats(), sw = rw / st.length; st.forEach(([, ab, v0, v1], i) => { const rt = t - 1.4 - i * .1; if (rt < 0) return; const x = rx + sw * (i + .5), y = ry + 54, p = eOut(clamp(rt / .45));
+        ctx.save(); ctx.globalAlpha *= clamp(rt / .2); text(ab, x, y, '700 9px system-ui', '#9a927e', 'center', { ls: '1px' }); roll('s' + i, fmt(lerp(v0, v1, p)), x, y + 16, 13, '#fff', 'center'); text('+' + (v1 - v0), x, y + 30, '700 10px system-ui', XPL, 'center', { alpha: clamp((rt - .4) / .2) }); ctx.restore(); });
+      unlocks().forEach(([e, s], i) => { const ua = clamp((t - 2.4 - i * .2) / .3), y = ry + 112 + i * 18; emoji(W / 2 - measure(s, '500 12px system-ui') / 2 - 12, y - 4, 13, e, ua); text(s, W / 2, y, '500 12px system-ui', GOLD, 'center', { alpha: ua }); }); } },
+};
+
+// the Ledger's rows (Medallion and Ringed ledger); rings: a small ring per row instead of the sweep
+function ledgerRows(t, px, y0, pw, rowH, rings) { const n = stats().length;
+  stats().forEach(([lab, , v0, v1], i) => { const rt = t - 1 - i * .16; if (rt < 0) return; const y = y0 + i * rowH, p = eOut(clamp((rt - .1) / .45)), ra = clamp(rt / .15);
+    ctx.save(); ctx.globalAlpha *= ra; ctx.fillStyle = 'rgba(255,255,255,.05)'; if (i % 2) ctx.fillRect(px + 14, y - 15, pw - 28, rowH - 2);
+    let lx = px + 24; if (rings) { const rx = px + 28, ry = y - 5; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(rx, ry, 6, 0, 7); ctx.stroke();
+        ctx.strokeStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(rx, ry, 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p); ctx.stroke(); ctx.shadowBlur = 0;
+        if (p >= 1) once('rr' + i, () => spawn({ x: rx, y: ry, size: 6, shape: 'ring', grow: 10, life: .4, col: XPL })); lx = px + 42; }
+    else if (rt < .5) { const sx = px + 14 + (pw - 28) * eOut(rt / .5), g = ctx.createLinearGradient(sx - 60, 0, sx, 0); g.addColorStop(0, 'rgba(220,184,255,0)'); g.addColorStop(1, `rgba(220,184,255,${.25 * (1 - rt / .5)})`); ctx.fillStyle = g; ctx.fillRect(px + 14, y - 15, sx - px - 14, 20); }
+    text(lab, lx, y, '400 13px Georgia, serif', '#cfc6b0'); text(fmt(v0), px + pw - 130, y, '500 12px system-ui', '#8a8270', 'right'); text('→', px + pw - 116, y, '500 12px system-ui', '#8a8270', 'center');
+    roll('s' + i, fmt(lerp(v0, v1, p)), px + pw - 62, y, 13, '#fff', 'right');
+    if (p >= 1) { const pop = rings ? 1 + .4 * clamp(1 - (rt - .55) / .2) : 1; ctx.save(); ctx.translate(px + pw - 22, y); ctx.scale(pop, pop); text('+' + (v1 - v0), 0, 0, '700 12px system-ui', XPL, 'right', { alpha: clamp((rt - .55) / .2) }); ctx.restore(); }
+    ctx.restore(); });
+  unlocks().forEach(([e, s], i) => { const ua = clamp((t - 2.6 - i * .2) / .3), y = y0 + n * rowH + 10 + i * 18; emoji(px + 30, y - 4, 13, e, ua); text(s, px + 44, y, '500 12px system-ui', GOLD, 'left', { alpha: ua }); }); }
+
+// ---------- scene ----------
+let S = null, lay = 'B', moment = 'quest', exitMode = 'gather';
+function play() { S = { age: 0, fired: {}, nums: {}, lv: LV[moment], xpShown: .955, motes: null }; P = []; document.getElementById('note').textContent = moment === 'combat' ? 'Mid-fight: the small ring now, the full screen once the fight ends (here at 3.5 s).' : ''; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+function bars() { const w = Math.min(W * .66, 760), x = (W - w) / 2; return { x, y: H - 44, w, h: 11 }; }
+function gameUI() { const b = bars(); ctx.save(); for (let i = 0; i < 12; i++) { const s = 32, x = W / 2 - 6 * (s + 3) + i * (s + 3); ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(x, H - 30, s, 26); ctx.strokeStyle = '#4a4234'; ctx.strokeRect(x + .5, H - 29.5, s - 1, 25); }
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4); ctx.fillStyle = '#1a1424'; ctx.fillRect(b.x, b.y, b.w, b.h);
+  const gr = ctx.createLinearGradient(0, b.y, 0, b.y + b.h); gr.addColorStop(0, '#b070f0'); gr.addColorStop(1, '#5a22a0'); ctx.fillStyle = gr; ctx.fillRect(b.x, b.y, b.w * clamp(S.xpShown), b.h);
+  if (S.fullAt !== undefined) { const t = S.age - S.fullAt; ctx.fillStyle = `rgba(255,255,255,${clamp(1 - t / .5)})`; ctx.fillRect(b.x, b.y, b.w, b.h); }
+  ctx.fillStyle = '#0a0a0a'; for (let i = 1; i < 20; i++) ctx.fillRect(b.x + b.w * i / 20 - .5, b.y, 1, b.h); ctx.restore(); }
+// the last XP comes in as the Stream; the bar fills, flashes, empties to the leftover
+function xpIn() { const b = bars(), c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), x0 = c.left - s.left + c.width / 2, y0 = c.top - s.top + 30;
+  if (!S.motes) { S.motes = []; for (let i = 0; i < 26; i++) S.motes.push({ t: .15 - .3 * i / 26, j: rnd(-1, 1), share: (i + 1) / 26 }); }
+  for (const m of S.motes) { if (m.done) continue; m.t += S.dt; if (m.t < 0) continue; const u = eInOut(clamp(m.t / .45)), tx = b.x + b.w * Math.min(1, S.xpShown), ty = b.y + 5, cx = x0 - 90, cy = y0 - 70, w = Math.sin(Math.PI * u) * 10 * m.j;
+    const x = (1 - u) ** 2 * x0 + 2 * (1 - u) * u * cx + u * u * tx + w, y = (1 - u) ** 2 * y0 + 2 * (1 - u) * u * cy + u * u * ty;
+    ctx.save(); ctx.fillStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); ctx.restore(); if (u >= 1) { m.done = true; S.xpShown = .955 + .065 * m.share; } }
+  if (S.xpShown >= 1 && S.fullAt === undefined) S.fullAt = S.age; if (S.fullAt !== undefined && S.age - S.fullAt > .35) S.xpShown = .02 * eOut(clamp((S.age - S.fullAt - .35) / .4)) + (S.age - S.fullAt > .35 ? 0 : 1); }
+// mid-fight: a small ring with the level, top middle
+function compact(t) { if (t < 0 || t > 2.6) return; const cx = W / 2, cy = H * .12, a = clamp(t / .15) * clamp((2.6 - t) / .4); ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = 'rgba(6,8,12,.9)'; ctx.beginPath(); ctx.arc(cx, cy, 30, 0, 7); ctx.fill();
+  const f = eInOut(clamp(t / .5)); ring(cx, cy, 23, f, 4, t); if (f >= 1) once('cclose', () => shock(cx, cy, 23, false)); roll('clv', String(f >= 1 ? S.lv[1] : S.lv[0]), cx, cy + 8, 20, XPL, 'center');
+  text('Stats after the fight', cx, cy + 50, '500 11px system-ui', '#cfc6b0', 'center', { alpha: clamp((t - .6) / .3) }); ctx.restore(); }
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; S.dt = dt; const start = S.fullAt !== undefined ? S.fullAt + .4 + (moment === 'combat' ? 3.1 : 0) : 99, dur = 7.5, t = S.age - start;
+    if (document.getElementById('dim').checked && t > -.3 && t < dur) { ctx.fillStyle = `rgba(0,0,0,${.4 * clamp((t + .3) / .4) * clamp((dur - t) / .5)})`; ctx.fillRect(0, 0, W, H); }
+    gameUI(); xpIn();
+    if (moment === 'combat' && S.fullAt !== undefined) { compact(S.age - S.fullAt - .2); if (t < 0 && S.age - S.fullAt > 2.8) text('…the fight ends', W / 2, H * .12, '500 12px system-ui', '#9a927e', 'center'); }
+    const gather = exitMode === 'gather', out = gather ? clamp((dur - t) / .3) : clamp((dur - t) / .5);
+    S.spots = []; if (t >= 0 && t < dur) { ctx.save(); ctx.globalAlpha = clamp(t / .25) * out; LAY[lay].draw(t, 1); ctx.restore(); }
+    if (gather && t > dur - .3) once('gather', () => { const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), tx = c.left - s.left + c.width / 2, ty = c.top - s.top + 50;
+      S.spots.forEach((p, i) => { for (let k = 0; k < 5; k++) spawn({ home: true, x0: p.x + rnd(-14, 14), y0: p.y + rnd(-5, 5), cx: lerp(p.x, tx, .5) + rnd(-80, 80), cy: Math.min(p.y, ty) - rnd(10, 60), tx, ty, x: p.x, y: p.y, life: rnd(.55, .8) + i * .025, size: 1.7, col: k % 2 ? '#fff' : XPL }); });
+      setTimeout(() => { if (S) { spawn({ x: tx, y: ty, size: 10, shape: 'ring', grow: 40, life: .6, col: XPL }); spawn({ x: tx, y: ty - 10, size: 24, shape: 'ring', grow: 30, life: .8, col: '#fff' }); } }, 750); });
+    stepP(dt); if (t > dur + .4 && document.getElementById('loop').checked) play(); }
+  requestAnimationFrame(frame); }
+
+// ---------- panel ----------
+const lEl = document.getElementById('lays');
+['B', 'E', 'C', 'F'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + LAY[k].name; b.dataset.l = k; b.onclick = () => { lay = k; sync(); play(); }; lEl.appendChild(b); });
+function sync() { document.querySelectorAll('[data-l]').forEach(b => b.classList.toggle('on', b.dataset.l === lay)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('ldesc').textContent = LAY[lay].desc; }
+document.querySelectorAll('[data-exit]').forEach(b => b.onclick = () => { exitMode = b.dataset.exit; document.querySelectorAll('[data-exit]').forEach(x => x.classList.toggle('on', x === b)); play(); });
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '1234'.indexOf(e.key); if (i >= 0) { lay = 'BECF'[i]; sync(); play(); } });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

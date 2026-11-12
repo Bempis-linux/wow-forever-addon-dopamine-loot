@@ -496,7 +496,135 @@ No existing addon named "Dopamine Loot" was found.
 | after 1.0 | **Smarter upgrades**: usability via `C_PlayerInfo.CanUseItem`/tooltip, per-class stat weights (editable), Pawn when present; "upgrade at level N" |
 | later | Popup position (drag to move, like the rain landing height); per-style default zoom/tilt presets; dungeon recap show, screenshot mode, mail attachments, account-wide "never seen" view, sound packs, 3D props for non-model items, localization |
 
-### 1.4.0: Dungeons (set by the user 2026-11-10; brainstorm + mockups first, then build)
+### 1.4.0 scope, revised 2026-11-12: Leveling + the dungeon recap
+
+Brainstormed with the user 2026-11-12 after a CurseForge comment asking for "numbers go up" moments (XP, levels).
+**1.4.0 = Leveling + the dungeon recap** (both testable solo). The dice roll moves to **1.5** (it needs a real
+group to test). Design process as in 1.3: no cap on mockup rounds. Picked leveling pieces (all four, plus one of
+the user's own):
+- **XP bar flourish**: a glow runs along the game's XP bar on kill/quest XP; bigger chunks sweep bigger; rested
+  XP its own tint.
+- **Level progress ticks**: a small "+10%" climb every tenth of a level.
+- **Level-up moment**: a banner with the new level and what it unlocks (talent point, trainer spells, mount at
+  40). Silent (the game plays its own; "no level-up sounds" preference).
+- **Level-up summary** (the user's idea, from RPGs): the stats tick up from the old values to the new level's
+  (health, mana, Strength, Agility, Stamina, Intellect, Spirit, talent points).
+- **Reputation gains**: the rep bar fills; a banner on a new standing (Friendly to Honored).
+- To verify on Forever: `PLAYER_XP_UPDATE`, `CHAT_MSG_COMBAT_XP_GAIN`, `PLAYER_LEVEL_UP` (Classic payload:
+  level, hp, mana, talent points, the five stat deltas), `UnitXP`/`UnitXPMax`/`GetXPExhaustion`, `UnitStat`,
+  `UPDATE_FACTION`/`CHAT_MSG_COMBAT_FACTION_CHANGE`, `GetWatchedFactionInfo`, the XP bar frame
+  (`MainMenuExpBar`?) and whether other bar addons replace it.
+- No damage numbers (they'd compete with the combat UI).
+- **API findings** (wow-api-researcher, 2026-11-12; evidence from RoadToSixty/Loredex on Forever + Ketho
+  annotations; no Blizzard UI source locally):
+  - Kill XP: `CHAT_MSG_COMBAT_XP_GAIN` (proven on Forever; the combat log is blocked), match
+    `COMBATLOG_XPGAIN_FIRSTPERSON` as a prefix so the rested tail still matches. Quest XP: `QUEST_TURNED_IN
+    (questID, xpReward, moneyReward)` (proven). `UnitXP`/`UnitXPMax`/`GetXPExhaustion`/`GetMaxPlayerLevel` (60).
+  - `PLAYER_LEVEL_UP` fires, but its payload is probably **retail's** (level, hp, power, talents, pvp slots,
+    str, agi, sta, int; no spirit), not Classic's. **Snapshot the stats ourselves** (`UnitStat` 1-5,
+    `UnitHealthMax`, `UnitPowerMax`) and diff them; guard for secret values.
+  - Rep: `C_Reputation.GetWatchedFactionData`/`GetFactionDataByID` (the old GetFactionInfo family is missing),
+    `UPDATE_FACTION`, `CHAT_MSG_COMBAT_FACTION_CHANGE` (`FACTION_STANDING_INCREASED_BONUS` first), and an event
+    `FACTION_STANDING_CHANGED(factionID, standing)` (works on Forever, per Loredex). Labels
+    `FACTION_STANDING_LABEL1..8`, colors `FACTION_BAR_COLORS`.
+  - Bars: Forever has the retail UI, so probably `StatusTrackingBarManager` (Edit Mode), not `MainMenuExpBar`.
+  - Secret values: system/skill chat is secret in instances; guard every chat text with `issecretvalue`.
+  - To `/dump` in game: `COMBATLOG_XPGAIN_FIRSTPERSON, COMBATLOG_XPGAIN_EXHAUSTION1`; `StatusTrackingBarManager ~=
+    nil, MainMenuExpBar ~= nil`; `UnitCharacterPoints, GetUnspentTalentPoints`; PLAYER_LEVEL_UP's args at a level.
+- **Redesigns of 1.3 pieces** (the user, 2026-11-12: 1.3 went straight to final designs without the wide
+  exploration the popups got in popup-designs.html):
+  1. **Bars first**: one exploration page (`docs/mockups/bars.html`) with 5-6 clearly different bar families,
+     each shown as skill-up, XP flourish, level-up (+ stat summary) and rep. The picked family replaces the
+     skill-up bar and sets the look of every 1.4.0 bar.
+     Round 1 (bars.html, 6 families): the user's top three, in order: **Ring, Constellation, Segments**. Worry:
+     losing the horizontal bar's per-profession designs. Round 2 (skillup-r2.html, skill-ups only): each bar
+     drawn in the profession's material, its tool riding the tip, unlocks in the design. The user: **Ring and
+     Constellation** ("Ring is the cleanest, Constellation shows milestone icons"). Round 3
+     (skillup-r3.html): Ring, Ring + road (next unlocks in a row beside it), Milestone ring (unlocks on the
+     ring at their levels), Constellation. **Picked 2026-11-12: Ring + road** (skillup-r3.html "B"): the ring
+     in the profession's material with its tool riding the head, the next unlock at the seam, the next few
+     unlocks in a row beside it with their levels (crafters: the text line). It sets the look for XP and rep.
+     Then XP, then rep, one at a time (the user has ideas for both).
+  XP and rep (the user, 2026-11-12): **no new bars; work on the game's own XP and rep bars** (overlays).
+  Milestones get the big moments: the +10% tick, a new rep standing (banner), the level-up screen. Ideas:
+  **orbs flying into the XP/rep bar** (in game the bar jumps at once, so we cover the new part and reveal it
+  as the orbs land); **any rep gain** reacts, not only the watched faction; the rep bar can be hidden: then
+  draw nothing on it (another way to show the gain). XP round 1: docs/mockups/xp-r1.html.
+  XP round 1 → the user liked **Comet, Stream, Burst & gather** but "not 100% there, not sure why". Round 2
+  (xp-r2.html) keeps those three with switches to find what's missing: the bar drinks it in (bulge, ripple,
+  head flare), a counter, snappier, orbs from the character or just above the bar, sound (notes per orb /
+  whoosh + chime / soft taps + chime); and a **Kill + loot** moment (is XP with a loot popup too much?):
+  together / XP waits / XP goes small. Everything a switch.
+  XP round 2 → **Snappier and the Counter are in**; "the bar drinks it in" optional (not felt); direction
+  **Stream** (it follows the count-up; still not 100%); sound **soft taps + chime**, but worried about fatigue
+  with fast kills + loot ("dopamine is the goal but it mustn't get exhausting over a long session"). The
+  With-loot choices were too subtle. Round 3 (xp-r3.html): four streams (Stream, Stream with a head, Ribbon,
+  Sparkle stream), a Grinding moment (8 kills / 11 s, 5 with loot), a **Calm when busy** sound policy (one
+  reward chime at a time; XP chimes wear off 100/70/50/35% then taps only, 30 s window; ≤6 taps per kill;
+  quest and +10% always sound) with an on-screen sound log, and clearer With-loot (XP waits 1 s / XP goes
+  quiet). The calm idea could become addon-wide (loot, gathering, crafting share one budget).
+  XP round 3 → **Stream stays the pick** (with Snappier + Counter); Ribbon "kind of cool but doesn't feel
+  snappy" (a snappier Ribbon is a possible later try); Stream with a head and Sparkle stream not liked.
+  **Open, the user is thinking:** the With-loot handling (Together / XP waits / XP goes quiet; the
+  difference is now clear) and the Calm-when-busy policy (no verdict yet). Moving on to other pieces.
+  The user is **still not 100% happy with the XP picks**; revisit after rep.
+  Rep round 1 (rep-r1.html): watched faction on the game's rep bar (Stream like XP / Sweep); other factions or
+  a hidden bar: Faction rings (mini Ring above the bars) / Picked-up rows (side column) / Over your head;
+  same-faction gains within 3 s add up in one counter (kill rep); new standing = Ring + road banner (the
+  ring closes, the standing rolls over, the road is Neutral…Exalted, a perk line); Exalted bigger and gold.
+  Rep round 1 → **Sweep** on the watched bar. Other factions as a **setting**: the user likes Faction rings,
+  rings over the head or over the bar (careful: action bars sit above the XP bar) or draggable, and the
+  Picked-up rows (clean when one kill moves many factions: Bloodsail kills raise four goblin towns and
+  lower the pirates). Wants **quiet repeats** and faction **icons** if the API has them.
+  Rep round 2 (rep-r2.html): setting Picked-up rows (proposed default) / Faction rings / Off; rings: two at
+  most then "+N more", placed above the action bars / over your head / dragged (Move frames); **losses**
+  shown quietly (dim red, no sound, no pop); Bloodsail moments (one kill, five kills); quiet repeats (one
+  tick per kill however many factions; 100/70/50/35% then silent within 30 s; a new standing always chimes).
+  **Rep picked (2026-11-12):** watched faction = **Sweep** on the game's rep bar (only while it's shown);
+  other factions (and a hidden bar) = setting **Faction rings (default) / Picked-up rows / Off**; the rings
+  are **draggable** (Move frames; default spot clear of the action bars, to settle when building); rows are
+  the informative option. Two rings at most then "+N more"; losses quiet; quiet repeats; same-faction gains
+  within 3 s add up; new standing = Ring + road banner.
+  Level-up round 1 (levelup-r1.html): four layouts, all silent, Stream into the bar first: Ring + road
+  (ring left, stats in two columns), Grand ring (big ring high in the middle, each stat pops out as a small
+  ring around its lower half), Ledger (RPG list: old → new rolling, gain in purple), Road of levels (levels
+  as a road, the ring rolls to the new stop, next big stops: talents 10, riding 40, 60; stats in a strip).
+  Moments: level 24, **mid-fight** (a small ring now, the full screen once the fight ends), level 10
+  (talents open), level 40 (riding). Options: dim the world, stat tick sounds (off).
+  Level-up round 1 → the user likes **Grand ring** and **Ledger** most. Round 2 (levelup-r2.html): Grand
+  ring, **Medallion** (the grand ring as a medallion on the Ledger card), Ledger, **Ringed ledger** (bigger
+  level ring, a small ring per row that fills as it rolls); exit: **the stats fly into you** (motes into
+  the character, a ring rises) or fade; in game hover holds it and a click closes it.
+  Level-up round 2 → "the options are a little too similar". Round 3 (levelup-r3.html) differs in staging:
+  **Ascension** (a light column and halo rise from your feet over your head, the stats float up off you
+  into a column beside it), **Cinematic** (letterbox bars, a huge faint ring behind a giant number, the
+  stats in one row across the screen), **Card flip** (eight face-down cards flip one by one to show each
+  gain); Grand ring and Ledger kept to compare; exit choice kept.
+  Level-up round 3 → **Ascension and Cinematic** liked ("nice way of branching out"); **Card flip rejected
+  for good**: no lottery/chance-style designs anywhere, the addon supplements the game's systems.
+  Level-up round 4 (levelup-r4.html): **Ascension for every level, Cinematic for every tenth level**
+  (10, 20 … 60; the user: "every 10 levels deserves a cinematic milestone, especially for Classic"). The
+  milestone **grows out of Ascension** (switch): the halo rises from your feet, flies up and becomes the huge
+  ring as the film bars slide in. Each milestone: the road of decades (10…60, the new stop lights), the
+  stats row, its unlock shown big (talents 10, riding 40, the top 60 "your XP bar retires"; 20/30/50 say
+  where you are on the climb). Ascension's stat column moved to the **left** (popups come in on the right).
+  Mid-fight: a small ring now, the full moment after the fight (the Cinematic never plays in combat).
+  **Level-up picked (2026-11-12): round 4 as the direction** ("Nice, I'm liking this"); polish details
+  later if needed.
+  Rep API findings (wow-api-researcher 2026-11-12): **no faction icons in the API** (FactionData has none;
+  only retail renown has art; RoadToSixty uses one generic Achievement_Reputation_01 for all). So: a
+  hand-made factionID -> game icon table (~40 Classic factions; check each path in game), generic icon as
+  fallback. Chat: only FACTION_STANDING_INCREASED(_BONUS) proven on Forever; DECREASED/_GENERIC variants
+  unverified (`/run` list check in game); build patterns from _G at runtime, longest first, escape magic
+  chars (RoadToSixty ChatPatterns.lua does this). Name -> factionID: no lookup API; scan
+  GetNumFactions/GetFactionDataByIndex (expand collapsed headers, re-collapse, guard re-entry) once at login
+  or for an unknown name, then cache; FACTION_STANDING_CHANGED gives the ID directly. FACTION_BAR_COLORS
+  probably exists (keep a fallback); labels FACTION_STANDING_LABEL1..8. **After the XP pick: iterate on the level-up
+  screen** (the user wants its own rounds).
+  2. **Then crafting animations, per profession**: several unique designs for every crafting profession
+     (not one concept adapted), like the popup rounds.
+
+### 1.4.0: Dungeons (set by the user 2026-11-10; the dice roll moved to 1.5 on 2026-11-12)
 
 Process as always: brainstorm with the user (a few questions with recommended picks), mockups
 (docs/mockups/), the user picks, then build. Simple shapes and real item icons, not drawn objects.

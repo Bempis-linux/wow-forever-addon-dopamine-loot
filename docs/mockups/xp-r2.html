@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XP Round 2</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  #odesc { margin-top: 4px; min-height: 44px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: calc(50% - 28px); top: 42%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .mob { position: absolute; left: calc(50% + 70px); top: 47%; width: 70px; height: 50px; background: linear-gradient(#4a4a40, #24241e); border-radius: 30px 30px 10px 10px; opacity: .7; }
+  .note { position: absolute; left: 12px; top: 10px; right: 12px; color: rgba(255,255,255,.6); font-size: 12px; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>XP, round 2</h1>
+  <small>Your three from round 1. They're "not 100% there", so below are switches for what might be missing:
+  turn them on one at a time and see which makes it click. Space replays; keys 1-3 switch the orbs.</small>
+
+  <h2>Orbs</h2>
+  <div id="orbs"></div>
+  <small id="odesc"></small>
+
+  <h2>Moment</h2>
+  <button data-m="kill" class="on">Kill</button><button data-m="rested">Kill, rested</button><button data-m="pack">Three kills</button><button data-m="tick">Crossing 70%</button><button data-m="quest">Quest turn-in</button><button data-m="level">Level-up</button><button data-m="loot">Kill + loot</button>
+  <small>Kill + loot: the mob drops an item, so the loot popup and the XP happen together (is it too much?).</small>
+
+  <h2>What might be missing</h2>
+  <label class="fx"><input type="checkbox" id="oBulge"><b>The bar drinks it in</b><small>Each landing bulges the bar where it hits; when the last one lands a ripple of light runs along the whole fill and its head flares.</small></label>
+  <label class="fx"><input type="checkbox" id="oCount"><b>Counter</b><small>The "+245 XP" counts up as the orbs land and punches when done, instead of just appearing.</small></label>
+  <label class="fx"><input type="checkbox" id="oFast"><b>Snappier</b><small>Everything about 40% quicker: less waiting between the kill and the bar.</small></label>
+  <b style="display:block;margin-top:6px">Where the orbs start</b>
+  <button data-src="char" class="on">Your character</button><button data-src="bar">Just above the bar</button>
+  <small>Above the bar: a short trip that stays near where you look for XP, away from the fight.</small>
+  <b style="display:block;margin-top:6px">Sound</b>
+  <button data-snd="notes" class="on">Notes per orb</button><button data-snd="chime">Whoosh + chime</button><button data-snd="soft">Soft taps + chime</button>
+  <small>Notes per orb (round 1); a soft whoosh while they fly and one warm chime when the last lands; or quiet taps and the chime.</small>
+
+  <h2>With loot (Kill + loot)</h2>
+  <button data-loot="same" class="on">Together</button><button data-loot="wait">XP waits</button><button data-loot="small">XP goes small</button>
+  <small>XP waits: the orbs leave once the popup has landed. XP goes small: half the orbs, dimmer, while loot is showing. Either way it's a switch you can turn off.</small>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+
+  <h2>Options</h2>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>Soft landing notes that climb, the +10% ping. The level-up stays silent (the game plays its own).</small></label>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="mob" id="mob"></div>
+  <div class="char" id="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eIn = t => t * t * t, eInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function measure(s, font) { ctx.save(); ctx.font = font; const w = ctx.measureText(s).width; ctx.restore(); return w; }
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const XP = '#a35cf0', XPL = '#dcb8ff', REST = '#4f8ae6', RESTL = '#b0ccff';
+
+// ---------- sound ----------
+let AC = null, OUT = null; const on = () => document.getElementById('snd').checked;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+function tone(f, t = 0, vol = .05, dec = .4, type = 'sine', f2) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.exponentialRampToValueAtTime(f2, T + dec * .8); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .004); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+const PENTA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33, 36], semi = n => Math.pow(2, n / 12);
+let noteStep = 0, lastNote = -9;
+// the round's options
+const OPT = { src: 'char', snd: 'notes', loot: 'same' }; const chk = id => document.getElementById(id).checked;
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', f2) { if (!on()) return; const A = ac(), T = A.currentTime + t, n = Math.floor(A.sampleRate * dur), buf = A.createBuffer(1, n, A.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain(); s.buffer = buf; fl.type = type; fl.frequency.setValueAtTime(f, T); if (f2) fl.frequency.exponentialRampToValueAtTime(f2, T + dur); fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(OUT); s.start(T); }
+function landNote(blue) { const now = performance.now() / 1000; if (now - lastNote < .045) return; lastNote = now; // (never a wall of notes)
+  if (OPT.snd === 'chime') return; if (OPT.snd === 'soft') { tone(1800 + Math.random() * 300, 0, .008, .05); return; }
+  const n = PENTA[Math.min(noteStep++, PENTA.length - 1)]; tone(660 * semi(n), 0, .028, .3); tone(1320 * semi(n), 0, blue ? .012 : .006, .18); }
+function whoosh(big) { if (OPT.snd === 'notes') return; noise(0, big ? .9 : .6, .03, 500, 1.2, 'bandpass', big ? 2600 : 2000); }
+function chime(big, blue) { if (OPT.snd === 'notes') return; const r = blue ? 587 : 523; [0, 4, 7].forEach((n, i) => tone(r * 2 * semi(n), i * .04, .035, .9)); tone(r * 4, .12, .012, .7); if (big) tone(r * 2 * semi(12), .16, .03, 1.1); }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0, vr: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    ctx.restore(); } }
+
+// ---------- the game's bars (Forever: the retail-style status bar above the action bar) ----------
+function bars() { const w = Math.min(W * .66, 760), x = (W - w) / 2; return { xp: { x, y: H - 44, w, h: 11 }, rep: { x, y: H - 58, w, h: 8 } }; }
+function gameUI(shown, rested, flash) { const g = bars(), b = g.xp; ctx.save();
+  for (let i = 0; i < 12; i++) { const s = 32, x = W / 2 - 6 * (s + 3) + i * (s + 3); ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(x, H - 30, s, 26); ctx.strokeStyle = '#4a4234'; ctx.strokeRect(x + .5, H - 29.5, s - 1, 25); }
+  const r = g.rep; ctx.fillStyle = '#0a0a0a'; ctx.fillRect(r.x - 2, r.y - 2, r.w + 4, r.h + 3); ctx.fillStyle = '#122014'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.fillStyle = '#2f9a3a'; ctx.fillRect(r.x, r.y, r.w * .46, r.h);
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4); ctx.fillStyle = '#1a1424'; ctx.fillRect(b.x, b.y, b.w, b.h);
+  if (rested) { ctx.fillStyle = 'rgba(70,110,200,.4)'; ctx.fillRect(b.x, b.y, b.w * Math.max(rested, shown), b.h); }
+  const gr = ctx.createLinearGradient(0, b.y, 0, b.y + b.h); gr.addColorStop(0, rested ? '#6a9af0' : '#b070f0'); gr.addColorStop(1, rested ? '#2a4aa0' : '#5a22a0');
+  ctx.fillStyle = gr; ctx.fillRect(b.x, b.y, b.w * shown, b.h);
+  if (S && chk('oBulge')) { // the bar drinks it in: a bulge where each orb lands, a ripple when the last one has
+    for (const u of S.bumps) { const t = (S.age - u.at) / .3; if (t > 1) continue; const k = Math.sin(Math.PI * t), half = 16;
+      const bg = ctx.createRadialGradient(u.x, b.y + b.h / 2, 0, u.x, b.y + b.h / 2, half * 1.4); bg.addColorStop(0, `rgba(255,255,255,${.9 * k})`); bg.addColorStop(.5, rested ? `rgba(120,160,255,${.7 * k})` : `rgba(190,130,255,${.7 * k})`); bg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.ellipse(u.x, b.y + b.h / 2, half, b.h / 2 + 5 * k, 0, 0, 7); ctx.fill(); }
+    if (S.rippleAt !== undefined) { const t = (S.age - S.rippleAt) / .55; if (t < 1) { const x = b.x + b.w * shown * eOut(t), rg = ctx.createLinearGradient(x - 50, 0, x + 10, 0);
+      rg.addColorStop(0, 'rgba(255,255,255,0)'); rg.addColorStop(.85, 'rgba(255,255,255,.75)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = rg; ctx.fillRect(Math.max(b.x, x - 50), b.y - 1, Math.min(60, x - b.x + 10), b.h + 2); } } }
+  ctx.fillStyle = '#0a0a0a'; for (let i = 1; i < 20; i++) ctx.fillRect(b.x + b.w * i / 20 - .5, b.y, 1, b.h);
+  if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash})`; ctx.fillRect(b.x, b.y, b.w, b.h); }
+  ctx.restore(); return g; }
+
+// ---------- scene ----------
+// kills: { at, f (fraction gained), rested (part of it that is the rested bonus), text, sub }
+const MOMENTS = {
+  kill: { f0: .62, kills: [{ at: .2, f: .011, text: '+245 XP' }], dur: 2.6, note: 'A kill: the orbs fly from you into the bar and reveal the new part as they land.' },
+  rested: { f0: .62, rested: .69, kills: [{ at: .2, f: .022, rest: .011, text: '+490 XP', sub: '+245 rested' }], dur: 2.8, note: 'A rested kill: the bonus half comes as blue orbs.' },
+  pack: { f0: .58, kills: [{ at: .2, f: .011, text: '+245 XP' }, { at: .65, f: .012, text: '+262 XP' }, { at: 1.1, f: .011, text: '+245 XP' }], dur: 3.4, note: 'Three kills in a pull: the landing notes keep climbing.' },
+  tick: { f0: .691, kills: [{ at: .2, f: .011, text: '+245 XP' }], dur: 3, note: 'Crossing 70%: the +10% tick, as you liked in round 1 (in the Ring look).' },
+  quest: { f0: .52, kills: [{ at: .2, f: .111, text: '+2,450 XP', big: true }], dur: 3.6, note: 'A quest turn-in: a big chunk, many orbs (and the 60% tick).' },
+  loot: { f0: .62, loot: true, kills: [{ at: .2, f: .011, text: '+245 XP' }], dur: 3.6, note: 'A kill that drops an item: the loot popup and the XP at once. Try the three "With loot" choices.' },
+  level: { f0: .955, kills: [{ at: .2, f: .045 + .02, text: '+1,430 XP', big: true }], dur: 9.5, level: true, note: 'Level 24: the bar fills, flashes and empties (the game\'s), then the level-up screen. Silent.' },
+};
+let S = null, orbStyle = 'W', moment = 'kill';
+function charPos() { if (OPT.src === 'bar') { const b = bars().xp; return { x: b.x + b.w * (S.real0 ?? .6) - 30, y: b.y - 90 }; }
+  const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(); return { x: c.left - s.left + c.width / 2, y: c.top - s.top + c.height * .35 }; }
+function play() { const m = MOMENTS[moment]; S = { m, age: 0, fired: {}, shown: m.f0, real: m.f0, orbs: [], lastLand: -9, ticks: {}, gains: [], nums: {}, bumps: [], left: {}, doneAt: {}, nMul: 1 }; P = []; noteStep = 0;
+  document.getElementById('note').textContent = ORB[orbStyle].name + ': ' + m.note; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+
+// one orb landed: reveal its share of the bar
+function land(o) { const b = bars().xp; S.shown = Math.min(S.real, S.shown + o.amt); S.lastLand = S.age;
+  const x = b.x + b.w * Math.min(S.shown, 1), y = b.y + b.h / 2; S.bumps.push({ x, at: S.age }); if (S.bumps.length > 40) S.bumps.shift(); spawn({ x, y, size: 2, shape: 'ring', grow: o.big ? 14 : 9, life: .35, col: o.blue ? RESTL : XPL });
+  if (Math.random() < .5) spawn({ x, y, vx: rnd(-30, 30), vy: rnd(-50, -20), life: .4, size: 1.2, col: '#fff' }); if (o.note !== false) landNote(o.blue); }
+
+// ---------- the orb styles ----------
+// launch(k): make the orbs of a kill; each orb: { amt, blue, ... } and update/draw in step(o, dt)
+const ORB = {
+  W: { name: 'Wisps', desc: 'Soft glowing wisps, more for bigger gains, float out of you on gentle arcs and land one after another along the new part of the bar, each with a small ring and a note a step higher.',
+    launch(k) { const c = charPos(), b = bars().xp, n = Math.round(clamp(k.f * 100 * (k.big ? 2.2 : 4), 4, 30)), nr = k.rest ? Math.round(n * k.rest / k.f) : 0;
+      for (let i = 0; i < n; i++) { const blue = i >= n - nr, f0 = S.real0 + k.f * i / n, tx = b.x + b.w * Math.min(1, S.real0 + k.f * (i + 1) / n);
+        S.orbs.push({ kind: 'W', amt: k.f / n, blue, big: k.big, t: -i * .045, dur: rnd(.75, .95), x0: c.x + rnd(-14, 14), y0: c.y + rnd(-20, 10), cx: c.x + rnd(-160, 160), cy: c.y - rnd(60, 160), tx, ty: b.y + b.h / 2, trail: [] }); } },
+    step(o, dt) { o.t += dt; if (o.t < 0) return; const u = eInOut(clamp(o.t / o.dur)), x = (1 - u) ** 2 * o.x0 + 2 * (1 - u) * u * o.cx + u * u * o.tx, y = (1 - u) ** 2 * o.y0 + 2 * (1 - u) * u * o.cy + u * u * o.ty;
+      o.trail.push([x, y]); if (o.trail.length > 8) o.trail.shift(); const col = o.blue ? RESTL : XPL;
+      ctx.save(); o.trail.forEach(([tx, ty], i) => { ctx.globalAlpha = i / o.trail.length * .35; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(tx, ty, 1.5 + i * .2, 0, 7); ctx.fill(); });
+      ctx.globalAlpha = 1; const g = ctx.createRadialGradient(x, y, 0, x, y, 9); g.addColorStop(0, '#fff'); g.addColorStop(.3, col); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fill(); ctx.restore();
+      if (o.t >= o.dur) { o.done = true; land(o); } } },
+  C: { name: 'Comet', desc: 'One bright comet (two when rested: purple, then the blue bonus) arcs from you to where the bar\'s fill ends, then runs along the bar, revealing the new part behind its head like the Ring\'s comet. Bigger gains, bigger comet.',
+    launch(k) { const c = charPos(), b = bars().xp, parts = k.rest ? [[k.f - k.rest, false], [k.rest, true]] : [[k.f, false]]; let start = S.real0;
+      parts.forEach(([f, blue], i) => { S.orbs.push({ kind: 'C', amt: f, blue, big: k.big, t: -i * .35, fly: .55, run: clamp(f * 9, .25, .9), x0: c.x, y0: c.y - 10, cx: lerp(c.x, b.x + b.w * start, .4), cy: c.y - 140, s0: start, s1: start + f, b, trail: [], given: 0 }); start += f; }); },
+    step(o, dt) { o.t += dt; if (o.t < 0) return; const b = o.b, ty = b.y + b.h / 2, col = o.blue ? RESTL : XPL; let x, y;
+      if (o.t < o.fly) { const u = eIn(clamp(o.t / o.fly)) * .7 + clamp(o.t / o.fly) * .3, tx = b.x + b.w * o.s0; x = (1 - u) ** 2 * o.x0 + 2 * (1 - u) * u * o.cx + u * u * tx; y = (1 - u) ** 2 * o.y0 + 2 * (1 - u) * u * o.cy + u * u * ty; }
+      else { const u = eOut(clamp((o.t - o.fly) / o.run)), s = lerp(o.s0, o.s1, u); x = b.x + b.w * Math.min(1, s); y = ty; const give = (s - o.s0) - o.given; if (give > 0) { S.shown = Math.min(S.real, S.shown + give); o.given += give; S.lastLand = S.age; }
+        once('cl' + o.s0, () => { spawn({ x, y, size: 3, shape: 'ring', grow: 18, life: .4, col }); tone(o.blue ? 990 : 880, 0, .035, .5, 'sine', o.blue ? 1480 : 1320); });
+        if (Math.random() < .7) spawn({ x, y, vx: rnd(-40, -10), vy: rnd(-25, 25), life: .4, size: 1.2, col }); if (u >= 1) o.done = true; }
+      o.trail.push([x, y]); if (o.trail.length > 16) o.trail.shift();
+      ctx.save(); ctx.lineCap = 'round'; for (let i = 1; i < o.trail.length; i++) { ctx.strokeStyle = col; ctx.globalAlpha = i / o.trail.length * .7; ctx.lineWidth = (o.big ? 5 : 3.5) * i / o.trail.length; ctx.beginPath(); ctx.moveTo(...o.trail[i - 1]); ctx.lineTo(...o.trail[i]); ctx.stroke(); }
+      ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.shadowColor = col; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(x, y, o.big ? 5.5 : 4, 0, 7); ctx.fill(); ctx.restore(); } },
+  T: { name: 'Stream', desc: 'A ribbon of tiny motes pours out of you in one smooth curve into the end of the fill, which grows as they arrive. Reads like the XP being drained into the bar; a big gain is a longer, thicker stream.',
+    launch(k) { const c = charPos(), b = bars().xp, n = Math.round(clamp(k.f * 100 * 14, 18, 110) * S.nMul), nr = k.rest ? Math.round(n * k.rest / k.f) : 0, span = clamp(k.f * 6, .35, .9);
+      const cx = c.x + (b.x + b.w * S.real0 > c.x ? 80 : -80), cy = c.y - 120;
+      for (let i = 0; i < n; i++) S.orbs.push({ kind: 'T', amt: k.f / n, blue: i >= n - nr, t: -span * i / n, dur: .7, x0: c.x, y0: c.y - 6, cx, cy, j: rnd(-1, 1), b, note: i % 4 === 0 ? undefined : false }); },
+    step(o, dt) { o.t += dt; if (o.t < 0) return; const b = o.b, u = eInOut(clamp(o.t / o.dur)), tx = b.x + b.w * Math.min(1, S.shown), ty = b.y + b.h / 2, w = Math.sin(Math.PI * u) * 10 * o.j;
+      const x = (1 - u) ** 2 * o.x0 + 2 * (1 - u) * u * o.cx + u * u * tx + w, y = (1 - u) ** 2 * o.y0 + 2 * (1 - u) * u * o.cy + u * u * ty + w * .5;
+      ctx.save(); ctx.fillStyle = o.blue ? RESTL : XPL; ctx.shadowColor = o.blue ? REST : XP; ctx.shadowBlur = 6; ctx.globalAlpha = .85; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); ctx.restore();
+      if (o.t >= o.dur) { o.done = true; land(o); } } },
+  B: { name: 'Burst & gather', desc: 'The orbs burst out of you in a ring, hang in the air a beat while they twinkle, then get pulled down into the bar all at once, like the loot rain\'s vacuum. The most dramatic; the pause gives each kill a little beat.',
+    launch(k) { const c = charPos(), b = bars().xp, n = Math.round(clamp(k.f * 100 * (k.big ? 1.6 : 4), 5, 26) * S.nMul), nr = k.rest ? Math.round(n * k.rest / k.f) : 0;
+      for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (i / n - .5) * Math.PI * 1.6 + rnd(-.1, .1), sp = rnd(140, 220) * (k.big ? 1.25 : 1);
+        S.orbs.push({ kind: 'B', amt: k.f / n, blue: i >= n - nr, big: k.big, t: 0, x: c.x, y: c.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, hang: .45 + i * .012, b, tx: b.x + b.w * Math.min(1, S.real0 + k.f * (i + 1) / n) }); } },
+    step(o, dt) { o.t += dt; const b = o.b, ty = b.y + b.h / 2, col = o.blue ? RESTL : XPL;
+      if (o.t < o.hang) { o.vx *= Math.pow(.02, dt); o.vy *= Math.pow(.02, dt); o.x += o.vx * dt; o.y += o.vy * dt; }
+      else { if (!o.sx) { o.sx = o.x; o.sy = o.y; } const u = eIn(clamp((o.t - o.hang) / .45)); o.x = lerp(o.sx, o.tx, u); o.y = lerp(o.sy, ty, u) - Math.sin(Math.PI * u) * 20; if (u >= 1) { o.done = true; land(o); } }
+      const tw = .7 + .3 * Math.sin(o.t * 20 + o.tx); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = col; ctx.shadowBlur = 10; ctx.globalAlpha = tw; star4(o.x, o.y, o.big ? 6 : 4.5, o.t * 2); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(o.x, o.y, 2.2, 0, 7); ctx.fill(); ctx.restore(); } },
+};
+
+// the +10% tick (the Ring look): a ring pops at the mark, "+10%" rises
+function tick(b, m, age) { const x = b.x + b.w * m;
+  once('tk' + m, () => { spawn({ x, y: b.y + b.h / 2, size: 4, shape: 'ring', grow: 26, life: .6, col: '#fff' }); spawn({ x, y: b.y + b.h / 2, size: 4, shape: 'ring', grow: 16, life: .8, col: XPL }); tone(1046, 0, .05, .25); tone(1568, .06, .035, .3); });
+  const a = clamp(1.8 - age); if (a <= 0) return; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = '#fff'; ctx.fillRect(x - 1, b.y - 4 * clamp(1 - age), 2, b.h + 8 * clamp(1 - age)); ctx.restore();
+  text('+10%', x, b.y - 12 - eOut(clamp(age / .4)) * 10, '700 12px system-ui', '#fff', 'center', { alpha: a }); }
+
+// the level-up screen, Ring + road: the ring closes around the level, the stats tick beside it
+const STATS = [['Health', 1042, 1101], ['Mana', 890, 925], ['Strength', 48, 50], ['Agility', 41, 42], ['Stamina', 52, 54], ['Intellect', 70, 73], ['Spirit', 66, 68], ['Talent points', 0, 1]];
+function roll(key, s, x, y, size, col, align) { const n = S.nums[key] || (S.nums[key] = { v: s, prev: s, t: -9 }); if (n.v !== s) { n.prev = n.v; n.v = s; n.t = S.age; }
+  const t = eOut(clamp((S.age - n.t) / .35)), font = `700 ${size}px system-ui`, w = measure(s, font), pp = n.prev.padStart(s.length, ' '); let sx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  ctx.save(); ctx.beginPath(); ctx.rect(sx - 3, y - size, w + 6, size * 1.3); ctx.clip();
+  for (let i = 0; i < s.length; i++) { const cw = measure(s[i], font); if (pp[i] !== s[i] && t < 1) { text(pp[i], sx, y - t * size, font, col); text(s[i], sx, y + (1 - t) * size, font, '#fff'); } else text(s[i], sx, y, font, col); sx += cw; }
+  ctx.restore(); return w; }
+function levelScreen(t0) { const age = S.age - t0; if (age < 0) return; const pw = 440, ph = 170, px = W / 2 - pw / 2, py = H * .14, a = clamp(age / .25) * clamp((S.m.dur - S.age) / .5);
+  const cx = px + 78, cy = py + ph / 2, r = 50; ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = 'rgba(6,8,12,.84)'; ctx.beginPath(); ctx.roundRect(px + 60, py + 14, pw - 60, ph - 28, 28); ctx.fill();
+  ctx.fillStyle = 'rgba(6,8,12,.96)'; ctx.beginPath(); ctx.arc(cx, cy, r + 14, 0, 7); ctx.fill();
+  // the ring fills all the way round in the XP's glowing purple, then closes
+  const f = eInOut(clamp((age - .15) / .8)); ctx.lineCap = 'round'; ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke();
+  ctx.strokeStyle = XP; ctx.shadowColor = XP; ctx.shadowBlur = 14; ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke();
+  for (let k = 0; k < 10; k++) { const s = ((k * .1 + age * .05) % 1) * f, an = -Math.PI / 2 + s * Math.PI * 2; ctx.fillStyle = '#fff'; ctx.globalAlpha = a * (.4 + .4 * Math.sin(age * 6 + k)); ctx.beginPath(); ctx.arc(cx + Math.cos(an) * r, cy + Math.sin(an) * r, 1, 0, 7); ctx.fill(); } ctx.globalAlpha = a;
+  const hx = cx + Math.cos(-Math.PI / 2 + Math.PI * 2 * f) * r, hy = cy + Math.sin(-Math.PI / 2 + Math.PI * 2 * f) * r; if (f < 1) { ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(hx, hy, 4.5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; }
+  if (f >= 1) once('close', () => { S.closeAt = S.age; spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 90, life: .8, col: '#fff' }); spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 50, life: 1, col: XPL });
+    for (let i = 0; i < 18; i++) { const an = rnd(0, 7); spawn({ x: cx + Math.cos(an) * r, y: cy + Math.sin(an) * r, vx: Math.cos(an) * 110, vy: Math.sin(an) * 110, life: .7, size: 1.8, col: XPL }); } });
+  if (S.closeAt !== undefined) { const t = S.age - S.closeAt; if (t < .45) { ctx.strokeStyle = `rgba(255,255,255,${1 - t / .45})`; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke(); } }
+  text('LEVEL', cx, cy - 16, '700 10px system-ui', '#cfc6b0', 'center', { ls: '3px' }); roll('lv', S.closeAt !== undefined ? '24' : '23', cx, cy + 16, 34, XPL, 'center');
+  // the road: the stats in two columns, each ticking up
+  text('Level 24', px + 150, py + 44, '600 18px system-ui', XPL, 'left', { alpha: clamp((age - 1) / .3) });
+  STATS.forEach(([lab, v0, v1], i) => { const col = i % 2, row = Math.floor(i / 2), rt = age - 1.15 - i * .14; if (rt < 0) return;
+    const x = px + 150 + col * 140, y = py + 70 + row * 20, ra = clamp(rt / .2), p = eOut(clamp((rt - .1) / .5));
+    ctx.save(); ctx.globalAlpha *= ra; ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.beginPath(); ctx.arc(x + 4, y - 4, 4, 0, 7); ctx.stroke(); ctx.strokeStyle = XPL; ctx.beginPath(); ctx.arc(x + 4, y - 4, 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p); ctx.stroke();
+    text(lab, x + 14, y, '500 11px system-ui', '#cfc6b0', 'left'); roll('s' + i, fmt(lerp(v0, v1, p)), x + 104, y, 12, '#fff', 'right');
+    if (p >= 1) text('+' + (v1 - v0), x + 108, y, '600 10px system-ui', XPL, 'left', { alpha: clamp((rt - .6) / .2) }); ctx.restore(); });
+  text('New spells at your trainer', px + 150, py + ph - 24, '500 11px system-ui', '#ffd36a', 'left', { alpha: clamp((age - 2.6) / .3) });
+  ctx.restore(); }
+
+// a kill's last orb is in: the ripple and head flare (if on), the chime (sound choices 2 and 3)
+function finish(i) { S.doneAt[i] = S.age; const k = S.m.kills[i]; if (S.age - (S.rippleAt ?? -9) > .3) S.rippleAt = S.age; chime(k.big, !!k.rest);
+  if (chk('oBulge')) { const b = bars().xp; spawn({ x: b.x + b.w * Math.min(1, S.shown), y: b.y + b.h / 2, size: 4, shape: 'ring', grow: 24, life: .5, col: '#fff' }); } }
+// the loot popup, a stand-in for Relic (to judge it next to the XP): a green item right of the character
+function lootPopup(t) { if (t < 0 || t > 3.2) return; const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), x = c.right - s.left + 150, y = c.top - s.top - 10;
+  const a = clamp(t / .15) * clamp((3.2 - t) / .5), sc = t < .3 ? lerp(1.25, 1, eOut(t / .3)) : 1; ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(sc, sc);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 70); g.addColorStop(0, 'rgba(120,255,120,.45)'); g.addColorStop(1, 'rgba(30,255,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 70, 0, 7); ctx.fill();
+  ctx.fillStyle = '#2a2014'; ctx.fillRect(-22, -22, 44, 44); ctx.strokeStyle = '#1eff00'; ctx.lineWidth = 2; ctx.strokeRect(-22, -22, 44, 44); ctx.font = '28px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🧤', 0, 1);
+  text('Ragged Leather Gloves', 0, 48, '600 17px Georgia, serif', '#1eff00', 'center'); text('UNCOMMON  ·  HANDS', 0, 64, '600 9px system-ui', '#b9b09a', 'center', { ls: '1.5px' }); ctx.restore();
+  if (t > 0 && t < .05) once('lootsnd', () => { tone(784, 0, .04, .3); tone(1175, .06, .03, .4); }); }
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; const m = S.m, b = bars().xp, sp = chk('oFast') ? 1.4 : 1;
+    S.nMul = m.loot && OPT.loot === 'small' ? .5 : 1; const delay = m.loot && OPT.loot === 'wait' ? .8 : 0;
+    m.kills.forEach((k, i) => { if (S.age >= k.at + delay) once('k' + i, () => { S.real0 = S.real; S.real = S.real + k.f; ORB[orbStyle].launch(k);
+      S.orbs.forEach(o => { if (o.kid === undefined) { o.kid = i; S.left[i] = (S.left[i] || 0) + 1; } }); whoosh(k.big);
+      S.gains.push({ at: S.age, k, i, start: S.real0, xp: parseInt(k.text.replace(/\D/g, '')) }); }); });
+    if (m.loot) lootPopup(S.age - .1);
+    // the level: the bar fills, flashes, then empties (the game's), the leftover shows after
+    let shown = S.shown, flash = 0;
+    if (m.level && S.shown >= 1 - 1e-6) { once('full', () => { S.fullAt = S.age; }); const t = S.age - S.fullAt; flash = clamp(1 - t / .5); shown = t < .35 ? 1 : (S.real - 1) * eOut(clamp((t - .35) / .4)); }
+    const g = gameUI(Math.min(1, shown), m.rested || 0, flash);
+    // the new part glows while orbs land, the fill's head shines
+    const since = S.age - S.lastLand; if (S.real0 !== undefined && since < .8 && !(m.level && S.fullAt !== undefined)) { const a = clamp(1 - since / .8), x0 = b.x + b.w * m.f0, x1 = b.x + b.w * Math.min(1, S.shown);
+      ctx.save(); ctx.fillStyle = `rgba(255,255,255,${.45 * a})`; ctx.fillRect(x0, b.y, x1 - x0, b.h); ctx.fillStyle = '#fff'; ctx.shadowColor = m.rested ? RESTL : XPL; ctx.shadowBlur = 12 * a; ctx.globalAlpha = a; ctx.fillRect(x1 - 2, b.y - 2, 3, b.h + 4); ctx.restore(); }
+    for (let t = .1; t < 1; t += .1) { const mm = Math.round(t * 10) / 10; if (m.f0 < mm && S.shown >= mm) { if (S.ticks[mm] === undefined) S.ticks[mm] = S.age; tick(b, mm, S.age - S.ticks[mm]); } }
+    S.orbs.forEach(o => { if (!o.done) ORB[orbStyle].step(o, dt * sp); if (o.done && !o.counted) { o.counted = true; if (--S.left[o.kid] === 0) finish(o.kid); } });
+    S.gains.forEach(g => { const { at, k } = g, col = m.rested ? RESTL : XPL, x = b.x + b.w * Math.min(S.shown, .97) + 10;
+      if (chk('oCount')) { // counts up as the orbs land, punches when done
+        const got = clamp((S.shown - g.start) / k.f), done = S.doneAt[g.i], t = done === undefined ? 0 : S.age - done; if (got <= 0 || t > 1.8) return;
+        const pop = done !== undefined && t < .25 ? 1 - t / .25 : 0, a = clamp(1.8 - t), y = b.y - 8 - t * 6;
+        ctx.save(); ctx.translate(x, y); ctx.scale(1 + pop * .35, 1 + pop * .35); text('+' + fmt(g.xp * got) + ' XP', 0, 0, '700 13px system-ui', pop > .3 ? '#fff' : col, 'left', { alpha: a }); ctx.restore();
+        if (k.sub && done !== undefined) text(k.sub, x, y + 13, '600 10px system-ui', RESTL, 'left', { alpha: a * clamp(t / .2) }); return; }
+      const t = S.age - at - .5 / sp; if (t < 0 || t > 2) return;
+      text(k.text, x, b.y - 8 - t * 10, '700 13px system-ui', col, 'left', { alpha: clamp(t / .2) * clamp(2 - t) }); if (k.sub) text(k.sub, x, b.y + 5 - t * 10, '600 10px system-ui', RESTL, 'left', { alpha: clamp(t / .2) * clamp(2 - t) }); });
+    if (chk('oBulge') && S.rippleAt !== undefined) { const t = S.age - S.rippleAt; if (t < .5) { const x = b.x + b.w * Math.min(1, S.shown), a = 1 - t / .5; ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = m.rested ? RESTL : XPL; ctx.shadowBlur = 20 * a; ctx.globalAlpha = a; star4(x, b.y + b.h / 2, 10 + 10 * (1 - a), t * 3); ctx.restore(); } }
+    if (m.level && S.fullAt !== undefined) levelScreen(S.fullAt + .5);
+    stepP(dt); if (S.age > m.dur + .4 && document.getElementById('loop').checked) play();
+  } else gameUI(.62, 0, 0);
+  requestAnimationFrame(frame); }
+
+// ---------- panel ----------
+const oEl = document.getElementById('orbs');
+['C', 'T', 'B'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + ORB[k].name; b.dataset.o = k; b.onclick = () => { orbStyle = k; sync(); play(); }; oEl.appendChild(b); });
+function sync() { document.querySelectorAll('[data-o]').forEach(b => b.classList.toggle('on', b.dataset.o === orbStyle)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('odesc').textContent = ORB[orbStyle].desc; }
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '123'.indexOf(e.key); if (i >= 0) { orbStyle = 'CTB'[i]; sync(); play(); } });
+[['src', 'src'], ['snd', 'snd'], ['loot', 'loot']].forEach(([attr, key]) => document.querySelectorAll(`[data-${attr}]`).forEach(b => b.onclick = () => { OPT[key] = b.dataset[attr];
+  document.querySelectorAll(`[data-${attr}]`).forEach(x => x.classList.toggle('on', x === b)); play(); }));
+['oBulge', 'oCount', 'oFast'].forEach(id => document.getElementById(id).onchange = () => play());
+orbStyle = 'C'; sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

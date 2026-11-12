@@ -3,7 +3,7 @@
 -- profession's color filling toward what's next, with its icon at the bar's end: for Herbalism and
 -- Mining the next herb or ore you can gather (the Classic skill levels; check them on Forever), for the
 -- others the next rank cap (75, 150, 225, 300). Weapon and other skills are left out. Movable (Mover.lua).
--- Shared by gathering and (later) crafting.
+-- Shared by gathering and crafting (crafting bars: SkillBar.lua).
 local _, ns = ...
 
 local BORDER = "Interface\\COMMON\\WhiteIconFrame"
