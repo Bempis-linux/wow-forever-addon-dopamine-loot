@@ -725,6 +725,21 @@ the user's own):
      **BLACKSMITHING LOCKED (2026-11-12): E. Heated + sparks** on Ring + batch. **Process from here (the user):**
      get a direction locked for every profession on the compare page first; then a **final round of new ideas
      for each profession**, once the whole set has a clearer direction.
+     Leatherworking iterations (same timing as 1.3: four punches, the thread, the tug): **A. Arc holes**
+     (round 1), **B. Leather strap** (the ring's stroke becomes a tan strap as it fills, holes punched in it,
+     the thread laces along it, the tug cinches the ring with a flash), **C. Crumbs and whip** (each punch
+     knocks leather crumbs off; a bright thread whips once around the whole ring leaving a stitched line),
+     **D. Lacing** (holes alternate inside/outside the ring, the thread zigzags between them like a boot lace
+     and pulls tight at the tug). The page opens Leatherworking on B.
+     → **C liked**, but "I was expecting more unique animations, not 4 similar" (A/B/D were all "holes +
+     thread"; saved as a memory rule: every option a different mechanism). Round 2 keeps **C** and adds three
+     different mechanisms: **E. Hide stretch** (the shape changes: a wobbly raw hide pulled into a true circle
+     beat by beat, snapping taut with a twang), **F. Tooled pattern** (marks stamped in: embossed chevrons
+     stamped around the ring stretch by stretch, a light sweep around it at the end), **G. Rivets** (objects
+     set in: brass rivets hammered into the ring, shining one after another at the end).
+     **LEATHERWORKING LOCKED (2026-11-12): C. Crumbs and whip** (E/F/G not liked). Fix: the four punches sit
+     evenly, one per quarter (at 12.5/37.5/62.5/87.5% of the cast; 1.3's .18-.66 left a gap at the top-left),
+     the whip runs right after the last (89-99%). More ideas wait for the final round.
   2. **Then crafting animations, per profession**: several unique designs for every crafting profession
      (not one concept adapted), like the popup rounds.
 

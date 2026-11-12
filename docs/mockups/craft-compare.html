@@ -186,7 +186,7 @@ function ringBatch(rg, c, p) { const { x, y, r } = rg, mt = c.t - CAST; ctx.save
 // ---------- the scene: two halves on one clock ----------
 const CAST = 3, N_ALL = 5;
 let S = null, prof = 'Blacksmithing', moment = 'one';
-function play() { S = { age: 0, fired: {}, potion: Math.floor(Math.random() * POTION.length), runeSeed: Math.floor(Math.random() * 4), mute: false, flashes: [], notches: [], item: 0 }; FX = []; TIMERS = []; }
+function play() { S = { age: 0, fired: {}, potion: Math.floor(Math.random() * POTION.length), runeSeed: Math.floor(Math.random() * 4), mute: false, flashes: [], notches: [], item: 0, lw: { holes: [] } }; FX = []; TIMERS = []; }
 function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
 function state() { const n = moment === 'all' ? N_ALL : 1, per = CAST + .25, i = Math.min(n - 1, Math.floor(S.age / per)), t = S.age - i * per; return { i, n, t, f: clamp(t / CAST), made: t >= CAST, over: S.age >= n * per - .25 && t >= CAST, loud: i === 0 ? '' : i < 3 ? 'Q' : false, quiet: i >= 3 }; }
 function halves() { const hw = W / 2; return [{ x0: 0, w: hw, ring: { x: Math.min(hw * .32, 120), y: H * .62, r: 26 }, label: '1.3 animation beside the ring' }, { x0: hw, w: hw, ring: { x: hw + hw * .5, y: H * .62, r: 26 }, label: 'New: on the arc' }]; }
@@ -244,7 +244,74 @@ ITER.Blacksmithing.E = { name: 'E. Heated + sparks (B + C)', desc: 'B and C toge
     for (let i = 0; i < 9; i++) { const sp = R(110, 220), ox = Math.cos(p.a) * R(0, .5), oy = Math.sin(p.a) * R(0, .5); Dot({ x: p.x, y: p.y, vx: (tx + ox) * sp, vy: -(ty + oy) * sp, g: 260, size: R(2, 3.5), life: R(.3, .5), add: true, c: SPARK, fade: false }); } })); },
   payoff(rg, quiet) { ITER.Blacksmithing.C.payoff(rg, quiet); steamRing(rg, 12); },
   overlay(rg, c) { ITER.Blacksmithing.B.overlay(rg, c); } };
-const iterPick = { Blacksmithing: 'E' };
+// ---------- Leatherworking: four punches (.18, .34, .50, .66), the thread (.8-.9), the tug ----------
+const LW_F = [.18, .34, .50, .66], CREAM = [.96, .86, .68];
+function lwHole(x, y, s = 1) { ctx.save(); const g = ctx.createRadialGradient(x, y, 0, x, y, 9 * s); g.addColorStop(0, 'rgba(255,207,138,.55)'); g.addColorStop(1, 'rgba(255,207,138,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 9 * s, 0, 7); ctx.fill();
+  ctx.strokeStyle = rgb(CREAM); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(x, y, 4.2 * s, 0, 7); ctx.stroke(); ctx.fillStyle = '#3a2412'; ctx.beginPath(); ctx.arc(x, y, 2 * s, 0, 7); ctx.fill(); ctx.restore(); }
+function lwPunch(x, y) { RingFx(x, y, 20, .3, 0, [1, .85, .63]); }
+function lwThread(pts, prog, w = 3, alpha = 1) { if (pts.length < 2 || prog <= 0) return; ctx.save(); ctx.strokeStyle = `rgba(255,232,190,${alpha})`; ctx.shadowColor = '#ffcf8a'; ctx.shadowBlur = 8; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  const total = pts.length - 1, upto = prog * total; for (let k = 1; k <= Math.ceil(upto); k++) { const u = Math.min(1, upto - (k - 1)), a = pts[k - 1], b = pts[k]; ctx.lineTo(lerp(a.x, b.x, u), lerp(a.y, b.y, u)); } ctx.stroke(); ctx.restore(); }
+const lwTimes = (c) => { const tt = c.t / CAST; return { thread: clamp((tt - .8) / .15), made: c.made, mt: c.t - CAST }; };
+function lwFade(c) { return c.made ? clamp(1 - (c.t - CAST - .5) / .5) : 1; }
+ITER.Leatherworking = {
+  A: Object.assign({ name: 'A. Arc holes', desc: 'Round 1\'s arc version: each hole is punched into the arc where the head is; the glowing thread runs between them along the ring; the tug glints at the top.' }, PROF.Leatherworking.arc),
+  B: { name: 'B. Leather strap', desc: 'The ring\'s stroke becomes a tan leather strap as it fills (like Blacksmithing\'s heated metal). Each punch lands on the strap with a cream ring; at the end the glowing thread laces hole to hole along it, and the tug cinches the ring tight with a flash and a glint at the top.',
+    work(rg, T) { LW_F.forEach(f => After(T * f, () => { S.lw.holes.push({ i: S.item, f }); const p = head(rg, f); lwPunch(p.x, p.y); })); },
+    payoff(rg) { const p = head(rg, 1); Glint(p.x, p.y, 22, .4); RingFx(rg.x, rg.y, rg.r * 2.4, .4, 0, [1, .88, .69]); S.lw.cinch = S.age; },
+    overlay(rg, c) { const f = c.made ? 1 : c.f, a0 = -Math.PI / 2, fd = lwFade(c); if (f <= .005 || fd <= 0) return; const cin = S.lw.cinch !== undefined && S.age - S.lw.cinch < .3 ? Math.sin(Math.PI * (S.age - S.lw.cinch) / .3) : 0, r = rg.r - cin * 2;
+      ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'butt'; ctx.lineWidth = 8; ctx.strokeStyle = '#a8703e'; ctx.beginPath(); ctx.arc(rg.x, rg.y, r, a0, a0 + Math.PI * 2 * f); ctx.stroke();
+      ctx.lineWidth = 1; ctx.strokeStyle = '#6a4220'; [r - 3.5, r + 3.5].forEach(rr => { ctx.beginPath(); ctx.arc(rg.x, rg.y, rr, a0, a0 + Math.PI * 2 * f); ctx.stroke(); }); if (cin > 0) { ctx.strokeStyle = `rgba(255,255,255,${cin * .8})`; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(rg.x, rg.y, r, 0, 7); ctx.stroke(); }
+      const hs = S.lw.holes.filter(h => h.i === c.i).map(h => { const a = a0 + Math.PI * 2 * h.f; return { x: rg.x + Math.cos(a) * r, y: rg.y + Math.sin(a) * r }; }); hs.forEach(h => lwHole(h.x, h.y, .85));
+      const th = lwTimes(c).thread; if (th > 0 && hs.length > 1) { const pts = []; for (let k = 0; k < hs.length - 1; k++) { const fa = S.lw.holes.filter(h => h.i === c.i)[k].f, fb = S.lw.holes.filter(h => h.i === c.i)[k + 1].f; for (let j = 0; j <= 6; j++) { const a = a0 + Math.PI * 2 * lerp(fa, fb, j / 6); pts.push({ x: rg.x + Math.cos(a) * r, y: rg.y + Math.sin(a) * r }); } } lwThread(pts, th, 2.6); }
+      ctx.restore(); } },
+  C: { name: 'C. Crumbs and whip', desc: 'Each punch knocks a few leather crumbs off the ring with a cream ring burst. At the end a bright thread whips once all the way around the ring, leaving a stitched line through every hole, then the tug glints at the top.',
+    // (evenly round the ring, a hole in each quarter: the user saw a gap at the top-left with 1.3's .18-.66 timing)
+    work(rg, T) { [.125, .375, .625, .875].forEach(f => After(T * f, () => { S.lw.holes.push({ i: S.item, f }); const p = head(rg, f); lwPunch(p.x, p.y); for (let k = 0; k < 5; k++) { const a = p.a + R(-.6, .6); Dot({ x: p.x, y: p.y, vx: Math.cos(a) * R(60, 120), vy: -Math.sin(a) * R(60, 120), g: 400, size: R(2, 3), life: R(.35, .5), c: [.55, .36, .2] }); } })); },
+    payoff(rg) { const p = head(rg, 1); Glint(p.x, p.y, 22, .4); RingFx(p.x, p.y, 34, .35, 0, [1, .88, .69]); },
+    overlay(rg, c) { const fd = lwFade(c); if (fd <= 0) return; ctx.save(); ctx.globalAlpha = fd; const a0 = -Math.PI / 2; S.lw.holes.filter(h => h.i === c.i).forEach(h => { const p = head(rg, h.f); lwHole(p.x, p.y, .8); });
+      const th = clamp((c.t / CAST - .89) / .1); if (th > 0) { const end = a0 + Math.PI * 2 * th; ctx.strokeStyle = 'rgba(255,232,190,.95)'; ctx.lineWidth = 2.4; ctx.setLineDash([5, 4]); ctx.shadowColor = '#ffcf8a'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, end); ctx.stroke(); ctx.setLineDash([]);
+        if (th < 1) { const hx = rg.x + Math.cos(end) * rg.r, hy = rg.y + Math.sin(end) * rg.r; ctx.fillStyle = '#fff'; ctx.shadowBlur = 14; ctx.beginPath(); ctx.arc(hx, hy, 3, 0, 7); ctx.fill(); } } ctx.restore(); } },
+  D: { name: 'D. Lacing', desc: 'The holes alternate just inside and just outside the ring; at the end the glowing thread laces between them in a zigzag, like a boot lace, and at the tug the lace pulls tight (the zigzag narrows) and brightens, with a glint at the top.',
+    work(rg, T) { LW_F.forEach((f, k) => After(T * f, () => { S.lw.holes.push({ i: S.item, f, side: k % 2 ? 1 : -1 }); const p = head(rg, f), off = (k % 2 ? 1 : -1) * 7; lwPunch(p.x + Math.cos(p.a) * off, p.y + Math.sin(p.a) * off); })); },
+    payoff(rg) { const p = head(rg, 1); Glint(p.x, p.y, 22, .4); S.lw.cinch = S.age; },
+    overlay(rg, c) { const fd = lwFade(c); if (fd <= 0) return; ctx.save(); ctx.globalAlpha = fd; const tight = S.lw.cinch !== undefined ? clamp((S.age - S.lw.cinch) / .25) : 0, hs = S.lw.holes.filter(h => h.i === c.i).map(h => { const a = -Math.PI / 2 + Math.PI * 2 * h.f, off = h.side * 7 * (1 - .55 * tight); return { x: rg.x + Math.cos(a) * (rg.r + off), y: rg.y + Math.sin(a) * (rg.r + off) }; });
+      hs.forEach(h => lwHole(h.x, h.y, .75)); const th = lwTimes(c).thread; if (th > 0) lwThread(hs, th, 2.4 + tight, .85 + .15 * tight); ctx.restore(); } },
+};
+// Leatherworking round 2: C stays (the user's pick); A, B and D were all "holes + thread" and are replaced by
+// three different mechanisms: the shape itself changes (Hide stretch), marks are stamped in (Tooled pattern),
+// objects are set into it (Rivets)
+delete ITER.Leatherworking.A; delete ITER.Leatherworking.B; delete ITER.Leatherworking.D;
+const LW_BEATS = [.18, .34, .50, .66, .80];
+function lwBeats(c) { return S.lw.holes.filter(h => h.i === c.i); }
+Object.assign(ITER.Leatherworking, {
+  E: { name: 'E. Hide stretch', desc: 'The shape itself changes: the ring starts as a wobbly, uneven raw hide. Each beat stretches it a step closer to a true circle (a quick pull you can see), and when the item is made it snaps taut with an overshoot and a twang of rippling rings.',
+    work(rg, T) { LW_BEATS.forEach(f => After(T * f, () => { S.lw.holes.push({ i: S.item, f, at: S.age }); const p = head(rg, f); RingFx(p.x, p.y, 16, .3, 0, [1, .85, .63]); })); },
+    payoff(rg) { S.lw.cinch = S.age; for (let k = 0; k < 3; k++) RingFx(rg.x, rg.y, rg.r * (2.3 + k * .7), .55, k * .07, [1, .88, .69]); const p = head(rg, 1); Glint(p.x, p.y, 20, .35); },
+    overlay(rg, c) { const fd = lwFade(c); if (fd <= 0) return; const n = lwBeats(c).length, last = lwBeats(c).slice(-1)[0], pull = last ? clamp(1 - (S.age - last.at) / .2) : 0;
+      let amp = 7 * (1 - n / LW_BEATS.length) + pull * 2; if (S.lw.cinch !== undefined) { const u = (S.age - S.lw.cinch) / .35; amp = u < 1 ? -3 * Math.sin(Math.PI * u) * (1 - u) : 0; }
+      const f = c.made ? 1 : c.f, a0 = -Math.PI / 2; ctx.save(); ctx.globalAlpha = fd; ctx.lineWidth = 7; ctx.lineJoin = 'round'; ctx.strokeStyle = '#9a6436'; ctx.shadowColor = '#e8c08a'; ctx.shadowBlur = c.made ? 10 : 3; ctx.beginPath();
+      const steps = 90; for (let k = 0; k <= steps * f; k++) { const a = a0 + Math.PI * 2 * k / steps, w = Math.sin(3 * a + 1.3) * .7 + Math.sin(5 * a + .4) * .45 + Math.sin(8 * a) * .2, rr = rg.r + amp * w; ctx.lineTo(rg.x + Math.cos(a) * rr, rg.y + Math.sin(a) * rr); } ctx.stroke();
+      ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,230,190,.35)'; ctx.stroke(); ctx.restore(); } },
+  F: { name: 'F. Tooled pattern', desc: 'Marks are stamped in: each beat stamps the next stretch of the ring with an embossed border of little chevrons (a flash as the stamp lands), like tooling a leather belt. When it\'s made, a sweep of light runs once all the way around the finished pattern and glints at the top.',
+    work(rg, T) { LW_BEATS.forEach(f => After(T * f, () => { S.lw.holes.push({ i: S.item, f, at: S.age }); })); },
+    payoff(rg) { S.lw.sweep = S.age; },
+    overlay(rg, c) { const fd = lwFade(c); if (fd <= 0) return; const bs = lwBeats(c); ctx.save(); ctx.globalAlpha = fd; let prev = 0;
+      bs.forEach(b => { const age = S.age - b.at, flash = clamp(1 - age / .25), n = Math.max(1, Math.round((b.f - prev) * 2 * Math.PI * rg.r / 7));
+        for (let k = 0; k < n; k++) { const f = lerp(prev, b.f, (k + .5) / n), a = -Math.PI / 2 + Math.PI * 2 * f, x = rg.x + Math.cos(a) * rg.r, y = rg.y + Math.sin(a) * rg.r; ctx.save(); ctx.translate(x, y); ctx.rotate(a + Math.PI / 2);
+          ctx.strokeStyle = 'rgba(30,16,6,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-2.5, 2.8); ctx.lineTo(0, -1.2); ctx.lineTo(2.5, 2.8); ctx.stroke(); ctx.strokeStyle = `rgba(255,${Math.round(lerp(220, 255, flash))},${Math.round(lerp(170, 255, flash))},.95)`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-2.5, 2); ctx.lineTo(0, -2); ctx.lineTo(2.5, 2); ctx.stroke(); ctx.restore(); }
+        if (flash > 0) { const p = head(rg, b.f); ctx.fillStyle = `rgba(255,240,210,${flash * .7})`; ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, 7); ctx.fill(); } prev = b.f; });
+      if (S.lw.sweep !== undefined) { const u = (S.age - S.lw.sweep) / .45; if (u < 1) { const a = -Math.PI / 2 + Math.PI * 2 * u, g = ctx.createRadialGradient(rg.x + Math.cos(a) * rg.r, rg.y + Math.sin(a) * rg.r, 0, rg.x + Math.cos(a) * rg.r, rg.y + Math.sin(a) * rg.r, 12); g.addColorStop(0, 'rgba(255,250,230,.95)'); g.addColorStop(1, 'rgba(255,220,160,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(rg.x + Math.cos(a) * rg.r, rg.y + Math.sin(a) * rg.r, 12, 0, 7); ctx.fill(); }
+        else once('lwgl' + c.i, () => { const p = head(rg, 1); Glint(p.x, p.y, 20, .35); }); }
+      ctx.restore(); } },
+  G: { name: 'G. Rivets', desc: 'Objects are set in: each beat hammers a brass rivet into the ring, popping in with a little ring and a glint; the rivets stay, catching the light. When it\'s made, they shine one after another all the way around, and the last one glints at the top.',
+    work(rg, T) { LW_BEATS.forEach(f => After(T * f, () => { S.lw.holes.push({ i: S.item, f, at: S.age }); const p = head(rg, f); RingFx(p.x, p.y, 14, .25, 0, [1, .85, .5]); Glint(p.x, p.y, 10, .2, 0, [1, .9, .6]); })); },
+    payoff(rg) { S.lw.shine = S.age; const p = head(rg, 1); Glint(p.x, p.y, 22, .35, .3, [1, .9, .6]); },
+    overlay(rg, c) { const fd = lwFade(c); if (fd <= 0) return; const bs = lwBeats(c); ctx.save(); ctx.globalAlpha = fd;
+      bs.forEach((b, k) => { const p = head(rg, b.f), pop = eBack(clamp((S.age - b.at) / .2)), sh = S.lw.shine !== undefined ? clamp(1 - Math.abs(S.age - S.lw.shine - k * .06 - .1) / .12) : 0;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.scale(pop, pop); const g = ctx.createRadialGradient(-1, -1, 0, 0, 0, 4); g.addColorStop(0, '#fff3c0'); g.addColorStop(.5, '#d8a440'); g.addColorStop(1, '#6a4a14'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 3.6, 0, 7); ctx.fill();
+        if (sh > 0) { ctx.fillStyle = `rgba(255,255,255,${sh})`; ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 10; star4(0, 0, 4 + 6 * sh, 0); } ctx.restore(); }); ctx.restore(); } },
+});
+const iterPick = { Blacksmithing: 'E', Leatherworking: 'C' }; // (locked: Blacksmithing E, Leatherworking C)
 function arcOf() { const it = ITER[prof]; if (!it) return PROF[prof].arc; return it[iterPick[prof] || Object.keys(it)[0]]; }
 function syncIters() { const el = document.getElementById('iters'), it = ITER[prof]; el.innerHTML = ''; document.getElementById('itbox').style.display = it ? 'block' : 'none'; if (!it) return;
   Object.keys(it).forEach(k => { const b = document.createElement('button'); b.textContent = it[k].name; b.classList.toggle('on', (iterPick[prof] || Object.keys(it)[0]) === k); b.onclick = () => { iterPick[prof] = k; syncIters(); play(); }; el.appendChild(b); });
