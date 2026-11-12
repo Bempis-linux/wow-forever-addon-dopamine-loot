@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dungeon Recap Round 1</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  .desc { margin-top: 4px; min-height: 44px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: calc(36% - 28px); top: 56%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .note { position: absolute; left: 12px; bottom: 10px; right: 12px; color: rgba(255,255,255,.55); font-size: 12px; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Dungeon recap, round 1</h1>
+  <small>The same run three ways, as picked: The Deadmines, 6 bosses, 38:12, a rare as the best drop, every item,
+  money and vendor value, XP and a level, and a new record. It plays once you're outside. Space replays; keys 1-3.</small>
+
+  <h2>Staging</h2>
+  <button data-s="card" class="on">1. Ring + road card</button><button data-s="rain">2. Loot rain replay</button><button data-s="cine">3. Cinematic</button>
+  <small class="desc" id="sdesc"></small>
+
+  <h2>Moments</h2>
+  <button data-m="recap" class="on">The recap (on leaving)</button><button data-m="cleared">Last boss: "Dungeon cleared"</button>
+  <small>The short moment when the final boss dies, while you're still inside looting. The recap waits until you
+  leave.</small>
+
+  <h2>Options</h2>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>Boss stops ticking in, counters, the best drop's arrival.</small></label>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="char" id="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note">Item and boss icons are emoji stand-ins; the game uses the real icons.</div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eIn = t => t * t * t, eInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const XP = '#a35cf0', XPL = '#dcb8ff', GOLD = '#ffd36a', Q = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee'];
+function money(c) { c = Math.round(c); const g = Math.floor(c / 10000), s = Math.floor(c / 100) % 100, cc = c % 100; return (g ? g + 'g ' : '') + (g || s ? s + 's ' : '') + cc + 'c'; }
+function icon(x, y, s, emo, q, a = 1, glow = 0) { ctx.save(); ctx.globalAlpha *= a; if (glow) { ctx.shadowColor = Q[q]; ctx.shadowBlur = 14 * glow; }
+  const g = ctx.createRadialGradient(x, y, 0, x, y, s * .7); g.addColorStop(0, '#3a3226'); g.addColorStop(1, '#14100a'); ctx.fillStyle = g; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.shadowBlur = 0;
+  ctx.font = `${Math.round(s * .64)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emo, x, y + 1); ctx.strokeStyle = Q[q]; ctx.lineWidth = 1.5; ctx.strokeRect(x - s / 2 + .75, y - s / 2 + .75, s - 1.5, s - 1.5); ctx.restore(); }
+
+// ---------- sound ----------
+let AC = null, OUT = null; const on = () => document.getElementById('snd').checked;
+function tone(f, t = 0, vol = .05, dec = .4, type = 'sine') { if (!on()) return; if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.5; OUT.connect(AC.destination); }
+  const T = AC.currentTime + t, o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .004); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+const semi = n => Math.pow(2, n / 12); let lastTick = 0;
+function tick(n) { const now = performance.now(); if (now - lastTick < 45) return; lastTick = now; tone(1400 + n * 30, 0, .01, .05); }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += (p.vr || 0) * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
+    else { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); } ctx.restore(); } }
+function burst(x, y, col, n = 14) { spawn({ x, y, size: 10, shape: 'ring', grow: 50, life: .7, col: '#fff' }); for (let i = 0; i < n; i++) { const a = rnd(0, 7), sp = rnd(60, 170); spawn({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rnd(.5, .9), size: i % 3 ? 1.8 : 3.5, shape: i % 3 ? 'dot' : 'star', vr: 3, col: i % 2 ? '#fff' : col }); } }
+
+// ---------- the run ----------
+const RUN = { name: 'The Deadmines', time: '38:12', record: { old: '41:05' },
+  bosses: [['Rhahk\'Zor', '🪓'], ['Sneed', '⚙️'], ['Gilnid', '🔥'], ['Mr. Smite', '🔨'], ['Captain Greenskin', '🏴'], ['Edwin VanCleef', '🗡️']],
+  best: ['🗡️', 'Cruel Barb', 3, 'Rare · One-Hand Sword'],
+  items: [['🗡️', 'Cruel Barb', 3, 1], ['🧤', 'Blackened Defias Gloves', 3, 1], ['👖', 'Smelting Pants', 2, 1], ['🔪', 'Cookie\'s Tenderizer', 2, 1], ['👕', 'Corsair\'s Overshirt', 2, 1], ['💍', 'Copper Band', 2, 1],
+    ['🧵', 'Linen Cloth', 1, 14], ['🧶', 'Wool Cloth', 1, 9], ['🧪', 'Minor Healing Potion', 1, 3], ['🍖', 'Goretusk Snout', 0, 6], ['🦷', 'Broken Tooth', 0, 5], ['🪨', 'Coarse Stone', 1, 4]],
+  copper: 41230, vendor: 28770, xp: 18340, level: [18, 19] };
+const DESC = { card: 'A card in our Ring + road look: the bosses as a road of rings that light one by one, then the best drop\'s moment, the loot grid in quality borders, and the numbers counting up underneath. Readable, like the level-up Ledger.',
+  rain: 'The run\'s loot rains out of you again, the best drop last, and gathers into a tally that counts up as each piece lands: money, vendor value, XP. The most dopamine; then the bosses and the time settle on top.',
+  cine: 'A chapter ending: letterbox bars, the dungeon\'s name as a title, "cleared in 38:12", the boss road across the screen, then the best drop big in the middle and the totals in one row. Like the milestone level-up.' };
+
+// ---------- shared pieces ----------
+function bossRoad(cx, y, w, t, big) { const n = RUN.bosses.length, r = big ? 17 : 14, step = w / (n - 1), x0 = cx - w / 2; ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y); ctx.stroke();
+  const lit = clamp(t / (n * .28)) * (n - 1); ctx.strokeStyle = GOLD; ctx.shadowColor = GOLD; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + step * lit, y); ctx.stroke(); ctx.shadowBlur = 0;
+  RUN.bosses.forEach(([nm, emo], i) => { const x = x0 + i * step, bt = t - i * .28, got = bt > 0, pop = got ? eBack(clamp(bt / .3)) : 0;
+    if (got) once('boss' + i, () => { spawn({ x, y, size: r, shape: 'ring', grow: 18, life: .5, col: GOLD }); tone(523 * semi(i * 2), 0, .03, .35); });
+    ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(x, y, r + 4, 0, 7); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke();
+    if (got) { ctx.strokeStyle = GOLD; ctx.shadowColor = GOLD; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * clamp(bt / .25)); ctx.stroke(); ctx.shadowBlur = 0; }
+    ctx.save(); ctx.translate(x, y); ctx.scale(.85 + .15 * pop, .85 + .15 * pop); ctx.globalAlpha = got ? 1 : .35; ctx.font = `${r * 1.05}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emo, 0, 1); ctx.restore();
+    text(nm, x, y + r + 15, `${i === n - 1 ? 700 : 500} 10px system-ui`, got ? '#cfc6b0' : '#6a6252', 'center'); }); ctx.restore(); }
+function counter(label, val, fmtf, x, y, t, col, align = 'center') { if (t < 0) return; const p = eOut(clamp(t / 1.1)), v = val * p; if (p < 1) tick(Math.floor(p * 20));
+  text(label, x, y - 18, '700 9px system-ui', '#9a927e', align, { ls: '1.5px', alpha: clamp(t / .2) }); text(fmtf(v), x, y, '700 16px system-ui', col, align, { alpha: clamp(t / .2) }); }
+function lootGrid(x0, y0, cols, s, t, perItem = .07) { RUN.items.forEach(([e, nm, q, n], i) => { const it = t - i * perItem; if (it < 0) return; const x = x0 + (i % cols) * (s + 8) + s / 2, y = y0 + Math.floor(i / cols) * (s + 8) + s / 2, pop = eBack(clamp(it / .25));
+  ctx.save(); ctx.translate(x, y); ctx.scale(pop, pop); icon(0, 0, s, e, q, 1, q >= 3 ? .6 : 0); ctx.restore(); if (n > 1) text('×' + n, x + s / 2 - 2, y + s / 2 - 2, '700 10px system-ui', '#fff', 'right'); if (it < .05) tick(i); }); }
+function record(x, y, t) { if (t < 0) return; const a = clamp(t / .3), pop = eBack(clamp(t / .35)); once('rec', () => { tone(784, 0, .04, .4); tone(1175, .08, .035, .5); });
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(pop, pop); ctx.fillStyle = 'rgba(255,211,106,.14)'; ctx.strokeStyle = GOLD; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(-110, -14, 220, 22, 11); ctx.fill(); ctx.stroke();
+  text(`New record: fastest clear (was ${RUN.record.old})`, 0, 1, '700 11px system-ui', GOLD, 'center'); ctx.restore(); }
+
+// ---------- the three stagings (t: seconds since the recap began) ----------
+const ST = {
+  card(t) { const pw = 470, ph = 400, px = W / 2 - pw / 2, py = Math.max(16, H * .06), a = clamp(t / .3); ctx.save(); ctx.globalAlpha = a;
+    ctx.fillStyle = 'rgba(8,8,12,.9)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 14); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.3)'; ctx.lineWidth = 1; ctx.stroke();
+    text(RUN.name, px + 22, py + 32, '400 20px Georgia, serif', '#e8e2d0', 'left'); text('CLEARED', px + pw - 22, py + 26, '700 10px system-ui', GOLD, 'right', { ls: '3px' }); text(RUN.time, px + pw - 22, py + 42, '700 15px system-ui', '#fff', 'right');
+    bossRoad(W / 2, py + 82, pw - 80, t - .4, false);
+    // the best drop's moment
+    const bt = t - 2.4; if (bt > 0) { once('best', () => { burst(px + 54, py + 160, Q[3]); tone(659, 0, .04, .5); tone(988, .06, .035, .6); }); const pop = eBack(clamp(bt / .35));
+      ctx.save(); ctx.translate(px + 54, py + 160); ctx.scale(pop, pop); icon(0, 0, 50, RUN.best[0], RUN.best[2], 1, 1); ctx.restore();
+      text('BEST DROP', px + 92, py + 146, '700 9px system-ui', '#9a927e', 'left', { ls: '2px', alpha: clamp(bt / .3) }); text(RUN.best[1], px + 92, py + 168, '600 19px Georgia, serif', Q[3], 'left', { alpha: clamp(bt / .3) }); text(RUN.best[3], px + 92, py + 184, '500 10px system-ui', '#b9b09a', 'left', { alpha: clamp(bt / .3) }); }
+    lootGrid(px + 22, py + 206, 12, 30, t - 3.2);
+    const ct = t - 4.4, cy = py + 312; counter('MONEY LOOTED', RUN.copper, money, px + 80, cy, ct, GOLD); counter('VENDOR VALUE', RUN.vendor, money, px + 200, cy, ct - .3, '#cfc6b0'); counter('XP', RUN.xp, v => '+' + fmt(v), px + 315, cy, ct - .6, XPL);
+    if (ct > 1) { const lt = ct - 1; text('LEVEL', px + 410, cy - 18, '700 9px system-ui', '#9a927e', 'center', { ls: '1.5px', alpha: clamp(lt / .2) }); text(`${RUN.level[0]} → ${RUN.level[1]}`, px + 410, cy, '700 16px system-ui', XPL, 'center', { alpha: clamp(lt / .2) }); }
+    record(W / 2, py + ph - 30, t - 6.4); ctx.restore(); },
+  rain(t) { const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), ox = c.left - s.left + c.width / 2, oy = c.top - s.top + 30;
+    const tx0 = W * .58, ty0 = H * .2, cols = 4, sz = 34; const tw = cols * (sz + 8) + 28, th = 3 * (sz + 8) + 190;
+    ctx.save(); ctx.globalAlpha = clamp(t / .3); ctx.fillStyle = 'rgba(8,8,12,.88)'; ctx.beginPath(); ctx.roundRect(tx0 - 14, ty0 - 70, tw + 10, th + 60, 14); ctx.fill(); ctx.restore();
+    // each item flies out of you on an arc and lands in its slot in the tally; the best drop last, with a slam
+    const order = RUN.items.map((it, i) => i).sort((a, b) => (a === 0) - (b === 0)); let landed = 0, copper = 0, vend = 0;
+    order.forEach((i, k) => { const [e, nm, q] = RUN.items[i], best = i === 0, st = .5 + k * .22 + (best ? .5 : 0), u = clamp((t - st) / (best ? .75 : .55)); if (t < st) return;
+      const sx = tx0 + (i % cols) * (sz + 8) + sz / 2, sy = ty0 + Math.floor(i / cols) * (sz + 8) + sz / 2, cx = lerp(ox, sx, .3), cy = Math.min(oy, sy) - (best ? 260 : 170);
+      if (u < 1) { const v = eInOut(u), x = (1 - v) ** 2 * ox + 2 * (1 - v) * v * cx + v * v * sx, y = (1 - v) ** 2 * oy + 2 * (1 - v) * v * cy + v * v * sy; ctx.save(); ctx.translate(x, y); ctx.rotate(u * 6 * (k % 2 ? 1 : -1)); icon(0, 0, sz * (best ? 1.3 : .9), e, q, 1, q >= 3 ? .7 : 0); ctx.restore(); }
+      else { landed++; copper += RUN.copper / RUN.items.length; vend += RUN.vendor / RUN.items.length; once('land' + i, () => { if (best) { burst(sx, sy, Q[3], 20); S.shake = .25; tone(70, 0, .14, .3); tone(659, .02, .04, .5); tone(988, .08, .035, .6); } else { spawn({ x: sx, y: sy, size: 6, shape: 'ring', grow: 12, life: .35, col: Q[q] }); tone(880 * semi(k), 0, .015, .15); } });
+        const pop = eBack(clamp((t - st - (best ? .75 : .55)) / .25)); ctx.save(); ctx.translate(sx, sy); ctx.scale(pop, pop); icon(0, 0, sz, e, q, 1, q >= 3 ? .6 : 0); ctx.restore(); if (RUN.items[i][3] > 1) text('×' + RUN.items[i][3], sx + sz / 2 - 2, sy + sz / 2 - 2, '700 10px system-ui', '#fff', 'right'); } });
+    const ty = ty0 + 3 * (sz + 8) + 20; text('MONEY LOOTED', tx0, ty + 6, '700 9px system-ui', '#9a927e', 'left', { ls: '1.5px' }); text(money(copper), tx0, ty + 24, '700 16px system-ui', GOLD, 'left');
+    text('VENDOR VALUE', tx0 + 110, ty + 6, '700 9px system-ui', '#9a927e', 'left', { ls: '1.5px' }); text(money(vend), tx0 + 110, ty + 24, '700 16px system-ui', '#cfc6b0', 'left');
+    if (landed && landed < RUN.items.length) tick(landed);
+    const done = .5 + RUN.items.length * .22 + 1.4; if (t > done) { const dt2 = t - done; text(RUN.name, tx0, ty0 - 40, '400 19px Georgia, serif', '#e8e2d0', 'left', { alpha: clamp(dt2 / .3) }); text(`cleared · ${RUN.time}`, tx0, ty0 - 22, '700 11px system-ui', GOLD, 'left', { alpha: clamp(dt2 / .3) });
+      counter('XP', RUN.xp, v => '+' + fmt(v), tx0, ty + 70, dt2 - .2, XPL, 'left'); if (dt2 > 1.4) text(`Level ${RUN.level[0]} → ${RUN.level[1]}`, tx0 + 110, ty + 70, '700 14px system-ui', XPL, 'left', { alpha: clamp((dt2 - 1.4) / .2) });
+      ctx.save(); ctx.translate(0, 0); bossRoadSmall(tx0, ty + 110, tw - 20, dt2 - .6); ctx.restore(); record(tx0 + (tw - 20) / 2, ty + 150, dt2 - 2.6); } },
+  cine(t) { const bh = H * .11 * eOut(clamp(t / .4)); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, bh); ctx.fillRect(0, H - bh, W, bh);
+    const cy = H * .2, g = ctx.createLinearGradient(0, cy - 60, 0, cy + 420); g.addColorStop(0, 'rgba(6,8,12,0)'); g.addColorStop(.12, 'rgba(6,8,12,.78)'); g.addColorStop(.88, 'rgba(6,8,12,.78)'); g.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = g; ctx.fillRect(0, cy - 60, W, 480);
+    text(RUN.name.toUpperCase(), W / 2, cy + 10, '400 34px Georgia, serif', '#e8e2d0', 'center', { ls: '6px', alpha: clamp((t - .3) / .6) }); text(`cleared in ${RUN.time}`, W / 2, cy + 36, '400 14px Georgia, serif', GOLD, 'center', { ls: '2px', alpha: clamp((t - .8) / .5) });
+    bossRoad(W / 2, cy + 90, Math.min(W * .78, 620), t - 1.2, true);
+    const bt = t - 3.4; if (bt > 0) { once('best', () => { burst(W / 2, cy + 200, Q[3], 22); tone(70, 0, .12, .3); tone(659, .02, .04, .5); tone(988, .08, .035, .6); }); const pop = eBack(clamp(bt / .4));
+      ctx.save(); ctx.translate(W / 2, cy + 196); ctx.scale(pop, pop); icon(0, 0, 64, RUN.best[0], RUN.best[2], 1, 1.2); ctx.restore();
+      text(RUN.best[1], W / 2, cy + 252, '400 22px Georgia, serif', Q[3], 'center', { alpha: clamp(bt / .4) }); text('the best drop of the run', W / 2, cy + 270, '500 11px system-ui', '#b9b09a', 'center', { alpha: clamp((bt - .3) / .3) }); }
+    const ct = t - 4.8, ry = cy + 320, sp = Math.min(W * .18, 150);
+    counter('ITEMS', RUN.items.reduce((a, i) => a + i[3], 0), fmt, W / 2 - sp * 1.5, ry, ct, '#fff'); counter('MONEY', RUN.copper, money, W / 2 - sp * .5, ry, ct - .25, GOLD); counter('VENDOR VALUE', RUN.vendor, money, W / 2 + sp * .5, ry, ct - .5, '#cfc6b0'); counter('XP', RUN.xp, v => '+' + fmt(v), W / 2 + sp * 1.5, ry, ct - .75, XPL);
+    if (ct > 1.6) text(`Level ${RUN.level[0]} → ${RUN.level[1]}`, W / 2, ry + 30, '700 13px system-ui', XPL, 'center', { alpha: clamp((ct - 1.6) / .3) });
+    record(W / 2, ry + 62, t - 7.4); },
+};
+function bossRoadSmall(x0, y, w, t) { if (t < 0) return; const n = RUN.bosses.length, step = w / (n - 1); ctx.strokeStyle = 'rgba(255,211,106,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w * clamp(t / 1), y); ctx.stroke();
+  RUN.bosses.forEach(([nm, emo], i) => { const bt = t - i * .15, x = x0 + i * step; if (bt < 0) return; ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(x, y, 11, 0, 7); ctx.fill(); ctx.strokeStyle = GOLD; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.stroke();
+    ctx.font = '10px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emo, x, y + 1); }); text('6 / 6 bosses', x0 + w, y + 24, '600 10px system-ui', '#cfc6b0', 'right', { alpha: clamp(t / .3) }); }
+
+// the short moment on the last boss: the boss road completes, "Dungeon cleared"
+function cleared(t) { const cx = W / 2, cy = H * .14, a = clamp(t / .2) * clamp((4.2 - t) / .4); if (a <= 0) return; ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = 'rgba(8,8,12,.85)'; ctx.beginPath(); ctx.roundRect(cx - 220, cy - 34, 440, 110, 14); ctx.fill();
+  text('EDWIN VANCLEEF DEFEATED', cx, cy - 10, '700 10px system-ui', '#cfc6b0', 'center', { ls: '3px' }); text(`${RUN.name} cleared`, cx, cy + 14, '400 20px Georgia, serif', GOLD, 'center');
+  bossRoadSmall(cx - 150, cy + 46, 300, t - .2); text('Recap when you leave', cx, cy + 92, '500 10px system-ui', '#9a927e', 'center', { alpha: clamp((t - 1.2) / .3) }); ctx.restore();
+  if (t > .2) once('clr', () => { tone(523, 0, .04, .5); tone(784, .08, .04, .6); tone(1046, .16, .035, .8); }); }
+
+// ---------- loop ----------
+let S = null, stage = 'card', moment = 'recap', last = performance.now();
+function play() { S = { age: 0, fired: {}, shake: 0 }; P = []; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; if (S.shake > 0) { S.shake -= dt; ctx.translate(rnd(-1, 1) * S.shake * 20, rnd(-1, 1) * S.shake * 12); }
+    if (moment === 'cleared') cleared(S.age); else ST[stage](S.age); stepP(dt);
+    const dur = moment === 'cleared' ? 4.6 : stage === 'rain' ? 11 : 9.5; if (S.age > dur + 1.5 && document.getElementById('loop').checked) play(); }
+  requestAnimationFrame(frame); }
+function sync() { document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === stage)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('sdesc').textContent = DESC[stage]; }
+document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { stage = b.dataset.s; moment = 'recap'; sync(); play(); });
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '123'.indexOf(e.key); if (i >= 0) { stage = ['card', 'rain', 'cine'][i]; moment = 'recap'; sync(); play(); } });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

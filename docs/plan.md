@@ -673,6 +673,74 @@ the user's own):
   2. **Then crafting animations, per profession**: several unique designs for every crafting profession
      (not one concept adapted), like the popup rounds.
 
+  **Dungeon recap brainstorm (2026-11-12):** appears **on leaving** the instance (zone out or hearth; a short
+  "Dungeon cleared" moment when the last boss dies; a disconnect or /reload inside keeps the run going).
+  Shows **all of**: bosses + time (the bosses as a road of rings), the best drop moment then every item
+  (quality borders, counts), money looted + vendor value counting up, XP/levels/rep gained (in the picked
+  looks). Stagings to mock up: **Ring + road card**, **Loot rain replay** ("gather it all again" into a
+  tally), **Cinematic** (letterbox + chapter title "The Deadmines, cleared"). History: **last 10 runs per
+  character**, reopened from a settings page, with records (fastest clear, best drop). Mockup:
+  docs/mockups/recap-r1.html.
+  Recap round 1 → **Loot rain replay "definitely in the spirit of the addon"**; the user's idea: **replay the
+  run in order**: the boss road as a timeline, the loot raining out at the moment it was received. Round 2
+  (recap-r2.html): the run compressed to ~8.5 s with a clock, drops leave the road at their minute (trash
+  between bosses, boss loot at the boss, the best drop where it happened), small drops merge / counts climb:
+  **Timeline → tally** (the road on a card, drops hop into a grid, counters climb) and **Timeline → ground →
+  gather** (drops fall from the marker onto the ground around you like the loot rain, then are pulled into
+  the tally card), with round 1's rain replay to compare. Building it needs a timestamp per drop in the run
+  record (we already see each CHAT_MSG_LOOT line: store GetServerTime/GetTime offset).
+  Recap round 2 → **picked: Timeline → tally** (the running gold/XP tally; the loot rain already plays all
+  through the run, so the recap sums up at the end), **replay shortened to 6 s**. Wanted: a better visual
+  design for the window, and a better "Dungeon cleared" that does **not** show the road (the recap shows it).
+  Round 3 (recap-r3.html): window designs **Refined / Gilded** (Achievement style, double gold rail, boss
+  medallions, framed slots) **/ Glass** (translucent, thin white rail, light numerals) **/ Wide banner**
+  (road on top, loot left, totals stacked right); "Dungeon cleared": **Final medallion** (the last boss's
+  ring closes, gold shockwave, CLEARED) **/ Chapter lines** (gold lines sweep in to the name) **/ Pennant**
+  (a banner drops from the top: emblem, name, CLEARED, 6 / 6).
+  Recap round 3 → **"Dungeon cleared" = Final medallion (picked**; matches the skill-up rework). Window:
+  **the Wide banner direction**. The lag was the mockup test harness (manual frame steps spawned hundreds of
+  animation loops), and the finish added ~3 s past the 6 s replay. Round 4 (recap-r4.html): **the whole recap
+  in ~6.5 s** (4.6 s replay + a quick finish; measured in real time), one animation loop; **Wide**, **Wide
+  gilded**, **Wide medallion** (the Final medallion at the left end is the run's clock: its ring fills with
+  the replay and closes with the gold shockwave + CLEARED at 38:12), **Slim strip** (adapts: one row of loot
+  when wide enough, two otherwise).
+  **RECAP PICKED (2026-11-12, recap-r4.html "Slim strip"):** on leaving the instance, a slim strip near the
+  top: the name and time on one line, the boss road as the run's timeline (a marker + clock, the run in
+  ~4.6 s), each drop leaving the road at its minute into the loot row (counts climb, small drops merge), the
+  totals inline (money looted, vendor value, XP, level), then CLEARED, the best drop (with when/which boss)
+  and the record badge; about 6.5 s in all. "Dungeon cleared" on the last boss = **Final medallion**. History:
+  last 10 runs per character. Build needs per-drop timestamps, an instanceID → boss list table, the
+  RoadToSixty-style run model.
+- **Cohesion pass (added by the user 2026-11-12):** make every piece of UI look like one addon, not "a hodge
+  podge of random features". Plan: (1) a **style guide** written from what's been picked (colors: panel
+  darks, gold, XP purple, quality colors; type: serif titles vs. system labels/numbers; shapes: the Ring
+  family, rounded panels, gold hairlines, glints; motion: pops, shockwaves, counters; sounds); (2) an
+  **overview mockup** with every piece side by side on one game screen (popups, rain, harvest window/side
+  column, bag, Create All pile, crafting effects, skill-up ring, XP bar, rep rings, level-up, recap strip,
+  settings) to spot the odd ones out; (3) the user picks what changes; (4) the crafting redesign follows the
+  guide. Probably before the crafting redesign.
+  **Recap API findings** (wow-api-researcher 2026-11-12; proof: saved data of one Ragefire Chasm run by
+  RoadToSixty and Loredex on 16001):
+  - **CHAT_MSG_LOOT and CHAT_MSG_COMBAT_XP_GAIN are readable inside 5-man dungeons** (not secret). Secret in
+    instances: system, skill and trade-skill messages, mob names/GUIDs, the loot source. CHAT_MSG_MONEY and
+    CHAT_MSG_COMBAT_FACTION_CHANGE inside dungeons: unproven (use a `GetMoney()` difference for money). Keep
+    `issecretvalue` guards everywhere; raids/battlegrounds unproven. Fallbacks that work: LOOT_READY/OPENED +
+    GetLootSlotLink, BAG_UPDATE_DELAYED, ITEM_PUSH.
+  - Enter/leave: PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi) + IsInInstance + GetInstanceInfo (8th
+    = instanceID). Save the run per character; /reload inside = same run. **Copy RoadToSixty's run model**: a
+    death sends you outside, so coming back to the same instanceID within a gap is the same run; logging
+    out inside too. Something non-dungeon showed as a "party" instance ("Ruins of Lordaeron", 48 s): filter
+    on maxPlayers/difficulty or "a boss was killed".
+  - **ENCOUNTER_END(encounterID, name, difficulty, size, success) fires** in Classic dungeons (Ragefire's
+    four bosses 2732-2735 recorded). BOSS_KILL/ENCOUNTER_START unproven. **Boss totals: no proven API** (EJ,
+    lockouts unproven): a hand-made instanceID → encounter list table (the final boss = the last entry).
+  - Timing: GetTime for durations, GetServerTime for saved times (time() differs from server time on this
+    PC). LFG/scenario completion events unproven.
+  - Vendor value: C_Item.GetItemInfo 11th return (sellPrice) works; nil until cached
+    (GET_ITEM_INFO_RECEIVED); multiply by the stack.
+  - In-game checks (inside a dungeon): CHAT_MSG_MONEY / FACTION_CHANGE secret? (`issecretvalue` print),
+    `/dump GetInstanceLockTimeRemaining()`, the EJ encounter list, `/dump GetInstanceInfo()` at Undercity.
+
 ### 1.4.0: Dungeons (set by the user 2026-11-10; the dice roll moved to 1.5 on 2026-11-12)
 
 Process as always: brainstorm with the user (a few questions with recommended picks), mockups
