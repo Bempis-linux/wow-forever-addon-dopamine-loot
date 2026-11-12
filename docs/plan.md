@@ -670,6 +670,61 @@ the user's own):
   or for an unknown name, then cache; FACTION_STANDING_CHANGED gives the ID directly. FACTION_BAR_COLORS
   probably exists (keep a fallback); labels FACTION_STANDING_LABEL1..8. **After the XP pick: iterate on the level-up
   screen** (the user wants its own rounds).
+     **Crafting redesign started 2026-11-12, one profession at a time, Blacksmithing first.** The user wants
+     all four stagings explored: on the cast bar, beside it (1.3's spot), at the item in the profession
+     window, around the character. Round 1 (docs/mockups/craft-bs-r1.html): **On the cast bar** (the fill is
+     the metal heating red→white; beats strike its end with sparks and a squash; made = flash, quench steam,
+     cools to steel, the icon pops out of its end), **Beside the bar** (the item's icon on an ember spot,
+     jolted and heated per beat, quenched, gold ring "+1"), **At the item** (the recipe icon in the window
+     heats and sparks; made = quench, then it flies out of the window into the bag, which bumps), **Around
+     you** (sparks off your hands, a ground ring per beat; made = an ember fountain, the item rises over your
+     head). Single craft + Create All ×5 with the 1.3 sound step-down.
+     Round 1 → **keep 1.3's work beats** ("kind of unique"; the bar animation would lose them). The user's
+     idea: **replace the game's cast bar while crafting** with our own. Round 2 (craft-bs-r2.html): 1.3's
+     beats unchanged, and the bar: 1.3 as now / **Heated bar** (our bar, the fill heats like metal, the icon
+     and time on it) / **Ring cast** (a Ring-recipe ring in the profession's color, the icon inside, time
+     under; closes with a flash + shockwave) / **Ring + batch** (an outer thin ring for the Create All,
+     "3 / 5"). **Feasibility (wow-api-researcher 2026-11-12): yes, by alpha only.** `PlayerCastingBarFrame`
+     (not protected, but a UIParent-managed frame): `HookScript("OnEvent")` and on UNIT_SPELLCAST_START with
+     `select(6, UnitCastingInfo("player"))` (isTradeskill) set alpha 0, else 1 (Blizzard resets alpha 1 at
+     each cast start, so the hook must run after it); never Hide/Show, SetParent, UnregisterEvent,
+     SetAndUpdateShowCastbar or SetPoint (tainted layout → blocked actions in combat). Leave it alone while
+     `isInEditMode`; restore alpha 1 when the batch ends or the feature is off. Read its rect for our bar's
+     spot (as Spot() does), re-read at each cast start; `IsAttachedToPlayerFrame()` tells the locked look.
+     Retail swaps in `OverlayPlayerCastingBarFrame` inside the Professions window when locked: check on
+     Forever, alpha it too. Cast times may be secret in combat (guard). Keep our bar across Create All gaps
+     (end on GAP_END). Unproven on Forever (no addon here hides the bar): in-game `/run` tests listed in the
+     agent's report; taint check with `/console taintLog 1`.
+     Round 2 → **Ring + batch picked** for the bar. Round 3 (craft-bs-r3.html): where 1.3's beats go around
+     it, the payoff always at the instant the ring closes: **Beside** / **Attached** (a short gold hairline
+     ties the beat spot to the ring; the closing flash runs down it into the CLANG; room for wide beats; my
+     recommendation) / **Inside** (on the icon in the ring; cramped for Leatherworking/Tailoring) / **On the
+     arc** (taps strike the arc's moving head, payoff at the top).
+     Round 3 → **direction (the user): Ring + batch replaces the cast bar for every profession; the new beats
+     go "On the arc".** Work through all eight professions until the user is happy with each. Every
+     profession mockup from now on is **side by side on one clock**: left = Ring + batch with 1.3's animation
+     beside it (as shipped), right = Ring + batch with the new iteration. Page: docs/mockups/craft-compare.html.
+     Compare round 1 (2026-11-12): the left side ports all eight 1.3 effects from Craft.lua (Leatherworking
+     = leather-r3 A, First Aid = firstaid-r7 P2) with 1.3's sounds; the right side is a first "on the arc"
+     version of each: Blacksmithing taps on the arc head, CLANG at the top; Leatherworking holes punched into
+     the arc, the thread along the ring; Alchemy bubbles and foam off the head, the cork off the top;
+     Tailoring stitches on the arc, the snip at the top; Engineering a gear riding the head, ratcheting;
+     Cooking spatters off the head, the food flips over the ring to the top, steam; Enchanting runes stamped
+     on the arc, drawn in to the top; First Aid the plus drawn on the top seam, lit by the ring's closing.
+     Blacksmithing iterations (the compare page's right side, "New iteration" A-D; left stays 1.3):
+     **A. Arc taps** (round 1), **B. Heated arc** (the ring's stroke glows hot behind the head and cools to
+     dark red; taps flash it white-hot; the CLANG turns the whole ring white-hot, then quench steam and it
+     cools), **C. Sparks along the arc** (each tap throws sparks off along the ring's curve; the CLANG bursts
+     sparks outward from the whole ring with a shockwave), **D. Forge marks** (each tap leaves a glowing notch
+     across the ring that cools; the CLANG flashes them, the ring "rings" in ripples, steam).
+     The user asked for **B + C mixed: E. Heated + sparks** (the heated stroke and white-hot tap flashes, C's
+     sparks along the curve and outward burst at the CLANG, then the quench steam); the page opens on E.
+     E → "the heated animation looks a little laggy, the sparks along the arc are nice". The heated stroke was
+     60 glowing segments a frame; now one conic color sweep + one soft glow pass (0.18 ms a frame), tap
+     flashes as small bright spots. In game it would be a texture (cheap either way).
+     **BLACKSMITHING LOCKED (2026-11-12): E. Heated + sparks** on Ring + batch. **Process from here (the user):**
+     get a direction locked for every profession on the compare page first; then a **final round of new ideas
+     for each profession**, once the whole set has a clearer direction.
   2. **Then crafting animations, per profession**: several unique designs for every crafting profession
      (not one concept adapted), like the popup rounds.
 

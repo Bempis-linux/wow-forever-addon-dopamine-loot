@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blacksmithing Round 1</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  .desc { margin-top: 4px; min-height: 58px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 55% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 55% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 55% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 55% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Blacksmithing, round 1</h1>
+  <small>Four stagings, each its own design (your picks): on the cast bar, beside it, at the item in the
+  profession window, around your character. A craft is a 3 s cast with three hammer beats and the payoff when
+  the item is made. Simple shapes, the real item icon, sounds that feel like metal. Space replays; keys 1-4.</small>
+
+  <h2>Staging</h2>
+  <button data-s="bar" class="on">1. On the cast bar</button><button data-s="beside">2. Beside the bar</button><button data-s="window">3. At the item</button><button data-s="char">4. Around you</button>
+  <small class="desc" id="sdesc"></small>
+
+  <h2>Moment</h2>
+  <button data-m="one" class="on">One craft</button><button data-m="all">Create All ×5</button>
+  <small>Create All: every item plays at full size (as you set in 1.3); the sounds step down: full, quieter
+  copies for items 2-3, silent beats from the 4th (the payoff stays, quieter).</small>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>Taps on the beats, a clang when made, a hiss for the quench.</small></label>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark"><canvas id="cv"></canvas></div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen'); const DPR = window.devicePixelRatio || 1; let W = 0, H = 0;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eIn = t => t * t * t, eInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha; ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); ctx.restore(); }
+const GOLD = '#ffd36a', GREEN = '#1eff00', FRIZ = '600 11px system-ui';
+// heat color: 0 steel, then dull red, orange, yellow, white-hot
+function heat(h) { const st = [[0, [120, 128, 140]], [.25, [140, 40, 20]], [.55, [230, 100, 30]], [.8, [255, 200, 90]], [1, [255, 248, 230]]]; for (let i = 1; i < st.length; i++) if (h <= st[i][0]) { const u = (h - st[i - 1][0]) / (st[i][0] - st[i - 1][0]), a = st[i - 1][1], b = st[i][1]; return `rgb(${a.map((v, k) => Math.round(lerp(v, b[k], u))).join(',')})`; } return 'rgb(255,248,230)'; }
+// the item icon (a stand-in: Copper Bracers, green)
+function itemIcon(x, y, s, a = 1, hot = 0, glow = 0) { ctx.save(); ctx.globalAlpha *= a; if (glow) { ctx.shadowColor = hot > .1 ? heat(hot) : GREEN; ctx.shadowBlur = 16 * glow; }
+  const g = ctx.createRadialGradient(x, y, 0, x, y, s * .7); g.addColorStop(0, '#3a3226'); g.addColorStop(1, '#14100a'); ctx.fillStyle = g; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.shadowBlur = 0;
+  ctx.font = `${Math.round(s * .62)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🛡️', x, y + 1);
+  if (hot > 0) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = heat(hot); ctx.globalAlpha = a * hot * .55; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a; }
+  ctx.strokeStyle = GREEN; ctx.lineWidth = 1.5; ctx.strokeRect(x - s / 2 + .75, y - s / 2 + .75, s - 1.5, s - 1.5); ctx.restore(); }
+
+// ---------- sound: the 1.3 hammer (tools/render-media.html H2) and a quench hiss ----------
+let AC = null, OUT = null; const on = () => document.getElementById('snd').checked;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.exponentialRampToValueAtTime(f2, T + dec * .8); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .002); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', hit) { if (!on()) return; const A = ac(), T = A.currentTime + t, n = Math.floor(A.sampleRate * dur), buf = A.createBuffer(1, n, A.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (hit ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n)); const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(OUT); s.start(T); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine', null)); }
+function tap(i, v) { if (!v) return; noise(0, .02, .06 * v, 3800, 4, 'bandpass', true); metal(0, 1250 + i * 120, .01 * v, .08, [1, 2.76], [1, .3]); }
+function clang(v) { tone(85, 0, .18 * v, .12, 'sine', 50); noise(0, .08, .14 * v, 1800, 2.5, 'bandpass', true); metal(0, 470, .024 * v, .35, [1, 2.76, 5.4], [1, .35, .15]); }
+function hiss(v) { noise(.05, .5, .022 * v, 5000, .6, 'highpass'); }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', grow: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'spark') { ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * .035, p.y - p.vy * .035); ctx.stroke(); }
+    else if (p.shape === 'steam') { ctx.globalAlpha = a * .45; ctx.fillStyle = '#e8eef4'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + p.age * 22, 0, 7); ctx.fill(); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    else if (p.shape === 'ground') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.size + (1 - a) * p.grow, (p.size + (1 - a) * p.grow) * .28, 0, 0, 7); ctx.stroke(); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.age * 3); }
+    ctx.restore(); } }
+function sparks(x, y, n, spread = 1, up = 1) { for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + rnd(-1.1, 1.1) * spread, sp = rnd(120, 260); spawn({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * up, g: 520, life: rnd(.3, .6), shape: 'spark', col: i % 3 ? '#ffb040' : '#fff4c0' }); } }
+function steam(x, y, n, w = 30) { for (let i = 0; i < n; i++) spawn({ x: x + rnd(-w, w), y: y + rnd(-4, 4), vx: rnd(-10, 10), vy: rnd(-55, -30), life: rnd(.7, 1.2), size: rnd(3, 7), shape: 'steam', col: '#fff' }); }
+
+// ---------- the game pieces: profession window, cast bar, character, bag ----------
+function geo() { const win = { x: 18, y: 18, w: 250, h: 300 }, ch = { x: W * .6, y: H * .5 }, bar = { x: W / 2 - 110, y: H - 120, w: 220, h: 14 }; return { win, ch, bar, icon: { x: win.x + 46, y: win.y + 214 }, bag: { x: W - 40, y: H - 40 } }; }
+function gameUI(g, castF, name, sty) { const w = g.win; ctx.save();
+  // profession window (the game's, simplified)
+  ctx.fillStyle = 'rgba(20,16,10,.94)'; ctx.fillRect(w.x, w.y, w.w, w.h); ctx.strokeStyle = '#6a5636'; ctx.lineWidth = 2; ctx.strokeRect(w.x + 1, w.y + 1, w.w - 2, w.h - 2); text('Blacksmithing', w.x + w.w / 2, w.y + 20, '600 12px system-ui', '#ffd100', 'center');
+  ['Rough Sharpening Stone', 'Copper Chain Belt', 'Copper Bracers', 'Rough Copper Vest'].forEach((r, i) => { const y = w.y + 44 + i * 20; if (i === 2) { ctx.fillStyle = 'rgba(255,209,0,.15)'; ctx.fillRect(w.x + 8, y - 13, w.w - 16, 18); } text(r, w.x + 14, y, '500 11px system-ui', i === 0 ? '#9d9d9d' : '#40bf40', 'left'); });
+  if (sty !== 'window' || !S.iconHidden) itemIcon(g.icon.x, g.icon.y, 40, 1, sty === 'window' ? S.hot : 0, sty === 'window' ? S.hot : 0);
+  text('Copper Bracers', g.icon.x + 30, g.icon.y - 6, '600 12px system-ui', GREEN, 'left'); text('Reagents: 6 Copper Bar', g.icon.x + 30, g.icon.y + 10, '500 10px system-ui', '#cfc6b0', 'left');
+  ctx.fillStyle = '#5a1a10'; ctx.fillRect(w.x + 14, w.y + w.h - 34, 70, 20); ctx.fillRect(w.x + 92, w.y + w.h - 34, 70, 20); text('Create All', w.x + 49, w.y + w.h - 20, '600 10px system-ui', '#ffd100', 'center'); text('Create', w.x + 127, w.y + w.h - 20, '600 10px system-ui', '#ffd100', 'center');
+  // character
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(g.ch.x, g.ch.y + 118, 36, 9, 0, 0, 7); ctx.fill(); const cg = ctx.createLinearGradient(0, g.ch.y, 0, g.ch.y + 120); cg.addColorStop(0, '#6d5a44'); cg.addColorStop(1, '#3b2f22'); ctx.fillStyle = cg; ctx.beginPath(); ctx.roundRect(g.ch.x - 28, g.ch.y, 56, 120, [28, 28, 8, 8]); ctx.fill();
+  // action bars and the bag button
+  for (let i = 0; i < 12; i++) { ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(W / 2 - 210 + i * 35, H - 34, 32, 28); }
+  ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(g.bag.x - 18, g.bag.y - 18, 36, 36); ctx.save(); const bump = S.bagBump !== undefined ? Math.sin(Math.PI * clamp((S.age - S.bagBump) / .3)) : 0; ctx.translate(g.bag.x, g.bag.y); ctx.scale(1 + bump * .15, 1 - bump * .1); ctx.font = '24px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🎒', 0, 1); ctx.restore();
+  // the game's cast bar (unless the bar staging draws its own over it)
+  if (castF !== null) { const b = g.bar; ctx.fillStyle = '#0a0a0a'; ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4); if (sty !== 'bar') { const cg2 = ctx.createLinearGradient(0, b.y, 0, b.y + b.h); cg2.addColorStop(0, '#f8c44a'); cg2.addColorStop(1, '#a8701a'); ctx.fillStyle = cg2; ctx.fillRect(b.x, b.y, b.w * castF, b.h); }
+    text(name, b.x + b.w / 2, b.y + 11, '600 10px system-ui', '#fff', 'center'); }
+  ctx.restore(); }
+
+// ---------- the craft timeline ----------
+const CAST = 3, BEATS = [.3, .55, .8], N_ALL = 5;
+let S = null, sty = 'bar', moment = 'one';
+function play() { S = { age: 0, fired: {}, hot: 0, iconHidden: false, made: 0 }; P = []; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+// which item of a batch, its cast progress, its loudness (1 full, .45 quiet copy, 0 silent beats)
+function now() { const n = moment === 'all' ? N_ALL : 1, per = CAST + .25, i = Math.min(n - 1, Math.floor(S.age / per)), t = S.age - i * per, done = S.age > n * per; return { i, n, t, f: clamp(t / CAST), done: done && t >= CAST, beatVol: i === 0 ? 1 : i < 3 ? .45 : 0, payVol: i < 3 ? 1 : .5 }; }
+
+const STY = {
+  bar: { desc: 'The cast bar is the metal. Its fill heats from dull red through orange to white-hot as the cast runs; each hammer beat lands on the fill\'s end as a bright strike from above, sparks fly off the bar and it squashes for a moment. When the item is made the bar flashes and is quenched: steam rises, it cools to steel, and the item\'s icon pops out of its end.',
+    draw(g, c) { const b = g.bar; let squash = 0; BEATS.forEach((bt, k) => { const ago = c.t - bt * CAST; if (ago >= 0 && ago < .18) squash = Math.max(squash, 1 - ago / .18); if (ago >= 0) once(`b${c.i}-${k}`, () => { sparks(b.x + b.w * bt, b.y, 12); spawn({ x: b.x + b.w * bt, y: b.y + b.h / 2, size: 4, shape: 'ring', grow: 16, life: .3, col: '#fff' }); tap(k, c.beatVol); }); });
+      const made = c.t >= CAST, mt = c.t - CAST, cool = made ? clamp(mt / .6) : 0; ctx.save(); ctx.translate(b.x, b.y + b.h / 2); ctx.scale(1, 1 - squash * .35); ctx.translate(-b.x, -(b.y + b.h / 2));
+      const fill = made ? 1 : c.f; for (let x = 0; x < b.w * fill; x += 2) { const pos = x / b.w, h = made ? lerp(1, 0, cool) * (.6 + .4 * pos) : clamp(.15 + .85 * (pos / Math.max(.05, c.f)) * c.f + .1); ctx.fillStyle = heat(h); ctx.fillRect(b.x + x, b.y, 2.2, b.h); }
+      const hx = b.x + b.w * fill; if (!made) { ctx.fillStyle = '#fff'; ctx.shadowColor = '#ffb040'; ctx.shadowBlur = 14; ctx.fillRect(hx - 2, b.y - 1, 3, b.h + 2); ctx.shadowBlur = 0; }
+      BEATS.forEach((bt, k) => { const ago = c.t - bt * CAST; if (ago >= 0 && ago < .14) { ctx.fillStyle = `rgba(255,255,255,${1 - ago / .14})`; ctx.fillRect(b.x + b.w * bt - 3, b.y - 26 + ago * 60, 6, 26); } }); ctx.restore();
+      if (made) { once('pay' + c.i, () => { clang(c.payVol); hiss(c.payVol); steam(b.x + b.w / 2, b.y - 2, 14, b.w / 2); spawn({ x: b.x + b.w + 22, y: b.y + b.h / 2, size: 10, shape: 'ring', grow: 26, life: .5, col: GREEN }); });
+        if (mt < .25) { ctx.fillStyle = `rgba(255,255,255,${1 - mt / .25})`; ctx.fillRect(b.x, b.y, b.w, b.h); } const pop = eBack(clamp(mt / .3)); ctx.save(); ctx.translate(b.x + b.w + 22, b.y + b.h / 2); ctx.scale(pop, pop); itemIcon(0, 0, 28, clamp(1.4 - mt / .25 + 1), 0, 1); ctx.restore(); } } },
+  beside: { desc: 'The item\'s own icon sits on a glowing ember spot just right of the cast bar and gets worked: each hammer beat jolts it down, sparks fan out and it heats a step (its colors go orange). When it\'s made it\'s quenched in a puff of steam, cools to its real colors, and a gold ring and "+1" mark it done.',
+    draw(g, c) { const x = g.bar.x + g.bar.w + 40, y = g.bar.y + 4, made = c.t >= CAST, mt = c.t - CAST; let jolt = 0, hot = 0;
+      BEATS.forEach((bt, k) => { const ago = c.t - bt * CAST; if (ago >= 0) { hot = .3 + k * .25; if (ago < .15) jolt = Math.max(jolt, 1 - ago / .15); once(`b${c.i}-${k}`, () => { sparks(x, y + 10, 10, 1.3); tap(k, c.beatVol); }); } });
+      const cool = made ? clamp(mt / .7) : 0; hot = made ? lerp(1, 0, cool) : hot;
+      const eg = ctx.createRadialGradient(x, y + 16, 0, x, y + 16, 34); eg.addColorStop(0, `rgba(255,140,40,${.55 * (made ? 1 - cool : .4 + hot * .5)})`); eg.addColorStop(1, 'rgba(255,100,20,0)'); ctx.fillStyle = eg; ctx.beginPath(); ctx.ellipse(x, y + 16, 34, 12, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.translate(x, y + jolt * 5); ctx.scale(1 + jolt * .1, 1 - jolt * .14); itemIcon(0, 0, 32, 1, hot, .4 + hot * .6); ctx.restore();
+      if (made) { once('pay' + c.i, () => { clang(c.payVol); hiss(c.payVol); steam(x, y - 6, 12, 14); spawn({ x, y, size: 18, shape: 'ring', grow: 22, life: .6, col: GOLD }); }); text('+1', x + 22, y - 14 - mt * 12, '700 13px system-ui', GOLD, 'left', { alpha: clamp(1.4 - mt) }); } } },
+  window: { desc: 'The item being made, right where you picked it: the recipe\'s icon in the profession window glows hotter with each hammer beat and throws sparks; when it\'s made it\'s quenched, then flies out of the window in an arc down into your bag, which bumps as it lands.',
+    draw(g, c) { const ix = g.icon.x, iy = g.icon.y, made = c.t >= CAST, mt = c.t - CAST; S.hot = 0;
+      BEATS.forEach((bt, k) => { const ago = c.t - bt * CAST; if (ago >= 0) { S.hot = .3 + k * .25; once(`b${c.i}-${k}`, () => { sparks(ix, iy - 16, 9, 1.2); spawn({ x: ix, y: iy, size: 20, shape: 'ring', grow: 14, life: .3, col: '#ffb040' }); tap(k, c.beatVol); }); } });
+      if (made) { const cool = clamp(mt / .3); S.hot = lerp(1, 0, cool); once('pay' + c.i, () => { clang(c.payVol); hiss(c.payVol); steam(ix, iy - 18, 10, 16); });
+        const fly = clamp((mt - .3) / .55); if (fly > 0 && fly < 1) { const fx = lerp(ix, g.bag.x, eInOut(fly)), fy = lerp(iy, g.bag.y, eIn(fly)) - Math.sin(Math.PI * fly) * 120; itemIcon(fx, fy, lerp(40, 22, fly), 1, 0, 1); }
+        if (fly >= 1) once('bag' + c.i, () => { S.bagBump = S.age; spawn({ x: g.bag.x, y: g.bag.y, size: 14, shape: 'ring', grow: 16, life: .4, col: GREEN }); tap(4, .6 * c.payVol); }); } } },
+  char: { desc: 'In the world: each hammer beat sends sparks off your hands and a ring pulses on the ground at your feet; when it\'s made, a fountain of embers rises around you and the item lifts over your head with a glint, then fades.',
+    draw(g, c) { const hx = g.ch.x + 26, hy = g.ch.y + 62, fx = g.ch.x, fy = g.ch.y + 118, made = c.t >= CAST, mt = c.t - CAST;
+      const glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, 26); glow.addColorStop(0, `rgba(255,150,50,${.25 + .35 * c.f})`); glow.addColorStop(1, 'rgba(255,120,30,0)'); if (!made) { ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(hx, hy, 26, 0, 7); ctx.fill(); }
+      BEATS.forEach((bt, k) => { const ago = c.t - bt * CAST; if (ago >= 0) once(`b${c.i}-${k}`, () => { sparks(hx, hy, 12, 1.2); spawn({ x: fx, y: fy, size: 16, shape: 'ground', grow: 40, life: .5, col: '#ffb040' }); tap(k, c.beatVol); }); });
+      if (made) { once('pay' + c.i, () => { clang(c.payVol); for (let i = 0; i < 22; i++) spawn({ x: fx + rnd(-30, 30), y: fy, vx: rnd(-30, 30), vy: rnd(-220, -120), g: 160, life: rnd(.8, 1.3), size: rnd(1.2, 2.2), col: i % 2 ? '#ffb040' : '#fff0c0' }); spawn({ x: fx, y: fy, size: 20, shape: 'ground', grow: 60, life: .7, col: GOLD }); });
+        const rise = eOut(clamp(mt / .6)), a = clamp(1.5 - mt); itemIcon(g.ch.x, lerp(g.ch.y + 30, g.ch.y - 40, rise), 30, a, 0, 1); if (mt > .55 && mt < .6) once('gl' + c.i, () => spawn({ x: g.ch.x + 12, y: g.ch.y - 52, size: 7, shape: 'star', life: .6, col: '#fff' })); } } },
+};
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now_) { const dt = Math.min(.05, (now_ - last) / 1000); last = now_; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; const g = geo(), c = now(), casting = !c.done && c.t < CAST; gameUI(g, casting ? c.f : null, moment === 'all' ? `Copper Bracers (${c.i + 1} / ${c.n})` : 'Copper Bracers', sty);
+    if (!c.done || c.t < CAST + 1.6) STY[sty].draw(g, c); stepP(dt);
+    const end = (moment === 'all' ? N_ALL : 1) * (CAST + .25) + 1.6; if (S.age > end + .6 && document.getElementById('loop').checked) play(); }
+  requestAnimationFrame(frame); }
+function sync() { document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === sty)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('sdesc').textContent = STY[sty].desc; }
+document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { sty = b.dataset.s; sync(); play(); });
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '1234'.indexOf(e.key); if (i >= 0) { sty = ['bar', 'beside', 'window', 'char'][i]; sync(); play(); } });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

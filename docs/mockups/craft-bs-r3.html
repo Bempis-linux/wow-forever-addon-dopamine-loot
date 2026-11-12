@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blacksmithing Round 3</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  .desc { margin-top: 4px; min-height: 58px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 55% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 55% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 55% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 55% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Blacksmithing, round 3</h1>
+  <small>Ring + batch (your pick) in place of the game's cast bar, and 1.3's work beats (the taps, then the CLANG
+  and the quench) placed four ways around it. In every one the payoff lands the instant the ring closes.
+  Try <b>Create All ×5</b> too. Space replays; keys 1-4.</small>
+
+  <h2>Where the work beats go</h2>
+  <button data-s="beside" class="on">1. Beside</button><button data-s="attached">2. Attached</button><button data-s="inside">3. Inside</button><button data-s="arc">4. On the arc</button>
+  <small class="desc" id="sdesc"></small>
+
+  <h2>Moment</h2>
+  <button data-m="one" class="on">One craft</button><button data-m="all">Create All ×5</button>
+  <small>Create All keeps 1.3's rules: full size every item, the sounds step down (full, quieter copies for
+  items 2-3, silent taps from the 4th; the payoff stays, quieter).</small>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>1.3's smithing sounds: the taps, the CLANG, the hiss.</small></label>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark"><canvas id="cv"></canvas></div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen'); const DPR = window.devicePixelRatio || 1; let W = 0, H = 0;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha; ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); ctx.restore(); }
+const GOLD = '#ffd36a', GREEN = '#1eff00', SMITH = '#e0883a', SMITHL = '#ffc890';
+function heat(h) { const st = [[0, [120, 128, 140]], [.25, [140, 40, 20]], [.55, [230, 100, 30]], [.8, [255, 200, 90]], [1, [255, 248, 230]]]; for (let i = 1; i < st.length; i++) if (h <= st[i][0]) { const u = (h - st[i - 1][0]) / (st[i][0] - st[i - 1][0]), a = st[i - 1][1], b = st[i][1]; return `rgb(${a.map((v, k) => Math.round(lerp(v, b[k], u))).join(',')})`; } return 'rgb(255,248,230)'; }
+function itemIcon(x, y, s, a = 1, glow = 0) { ctx.save(); ctx.globalAlpha *= a; if (glow) { ctx.shadowColor = GREEN; ctx.shadowBlur = 14 * glow; } const g = ctx.createRadialGradient(x, y, 0, x, y, s * .7); g.addColorStop(0, '#3a3226'); g.addColorStop(1, '#14100a'); ctx.fillStyle = g; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.shadowBlur = 0;
+  ctx.font = `${Math.round(s * .62)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🛡️', x, y + 1); ctx.strokeStyle = GREEN; ctx.lineWidth = 1.5; ctx.strokeRect(x - s / 2 + .75, y - s / 2 + .75, s - 1.5, s - 1.5); ctx.restore(); }
+
+// ---------- sound: 1.3's smithing sounds (tools/render-media.html H2: SmithTap, SmithClang, SmithHiss) ----------
+let AC = null, OUT = null; const on = () => document.getElementById('snd').checked;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.exponentialRampToValueAtTime(f2, T + dec * .8); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .002); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', hit) { if (!on()) return; const A = ac(), T = A.currentTime + t, n = Math.floor(A.sampleRate * dur), buf = A.createBuffer(1, n, A.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (hit ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n)); const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(OUT); s.start(T); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine')); }
+function smithTap(i, v) { if (!v) return; noise(0, .02, .06 * v, 3800, 4, 'bandpass', true); metal(0, 1250 + i * 120, .01 * v, .08, [1, 2.76], [1, .3]); }
+function smithClang(v) { tone(85, 0, .18 * v, .12, 'sine', 50); noise(0, .08, .14 * v, 1800, 2.5, 'bandpass', true); metal(0, 470, .024 * v, .35, [1, 2.76, 5.4], [1, .35, .15]); noise(.05, .4, .022 * v, 5000, .6, 'highpass'); }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', grow: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = p.fade === false ? 1 : a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.globalCompositeOperation = 'lighter'; ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'glint') { ctx.globalAlpha = Math.sin(Math.PI * p.age / p.life); ctx.shadowColor = p.col; ctx.shadowBlur = 10; star4(p.x, p.y, p.size, 0); }
+    else if (p.shape === 'glow') { ctx.globalCompositeOperation = 'lighter'; const r = p.size * (1 + p.grow * p.age / p.life), g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, `rgba(255,90,30,${.6 * a})`); g.addColorStop(1, 'rgba(255,90,30,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    ctx.restore(); } }
+
+// ---------- 1.3's Blacksmithing work, unchanged (Craft.lua P.Blacksmithing): two taps, then the CLANG ----------
+// (screen y grows down here, so the motes' "up" is negative)
+function smithTapFx(x, y, s) { spawn({ x, y, size: 14 * s, life: .22, shape: 'glint', col: '#ffd17a' }); for (let i = 0; i < 3; i++) spawn({ x, y, vx: rnd(-90, 90), vy: -rnd(50, 140), g: 700, size: 2, life: .35, col: '#ffb340', fade: false }); }
+function smithPayFx(x, y, s) { spawn({ x, y, size: 24 * s, life: .3, shape: 'glint', col: '#ffd17a' }); for (let i = 0; i < Math.round(8 * s); i++) spawn({ x, y, vx: rnd(-120, 120), vy: -rnd(60, 200), g: 700, size: 2, life: rnd(.3, .5), col: '#ffb340', fade: false }); spawn({ x, y, size: 30 * s, grow: .6, life: .6, shape: 'glow', col: '#ff5a1e' }); }
+
+// ---------- the scene ----------
+const CAST = 3, TAPS = [.35, .62], N_ALL = 5;
+let S = null, sty = 'beside', moment = 'one';
+function play() { S = { age: 0, fired: {} }; P = []; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+function state() { const n = moment === 'all' ? N_ALL : 1, per = CAST + .25, i = Math.min(n - 1, Math.floor(S.age / per)), t = S.age - i * per; return { i, n, t, f: clamp(t / CAST), made: t >= CAST, over: S.age >= n * per - .25 && t >= CAST, tapVol: i === 0 ? 1 : i < 3 ? .45 : 0, payVol: i < 3 ? 1 : .5 }; }
+function geo() { return { bar: { x: W / 2 - 110, y: H - 120, w: 220, h: 14 }, ring: { x: W / 2, y: H - 150, r: 26 }, ch: { x: W * .6, y: H * .44 } }; }
+function world(g) { ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(g.ch.x, g.ch.y + 118, 36, 9, 0, 0, 7); ctx.fill(); const cg = ctx.createLinearGradient(0, g.ch.y, 0, g.ch.y + 120); cg.addColorStop(0, '#6d5a44'); cg.addColorStop(1, '#3b2f22'); ctx.fillStyle = cg; ctx.beginPath(); ctx.roundRect(g.ch.x - 28, g.ch.y, 56, 120, [28, 28, 8, 8]); ctx.fill();
+  for (let i = 0; i < 12; i++) { ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(W / 2 - 210 + i * 35, H - 34, 32, 28); }
+  ctx.fillStyle = 'rgba(20,16,10,.94)'; ctx.fillRect(18, 18, 220, 120); ctx.strokeStyle = '#6a5636'; ctx.lineWidth = 2; ctx.strokeRect(19, 19, 218, 118); text('Blacksmithing', 128, 38, '600 12px system-ui', '#ffd100', 'center'); text('Copper Bracers', 30, 64, '500 11px system-ui', '#40bf40'); text('(the profession window)', 30, 84, '500 10px system-ui', '#7a7262'); ctx.restore(); }
+
+// where 1.3's work plays: just right of the bar (or the ring), as Craft.lua's Spot()
+const STY = {
+  now: { desc: '1.3 as it ships: the game\'s own cast bar, and Blacksmithing\'s work beats just right of it: two taps (a gold glint, a few sparks), then the CLANG and the quench when the item is made. Here for comparison.',
+    spot: g => ({ x: g.bar.x + g.bar.w + 62, y: g.bar.y + 7 }),
+    bar(g, c) { const b = g.bar; ctx.fillStyle = '#0a0a0a'; ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4); const cg = ctx.createLinearGradient(0, b.y, 0, b.y + b.h); cg.addColorStop(0, '#f8c44a'); cg.addColorStop(1, '#a8701a'); ctx.fillStyle = cg; ctx.fillRect(b.x, b.y, b.w * c.f, b.h); text(c.label, b.x + b.w / 2, b.y + 11, '600 10px system-ui', '#fff', 'center'); } },
+  heat: { desc: 'Our own bar in place of the game\'s while you craft, in the dark panel style: its fill is the metal, heating from dull red through orange to white-hot as the cast runs, the item and the time on it. It doesn\'t do the work itself: 1.3\'s taps and CLANG stay beside it. When made, the fill flashes and cools to steel.',
+    spot: g => ({ x: g.bar.x + g.bar.w + 62, y: g.bar.y + 7 }),
+    bar(g, c) { const b = { x: g.bar.x - 10, y: g.bar.y - 4, w: g.bar.w + 20, h: 22 }; ctx.save(); ctx.fillStyle = 'rgba(8,8,12,.9)'; ctx.beginPath(); ctx.roundRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8, 8); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.25)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 4); ctx.fill(); ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 4); ctx.clip();
+      const mt = c.t - CAST, cool = c.made ? clamp(mt / .6) : 0, fill = c.made ? 1 : c.f;
+      for (let x = 0; x < b.w * fill; x += 2) { const pos = x / b.w, h = c.made ? lerp(1, 0, cool) * (.5 + .5 * pos) : clamp(.12 + .88 * (pos / Math.max(.05, fill)) * (.4 + .6 * fill)); ctx.fillStyle = heat(h); ctx.fillRect(b.x + x, b.y, 2.2, b.h); }
+      if (!c.made) { ctx.fillStyle = '#fff'; ctx.shadowColor = '#ffb040'; ctx.shadowBlur = 12; ctx.fillRect(b.x + b.w * fill - 2, b.y, 3, b.h); ctx.shadowBlur = 0; } else if (mt < .25) { ctx.fillStyle = `rgba(255,255,255,${1 - mt / .25})`; ctx.fillRect(b.x, b.y, b.w, b.h); } ctx.restore();
+      itemIcon(b.x - 18, b.y + b.h / 2, 24); text(c.label, b.x + 8, b.y + 15, '600 11px system-ui', '#fff', 'left'); if (!c.made) text((CAST - c.t).toFixed(1), b.x + b.w - 8, b.y + 15, '700 11px system-ui', '#fff', 'right'); } },
+  ring: { desc: 'A ring in the cast bar\'s place, drawn from the Ring recipe in the profession\'s color, the item\'s icon in the middle and the time left under it: the arc fills as the cast runs and closes with a white flash and a shockwave when the item is made (the skill-up ring\'s family). 1.3\'s work plays just right of it.',
+    spot: g => ({ x: g.ring.x + g.ring.r + 56, y: g.ring.y }),
+    bar(g, c) { ringCast(g, c, false); } },
+  batch: { desc: 'The Ring cast, plus a thin outer ring for the whole Create All: it fills one step per item made ("3 / 5" under it), so you see this item and the batch at a glance in one place. For a single craft it\'s just the Ring cast.',
+    spot: g => ({ x: g.ring.x + g.ring.r + 64, y: g.ring.y }),
+    bar(g, c) { ringCast(g, c, true); } },
+};
+function ringCast(g, c, batch) { const { x, y, r } = g.ring, mt = c.t - CAST; ctx.save();
+  ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(x, y, r + (batch ? 15 : 9), 0, 7); ctx.fill();
+  if (batch && c.n > 1) { const done = c.i + (c.made ? 1 : 0), bf = done / c.n; ctx.lineCap = 'round'; ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(x, y, r + 9, 0, 7); ctx.stroke(); ctx.strokeStyle = GOLD; ctx.shadowColor = GOLD; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, r + 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * bf); ctx.stroke(); ctx.shadowBlur = 0;
+    for (let k = 1; k < c.n; k++) { const a = -Math.PI / 2 + Math.PI * 2 * k / c.n; ctx.fillStyle = 'rgba(6,8,12,1)'; ctx.beginPath(); ctx.arc(x + Math.cos(a) * (r + 9), y + Math.sin(a) * (r + 9), 1.6, 0, 7); ctx.fill(); }
+    text(`${done} / ${c.n}`, x, y + r + 36, '700 11px system-ui', GOLD, 'center'); }
+  const f = c.made ? 1 : c.f; ctx.lineCap = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke(); ctx.strokeStyle = SMITH; ctx.shadowColor = SMITH; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.shadowBlur = 0;
+  if (!c.made) { const a = -Math.PI / 2 + Math.PI * 2 * f; ctx.fillStyle = '#fff'; ctx.shadowColor = SMITHL; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, 3, 0, 7); ctx.fill(); ctx.shadowBlur = 0; }
+  if (c.made) { once('close' + c.i, () => { spawn({ x, y, size: r, shape: 'ring', grow: 34, life: .5, col: '#fff' }); spawn({ x, y, size: r, shape: 'ring', grow: 20, life: .6, col: SMITHL }); }); if (mt < .3) { ctx.strokeStyle = `rgba(255,255,255,${1 - mt / .3})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke(); } }
+  const pop = c.made ? 1 + .18 * Math.sin(Math.PI * clamp(mt / .25)) : 1; ctx.save(); ctx.translate(x, y); ctx.scale(pop, pop); itemIcon(0, 0, 26, 1, c.made ? clamp(1 - mt) : 0); ctx.restore();
+  text(c.made ? 'Copper Bracers' : (CAST - c.t).toFixed(1), x, y + r + (batch ? 22 : 20), '600 11px system-ui', c.made ? GREEN : '#fff', 'center'); ctx.restore(); }
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now_) { const dt = Math.min(.05, (now_ - last) / 1000); last = now_; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; const g = geo(), c = state(); c.label = moment === 'all' ? `Copper Bracers (${c.i + 1} / ${c.n})` : 'Copper Bracers'; world(g);
+    const showBar = !c.over || c.t < CAST + .8, pl = PLACE[sty]; if (showBar) { ringCast(g, c, true); if (pl.draw) pl.draw(g, c); }
+    TAPS.forEach((tp, k) => { if (c.t >= tp * CAST) once(`t${c.i}-${k}`, () => { const sp = pl.spot(g, c, false); smithTapFx(sp.x, sp.y, pl.s || 1); smithTap(k, c.tapVol); }); });
+    if (c.made) once('p' + c.i, () => { const sp = pl.spot(g, c, true); smithPayFx(sp.x, sp.y, pl.ps || 1); smithClang(c.payVol); });
+    stepP(dt); const end = (moment === 'all' ? N_ALL : 1) * (CAST + .25) + 1.2; if (S.age > end + .5 && document.getElementById('loop').checked) play(); }
+  requestAnimationFrame(frame); }
+// round 3: where 1.3's beats go around the Ring + batch
+const PLACE = {
+  beside: { desc: 'As in round 2: the beats play a little right of the ring, on their own. Simple, but the two read as separate things.',
+    spot: g => ({ x: g.ring.x + g.ring.r + 64, y: g.ring.y }) },
+  attached: { desc: 'A short gold hairline ties the beat spot to the ring, so they read as one piece: the taps happen at the line\'s end, and when the item is made the ring\'s closing flash runs down the line into the CLANG. Keeps room for wide beats (Leatherworking\'s holes, a stitched line). My pick.',
+    spot: g => ({ x: g.ring.x + g.ring.r + 62, y: g.ring.y }),
+    draw(g, c) { const { x, y, r } = g.ring, x0 = x + r + 16, x1 = x + r + 50; ctx.save(); ctx.strokeStyle = 'rgba(255,211,106,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); ctx.fillStyle = 'rgba(255,211,106,.7)'; ctx.beginPath(); ctx.arc(x1, y, 1.8, 0, 7); ctx.fill();
+      const mt = c.t - CAST; if (c.made && mt < .2) { const px = lerp(x0, x1, mt / .2), gr = ctx.createLinearGradient(px - 14, 0, px, 0); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(255,255,255,1)'); ctx.strokeStyle = gr; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(Math.max(x0, px - 14), y); ctx.lineTo(px, y); ctx.stroke(); } ctx.restore(); } },
+  inside: { desc: 'The beats land on the item itself, in the middle of the ring: each tap glints on the icon and throws its sparks out over the rim; when it\'s made, the payoff bursts out of the ring as it closes. The most compact; wide beats (Leatherworking, Tailoring) would be cramped in it.',
+    s: .7, ps: 1.1, spot: g => ({ x: g.ring.x, y: g.ring.y }) },
+  arc: { desc: 'The beats ride the progress: each tap strikes the moving head of the ring\'s arc where the cast is at that moment, and the payoff fires at the top where the ring closes. Ties the work to the time left.',
+    s: .85, spot: (g, c, pay) => { const { x, y, r } = g.ring, a = -Math.PI / 2 + Math.PI * 2 * (pay ? 1 : c.f); return { x: x + Math.cos(a) * r, y: y + Math.sin(a) * r }; } },
+};
+function sync() { document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === sty)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('sdesc').textContent = PLACE[sty].desc; }
+document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { sty = b.dataset.s; sync(); play(); });
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '1234'.indexOf(e.key); if (i >= 0) { sty = ['beside', 'attached', 'inside', 'arc'][i]; sync(); play(); } });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
