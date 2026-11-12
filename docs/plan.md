@@ -740,6 +740,108 @@ the user's own):
      **LEATHERWORKING LOCKED (2026-11-12): C. Crumbs and whip** (E/F/G not liked). Fix: the four punches sit
      evenly, one per quarter (at 12.5/37.5/62.5/87.5% of the cast; 1.3's .18-.66 left a gap at the top-left),
      the whip runs right after the last (89-99%). More ideas wait for the final round.
+     Alchemy iterations (four mechanisms, 1.3's beats): **A. Bubbles off the head** (particles; round 1),
+     **B. Glass tube** (material: the ring is a glass tube filling with the potion, a sloshing liquid end,
+     bubbles drifting inside, a surge per beat, foam, the cork pops), **C. Transmutation** (color: a reagent
+     drop falls into the ring's center each beat with a ripple and the ring's color shifts a step toward the
+     potion; a flash and a colored smoke puff when made), **D. Vapors** (rising smoke: colored wisps curl up
+     off the ring, thicker each beat; vapor rings float up from the top when made).
+     → the user liked something in each (A simple; A/B the cork popping; B very clean; C's finale: the ring
+     glow and the shine at the top; D's vapor texture along the ring) and asked for a mix: **E. The mix** =
+     B's glass tube + D's vapor wisps while filling; when made C's finale (center flash, colored smoke, the
+     ring glowing in the potion's color, the shine at the top) + the cork popping. The page opens on E.
+     E colors (the user): **the fill always purple** (no random potion color), and at the flash it **shifts to
+     magenta-pink** like C's color change (ring, flash and smoke); each Create All item starts purple again.
+     **ALCHEMY LOCKED (2026-11-12): E. The mix.** The glass tube stays (it gives Alchemy its material look);
+     the user may revisit how busy it is in the final round.
+     Tailoring iterations (four mechanisms, 1.3's beats .2/.36/.52/.68 and the snip): **A. Stitches on the
+     arc** (marks added; round 1), **B. Thread wrap** (material: the stroke becomes wound thread, a bead of
+     thread circling the head, each beat pulls a turn tight; the snip cuts the loose end at the top and a
+     shine runs once round the wrap), **C. Silk ribbon** (flowing cloth: a pale-blue ribbon fluttering most
+     near the head, a ripple travels back per beat; when made it snaps flat with a sheen and the snip),
+     **D. Spool** (a feeder: a spool above the ring pays thread down and round, spinning faster each beat;
+     the snip cuts between spool and ring, the spool spins down, the thread glints).
+     **TAILORING LOCKED (2026-11-12): D. Spool** ("hands down the most unique"). Fix: the cut, sweep and snap are per item
+     (Create All items 2+ lost the thread from the spool).
+     Engineering iterations (four mechanisms, 1.3's clicks .3/.45/.6, then the boing + puff): **A. Gear on the arc**
+     (an object riding; round 1), **B. Clockwork ring** (the ring itself moves: teeth grow on the filled part,
+     the whole ring jolts a notch per click; a spring shoots up from the top and wobbles), **C. Live wire**
+     (electricity: a crackle along the ring, a bolt from the head into the item per click; made = the whole
+     ring discharges into the item, a flash, a puff), **D. Fuse** (the ring is a fuse cord burnt by a sizzling
+     spark, a crackle of sparks per click; at the top a small friendly bang: flash, shockwave ring, smoke).
+     → the user: A definitely works, C a cool idea, D a really cool idea; asked for D with an explosion:
+     **E. Fuse + explosion** = D's fuse, then the item in the middle blows up: a fireball swelling well past the
+     ring (white core, orange, red edge), sparks and dark debris flying out, two shockwaves, a smoke cloud
+     drifting up; cartoon-sized, over in about a second.
+     → the user: E definitely unique; A's turning gear liked; **keep 1.3's final sound (the boing, EngBoing)**,
+     "really like the sound design", specifically the final sound. **F. Gear + explosion** = A's gear riding
+     the head (no fuse) + E's explosion: "not really cohesive"; E stays its own idea.
+     **ENGINEERING LOCKED for now (2026-11-12): A. Gear on the arc.** For the final round: iterate on A's
+     turning-gears idea (the user leans to A); keep E (Fuse + explosion) on the table as its own option.
+     Cooking iterations (four mechanisms, 1.3's sizzles .3/.45, the flip .62, the tss): **A. Flip over the ring**
+     (round 1: spatters off the head, the food flips over the ring to the top, steam), **B. The burner** (the ring
+     is the heat: the stroke glows like a stove coil, dull red to orange to yellow-white, heat shimmer inside;
+     oil pops along the hot part, a lick of flame round the ring on the flip; made = a gold flare + steam),
+     **C. On the spit** (the food itself cooks: the item turns on the spot and browns step by step, fat drips
+     onto the ring's bottom with a flare, a quick full turn on the flip; made = face-on, a glaze shine, steam),
+     **D. Season and serve** (things fall in: a pinch of salt, pepper and herbs sprinkles onto the food each
+     beat and it bobs; made = warm gold "smells good" lines curl up).
+     → the user: A the most unique; likes B's burner towards the end; C and D "interesting but not a fit".
+     **E. Flip on the burner** = A's flip over the ring + B's burner as the stroke (heating up, the flame
+     lick on the flip, the gold flare when made): "pretty cool"; asked for other designs instead of C and D.
+     New **C. Grill marks** (marks seared onto the food: each sizzle sears a glowing stripe across the item,
+     cooling to brown, with a wisp of smoke; the flip turns it over and the next sears cross the first, so it
+     ends cross-hatched; made = the marks glow once + steam) and **D. Kitchen timer** (the ring is a timer:
+     minute ticks light up around it, a pointer rides the head, the ticks jitter on each sizzle and rattle on
+     the flip; made = it dings: all ticks flash, sound-wave arcs ring out from the top, then steam). The page
+     opens on E. → "fun ideas"; **COOKING LOCKED (2026-11-12): E. Flip on the burner.**
+     Enchanting iterations (four mechanisms, 1.3's chimes .3/.44/.58, the ping): **A. Runes on the arc** (round 1:
+     runes stamped where the head is, drawn in to the top), **B. Magic circle** (lines drawn: each chime draws a
+     glowing line corner to corner, a triangle inscribed in the ring; made = a second triangle flips in to make a
+     star, the circle turns a little and flashes), **C. Orbiting motes** (each chime adds a bright mote orbiting
+     the item, faster and closer each time, with a trail; made = they spiral into the item, it flares),
+     **D. Shimmer and aura** (light: each chime sends a violet wave once round the ring, the item glows a
+     little more; made = a white sheen across the item and a soft pulsing violet aura).
+     → the user likes B and C but together they'd be overwhelming; leans to B. **E. Motes draw the circle** =
+     one element doing both: each chime a mote travels corner to corner drawing B's line and rests at the
+     corner (no orbiting); made = the motes draw the second triangle into a star, the circle turns and
+     flashes, the motes spiral into the item, it flares. → "Nice": **ENCHANTING LOCKED (2026-11-12): E.**
+     First Aid iterations (four mechanisms, 1.3's taps .4/.62, the done chime): **A. Plus on the seam** (round 1),
+     **B. Heartbeat** (the ring is a pulse trace: a calm line with a sharp blip where each tap lands; made = the
+     ring beats once, lub-dub, two green pulses), **C. Healing rise** (little green plus signs drift up from the
+     ring, more on each tap; made = a column of soft green light rises through the item, glints at the top),
+     **D. Mending ring** (a cracked green shell round the ring, broken at the taps and the top; each tap pulls a
+     crack shut, the top one closes as it finishes and the shell glows whole).
+     → the user: none really stand out; Heartbeat the most unique but its trace (outside the ring) overlapped
+     the batch bar. Fix: B's trace is now the ring's own stroke, blips pointing in toward the item, clear of
+     the batch bar.
+     → the user wanted other options in place of A, C and D too, and noticed First Aid had a 1-2-final beat
+     where the others go 1-2-3-final. **First Aid now taps three times** (.3/.46/.62, rising: AidTapA/B + a new
+     AidTapC, then 1.3's done chime); in the mockup these iterations play their own taps (the 1.3 side's taps go
+     silent). Round 2: **A. Salve** (drops that spread: a drop of green salve lands on the ring at each tap and
+     spreads into a glossy patch; made = the patches coat the whole ring and a shine travels round), **B.
+     Heartbeat** (kept, three blips), **C. Cross of light** (beams: a vertical beam through the item, then a
+     horizontal one, the third tap brightens them with glints at the tips; made = the plus flashes and widens),
+     **D. Soothing ripples** (ripples moving in from the ring to the item, each stronger, the item glows calm
+     green; made = the glow swells like a slow breath, a last ripple goes out).
+     → the user: still not feeling it; likes D's animations. **The feel is wrong: too healer/medic.** It should
+     feel like **patching yourself up after a battle, or making a remedy in the wild with what you have**
+     (rough, hands-on, cloth and herbs; not glowing green magic). Round 3 (D kept): **A. Field dressing** (a creased
+     linen strip winds round the ring, each tap a hard tug cinches it tight with a puff of dust; made = a knot
+     pulled at the top), **B. Slap on a patch** (each tap slaps a cloth strip across the ring at a rough angle,
+     it lands big and squashes flat; made = a last strip over the top, all pressed down with a soft thump),
+     **C. Crushed herbs** (leaf bits in the ring are ground round on each tap, smaller and darker into a paste;
+     made = pressed onto the item as a dark green poultice dab, a cool ripple), **D. Soothing ripples** (kept).
+     → the user likes A most and wants **more iterations of A later** (final round); for now A + D:
+     **E. Dressing + ripples** = A's linen strip and tugs, each tug sending one of D's ripples in to the item
+     (it warms to a calm glow); made = the knot at the top + D's slow-breath swell.
+     **FIRST AID LOCKED (2026-11-12): E. Dressing + ripples.**
+     **Every profession has a direction (2026-11-12):** Blacksmithing E (heated + sparks), Leatherworking C
+     (crumbs and whip), Alchemy E (glass tube + vapors, purple to magenta), Tailoring D (spool), Engineering A
+     (gear on the arc; E fuse + explosion kept as its own option), Cooking E (flip on the burner), Enchanting E
+     (motes draw the circle), First Aid E (dressing + ripples; three taps now). Next: the final round of new
+     ideas per profession (the user's plan), incl. iterations of Engineering A's gears, First Aid A's dressing,
+     and maybe Alchemy's glass tube.
   2. **Then crafting animations, per profession**: several unique designs for every crafting profession
      (not one concept adapted), like the popup rounds.
 

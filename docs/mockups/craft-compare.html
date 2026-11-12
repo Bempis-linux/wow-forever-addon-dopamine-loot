@@ -83,7 +83,7 @@ const SOUNDS = { LeatherThok: () => thok(0, 1), LeatherZip: () => noise(0, .06, 
   EngTick: () => E1.tick(1), EngBoing: () => E1.pay(1), CookSizzle: () => noise(0, .12, .025, 6000, .6, 'highpass'), CookWhoosh: () => noise(0, .2, .02, 900, .8), CookTss: () => { noise(0, .3, .03, 6000, .5, 'highpass'); tone(260, 0, .03, .08, 'triangle'); },
   SmithTap: () => H2.strike(0, 1), SmithClang: () => H2.strike(2, 1), SmithHiss: () => H2.after(),
   EnchChime1: () => tone(1046 * semi(PENTA[0]), 0, .03, .35), EnchChime2: () => tone(1046 * semi(PENTA[2]), 0, .03, .35), EnchChime3: () => tone(1046 * semi(PENTA[4]), 0, .03, .35), EnchPing: () => { tone(1568, 0, .05, .6); tone(2093, .02, .03, .5); },
-  AidTapA: () => { tone(200, 0, .045, .06, 'sine', 140); noise(0, .04, .02, 1600, 2); }, AidTapB: () => { tone(230, 0, .045, .06, 'sine', 160); noise(0, .04, .02, 1800, 2); }, AidDone: () => { tone(880, 0, .035, .3); tone(1318, .03, .025, .35); } };
+  AidTapA: () => { tone(200, 0, .045, .06, 'sine', 140); noise(0, .04, .02, 1600, 2); }, AidTapB: () => { tone(230, 0, .045, .06, 'sine', 160); noise(0, .04, .02, 1800, 2); }, AidTapC: () => { tone(265, 0, .045, .06, 'sine', 185); noise(0, .04, .02, 2000, 2); }, AidDone: () => { tone(880, 0, .035, .3); tone(1318, .03, .025, .35); } };
 // Sound(name + loud): loud "" full, "Q" the quiet copy (the game's quiet copies are about half)
 function Sound(name) { if (S.mute) return; const q = name.endsWith('Q'), f = SOUNDS[q ? name.slice(0, -1) : name]; if (!f) return; VOL = q ? .45 : 1; f(); VOL = 1; }
 
@@ -186,17 +186,17 @@ function ringBatch(rg, c, p) { const { x, y, r } = rg, mt = c.t - CAST; ctx.save
 // ---------- the scene: two halves on one clock ----------
 const CAST = 3, N_ALL = 5;
 let S = null, prof = 'Blacksmithing', moment = 'one';
-function play() { S = { age: 0, fired: {}, potion: Math.floor(Math.random() * POTION.length), runeSeed: Math.floor(Math.random() * 4), mute: false, flashes: [], notches: [], item: 0, lw: { holes: [] } }; FX = []; TIMERS = []; }
+function play() { S = { age: 0, fired: {}, potion: Math.floor(Math.random() * POTION.length), runeSeed: Math.floor(Math.random() * 4), mute: false, flashes: [], notches: [], item: 0, lw: { holes: [] }, alc: { pulses: [], cols: [], level: 0 }, tl: { beats: [] }, en: { clicks: [] }, ck: { beats: [] }, enc: { beats: [] }, fa: { beats: [], bits: [] } }; FX = []; TIMERS = []; }
 function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
 function state() { const n = moment === 'all' ? N_ALL : 1, per = CAST + .25, i = Math.min(n - 1, Math.floor(S.age / per)), t = S.age - i * per; return { i, n, t, f: clamp(t / CAST), made: t >= CAST, over: S.age >= n * per - .25 && t >= CAST, loud: i === 0 ? '' : i < 3 ? 'Q' : false, quiet: i >= 3 }; }
 function halves() { const hw = W / 2; return [{ x0: 0, w: hw, ring: { x: Math.min(hw * .32, 120), y: H * .62, r: 26 }, label: '1.3 animation beside the ring' }, { x0: hw, w: hw, ring: { x: hw + hw * .5, y: H * .62, r: 26 }, label: 'New: on the arc' }]; }
 let last = performance.now();
 function frame(now_) { const dt = Math.min(.05, (now_ - last) / 1000); last = now_; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
-  if (S) { S.age += dt; const p = PROF[prof], c = state(), [L, Rt] = halves();
+  if (S) { S.age += dt; S.dtf = dt; const p = PROF[prof], c = state(), [L, Rt] = halves();
     ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fillRect(W / 2 - .5, 20, 1, H - 40); text(L.label, L.w / 2, 30, '700 11px system-ui', '#cfc6b0', 'center', { ls: '1.5px' }); text(Rt.label, Rt.x0 + Rt.w / 2, 30, '700 11px system-ui', '#dcb8ff', 'center', { ls: '1.5px' });
     // each item: schedule both sides' work at its start (sounds from the left only; both sides share the beats)
     const arc = arcOf(); S.item = c.i;
-    if (!c.over || c.t < CAST) once('start' + c.i, () => { const spot = { x: L.ring.x + L.ring.r + 64, y: L.ring.y }; S.mute = false; p.old.work(spot.x, spot.y, CAST, c.loud); S.mute = true; arc.work(Rt.ring, CAST, c.loud); S.mute = false; });
+    if (!c.over || c.t < CAST) once('start' + c.i, () => { const spot = { x: L.ring.x + L.ring.r + 64, y: L.ring.y }; S.mute = false; p.old.work(spot.x, spot.y, CAST, arc.ownSound ? false : c.loud); S.mute = true; arc.work(Rt.ring, CAST, c.loud); S.mute = false; });
     if (c.made) once('pay' + c.i, () => { const spot = { x: L.ring.x + L.ring.r + 64, y: L.ring.y }; p.old.payoff(spot.x, spot.y, c.quiet); arc.payoff(Rt.ring, c.quiet); spawn2(L.ring, p); spawn2(Rt.ring, p); });
     TIMERS = TIMERS.filter(tm => { if (S.age >= tm.at) { const m = S.mute; tm.fn(); S.mute = m; return false; } return true; });
     if (!c.over || c.t < CAST + .9) { ringBatch(L.ring, c, p); ringBatch(Rt.ring, c, p); if (arc.overlay) arc.overlay(Rt.ring, c); }
@@ -311,7 +311,259 @@ Object.assign(ITER.Leatherworking, {
         ctx.save(); ctx.translate(p.x, p.y); ctx.scale(pop, pop); const g = ctx.createRadialGradient(-1, -1, 0, 0, 0, 4); g.addColorStop(0, '#fff3c0'); g.addColorStop(.5, '#d8a440'); g.addColorStop(1, '#6a4a14'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 3.6, 0, 7); ctx.fill();
         if (sh > 0) { ctx.fillStyle = `rgba(255,255,255,${sh})`; ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 10; star4(0, 0, 4 + 6 * sh, 0); } ctx.restore(); }); ctx.restore(); } },
 });
-const iterPick = { Blacksmithing: 'E', Leatherworking: 'C' }; // (locked: Blacksmithing E, Leatherworking C)
+// ---------- Alchemy: four mechanisms (particles / material / color / rising smoke); 1.3's beats .15 .32 .49 .66, foam .86 ----------
+const AL_F = [.15, .32, .49, .66];
+// the potion's color; E sets an override: purple while it fills, shifting to magenta-pink at the flash (the user, 2026-11-12)
+const AL_PURPLE = [.62, .36, .92], AL_MAGENTA = [1, .38, .82];
+const alCol = () => { const o = S.alc.override; if (!o) return POTION[S.potion]; if (o.at === undefined) return o.from; const u = clamp((S.age - o.at) / .25); return o.from.map((v, k) => lerp(v, o.to[k], u)); }, alHex = (c, a = 1) => rgba(c, a);
+function alFade(c) { return c.made ? clamp(1 - (c.t - CAST - .5) / .5) : 1; }
+ITER.Alchemy = {
+  A: Object.assign({ name: 'A. Bubbles off the head', desc: 'Particles: round 1\'s arc version. Bubbles boil up off the arc\'s moving head, more and stronger each beat (a new potion color each craft); the foam bursts from the head, and the cork pops off the top of the ring.' }, PROF.Alchemy.arc),
+  B: { name: 'B. Glass tube', desc: 'Material: the ring becomes a glass tube filling with the potion. Its liquid end sloshes and wobbles, bubbles drift along inside, and each beat makes it surge forward with a bright pulse; foam froths at the head near the end, and the cork pops off the top when it\'s full.',
+    work(rg, T) { AL_F.forEach(f => After(T * f, () => S.alc.pulses.push({ i: S.item, at: S.age }))); After(T * .86, () => { const p = head(rg, .86); for (let i = 0; i < 6; i++) Dot({ x: p.x + R(-5, 5), y: p.y + R(-5, 5), vx: R(-20, 20), vy: R(10, 40), g: 30, size: R(5, 8), life: R(.4, .6), a: .7 }); }); },
+    payoff(rg) { const p = head(rg, 1); corkFx(p.x, p.y); Glint(p.x, p.y, 18, .3); },
+    overlay(rg, c) { const fd = alFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2, col = alCol(); ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(220,235,255,.18)'; ctx.lineWidth = 11; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, 0, 7); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; [rg.r - 5.5, rg.r + 5.5].forEach(rr => { ctx.beginPath(); ctx.arc(rg.x, rg.y, rr, 0, 7); ctx.stroke(); });
+      const pulse = S.alc.pulses.filter(p => p.i === c.i).reduce((m, p) => Math.max(m, clamp(1 - (S.age - p.at) / .35)), 0);
+      ctx.strokeStyle = alHex(col, .9); ctx.shadowColor = alHex(col); ctx.shadowBlur = 8 + 10 * pulse; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, a0 + Math.PI * 2 * f); ctx.stroke(); ctx.shadowBlur = 0;
+      if (!c.made) { const h = head(rg, f), wob = Math.sin(S.age * 14) * 1.5 + pulse * 3; ctx.fillStyle = alHex(col.map(v => Math.min(1, v + .25))); ctx.beginPath(); ctx.ellipse(h.x, h.y, 4.5 + wob * .4, 4.5 - wob * .2, h.a, 0, 7); ctx.fill(); }
+      ctx.fillStyle = 'rgba(255,255,255,.75)'; for (let k = 0; k < 7; k++) { const s = ((k * .143 + S.age * .12) % 1) * f, a = a0 + Math.PI * 2 * s, o = Math.sin(k * 2.1 + S.age * 3) * 2; ctx.beginPath(); ctx.arc(rg.x + Math.cos(a) * (rg.r + o), rg.y + Math.sin(a) * (rg.r + o), 1 + (k % 3) * .4, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r - 2.5, a0, a0 + Math.PI * 2 * f); ctx.stroke(); ctx.restore(); } },
+  C: { name: 'C. Transmutation', desc: 'Color: each beat drops a reagent from above into the ring\'s center with a ripple, and the ring\'s color shifts a step, from murky green toward the finished potion\'s color. When it\'s made the final mix flashes in the middle and puffs a cloud of colored smoke.',
+    work(rg, T) { const col = alCol(), steps = [[.35, .45, .25], [.55, .5, .3], [.5, .5, .6], col.map(v => v * .8)];
+      AL_F.forEach((f, k) => After(T * f, () => { Fx({ life: .22, draw(u) { const y = lerp(rg.y - 60, rg.y, u * u); ctx.fillStyle = alHex(steps[k]); ctx.shadowColor = alHex(steps[k]); ctx.shadowBlur = 6; ctx.beginPath(); ctx.ellipse(rg.x, y, 2.5, 3.5, 0, 0, 7); ctx.fill(); } });
+        After(.22, () => { RingFx(rg.x, rg.y, 26, .35, 0, steps[k]); S.alc.cols.push({ i: S.item, at: S.age, c: steps[k] }); }); })); },
+    payoff(rg) { const col = alCol(); Dot({ x: rg.x, y: rg.y, size: 40, grow: 2.2, life: .5, add: true, glow: true, c: col, a: .8 }); for (let i = 0; i < 7; i++) Dot({ x: rg.x + R(-8, 8), y: rg.y + R(-8, 8), vx: R(-25, 25), vy: R(15, 45), g: -8, size: R(10, 16), grow: 2, life: R(.7, 1.1), glow: true, c: col, a: .45 }); const p = head(rg, 1); Glint(p.x, p.y, 18, .3); S.alc.cols.push({ i: S.item, at: S.age, c: col.map(v => Math.min(1, v + .1)) }); },
+    overlay(rg, c) { const fd = alFade(c); if (fd <= 0) return; const cs = S.alc.cols.filter(x => x.i === c.i); if (!cs.length) return; const cur = cs[cs.length - 1], prev = cs.length > 1 ? cs[cs.length - 2].c : [.4, .4, .4], u = clamp((S.age - cur.at) / .25), col = prev.map((v, k) => lerp(v, cur.c[k], u));
+      const f = c.made ? 1 : c.f; ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = alHex(col); ctx.shadowColor = alHex(col); ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.restore(); } },
+  D: { name: 'D. Vapors', desc: 'Rising smoke: thin wisps of colored vapor curl up off the ring the whole time it fills, thicker after each beat. When it\'s done, a puff of vapor rings floats up from the top of the ring and fades.',
+    work(rg, T) { AL_F.forEach((f, k) => After(T * f, () => { S.alc.level = k + 1; const p = head(rg, f), col = alCol(); for (let i = 0; i < 3 + k; i++) Dot({ x: p.x + R(-4, 4), y: p.y, vx: R(-10, 10), vy: R(25, 45), g: -5, size: R(6, 9), grow: 2.2, life: R(.7, 1), glow: true, c: col, a: .4 }); })); },
+    payoff(rg) { const p = head(rg, 1), col = alCol(); for (let k = 0; k < 3; k++) Fx({ life: 1.1, delay: k * .15, draw(u) { ctx.strokeStyle = alHex(col.map(v => Math.min(1, v + .3)), (1 - u) * .8); ctx.lineWidth = 2.5 * (1 - u) + .5; ctx.shadowColor = alHex(col); ctx.shadowBlur = 8; ctx.beginPath(); ctx.ellipse(p.x + Math.sin(u * 4 + k) * 3, p.y - 10 - u * 60, 6 + u * 12, (6 + u * 12) * .45, 0, 0, 7); ctx.stroke(); } }); Glint(p.x, p.y, 18, .3); },
+    overlay(rg, c) { if (c.made && c.t - CAST > .3) return; const f = c.made ? 1 : c.f, lvl = S.alc.level || 0, col = alCol(); if (Math.random() < .25 + lvl * .15) { const s = Math.random() * f, a = -Math.PI / 2 + Math.PI * 2 * s; Dot({ x: rg.x + Math.cos(a) * rg.r, y: rg.y + Math.sin(a) * rg.r, vx: R(-8, 8), vy: R(18, 34), g: -4, size: R(4, 6 + lvl), grow: 2.4, life: R(.7, 1.1), glow: true, c: col, a: .22 + lvl * .05 }); } } },
+};
+// E: the mix the user asked for (2026-11-12): B's clean glass tube, D's vapor wisps along the ring, C's finale
+// (the flash in the middle, the ring's glow, the shine at the top) and the cork popping (A/B)
+ITER.Alchemy.E = { name: 'E. The mix (B + D + C + cork)', desc: 'What you liked, together: B\'s clean glass tube filling with a purple potion, with D\'s vapor wisps curling up off the ring as it fills; when it\'s made it shifts to magenta-pink with C\'s finale (the flash in the middle, the colored smoke, the ring glowing and the shine at the top) while the cork pops off the top.',
+  work(rg, T) { S.alc.override = { from: AL_PURPLE, to: AL_MAGENTA }; S.alc.glowAt = undefined; ITER.Alchemy.B.work(rg, T); AL_F.forEach((f, k) => After(T * f, () => { S.alc.level = k + 1; })); },
+  payoff(rg) { S.alc.override.at = S.age - .25; ITER.Alchemy.C.payoff(rg); const p = head(rg, 1); corkFx(p.x, p.y); S.alc.glowAt = S.age; },
+  overlay(rg, c) { ITER.Alchemy.B.overlay(rg, c); ITER.Alchemy.D.overlay(rg, c);
+    if (S.alc.glowAt !== undefined && c.made) { const u = (S.age - S.alc.glowAt) / .9; if (u < 1) { const col = alCol(); ctx.save(); ctx.globalAlpha = Math.sin(Math.PI * Math.min(1, u * 1.6)) * (1 - u * .5); ctx.strokeStyle = alHex(col.map(v => Math.min(1, v + .2))); ctx.shadowColor = alHex(col); ctx.shadowBlur = 18; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, 0, 7); ctx.stroke(); ctx.restore(); } } } };
+// ---------- Tailoring: four mechanisms (marks / material / flowing cloth / a feeder); 1.3's beats .2 .36 .52 .68, the snip ----------
+const TL_F = [.2, .36, .52, .68], THREAD = 'rgba(255,244,216,', SILK = [.55, .72, 1];
+function tlFade(c) { return c.made ? clamp(1 - (c.t - CAST - .5) / .5) : 1; }
+ITER.Tailoring = {
+  A: Object.assign({ name: 'A. Stitches on the arc', desc: 'Marks added: round 1\'s arc version. Each stitch appears on the arc where the head is (a running stitch around the ring); the scissors snip at the top.' }, PROF.Tailoring.arc),
+  B: { name: 'B. Thread wrap', desc: 'Material: thread winds around the ring as it fills; the stroke becomes wound thread (fine diagonal turns), with a little bead of thread circling the stroke at the head. Each beat pulls a turn tight with a flash. When it\'s made the scissors snip the loose end at the top and a shine runs once around the finished wrap.',
+    work(rg, T) { TL_F.forEach(f => After(T * f, () => S.tl.beats.push({ i: S.item, f, at: S.age }))); },
+    payoff(rg) { const p = head(rg, 1); scissors(p.x + 6, p.y - 12, 20, .4); S.tl.sweep = S.age; S.tl.sweepI = S.item; },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2, n = Math.floor(f * 2 * Math.PI * rg.r / 3.2); ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(120,100,70,.8)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, a0 + Math.PI * 2 * f); ctx.stroke();
+      const fl = S.tl.beats.filter(b => b.i === c.i).reduce((m, b) => Math.max(m, clamp(1 - (S.age - b.at) / .3)), 0);
+      for (let k = 0; k < n; k++) { const a = a0 + Math.PI * 2 * (k / (2 * Math.PI * rg.r / 3.2)), cx = rg.x + Math.cos(a) * rg.r, cy = rg.y + Math.sin(a) * rg.r, tx = -Math.sin(a), ty = Math.cos(a), nx = Math.cos(a), ny = Math.sin(a);
+        ctx.strokeStyle = THREAD + (.75 + .25 * fl) + ')'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(cx - nx * 3.5 - tx * 1.2, cy - ny * 3.5 - ty * 1.2); ctx.lineTo(cx + nx * 3.5 + tx * 1.2, cy + ny * 3.5 + ty * 1.2); ctx.stroke(); }
+      if (!c.made) { const h = head(rg, f), ph = S.age * 18, ox = Math.cos(h.a) * Math.cos(ph) * 5, oy = Math.sin(h.a) * Math.cos(ph) * 5; ctx.fillStyle = '#fffaf0'; ctx.shadowColor = '#fff4d8'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(h.x + ox, h.y + oy, 2.2, 0, 7); ctx.fill(); }
+      if (S.tl.sweepI === c.i) { const u = (S.age - S.tl.sweep) / .45; if (u < 1) { const p = head(rg, u), g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 11); g.addColorStop(0, 'rgba(255,255,250,.9)'); g.addColorStop(1, 'rgba(255,240,210,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 11, 0, 7); ctx.fill(); } }
+      ctx.restore(); } },
+  C: { name: 'C. Silk ribbon', desc: 'Flowing cloth: a ribbon of silk flows around the ring behind the head, its edges fluttering most near the head; each beat sends a ripple along it. When it\'s made it snaps flat with a sheen running along it, and the scissors snip at the top.',
+    work(rg, T) { TL_F.forEach(f => After(T * f, () => S.tl.beats.push({ i: S.item, f, at: S.age }))); },
+    payoff(rg) { const p = head(rg, 1); scissors(p.x + 6, p.y - 12, 20, .4); S.tl.flat = S.age; S.tl.flatI = S.item; },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2; if (f < .01) return; const flat = S.tl.flatI === c.i ? clamp((S.age - S.tl.flat) / .2) : 0;
+      const rip = S.tl.beats.filter(b => b.i === c.i).map(b => ({ s: b.f, age: S.age - b.at })); const steps = Math.max(8, Math.ceil(f * 120)), outer = [], inner = [];
+      for (let k = 0; k <= steps; k++) { const s = f * k / steps, a = a0 + Math.PI * 2 * s, near = clamp(1 - (f - s) * 4), wave = (Math.sin(s * 70 - S.age * 12) * (.6 + 1.6 * near)) * (1 - flat);
+        let bump = 0; rip.forEach(r => { const d = s - (r.s - r.age * .5); if (r.age < .8 && Math.abs(d) < .05) bump += Math.cos(d / .05 * Math.PI / 2) * 2.5 * (1 - r.age / .8); });
+        const w = 4 + wave * .5 + bump * (1 - flat); outer.push([rg.x + Math.cos(a) * (rg.r + w + wave), rg.y + Math.sin(a) * (rg.r + w + wave)]); inner.push([rg.x + Math.cos(a) * (rg.r - w + wave), rg.y + Math.sin(a) * (rg.r - w + wave)]); }
+      ctx.save(); ctx.globalAlpha = fd; const g = ctx.createLinearGradient(rg.x - rg.r, rg.y - rg.r, rg.x + rg.r, rg.y + rg.r); g.addColorStop(0, rgba(SILK, .85)); g.addColorStop(.5, rgba(SILK.map(v => Math.min(1, v + .25)), .9)); g.addColorStop(1, rgba(SILK.map(v => v * .7), .85));
+      ctx.fillStyle = g; ctx.beginPath(); outer.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); for (let k = inner.length - 1; k >= 0; k--) ctx.lineTo(inner[k][0], inner[k][1]); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = .8; ctx.stroke();
+      if (flat > 0 && flat < 1) { const p = head(rg, flat); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, 7); ctx.fill(); } ctx.restore(); } },
+  D: { name: 'D. Spool', desc: 'A feeder: a spool sits just above the top of the ring and spins, paying thread out down into the ring and around it as it fills; it spins faster with each beat. When it\'s made the thread is snipped between the spool and the ring, the spool spins down, and the thread ring glints.',
+    work(rg, T) { TL_F.forEach(f => After(T * f, () => { S.tl.beats.push({ i: S.item, f, at: S.age }); Glint(rg.x, rg.y - rg.r - 22, 8, .2); })); },
+    payoff(rg) { scissors(rg.x + 4, rg.y - rg.r - 9, 18, .4); S.tl.cut = S.age; S.tl.cutI = S.item; const p = head(rg, 1); Glint(p.x, p.y, 16, .3); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2, sx = rg.x, sy = rg.y - rg.r - 22, nb = S.tl.beats.filter(b => b.i === c.i).length, cut = S.tl.cutI === c.i;
+      S.tl.spin = (S.tl.spin || 0) + (cut ? Math.max(0, 6 - (S.age - S.tl.cut) * 10) : 4 + nb * 4) * (S.dtf || .016); ctx.save(); ctx.globalAlpha = fd;
+      ctx.strokeStyle = THREAD + '.95)'; ctx.lineWidth = 1.8; ctx.shadowColor = '#fff4d8'; ctx.shadowBlur = 4; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, a0 + Math.PI * 2 * f); ctx.stroke();
+      if (!cut) { const h = head(rg, f); ctx.beginPath(); ctx.moveTo(sx, sy + 6); ctx.lineTo(rg.x, rg.y - rg.r); ctx.stroke(); } ctx.shadowBlur = 0;
+      ctx.translate(sx, sy); ctx.fillStyle = '#5a4630'; ctx.fillRect(-9, -7, 18, 3); ctx.fillRect(-9, 4, 18, 3); ctx.fillStyle = '#e8dcc0'; ctx.fillRect(-7, -4, 14, 8);
+      ctx.strokeStyle = 'rgba(120,90,50,.8)'; ctx.lineWidth = 1; for (let k = 0; k < 4; k++) { const x = -7 + ((k * 3.5 + S.tl.spin * 6) % 14); ctx.beginPath(); ctx.moveTo(x, -4); ctx.lineTo(x, 4); ctx.stroke(); } ctx.restore(); } },
+};
+// ---------- Engineering: four mechanisms (an object riding / the ring itself moves / electricity / a fuse burning); 1.3's clicks .3 .45 .6, then the boing + puff ----------
+const EN_F = [.3, .45, .6], STEEL = [.78, .84, .9];
+function enClicks(i) { return S.en.clicks.filter(b => b.i === i); }
+function zap(x1, y1, x2, y2, life, c = [.6, .85, 1]) { const pts = [], n = 7; for (let k = 0; k <= n; k++) { const u = k / n, j = (k === 0 || k === n) ? 0 : R(-7, 7); pts.push([lerp(x1, x2, u) + j * -(y2 - y1) / Math.hypot(x2 - x1, y2 - y1), lerp(y1, y2, u) + j * (x2 - x1) / Math.hypot(x2 - x1, y2 - y1)]); }
+  Fx({ life, add: true, draw(u) { ctx.globalAlpha = (1 - u) * (u < .5 && Math.random() < .3 ? .4 : 1); ctx.strokeStyle = rgb(c); ctx.shadowColor = rgb(c); ctx.shadowBlur = 10; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.beginPath(); pts.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = .7; ctx.stroke(); } }); }
+function springFx(x, y, life) { Fx({ life, draw(u) { const h = 22 * eBack(Math.min(1, u * 2.2)) * (1 + .25 * Math.sin(u * 30) * (1 - u)), coils = 6; ctx.globalAlpha = u > .7 ? (1 - u) / .3 : 1; ctx.strokeStyle = rgb(STEEL); ctx.lineWidth = 1.6; ctx.shadowColor = '#e0ecf8'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(x, y); for (let k = 1; k <= coils * 2; k++) ctx.lineTo(x + (k % 2 ? 5 : -5), y - h * k / (coils * 2)); ctx.lineTo(x, y - h - 2); ctx.stroke(); } }); }
+function puffFx(x, y, n = 6, c = [.85, .85, .85]) { for (let i = 0; i < n; i++) Dot({ x: x + R(-6, 6), y: y + R(-4, 4), vx: R(-25, 25), vy: R(15, 45), g: -10, size: R(9, 14), grow: 2, life: R(.6, .9), a: .35, c }); }
+ITER.Engineering = {
+  A: Object.assign({ name: 'A. Gear on the arc', desc: 'An object riding: round 1\'s arc version. A small gear rides the ring\'s head and ratchets a step on each click; the boing and the puff come off the top.' }, PROF.Engineering.arc),
+  B: { name: 'B. Clockwork ring', desc: 'The ring itself moves: the filled part grows gear teeth on its outside, and on each click the whole toothed ring turns a notch with a jolt (an escapement), a small glint where the tooth catches. When it\'s made a spring shoots up from the top and wobbles (the boing), with a little puff.',
+    work(rg, T) { EN_F.forEach(f => After(T * f, () => { S.en.clicks.push({ i: S.item, at: S.age }); const p = head(rg, f); Glint(p.x, p.y, 9, .2, 0, [.88, .94, 1]); })); },
+    payoff(rg) { springFx(rg.x, rg.y - rg.r - 4, .9); puffFx(rg.x, rg.y - rg.r - 14, 4); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, cl = enClicks(c.i); let rot = 0; cl.forEach(b => { const u = clamp((S.age - b.at) / .12); rot += .14 * eBack(u); });
+      const teeth = 36, n = Math.floor(f * teeth); ctx.save(); ctx.globalAlpha = fd; ctx.translate(rg.x, rg.y); ctx.rotate(rot); ctx.fillStyle = rgb(STEEL); ctx.shadowColor = '#e0ecf8'; ctx.shadowBlur = 4;
+      for (let k = 0; k < n; k++) { const a = -Math.PI / 2 + (k + .5) / teeth * Math.PI * 2; ctx.save(); ctx.rotate(a); ctx.fillRect(rg.r + 3, -2.2, 5, 4.4); ctx.restore(); } ctx.restore(); } },
+  C: { name: 'C. Live wire', desc: 'Electricity: the ring hums with a faint crackle along the filled part; on each click a lightning bolt jumps from the head into the item in the middle. When it\'s made the whole ring discharges at once (bolts from all round the ring into the item), the item flashes and a puff of smoke rises.',
+    work(rg, T) { EN_F.forEach(f => After(T * f, () => { S.en.clicks.push({ i: S.item, at: S.age }); const p = head(rg, f); zap(p.x, p.y, rg.x, rg.y, .25); Glint(rg.x, rg.y, 10, .2, 0, [.7, .9, 1]); })); },
+    payoff(rg) { for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + R(0, .5); zap(rg.x + Math.cos(a) * rg.r, rg.y + Math.sin(a) * rg.r, rg.x, rg.y, .3); } Glint(rg.x, rg.y, 26, .35, 0, [.8, .95, 1]); RingFx(rg.x, rg.y, rg.r * 2.4, .35, 0, [.6, .85, 1]); puffFx(rg.x, rg.y - rg.r - 6, 5); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0 || c.made) return; const f = c.f; if (f < .02) return; ctx.save(); ctx.globalAlpha = fd * .8; ctx.strokeStyle = 'rgba(150,215,255,.8)'; ctx.shadowColor = '#9fd8ff'; ctx.shadowBlur = 6; ctx.lineWidth = 1;
+      for (let s = 0; s < 3; s++) { const s0 = Math.random() * f, len = .05, steps = 5; ctx.beginPath(); for (let k = 0; k <= steps; k++) { const a = -Math.PI / 2 + Math.PI * 2 * Math.min(f, s0 + len * k / steps), r = rg.r + R(-4, 4); k ? ctx.lineTo(rg.x + Math.cos(a) * r, rg.y + Math.sin(a) * r) : ctx.moveTo(rg.x + Math.cos(a) * r, rg.y + Math.sin(a) * r); } ctx.stroke(); }
+      const h = head(rg, f); ctx.fillStyle = '#dff3ff'; ctx.beginPath(); ctx.arc(h.x, h.y, 2 + Math.random(), 0, 7); ctx.fill(); ctx.restore(); } },
+  D: { name: 'D. Fuse', desc: 'A fuse burning: the ring is a fuse cord; a sizzling spark burns along it, throwing little sparks, and leaves it charred behind. Each click is a crackle (a burst of sparks off the spark). When it reaches the top it goes off: a flash, a shockwave ring and a puff of smoke (a small, friendly bang, not an explosion).',
+    work(rg, T) { EN_F.forEach(f => After(T * f, () => { const p = head(rg, f); for (let i = 0; i < 6; i++) Dot({ x: p.x, y: p.y, vx: R(-110, 110), vy: R(-40, 140), g: 600, size: 2.5, life: .3, add: true, c: [1, .8, .35] }); })); },
+    payoff(rg) { const p = head(rg, 1); Glint(p.x, p.y, 30, .35, 0, [1, .9, .6]); RingFx(p.x, p.y, 70, .4, 0, [1, .85, .5]); RingFx(p.x, p.y, 40, .3, .05, [1, 1, 1]); puffFx(p.x, p.y - 4, 8, [.7, .68, .64]); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2; ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'round';
+      ctx.setLineDash([3, 2]); ctx.strokeStyle = 'rgba(200,180,140,.75)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0 + Math.PI * 2 * f, a0 + Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      if (f > 0) { ctx.strokeStyle = 'rgba(40,32,28,.9)'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, a0 + Math.PI * 2 * f); ctx.stroke(); }
+      if (!c.made && f > 0) { const h = head(rg, f), g = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, 10); g.addColorStop(0, 'rgba(255,250,220,1)'); g.addColorStop(.4, 'rgba(255,170,60,.8)'); g.addColorStop(1, 'rgba(255,120,30,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(h.x, h.y, 10, 0, 7); ctx.fill();
+        if (Math.random() < .5) Dot({ x: h.x, y: h.y, vx: R(-60, 60), vy: R(0, 90), g: 500, size: 2, life: .22, add: true, c: [1, .75, .3] }); }
+      ctx.restore(); } },
+};
+function explodeFx(x, y, R0) {
+  Fx({ life: .45, add: true, draw(u) { const r = R0 * (.4 + 2.4 * eOut(u)), g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(255,255,235,${1 - u})`); g.addColorStop(.35, `rgba(255,190,70,${.9 * (1 - u)})`); g.addColorStop(.75, `rgba(230,80,30,${.6 * (1 - u)})`); g.addColorStop(1, 'rgba(200,40,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); } });
+  RingFx(x, y, R0 * 7, .5, 0, [1, .8, .45]); RingFx(x, y, R0 * 4.4, .36, .06, [1, 1, 1]);
+  for (let i = 0; i < 18; i++) { const a = R(0, Math.PI * 2), v = R(220, 420); Dot({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 380, size: R(2, 3.5), life: R(.35, .6), add: true, c: [1, R(.6, .9), .3] }); }
+  for (let i = 0; i < 6; i++) { const a = R(0, Math.PI * 2), v = R(80, 160); Dot({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v + 60, g: 500, size: R(3, 4.5), life: R(.5, .75), c: [.22, .2, .18] }); }
+  After(.12, () => { for (let i = 0; i < 10; i++) { const a = R(0, Math.PI * 2), d = R(0, R0 * 1.6); Dot({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, vx: Math.cos(a) * 30, vy: R(20, 50), g: -15, size: R(16, 24), grow: 2.2, life: R(.8, 1.2), a: .4, c: [.5, .47, .44] }); } }); }
+ITER.Engineering.E = { name: 'E. Fuse + explosion', desc: 'D with a real bang: the fuse burns around the ring the same way; when it reaches the top the item in the middle blows up: a fireball swelling past the ring (white core, orange, red edge), sparks and dark debris flying out, two shockwaves, then a cloud of smoke drifting up. Cartoon-sized: over in about a second, the item shows again as the smoke clears.',
+  work: ITER.Engineering.D.work, overlay: ITER.Engineering.D.overlay,
+  payoff(rg) { const p = head(rg, 1); Glint(p.x, p.y, 16, .2, 0, [1, .9, .6]); After(.06, () => explodeFx(rg.x, rg.y, rg.r * .9)); } };
+ITER.Engineering.F = { name: 'F. Gear + explosion', desc: "The mix: A's gear rides the ring's head and ratchets a step on each click while the ring fills (no fuse); when it's made the item in the middle blows up like E (fireball past the ring, sparks and debris, shockwaves, smoke). The boing stays the final sound.",
+  work: ITER.Engineering.A.work, payoff: ITER.Engineering.E.payoff };
+// ---------- Cooking: four mechanisms (food flipped over the ring / the ring is the heat / the food itself turns and browns / things fall in, scent rises); 1.3's sizzles .3 .45, the flip .62, the tss ----------
+const CK_F = [.3, .45, .62];
+function ckBeat(i, k) { return S.ck.beats.find(b => b.i === i && b.k === k); }
+function itemBox(x, y, item, q, o = {}) { ctx.save(); ctx.translate(x, y + (o.dy || 0)); ctx.scale(o.sx ?? 1, o.sy ?? 1); ctx.fillStyle = '#1a140c'; ctx.fillRect(-12, -12, 24, 24); ctx.strokeStyle = q; ctx.lineWidth = 1.5; ctx.strokeRect(-11, -11, 22, 22);
+  ctx.font = '15px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText(item, 0, 1); if (o.tint) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = o.tint; ctx.fillRect(-10, -10, 20, 20); } ctx.restore(); }
+function scentFx(x, y, delay = 0) { for (let i = 0; i < 3; i++) { const ph = R(0, 6), dx = (i - 1) * 8; Fx({ life: 1.1, delay: delay + i * .1, draw(u) { ctx.globalAlpha = Math.sin(Math.PI * u) * .85; ctx.strokeStyle = '#ffd890'; ctx.shadowColor = '#ffb050'; ctx.shadowBlur = 6; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath();
+  for (let k = 0; k <= 14; k++) { const s = k / 14, yy = y - 6 - (18 + 30 * u) * s, xx = x + dx + Math.sin(s * 7 + ph + u * 5) * 4 * (.4 + s); k ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); } ctx.stroke(); } }); } }
+ITER.Cooking = {
+  A: Object.assign({ name: 'A. Flip over the ring', desc: 'Round 1\'s arc version: the spatters fly off the ring\'s head, the food flips over the ring from the head to the top, the steam rises from the top.' }, PROF.Cooking.arc),
+  B: { name: 'B. The burner', desc: 'The ring is the heat: the filled part glows like a stove coil, dull red at first, hotter orange, then yellow-white as it fills, with heat shimmer rising inside the ring. The sizzles are oil pops along the hot part; the flip beat is a lick of flame round the whole ring. When it\'s made the coil flares gold and steam rises off the food.',
+    work(rg, T) { CK_F.forEach((f, k) => After(T * f, () => { S.ck.beats.push({ i: S.item, k, at: S.age }); if (k < 2) for (let j = 0; j < 3; j++) { const p = head(rg, R(.05, f)); Glint(p.x, p.y, 7, .2, j * .04, [1, .9, .6]); Dot({ x: p.x, y: p.y, vx: R(-40, 40), vy: R(60, 110), g: 500, size: 2.5, life: .3, add: true, c: [1, .85, .5], delay: j * .04 }); } })); },
+    payoff(rg) { S.ck.done = { i: S.item, at: S.age }; RingFx(rg.x, rg.y, rg.r * 2.6, .4, 0, [1, .85, .45]); steamFx(rg.x, rg.y - 10); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2; if (f <= 0) return; const heat = f, col = heat < .5 ? [lerp(.55, 1, heat * 2), lerp(.12, .45, heat * 2), .08] : [1, lerp(.45, .92, (heat - .5) * 2), lerp(.08, .6, (heat - .5) * 2)];
+      const done = S.ck.done && S.ck.done.i === c.i ? clamp(1 - (S.age - S.ck.done.at) / .6) : 0, flip = ckBeat(c.i, 2), lick = flip ? clamp(1 - (S.age - flip.at) / .45) : 0;
+      ctx.save(); ctx.globalAlpha = fd; ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.strokeStyle = rgba(done ? [1, .85, .45] : col, .9); ctx.shadowColor = rgb(col); ctx.shadowBlur = 8 + 10 * heat + 14 * done; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, a0 + Math.PI * 2 * f); ctx.stroke();
+      if (lick > 0) { ctx.strokeStyle = rgba([1, .6, .2], .6 * lick); ctx.lineWidth = 3; for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, h = (5 + 6 * Math.sin(k * 2.3 + S.age * 20)) * lick; ctx.beginPath(); ctx.moveTo(rg.x + Math.cos(a) * (rg.r + 3), rg.y + Math.sin(a) * (rg.r + 3)); ctx.lineTo(rg.x + Math.cos(a) * (rg.r + 3 + h), rg.y + Math.sin(a) * (rg.r + 3 + h)); ctx.stroke(); } }
+      ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0; ctx.strokeStyle = `rgba(255,200,140,${.18 * heat})`; ctx.lineWidth = 1.2; for (let k = 0; k < 3; k++) { const x0 = rg.x - 10 + k * 10; ctx.beginPath(); for (let s = 0; s <= 10; s++) { const yy = rg.y + 14 - s * 3, xx = x0 + Math.sin(s * .9 - S.age * 8 + k) * 2.5; s ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); } ctx.stroke(); }
+      ctx.restore(); } },
+  C: { name: 'C. Grill marks', desc: 'Marks seared onto the food: each sizzle sears a glowing stripe across the item in the middle (orange-hot, then cooling to dark brown) with a wisp of smoke. On the flip the food turns over and the next sears cross the first ones, so it ends cross-hatched like a steak off the grill. When it\'s made the marks glow once and steam rises off the food.',
+    work(rg, T) { CK_F.forEach((f, k) => After(T * f, () => { S.ck.beats.push({ i: S.item, k, at: S.age }); if (k < 2) { Glint(rg.x, rg.y, 10, .2, 0, [1, .7, .3]); puffFx(rg.x + R(-4, 4), rg.y - 8, 2, [.6, .58, .55]); } })); After(T * .82, () => { S.ck.beats.push({ i: S.item, k: 3, at: S.age }); Glint(rg.x, rg.y, 10, .2, 0, [1, .7, .3]); puffFx(rg.x, rg.y - 8, 2, [.6, .58, .55]); }); },
+    payoff(rg) { S.ck.done = { i: S.item, at: S.age }; steamFx(rg.x, rg.y - 12); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const p = PROF.Cooking, bs = S.ck.beats.filter(b => b.i === c.i), flip = bs.find(b => b.k === 2), done = S.ck.done && S.ck.done.i === c.i ? clamp(1 - (S.age - S.ck.done.at) / .5) : 0;
+      const fu = flip ? clamp((S.age - flip.at) / .3) : 0, sy = flip && fu < 1 ? Math.cos(Math.PI * 2 * fu) : 1, hop = flip && fu < 1 ? -Math.sin(Math.PI * fu) * 8 : 0;
+      ctx.save(); ctx.globalAlpha = fd; itemBox(rg.x, rg.y, p.item, p.q, { sy: Math.abs(sy) < .08 ? .08 : sy, dy: hop });
+      ctx.beginPath(); ctx.rect(rg.x - 10, rg.y - 10 + hop, 20, 20); ctx.clip(); ctx.lineCap = 'round';
+      bs.filter(b => b.k !== 2).forEach((b, n) => { const cross = b.k === 3, age = S.age - b.at, hot = clamp(1 - age / .6), off = b.k === 0 ? -4 : b.k === 1 ? 4 : 0;
+        ctx.save(); ctx.translate(rg.x, rg.y + hop); ctx.rotate(cross ? -Math.PI / 4 : Math.PI / 4); ctx.scale(1, Math.abs(sy) < .08 ? .08 : sy); const glow = Math.max(hot, done);
+        ctx.strokeStyle = glow > 0 ? `rgb(${Math.round(lerp(70, 255, glow))},${Math.round(lerp(38, 150, glow))},${Math.round(lerp(18, 40, glow))})` : 'rgb(70,38,18)'; ctx.shadowColor = '#ff9a30'; ctx.shadowBlur = 8 * glow; ctx.lineWidth = 2.6;
+        const xs = b.k === 3 ? [-4, 4] : [off]; xs.forEach(xo => { ctx.beginPath(); ctx.moveTo(xo, -12); ctx.lineTo(xo, 12); ctx.stroke(); }); ctx.restore(); });
+      ctx.restore(); } },
+  D: { name: 'D. Kitchen timer', desc: 'The ring is a kitchen timer: minute ticks light up around it as it fills and a small pointer rides the head; each sizzle makes the ring\'s ticks jitter, the flip beat is a quick tick-tick rattle. When it\'s made the timer dings: the ticks all flash and sound-wave arcs ring out from the top, then the steam rises.',
+    work(rg, T) { CK_F.forEach((f, k) => After(T * f, () => S.ck.beats.push({ i: S.item, k, at: S.age }))); },
+    payoff(rg) { S.ck.done = { i: S.item, at: S.age }; const top = head(rg, 0); for (let w = 0; w < 3; w++) Fx({ life: .5, delay: w * .1, draw(u) { ctx.globalAlpha = 1 - u; ctx.strokeStyle = '#ffd890'; ctx.shadowColor = '#ffb050'; ctx.shadowBlur = 6; ctx.lineWidth = 2; ctx.lineCap = 'round'; const r = 8 + 22 * u; ctx.beginPath(); ctx.arc(top.x, top.y - 4, r, -Math.PI * .8, -Math.PI * .2); ctx.stroke(); } }); After(.25, () => steamFx(top.x, top.y - 8)); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, bs = S.ck.beats.filter(b => b.i === c.i), done = S.ck.done && S.ck.done.i === c.i ? clamp(1 - (S.age - S.ck.done.at) / .5) : 0;
+      let jit = 0; bs.forEach(b => { const u = (S.age - b.at) / (b.k === 2 ? .3 : .18); if (u >= 0 && u < 1) jit = Math.max(jit, (1 - u) * (b.k === 2 ? 2.2 : 1.4)); });
+      ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'round'; const N = 12;
+      for (let k = 0; k < N; k++) { const s = k / N, a = -Math.PI / 2 + s * Math.PI * 2, lit = s <= f + .001, j = jit ? Math.sin(S.age * 90 + k) * jit : 0, r0 = rg.r + 6 + j, r1 = rg.r + (k % 3 === 0 ? 12 : 9) + j;
+        ctx.strokeStyle = lit ? (done ? '#fff4d0' : '#ffd890') : 'rgba(255,216,144,.18)'; ctx.shadowColor = '#ffb050'; ctx.shadowBlur = lit ? 4 + 10 * done : 0; ctx.lineWidth = k % 3 === 0 ? 2.2 : 1.4;
+        ctx.beginPath(); ctx.moveTo(rg.x + Math.cos(a) * r0, rg.y + Math.sin(a) * r0); ctx.lineTo(rg.x + Math.cos(a) * r1, rg.y + Math.sin(a) * r1); ctx.stroke(); }
+      if (!c.made) { const h = head(rg, f), a = h.a; ctx.shadowBlur = 4; ctx.strokeStyle = '#fff4d8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rg.x + Math.cos(a) * (rg.r - 7), rg.y + Math.sin(a) * (rg.r - 7)); ctx.lineTo(rg.x + Math.cos(a) * (rg.r + 13), rg.y + Math.sin(a) * (rg.r + 13)); ctx.stroke(); }
+      ctx.restore(); } },
+};
+ITER.Cooking.E = { name: 'E. Flip on the burner', desc: "The mix: A's flip over the ring (spatters off the head, the food flips from the head to the top, steam) with B's burner as the stroke: it heats from dull red through orange to yellow-white as it fills, the flip sends a lick of flame round the ring, and when it's made the coil flares gold.",
+  work(rg, T) { PROF.Cooking.arc.work(rg, T); CK_F.forEach((f, k) => After(T * f, () => S.ck.beats.push({ i: S.item, k, at: S.age }))); },
+  payoff(rg) { PROF.Cooking.arc.payoff(rg); S.ck.done = { i: S.item, at: S.age }; RingFx(rg.x, rg.y, rg.r * 2.6, .4, 0, [1, .85, .45]); },
+  overlay(rg, c) { ITER.Cooking.B.overlay(rg, c); } };
+// ---------- Enchanting: four mechanisms (runes stamped / a figure drawn / motes orbiting in / light waves and an aura); 1.3's chimes .3 .44 .58, the ping ----------
+const EC_F = [.3, .44, .58], ARC = [.62, .5, 1], ARC_L = [.82, .74, 1];
+function ecBeats(i) { return S.enc.beats.filter(b => b.i === i); }
+function ecDone(i, len) { return S.enc.done && S.enc.done.i === i ? (S.age - S.enc.done.at) / len : -1; }
+ITER.Enchanting = {
+  A: Object.assign({ name: 'A. Runes on the arc', desc: 'Round 1\'s arc version: each rune stamps onto the ring where the head is, and at the end all three are drawn in to the top as the ring closes; the glint and the ring at the top.' }, PROF.Enchanting.arc),
+  B: { name: 'B. Magic circle', desc: 'Lines drawn: the ring becomes a magic circle. On each chime a glowing line is drawn across the inside of the ring, corner to corner, so the three beats draw a triangle inscribed in it; when it\'s made a second triangle flips in to make a star, the whole circle turns a little and flashes, and the figure fades.',
+    work(rg, T) { EC_F.forEach((f, k) => After(T * f, () => { S.enc.beats.push({ i: S.item, k, at: S.age }); const a = -Math.PI / 2 + k * Math.PI * 2 / 3; Glint(rg.x + Math.cos(a) * rg.r, rg.y + Math.sin(a) * rg.r, 10, .25, 0, ARC_L); })); },
+    payoff(rg) { S.enc.done = { i: S.item, at: S.age }; Glint(rg.x, rg.y - rg.r, 22, .35, 0, ARC_L); RingFx(rg.x, rg.y, rg.r * 2.8, .4, 0, ARC); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const bs = ecBeats(c.i), d = ecDone(c.i, .6), rot = d >= 0 ? eOut(clamp(d)) * Math.PI / 3 : 0, flash = d >= 0 ? clamp(1 - d) : 0, R0 = rg.r - 3;
+      ctx.save(); ctx.globalAlpha = fd; ctx.translate(rg.x, rg.y); ctx.rotate(rot); ctx.lineCap = 'round'; ctx.globalCompositeOperation = 'lighter'; ctx.shadowColor = rgb(ARC); ctx.shadowBlur = 8 + 10 * flash;
+      const corner = (k, off = 0) => { const a = -Math.PI / 2 + k * Math.PI * 2 / 3 + off; return [Math.cos(a) * R0, Math.sin(a) * R0]; };
+      bs.forEach(b => { const u = clamp((S.age - b.at) / .22), [x0, y0] = corner(b.k), [x1, y1] = corner(b.k + 1); ctx.strokeStyle = rgba(flash ? ARC_L : ARC, .9); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(lerp(x0, x1, u), lerp(y0, y1, u)); ctx.stroke(); });
+      if (d >= 0) { const u = clamp(d * 2.5); for (let k = 0; k < 3; k++) { const [x0, y0] = corner(k, Math.PI), [x1, y1] = corner(k + 1, Math.PI); ctx.strokeStyle = rgba(ARC_L, .9); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(lerp(x0, x1, u), lerp(y0, y1, u)); ctx.stroke(); } }
+      ctx.restore(); } },
+  C: { name: 'C. Orbiting motes', desc: 'Motes circling in: on each chime a bright arcane mote appears on the ring and starts orbiting the item, each one faster and a little closer, with a faint trail. When it\'s made they spiral into the item one after another and it flares, with the glint and the ring.',
+    work(rg, T) { EC_F.forEach((f, k) => After(T * f, () => { const p = head(rg, f); S.enc.beats.push({ i: S.item, k, at: S.age, a0: p.a }); Glint(p.x, p.y, 10, .2, 0, ARC_L); })); },
+    payoff(rg) { S.enc.done = { i: S.item, at: S.age }; After(.3, () => { Glint(rg.x, rg.y, 24, .35, 0, ARC_L); RingFx(rg.x, rg.y, rg.r * 2.6, .4, 0, ARC); }); },
+    overlay(rg, c) { const fd = tlFade(c); const bs = ecBeats(c.i), d = ecDone(c.i, .3); if (!bs.length) return; ctx.save(); ctx.globalAlpha = Math.max(fd, d >= 0 && d < 1.2 ? 1 : 0); ctx.globalCompositeOperation = 'lighter';
+      bs.forEach(b => { const age = S.age - b.at, w = 3 + b.k * 1.6, rr0 = rg.r - b.k * 4; let rr = rr0; if (d >= 0) { const u = clamp(d * 1.4 - b.k * .15); rr = rr0 * (1 - eOut(u)); if (u >= 1) return; }
+        for (let t = 0; t < 6; t++) { const a = b.a0 + w * (age - t * .025), x = rg.x + Math.cos(a) * rr, y = rg.y + Math.sin(a) * rr; ctx.fillStyle = rgba(t ? ARC : [1, 1, 1], t ? .5 * (1 - t / 6) : 1); ctx.shadowColor = rgb(ARC); ctx.shadowBlur = t ? 0 : 10; ctx.beginPath(); ctx.arc(x, y, t ? 2.2 : 2.6, 0, 7); ctx.fill(); } });
+      ctx.restore(); } },
+  D: { name: 'D. Shimmer and aura', desc: 'Light, not marks: each chime sends a wave of violet light sweeping once around the ring, each brighter than the last, and the item takes on a little more glow. When it\'s made a white sheen sweeps across the item and it keeps a soft pulsing violet aura (the enchant glow) as it fades out.',
+    work(rg, T) { EC_F.forEach((f, k) => After(T * f, () => S.enc.beats.push({ i: S.item, k, at: S.age }))); },
+    payoff(rg) { S.enc.done = { i: S.item, at: S.age }; Glint(rg.x, rg.y, 20, .3, 0, ARC_L); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const bs = ecBeats(c.i), d = ecDone(c.i, 1); ctx.save(); ctx.globalAlpha = fd; ctx.globalCompositeOperation = 'lighter';
+      bs.forEach(b => { const u = (S.age - b.at) / .5; if (u < 0 || u >= 1) return; const p = head(rg, u), g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 12 + b.k * 3); g.addColorStop(0, rgba(ARC_L, .55 + .15 * b.k)); g.addColorStop(1, rgba(ARC, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 12 + b.k * 3, 0, 7); ctx.fill(); });
+      const glow = bs.length / 3 * .5 + (d >= 0 ? .5 : 0), pulse = d >= 0 ? .75 + .25 * Math.sin(S.age * 6) : 1, rA = 16 + 4 * glow, ga = ctx.createRadialGradient(rg.x, rg.y, 8, rg.x, rg.y, rA); ga.addColorStop(0, rgba(ARC, .5 * glow * pulse)); ga.addColorStop(1, rgba(ARC, 0)); ctx.fillStyle = ga; ctx.beginPath(); ctx.arc(rg.x, rg.y, rA, 0, 7); ctx.fill();
+      if (d >= 0 && d < .45) { const u = d / .45; ctx.globalCompositeOperation = 'source-over'; ctx.beginPath(); ctx.rect(rg.x - 11, rg.y - 11, 22, 22); ctx.clip(); ctx.translate(rg.x - 22 + 44 * u, rg.y); ctx.rotate(.5); const g = ctx.createLinearGradient(-6, 0, 6, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.85)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(-6, -20, 12, 40); }
+      ctx.restore(); } },
+};
+ITER.Enchanting.E = { name: 'E. Motes draw the circle', desc: 'The mix, kept calm: one element does both jobs. On each chime a bright mote (C) appears at a corner inside the ring and travels to the next corner, drawing B\'s glowing line behind it, then rests there softly glowing, so three motes draw the triangle. When it\'s made the three motes run once more and draw the second triangle into a star, the circle turns a little and flashes, and the motes spiral into the item and it flares.',
+  work(rg, T) { EC_F.forEach((f, k) => After(T * f, () => { S.enc.beats.push({ i: S.item, k, at: S.age }); })); },
+  payoff(rg) { S.enc.done = { i: S.item, at: S.age }; After(.5, () => { Glint(rg.x, rg.y, 24, .35, 0, ARC_L); RingFx(rg.x, rg.y, rg.r * 2.6, .4, 0, ARC); }); },
+  overlay(rg, c) { const fd = tlFade(c), bs = ecBeats(c.i), d = S.enc.done && S.enc.done.i === c.i ? S.age - S.enc.done.at : -1; if (!bs.length) return; const R0 = rg.r - 3, rot = d >= 0 ? eOut(clamp(d / .6)) * Math.PI / 3 : 0, flash = d >= 0 ? clamp(1 - Math.abs(d - .3) / .3) : 0;
+    const corner = (k, off = 0) => { const a = -Math.PI / 2 + k * Math.PI * 2 / 3 + off; return [Math.cos(a) * R0, Math.sin(a) * R0]; };
+    ctx.save(); ctx.globalAlpha = Math.max(fd, d >= 0 && d < 1 ? 1 : 0); ctx.translate(rg.x, rg.y); ctx.rotate(rot); ctx.lineCap = 'round'; ctx.globalCompositeOperation = 'lighter';
+    const lineFade = d >= 0 ? clamp(1 - (d - .5) / .4) : 1, motes = [];
+    bs.forEach(b => { const u = eOut(clamp((S.age - b.at) / .3)), [x0, y0] = corner(b.k), [x1, y1] = corner(b.k + 1); ctx.strokeStyle = rgba(flash ? ARC_L : ARC, .9 * lineFade); ctx.shadowColor = rgb(ARC); ctx.shadowBlur = 8 + 10 * flash; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(lerp(x0, x1, u), lerp(y0, y1, u)); ctx.stroke(); motes.push([lerp(x0, x1, u), lerp(y0, y1, u), b.k]); });
+    if (d >= 0) { const u = eOut(clamp(d / .25)); for (let k = 0; k < 3; k++) { const [x0, y0] = corner(k, Math.PI), [x1, y1] = corner(k + 1, Math.PI); ctx.strokeStyle = rgba(ARC_L, .9 * lineFade); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(lerp(x0, x1, u), lerp(y0, y1, u)); ctx.stroke(); }
+      const s = clamp((d - .25) / .25); motes.length = 0; for (let k = 0; k < 3; k++) { const [x0, y0] = corner(k + 1, Math.PI), sp = 1 - eOut(clamp(s * 1.3 - k * .15)), a = Math.atan2(y0, x0) + (1 - sp) * 2.5; if (sp > .02) motes.push([Math.cos(a) * R0 * sp, Math.sin(a) * R0 * sp, k]); } }
+    motes.forEach(([x, y]) => { ctx.shadowColor = rgb(ARC); ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 2.6, 0, 7); ctx.fill(); ctx.fillStyle = rgba(ARC, .35 + .15 * Math.sin(S.age * 8 + x)); ctx.beginPath(); ctx.arc(x, y, 5.5, 0, 7); ctx.fill(); });
+    ctx.restore(); } };
+// ---------- First Aid: 1-2-3-final like the other professions (1.3 had two taps): three taps rising in pitch (AidTapA/B/C) at .3 .46 .62, then the done chime.
+// These iterations play their own taps (ownSound: the 1.3 side's taps go silent); the done chime stays 1.3's. Mechanisms: drops that spread / a pulse trace / beams of light / ripples inward ----------
+const FA_F = [.3, .46, .62], AID = [.49, 1, .54], AID_L = [.78, 1, .78];
+function faTap(k, loud) { if (loud !== false) Sound(['AidTapA', 'AidTapB', 'AidTapC'][k] + loud); }
+function faDone(i) { return S.fa.done && S.fa.done.i === i ? S.age - S.fa.done.at : -1; }
+function faBeats(i) { return S.fa.beats.filter(b => b.i === i); }
+ITER['First Aid'] = {
+  A: { name: 'A. Field dressing', desc: 'Patching yourself up after a fight: a strip of linen winds around the ring as it fills (off-white cloth, creased), and each tap is a hard tug that cinches it tight: the band squeezes in and a small puff of dust shakes off. When it\'s made a knot is pulled at the top with one last firm tug.', ownSound: true,
+    work(rg, T, loud) { FA_F.forEach((f, k) => After(T * f, () => { faTap(k, loud); S.fa.beats.push({ i: S.item, k, at: S.age }); const p = head(rg, f); puffFx(p.x, p.y, 2, [.7, .65, .55]); })); },
+    payoff(rg) { S.fa.done = { i: S.item, at: S.age }; puffFx(rg.x, rg.y - rg.r - 4, 3, [.7, .65, .55]); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const f = c.made ? 1 : c.f, a0 = -Math.PI / 2, d = faDone(c.i); if (f <= 0) return; let tug = 0; faBeats(c.i).forEach(b => { const u = (S.age - b.at) / .22; if (u >= 0 && u < 1) tug = Math.max(tug, Math.sin(Math.PI * u)); }); if (d >= 0 && d < .25) tug = Math.max(tug, Math.sin(Math.PI * d / .25) * 1.4);
+      const r = rg.r - 1.5 * tug, w = 7 - 2 * tug; ctx.save(); ctx.globalAlpha = fd; ctx.lineCap = 'butt'; ctx.strokeStyle = 'rgb(6,8,12)'; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, a0, a0 + Math.PI * 2 * f); ctx.stroke();
+      ctx.strokeStyle = '#e9dfc6'; ctx.lineWidth = w; ctx.beginPath(); ctx.arc(rg.x, rg.y, r, a0, a0 + Math.PI * 2 * f); ctx.stroke();
+      ctx.strokeStyle = 'rgba(120,100,70,.55)'; ctx.lineWidth = 1; const n = Math.floor(f * 22); for (let k = 0; k < n; k++) { const a = a0 + (k + .5) / 22 * Math.PI * 2, cx = rg.x + Math.cos(a) * r, cy = rg.y + Math.sin(a) * r, tx = -Math.sin(a), ty = Math.cos(a), nx = Math.cos(a), ny = Math.sin(a); ctx.beginPath(); ctx.moveTo(cx - nx * w / 2 - tx * 2, cy - ny * w / 2 - ty * 2); ctx.lineTo(cx + nx * w / 2 + tx * 2, cy + ny * w / 2 + ty * 2); ctx.stroke(); }
+      if (d >= 0) { const u = eBack(clamp(d / .2)), kx = rg.x, ky = rg.y - r; ctx.fillStyle = '#e9dfc6'; ctx.strokeStyle = 'rgba(120,100,70,.8)'; ctx.lineWidth = 1; ctx.save(); ctx.translate(kx, ky); ctx.scale(u, u);
+        [[-1, 0], [1, 0]].forEach(([s]) => { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s * 8, -4); ctx.lineTo(s * 8, 4); ctx.closePath(); ctx.fill(); ctx.stroke(); }); [[-1], [1]].forEach(([s]) => { ctx.beginPath(); ctx.moveTo(s * 2, 2); ctx.lineTo(s * 5, 10); ctx.lineTo(s * 2.5, 10.5); ctx.closePath(); ctx.fill(); }); ctx.beginPath(); ctx.arc(0, 0, 2.6, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore(); }
+      if (!c.made) { const h = head(rg, f); ctx.fillStyle = '#fff8e8'; ctx.beginPath(); ctx.arc(h.x, h.y, 2.4, 0, 7); ctx.fill(); } ctx.restore(); } },
+  B: { name: 'B. Slap on a patch', desc: 'Makeshift and quick: on each tap a strip of cloth is slapped across the ring where the head is, at a rough angle (it lands big and squashes flat, a little dust flies). The strips stay, crossing the ring like patches. When it\'s made a last strip slaps over the top and you press them all down: they flatten and darken a touch, with a soft thump.', ownSound: true,
+    work(rg, T, loud) { FA_F.forEach((f, k) => After(T * f, () => { faTap(k, loud); const p = head(rg, f); S.fa.beats.push({ i: S.item, k, f, rot: R(-.7, .7), at: S.age }); for (let j = 0; j < 4; j++) Dot({ x: p.x, y: p.y, vx: R(-60, 60), vy: R(20, 70), g: 400, size: 2, life: .3, c: [.75, .7, .6] }); })); },
+    payoff(rg) { S.fa.done = { i: S.item, at: S.age }; S.fa.beats.push({ i: S.item, k: 3, f: 0, rot: R(-.4, .4), at: S.age }); RingFx(rg.x, rg.y, rg.r * 2.3, .3, .12, [.93, .88, .76]); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const d = faDone(c.i), press = d >= .12 ? clamp((d - .12) / .12) : 0; ctx.save(); ctx.globalAlpha = fd;
+      faBeats(c.i).forEach(b => { const p = head(rg, b.f), u = clamp((S.age - b.at) / .14), sc = lerp(1.6, 1, eOut(u)) * (1 - .06 * press); ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a + Math.PI / 2 + b.rot); ctx.scale(sc, sc * (u < 1 ? lerp(.6, 1, u) : 1));
+        ctx.globalAlpha = fd * Math.min(1, u * 3); ctx.fillStyle = press ? '#ddd1b4' : '#e9dfc6'; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 3; ctx.shadowOffsetY = 1; ctx.fillRect(-10, -3.5, 20, 7); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = 'rgba(120,100,70,.5)'; ctx.lineWidth = .8; for (const x of [-10, 10]) { ctx.beginPath(); for (let s = 0; s <= 4; s++) ctx.lineTo(x + (s % 2 ? (x < 0 ? 1.2 : -1.2) : 0), -3.5 + s * 7 / 4); ctx.stroke(); } ctx.restore(); });
+      ctx.restore(); } },
+  C: { name: 'C. Crushed herbs', desc: 'A remedy made with what you have: a few bits of leaf fall into the ring, and on each tap they\'re ground round and round inside it (a grinding swirl), getting smaller and darker green each time until it\'s a paste. When it\'s made the paste is pressed onto the item as a poultice: the bits pull in to a dark green dab on it and a cool ripple goes out.', ownSound: true,
+    work(rg, T, loud) { for (let j = 0; j < 10; j++) S.fa.bits.push({ i: S.item, a: R(0, Math.PI * 2), r: R(0, 1), s: R(3, 4.5), c: [R(.35, .55), R(.68, .88), R(.22, .38)], born: S.age + j * .03 }); FA_F.forEach((f, k) => After(T * f, () => { faTap(k, loud); S.fa.beats.push({ i: S.item, k, at: S.age }); })); },
+    payoff(rg) { S.fa.done = { i: S.item, at: S.age }; RingFx(rg.x, rg.y, rg.r * 2.2, .45, .22, [.6, .85, .55]); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const bs = faBeats(c.i), d = faDone(c.i), ground = bs.length; let spin = 0; bs.forEach(b => { spin += Math.PI * 1.2 * eOut(clamp((S.age - b.at) / .35)); });
+      const pull = d >= 0 ? eOut(clamp(d / .2)) : 0; ctx.save(); ctx.globalAlpha = fd;
+      S.fa.bits.filter(b => b.i === c.i).forEach((b, j) => { const t = S.age - b.born; if (t < 0) return; const drop = clamp(t / .2), rr = (15 + (rg.r - 19) * b.r) * (1 - pull), a = b.a + spin * (1 + j % 3 * .15), x = rg.x + Math.cos(a) * rr, y = rg.y + Math.sin(a) * rr - (1 - drop) * 20, sz = b.s * (1 - ground * .18) * (1 - pull * .5), dk = 1 - ground * .17;
+        if (pull >= 1) return; ctx.fillStyle = rgb(b.c.map(v => v * dk)); ctx.beginPath(); ctx.ellipse(x, y, sz, sz * .6, a, 0, 7); ctx.fill(); });
+      if (d >= 0) { const u = eOut(clamp((d - .12) / .15)); ctx.fillStyle = 'rgba(52,92,40,.85)'; ctx.beginPath(); ctx.ellipse(rg.x + 2, rg.y + 2, 8 * u, 6 * u, .4, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(160,210,140,.5)'; ctx.beginPath(); ctx.ellipse(rg.x, rg.y, 3 * u, 1.6 * u, .4, 0, 7); ctx.fill(); }
+      ctx.restore(); } },
+  D: { name: 'D. Soothing ripples', desc: 'Ripples moving in: each tap sends a soft green ripple from the ring inward to the item (inside the ring, clear of the batch bar), each one stronger, and the item takes on a calm green glow. When it\'s made the glow swells once like a slow breath and a last ripple goes out from the item.', ownSound: true,
+    work(rg, T, loud) { FA_F.forEach((f, k) => After(T * f, () => { faTap(k, loud); S.fa.beats.push({ i: S.item, k, at: S.age }); })); },
+    payoff(rg) { S.fa.done = { i: S.item, at: S.age }; RingFx(rg.x, rg.y, rg.r * 2.4, .5, 0, AID_L); },
+    overlay(rg, c) { const fd = tlFade(c); if (fd <= 0) return; const bs = faBeats(c.i), d = faDone(c.i); ctx.save(); ctx.globalAlpha = fd; ctx.globalCompositeOperation = 'lighter';
+      bs.forEach(b => { const u = (S.age - b.at) / .45; if (u < 0 || u >= 1) return; const r = lerp(rg.r - 3, 13, eOut(u)); ctx.strokeStyle = rgba(AID_L, (.4 + .2 * b.k) * Math.sin(Math.PI * Math.min(1, u * 1.3 + .1))); ctx.shadowColor = rgb(AID); ctx.shadowBlur = 6; ctx.lineWidth = 1.5 + b.k * .6; ctx.beginPath(); ctx.arc(rg.x, rg.y, r, 0, 7); ctx.stroke(); });
+      const breath = d >= 0 ? Math.sin(Math.PI * clamp(d / .9)) : 0, glow = bs.length / 3 * .45 + .35 * breath, rr = 16 + 8 * breath; if (glow > 0) { const g = ctx.createRadialGradient(rg.x, rg.y, 6, rg.x, rg.y, rr); g.addColorStop(0, rgba(AID, glow)); g.addColorStop(1, rgba(AID, 0)); ctx.fillStyle = g; ctx.shadowBlur = 0; ctx.beginPath(); ctx.arc(rg.x, rg.y, rr, 0, 7); ctx.fill(); }
+      ctx.restore(); } },
+};
+ITER['First Aid'].E = { name: 'E. Dressing + ripples', desc: 'A + D: the linen strip winds around the ring and each tap is a hard tug that cinches it, and each tug sends one of D’s soft ripples in from the ring to the item, stronger each time, the item warming to a calm glow. When it’s made the knot is pulled at the top and the glow swells once like a slow breath, a last ripple going out.', ownSound: true,
+  work(rg, T, loud) { ITER['First Aid'].A.work(rg, T, loud); },
+  payoff(rg) { ITER['First Aid'].A.payoff(rg); ITER['First Aid'].D.payoff(rg); },
+  overlay(rg, c) { ITER['First Aid'].D.overlay(rg, c); ITER['First Aid'].A.overlay(rg, c); } };
+const iterPick = { Blacksmithing: 'E', Leatherworking: 'C', Alchemy: 'E', Tailoring: 'D', Engineering: 'A', Cooking: 'E', Enchanting: 'E', 'First Aid': 'E' }; // (locked: Blacksmithing E, Leatherworking C, Alchemy E, Tailoring D, Engineering A, Cooking E, Enchanting E, First Aid E)
 function arcOf() { const it = ITER[prof]; if (!it) return PROF[prof].arc; return it[iterPick[prof] || Object.keys(it)[0]]; }
 function syncIters() { const el = document.getElementById('iters'), it = ITER[prof]; el.innerHTML = ''; document.getElementById('itbox').style.display = it ? 'block' : 'none'; if (!it) return;
   Object.keys(it).forEach(k => { const b = document.createElement('button'); b.textContent = it[k].name; b.classList.toggle('on', (iterPick[prof] || Object.keys(it)[0]) === k); b.onclick = () => { iterPick[prof] = k; syncIters(); play(); }; el.appendChild(b); });
