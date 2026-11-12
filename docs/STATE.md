@@ -14,16 +14,18 @@ round and pick). Older detail: git log, CHANGELOG.md._
   - **Bars family = Ring + road** (bars.html → skillup-r2/r3.html "B"): the skill-up is a ring drawn in the
     profession's material, its tool riding the head, the next unlock at the seam, the next unlocks in a row.
     It replaces the 1.3 skill-up bar and sets the look for XP and rep.
-  - **XP: Stream + Snappier + Counter** (xp-r1..r3.html), on the game's own XP bar (cover the new part,
-    reveal as motes land). The user is **not 100% happy yet**: revisit. Open: With-loot handling (Together /
-    XP waits / XP goes quiet) and the "Calm when busy" sound policy.
+  - **XP picked: xp-r10.html** (10 rounds), all on the game's XP bar (cover the new part, reveal as XP
+    lands): Combined (swell + segment pops + spark to a ring at the bar's end with the next level) + chain
+    counter + session glow + quiet kills / loud milestones; **kills = Rain from above, quests = Comet +
+    impact**. Open: With-loot handling and the "Calm when busy" sound policy.
   - **Rep picked** (rep-r1/r2.html): Sweep on the game's rep bar (only while shown); other factions = setting
     Faction rings (default, draggable via Move frames) / Picked-up rows / Off; losses quiet; quiet repeats;
     new standing = Ring + road banner. No faction icons in the API: a hand-made factionID → icon table.
   - **Level-up picked: levelup-r4.html**: Ascension every level (halo rises from your feet, stats float up
     into a column on your LEFT), Cinematic every 10 levels growing out of Ascension (road of decades, the
     unlock shown big); mid-fight a small ring, the full moment after the fight.
-- **Next up** (one thing at a time, the user's wish this release): back to XP, or the dungeon recap; then
+- **Next up** (one thing at a time, the user's wish this release): the **dungeon recap** (plan.md "1.4.0:
+  Dungeons" part 2: brainstorm, API checks, mockups); then
   the **crafting animations redesign per profession** (several unique designs each, like the popup rounds);
   then API checks in game and build. API findings so far: plan.md (XP, PLAYER_LEVEL_UP payload is probably
   retail's: snapshot stats ourselves; rep chat strings, name → factionID scan).
@@ -57,19 +59,18 @@ round and pick). Older detail: git log, CHANGELOG.md._
   (around the character, whole screen, the game's own bars), never **lottery/chance metaphors** (card flips
   rejected for good: the addon supplements the game's systems; memory file). No new bars on screen: work on
   the game's own XP/rep bars. **Fatigue matters**: "dopamine is the goal but it mustn't get exhausting over a
-  long session" (fast kills + loot): calm sound policies, quiet repeats.
+  long session" (fast kills + loot): calm sound policies, quiet repeats. **Info in one place**: effects for
+  an always-visible element (the XP bar) live on it (memory file). Vary the thing the user names ("how the
+  bar gains XP" meant the arrival, not the look).
 - Tag/publish only with the user's OK in chat ("Tested, publish it" / "lets just release"). Secrets never
   pass through the chat. Each minor release (1.x.0) replaces the "What's new" block in `docs/curseforge.md`.
 - Process: preflight → reviewer agent for big changes → commit → push → a short "to test" list saying
   `/reload` vs **full restart** (new files = restart). Answers concise. No rush.
 
 ## Gotchas and environment notes
-- **Media pipeline** (sounds and tool art, 2026-11-10): `tools/render-media.html` holds the mockups' WebAudio
-  sound code and our own SVG drawings. Run `powershell -ExecutionPolicy Bypass -File tools/render-media.ps1`
-  (background), open `http://localhost:8765/` in the browser pane, run `await renderAll()` (silent,
-  OfflineAudioContext), then `bash tools/convert-media.sh` (WAV → OGG trimmed, PNG → TGA bottom-up) into
-  `DopamineLoot/Media`. `tools/out/` is gitignored; delete a stale render from it before converting.
-  `tools/gen_craft_sounds.sh` is superseded (it would overwrite the rendered sounds).
+- **Media pipeline**: `tools/render-media.ps1` (background) serves `tools/render-media.html` (the mockups'
+  sound code + our SVGs) on :8765; in the browser pane `await renderAll()`, then `bash tools/convert-media.sh`
+  into `DopamineLoot/Media` (clear stale `tools/out/` first). `gen_craft_sounds.sh` is superseded.
 - Bash tool collapses `\\` to `\`: write Lua with Write/Edit only. No python/node/lua on PATH (Lua via
   lua-language-server, found by preflight). ffmpeg via winget (on PATH in Git Bash).
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models set after `Show()`; no
@@ -86,7 +87,7 @@ where they land; the **harvest window** / **loot column** (side column with "Pic
 Create All tray.
 
 ## Open questions / waiting on the user
-- XP: what's still missing from the Stream; With-loot handling; Calm-when-busy (maybe addon-wide: loot,
+- XP: With-loot handling; Calm-when-busy (maybe addon-wide: loot,
   gathering, crafting and XP sharing one sound budget).
 - Paste the CurseForge description; update the release copy to 1.3.1 in the app.
 

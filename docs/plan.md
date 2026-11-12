@@ -568,6 +568,55 @@ the user's own):
   **Open, the user is thinking:** the With-loot handling (Together / XP waits / XP goes quiet; the
   difference is now clear) and the Calm-when-busy policy (no verdict yet). Moving on to other pieces.
   The user is **still not 100% happy with the XP picks**; revisit after rep.
+  XP round 4 (xp-r4.html, after rep and level-up were picked): Stream (reference), **Snappy ribbon** (the
+  Ribbon about twice as fast), **Sweep** (no motes: a light runs over the new part while the counter climbs,
+  like the rep pick; XP stays on the bar), **Head ring** (a small ring over the fill's end fills as the
+  counter counts, closes and drops into the bar). Counter + Snappier in all; Grinding, the sound log and the
+  With-loot choices carried over.
+  XP round 4 → **Sweep and Snappy ribbon best**, but "not varying enough to decide". Round 5 (xp-r5.html)
+  varies **where XP shows**: on the bar (Sweep), from you to the bar (Snappy ribbon), **at your feet**
+  (Feet halo: a ground ring = your level progress, grows per gain; when full it becomes the Ascension halo
+  that rises into the level-up), **with your loot** (Picked-up row "+245 XP", merges kills "×3", a thin
+  progress line; the game's bar just updates).
+  XP round 5 → **XP lives on the XP bar** (the user): it's always visible, unlike other systems, so effects
+  should use it; no second place to look (Feet halo "really cool" but splits the info from the bar; the
+  Picked-up row is out). Round 6 (xp-r6.html), all on the bar: Sweep, Snappy ribbon, **Segment pop** (the
+  game bar's 20 segments pop as a gain completes them), **Bar swell** (the bar swells, the new part fills
+  like liquid with a wave), **Ring at the end** (a ring at the bar's right end holds the next level, a spark
+  runs along the bar to it; Ring + road on XP; on a level-up it closes and launches the Ascension).
+  XP round 6 → the user asked for 3+4+5 together: **Combined** (swell + segment pops + ring at the end) is
+  the **new baseline, likely the pick**. Round 7 (xp-r7.html) varies one thing each: **Chain counter** (one
+  climbing counter "+1,470 XP ×6" through a pull, 4 s ends it; swell/pops grow with the chain), **Rolling
+  bulge** (a bulge rolls along the bar instead of the whole-bar swell), **Ring with info** ("~33 kills to
+  24" / "~3 more quests" above the ring, from the last gain), **Session glow** (this session's part of the
+  bar shimmers), **Quiet kills, loud milestones** (plain kills: light swell + counter; quests and 10%
+  crossings: the full show).
+  XP round 7 → **behaviour picked: Combined + Chain counter + Session glow + Quiet kills, loud milestones.**
+  But "these options aren't varying the design of our XP intake": round 8 (xp-r8.html) keeps that behaviour
+  and varies the **look** of the intake (fill, segment pops, spark run, ring): Liquid (today's), Crystal,
+  Ember, Runes, Starlight, Spark.
+  XP round 8 → "can barely tell the difference; I meant how the bar *gains* XP, like Comet/Stream". Round 9
+  (xp-r9.html): the picked behaviour in the Liquid look, driven by the **arrival** (the bar swells while XP
+  lands, pops as it completes segments, the ring spark when all is in): Stream, Snappy ribbon, Comet, Burst &
+  gather, **Rain from above** (drops onto the new part), **Along the bar** (a pulse enters at the left end and
+  runs along the fill), **From the ring** (a pulse comes back from the next-level ring, the fill reaches out).
+  XP round 9 → **liked: Stream and Comet** ("look much better with the bar animations") **and Rain from above,
+  Along the bar**; out: Snappy ribbon, Burst & gather, From the ring (its back-and-forth pulse "kind of
+  cool": a detail to reuse). Idea: pair them by size, matching quiet kills / loud milestones: kills =
+  Rain or Along (short, at the bar), quests and big gains = Comet or Stream (a journey from you).
+  **Kills = Rain from above (picked).** Quests: Stream or Comet undecided; the user wants quest turn-ins
+  **punchy**. Round 10 (xp-r10.html, kills always Rain): Stream, Comet, **Comet + impact** (freeze-frame
+  ~70 ms, small shake, a shockwave both ways along the bar, a low thump, the counter slams big), **Charge &
+  slam** (the stream gathers into a ball above the fill's end, then slams down), **Barrage** (three comets,
+  each harder and higher, the last with the full impact), **Stream + finisher** (the stream brings ~70%, a
+  comet slams the rest home).
+  **XP PICKED (2026-11-12, xp-r10.html):** on the game's XP bar, Liquid look. Behaviour: Combined (the bar
+  swells and fills like liquid while XP lands; completed segments pop; a spark runs to the ring at the bar's
+  end holding the next level) + **chain counter** (one climbing "+N XP ×k", 4 s ends it) + **session glow**
+  + **quiet kills, loud milestones** (plain kills: light swell + counter; quests and 10% crossings: full
+  show). Arrival: **kills = Rain from above**; **quest turn-ins = Comet + impact** (freeze-frame ~70 ms,
+  small shake, shockwave both ways along the bar, low thump, the counter slams). The +10% tick stays.
+  Still open: the With-loot handling and the Calm-when-busy sound policy.
   Rep round 1 (rep-r1.html): watched faction on the game's rep bar (Stream like XP / Sweep); other factions or
   a hidden bar: Faction rings (mini Ring above the bars) / Picked-up rows (side column) / Over your head;
   same-faction gains within 3 s add up in one counter (kill rep); new standing = Ring + road banner (the

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XP Round 6</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  .desc { margin-top: 4px; min-height: 30px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: calc(50% - 28px); top: 42%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .note { position: absolute; left: 12px; top: 10px; right: 12px; color: rgba(255,255,255,.6); font-size: 12px; text-shadow: 0 1px 2px #000; }
+  #log { position: absolute; right: 12px; top: 34px; width: 250px; font: 11px/1.45 ui-monospace, Consolas, monospace; color: #cfc6b0; background: rgba(0,0,0,.55); border: 1px solid #3a3426; border-radius: 4px; padding: 6px 8px; }
+  #log b { color: var(--gold); font-weight: 600; } #log .skip { color: #8a8270; } #log .xp { color: #dcb8ff; } #log .loot { color: #7cff6a; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>XP, round 6</h1>
+  <small>Everything on the XP bar, as you said: it's always on screen, so it's the stage. Sweep and Snappy
+  ribbon (your best two) and three new ways for the bar itself to react: <b>Segment pop</b>, <b>Bar swell</b>,
+  <b>Ring at the end</b>. Counter and Snappier in all. Try <b>Grinding</b> too. Space replays; keys 1-6 (6 = 3, 4 and 5 combined).</small>
+
+  <h2>Stream</h2>
+  <div id="styles"></div>
+  <small class="desc" id="sdesc"></small>
+
+  <h2>Moment</h2>
+  <button data-m="kill" class="on">Kill</button><button data-m="rested">Kill, rested</button><button data-m="tick">Crossing 70%</button><button data-m="quest">Quest turn-in</button><button data-m="loot">Kill + loot</button><button data-m="grind">Grinding</button>
+  <small>Grinding: 8 kills in about 11 seconds, 5 of them with loot, like pulling mobs one after another.</small>
+
+  <h2>Sound</h2>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>Soft taps as the motes land, one chime when the last is in (your pick).</small></label>
+  <label class="fx"><input type="checkbox" id="calm" checked><b>Calm when busy</b><small>
+    1. One reward chime at a time: the XP chime is skipped if loot (or any of our sounds) just played; the taps stay.<br>
+    2. Chimes wear off: each XP chime within 30 s is softer (100, 70, 50, 35%); after four, taps only. Each chime counts for 30 s, then they're back to full.<br>
+    3. At most 6 taps per kill. Quest turn-ins and the +10% tick always get their sound.</small></label>
+
+  <h2>With loot</h2>
+  <button data-loot="same">Together</button><button data-loot="wait" class="on">XP waits</button><button data-loot="quiet">XP goes quiet</button>
+  <small>For a kill that drops loot. XP waits: the stream leaves once the loot popup has landed (1 s). XP goes
+  quiet: a thin, dim stream and no chime while the popup shows. (Round 2's were too subtle to notice.)</small>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="char" id="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note"></div>
+  <div id="log"></div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t, rnd = (a, b) => a + Math.random() * (b - a);
+const eOut = t => 1 - Math.pow(1 - t, 3), eInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const XP = '#a35cf0', XPL = '#dcb8ff', REST = '#4f8ae6', RESTL = '#b0ccff';
+const SP = 1.4; // Snappier (picked in round 2)
+
+// ---------- sound, with the calm policy ----------
+let AC = null, OUT = null; const on = () => document.getElementById('snd').checked, calm = () => document.getElementById('calm').checked;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+function tone(f, t = 0, vol = .05, dec = .4, type = 'sine') { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .004); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+const semi = n => Math.pow(2, n / 12);
+const LOG = []; function log(cls, msg) { LOG.unshift(`<span class="${cls}">${S.age.toFixed(1).padStart(5)}s  ${msg}</span>`); LOG.length = Math.min(LOG.length, 12); document.getElementById('log').innerHTML = '<b>Sound log</b><br>' + LOG.join('<br>'); }
+const SND = { lastReward: -99, chimes: [], lastXP: -99 };
+function tap(k) { if (calm() && k.taps >= 6) return; k.taps++; tone(1800 + Math.random() * 300, 0, .008 * (k.quiet ? .5 : 1), .05); }
+function xpChime(k) {
+  if (k.quiet) { log('skip', 'XP chime: skipped (loot showing, XP quiet)'); return; }
+  let vol = 1; const now = S.age;
+  if (calm() && !k.big) {
+    if (now - SND.lastReward < 1.5) { log('skip', 'XP chime: skipped (a reward sound just played)'); return; }
+    SND.chimes = SND.chimes.filter(t => now - t < 30); const n = SND.chimes.length; if (n >= 4) { log('skip', 'XP chime: taps only (4 chimes in 30 s)'); return; }
+    vol = [1, .7, .5, .35][n]; }
+  SND.chimes.push(now); SND.lastReward = now; const r = k.rest ? 587 : 523;
+  [0, 4, 7].forEach((n, i) => tone(r * 2 * semi(n), i * .04, .035 * vol, .9)); tone(r * 4, .12, .012 * vol, .7); if (k.big) tone(r * 2 * semi(12), .16, .03, 1.1);
+  log('xp', `XP chime ${Math.round(vol * 100)}%${k.big ? ' (quest: always)' : ''}`); }
+function lootSound() { SND.lastReward = S.age; tone(784, 0, .04, .3); tone(1175, .06, .03, .4); log('loot', 'Loot popup sound'); }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    ctx.restore(); } }
+
+// ---------- the game's bars ----------
+function bars() { const w = Math.min(W * .66, 760), x = (W - w) / 2; return { xp: { x, y: H - 44, w, h: 11 }, rep: { x, y: H - 58, w, h: 8 } }; }
+function gameUI(shown, rested) { const g = bars(), b = g.xp; ctx.save();
+  for (let i = 0; i < 12; i++) { const s = 32, x = W / 2 - 6 * (s + 3) + i * (s + 3); ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(x, H - 30, s, 26); ctx.strokeStyle = '#4a4234'; ctx.strokeRect(x + .5, H - 29.5, s - 1, 25); }
+  const r = g.rep; ctx.fillStyle = '#0a0a0a'; ctx.fillRect(r.x - 2, r.y - 2, r.w + 4, r.h + 3); ctx.fillStyle = '#122014'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.fillStyle = '#2f9a3a'; ctx.fillRect(r.x, r.y, r.w * .46, r.h);
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4); ctx.fillStyle = '#1a1424'; ctx.fillRect(b.x, b.y, b.w, b.h);
+  if (rested) { ctx.fillStyle = 'rgba(70,110,200,.4)'; ctx.fillRect(b.x, b.y, b.w * Math.max(rested, shown), b.h); }
+  const gr = ctx.createLinearGradient(0, b.y, 0, b.y + b.h); gr.addColorStop(0, rested ? '#6a9af0' : '#b070f0'); gr.addColorStop(1, rested ? '#2a4aa0' : '#5a22a0'); ctx.fillStyle = gr; ctx.fillRect(b.x, b.y, b.w * shown, b.h);
+  ctx.fillStyle = '#0a0a0a'; for (let i = 1; i < 20; i++) ctx.fillRect(b.x + b.w * i / 20 - .5, b.y, 1, b.h); ctx.restore(); return g; }
+function charPos() { const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(); return { x: c.left - s.left + c.width / 2, y: c.top - s.top + c.height * .3 }; }
+
+// ---------- moments ----------
+const K = (at, f, text, o = {}) => Object.assign({ at, f, text }, o);
+const MOMENTS = {
+  kill: { f0: .62, kills: [K(.2, .011, '+245 XP')], dur: 2.4, note: 'A kill.' },
+  rested: { f0: .62, rested: .69, kills: [K(.2, .022, '+490 XP', { rest: .011, sub: '+245 rested' })], dur: 2.6, note: 'A rested kill: the bonus half of the stream in blue.' },
+  tick: { f0: .691, kills: [K(.2, .011, '+245 XP')], dur: 2.8, note: 'Crossing 70%: the +10% tick.' },
+  quest: { f0: .52, kills: [K(.2, .111, '+2,450 XP', { big: true })], dur: 3.4, note: 'A quest turn-in: a long, thick stream (and the 60% tick); its chime always plays.' },
+  loot: { f0: .62, kills: [K(.2, .011, '+245 XP', { loot: true })], dur: 3.6, note: 'A kill that drops an item: see the "With loot" choices.' },
+  grind: { f0: .55, kills: [[.2, 1], [1.5, 0], [2.8, 1], [4.2, 1], [5.5, 0], [7, 1], [8.3, 0], [9.8, 1]].map(([at, l], i) => K(at, .011 + (i % 3) * .001, `+${245 + (i % 3) * 17} XP`, { loot: !!l })), dur: 12.5,
+    note: 'Grinding: 8 kills, 5 with loot. Listen over the whole run and watch the sound log (top right).' },
+};
+let S = null, style = 'T6', moment = 'grind', lootMode = 'wait';
+function play() { const m = MOMENTS[moment]; S = { m, age: 0, fired: {}, shown: m.f0, real: m.f0, streams: [], ticks: {}, popups: [] }; P = []; SND.lastReward = -99; SND.chimes = []; LOG.length = 0;
+  document.getElementById('log').innerHTML = '<b>Sound log</b><br><span class="skip">(nothing yet)</span>'; document.getElementById('note').textContent = STY[style].name + ': ' + m.note; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+
+// a stream: from you to the fill's head; landed (0..1) reveals its share of the bar
+function startStream(k) { const c = charPos(), b = bars().xp, quiet = k.loot && lootMode === 'quiet';
+  const st = { k, c, b, t: 0, from: S.real, f: k.f, landed: 0, taps: 0, quiet, rest: k.rest, big: k.big, span: clamp(k.f * 5, .3, .8) / SP, dur: .62 / SP, side: rnd(-1, 1) > 0 ? 1 : -1, motes: [] };
+  k.taps = 0; k.quiet = quiet; S.real += k.f; STY[style].init(st); S.streams.push(st); }
+function pathAt(st, u, j = 0) { const b = st.b, tx = b.x + b.w * Math.min(1, S.shown), ty = b.y + b.h / 2, cx = st.c.x + st.side * 90, cy = st.c.y - 70;
+  const w = Math.sin(Math.PI * u) * 10 * j; return { x: (1 - u) ** 2 * st.c.x + 2 * (1 - u) * u * cx + u * u * tx + w, y: (1 - u) ** 2 * st.c.y + 2 * (1 - u) * u * cy + u * u * ty + w * .5 }; }
+function landTo(st, frac) { const add = frac - st.landed; if (add <= 0) return; st.landed = frac; S.shown = Math.min(S.real, S.shown + add * st.f); }
+function colOf(st, u) { return st.rest && u > (st.f - st.rest) / st.f ? RESTL : XPL; }
+
+// ---------- the four streams ----------
+const STY = {
+  T1: { name: 'Stream', desc: 'Round 2\'s stream with Snappier and the Counter: a ribbon of tiny motes pours from you into the fill\'s head.',
+    init(st) { const n = Math.round(clamp(st.f * 100 * 14, 16, 100) * (st.quiet ? .4 : 1)); for (let i = 0; i < n; i++) st.motes.push({ t: -st.span * i / n, j: rnd(-1, 1), share: (i + 1) / n }); },
+    draw(st, dt) { for (const m of st.motes) { if (m.done) continue; m.t += dt; if (m.t < 0) continue; const u = eInOut(clamp(m.t / st.dur)), p = pathAt(st, u, m.j);
+        ctx.save(); ctx.globalAlpha = st.quiet ? .45 : .9; ctx.fillStyle = colOf(st, m.share); ctx.shadowColor = XP; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, 7); ctx.fill(); ctx.restore();
+        if (u >= 1) { m.done = true; landTo(st, m.share); tap(st.k); } } } },
+  T2: { name: 'Stream with a head', desc: 'A bright spark leads the stream, the motes follow it in, and the counter rides on the bar right above the fill\'s head, climbing as it moves. Your eye follows the spark, then the number.',
+    init(st) { STY.T1.init(st); st.ride = true; },
+    draw(st, dt) { STY.T1.draw(st, dt); const lead = st.motes[0]; if (lead && lead.t > 0 && !lead.done) { const p = pathAt(st, eInOut(clamp(lead.t / st.dur))); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 14; star4(p.x, p.y, 6, lead.t * 6); ctx.restore(); }
+      if (st.landed > 0 && st.landed < 1) { const b = st.b, x = b.x + b.w * Math.min(1, S.shown); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 10; ctx.fillRect(x - 1.5, b.y - 3, 3, b.h + 6); ctx.restore(); } } },
+  T3: { name: 'Ribbon', desc: 'One continuous glowing ribbon instead of separate motes: it draws itself from you to the bar, pours in, and its tail follows it in. Thicker for bigger gains. Smooth and liquid.',
+    init(st) { st.w = clamp(2 + st.f * 60, 2.5, 8) * (st.quiet ? .5 : 1); },
+    draw(st, dt) { st.t += dt; const head = clamp(st.t / st.dur), tail = clamp((st.t - st.span) / st.dur); if (tail >= 1) { landTo(st, 1); st.done = true; return; }
+      const inflow = clamp((st.t - st.dur) / st.span); if (inflow > 0) { const before = st.landed; landTo(st, inflow); if (Math.floor(inflow * 6) > Math.floor(before * 6)) tap(st.k); }
+      const n = 26; ctx.save(); ctx.lineCap = 'round'; ctx.globalAlpha = st.quiet ? .45 : 1;
+      for (let i = 0; i < n; i++) { const u0 = lerp(eInOut(tail), eInOut(head), i / n), u1 = lerp(eInOut(tail), eInOut(head), (i + 1) / n), a = pathAt(st, u0), c = pathAt(st, u1), taper = Math.sin(Math.PI * (i + .5) / n);
+        ctx.strokeStyle = colOf(st, i / n); ctx.shadowColor = XP; ctx.shadowBlur = 10; ctx.lineWidth = st.w * (.35 + .65 * taper); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(c.x, c.y); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.shadowBlur = 0; ctx.lineWidth = Math.max(.8, st.w * .25 * taper); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(c.x, c.y); ctx.stroke(); }
+      ctx.restore(); } },
+  T4: { name: 'Sparkle stream', desc: 'Fewer, twinkling motes: little four-point glints of different sizes, each with a short trail, spread a little wider. More magical, less "liquid"; reads as XP being collected.',
+    init(st) { const n = Math.round(clamp(st.f * 100 * 7, 9, 50) * (st.quiet ? .4 : 1)); for (let i = 0; i < n; i++) st.motes.push({ t: -st.span * i / n, j: rnd(-2, 2), share: (i + 1) / n, s: rnd(2.5, 5), tr: [] }); },
+    draw(st, dt) { for (const m of st.motes) { if (m.done) continue; m.t += dt; if (m.t < 0) continue; const u = eInOut(clamp(m.t / st.dur)), p = pathAt(st, u, m.j); m.tr.push(p); if (m.tr.length > 6) m.tr.shift();
+        ctx.save(); ctx.globalAlpha = st.quiet ? .45 : 1; const col = colOf(st, m.share);
+        m.tr.forEach((q, i) => { ctx.globalAlpha = (st.quiet ? .2 : .4) * i / m.tr.length; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(q.x, q.y, 1.1, 0, 7); ctx.fill(); });
+        ctx.globalAlpha = (st.quiet ? .45 : 1) * (.65 + .35 * Math.sin(m.t * 30 + m.s)); ctx.fillStyle = '#fff'; ctx.shadowColor = col; ctx.shadowBlur = 10; star4(p.x, p.y, m.s, m.t * 4); ctx.restore();
+        if (u >= 1) { m.done = true; landTo(st, m.share); tap(st.k); spawn({ x: p.x, y: p.y, size: 1.5, shape: 'ring', grow: 8, life: .3, col }); } } } },
+  T5: { name: 'Snappy ribbon', desc: 'Round 3\'s Ribbon at about twice the speed: it whips from you to the bar and pours in fast, a short tail snapping in after it.',
+    init(st) { STY.T3.init(st); st.dur = .26; st.span = clamp(st.f * 3, .12, .35); }, draw(st, dt) { STY.T3.draw(st, dt); } },
+  T6: { name: 'Sweep', desc: 'No motes: the new part of the bar is revealed by a light that runs from the old end to the new while the counter climbs above it, the same as the rep you picked. XP stays on the bar instead of crossing the screen every kill.',
+    init(st) { st.dur = clamp(.25 + st.f * 2.5, .25, .6); },
+    draw(st, dt) { st.t += dt; const p = eOut(clamp(st.t / st.dur)), before = st.landed; landTo(st, p); if (Math.floor(p * 4) > Math.floor(before * 4)) tap(st.k);
+      const b = st.b, x0 = b.x + b.w * st.from, x1 = b.x + b.w * Math.min(1, st.from + st.f * p), a = clamp(1 - (st.t - st.dur) / .5) * (st.quiet ? .5 : 1);
+      if (a > 0) { ctx.save(); const g = ctx.createLinearGradient(x1 - 50, 0, x1, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, `rgba(255,255,255,${.9 * a})`); ctx.fillStyle = g; ctx.fillRect(Math.max(x0, x1 - 50), b.y - 1, Math.min(50, x1 - x0), b.h + 2);
+        ctx.fillStyle = '#fff'; ctx.shadowColor = st.rest ? RESTL : XPL; ctx.shadowBlur = 12 * a; ctx.globalAlpha = a; ctx.fillRect(x1 - 1.5, b.y - 3, 3, b.h + 6); ctx.restore(); }
+      if (p >= 1) st.done = true; } },
+  T7: { name: 'Head ring', desc: 'The Ring look on the XP bar: a small ring pops up over the end of the fill and fills as the counter counts; full, it closes with a flash and drops into the bar, which takes the new part in one beat.',
+    init(st) { st.fill = clamp(.25 + st.f * 3, .3, .7); st.ring = 0; },
+    draw(st, dt) { st.t += dt; const b = st.b, hx = b.x + b.w * Math.min(1, st.from), f = eOut(clamp(st.t / st.fill)), drop = clamp((st.t - st.fill - .08) / .16), col = st.rest ? RESTL : XPL;
+      st.cnt = f; if (f >= 1 && drop === 0) once('rc' + st.from, () => { spawn({ x: hx, y: b.y - 22, size: 11, shape: 'ring', grow: 14, life: .35, col: '#fff' }); tap(st.k); });
+      const y = lerp(b.y - 22, b.y + b.h / 2, eOut(drop)), r = lerp(11, 4, drop), a = (st.quiet ? .55 : 1) * clamp(1 - (drop - .8) / .2);
+      if (a > 0) { ctx.save(); ctx.globalAlpha = a * clamp(st.t / .08); ctx.fillStyle = 'rgba(6,8,12,.9)'; ctx.beginPath(); ctx.arc(hx, y, r + 4, 0, 7); ctx.fill(); ctx.lineCap = 'round'; ctx.lineWidth = lerp(3.5, 2, drop);
+        ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.beginPath(); ctx.arc(hx, y, r, 0, 7); ctx.stroke(); ctx.strokeStyle = col; ctx.shadowColor = XP; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(hx, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.restore(); }
+      if (drop >= 1 && !st.dropped) { st.dropped = true; landTo(st, 1); spawn({ x: hx, y: b.y + b.h / 2, size: 4, shape: 'ring', grow: 20, life: .45, col }); for (let i = 0; i < 6; i++) spawn({ x: hx, y: b.y, vx: rnd(-60, 60), vy: rnd(-70, -20), life: .45, size: 1.3, col: '#fff' }); }
+      if (st.dropped) { const t2 = st.t - st.fill - .24, x1 = b.x + b.w * Math.min(1, st.from + st.f), a2 = clamp(1 - t2 / .5); ctx.fillStyle = `rgba(255,255,255,${.6 * a2})`; ctx.fillRect(hx, b.y, x1 - hx, b.h); if (a2 <= 0) st.done = true; } } },
+  T8: { name: 'Feet halo', desc: 'At your feet: a faint halo on the ground around your character is your level progress. Each gain grows its arc with a glint and the counter shows beside it; it fades when you stop. When it fills, it becomes the Ascension halo that rises into the level-up: XP and leveling are one thing. The game\'s bar just updates.',
+    init(st) { st.dur = clamp(.3 + st.f * 3, .3, .7); S.halo = { last: S.age, from: st.from }; },
+    draw(st, dt) { st.t += dt; const p = eOut(clamp(st.t / st.dur)), before = st.landed; landTo(st, p); S.halo.last = S.age; if (Math.floor(p * 3) > Math.floor(before * 3)) tap(st.k); if (p >= 1) st.done = true; } },
+  T9: { name: 'Picked-up row', desc: 'With your loot: a row in the side column, "+245 XP" with a thin line of your level progress; kills close together merge into one row ("+735 XP ×3"). Nothing crosses the screen; the calmest and most informative. The game\'s bar just updates.',
+    init(st) { st.dur = .25; const xp = parseInt(st.k.text.replace(/\D/g, '')), r = S.xprow;
+      if (r && S.age - r.last < 3.5) { r.amt += xp; r.kills++; r.last = S.age; r.pop = S.age; r.from = Math.min(r.from, st.from); } else S.xprow = { amt: xp, kills: 1, at: S.age, last: S.age, pop: S.age, from: st.from, rest: !!st.rest }; },
+    draw(st, dt) { st.t += dt; landTo(st, eOut(clamp(st.t / st.dur))); if (st.landed >= 1) st.done = true; } },
+  T10: { name: 'Segment pop', desc: 'The game\'s bar already has 20 segments (5% each). The new part fills in quickly, and every segment the gain completes pops: it swells, flashes white and throws a few square sparks, a blip a step higher each. A small kill just brightens the open segment; a quest pops a row of them.',
+    init(st) { st.dur = clamp(.2 + st.f * 4, .2, .7); S.segs = S.segs || {}; },
+    draw(st, dt) { st.t += dt; const p = eOut(clamp(st.t / st.dur)); landTo(st, p); const b = st.b;
+      for (let k = 0; k < 20; k++) { const edge = (k + 1) / 20; if (st.from < edge - 1e-6 && S.shown >= edge - 1e-6 && S.segs[k] === undefined) { S.segs[k] = S.age; tone(660 * Math.pow(2, (2 * (st.segN = (st.segN || 0) + 1)) / 12), 0, .02, .1, 'square');
+          for (let i = 0; i < 5; i++) spawn({ x: b.x + b.w * (k + .5) / 20, y: b.y, vx: rnd(-40, 40), vy: rnd(-90, -40), life: .45, size: 1.5, col: i % 2 ? '#fff' : XPL }); } }
+      const head = Math.floor(S.shown * 20), hx = b.x + b.w * head / 20, ha = clamp(1 - (st.t - st.dur) / .6); if (ha > 0 && head < 20) { ctx.fillStyle = `rgba(220,184,255,${.35 * ha})`; ctx.fillRect(hx, b.y, b.w / 20, b.h); }
+      if (st.t > st.dur + .6) st.done = true; } },
+  T11: { name: 'Bar swell', desc: 'The bar itself reacts: it swells taller for a moment, the new part fills like liquid with a wave running along its top, then the bar settles back to its size. Bigger gains swell more. No particles: the bar moves.',
+    init(st) { st.dur = clamp(.3 + st.f * 3, .3, .7); },
+    draw(st, dt) { st.t += dt; const p = eOut(clamp(st.t / st.dur)); landTo(st, p); const b = st.b, sw = Math.sin(Math.PI * clamp(st.t / (st.dur + .3))) * clamp(.5 + st.f * 8, .5, 1) * (st.quiet ? .5 : 1);
+      if (sw > .01) { const x1 = b.x + b.w * Math.min(1, S.shown), x0 = b.x + b.w * st.from, up = 6 * sw, dn = 3 * sw; ctx.save();
+        const g = ctx.createLinearGradient(0, b.y - up, 0, b.y + b.h + dn); g.addColorStop(0, '#d8a8ff'); g.addColorStop(.5, '#a35cf0'); g.addColorStop(1, '#4a1a90'); ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(b.x, b.y + b.h + dn); ctx.lineTo(b.x, b.y - up * .6); for (let x = b.x; x <= x1; x += 3) { const w = x > x0 ? Math.sin((x - x0) * .12 - st.t * 16) * 2.2 * sw : 0; ctx.lineTo(x, b.y - up * (x > x0 ? 1 : .6) + w); } ctx.lineTo(x1, b.y + b.h + dn); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = `rgba(255,255,255,${.5 * sw})`; ctx.fillRect(x0, b.y - up, x1 - x0, 2); ctx.fillStyle = '#0a0a0a'; for (let i = 1; i < 20; i++) { const sx = b.x + b.w * i / 20; if (sx < x1) ctx.fillRect(sx - .5, b.y - up + 1, 1, b.h + up + dn - 1); } ctx.restore(); }
+      if (st.t > st.dur + .3) st.done = true; } },
+  T12: { name: 'Ring at the end', desc: 'Ring + road on the XP bar: a small ring at the bar\'s right end holds your next level, its arc your progress. The new part lights up, then a spark runs along the rest of the bar to the ring and its arc grows with a glint. On a level-up the ring closes and launches the Ascension. Shows on a gain, fades after.',
+    init(st) { st.dur = .3; S.endRing = S.age; },
+    draw(st, dt) { st.t += dt; const p = eOut(clamp(st.t / st.dur)); landTo(st, p); S.endRing = S.age; const b = st.b, hx = b.x + b.w * Math.min(1, S.shown), ex = b.x + b.w + 26, run = clamp((st.t - st.dur) / .3);
+      if (run > 0 && run < 1) { const x = lerp(hx, ex - 16, eOut(run)); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(x, b.y + b.h / 2, 2.5, 0, 7); ctx.fill(); const g = ctx.createLinearGradient(x - 40, 0, x, 0); g.addColorStop(0, 'rgba(220,184,255,0)'); g.addColorStop(1, 'rgba(220,184,255,.8)'); ctx.fillStyle = g; ctx.fillRect(Math.max(hx, x - 40), b.y + b.h / 2 - 1, Math.min(40, x - hx), 2); ctx.restore(); }
+      if (run >= 1) once('eg' + st.from, () => { S.endGlint = S.age; spawn({ x: ex, y: b.y + b.h / 2, size: 13, shape: 'ring', grow: 12, life: .4, col: '#fff' }); tone(1318, 0, .025, .3); });
+      if (st.t > st.dur + .4) st.done = true; } },
+  T13: { name: 'Combined (3+4+5)', desc: 'Segment pop, Bar swell and Ring at the end together: the bar swells and the new part fills like liquid, every segment it completes pops, then a spark runs on to the ring at the end, which glints.',
+    init(st) { STY.T10.init(st); STY.T12.init(st); STY.T11.init(st); },
+    draw(st, dt) { st.t += dt; STY.T11.draw(st, 0); STY.T10.draw(st, 0); STY.T12.draw(st, 0); st.done = st.t > st.dur + .7; } },
+};
+// Ring at the end: the ring beside the XP bar (your next level, the arc your progress)
+function endRing() { if ((style !== 'T12' && style !== 'T13') || S.endRing === undefined) return; const b = bars().xp, since = S.age - S.endRing, a = clamp((2.6 - since) / .5) * clamp((S.age - (S.endFirst ?? (S.endFirst = S.age))) / .2); if (a <= 0) return;
+  const x = b.x + b.w + 26, y = b.y + b.h / 2, r = 13, gl = S.endGlint !== undefined ? clamp(1 - (S.age - S.endGlint) / .5) : 0; ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = 'rgba(6,8,12,.92)'; ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7); ctx.fill(); ctx.lineCap = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke();
+  ctx.strokeStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 8 + 10 * gl; ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * S.shown); ctx.stroke(); ctx.shadowBlur = 0;
+  if (gl > 0) { const an = -Math.PI / 2 + Math.PI * 2 * S.shown; ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 10; ctx.globalAlpha = a * gl; star4(x + Math.cos(an) * r, y + Math.sin(an) * r, 6, S.age * 3); ctx.globalAlpha = a; ctx.shadowBlur = 0; }
+  text('24', x, y + 4.5, '700 12px system-ui', '#fff', 'center'); ctx.restore(); }
+// Segment pop: the popped segments swell and flash
+function segPops() { if ((style !== 'T10' && style !== 'T13') || !S.segs) return; const b = bars().xp; for (const k in S.segs) { const t = (S.age - S.segs[k]) / .45; if (t > 1) continue; const s = Math.sin(Math.PI * t), x = b.x + b.w * k / 20, w = b.w / 20;
+  ctx.save(); ctx.fillStyle = `rgba(190,130,255,${.8 * s})`; ctx.fillRect(x - 1, b.y - 4 * s, w + 2, b.h + 8 * s); ctx.fillStyle = `rgba(255,255,255,${(1 - t) * .9})`; ctx.fillRect(x, b.y - 4 * s, w, b.h + 8 * s); ctx.restore(); } }
+// the feet halo: an ellipse on the ground, the arc = your level progress, the newest part bright
+function feetHalo() { if (style !== 'T8' || !S.halo) return; const since = S.age - S.halo.last, a = clamp((2.4 - since) / .5) * clamp((S.age - (S.halo.first ?? (S.halo.first = S.age))) / .2); if (a <= 0) return;
+  const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), cx = c.left - s.left + c.width / 2, cy = c.bottom - s.top - 4, rx = 52, ry = 15;
+  const arc = (f0, f1) => { ctx.beginPath(); const n = 60; for (let i = 0; i <= n; i++) { const an = Math.PI / 2 + Math.PI * 2 * lerp(f0, f1, i / n); ctx.lineTo(cx + Math.cos(an) * rx, cy + Math.sin(an) * ry); } ctx.stroke(); };
+  ctx.save(); ctx.globalAlpha = a; ctx.lineCap = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.12)'; arc(0, 1);
+  ctx.strokeStyle = XP; ctx.shadowColor = XP; ctx.shadowBlur = 10; arc(0, S.shown); ctx.shadowBlur = 0;
+  const fresh = clamp(1 - since / .8); if (fresh > 0) { ctx.strokeStyle = `rgba(255,255,255,${fresh})`; ctx.lineWidth = 3.5; arc(Math.max(0, S.halo.from), S.shown); }
+  const an = Math.PI / 2 + Math.PI * 2 * S.shown, hx = cx + Math.cos(an) * rx, hy = cy + Math.sin(an) * ry; ctx.fillStyle = '#fff'; ctx.shadowColor = XPL; ctx.shadowBlur = 12; star4(hx, hy, 4 + 4 * fresh, S.age * 2);
+  ctx.restore(); text(Math.floor(S.shown * 100) + '%', cx + rx + 12, cy + 18, '600 10px system-ui', '#cfc6b0', 'left', { alpha: a }); }
+// the Picked-up row, in the side column with your loot
+function xpRow() { if (style !== 'T9' || !S.xprow) return; const r = S.xprow, t = S.age - r.at, a = clamp(t / .15) * clamp((3.6 - (S.age - r.last)) / .4); if (a <= 0) return;
+  const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), w = 200, x = Math.min(c.right - s.left + 110, W - w - 14), y = c.top - s.top + 70, slide = eOut(clamp(t / .25)), pop = clamp(1 - (S.age - r.pop) / .3), col = r.rest ? RESTL : XPL;
+  ctx.save(); ctx.globalAlpha = a; ctx.translate((1 - slide) * 30, 0); ctx.fillStyle = 'rgba(8,8,12,.8)'; ctx.fillRect(x, y - 12, w, 26); ctx.fillStyle = XP; ctx.fillRect(x, y - 12, 2, 26);
+  ctx.font = '13px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('✨', x + 14, y); ctx.save(); ctx.translate(x + 28, y + 4); ctx.scale(1 + pop * .2, 1 + pop * .2); text('+' + fmt(r.amt) + ' XP', 0, 0, '700 12px system-ui', pop > .5 ? '#fff' : col, 'left'); ctx.restore();
+  if (r.kills > 1) text('×' + r.kills, x + w - 40, y + 4, '700 11px system-ui', '#cfc6b0', 'right'); text(Math.floor(S.shown * 100) + '%', x + w - 8, y + 4, '600 10px system-ui', '#9a927e', 'right');
+  ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(x + 28, y + 9, w - 40, 2); ctx.fillStyle = XP; ctx.fillRect(x + 28, y + 9, (w - 40) * S.shown, 2); ctx.fillStyle = `rgba(255,255,255,${.4 + .6 * pop})`; ctx.fillRect(x + 28 + (w - 40) * r.from, y + 9, (w - 40) * Math.max(0, S.shown - r.from), 2);
+  ctx.restore(); }
+
+// the halo's counter: beside your feet
+function haloCounter(st) { const got = st.landed; if (got <= 0) return; if (got >= 1 && st.doneAt === undefined) st.doneAt = S.age; const t = st.doneAt === undefined ? 0 : S.age - st.doneAt; if (t > 1.6) return;
+  const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), x = c.left - s.left + c.width / 2 + 64, y = c.bottom - s.top - 2 - t * 6, pop = st.doneAt !== undefined && t < .25 ? 1 - t / .25 : 0, xp = parseInt(st.k.text.replace(/\D/g, ''));
+  ctx.save(); ctx.translate(x, y); ctx.scale(1 + pop * .35, 1 + pop * .35); text('+' + fmt(xp * got) + ' XP', 0, 0, '700 13px system-ui', pop > .3 ? '#fff' : (st.rest ? RESTL : XPL), 'left', { alpha: clamp(1.6 - t) }); ctx.restore(); }
+// the counter (built in): counts as the stream lands, punches when done; rides above the head for "Stream with a head"
+function counter(st) { if (style === 'T9') return; if (style === 'T8') return haloCounter(st); const b = st.b, got = st.cnt !== undefined && st.landed < 1 ? st.cnt * .999 : st.landed; if (got <= 0) return; if (got >= 1 && st.doneAt === undefined) st.doneAt = S.age; const t = st.doneAt === undefined ? 0 : S.age - st.doneAt; if (t > 1.6) return;
+  const pop = st.doneAt !== undefined && t < .25 ? 1 - t / .25 : 0, a = clamp(1.6 - t) * (st.quiet ? .7 : 1), col = st.rest ? RESTL : XPL, hx = b.x + b.w * Math.min(1, S.shown), xp = parseInt(st.k.text.replace(/\D/g, ''));
+  const x = st.ride ? hx : hx + 10, y = st.ride ? b.y - 10 - t * 6 : b.y - 8 - t * 6, align = st.ride ? 'center' : 'left';
+  ctx.save(); ctx.translate(x, y); ctx.scale(1 + pop * .35, 1 + pop * .35); text('+' + fmt(xp * got) + ' XP', 0, 0, '700 13px system-ui', pop > .3 ? '#fff' : col, align, { alpha: a }); ctx.restore();
+  if (st.k.sub && st.doneAt !== undefined) text(st.k.sub, x, y + 13, '600 10px system-ui', RESTL, align, { alpha: a * clamp(t / .2) }); }
+
+function tick(b, m, age) { const x = b.x + b.w * m;
+  once('tk' + m, () => { spawn({ x, y: b.y + b.h / 2, size: 4, shape: 'ring', grow: 26, life: .6, col: '#fff' }); tone(1046, 0, .04, .25); tone(1568, .06, .03, .3); log('xp', '+10% tick (always)'); });
+  const a = clamp(1.6 - age); if (a <= 0) return; text('+10%', x, b.y - 24 - eOut(clamp(age / .4)) * 8, '700 12px system-ui', '#fff', 'center', { alpha: a }); }
+
+// the loot popup stand-in (a green item, right of you)
+const ITEMS = [['🧤', 'Ragged Leather Gloves'], ['🗡️', 'Rusty Shortsword'], ['🥾', 'Worn Leather Boots'], ['💍', 'Copper Band'], ['🪖', 'Dented Cap']];
+function popup(p) { const t = S.age - p.at; if (t < 0 || t > 2.6) return; const c = document.getElementById('char').getBoundingClientRect(), s = screenEl.getBoundingClientRect(), x = c.right - s.left + 150, y = c.top - s.top - 10;
+  const a = clamp(t / .15) * clamp((2.6 - t) / .4), sc = t < .3 ? lerp(1.25, 1, eOut(t / .3)) : 1; ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(sc, sc);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 70); g.addColorStop(0, 'rgba(120,255,120,.4)'); g.addColorStop(1, 'rgba(30,255,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 70, 0, 7); ctx.fill();
+  ctx.fillStyle = '#2a2014'; ctx.fillRect(-22, -22, 44, 44); ctx.strokeStyle = '#1eff00'; ctx.lineWidth = 2; ctx.strokeRect(-22, -22, 44, 44); ctx.font = '28px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.item[0], 0, 1);
+  text(p.item[1], 0, 48, '600 17px Georgia, serif', '#1eff00', 'center'); text('UNCOMMON', 0, 64, '600 9px system-ui', '#b9b09a', 'center', { ls: '1.5px' }); ctx.restore(); }
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; const m = S.m, b = bars().xp;
+    m.kills.forEach((k, i) => {
+      if (k.loot && S.age >= k.at) once('loot' + i, () => { S.popups.push({ at: S.age, item: ITEMS[i % ITEMS.length] }); lootSound(); });
+      const at = k.at + (k.loot && lootMode === 'wait' ? 1 : 0); if (S.age >= at) once('k' + i, () => startStream(k)); });
+    gameUI(Math.min(1, S.shown), m.rested || 0);
+    for (let t = .1; t < 1; t += .1) { const mm = Math.round(t * 10) / 10; if (m.f0 < mm && S.shown >= mm) { if (S.ticks[mm] === undefined) S.ticks[mm] = S.age; tick(b, mm, S.age - S.ticks[mm]); } }
+    S.popups.forEach(popup); segPops(); endRing();
+    S.streams.forEach(st => { if (!st.done) STY[style].draw(st, dt); if (st.landed >= 1 && !st.chimed) { st.chimed = true; xpChime(st.k); } counter(st); });
+    stepP(dt); if (S.age > m.dur + .4 && document.getElementById('loop').checked) play();
+  } else gameUI(.62, 0);
+  requestAnimationFrame(frame); }
+
+// ---------- panel ----------
+const sEl = document.getElementById('styles');
+['T6', 'T5', 'T10', 'T11', 'T12', 'T13'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + STY[k].name; b.dataset.s = k; b.onclick = () => { style = k; sync(); play(); }; sEl.appendChild(b); });
+function sync() { document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === style)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment));
+  document.querySelectorAll('[data-loot]').forEach(b => b.classList.toggle('on', b.dataset.loot === lootMode)); document.getElementById('sdesc').textContent = STY[style].desc; }
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-loot]').forEach(b => b.onclick = () => { lootMode = b.dataset.loot; if (moment !== 'loot' && moment !== 'grind') moment = 'loot'; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+document.getElementById('calm').onchange = () => play();
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '123456'.indexOf(e.key); if (i >= 0) { style = ['T6', 'T5', 'T10', 'T11', 'T12', 'T13'][i]; sync(); play(); } });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
