@@ -118,6 +118,10 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
 - Popup placement (0.4.20, picked in docs/mockups/placement.html): right of the character, mid-screen by
   default; Poor/Common come compact (one line), an Uncommon too unless it is the best of its loot; clicks
   pass through (hover holds, up to 10 s); 2 at once; time on screen by rarity; compact in combat.
+- **Style guide** (`docs/style-guide.md`, cohesion pass 2026-11-12): every piece follows it so the addon reads
+  as one: two golds (accent `#ffd36a`, game `#ffd100`), Morpheus only for item names and the biggest titles
+  (Friz Quadrata for the rest), dark rounded panels with a gold hairline (fading rows for lists), one Ring
+  recipe, and **money always with the game's coins as in the bags** (`GetCoinTextureString`, never "2g 39s").
 - Visual changes: show mockups first, the user picks, then build. Generated art comes from
   `tools/gen_textures.lua` (check it rendered with ffmpeg before pushing).
 - Assets: Blizzard's game assets (models, textures, icons, sounds, referenced by path or ID) and our

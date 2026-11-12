@@ -719,6 +719,15 @@ the user's own):
   column, bag, Create All pile, crafting effects, skill-up ring, XP bar, rep rings, level-up, recap strip,
   settings) to spot the odd ones out; (3) the user picks what changes; (4) the crafting redesign follows the
   guide. Probably before the crafting redesign.
+  **Started 2026-11-12 (cohesion first, the user):** `docs/style-guide.md` (principles, the Ring recipe,
+  colors, type, panels, motion, sound, open decisions) and `docs/mockups/cohesion-r1.html` (all 12 pieces side
+  by side or on the game screen, with flags). Survey of the 1.3 code: fonts are Morpheus (`TITLE_FONT`, item
+  names) + Friz Quadrata; **five golds** in the code; **three panel styles** (tooltip box on brown: Create All
+  tray and the Popups page preview; fading rows: harvest/side column; dark rounded + gold hairline: 1.4).
+  Open decisions: two golds; where Morpheus goes; one panel family (restyle the tray); one Ring recipe.
+  **Agreed 2026-11-12: all four**, plus a rule from the user: **money is shown with the game's coins, as in
+  the bags** ("2 [gold] 39 [silver] 53 [copper]", `GetCoinTextureString`), never "2g 39s 53c". Details and
+  the build list in docs/style-guide.md "Decisions".
   **Recap API findings** (wow-api-researcher 2026-11-12; proof: saved data of one Ragefire Chasm run by
   RoadToSixty and Loredex on 16001):
   - **CHAT_MSG_LOOT and CHAT_MSG_COMBAT_XP_GAIN are readable inside 5-man dungeons** (not secret). Secret in

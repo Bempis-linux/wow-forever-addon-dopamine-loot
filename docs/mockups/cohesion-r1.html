@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cohesion Round 1</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  ol { margin: 4px 0 0; padding-left: 18px; color: #cfc6b0; } ol li { margin: 3px 0; } ol b { color: #ffd36a; font-weight: 600; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: auto; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Cohesion, round 1: the overview</h1>
+  <small>Every piece of Dopamine Loot at once: the 1.3 features as they ship, and the 1.4 picks. Frozen at a
+  telling moment so they can be compared. Turn on <b>Flags</b> to see where a piece breaks the style guide
+  (docs/style-guide.md). Nothing changes until you pick.</small>
+
+  <h2>View</h2>
+  <button data-v="sheet" class="on">Side by side</button><button data-v="game">On the game screen</button>
+  <small>Side by side: each piece in its own tile, labeled (1.3 shipped / 1.4 picked). Game screen: where they
+  really appear (they'd never all be up at once).</small>
+
+  <h2>Show</h2>
+  <label class="fx"><input type="checkbox" id="flags" checked><b>Flags</b><small>Amber tags on what doesn't match the guide.</small></label>
+
+  <h2>What sticks out (my read)</h2>
+  <ol>
+    <li><b>Panels:</b> three styles. The Create All tray (tooltip box on brown) is the odd one out; the 1.4
+    pieces use dark rounded panels with a gold hairline; lists use fading rows.</li>
+    <li><b>Golds:</b> five in the code, a sixth in the mockups. Two would do: our accent gold and the game's.</li>
+    <li><b>Titles:</b> the 1.4 designs put a serif on many titles; in game that's Morpheus. Proposal: Morpheus only
+    for item names and the biggest titles, Friz Quadrata for the rest.</li>
+    <li><b>The Ring family</b> already ties 1.4 together; the 1.3 skill-up bar it replaces was the last bar-shaped
+    banner. The harvest window and the bag have no ring, which is fine (they aren't progress).</li>
+    <li><b>Counters:</b> each system colors its numbers (gold money, purple XP, green rep, profession color). Keep.</li>
+  </ol>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+</div>
+<div id="screen" class="dark"><canvas id="cv"></canvas></div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen'); const DPR = window.devicePixelRatio || 1; let W = 0, H = 0, view = 'sheet';
+const GOLD = '#ffd36a', XP = '#a35cf0', XPL = '#dcb8ff', Q = ['#9d9d9d', '#ffffff', '#1eff00', '#0070dd', '#a335ee', '#ff8000'], PANEL = 'rgba(8,8,12,.9)', TXT = '#e8e2d0', MUTED = '#9a927e';
+const TITLE = 'Georgia, serif', UI = 'system-ui, sans-serif';
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', ls = '0px') { ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = ls; ctx.shadowColor = 'rgba(0,0,0,.95)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillStyle = col; ctx.fillText(str, x, y); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function icon(x, y, s, emo, q, glow = 0) { ctx.save(); if (glow) { ctx.shadowColor = Q[q]; ctx.shadowBlur = 12 * glow; } const g = ctx.createRadialGradient(x, y, 0, x, y, s * .7); g.addColorStop(0, '#3a3226'); g.addColorStop(1, '#14100a'); ctx.fillStyle = g; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.shadowBlur = 0;
+  ctx.font = `${Math.round(s * .64)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emo, x, y + 1); ctx.strokeStyle = Q[q]; ctx.lineWidth = 1.5; ctx.strokeRect(x - s / 2 + .75, y - s / 2 + .75, s - 1.5, s - 1.5); ctx.restore(); }
+// the three panel styles found in the addon
+function panelRounded(x, y, w, h, r = 12) { ctx.save(); ctx.fillStyle = PANEL; ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.25)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
+function panelTooltip(x, y, w, h) { ctx.save(); ctx.fillStyle = 'rgba(18,13,8,.95)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#73603d'; ctx.lineWidth = 3; ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1; ctx.strokeRect(x + 4, y + 4, w - 8, h - 8); ctx.restore(); }
+function rowFade(x, y, w, h, stripe) { ctx.save(); const g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, 'rgba(0,0,0,.62)'); g.addColorStop(1, 'rgba(0,0,0,.04)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); if (stripe) { ctx.fillStyle = stripe; ctx.fillRect(x, y, 2, h); } ctx.restore(); }
+// the Ring recipe (style guide): dark disc, faint track, arc from the top, head dot
+function ringR(x, y, r, f, col, w = 5, head = true) { ctx.save(); ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(x, y, r + w + 3, 0, 7); ctx.fill(); ctx.lineCap = 'round'; ctx.lineWidth = w; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke();
+  ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * f); ctx.stroke(); ctx.shadowBlur = 0;
+  if (head && f < 1) { const a = -Math.PI / 2 + Math.PI * 2 * f; ctx.fillStyle = '#fff'; ctx.shadowColor = col; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, w * .6, 0, 7); ctx.fill(); } ctx.restore(); }
+function flag(x, y, str) { if (!document.getElementById('flags').checked) return; ctx.save(); ctx.font = `600 9.5px ${UI}`; const w = ctx.measureText(str).width + 16; ctx.fillStyle = 'rgba(255,170,40,.95)'; ctx.beginPath(); ctx.roundRect(x, y, w, 18, 9); ctx.fill(); ctx.fillStyle = '#1a1206'; ctx.textBaseline = 'middle'; ctx.fillText('⚑ ' + str, x + 7, y + 9.5); ctx.restore(); }
+function ok(x, y, str) { if (!document.getElementById('flags').checked) return; ctx.save(); ctx.font = `600 9.5px ${UI}`; const w = ctx.measureText(str).width + 16; ctx.fillStyle = 'rgba(80,200,120,.9)'; ctx.beginPath(); ctx.roundRect(x, y, w, 18, 9); ctx.fill(); ctx.fillStyle = '#06200e'; ctx.textBaseline = 'middle'; ctx.fillText('✓ ' + str, x + 7, y + 9.5); ctx.restore(); }
+
+// ---------- the pieces, each drawn around (0,0) at its own size; tile = 300 x 190 ----------
+const PIECES = [
+  { id: 'popup', name: 'Loot popup (Relic)', ver: '1.3', draw() { const g = ctx.createRadialGradient(150, 70, 0, 150, 70, 80); g.addColorStop(0, 'rgba(0,112,221,.45)'); g.addColorStop(1, 'rgba(0,112,221,0)'); ctx.fillStyle = g; ctx.fillRect(60, 0, 180, 150);
+      icon(150, 66, 50, '🗡️', 3, 1); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(70, 104, 160, 46); text('Cruel Barb', 150, 126, `600 19px ${TITLE}`, Q[3], 'center'); text('RARE · ONE-HAND SWORD', 150, 142, `600 9px ${UI}`, '#b9b09a', 'center', '1.5px');
+      ctx.fillStyle = 'rgba(0,112,221,.8)'; ctx.fillRect(100, 108, 100, 1.5); ok(8, 160, 'Morpheus item name, quality color'); } },
+  { id: 'rain', name: 'Loot rain (ground + tally)', ver: '1.3', draw() { ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(150, 120, 120, 18, 0, 0, 7); ctx.fill();
+      [['🧤', 3, 90], ['🪙', 1, 130], ['👖', 2, 165], ['🪙', 1, 200], ['💍', 2, 230]].forEach(([e, q, x], i) => { if (e === '🪙') { ctx.fillStyle = '#f0c040'; ctx.beginPath(); ctx.arc(x, 112, 8, 0, 7); ctx.fill(); ctx.strokeStyle = '#8a6a10'; ctx.stroke(); } else icon(x, 106, 26, e, q, q >= 3 ? .6 : 0); });
+      ctx.fillStyle = 'rgba(0,112,221,.35)'; ctx.fillRect(87, 20, 6, 74); text('3g 72s 66c', 150, 52, `700 18px ${UI}`, '#ffd34a', 'center'); flag(8, 160, 'money tally gold ≠ accent gold'); } },
+  { id: 'harvest', name: 'Harvest window / side column', ver: '1.3', draw() { text('Picked up', 30, 22, `600 12px ${UI}`, '#ffd100', 'left');
+      [['🌼', 'Peacebloom', 1, '+6', '#4fbf4a'], ['🍃', 'Silverleaf', 1, '+3', '#4fbf4a'], ['🪨', 'Copper Ore', 1, '+4', '#d07a3a'], ['🧤', 'Ragged Leather Gloves', 2, '', '#1eff00']].forEach(([e, nm, q, n, st], i) => { const y = 32 + i * 30; rowFade(30, y, 240, 26, st); icon(46, y + 13, 20, e, q); text(nm, 62, y + 17, `600 12px ${UI}`, Q[q], 'left'); if (n) text(n, 262, y + 17, `700 12px ${UI}`, '#fff', 'right'); });
+      ok(8, 160, 'fading rows: the list style'); } },
+  { id: 'bag', name: 'Bulging bag', ver: '1.3', draw() { ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(120, 46, 60, 60); ctx.save(); ctx.translate(150, 76); ctx.scale(1.12, .92); ctx.font = '38px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🎒', 0, 2); ctx.restore();
+      ctx.strokeStyle = Q[2]; ctx.lineWidth = 2; ctx.strokeRect(121, 47, 58, 58); text('3', 174, 102, `700 15px ${UI}`, '#fff', 'right'); text('+1', 192, 52, `700 13px ${UI}`, '#ffd34a', 'left'); ok(8, 160, 'the game\'s own button, our accents'); } },
+  { id: 'tray', name: 'Create All pile (tray)', ver: '1.3', draw() { panelTooltip(40, 18, 220, 120); text('Creating: Linen Bandage', 150, 40, `600 12px ${UI}`, '#ffd100', 'center');
+      for (let i = 0; i < 9; i++) icon(80 + (i % 5) * 26 + (i > 4 ? 13 : 0), 104 - Math.floor(i / 5) * 20, 22, '🩹', 1); text('5 / 26', 236, 128, `700 13px ${UI}`, '#fff', 'right'); flag(8, 152, 'tooltip box on brown: odd panel'); flag(8, 172, 'label in the game gold'); } },
+  { id: 'craft', name: 'Crafting effect (cast bar)', ver: '1.3', draw() { ctx.fillStyle = '#0a0a0a'; ctx.fillRect(48, 96, 204, 16); const g = ctx.createLinearGradient(0, 96, 0, 112); g.addColorStop(0, '#f8c44a'); g.addColorStop(1, '#a8701a'); ctx.fillStyle = g; ctx.fillRect(50, 98, 140, 12); text('Copper Bracers', 150, 108, `600 10px ${UI}`, '#fff', 'center');
+      for (let i = 0; i < 9; i++) { ctx.fillStyle = i % 2 ? '#ffd070' : '#ff8a30'; ctx.beginPath(); ctx.arc(190 + Math.cos(i) * 22, 80 + Math.sin(i * 2) * 12, 2, 0, 7); ctx.fill(); } ctx.fillStyle = '#fff'; star4(192, 74, 9, .3); ok(8, 160, 'on the game\'s cast bar'); } },
+  { id: 'skill', name: 'Skill-up (Ring + road)', ver: '1.4', draw() { ctx.fillStyle = PANEL; ctx.beginPath(); ctx.roundRect(60, 46, 230, 54, 27); ctx.fill(); ringR(58, 73, 27, .7, '#3fa83a', 6);
+      text('109', 58, 79, `700 16px ${UI}`, '#fff', 'center'); text('Herbalism', 98, 68, `600 16px ${UI}`, '#9ff08a'); [['🌼', 115], ['🍀', 120], ['🌺', 125], ['🌱', 150]].forEach(([e, l], i) => { icon(106 + i * 34, 86, 15, e, 1); });
+      ok(8, 160, 'Ring recipe, profession color'); flag(8, 140, 'title: serif in mockups → Friz?'); } },
+  { id: 'xp', name: 'XP bar (Combined)', ver: '1.4', draw() { ctx.fillStyle = '#0a0a0a'; ctx.fillRect(18, 98, 236, 15); const g = ctx.createLinearGradient(0, 98, 0, 113); g.addColorStop(0, '#d8a8ff'); g.addColorStop(.5, '#a35cf0'); g.addColorStop(1, '#4a1a90'); ctx.fillStyle = g; ctx.fillRect(20, 96, 150, 18);
+      ctx.fillStyle = '#0a0a0a'; for (let i = 1; i < 20; i++) ctx.fillRect(20 + 232 * i / 20, 100, 1, 11); ctx.fillStyle = 'rgba(255,240,255,.16)'; ctx.fillRect(110, 100, 60, 11); ringR(276, 105, 12, .65, XPL, 3, false); text('24', 276, 109, `700 11px ${UI}`, '#fff', 'center');
+      text('+1,470 XP', 176, 88, `700 13px ${UI}`, XPL, 'left'); text('×6', 246, 88, `700 11px ${UI}`, '#cfc6b0', 'left'); ok(8, 160, 'on the game\'s bar, Ring at the end'); } },
+  { id: 'rep', name: 'Reputation (sweep + ring)', ver: '1.4', draw() { ctx.fillStyle = '#0a0a0a'; ctx.fillRect(18, 116, 264, 10); ctx.fillStyle = '#3fc04f'; ctx.fillRect(20, 118, 140, 6); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(150, 117, 12, 8);
+      text('+250 Stormwind', 168, 112, `700 12px ${UI}`, '#9ff0a8'); ringR(70, 62, 15, .55, '#3fc04f', 3.5, false); ctx.font = '16px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⛰️', 70, 63); text('+62', 94, 61, `700 14px ${UI}`, '#9ff0a8'); text('Ironforge', 94, 74, `600 10px ${UI}`, '#cfc6b0');
+      ok(8, 160, 'Ring recipe, standing color'); } },
+  { id: 'level', name: 'Level-up (Ascension)', ver: '1.4', draw() { ctx.save(); ctx.translate(210, 70); ctx.scale(1, 1); ringR(0, 0, 36, 1, XP, 6, false); ctx.restore(); text('LEVEL', 210, 58, `700 9px ${UI}`, '#cfc6b0', 'center', '3px'); text('24', 210, 86, `700 28px ${UI}`, XPL, 'center');
+      ctx.fillStyle = 'rgba(6,8,12,.78)'; ctx.beginPath(); ctx.roundRect(20, 20, 140, 110, 10); ctx.fill(); [['Health', '1,101', '+59'], ['Mana', '925', '+35'], ['Strength', '50', '+2'], ['Stamina', '54', '+2'], ['Intellect', '73', '+3']].forEach(([l, v, d], i) => { text(l, 30, 40 + i * 19, `500 11px ${UI}`, '#cfc6b0'); text(v, 128, 40 + i * 19, `700 12px ${UI}`, '#fff', 'right'); text(d, 132, 40 + i * 19, `700 10px ${UI}`, XPL); });
+      ok(8, 160, 'Ring recipe, XP purple'); flag(8, 140, 'rounded panel without the gold hairline'); } },
+  { id: 'recap', name: 'Dungeon recap (slim strip)', ver: '1.4', draw() { panelRounded(10, 14, 280, 132); text('The Deadmines', 22, 34, `400 15px ${TITLE}`, TXT); text('CLEARED', 278, 28, `700 8px ${UI}`, GOLD, 'right', '2px'); text('38:12', 278, 41, `700 12px ${UI}`, '#fff', 'right');
+      ctx.strokeStyle = GOLD; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(30, 62); ctx.lineTo(270, 62); ctx.stroke(); [30, 70, 110, 150, 210, 266].forEach(x => { ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(x, 62, 7, 0, 7); ctx.fill(); ctx.strokeStyle = GOLD; ctx.beginPath(); ctx.arc(x, 62, 6, 0, 7); ctx.stroke(); });
+      [['🗡️', 3], ['🧤', 3], ['👖', 2], ['🔪', 2], ['👕', 2], ['💍', 2]].forEach(([e, q], i) => icon(32 + i * 26, 96, 22, e, q)); text('3g 72s 66c', 200, 96, `700 12px ${UI}`, GOLD); text('+18,340', 200, 116, `700 12px ${UI}`, XPL); text('Cruel Barb', 32, 134, `600 13px ${TITLE}`, Q[3]);
+      ok(8, 160, 'rounded panel + gold hairline'); flag(150, 160, 'serif title'); } },
+  { id: 'cleared', name: '"Dungeon cleared" (medallion)', ver: '1.4', draw() { ctx.fillStyle = PANEL; ctx.beginPath(); ctx.roundRect(70, 40, 220, 56, 28); ctx.fill(); ringR(66, 68, 28, 1, GOLD, 5, false); ctx.font = '24px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🗡️', 66, 69);
+      text('EDWIN VANCLEEF DEFEATED', 108, 60, `700 8px ${UI}`, '#cfc6b0', 'left', '2px'); text('The Deadmines', 108, 80, `400 17px ${TITLE}`, TXT); text('CLEARED', 262, 74, `800 10px ${UI}`, GOLD, 'right', '2px'); ok(8, 160, 'Ring recipe, accent gold'); } },
+];
+
+// ---------- the two views ----------
+function layout() { const r = screenEl.getBoundingClientRect(); W = view === 'sheet' ? Math.max(340, r.width - 18) : Math.max(640, r.width - 2); H = view === 'sheet' ? (Math.ceil(PIECES.length / Math.max(1, Math.floor(W / 340))) * 230 + 20) : Math.max(700, r.height - 2);
+  cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; draw(); }
+function draw() { ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (view === 'sheet') { const cols = Math.max(1, Math.floor(W / 340)), tw = 320, th = 210, gap = (W - cols * tw) / (cols + 1);
+    PIECES.forEach((p, i) => { const x = gap + (i % cols) * (tw + gap), y = 14 + Math.floor(i / cols) * (th + 20);
+      ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.roundRect(x, y, tw, th, 8); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.stroke();
+      text(`${i + 1}. ${p.name}`, x + 10, y + 18, `600 11px ${UI}`, '#cfc6b0'); text(p.ver === '1.4' ? '1.4 PICK' : '1.3 SHIPPED', x + tw - 10, y + 18, `700 9px ${UI}`, p.ver === '1.4' ? '#dcb8ff' : MUTED, 'right', '1.5px');
+      ctx.beginPath(); ctx.rect(x, y + 22, tw, th - 22); ctx.clip(); ctx.translate(x, y + 24); p.draw(); ctx.restore(); }); }
+  else { // the game screen: action bars, XP bar, the character, then each piece where it lives
+    ctx.fillStyle = 'rgba(80,60,40,.85)'; ctx.beginPath(); ctx.roundRect(W * .42, H * .5, 56, 120, [28, 28, 8, 8]); ctx.fill();
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 12; i++) { ctx.fillStyle = 'rgba(20,18,14,.92)'; ctx.fillRect(W / 2 - 210 + i * 35, H - 32 - r * 34, 32, 28); }
+    const at = (id, x, y, s = 1) => { const p = PIECES.find(q => q.id === id); ctx.save(); ctx.translate(x, y); ctx.scale(s, s); p.draw(); ctx.restore(); };
+    at('recap', W / 2 - 150, 14); at('skill', W / 2 - 160, 170, .9); at('popup', W * .42 + 90, H * .32); at('harvest', W - 320, H * .2); at('rain', W * .42 - 120, H * .58);
+    at('level', 20, H * .34, .9); at('xp', W / 2 - 150, H - 190); at('rep', W / 2 - 150, H - 250, .9); at('bag', W - 240, H - 140, .8); at('tray', 20, H - 230, .9); at('craft', W / 2 + 60, H - 300, .8); }
+}
+document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { view = b.dataset.v; document.querySelectorAll('[data-v]').forEach(x => x.classList.toggle('on', x === b)); layout(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+document.getElementById('flags').onchange = draw; addEventListener('resize', layout); layout();
+</script>
+</body>
+</html>
