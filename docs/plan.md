@@ -842,6 +842,292 @@ the user's own):
      (motes draw the circle), First Aid E (dressing + ripples; three taps now). Next: the final round of new
      ideas per profession (the user's plan), incl. iterations of Engineering A's gears, First Aid A's dressing,
      and maybe Alchemy's glass tube.
+     **Final round (started 2026-11-12)**: craft-compare.html has a Round switch (Final round / Exploration
+     rounds); in the final round A is always the locked design and B-D are new takes on it.
+     Blacksmithing: its rhythm was 1-2-final too (tap, tap, CLANG), so B-D strike **three times** (.3/.46/.62,
+     the taps rising: SmithT1-3 = H2.strike(0 / .75 / 1.5)). **B. The weld** (the ring's starting end heats up
+     as the head comes round; the CLANG welds them: a flash, a molten bead on the seam dripping sparks, cooling
+     white to orange to dark), **C. Bellows** (the whole ring at one heat, each tap a bellows pump: it flares
+     hotter step by step, embers drift up; the CLANG goes white-hot, then a cooling wave runs round from the
+     top with steam where it passes), **D. Hammered facets** (each tap flattens the ring into a short straight
+     facet where it lands; the CLANG trues it round in a flash with the spark burst).
+     → the user: combine A and C: **E. Heated + bellows** = A's stroke (white-hot at the head, cooling behind) and
+     spark fans + each of three taps a bellows pump flaring the whole ring with embers; the CLANG = A's spark
+     burst and shockwave, then C's cooling wave with steam. **BLACKSMITHING FINAL: E. Heated + bellows** (locked 2026-11-12).
+     Leatherworking final round (A = locked Crumbs and whip; B-D play their own thoks on the four quarter punches,
+     which the locked version borrows from 1.3 slightly off its punches): **B. Slack, then taut** (the thread whips
+     through the holes hanging slack, sagging between them; the tug snaps it taut with a twang, it shivers and
+     settles), **C. Stitch as you go** (after each punch a stitch runs from the last hole to the new one with a
+     zip; the last stretch to the top whips shut at the end, the knot glints), **D. Burnished** (as locked, then
+     the finish: a warm gloss runs round, leaving polished brown leather with a thin bright edge).
+     **LEATHERWORKING FINAL: D. Burnished** (2026-11-12).
+     Alchemy final round (A = the locked mix; B-D each change one thing): **B. Distillation** (each beat a single
+     drop falls from above onto the liquid's end with a splash, a bright ripple runs back along it), **C. Layers
+     that mix** (each beat pours a new shade of purple so the tube shows bands; when made the bands swirl and run
+     together into the magenta), **D. Boil over** (bubbles grow livelier each beat; near the end foam rises over
+     the top of the tube and spills a little; made = the cork pops and the foam settles with steam).
+     → the user really likes D and asked for the exploration rounds' A bubbles off the head with it: **E. Boil over +
+     bubbles** = D + bubbles boiling up off the liquid's moving end (a trickle while it fills, a rising burst each
+     beat, more and bigger every beat, in the potion's purple). The end steam at the top looked awkward (the user):
+     E now puffs foam off the head at 86% like the exploration A (light purple puffs + a ring) instead. Still a
+     growing "steam" at the very top near the end: that was the boil-over foam, fixed at the top; it now rises off
+     the head and travels with it to the top as the ring closes (in D and E). **ALCHEMY FINAL: E. Boil over +
+     bubbles** (2026-11-12).
+     Tailoring final round (A = the locked Spool; B-D change one thing each): **B. Needle leads** (a small bright
+     needle rides the head pulling the thread, which goes round as a running stitch weaving in and out; the needle
+     dips through on each beat), **C. Plucked thread** (the taut thread from the spool shivers like a string on each
+     beat, a bead of light running down it; at the snip the cut end springs back up and curls), **D. Spool runs
+     down** (the thread wound on the spool thins as the ring fills, the spool hops on each beat; at the snip the
+     loose end whips round the nearly empty spool).
+     → the user likes C and D; the running out should be more obvious: D's spool is now bigger and its thread runs
+     down to the bare dark core, spinning faster as it empties. **E. Plucked + runs down** = C + D. The bigger spool
+     was "a little too fat": back to the normal spool (as D first was), E = plain C + D. **TAILORING FINAL:
+     E. Plucked + runs down** (2026-11-12).
+     Engineering final round (A = the locked gear on the arc; new takes on its turning gears): **B. Meshing pair**
+     (like 1.3's two gears: a second smaller gear meshes with the head gear just outside the ring, the two turning
+     against each other, ratcheting together on each click; made = they spin up together), **C. Gears left behind**
+     (each click drops a small meshed gear on the ring where the head is, three end up round it, ticking on every
+     click; made = all spin together), **D. Wind up, let go** (a winding gear at the top turns a step tighter on
+     each click, shaking a little by the third; made = it lets go, the head gear whirs once round the ring back to
+     the top, then the boing).
+     → the user likes the direction of B and D but isn't fully feeling them. Round 2: **E. Pair + wind-up** (B + D: the
+     meshing pair rides the head with a few sparks per click, the winding gear at the top strains; made = it lets
+     go and the pair whirs once round back to the top), **F. E + the spring** (a coiled spring shoots up out of the
+     winding gear and wobbles with the boing, sparks off the teeth), **G. Drive the item** (the meshing pair rides
+     the head and the item in the middle turns a notch on each click, like the end of the gear train; made = one
+     full turn, settles face-on).
+     → the user didn't mean combining B and D, only liked the direction; idea: **a ratchet turning**. E-G replaced with
+     three ratchets in different places: **E. Ratchet at the head** (the gear becomes a saw-toothed ratchet wheel
+     with a pawl; each click it turns one tooth and the pawl snaps into the next notch; made = the pawl lifts, the
+     wheel spins free), **F. The ring is the ratchet** (saw teeth grow along the outside of the filled ring, a pawl
+     rests on them at the head; each click the ring jolts one tooth; made = the pawl lifts away and the ring spins
+     free once), **G. Ratchet round the item** (a big ratchet wheel round the item inside the ring, its pawl at
+     the top, one tooth per click while the gear rides the head; made = it spins free).
+     → "not quite": the user's idea (a sketch): **a wrench turns something 3-4 times, each turn steps the bar one
+     section, then the finish** (no smooth fill). Built as **H. Wrench, 4 turns** and **I. Wrench, 3 turns**: the ring is
+     the wrench's ring end round the item, the handle sticks out and swings; each forward swing turns the bolt (a hex
+     round the item) and steps the ring one whole section with a solid click (sparks at the step), the swing back
+     ticks twice (the ratchet); then the boing + puff. The smooth fill is hidden, the track shows its sections
+     (bright steel fill, dark empty track). Own sounds (EngTick per turn, quiet ticks back).
+     → "exactly what I was thinking"; can't decide 3 or 4, 4 feels more like tinkering. **Baseline from here: A
+     (locked gear) and the wrench with 4 turns.** The round was trimmed to: A, **B. Wrench, 4 turns** (was H),
+     **C. Wrench drives the gear** (the swings as B, the locked gear rides the end of the fill and rolls through each
+     new section with the swing), **D. Seat the bolts** (a hex bolt stands proud at the end of each section; each
+     swing spins the next one down flush with a flash, its section lights), **E. The crank** (the handle goes all
+     the way round once per turn, four full turns, the section filling as it goes, a click at the end of each).
+     The earlier B-G and the 3-turn wrench stay in the code but off the buttons.
+     → "cool iterations, but I was thinking you would come up with 2/3 different animations, not variations of the same
+     wrench" (the clearly-different rule again: new ideas means new mechanisms). C-E replaced (the wrench variants stay
+     in the code, off the buttons): **C. Parts snap in** (assembly: on each click a part, a gear then a bolt then a
+     spring, flies in from outside and snaps onto the ring at the head; made = they all flash), **D. Pressure gauge**
+     (the ring is a gauge with ticks and a red zone before the top; a needle rises in jerky steps, trembling more as
+     pressure builds; made = a valve at the top pops a quick jet up with the boing, the needle drops back),
+     **E. Blueprint** (while it fills the ring and the item are a pale-blue blueprint with drafting lines sketched
+     inside, more each click; made = a bright line sweeps across printing it into the real item).
+     → the user sticks with **Wrench, 4 turns** and asked for add-ons like Alchemy's. C-E replaced again (round 4 kept
+     in the code): **C. Sparks and strain** (sparks spray where the wrench bites on each turn, each turn harder: the
+     handle trembles more, the fourth is the tightest with a bigger burst), **D. It starts up** (finale: light races
+     round the four sections twice, the bolt glows and spins once, then the boing), **E. The spring** (finale: a
+     coiled spring shoots up out of the top and wobbles with the boing, a few sparks off it).
+     → likes It starts up, not C or E: **ENGINEERING FINAL: D. Wrench, 4 turns + it starts up** (2026-11-12).
+     Cooking final round (A = the locked Flip on the burner; B-D each add one thing): **B. Sizzling pan** (little pops of
+     hot oil spit off the burner the whole time, more the hotter it gets), **C. Golden brown** (made = the item browns
+     to a warm gold and a glaze shine sweeps across it), **D. Flambé** (on the flip a burst of flame leaps up round the
+     top of the ring, embers drifting after, in place of the small lick).
+     → **The user clarified the final pass (2026-11-12):** it is for ENTIRELY NEW designs inspired by the first-pass
+     picks (as the wrench was), not add-ons; the first pass was inspiration (the user may still keep a first-pass
+     design). One profession at a time. After Enchanting and First Aid, a **final-final polish/idea round for all 8**
+     with the same intent. (The kit now has this process as the skill `wow-design-rounds`, and
+     `wow-mockup-to-addon` for the build.) Cooking redone (the add-ons stay in the code, off the buttons): **B. Stir
+     the pot** (a pot from above, a spoon stirs four laps, each lap fills a quarter, the stew swirls and bubbles more
+     each lap; made = a big bubble pops), **C. Toss the pan** (a frying pan with a handle; three tosses, the food hops
+     up and lands with a sizzle, each toss a third; the third flips it right over), **D. Chop it in** (a knife at the
+     side chops three times, the cut pieces tumble into the middle round the food; made = they sizzle bright). Opens
+     on B.
+     **Run order from here (the user, 2026-11-12, now with the `wow-design-rounds` skill):** finish Phase 2 one profession
+     at a time (Cooking pick, Enchanting, First Aid); then Phase 2 once more across all 8 (the skill came half way, so the
+     earlier professions get new designs too); then Phase 3, Polish.
+     Cooking pick: **C. Toss the pan** ("definitely C, my favorite"), with the burner added: **E. Toss the pan + burner**
+     (the pan's ring heats as it steps, dull red, orange, yellow-white; a lick of flame round the ring as the big flip
+     lands; made = a gold flare). + A's little sizzle (a spatter off the end of the fill on each landing).
+     The third toss now hangs in the air longer (30% of the cast, higher) and
+     lands right at the end of the cast, so the final sizzle (CookTss) plays as it lands; no extra sizzle before it.
+     **COOKING FINAL (phase 2): E. Toss the pan + burner + sizzle, long last toss** ("very nice", 2026-11-12).
+     Enchanting phase 2 (A = the locked Motes draw the circle; new designs from what the user liked across the picks: a
+     tool you can see working, stepped progress, a material, glow building up, a "starts up" finale): **B. Rune by rod**
+     (a glowing rod writes a rune round the item in three strokes, each steps the ring a third and ends on a chime;
+     made = the rune flashes and shrinks into the item; own chime timing .3/.6/.9), **C. Dust to crystal** (arcane dust
+     drifts in toward the head the whole time; each chime packs it into a violet crystal growing out of the ring; made =
+     the crystals flash and beam into the item), **D. Tuning the ring** (the ring hums like a singing bowl rim:
+     shimmering and uneven at first, each chime rings waves round it, it settles truer; made = a pure bright circle and
+     two rings of sound).
+     → not B or C; D "kind of cool" but would be awkward mixed with A (A locks three positions on the circle). New B and C
+     (the rod and crystals stay in the code): **B. Armillary** (each chime a thin ring of light appears round the item,
+     tilted and spinning in 3D; made = all three swing flat into line and merge into one bright circle), **C. Woven
+     light** (the ring's stroke is two strands of light braiding; each chime pulls a bright knot that stays; made = the
+     braid pulls tight into one line and a pulse runs round through the knots).
+     → "B is very cool"; mix **B and D** (the user first wrote "B & C" by mistake); C (woven) out, one more in its place.
+     **E. Armillary + tuning** (D's humming ring, uneven at first, rings with waves on each chime as an armillary ring
+     appears and spins, settling truer between chimes; made = the rings swing flat as the ring rings pure, a flash, two
+     rings of sound). New **C. Script band** (a band of tiny runes round the outside of the ring lights up one by one as
+     it fills, turning a notch on each chime; made = all flare, the band shrinks onto the item; it sits where the batch
+     bar goes in Create All, so it would move inside the ring if picked).
+     → C crashed on click (my B+D swap deleted its rune shapes; fixed). Then: the armillary is cool but reads **"science"
+     rather than "magical"**; rework B, C, D, drop E (C "wasn't bad"). Magical = runes, soft drifting light, sparkles,
+     things floating and absorbed, nothing precise. **B. Sigil rings** (each chime a circle of glowing runes appears round
+     the item, tilted and slowly turning, shedding sparkles, violet to pink; made = they spiral in and collapse into the
+     item in a sparkle burst), **C. Rising runes** (a band of runes inside the ring lights up as it fills; on each chime
+     the freshly lit runes lift off and drift into the item, which glows more; made = the rest swirl in, it flares),
+     **D. Arcane flame** (soft violet flames lick up off the filled ring, tips pink, surging taller each chime; made = a
+     tall crown of flame that calms into a glowing halo). Earlier B-E stay in the code.
+     → "A is still top contender but the effects for D are pretty cool": **E. Motes + arcane flame** (A as locked, the
+     motes drawing the triangle and the star, with D's violet flames licking off the filled ring, surging each chime;
+     made = the star and the spiral, the flames flare into a crown and calm into a halo).
+     **ENCHANTING FINAL for now (phase 2): E. Motes + arcane flame** (2026-11-13; "still not 100% in", revisit in the
+     second phase 2).
+     First Aid phase 2 (A = the locked Dressing + ripples; the feel: patching up after a fight / a remedy in the wild,
+     hands-on steps, a firm finish): **B. Splint it** (two sticks laid along the item, each tap a linen tie wraps across
+     and cinches, three ties top to bottom; made = the middle tie knotted with a tug), **C. Wash it clean** (the item
+     starts grimy with dirt and blood; each tap water splashes down from above and washes a third away; made = it
+     shines clean), **D. Stitch it shut** (a red gash across the ring and item; each tap a curved needle leaves a
+     cross-stitch and the red fades; made = tied off, the gash gone).
+     **FIRST AID FINAL for now (phase 2): B. Splint it** (2026-11-13).
+     **Phase 2, first pass done (2026-11-13):** Blacksmithing E Heated + bellows, Leatherworking D Burnished, Alchemy E
+     Boil over + bubbles, Tailoring E Plucked + runs down, Engineering D Wrench 4 turns + it starts up, Cooking E Toss
+     the pan + burner + sizzle, Enchanting E Motes + arcane flame (not 100%), First Aid B Splint it (for now). The
+     first six were done before the user clarified that phase 2 means entirely new designs, so the second phase 2 pass
+     (next, one profession at a time, Blacksmithing first) brings new designs to all eight.
+     **Phase 2, second pass** (the user: "lets continue", 2026-11-13). The page keeps each first-pass set (P2A) and starts
+     a fresh one with A = the current pick (options that borrowed from a sibling by letter now look it up in their own
+     set, P2S, so A plays exactly as picked). Blacksmithing: **B. Hammer and anvil** (a hammer over the top of the ring
+     strikes three times with sparks, each blow forges a third that glows white-hot and cools; the CLANG is the fourth
+     blow), **C. Quench** (the ring heats evenly in the forge as it fills, sparks on each tap; made = it plunges into a
+     line of water, a burst of steam, the glow snuffed to dark steel, a cool shine), **D. Cast in the mould** (a dark
+     mould ring; a crucible over the top tips three times, each pour runs molten metal a third round the channel; made =
+     the CLANG cracks the mould, its pieces fall away, the cast ring cools with a shine).
+     → "B and D I like the direction of"; mixes asked for: **E. Cast + bellows** (D, and before each pour the bellows pump
+     the crucible: it glows hotter and throws embers, the metal in the channel flares brighter), **F. Hammer + heat** (B's
+     three hammer blows, each with A's spark fan along the curve and A's bellows flare + embers; the CLANG with A's spark
+     burst and shockwave, then A's cooling wave with steam). Opens on F.
+     → "F is the obvious choice but I like how unique E is": E fits **smelting** (pouring metal into a mould is what
+     smelting ore does; Blacksmithing is the hammer). **BLACKSMITHING FINAL (phase 2b): F. Hammer + heat** (2026-11-13).
+     **New crafting sub-systems (the user, 2026-11-13): 9 = Smelting** (Mining's crafting side, its own trade-skill
+     window; nothing in the addon handles it yet; A = Cast + bellows) and **10 = Disenchanting** (Enchanting's
+     disenchant cast). Both get phase 2 after the eight. To check: the Smelting window's name on Forever; whether
+     disenchant is a trade-skill cast (isTradeskill) or a plain spell.
+     Leatherworking (phase 2b; A = Burnished; each new one is four steps you can count, with its own thoks on them):
+     **B. Cut the pattern** (a small knife cuts round the leather band in four strokes leaving a bright cut line and
+     curling shavings; made = the cut piece lifts free with a shadow under it), **C. Dye it** (raw pale leather; a dauber
+     dabs four times and dark dye soaks out over a quarter each; made = a polish shine sweeps round), **D. Set the studs**
+     (a small mallet taps four metal studs into the strap, each popping in with a glint; made = the studs catch the light
+     one after another).
+     → "not feeling the new options" (they shared one structure: a tool working four even steps). Round 2, varied in
+     structure: **B. Whip crack** (the ring is a braided whip; on the four beats it lashes a crack out from the head with
+     a flash at the tip; made = a big crack from the top), **C. Belt and buckle** (a strap whose tip slides round,
+     punched on each beat; made = the tip pulls through the buckle at the top, the prong drops in, it cinches), **D.
+     Patchwork** (four curved leather pieces in different tans drop into place on the beats; made = a thread whips
+     round through the seams).
+     **LEATHERWORKING FINAL (phase 2b): A. Burnished, kept** (2026-11-13).
+     Alchemy (phase 2b; A = Boil over + bubbles; each new one a different structure): **B. Two flasks** (a blue flask left
+     and a red one right take turns pouring into the ring on the beats, the liquid mixing toward purple; made = magenta
+     flash, cork), **C. The vortex** (the potion swirls round the item inside the ring, each beat spinning it faster;
+     made = it collapses into the item with a magenta flash, cork), **D. Fill the flask** (a round flask outline round
+     the item fills a quarter per beat with a wobble and bubbles; made = full, magenta flash, a cork pushed in and
+     popping). Opens on B.
+     → "I like A the most, B as an idea"; mix A and B with the fill **starting at the bottom and climbing both sides,
+     meeting at the top**: **E. Twin pour** (the blue flask left and red flask right pour in turns on the beats; the glass
+     tube fills from the bottom up both sides, blue up the left, red up the right, each end bubbling with bubbles boiling
+     off and vapor; near the end both ends foam as they close in; they meet at the top: purple, magenta flash, the cork
+     pops where they met).
+     The user's flask ideas: **C. The flask fills (blows up)** (replaces the vortex: the whole ring is a round flask with a
+     corked neck, filling bottom to top, bubbling harder and sloshing each beat; made = it blows up: glass shards, a magenta
+     burst, the item flies up, spins once and drops back glowing), **F. Full flask, shaking (blows up)** (full from the
+     start, shaking harder each beat with sloshing, faster bubbles and a new crack per beat; same blow-up). Note: the flask
+     covers the batch bar in Create All; it would need the bar outside it if picked.
+     → "I still really like the animations for A"; for F: keep a progress bar, no cracks or breaking, bubble more
+     intensely each shake, the item and liquid fly up out of the flask as the cork pops. **F reworked** (the flask sits
+     inside the ring, which stays the progress bar; each shake the bubbles get more, faster, bigger and the surface rolls;
+     made = the cork pops, a magenta spray and the item fly up out of the neck, the item spins and drops back).
+     My view (asked): A, since the user keeps coming back to it, F's item flying up repeats Cooking's toss, and a pop and
+     spray a hundred times in a Create All tires. **ALCHEMY FINAL (phase 2b): A. Boil over + bubbles, kept** (2026-11-13).
+     Tailoring (phase 2b; A = Plucked + runs down; each new one a different structure): **B. On the loom** (warp threads
+     inside the ring, a shuttle flies back and forth laying rows of cloth from the top down behind the item, rows beaten
+     tight on the beats; made = the snip cuts it free, a sheen), **C. Embroidery hoop** (the ring is a wooden hoop with a
+     clamp holding cloth; a needle stitches a four-petal flower round the item, a petal per beat; made = snip at the clamp,
+     the petals glint in turn), **D. Spinning wheel** (spokes turn round the item; a tuft of wool at the side is spun into
+     thread that winds onto the rim, faster each beat; made = snip, the wheel spins down, the thread glints). Opens on B.
+     **TAILORING FINAL (phase 2b): A. Plucked + runs down, kept** (2026-11-13).
+     Engineering (phase 2b; A = Wrench, 4 turns + it starts up; each new one a different structure): **B. Conveyor and press**
+     (the ring is a conveyor belt carrying gears, bolts and springs round; one drops into the item on each click; made = a
+     stamping press comes down on the item with the boing and a puff), **C. Wire it up** (red, blue and yellow wires snake
+     in from outside one per click and plug into sockets on the ring with a spark; made = current runs round through the
+     sockets, the item lights blue-white), **D. Lever and lights** (a lever at the side is pulled on each click, lighting
+     the next of three bulbs on the ring; made = all flash, the item hops with a puff, the lever springs back). Opens on B.
+     **ENGINEERING FINAL (phase 2b): A. Wrench, 4 turns + it starts up, kept** (2026-11-13).
+     Cooking (phase 2b; A = Toss the pan + burner + sizzle; each new one a different structure): **B. Lid rattles** (the
+     ring is a pot with a lid on top; it rattles, hopping higher with a puff of steam each beat; made = the lid pops off and
+     lifts away, warm steam), **C. Rising in the oven** (an oven glow warms inside the ring; the food puffs up a little bigger
+     each beat and browns; made = risen golden, a shine, the glow fades), **D. Batter spreads** (batter spreads outward
+     from round the food to the ring, bubbles popping on it each beat; made = the edge crisps golden). Opens on B.
+     → the lid is "really cool but kind of awkward with the ring shape": **E. Lid from above** (the pot seen from above: the
+     ring is its rim, a round metal lid with a knob sits inside over the food; it rattles and hops each beat with a shadow
+     and steam puffing from its edge; made = the lid lifts off up and away showing the food, warm steam). Opens on E.
+     "E is really cool but I think A fits best": **COOKING FINAL (phase 2b): A. Toss the pan + burner + sizzle, kept** (2026-11-13).
+     Enchanting (phase 2b; A = Motes + arcane flame, "not 100%"; new ones magical, each a different structure): **B.
+     Starfall** (tiny stars drift down onto the ring; each chime a shooting star streaks down and lands with a sparkle, the
+     ring brighter each time; made = a big star falls onto the item and bursts), **C. Moon phases** (a pale moon behind the
+     item waxes a phase each chime, crescent, half, gibbous; made = full, a silver-violet halo, stars twinkle round the
+     ring), **D. Arcane bloom** (each chime a layer of glowing violet petals unfolds from behind the item, bigger and
+     paler each time; made = the bloom opens fully, flares, the petals scatter as sparkles). Opens on B.
+     → mix B and C, replace D: **E. Starfall moon** (the moon behind the item waxes a phase each time a shooting star lands on
+     it on a chime, the ring glowing brighter, tiny stars drifting down; made = a big star falls, the moon turns full, halo,
+     stars twinkle), new **D. Echoes** (three ghostly echoes of the item float round it; each chime one drifts in and merges
+     with a ripple, the item glowing stronger; made = it flares, a ring of light, sparkles rise). Opens on E.
+     → "A is still the best, but remove the arcane flames and add the finale sparkle flair the moon phases has": **F. Motes +
+     moon sparkle** (the first-pass Motes draw the circle, no flames; made = the star and spiral plus a silver-violet halo
+     and stars twinkling round the ring). Opens on F.
+     **ENCHANTING FINAL (phase 2b): F. Motes + moon sparkle** (2026-11-13).
+     First Aid (phase 2b; A = Splint it; after-battle and hands-on, each a different structure): **B. Tourniquet** (a linen
+     strap round the ring with a stick knotted in at the top; each tap twists it a half turn and the strap cinches in a
+     notch; made = the stick tucked and locked with a tug), **C. Catch your breath** (the ring breathes, ragged and quick at
+     first, slower and deeper as it fills, a deep breath on each tap with a ripple in to the item; made = calm, a warm glow
+     eases out), **D. Bandage roll** (a small linen roll rolls round the ring laying the bandage behind it, thinner as it
+     runs out, bumping on each tap; made = the end tucked in at the top with a tug). Opens on B.
+     → "First Aid is kind of hard ... maybe lean away from the bandage motifs". Round 2 without bandages: **B. Draw out the
+     venom** (a cure like anti-venom: the ring starts sickly green; each tap draws a dark green drop out and away, the colour
+     shifting toward warm gold; made = clean warm gold glow), **C. By the campfire** (a small campfire beside the ring,
+     lower left; the ring warms from cold blue to amber to orange, embers rising; each tap stokes the fire; made = warm all
+     round, the fire settles), **D. Second wind** (wind streaks sweep round the ring, a stronger gust each tap; made = a
+     final gust spirals in and lifts the item a touch). Opens on B.
+     → "iterate on A ... add more to this to make it better; the most cohesive to First Aid". Add-ons on Splint it, each adding
+     one thing: **B. Splint + ripples** (a warm ripple runs in to the item on each tie, the item warming), **C. Splint + heft**
+     (each cinch puffs dust off the sticks and jolts the splint, the knot a double tug with a glint), **D. Splint + relief**
+     (after the knot a warm golden glow pulses out once and soft motes drift up). Opens on B.
+     → mix C and D: **E. Splint + heft + relief** (each tie cinches with dust and a jolt, the knot a double tug with a glint,
+     then the warm golden glow and rising motes). Opens on E.
+     **FIRST AID FINAL (phase 2b): E. Splint + heft + relief** (2026-11-13). **Phase 2 second pass done for all eight.**
+     **9. Smelting** (phase 2; on the page as profession 9: no 1.3 animation, own sounds: hammer taps SmithT1-3 on .3/.46/.62,
+     the CLANG + hiss when done; mockup item a Copper Bar): **A. Cast + bellows** (Blacksmithing's E, the user's pick for
+     smelting), **B. Melt it down** (lumps of grey ore round the ring glow and slump, a few melting into the molten pool on
+     each tap; made = all molten, the CLANG, it cools to copper), **C. Skim the slag** (the ring is molten metal with dark
+     slag floating; each tap a skimmer sweeps a third round and flicks the slag off; made = pure bright metal, the CLANG),
+     **D. Crack the ore** (the ring is a crust of ore; each tap a glowing crack splits it, molten veins showing; made = the
+     crust bursts and its chips fall away, a bright molten band, the CLANG). Opens on B.
+     → "Definitely A, how can we improve on it?" Add-ons on Cast + bellows, each adding one thing: **B. + Ore in the
+     crucible** (before each pour a few grey lumps of ore drop into the crucible and sink in with a glow and a spit of
+     sparks), **C. + Sparks and drips** (sparks splash where the stream hits the channel, glowing drips fall off the lip
+     between pours, heat shimmer above the crucible), **D. + Cools to copper** (after the mould cracks, a cooling wave runs
+     round from the top, white-hot to copper, then a shine sweeps the item). Opens on B.
+     → "B and D, but what about the crucible itself": **E. B + D, new crucible** (a bigger iron crucible with a rounded bowl,
+     a light rim and outline and a pouring spout, over the top-left of the ring; the molten metal glows inside, hotter on each
+     bellows pump, its level dropping with each pour; it tips smoothly to pour from the spout and settles back; ore drops in
+     before each pour; when the mould cracks it lifts away empty and the cast cools to copper with a shine). Opens on E.
+     → the user **did not like this crucible** (2026-11-13, stop point). **Next session, first thing: new crucible designs**
+     for Smelting (A = Cast + bellows with B's ore drops and D's copper cooling kept; only the crucible changes), then
+     Disenchanting (phase 2, sub-system 10), then Phase 3 Polish.
+     Alchemy follow-up ("by end I mean the end of the animation"): the expanding "steam" after the last beat was
+     the colored smoke cloud from the locked mix's finale rising from the middle past the top; Alchemy E no longer
+     has it (the flash, the magenta glow and the cork stay; the puff comes off the head at 86%).
   2. **Then crafting animations, per profession**: several unique designs for every crafting profession
      (not one concept adapted), like the popup rounds.
 
