@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up Phase 2 round 10 built (tighter layout, notched vessel vs. grows along the line), awaiting the verdict; kit 0.8.1. Read this
+_Last checkpoint: 2026-11-15, skill-up Phase 2 round 10 picked B (grows along the line), round 11 (its add-ons) built, awaiting the verdict; kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -43,11 +43,11 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   only Herbalism's stalk lifting the icon), D The line is the container (likes only Herbalism's planter trough).
   **"The one" isn't found yet.** The user: **the presentation needs work** (lots of unused space; could show more
   info or design) but **don't over-design**.
-  **Round 10 built, awaiting the user's verdict** (keys 1-4; **rounds have four options**, the user expects it): the tighter layout (name, skill "/ 150 Journeyman", next
-  unlock + "N to go", then the two unlocks after it) with **A. The notched vessel** (B's vessel + A's notches up its
-  side, the brim = the unlock) and **B. It grows along the line** (A's line grows the profession's way: vine, blade,
-  crystal, seam, ore vein), **C. The module fills** (the material rises behind the text), **D. From one to the other**
-  (an hourglass: to go above, done below). Crafters have no third line (no unlock list), so their module is a line shorter in content.
+  **Round 10 picked B "It grows along the line"** in the tighter layout (name, skill "/ 150 Journeyman", next unlock +
+  "N to go", then the two after it); **rounds have four options** (the user expects it). **Round 11 built, awaiting
+  the verdict** (keys 1-4, add-ons to B; `growModule(top, mode)`): A as it is, B a flourish at the tip per skill-up,
+  C the unlocks on the line (the view slides on), D the growth is drawn into the unlock's icon and dresses it. After
+  the user locks B (with add-ons), the per-profession pass follows, like crafting's.
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.

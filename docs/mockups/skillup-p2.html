@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up, Phase 2 round 10</h1>
+  <h1>Skill-up, Phase 2 round 11</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  round 10: one tighter module (name, skill out of the rank cap, the next unlock and points to go, the two after it) and four ways built from round 9’s likes: A the notched vessel (B’s vessel + A’s notches), B the line grows (A’s line + the Herbalism plant), C the whole module fills, D an hourglass (to go above, done below). Rounds 2-9 stay in the code.
+  round 11: add-ons to round 10’s pick, the line that grows (A, as it is): B a flourish at the tip per skill-up, C the unlocks sit on the line and the view slides on, D at the unlock the growth is drawn into the icon and dresses it. Rounds 2-10 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the profession.</small>
 
@@ -225,7 +225,7 @@ function cell(p, x, y, w, h, lit, age, now, i) {
   ctx.restore(); }
 
 // ---------- scene ----------
-let S = null, fam = 'NV', profName = 'Herbalism', moment = 'up';
+let S = null, fam = 'G0', profName = 'Herbalism', moment = 'up';
 function build() { const p = PROF[profName], hits = []; let v0;
   if (moment === 'up') { v0 = p.v; hits.push(.35); }
   else if (moment === 'five') { v0 = p.five; for (let k = 0; k < 5; k++) hits.push(.35 + k * .75); }
@@ -1056,7 +1056,72 @@ const FAM = {
       ctx.restore();
       if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
     } },
+
+  // ---------- round 11 (2026-11-15): add-ons to round 10 B (it grows along the line); A = B as it is
+  G0: { name: 'A. It grows along the line (round 10 B)', desc: 'Round 10’s pick as it is: the line grows toward the next unlock’s icon a step per skill-up, the profession’s way (vine, blade, crystal, seam, ore vein); faint notches count the points; the skill out of the rank cap, the points to go, the two unlocks after it.',
+    note: 'round 10 B as it is (the reference).', draw(top) { growModule(top, 'plain'); } },
+  GT: { name: 'B. The tip does something', desc: 'Each skill-up lands at the growing tip with a small flourish of its own, besides the step forward and the profession’s sound: a new leaf unfurls (Herbalism), a white-hot flash with sparks as if struck (Blacksmithing), a new facet catches the light with a glint (Alchemy), the seam pulls taut and a knot pops (Tailoring), a crack opens with a glint of ore (Mining). Progress is the same; each point feels like it landed.',
+    note: 'a flourish at the tip on every skill-up.', draw(top) { growModule(top, 'tip'); } },
+  GR: { name: 'C. The unlocks on the line', desc: 'The “then …” text goes: the line is the road. The next unlock and the ones after it sit on the line at their levels (the next one bigger, the later ones faint), so the line shows the next three steps. The growth runs toward them. At an unlock that icon pops, then the view slides along: what grew slides off to the left and the next stretch opens. Crafters have only the rank cap on their line.',
+    note: 'the unlocks sit on the line at their levels; at one the view slides to the next stretch.', draw(top) { growModule(top, 'road'); } },
+  GU: { name: 'D. The growth turns into the unlock', desc: 'Skill-ups stay quiet; the unlock gets a finale. When the line reaches the end, everything that grew is drawn into the unlock’s icon (the line runs in from the left), then the icon lights the profession’s way: the vine winds round the icon and flowers (Herbalism), the icon glows white-hot and cools to gold (Blacksmithing), crystal shards burst off it (Alchemy), a seam stitches a frame round it (Tailoring), a stone shell cracks open to show it (Mining).',
+    note: 'at the unlock, the growth is drawn into the icon and dresses it.', draw(top) { growModule(top, 'unlock'); } },
 };
+// round 11: the grows-along-the-line module with its add-on (mode: plain, tip, road, unlock)
+function payoff(x, y) { [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(x, y); spawn({ x, y, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); }
+function growModule(top, mode) {
+  const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+  const road = mode === 'road', fin = mode === 'unlock', x0 = px + 48, x1 = px + pw - (road ? 16 : 32), L = x1 - x0, ly = py + 37, done = S.closeAt !== undefined, ux = px + pw - 17, f = clamp((st.v - lo) / n);
+  let X = v => x0 + clamp((v - lo) / n) * L, marks = [], lo2 = lo;
+  if (road) { const ups = (p.unlocks || []).filter(u => u[0] > lo), win = ups.length ? ups.slice(0, 3) : [[nx.lv, nx.name, nx.emo]], hi = win[win.length - 1][0];
+    const sl = done ? eOut(clamp((S.age - S.closeAt - .6) / .8)) : 0, hi2 = ups.length > 3 ? ups[3][0] : hi; lo2 = lerp(lo, nx.lv, sl); const hiN = lerp(hi, hi2, sl);
+    X = v => x0 + (v - lo2) / Math.max(1, hiN - lo2) * L; marks = ups.length ? ups.slice(0, 4) : win; }
+  const tipX = road ? X(st.v) : x0 + f * L, unX = road ? X(nx.lv) : ux;
+  strikes(() => ({ x: tipX, y: ly }));
+  if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; if (fin) tone(300, 0, .035, .7, 'sine', 900); else payoff(unX, ly); });
+  const k = fin && done ? clamp((S.age - S.closeAt) / .6) : 0, payAt = done ? S.closeAt + (fin ? .6 : 0) : 99;
+  if (fin && done && S.age >= payAt) once('pay', () => { payoff(ux, ly); if (p.mat === 'liquid') for (let i = 0; i < 10; i++) { const an = i / 10 * 6.283; spawn({ x: ux, y: ly, vx: Math.cos(an) * 90, vy: Math.sin(an) * 90, g: 120, life: .6, size: 2.2, shape: 'star', vr: 6, col: i % 2 ? '#e8d8ff' : '#9a5ae0' }); } });
+  ctx.save(); ctx.globalAlpha = a; pill(px, py, pw, ph);
+  icon(px + 24, py + ph / 2, 28, p.made || p.node, 1);
+  head(p, st.shown, x0, py + 19);
+  if (road) { for (let v = Math.ceil(lo2 / 5) * 5; X(v) <= x1; v += 5) { const x = X(v); if (x < x0) continue; ctx.strokeStyle = st.v >= v ? 'rgba(255,211,106,.6)' : 'rgba(255,255,255,.16)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, ly + 6); ctx.lineTo(x, ly + 9); ctx.stroke(); } }
+  else for (let j = 1; j < N; j++) { const x = x0 + j / N * L, got = f >= j / N - 1e-6; ctx.strokeStyle = got ? 'rgba(255,211,106,.7)' : 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, ly + 6); ctx.lineTo(x, ly + 9); ctx.stroke(); }
+  // the growth (road: from where the stretch began, so it slides off on the way to the next; finale: eaten from the left into the icon)
+  ctx.save(); ctx.beginPath(); ctx.rect(fin ? x0 - 4 + (L + 4) * k : x0 - 4, ly - 14, (fin ? (L + 4) * (1 - k) : L + 8) + 4, 28); ctx.clip();
+  if (road) { ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); const s0 = X(lo); grow(p, s0, ly, Math.max(.5, tipX - s0), 1, S.age); }
+  else grow(p, x0, ly, L, f, S.age);
+  ctx.restore();
+  if (fin && done && k < 1) { const hx = x0 + L * k; ctx.save(); ctx.fillStyle = hexA(p.light, .8 * (1 - k)); ctx.shadowColor = p.light; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(hx, ly, 3, 0, 7); ctx.fill(); ctx.restore(); }
+  if (mode === 'tip') S.hits.forEach(h => flourish(p, tipX, ly, S.age - h - HIT));
+  if (done && !fin && !road) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.strokeStyle = `rgba(255,255,255,${fl})`; ctx.lineWidth = 5; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); ctx.shadowBlur = 0; } }
+  const pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
+  if (road) marks.forEach(u => { const x = X(u[0]), isNext = u[0] === nx.lv, fade = clamp((x - x0 + 4) / 14) * clamp((x1 + 8 - x) / 10); if (fade <= 0) return;
+      ctx.save(); ctx.globalAlpha *= fade * (isNext || lit ? 1 : .6); icon(x, ly, (isNext ? 18 : 13) + (isNext ? pop * 6 : 0), u[2], isNext && lit ? 1 : .5, isNext && lit ? p.light : null); ctx.restore(); });
+  else { icon(ux, ly, 20 + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null); if (fin && lit) dressIcon(p, ux, ly, 20 + pop * 6, clamp((S.age - payAt) / .8), S.age - payAt); }
+  if (fin && done && !lit && p.mat === 'stone') { ctx.fillStyle = `rgba(90,82,74,${clamp((S.age - S.closeAt) / .3)})`; ctx.fillRect(ux - 12, ly - 12, 24, 24); }
+  tail(p, nx, st.shown, x0, py + 58, lit, false, road);
+  ctx.restore();
+  if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + (fin ? 1 : road ? .5 : .35), '600 13px system-ui', false); }
+// round 11 B: the flourish at the tip, t seconds after the strike lands
+function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
+  if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
+  else if (m === 'iron') { const r = 5 + u * 14, g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(255,250,230,${e})`); g.addColorStop(.4, `rgba(255,160,60,${e * .7})`); g.addColorStop(1, 'rgba(255,120,40,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
+  else if (m === 'liquid') { ctx.globalAlpha *= e; ctx.fillStyle = '#fff'; ctx.shadowColor = '#d0a8ff'; ctx.shadowBlur = 10; star4(x, y - 4, 3 + e * 6, t * 4); }
+  else if (m === 'thread') { ctx.globalAlpha *= e; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x - 24 * (1 - u * .5), y); ctx.lineTo(x, y); ctx.stroke(); ctx.fillStyle = '#fff4d8'; ctx.beginPath(); ctx.arc(x, y, 1.5 + eBack(clamp(t / .25)) * 2, 0, 7); ctx.fill(); }
+  else { ctx.globalAlpha *= e; ctx.strokeStyle = '#d8ccc0'; ctx.lineWidth = 1; [-.9, .1, 1.1, 2.4].forEach((an, i) => { const l = (4 + i % 2 * 3) * eOut(clamp(t / .2)) + u * 4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(an) * l, y + Math.sin(an) * l); ctx.stroke(); }); ctx.fillStyle = '#ffd0a0'; star4(x + 2, y - 3, 2 + e * 3, 0); }
+  ctx.restore(); }
+// round 11 D: the unlock's icon dressed by what grew; k 0..1 progress, t seconds since the payoff
+function perim(x, y, h, q) { const L = 8 * h, d = ((q % 1) + 1) % 1 * L; // around the square from the left middle, up and clockwise
+  const pts = [[x - h, y], [x - h, y - h], [x + h, y - h], [x + h, y + h], [x - h, y + h], [x - h, y]], seg = [h, 2 * h, 2 * h, 2 * h, h]; let r = d;
+  for (let i = 0; i < 5; i++) { if (r <= seg[i]) { const t = r / seg[i]; return { x: lerp(pts[i][0], pts[i + 1][0], t), y: lerp(pts[i][1], pts[i + 1][1], t) }; } r -= seg[i]; } return { x: x - h, y }; }
+function dressIcon(p, x, y, s, k, t) { const m = p.mat, h = s / 2 + 3; ctx.save();
+  if (m === 'stem' || m === 'thread') { ctx.strokeStyle = m === 'stem' ? '#3fa83a' : '#fff4d8'; ctx.lineWidth = m === 'stem' ? 1.8 : 1.3; if (m === 'thread') ctx.setLineDash([3, 2]); ctx.beginPath(); for (let q = 0; q <= k; q += .01) { const pt = perim(x, y, h, q); ctx.lineTo(pt.x, pt.y); } ctx.stroke(); ctx.setLineDash([]);
+    if (m === 'stem') { for (let q = .08; q < k; q += .12) { const pt = perim(x, y, h, q); ctx.fillStyle = '#7ee04a'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y, 3, 1.4, q * 9, 0, 7); ctx.fill(); } if (k >= 1) bud(x + h, y - h, clamp(t - .8) * 1 + .01); } }
+  else if (m === 'iron') { const hot = clamp(1 - t / 1.2), g = ctx.createRadialGradient(x, y, 0, x, y, s); g.addColorStop(0, `rgba(255,170,70,${hot * .7})`); g.addColorStop(1, 'rgba(255,120,40,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, s, 0, 7); ctx.fill();
+    ctx.strokeStyle = mix('#fff4d8', '#ffd36a', 1 - hot); ctx.lineWidth = 2; ctx.strokeRect(x - h + 2, y - h + 2, 2 * h - 4, 2 * h - 4); }
+  else if (m === 'liquid') { ctx.globalAlpha *= clamp(1 - t / 1.2); ctx.fillStyle = '#fff'; ctx.shadowColor = '#d0a8ff'; ctx.shadowBlur = 8; [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([a, b], i) => star4(x + a * h, y + b * h, 2 + 3 * Math.abs(Math.sin(t * 6 + i)), t * 2)); }
+  else { const sp = eOut(k) * 12, al = 1 - k; if (al > 0) { ctx.fillStyle = `rgba(90,82,74,${al})`; ctx.fillRect(x - 12 - sp, y - 12, 12, 24); ctx.fillRect(x + sp, y - 12, 12, 24); ctx.strokeStyle = `rgba(255,176,112,${al})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - sp, y - 12); ctx.lineTo(x - sp - 2, y); ctx.lineTo(x - sp, y + 12); ctx.stroke(); } }
+  ctx.restore(); }
 // round 10 C: the material behind the text, from surf down to bot, across the module
 function panelFill(p, px, pw, surf, bot, t, hitAge) { const m = p.mat, sp = hitAge >= 0 && hitAge < .6 ? (1 - hitAge / .6) : 0; if (surf >= bot) return; ctx.save();
   const wave = (i, amp) => surf + Math.sin(i * .08 + t * 3) * amp * (1 + sp * 2.5);
@@ -1083,11 +1148,11 @@ function matFill(p, x, y, w, h, t, top) { if (h <= .2) return; const m = p.mat;
 function rankOf(v) { return [[75, 'Apprentice'], [150, 'Journeyman'], [225, 'Expert'], [300, 'Artisan']].find(r => v < r[0]) || [300, 'Artisan']; }
 function head(p, shown, x, y) { const nf = '600 13px system-ui', w1 = text(profName, x, y, nf, p.light), wn = drawNum('n', String(shown), x + w1 + 6, y, 14, '#fff', 'left', 'roll'), rk = rankOf(shown);
   text(`/ ${rk[0]}  ${rk[1]}`, x + w1 + 6 + wn + 4, y, '400 10px system-ui', '#8a8270'); }
-function tail(p, nx, shown, x, y, done, withIcon) { let cx = x;
+function tail(p, nx, shown, x, y, done, withIcon, noAfter) { let cx = x;
   if (withIcon) { icon(cx + 7, y - 4, 14, nx.emo, done ? 1 : .6, done ? p.light : null); cx += 18; }
   if (done) { text(nx.cap ? `${nx.name} rank: train it` : `${nx.name} unlocked`, cx, y, '600 11px system-ui', '#ffd36a'); return; }
   const left = Math.max(0, nx.lv - shown); cx += text(nx.cap ? `${nx.name} rank at ${nx.lv}` : nx.name, cx, y, '400 11px system-ui', '#cfc6b0'); cx += text(`  ${left} to go`, cx, y, '600 11px system-ui', '#ffd36a');
-  const after = (p.unlocks || []).filter(u => u[0] > nx.lv).slice(0, 2); if (!after.length) return;
+  const after = (p.unlocks || []).filter(u => u[0] > nx.lv).slice(0, 2); if (!after.length || noAfter) return;
   cx += text('   then', cx, y, '400 10px system-ui', '#7a7262') + 4;
   after.forEach(u => { icon(cx + 6, y - 4, 12, u[2], .5); cx += 14; cx += text(String(u[0]), cx, y, '400 10px system-ui', '#8a8270') + 5; }); }
 function info(p, nx, shown, x, y, done) { head(p, shown, x, y); tail(p, nx, shown, x, y + 18, done, true); }
@@ -1267,7 +1332,7 @@ function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now;
 
 // ---------- panel ----------
 const fEl = document.getElementById('fams'), pEl = document.getElementById('profs');
-['NV', 'GL', 'MF', 'HG'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
+['G0', 'GT', 'GR', 'GU'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
 Object.keys(PROF).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.dataset.p = k; b.onclick = () => setProf(k); pEl.appendChild(b); });
 function sync() { document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam)); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
   document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('fdesc').textContent = FAM[fam].desc; }
@@ -1275,7 +1340,7 @@ function setFam(k) { fam = k; sync(); play(); } function setProf(k) { profName =
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
 addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); }
-  const i = '1234'.indexOf(e.key); if (i >= 0) setFam(['NV', 'GL', 'MF', 'HG'][i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
+  const i = '1234'.indexOf(e.key); if (i >= 0) setFam(['G0', 'GT', 'GR', 'GU'][i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
 sync(); play(); requestAnimationFrame(frame);
 </script>
 </body>

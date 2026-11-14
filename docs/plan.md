@@ -643,6 +643,16 @@ Professions (from 1.3.0):
    the material rises behind the text, dim, with a surface line; notches on the right edge; full = the panel flashes and
    the corner icon pops) and **D. From one to the other** (an hourglass: the top bulb is the points still to go, the
    bottom the points done; each skill-up runs a portion through the neck in the profession's material).
+   Round 10 → **B "It grows along the line" picked** ("pretty good"); the user wants add-ons/variations of B before
+   locking it and moving on to the per-profession pass.
+   Round 11 (same page, keys 1-4; rounds 2-10 kept in the code), pitched first, add-ons to B, each on a different
+   part: A. B as it is (reference), **B. The tip does something** (a flourish at the tip per skill-up: a leaf unfurls,
+   a white-hot flash, a facet glint, the seam pulls taut with a knot, a crack with an ore glint), **C. The unlocks on
+   the line** (no "then" text: the next three unlocks sit on the line at their levels, the next one bigger; at an
+   unlock the view slides on and what grew slides off left; crafters see only the rank cap), **D. The growth turns
+   into the unlock** (quiet skill-ups; at the unlock the growth runs into the icon from the left, then dresses it:
+   the vine winds round and flowers, white-hot cooling to gold, crystal shards burst, a stitched frame, a stone shell
+   cracks open).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
