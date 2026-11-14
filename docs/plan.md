@@ -668,6 +668,10 @@ Professions (from 1.3.0):
    Skinning: A The cut (knife glint), B Peeled strip (curl rides the tip), C Scraped clean (fur to smooth leather),
    D Tracks (claw marks to the beasts on the line). Fishing: A The cast (bobber, ripple), B The stream (the fish jumps),
    C Ripples (lit water), D The reel (the fish is pulled in to the reel).
+   **Round 12 feedback (2026-11-15):** Fishing: likes D The reel and A The cast; combine them (the cast with the reel at
+   the line's start, so the line doesn't come from nowhere), then add-ons to that. Skinning: happy with A The cut;
+   add-ons next. Herbalism: A Vine the favorite, may stay; B-D read as variations of A, wants clearly different ideas.
+   Mining: none clicked; all new. Round 13 pitched in chat first.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
