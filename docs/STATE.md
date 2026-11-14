@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-14, crafting Phase 2 done for all 10; starting Phase 3 Polish (design only). Read this
+_Last checkpoint: 2026-11-14, crafting Phase 3 Polish done (design only); next the in-game API checks and the build. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -19,9 +19,13 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   (a mould turning clockwise under a fixed spout, 3 punchy beats, heat gradient, glug beats, crack + clatter
   + tink finale), **10 Disenchanting H** (Burn away: the icon burns from its edges, embers feed the ring,
   storm into implosion, then the dust; the feel: "the item is actually getting destroyed").
-- **Next up: Phase 3 Polish** across all 10 (make them read as one addon; note deviations as options, the
-  user decides), then API checks in game (Smelting window's name on Forever; is disenchant a trade-skill
-  cast; the burn as an 8x8 grid of icon slices via SetTexCoord) and the build with `wow-mockup-to-addon`.
+- **Phase 3 Polish done** (2026-11-14; plan.md "Crafting Phase 3 Polish"): 3 beats + the finale for all ten; fill as
+  picked, plus Leatherworking now punchy (each punch slams the fill to its hole; punchy = the hits: Blacksmithing,
+  Engineering, Cooking, Smelting, Leatherworking); ring widths, tool placement and finale lengths as picked (Alchemy's tube
+  and Smelting's mould stay thicker); loudness **Even** (every profession about -29 dB at its loudest; per-profession gains
+  in `LOUD_GAIN.even`, Blacksmithing x0.38, Tailoring x3.63). The page's Polish panel opens on the decided settings.
+- **Next up**: API checks in game (Smelting window's name on Forever; is disenchant a trade-skill cast; the burn as an
+  8x8 grid of icon slices via SetTexCoord), then the build with `wow-mockup-to-addon`.
 
 ## The compare page (how it works, for the next session)
 - Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
@@ -30,6 +34,8 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   their own set). Options are `{ name, desc, work, payoff, overlay, ownSound }`; `ownSound` silences the
   1.3 side's beat sounds so the new side plays its own.
 - Checking: mute only the run (`play(); S.mute = true`), never untick the Sound box; one scene at a time.
+- Loudness check without playing: render a craft offline (log `Sound` calls over synthetic `frame()` steps, replay them into an
+  OfflineAudioContext behind a Proxy for `A` whose currentTime is the event time; loudest 50 ms RMS in dB).
 - Mockup perf: no `shadowBlur` inside rotated or mirrored transforms (Smelting dropped to 12 fps); use a soft wide
   stroke or halo. The page timer now keeps timers added from inside a timer (nested effects used to vanish).
 - sed gotchas: an unescaped apostrophe in a JS string breaks the page (use ’); plan.md edits with quotes:
@@ -75,6 +81,7 @@ every round and pick). Older detail: git log, CHANGELOG.md._
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-14 Crafting phase 3 Polish done (3 beats, Leatherworking punchy, loudness Even).
 - 2026-11-13 Crafting phase 2 second pass (all 8 locked), Smelting + Disenchanting added; kit 0.8.0.
 - 2026-11-12 1.4.0 design: scope, bars, XP, rep, level-up, recap, style guide, crafting phase 1.
 - 2026-11-10 1.3.1. 2026-11-09 1.2.x. 2026-11-06 1.1.0. 2026-11-04 1.0.0 on WoW Forever.

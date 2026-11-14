@@ -1216,6 +1216,47 @@ the user's own):
      sizzle · Enchanting F Motes + moon sparkle · First Aid E Splint + heft + relief · Smelting K Smooth turn, 3 punchy beats,
      bar effects, glug + clatter + tink · Disenchanting H Burn away + embers + storm into implosion. Next: Phase 3, Polish
      (make all ten read as one addon), then API checks in game and the build.
+  **Crafting Phase 3, Polish (started 2026-11-14).** The compare page has a "Play all ten" reel (each final pick in turn on
+  the same ring). Audit of where the ten drift apart; each is a decision for the user, not a silent change:
+  1. **Beat count**: 3 beats + finale (Blacksmithing, Cooking, Enchanting, First Aid, Smelting, Disenchanting) vs 4
+     (Leatherworking punches, Alchemy, Tailoring, Engineering turns). The user found 4 + finale too repetitive on Smelting.
+  2. **How the ring fills**: stepped/punchy chunks (Blacksmithing, Engineering, Cooking, Smelting) vs smooth (the other six).
+  3. **Ring recipe** (style guide: one Ring recipe): stroke widths differ (thread 1.8, tube 8, metal 4-5, leather 6-7), and
+     some rings are fully custom while others are the default stroke with extras.
+  4. **Tools outside the ring**: hammer top-right, spool top, wrench handle right, pan handle lower-left, hopper top, splint
+     over the item; no shared rule for where tools sit.
+  5. **Finale length and size**: from a short cork pop / snip to long ones (Blacksmithing CLANG + shockwave + cooling wave
+     + steam; Engineering's start-up chase; Smelting's cooling; Disenchanting's storm + implosion).
+  6. **Loudness**: the Blacksmithing anvil and CLANG are much louder than the new softer families (Smelting glug,
+     Disenchanting crackle); the user wants sounds "noticeable but out of the way".
+  7. **Leatherworking timing**: its punches land on even quarters but its punch sounds still use 1.3's .18-.66 beats.
+     Polish 1 (beat count) in progress: the Polish panel has a **Beats** switch ("As picked" / "3 for all"; the reel follows
+     it). 3-beat versions: Leatherworking Burnished with 3 punches (at 1/6, 1/2, 5/6, its own thoks, the whip as before),
+     Alchemy Boil over + bubbles with 3 beats (.2/.42/.64, own glug sounds), Tailoring Plucked + runs down with 3 beats
+     (.22/.44/.66, own fwips), Engineering the wrench with 3 turns + it starts up (the user earlier felt 4 turns read as more
+     "tinkering": a possible exception). Point 7 turned out moot: the locked Burnished already plays its own thoks on its
+     punches.
+     **Polish 1 decided 2026-11-14: "3 for all"** (3 beats + the finale for every profession; the switch now opens on it).
+     **Polish 2 decided 2026-11-14: "As picked"** (punchy only where the profession or animation calls for it). The **Fill** switch ("As picked" / "Punchy for all"). Punchy gives the six smooth
+     fills (Leatherworking, Alchemy, Tailoring, Enchanting, First Aid, Disenchanting) Smelting's feel: a slow creep to 40%,
+     each of the 3 beats lands a 20% jump with a little overshoot (`fillOf` in `state()`, so every overlay follows).
+     **Leatherworking punchy, decided 2026-11-14** (the rule: hits jump, flows creep; now its picked fill, the switch button
+     removed): the ring creeps and each punch slam the fill to that hole (1/6, 1/2, 5/6) with a little
+     overshoot, then runs to the end under the whip (`lwFill`). Punchy: Blacksmithing, Engineering, Cooking, Smelting, Leatherworking.
+     **Polish 3 decided 2026-11-14: "As picked"** (the tube and the mould are the material). Measured (strokes on the ring at mid-craft): the default ring (5 px faint track, 5 px
+     arc in the profession's color, white head dot) as is for Leatherworking, Tailoring, Enchanting, First Aid,
+     Disenchanting; Blacksmithing, Engineering and Cooking cover it and repaint their own arc at the same 5 px (heat, steel,
+     flame tones); only Alchemy (11 px glass tube, 8 px liquid) and Smelting (10 px mould, 9 px stone, 4 px metal) are
+     thicker. A **Ring** switch ("As picked" / "One width (5 px)") brings those two to the shared width (Alchemy tube 7,
+     liquid 5; Smelting mould 8, stone 7, metal 5), keeping their look (`withRingWidths`).
+     **Polish 4 decided 2026-11-14: "As picked"** (the user: the tool placements make sense for what each tool is).
+     **Polish 5 decided 2026-11-14: "As picked"** (the user: finales are per profession, uniqueness is good).
+     **Polish 6 decided 2026-11-14: "Even"** (every profession about -29 dB at its loudest; the build uses these gains). Measured offline (each final pick's whole craft rendered, the loudest 50 ms, dB):
+     Blacksmithing -20.6, Alchemy -25.8, Engineering -26.1, Enchanting -26.2, Disenchanting -30.2, First Aid -30.4,
+     Leatherworking -31.2, Cooking -32.9, Smelting -34.0, Tailoring -40.2. A **Loudness** switch: "As picked" / "Cap the
+     loud 4" (Blacksmithing, Alchemy, Engineering, Enchanting down to about -28; checked -27.3..-28.0) / "Even" (every
+     profession to about -29; checked -28.6..-29.7, Tailoring raised 3.6x). Per-profession gains in `LOUD_GAIN`.
+     **Phase 3 Polish done 2026-11-14** (all 7 points). Next: API checks in game, then the build with wow-mockup-to-addon.
      Alchemy follow-up ("by end I mean the end of the animation"): the expanding "steam" after the last beat was
      the colored smoke cloud from the locked mix's finale rising from the middle past the top; Alchemy E no longer
      has it (the flash, the magenta glow and the cork stay; the puff comes off the head at 86%).

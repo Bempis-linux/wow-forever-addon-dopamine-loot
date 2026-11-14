@@ -51,6 +51,11 @@
   <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>1.3's own sounds (the mockups' code), played once: both sides share the same beats.</small></label>
   <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
   <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+  <h2>Polish (phase 3)</h2>
+  <button id="reel">Play all ten</button><button id="reelStop">Stop</button><br><b style="font-size:11px">Beats:</b> <button id="bPicked">As picked</button><button id="bThree" class="on">3 for all</button><br><b style="font-size:11px">Fill:</b> <button id="fPicked" class="on">As picked</button>
+  <br><b style="font-size:11px">Ring:</b> <button id="rPicked" class="on">As picked</button><button id="rOne">One width (5 px)</button>
+  <br><b style="font-size:11px">Loudness:</b> <button id="l_picked">As picked</button><button id="l_cap">Cap the loud 4</button><button id="l_even" class="on">Even</button><button id="fPunch">Punchy for all</button>
+  <small>Plays each profession's final pick in turn on the same ring (one craft each), named as it plays: to compare rhythm, finales and loudness back to back.</small>
 </div>
 <div id="screen" class="dark"><canvas id="cv"></canvas></div>
 <script>
@@ -86,7 +91,14 @@ const SOUNDS = { LeatherThok: () => thok(0, 1), LeatherZip: () => noise(0, .06, 
   EnchChime1: () => tone(1046 * semi(PENTA[0]), 0, .03, .35), EnchChime2: () => tone(1046 * semi(PENTA[2]), 0, .03, .35), EnchChime3: () => tone(1046 * semi(PENTA[4]), 0, .03, .35), EnchPing: () => { tone(1568, 0, .05, .6); tone(2093, .02, .03, .5); },
   AidTapA: () => { tone(200, 0, .045, .06, 'sine', 140); noise(0, .04, .02, 1600, 2); }, AidTapB: () => { tone(230, 0, .045, .06, 'sine', 160); noise(0, .04, .02, 1800, 2); }, AidTapC: () => { tone(265, 0, .045, .06, 'sine', 185); noise(0, .04, .02, 2000, 2); }, AidDone: () => { tone(880, 0, .035, .3); tone(1318, .03, .025, .35); } };
 // Sound(name + loud): loud "" full, "Q" the quiet copy (the game's quiet copies are about half)
-function Sound(name) { if (S.mute) return; const q = name.endsWith('Q'), f = SOUNDS[q ? name.slice(0, -1) : name]; if (!f) return; VOL = q ? .45 : 1; f(); VOL = 1; }
+// Polish 6, loudness (measured 2026-11-14: the loudest 50 ms of one craft, dB): Blacksmithing -20.6, Alchemy -25.8, Engineering
+// -26.1, Enchanting -26.2, Disenchanting -30.2, First Aid -30.4, Leatherworking -31.2, Cooking -32.9, Smelting -34.0, Tailoring
+// -40.2. "Cap" brings the four loud ones down to -28; "Even" sets every profession to -29
+let loudMode = 'even'; // (polish 6 decided 2026-11-14: Even)
+const LOUD_GAIN = { cap: { Blacksmithing: .44, Alchemy: .78, Engineering: .80, Enchanting: .81 },
+  even: { Blacksmithing: .38, Leatherworking: 1.29, Alchemy: .69, Tailoring: 3.63, Engineering: .72, Cooking: 1.57, Enchanting: .72, 'First Aid': 1.17, Smelting: 1.78, Disenchanting: 1.15 } };
+function loudGain() { const m = round === 'final' && LOUD_GAIN[loudMode]; return (m && m[prof]) || 1; }
+function Sound(name) { if (S.mute) return; const q = name.endsWith('Q'), f = SOUNDS[q ? name.slice(0, -1) : name]; if (!f) return; VOL = (q ? .45 : 1) * loudGain(); f(); VOL = 1; }
 
 // ---------- a small port of Craft.lua's effects (screen y grows down here: Lua's +y is our -y) ----------
 let FX = [];
@@ -189,7 +201,7 @@ const CAST = 3, N_ALL = 5;
 let S = null, prof = 'Blacksmithing', moment = 'one';
 function play() { S = { age: 0, fired: {}, potion: Math.floor(Math.random() * POTION.length), runeSeed: Math.floor(Math.random() * 4), mute: false, flashes: [], notches: [], item: 0, lw: { holes: [] }, alc: { pulses: [], cols: [], level: 0 }, tl: { beats: [] }, en: { clicks: [] }, ck: { beats: [] }, enc: { beats: [] }, fa: { beats: [], bits: [] }, smDone: null }; FX = []; TIMERS = []; }
 function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
-function state() { const n = moment === 'all' ? N_ALL : 1, per = CAST + .25, i = Math.min(n - 1, Math.floor(S.age / per)), t = S.age - i * per; return { i, n, t, f: clamp(t / CAST), made: t >= CAST, over: S.age >= n * per - .25 && t >= CAST, loud: i === 0 ? '' : i < 3 ? 'Q' : false, quiet: i >= 3 }; }
+function state() { const n = moment === 'all' ? N_ALL : 1, per = CAST + .25, i = Math.min(n - 1, Math.floor(S.age / per)), t = S.age - i * per; return { i, n, t, f: fillOf(clamp(t / CAST)), made: t >= CAST, over: S.age >= n * per - .25 && t >= CAST, loud: i === 0 ? '' : i < 3 ? 'Q' : false, quiet: i >= 3 }; }
 function halves() { const hw = W / 2; return [{ x0: 0, w: hw, ring: { x: Math.min(hw * .32, 120), y: H * .62, r: 26 }, label: '1.3 animation beside the ring' }, { x0: hw, w: hw, ring: { x: hw + hw * .5, y: H * .62, r: 26 }, label: 'New: on the arc' }]; }
 let last = performance.now();
 function frame(now_) { const dt = Math.min(.05, (now_ - last) / 1000); last = now_; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
@@ -200,7 +212,7 @@ function frame(now_) { const dt = Math.min(.05, (now_ - last) / 1000); last = no
     if (!c.over || c.t < CAST) once('start' + c.i, () => { const spot = { x: L.ring.x + L.ring.r + 64, y: L.ring.y }; S.mute = false; p.old.work(spot.x, spot.y, CAST, arc.ownSound ? false : c.loud); S.mute = true; arc.work(Rt.ring, CAST, c.loud); S.mute = false; });
     if (c.made) once('pay' + c.i, () => { const spot = { x: L.ring.x + L.ring.r + 64, y: L.ring.y }; p.old.payoff(spot.x, spot.y, c.quiet); arc.payoff(Rt.ring, c.quiet); spawn2(L.ring, p); spawn2(Rt.ring, p); });
     { const due = TIMERS.filter(tm => S.age >= tm.at); TIMERS = TIMERS.filter(tm => S.age < tm.at); due.forEach(tm => { const m = S.mute; tm.fn(); S.mute = m; }); } // (timers added by a timer now survive: the old filter dropped them)
-    if (!c.over || c.t < CAST + .9) { ringBatch(L.ring, c, p); ringBatch(Rt.ring, c, p); if (arc.overlay) arc.overlay(Rt.ring, c); }
+    if (!c.over || c.t < CAST + .9) { ringBatch(L.ring, c, p); ringBatch(Rt.ring, c, p); if (arc.overlay) withRingWidths(() => arc.overlay(Rt.ring, c)); }
     stepFx(dt); const end = (moment === 'all' ? N_ALL : 1) * (CAST + .25) + 1.2; if (S.age > end + .5 && document.getElementById('loop').checked) play(); }
   }
 function loop(now_) { frame(now_); requestAnimationFrame(loop); } // (one loop only: calling frame() by hand never starts another)
@@ -1862,7 +1874,38 @@ FINAL.Disenchanting.H = { name: 'H. B + storm into implosion (E + F)', ownSound:
     After(.4, () => { RingFx(rg.x, rg.y, rg.r * 2.8, .4, 0, DCOL_L); Glint(rg.x, rg.y, 24, .3, 0, [1, .9, 1]); for (let i = 0; i < 16; i++) { const a = R(0, Math.PI * 2), v = R(60, 150); Dot({ x: rg.x, y: rg.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 60, size: R(1.4, 2.4), life: R(.35, .6), add: true, c: i % 2 ? DCOL_L : [1, .75, 1] }); } }); } };
 finalPick.Disenchanting = 'H'; // (final: Disenchanting H, burn away + embers + storm into implosion)
 function setOf() { return round === 'final' && FINAL[prof] ? [FINAL[prof], finalPick] : [ITER[prof], iterPick]; }
-function arcOf() { const [it, pk] = setOf(); if (!it) return PROF[prof].arc; return it[pk[prof] || Object.keys(it)[0]]; }
+// Polish 1, beat count: 3-beat versions of the four final picks that use 4 (Leatherworking, Alchemy, Tailoring, Engineering); the Beats
+// switch in the Polish panel ("As picked" / "3 for all") swaps them in, and the reel follows it
+let beatMode = 'three'; // (polish 1 decided 2026-11-14: 3 beats + the finale for all ten)
+function withBeats(arr, vals, fn) { const save = arr.slice(); arr.length = 0; arr.push(...vals); try { fn(); } finally { arr.length = 0; arr.push(...save); } }
+const LW3 = [1 / 6, .5, 5 / 6];
+function lw3Work(rg, T, loud) { LW3.forEach(f => After(T * f, () => { if (loud !== false) Sound('LeatherThok' + loud); S.lw.holes.push({ i: S.item, f, at: S.age }); const p = head(rg, f); lwPunch(p.x, p.y); for (let k = 0; k < 5; k++) { const a = p.a + R(-.6, .6); Dot({ x: p.x, y: p.y, vx: Math.cos(a) * R(60, 120), vy: -Math.sin(a) * R(60, 120), g: 400, size: R(2, 3), life: R(.35, .5), c: [.55, .36, .2] }); } }));
+  [.89, .92, .95].forEach(f => After(T * f, () => { if (loud !== false) Sound('LeatherZip' + loud); })); }
+function wrStartOverlay(n) { return (rg, c) => { const st = wrState(c, n), d = enDone(c); if (d >= 0) st.bolt += Math.PI * 2 * eOut(clamp(d / .5)); wrPaint(rg, c, n, st); const fd = enFade(c); if (fd <= 0 || d < 0 || d > .8) return; ctx.save(); ctx.globalAlpha = fd; ctx.globalCompositeOperation = 'lighter';
+  const u = d / .7, pos = u < .55 ? u / .55 : 1 + (u - .55) / .45, a0 = -Math.PI / 2, p = pos % 1, a = a0 + Math.PI * 2 * p; if (u < 1) { const g = ctx.createConicGradient(a - Math.PI * .5, rg.x, rg.y); g.addColorStop(0, 'rgba(160,210,255,0)'); g.addColorStop(.25, 'rgba(230,245,255,1)'); g.addColorStop(.26, 'rgba(160,210,255,0)'); g.addColorStop(1, 'rgba(160,210,255,0)'); ctx.strokeStyle = g; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, 0, 7); ctx.stroke(); }
+  const glow = clamp(1 - d / .8); ctx.strokeStyle = `rgba(200,230,255,${.8 * glow})`; ctx.lineWidth = 2.2; ctx.translate(rg.x, rg.y); ctx.rotate(st.bolt); ctx.beginPath(); for (let k = 0; k < 6; k++) { const b = k * Math.PI / 3; ctx.lineTo(Math.cos(b) * 18.5, Math.sin(b) * 18.5); } ctx.closePath(); ctx.stroke(); ctx.restore(); }; }
+const AL3 = [.2, .42, .64], TL3 = [.22, .44, .66];
+const BEAT3 = {
+  Leatherworking: Object.assign({}, FINAL.Leatherworking.A, { name: 'Burnished, 3 punches', ownSound: true, work: lw3Work }),
+  Alchemy: Object.assign({}, FINAL.Alchemy.A, { name: 'Boil over + bubbles, 3 beats', ownSound: true, work(rg, T, loud) { withBeats(AL_F, AL3, () => FINAL.Alchemy.A.work(rg, T, loud)); if (loud !== false) Sound('AlchClink' + loud); AL3.forEach(f => After(T * f, () => { if (loud !== false) Sound('AlchGlug' + loud); })); After(T * .86, () => { if (loud !== false) Sound('AlchFoam' + loud); }); } }),
+  Tailoring: Object.assign({}, FINAL.Tailoring.A, { name: 'Plucked + runs down, 3 beats', ownSound: true, work(rg, T, loud) { withBeats(TL_F, TL3, () => FINAL.Tailoring.A.work(rg, T, loud)); TL3.forEach(f => After(T * f, () => { if (loud !== false) Sound('TailorFwip' + loud); })); } }),
+  Engineering: Object.assign({}, FINAL.Engineering.A, { name: 'Wrench, 3 turns + it starts up', ownSound: true, work: wrWork(3), overlay: wrStartOverlay(3) }),
+};
+// Polish 2, how the ring fills: the six smooth ones can take Smelting's punchy fill (a slow creep, and each beat lands a 20% jump
+// with a little overshoot); every overlay reads c.f, so the whole design follows
+// Polish 3, the ring: 8 of the 10 draw their arc 5 px wide (the base ring's width); Alchemy's glass tube (11, liquid 8) and
+// Smelting's mould (10, metal 4) are thicker. "One width" maps their widths to the shared 5 px arc while they keep their look
+let ringMode = 'picked';
+const RING_MAP = { Alchemy: { 11: 7, 8: 5 }, Smelting: { 10: 8, 9: 7, 4: 5, 11: 8 } };
+const LW_DESC = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'lineWidth');
+function withRingWidths(fn) { const m = ringMode === 'one' && round === 'final' && RING_MAP[prof]; if (!m) return fn(); Object.defineProperty(ctx, 'lineWidth', { configurable: true, get() { return LW_DESC.get.call(ctx); }, set(v) { LW_DESC.set.call(ctx, m[v] ?? v); } }); try { fn(); } finally { delete ctx.lineWidth; } }
+let fillMode = 'picked';
+const PUNCH_BEATS = { Leatherworking: LW3, Alchemy: AL3, Tailoring: TL3, Enchanting: EC_F, 'First Aid': FA_F, Disenchanting: DE_F };
+// Leatherworking punchy (decided 2026-11-14, now its picked fill): the ring creeps, and each punch slams the fill to that hole (1/6, 1/2, 5/6) with a
+// little overshoot; after the last punch it runs to the end under the whip
+function lwFill(f) { const base = f < 5 / 6 ? .4 * f : 1 / 3 + (f - 5 / 6); let prev = 0, j = 0; LW3.forEach(b => { j += .6 * (b - prev) * eBack(clamp((f - b) / .1)); prev = b; }); return Math.min(1, base + j); }
+function fillOf(f) { if (round !== 'final') return f; if (prof === 'Leatherworking') return lwFill(f); const bs = fillMode === 'punchy' && PUNCH_BEATS[prof]; if (!bs) return f; return Math.min(1, .4 * f + bs.reduce((s, b) => s + .2 * eBack(clamp((f - b) / .1)), 0)); }
+function arcOf() { if (round === 'final' && beatMode === 'three' && BEAT3[prof]) return BEAT3[prof]; const [it, pk] = setOf(); if (!it) return PROF[prof].arc; return it[pk[prof] || Object.keys(it)[0]]; }
 function syncIters() { const el = document.getElementById('iters'), [it, pk] = setOf(); el.innerHTML = ''; document.getElementById('itbox').style.display = it ? 'block' : 'none'; if (!it) return;
   const rd = document.getElementById('rounds'); rd.innerHTML = ''; [['final', 'Final round'], ['explore', 'Exploration rounds']].forEach(([k, label]) => { const b = document.createElement('button'); b.textContent = label + (k === 'final' && !FINAL[prof] ? ' (not yet)' : ''); b.classList.toggle('on', round === k); b.onclick = () => { round = k; syncIters(); play(); }; rd.appendChild(b); });
   Object.keys(it).forEach(k => { const b = document.createElement('button'); b.textContent = it[k].name; b.classList.toggle('on', (pk[prof] || Object.keys(it)[0]) === k); b.onclick = () => { pk[prof] = k; syncIters(); play(); }; el.appendChild(b); });
@@ -1874,6 +1917,17 @@ function sync() { document.querySelectorAll('[data-p]').forEach(b => b.classList
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
 addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '1234567890'.indexOf(e.key); if (i >= 0) { prof = Object.keys(PROF)[i]; sync(); play(); } });
+// the polish reel: each final pick in turn
+let REEL = null; function reelStep(i) { const ks = Object.keys(PROF); if (i >= ks.length) { REEL = null; return; } prof = ks[i]; round = 'final'; moment = 'one'; sync(); play(); REEL = setTimeout(() => reelStep(i + 1), (CAST + 1.6) * 1000); }
+document.getElementById('reel').onclick = () => { clearTimeout(REEL); reelStep(0); }; document.getElementById('reelStop').onclick = () => { clearTimeout(REEL); REEL = null; };
+function setBeats(m) { beatMode = m; document.getElementById('bPicked').classList.toggle('on', m === 'picked'); document.getElementById('bThree').classList.toggle('on', m === 'three'); syncIters(); play(); }
+function setRing(m) { ringMode = m; document.getElementById('rPicked').classList.toggle('on', m === 'picked'); document.getElementById('rOne').classList.toggle('on', m === 'one'); play(); }
+document.getElementById('rPicked').onclick = () => setRing('picked'); document.getElementById('rOne').onclick = () => setRing('one');
+function setLoud(m) { loudMode = m; ['picked', 'cap', 'even'].forEach(k => document.getElementById('l_' + k).classList.toggle('on', k === m)); play(); }
+['picked', 'cap', 'even'].forEach(k => { document.getElementById('l_' + k).onclick = () => setLoud(k); });
+function setFill(m) { fillMode = m; document.getElementById('fPicked').classList.toggle('on', m === 'picked'); document.getElementById('fPunch').classList.toggle('on', m === 'punchy'); play(); }
+document.getElementById('fPicked').onclick = () => setFill('picked'); document.getElementById('fPunch').onclick = () => setFill('punchy');
+document.getElementById('bPicked').onclick = () => setBeats('picked'); document.getElementById('bThree').onclick = () => setBeats('three');
 sync(); play(); requestAnimationFrame(loop);
 </script>
 </body>
