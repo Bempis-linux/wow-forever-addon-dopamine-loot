@@ -40,7 +40,7 @@ every round and pick). Older detail: git log, CHANGELOG.md._
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.
-- **Not pushed yet:** dopamine-loot commit a1e7bd4 (1.4.0 order) and the uncommitted skill-up page, plan.md, STATE.md.
+- Everything is committed and pushed (2026-11-14).
 
 ## The compare page (how it works, for the next session)
 - Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
