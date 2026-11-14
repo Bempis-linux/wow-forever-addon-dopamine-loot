@@ -716,6 +716,12 @@ Professions (from 1.3.0):
    text outline, a thin dark edge on the line, growth, particles and icon; no backing), B Soft shade (the 1.3 banner's
    soft dark shade, no edges), C Fading strip (a dark strip fading out at both ends), D Outline + light shade.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
+   Round 16 feedback: **no outlines** (A and D out); the soft shade made it look too big; the fading strip "isn't bad";
+   the others read fine, so Fishing's own animation should read better. **Round 17** (`VIS17`, `r17`, `hStrip`; global
+   `FISHR` redraws Fishing: a deep-blue water band, a thicker cream line, a bigger bobber with a gold tip, a dark disc
+   behind the reel): A Fading strip (as round 16 C), B Slim, soft strip (hugs the text and line, soft on all edges), C Two
+   strips (one behind the text row, a thin band behind the line, the ground between), D Strip + gold hairline (the style
+   guide's hairline along its bottom, fading with it).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

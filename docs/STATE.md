@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); round 15 picked B "Just a line"; round 16 (readable on any ground: four treatments) built, awaiting a pick (round 14 picks paused); kit 0.8.1. Read this
+_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); round 15 picked B "Just a line"; round 17 (Just a line on four fading strips; Fishing redrawn to read) built, awaiting a pick (round 14 picks paused); kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -31,7 +31,7 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
 - **Skill-up gains: general design LOCKED 2026-11-15, "It grows along the line"** (round 11 A; the tip flourish and
   the unlocks-on-the-line are ideas to use per profession, not locked). **Next: the per-profession pass** for all
-  twelve (pitch first, four options per profession; plan.md "Round 11 → LOCKED"). **Round 15 picked B "Just a line" (a clean, quick pass-by); round 16 (four ways to keep it readable on bright ground) built, awaiting a pick; round 14 (gatherers) picks paused till then; finales are per profession like crafting. Round 14 built,
+  twelve (pitch first, four options per profession; plan.md "Round 11 → LOCKED"). **Round 15 picked B "Just a line" (a clean, quick pass-by); round 16: no outlines, the shade too big; round 17 (four fading strips, Fishing redrawn to read) built, awaiting a pick; round 14 (gatherers) picks paused till then; finales are per profession like crafting. Round 14 built,
   awaiting picks**; then crafters, then secondary skills.
 - **Skill-up gains, Phase 2 record, 11 rounds** (`docs/mockups/skillup-p2.html`, the only page;
   there is no skillup-p3; the title says the round; older rounds stay in the code, off the panel; full record in

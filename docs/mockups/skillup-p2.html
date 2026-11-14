@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 16, readable on any ground</h1>
+  <h1>Skill-up: round 17, Just a line on a strip</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 16: B “Just a line” picked (round 15); four ways to keep it readable on bright ground (the page opens on Bright; try Dark too). The growth is each profession’s current base. Rounds 2-15 stay in the code.
+  the line that grows. Round 17: B “Just a line” on a fading strip (round 16: no outlines, the shade looked too big); four strips; Fishing redrawn to read better. The page opens on Bright; try Dark too. Rounds 2-16 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1204,17 +1204,18 @@ Object.assign(FAM, { PA: r12('A'), PB: r12('B'), PC: r12('C'), PD: r12('D') });
 function onHits(key, fn) { S.hits.forEach((h, i) => { if (S.age >= h + HIT) once(key + i, () => fn(i)); }); }
 function lastHitIdx() { let k = -1; S.hits.forEach((h, i) => { if (S.age >= h + HIT) k = i; }); return k; }
 // Fishing: the reel at the start of the line (the spool empties as line goes out), the line, the bobber
-function reel(I, y, f, ang) { const rx = I.x0 + 4, ry = y - 2;
+function reel(I, y, f, ang) { const rx = I.x0 + 4, ry = y - 2; if (FISHR) { ctx.fillStyle = 'rgba(20,24,30,.9)'; ctx.beginPath(); ctx.arc(rx, ry, 7.5, 0, 7); ctx.fill(); }
   ctx.fillStyle = 'rgba(235,235,235,.85)'; ctx.beginPath(); ctx.arc(rx, ry, Math.max(1.4, 5 - 3.2 * f), 0, 7); ctx.fill();
   ctx.strokeStyle = '#c8b88a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(rx, ry, 6.5, 0, 7); ctx.stroke();
   ctx.lineWidth = 1; for (let i = 0; i < 3; i++) { const a2 = ang + i * 2.094; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + Math.cos(a2) * 6.5, ry + Math.sin(a2) * 6.5); ctx.stroke(); }
   ctx.fillStyle = '#8a6a3a'; ctx.beginPath(); ctx.arc(rx + Math.cos(ang) * 6.5, ry + Math.sin(ang) * 6.5, 1.8, 0, 7); ctx.fill(); return { x: rx, y: ry - 6.5 }; }
-function fishCast(p, x, y, L, f, t, I, o) { o = o || {}; const ha = I.hitAge;
-  ctx.strokeStyle = 'rgba(90,170,230,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let s = 14; s <= I.x1 - I.x0 + 6; s += 3) ctx.lineTo(I.x0 + s, y + 4 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke();
+function fishCast(p, x, y, L, f, t, I, o) { o = o || {}; const ha = I.hitAge, RD = FISHR;
+  if (RD) { ctx.fillStyle = 'rgba(28,84,140,.9)'; ctx.beginPath(); ctx.roundRect(I.x0 + 12, y + 1, I.x1 - I.x0 - 4, 7, 3.5); ctx.fill(); ctx.strokeStyle = 'rgba(170,225,255,.95)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (let s = 14; s <= I.x1 - I.x0 + 6; s += 3) ctx.lineTo(I.x0 + s, y + 3 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke(); } else {
+  ctx.strokeStyle = 'rgba(90,170,230,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let s = 14; s <= I.x1 - I.x0 + 6; s += 3) ctx.lineTo(I.x0 + s, y + 4 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke(); }
   const fx = Math.max(I.x0 + 20, x + L * f) + (o.dx ? o.dx(ha) : 0), hop = !o.noHop && ha >= 0 && ha < .45 ? Math.sin(Math.PI * ha / .45) * 7 : 0, dip = o.dip ? o.dip(ha) : 0, by = y + Math.sin(t * 3) - hop + dip;
   const R = reel(I, y, f, -(I.v - I.lo) * 6 + (o.spin || 0)), slack = o.slack ? o.slack(ha) : 1, vib = o.vib ? o.vib(ha) : 0;
-  ctx.strokeStyle = 'rgba(235,235,235,.75)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(R.x, R.y); ctx.quadraticCurveTo((R.x + fx) / 2, lerp((R.y + by - 2) / 2, Math.max(R.y, by) + 5, slack) + vib, fx, by - 2); ctx.stroke();
-  ctx.save(); if (dip > 2) ctx.globalAlpha *= .6; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(fx, by + 1, 3, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#e0402a'; ctx.beginPath(); ctx.arc(fx, by + 1, 3, Math.PI, 7); ctx.fill(); ctx.restore();
+  ctx.strokeStyle = RD ? '#fff6dc' : 'rgba(235,235,235,.75)'; ctx.lineWidth = RD ? 1.5 : .8; ctx.beginPath(); ctx.moveTo(R.x, R.y); ctx.quadraticCurveTo((R.x + fx) / 2, lerp((R.y + by - 2) / 2, Math.max(R.y, by) + 5, slack) + vib, fx, by - 2); ctx.stroke();
+  ctx.save(); if (dip > 2) ctx.globalAlpha *= .6; const br = RD ? 4.6 : 3; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(fx, by + 1, br, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#ff3a1a'; ctx.beginPath(); ctx.arc(fx, by + 1, br, Math.PI, 7); ctx.fill(); if (RD) { ctx.fillStyle = '#ffd36a'; ctx.fillRect(fx - .7, by + 1 - br - 3, 1.4, 3); } ctx.restore();
   return { fx, by }; }
 function reelClicks() { onHits('fr', () => { for (let k = 0; k < 4; k++) noise(k * .045, .012, .03, 4200, 6, 'bandpass', true); }); }
 // Skinning: the cut as round 12 drew it
@@ -1506,10 +1507,27 @@ const VIS16 = {
 };
 let OUTLINE = false, VISK = null;
 const HALO = 'drop-shadow(0 0 .8px #000) drop-shadow(0 0 1px #000) drop-shadow(0 0 2.5px rgba(0,0,0,.6))';
-function visBack(v, g, top) { const cx = (g.x0 + g.x1) / 2, cy = g.ly - 7; ctx.save();  if (v.shade) { ctx.translate(cx, cy); ctx.scale(1, .34); const r = ctx.createRadialGradient(0, 0, 10, 0, 0, 175); r.addColorStop(0, `rgba(0,0,0,${v.shade})`); r.addColorStop(.6, `rgba(0,0,0,${v.shade * .6})`); r.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = r; ctx.fillRect(-180, -180, 360, 360); }  if (v.strip) { const gr = ctx.createLinearGradient(g.x0 - 40, 0, g.x1 + 50, 0); gr.addColorStop(0, 'rgba(6,8,12,0)'); gr.addColorStop(.15, 'rgba(6,8,12,.72)'); gr.addColorStop(.85, 'rgba(6,8,12,.72)'); gr.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = gr; ctx.fillRect(g.x0 - 40, top - 2, g.x1 - g.x0 + 90, 40); }  ctx.restore(); }
+function visBack(v, g, top) { const cx = (g.x0 + g.x1) / 2, cy = g.ly - 7; ctx.save(); if (v.back) v.back(g, top);  if (v.shade) { ctx.translate(cx, cy); ctx.scale(1, .34); const r = ctx.createRadialGradient(0, 0, 10, 0, 0, 175); r.addColorStop(0, `rgba(0,0,0,${v.shade})`); r.addColorStop(.6, `rgba(0,0,0,${v.shade * .6})`); r.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = r; ctx.fillRect(-180, -180, 360, 360); }  if (v.strip) { const gr = ctx.createLinearGradient(g.x0 - 40, 0, g.x1 + 50, 0); gr.addColorStop(0, 'rgba(6,8,12,0)'); gr.addColorStop(.15, 'rgba(6,8,12,.72)'); gr.addColorStop(.85, 'rgba(6,8,12,.72)'); gr.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = gr; ctx.fillRect(g.x0 - 40, top - 2, g.x1 - g.x0 + 90, 40); }  ctx.restore(); }
 function r16(K) { return { get name() { return K + '. ' + VIS16[K].name; }, get desc() { return VIS16[K].desc + ' (B “Just a line”; the page opens on Bright ground.)'; },
   get note() { return 'just a line, ' + VIS16[K].name.toLowerCase() + '.'; }, draw(top) { VISK = VIS16[K]; cleanModule(top, 'B'); VISK = null; OUTLINE = false; } }; }
 Object.assign(FAM, { PA: r16('A'), PB: r16('B'), PC: r16('C'), PD: r16('D') });
+
+// ---------- round 17 (2026-11-15): Just a line on a fading strip (no outlines; the shade looked too big); Fishing redrawn to read ----------
+let FISHR = false;
+function hStrip(x0, x1, y, h, al, fade) { const gr = ctx.createLinearGradient(x0, 0, x1, 0), k = fade / (x1 - x0); gr.addColorStop(0, 'rgba(6,8,12,0)'); gr.addColorStop(k, `rgba(6,8,12,${al})`); gr.addColorStop(1 - k, `rgba(6,8,12,${al})`); gr.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = gr; ctx.fillRect(x0, y, x1 - x0, h); }
+const VIS17 = {
+  A: { name: 'Fading strip', desc: 'Round 16 C as it was: a dark strip behind the text and the line, fading out at both ends.',
+    back(g, top) { hStrip(g.x0 - 40, g.x1 + 50, top - 2, 40, .72, 50); } },
+  B: { name: 'Slim, soft strip', desc: 'Smaller: the strip hugs the text and the line, its ends fade quicker and its top and bottom edges are soft too, so it reads as a smudge of shadow, not a bar.',
+    back(g, top) { ctx.filter = 'blur(3px)'; hStrip(g.x0 - 18, g.x1 + 30, top + 1, 32, .66, 30); ctx.filter = 'none'; } },
+  C: { name: 'Two strips', desc: 'Split in two: a short strip just behind the name and level (and one behind "N to X"), and a thin band behind the line itself; the ground shows between them, so less is covered.',
+    back(g, top) { const ty = g.ly - 26; hStrip(g.x0 - 12, g.x0 + 92, ty, 16, .7, 16); hStrip(g.x1 - 128, g.x1 + 12, ty, 16, .7, 16); hStrip(g.x0 - 16, g.x1 + 30, g.ly - 9, 18, .7, 22); } },
+  D: { name: 'Strip + gold hairline', desc: 'The slim strip with the style guide’s gold hairline along its bottom edge, fading out with it at both ends: it ties the line to the rest of the addon’s panels.',
+    back(g, top) { hStrip(g.x0 - 24, g.x1 + 36, top + 1, 32, .7, 34); const gr = ctx.createLinearGradient(g.x0 - 24, 0, g.x1 + 36, 0); gr.addColorStop(0, 'rgba(255,211,106,0)'); gr.addColorStop(.25, 'rgba(255,211,106,.55)'); gr.addColorStop(.75, 'rgba(255,211,106,.55)'); gr.addColorStop(1, 'rgba(255,211,106,0)'); ctx.fillStyle = gr; ctx.fillRect(g.x0 - 24, top + 33, g.x1 - g.x0 + 60, 1); } },
+};
+function r17(K) { return { get name() { return K + '. ' + VIS17[K].name; }, get desc() { return VIS17[K].desc + ' (B “Just a line”; Fishing redrawn to read better in every option: a water band, a thicker line, a bigger bobber.)'; },
+  get note() { return 'just a line, ' + VIS17[K].name.toLowerCase() + '.'; }, draw(top) { VISK = VIS17[K]; FISHR = true; cleanModule(top, 'B'); VISK = null; FISHR = false; } }; }
+Object.assign(FAM, { PA: r17('A'), PB: r17('B'), PC: r17('C'), PD: r17('D') });
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
