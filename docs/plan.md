@@ -653,6 +653,11 @@ Professions (from 1.3.0):
    into the unlock** (quiet skill-ups; at the unlock the growth runs into the icon from the left, then dresses it:
    the vine winds round and flowers, white-hot cooling to gold, crystal shards burst, a stitched frame, a stone shell
    cracks open).
+   Round 11 → **LOCKED (2026-11-15): the general skill-up design is "It grows along the line"** in the tighter
+   layout (round 10 B = round 11 A). The user likes **B (a flourish at the tip per skill-up)** and **C (the unlocks on
+   the line, the view slides on)** as **ideas to draw on per profession**, not locked into the general design. D (the
+   growth turns into the unlock) not picked. Next: the per-profession pass (all twelve: Alchemy, Blacksmithing,
+   Enchanting, Engineering, Leatherworking, Tailoring, Cooking, First Aid, Fishing, Herbalism, Mining, Skinning).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).

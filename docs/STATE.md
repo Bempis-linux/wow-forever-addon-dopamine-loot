@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up Phase 2 round 10 picked B (grows along the line), round 11 (its add-ons) built, awaiting the verdict; kit 0.8.1. Read this
+_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); next: the per-profession pass, pitch first; kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -29,7 +29,10 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   then Phase 2 for skill-up gains, the Create All pile, gathering, the loot window (Picked-up rows / harvest window);
   build them; then Phase 2 for XP, rep, level-up; build; the dungeon recap last if the weekly budget allows (may slip to
   1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
-- **Skill-up gains, Phase 2 in progress, 10 rounds, nothing locked** (`docs/mockups/skillup-p2.html`, the only page;
+- **Skill-up gains: general design LOCKED 2026-11-15, "It grows along the line"** (round 11 A; the tip flourish and
+  the unlocks-on-the-line are ideas to use per profession, not locked). **Next: the per-profession pass** for all
+  twelve (pitch first, four options per profession; plan.md "Round 11 → LOCKED").
+- **Skill-up gains, Phase 2 record, 11 rounds** (`docs/mockups/skillup-p2.html`, the only page;
   there is no skillup-p3; the title says the round; older rounds stay in the code, off the panel; full record in
   plan.md under "2. Skill-up gains"). **Goal (the user): clear progression AND a frame easy to make unique, in fun
   ways, per profession**; then a per-profession pass like crafting's. **Decided: its own draggable module**, apart from
@@ -44,10 +47,10 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   **"The one" isn't found yet.** The user: **the presentation needs work** (lots of unused space; could show more
   info or design) but **don't over-design**.
   **Round 10 picked B "It grows along the line"** in the tighter layout (name, skill "/ 150 Journeyman", next unlock +
-  "N to go", then the two after it); **rounds have four options** (the user expects it). **Round 11 built, awaiting
-  the verdict** (keys 1-4, add-ons to B; `growModule(top, mode)`): A as it is, B a flourish at the tip per skill-up,
-  C the unlocks on the line (the view slides on), D the growth is drawn into the unlock's icon and dresses it. After
-  the user locks B (with add-ons), the per-profession pass follows, like crafting's.
+  "N to go", then the two after it); **rounds have four options** (the user expects it). **Round 11** (keys 1-4, add-ons
+  to B; `growModule(top, mode)`): A as it is (**locked**), B a flourish at the tip per skill-up (idea), C the unlocks on
+  the line (idea), D the growth drawn into the unlock's icon (not picked). On the phone app, send the page with
+  SendUserFile (the user can't open repo files there).
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.
