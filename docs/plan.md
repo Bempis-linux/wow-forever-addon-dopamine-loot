@@ -683,6 +683,12 @@ Professions (from 1.3.0):
    (ink draws the herb on a journal strip). Mining: A Breaks away (rock chips off to show the glowing seam), B Molten
    vein (white-hot tip cooling behind, embers), C Geode (quartz crystals grow in, a gleam sweeps them), D Lantern in the
    dark (the glow lights the vein, ore glints twinkle ahead).
+   **Round 13 feedback (2026-11-15):** the add-ons barely changed the animation (the user: "not providing enough of a
+   difference from the base"; aim for the crafting page's range, memory bold-addons). Fishing: B + C merged into the new
+   A (rod and reel + taut line + a bite); wants add-ons that differ more. Herbalism: stays A Vine (Sap rising looks nice
+   but doesn't feel like herbalism); add-ons to the vine next. Skinning: C (one stroke per skill-up) is good, the rest
+   too weak; D looked like nothing changed. Mining: A Breaks away is a cool idea but not there yet; Molten vein reads as
+   Blacksmithing. Round 14 pitched in chat first.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).

@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); per-profession round 13 (gatherers) built, awaiting picks; kit 0.8.1. Read this
+_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); per-profession round 13 feedback in, round 14 pitched; kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
