@@ -1125,6 +1125,97 @@ the user's own):
      → the user **did not like this crucible** (2026-11-13, stop point). **Next session, first thing: new crucible designs**
      for Smelting (A = Cast + bellows with B's ore drops and D's copper cooling kept; only the crucible changes), then
      Disenchanting (phase 2, sub-system 10), then Phase 3 Polish.
+     Smelting, new vessels (2026-11-14; the cast + bellows, ore drops and copper cooling stay, only the vessel changes):
+     **B. Ladle** (a long-handled ladle reaches in from the upper right, its bowl over the ring's top; it dips and tips to
+     pour from the lip; draws back out at the end), **C. Tongs and pot** (tongs carry a small pot in from the right at the
+     start, tip it on each pour, carry it away empty at the end), **D. Furnace sluice** (no crucible: a small stone furnace
+     above the ring with a glowing mouth, a stone trough down to the ring and an iron gate that lifts on each pour; dims at
+     the end). The add-ons and the disliked crucible stay in the code, off the buttons. Opens on B.
+     → "something more connected to the ring, like the spool for Tailoring or the wrench for Engineering": vessels joined to
+     the ring (ladle, tongs, sluice off the buttons): **B. Hinged crucible** (the crucible sits on the ring's rim at the top on
+     an iron hinge and bracket; each pour it swings forward and tips straight into the channel; folds back flat at the end),
+     **C. Turning mould** (a spout fixed over the top; the ring is the mould and turns a third under it with each pour, like
+     the wrench's steps, its notches sliding by; ore drops into the spout's hopper), **D. Bellows on the ring** (the ring is
+     the furnace; a bellows hinged to its side squeezes on each beat with a puff of air into the ring, the metal melting into
+     the channel a third per pump; one last squeeze at the end). All keep the copper cooling finale. Opens on B.
+     → "turning mould would be the direction; some variations, and keep the bellows". Redrawn from scratch (turnMould): a
+     fixed spout + hopper over the top, the ring the mould turning under it; the bellows pump before each pour (the hopper
+     flares and throws embers, the cast metal flares); ore drops into the hopper; made = the CLANG cracks the mould away and
+     the cast cools to copper in a wave from the top. **B. Turning mould + bellows** (a third per pour), **C. Smooth turn**
+     (one long pour, the mould turning steadily; four pumps make the stream surge thicker), **D. Four turns** (four stepped
+     quarter turns ticking like a ratchet, like the wrench), **E. Ingot moulds** (three bar-shaped cavities with walls between;
+     each pour fills one as it passes under the spout; ends with three ingots cooling to copper). Opens on B.
+     → iterating on Smooth turn: (1) "why are the moulds going counter clockwise?" They turned against the clockwise fill so
+     the pour stayed under the spout; **F. Smooth turn, clockwise + ore splash** mirrors it: the mould turns clockwise and the
+     metal trails away clockwise from the spout (checked: at 45% the metal is on the right). (2) "more feedback when the ore
+     drops in": three bigger outlined lumps drop into the hopper before each of the four pumps and land with a splash
+     (molten spits up out of it, the hopper flares bright, a ripple, a soft hiss SmithHissQ). Page fix found on the way: a
+     timer scheduled from inside another timer was dropped (the timer list was rebuilt by filter); now due timers run after
+     the list is rebuilt, so nested effects (e.g. sparks after ore lands) play. Opens on F.
+     → "super laggy": measured 11-13 fps for F (Tailoring 88); switching shadowBlur off gave 82, so the cause was glow
+     (shadowBlur) drawn inside the rotated and mirrored mould. The glows are now soft wide strokes and halos instead: F runs
+     at ~125 fps, same look. (Mockup rule: no shadowBlur inside rotated/scaled transforms; it is slow in the browser, and the
+     game draws glows as textures anyway.)
+     → feedback on F: no tick marks round the ring; 4 beats + finale too repetitive with this sound, so **3 beats + the
+     finale**; each beat punchier, a noticeable jump on the bar (still slow and smooth between). **F reworked: Smooth turn, 3
+     punchy beats** (the mould turns slowly the whole time: 40% of the ring spread over the cast; on each beat at .25/.5/.75
+     it lurches forward another 20% in a tenth of the cast with a little overshoot (eBack): the ore lands with its splash and
+     hiss, SmithT1-3 rising, the stream gushes thicker, the cast flares white-hot, sparks spray from the spout; then the CLANG
+     and the copper cooling). ~97 fps. The 4-pump version kept in the code (SM_F_V1). Opens on F.
+     → "Better; focus on improving the sound and the actual bar effects; the sound should be noticeable but out of the way".
+     Bar effects (G and H): the cast is white-hot where it leaves the spout and cools along the ring (orange, red); on each
+     beat a bright wave runs back along the new chunk and the ring pops out a touch (6%). Smelting gets its own, softer
+     sounds instead of the anvil (the 1.3 side's payoff now plays an option's own finale if it names one): **G = sound 1**,
+     a low soft plop + short sizzle per beat (SmeltPlop1-3, rising), finale a muted mould crack + small bright chime
+     (SmeltCrack); **H = sound 2**, a soft double glug + faint sizzle per beat (SmeltGlug1-3), finale a low gentle gong +
+     hiss (SmeltGong). Same visuals, the user picks by ear. ~91 fps. Opens on G.
+     → likes the effects and the glug, not the gong finale ("doesn't really match the animation": the mould cracks, its pieces
+     fall, it cools). Finales with the glug beats: **I. Glug + crack and clatter** (a sharp crack as the mould splits, the
+     pieces clattering down as a quick scatter of small clicks, a soft cooling hiss; SmeltClatter), **J. Glug + crack and
+     chime** (G's muted crack + small bright chime). Opens on I.
+     → likes both ("chime feels more like something was attained"). My view (asked): the clatter, since crafted items already
+     get their loot sound by rarity, every other finale is a material sound (Enchanting and First Aid already end on chimes),
+     and smelting runs in big batches; a middle way: **K. Glug + clatter + tink** (I's crack and clatter, the last piece
+     landing with one small bright tink like a coin, then the cooling hiss; SmeltClatterTink). Opens on K.
+     **SMELTING FINAL (phase 2): K. Smooth turn, 3 punchy beats, bar effects, glug + clatter + tink** (2026-11-14).
+     **10. Disenchanting** (phase 2, no first pass; on the page as profession 10, key 0; no 1.3 animation; the centre shows
+     the green item being taken apart and the dust pops in where it was at the end). Sound: three beats stepping DOWN in
+     pitch (DisNote1-3, the reverse of Enchanting's rising chimes: the magic taken apart), the finale a soft poof of dust with
+     a faint shimmer (DisPoof). Beats .3/.5/.7. **A. Unravel** (each beat a glowing violet thread is pulled out of the item to
+     the ring, the item dimming; made = it crumbles into a poof of dust), **B. Shatter** (each beat a glowing crack splits
+     further across the item; made = it shatters, the pieces spin and dissolve into dust), **C. Grindstone** (the ring is a
+     grindstone turning round the item; each beat a crunch, a spray of dust and sparks off the wheel, the item shrinking;
+     made = ground away into dust), **D. Seals break** (three small rune seals round the item snap one per beat; made = the
+     bound magic bursts out as dust and motes). Opens on A.
+     → "not feeling these animations or sounds"; the feel wanted: **the item is actually getting destroyed** (the game never
+     gives that feeling). Round 2: the destruction happens to the item icon itself; destruction sounds per beat, the finale a
+     deeper burst into dust (DisBurst), then the dust pops in. **A. Burn away** (violet fire eats the icon from its edges, a
+     glowing burn edge and ash flakes; each beat burns a big chunk with a crackle, DisCrackle), **B. Crush** (crushed a step
+     per beat with a crunch, flatter and wider, cracks and chips flying; DisCrunch1-3), **C. Disintegrate** (a band per beat
+     rips into small fragments that spin into the ring as violet sparks; DisRip), **D. Break apart** (cracks into four jagged
+     pieces that wrench further apart each beat, light pouring out; DisCrack; made = the pieces blow out). 68-76 fps. Opens on A.
+     → "Burn away is very very cool", **locked as the item animation** (2026-11-14). The user worries whether it's possible in
+     game: plan = an 8x8 grid of slices of the icon (SetTexCoord per tile), each tinted to the burn edge then hidden as the
+     burn passes (the mockup draws exactly that); verify on Forever with wow-api-researcher before the build; if it fails,
+     look at other options. Add-ons on it: **B. + Embers feed the ring** (embers off the burning edge are drawn into the ring,
+     sparking where they land, a stream on each beat), **C. + Scorched ring** (the filled ring chars dark behind a glowing
+     violet burn line at its head, sparks flicking off, flaring on each beat; made = the charred ring glows once), **D. +
+     Essence rises** (on each beat two or three glowing essence orbs lift out of the fire and float above the ring; made = they
+     sink back into the dust as it appears, which flares). 75-100 fps. Opens on B.
+     → "B for sure" (Burn away + embers feed the ring); finale variations, each with its own sound: **E. B + implosion**
+     (what's left collapses inward to a bright violet point with a falling whoosh, then pops: shockwave ring, sparks;
+     DisImplode), **F. B + ember storm** (the embers lift off the ring all the way round and spiral into the middle where the
+     dust appears, a rising shimmer; DisStorm), **G. B + afterimage crumble** (a glowing violet outline of the item hangs a
+     moment, then crumbles into ash that settles into the dust; DisCrumble). Opens on E.
+     → E and F combined: **H. B + storm into implosion** (the embers lift off the ring and spiral inward while the remains
+     collapse to a bright violet point; as they meet (~0.4 s) it pops: shockwave ring, sparks, the dust appears; the sound a
+     rising shimmer into the pop, DisStormPop). Opens on H.
+     **DISENCHANTING FINAL (phase 2): H. Burn away + embers feed the ring + storm into implosion** (2026-11-14).
+     **Phase 2 done for all 10 (2026-11-14):** Blacksmithing F Hammer + heat · Leatherworking Burnished · Alchemy Boil over
+     + bubbles · Tailoring Plucked + runs down · Engineering Wrench, 4 turns + it starts up · Cooking Toss the pan + burner +
+     sizzle · Enchanting F Motes + moon sparkle · First Aid E Splint + heft + relief · Smelting K Smooth turn, 3 punchy beats,
+     bar effects, glug + clatter + tink · Disenchanting H Burn away + embers + storm into implosion. Next: Phase 3, Polish
+     (make all ten read as one addon), then API checks in game and the build.
      Alchemy follow-up ("by end I mean the end of the animation"): the expanding "steam" after the last beat was
      the colored smoke cloud from the locked mix's finale rising from the middle past the top; Alchemy E no longer
      has it (the flash, the magenta glow and the cork stay; the puff comes off the head at 86%).

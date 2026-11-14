@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-13, stop point in the 1.4.0 crafting redesign (design only, no code yet). Read this
+_Last checkpoint: 2026-11-14, crafting Phase 2 done for all 10; starting Phase 3 Polish (design only). Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -12,26 +12,26 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   level-up levelup-r4; dungeon recap Slim strip + Final medallion; style guide `docs/style-guide.md`.
 - **Crafting redesign, in progress** (`docs/mockups/craft-compare.html`; Ring + batch replaces the cast bar
   during trade-skill casts). Run with the kit's **`wow-design-rounds`** skill (the user: keep using it):
-  Phase 1 Inspiration done; Phase 2 Finalization **second pass done for all 8** (one profession at a time):
+  Phase 1 Inspiration done; **Phase 2 Finalization done for all 10** (plan.md "Phase 2 done for all 10"):
   Blacksmithing **F Hammer + heat**, Leatherworking **Burnished**, Alchemy **Boil over + bubbles**, Tailoring
   **Plucked + runs down**, Engineering **Wrench 4 turns + it starts up**, Cooking **Toss the pan + burner +
-  sizzle**, Enchanting **F Motes + moon sparkle**, First Aid **E Splint + heft + relief**.
-  New sub-systems: **9 Smelting** (on the page as profession 9; A = Cast + bellows, add-ons B ore drops and
-  D cools to copper liked; E = B + D with a new crucible, **the user did not like the crucible**) and
-  **10 Disenchanting** (not started).
-- **Next up, first thing next session: new crucible designs for Smelting** (several clearly different
-  crucibles; keep the cast + bellows, ore drops and copper cooling; only the crucible changes). Then
-  Disenchanting (phase 2), then **Phase 3 Polish** across all 10, then API checks in game (the Smelting
-  window's name on Forever; is disenchant a trade-skill cast?) and the build with `wow-mockup-to-addon`.
-- **Uncommitted before this checkpoint**: craft-compare.html and plan.md since bc986cf (committed with this).
+  sizzle**, Enchanting **F Motes + moon sparkle**, First Aid **E Splint + heft + relief**, **9 Smelting K**
+  (a mould turning clockwise under a fixed spout, 3 punchy beats, heat gradient, glug beats, crack + clatter
+  + tink finale), **10 Disenchanting H** (Burn away: the icon burns from its edges, embers feed the ring,
+  storm into implosion, then the dust; the feel: "the item is actually getting destroyed").
+- **Next up: Phase 3 Polish** across all 10 (make them read as one addon; note deviations as options, the
+  user decides), then API checks in game (Smelting window's name on Forever; is disenchant a trade-skill
+  cast; the burn as an 8x8 grid of icon slices via SetTexCoord) and the build with `wow-mockup-to-addon`.
 
 ## The compare page (how it works, for the next session)
-- Profession buttons 1-9 (keys 1-0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
+- Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
 - Final round: A is always the current pick; `finalPick` sets what opens. `p2Start(prof)` began the second
   pass (the first-pass sets live in `P2A`; `P2S(prof)` makes options that borrow from a sibling by letter use
   their own set). Options are `{ name, desc, work, payoff, overlay, ownSound }`; `ownSound` silences the
   1.3 side's beat sounds so the new side plays its own.
 - Checking: mute only the run (`play(); S.mute = true`), never untick the Sound box; one scene at a time.
+- Mockup perf: no `shadowBlur` inside rotated or mirrored transforms (Smelting dropped to 12 fps); use a soft wide
+  stroke or halo. The page timer now keeps timers added from inside a timer (nested effects used to vanish).
 - sed gotchas: an unescaped apostrophe in a JS string breaks the page (use ’); plan.md edits with quotes:
   write the text to a scratch file and insert it with `sed "<line>r file"`.
 
