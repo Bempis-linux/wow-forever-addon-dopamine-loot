@@ -43,10 +43,11 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   only Herbalism's stalk lifting the icon), D The line is the container (likes only Herbalism's planter trough).
   **"The one" isn't found yet.** The user: **the presentation needs work** (lots of unused space; could show more
   info or design) but **don't over-design**.
-  **Round 10 built, awaiting the user's verdict** (keys 1-2): the tighter layout (name, skill "/ 150 Journeyman", next
+  **Round 10 built, awaiting the user's verdict** (keys 1-4; **rounds have four options**, the user expects it): the tighter layout (name, skill "/ 150 Journeyman", next
   unlock + "N to go", then the two unlocks after it) with **A. The notched vessel** (B's vessel + A's notches up its
   side, the brim = the unlock) and **B. It grows along the line** (A's line grows the profession's way: vine, blade,
-  crystal, seam, ore vein). Crafters have no third line (no unlock list), so their module is a line shorter in content.
+  crystal, seam, ore vein), **C. The module fills** (the material rises behind the text), **D. From one to the other**
+  (an hourglass: to go above, done below). Crafters have no third line (no unlock list), so their module is a line shorter in content.
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.

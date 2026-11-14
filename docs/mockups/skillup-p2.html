@@ -32,9 +32,9 @@
 <div id="panel">
   <h1>Skill-up, Phase 2 round 10</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  round 10: one tighter module (name, skill out of the rank cap, the next unlock and points to go, the two after it) and two bold ways built from round 9’s likes: A the notched vessel (B’s vessel + A’s notches), B the line grows (A’s line + the Herbalism plant). Rounds 2-9 stay in the code.
+  round 10: one tighter module (name, skill out of the rank cap, the next unlock and points to go, the two after it) and four ways built from round 9’s likes: A the notched vessel (B’s vessel + A’s notches), B the line grows (A’s line + the Herbalism plant), C the whole module fills, D an hourglass (to go above, done below). Rounds 2-9 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
-  Space replays; keys 1-2 switch the design, Q-T the profession.</small>
+  Space replays; keys 1-4 switch the design, Q-T the profession.</small>
 
   <h2>Family</h2>
   <div id="fams"></div>
@@ -975,7 +975,7 @@ const FAM = {
   NV: { name: 'A. The notched vessel', desc: 'B’s vessel with A’s notches up its side as the gauge, in the tighter module: the name, your skill out of the rank cap, the next unlock and how many points to go, and the two unlocks after it. Each skill-up pours a portion in (a drop, a ladle of molten metal, a seed that grows the plant, a strand, a chunk of ore) and the level rises to the next notch, which lights; the top notch is gold: the brim is the unlock.',
     note: 'a portion poured per skill-up, notches up the side, the brim is the unlock.',
     draw(top) {
-      const p = S.p, nx = S.nx, lo = p.span[0], m = p.mat, n = Math.max(1, nx.lv - lo), N = Math.min(n, 10), pw = 282, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), FALL = .3;
+      const p = S.p, nx = S.nx, lo = p.span[0], m = p.mat, n = Math.max(1, nx.lv - lo), N = Math.min(n, 10), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), FALL = .3;
       let lv = S.v0; S.hits.forEach((h, i) => { lv += eOut(clamp((S.age - h - HIT - FALL) / .35)); if (S.age >= h + HIT + FALL) once('land' + i, () => { S.p.snd(semi(i * 2)); S.p.hit(S.vx, S.surf); }); });
       const f = clamp((lv - lo) / n), vx = px + 30, by = py + ph - 5, V = vessel(m, vx, by), surf = V.bot - (V.bot - V.top) * f, done = S.closeAt !== undefined; S.vx = vx; S.surf = surf;
       if (S.reaches && f >= 1 - 1e-6) once('close', () => { S.closeAt = S.age; [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(vx, V.top); spawn({ x: vx, y: V.top, size: 10, shape: 'ring', grow: 34, life: .7, col: '#fff' }); });
@@ -1002,7 +1002,7 @@ const FAM = {
   GL: { name: 'B. It grows along the line', desc: 'A’s one line, but alive: it grows toward the next unlock’s icon at its end, a step per skill-up, in the profession’s own way: a vine with leaves unfurling and a bud at the tip (Herbalism), a blade drawn out longer, white-hot at the tip and cooling to steel behind (Blacksmithing), a crystal growing facet by facet (Alchemy), a seam stitching itself (Tailoring), a vein of ore with glints (Mining). Faint notches under it count the points. The same tighter layout: skill out of the rank cap, points to go, the unlocks after it.',
     note: 'the line itself grows toward the unlock, a step per skill-up, the profession’s way.',
     draw(top) {
-      const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), pw = 282, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
       const x0 = px + 48, x1 = px + pw - 32, L = x1 - x0, ly = py + 37, f = clamp((st.v - lo) / n), done = S.closeAt !== undefined, ux = px + pw - 17;
       strikes(() => ({ x: x0 + f * L, y: ly }));
       if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(ux, ly); spawn({ x: ux, y: ly, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); });
@@ -1019,7 +1019,66 @@ const FAM = {
       ctx.restore();
       if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
     } },
+  MF: { name: 'C. The module fills', desc: 'The whole module is the container: the profession’s material rises behind the text from the bottom of the panel, dim so the words stay readable, with a bright surface line at your level: liquid with bubbles (Alchemy), molten metal with a white-hot top (Blacksmithing), grass and stalks growing up (Herbalism), woven rows (Tailoring), strata of stone with ore glints (Mining). Each skill-up raises it with a splash at the surface; notches on the right edge count the points. Full to the top = the unlock: the panel flashes and the icon in the corner pops.',
+    note: 'the whole panel fills with the material behind the text; full = the unlock.',
+    draw(top) {
+      const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 10), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      const f = clamp((st.v - lo) / n), done = S.closeAt !== undefined, ib = py + ph - 3, it = py + 3, surf = ib - (ib - it) * f, ux = px + pw - 18, uy = py + 17;
+      strikes(() => ({ x: px + pw * .55, y: surf }));
+      if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(ux, uy); spawn({ x: ux, y: uy, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); });
+      ctx.save(); ctx.globalAlpha = a; pill(px, py, pw, ph);
+      ctx.save(); ctx.beginPath(); ctx.roundRect(px + 1, py + 1, pw - 2, ph - 2, 9); ctx.clip(); panelFill(p, px, pw, surf, ib + 3, S.age, st.hitAge); ctx.restore();
+      for (let j = 1; j < N; j++) { const yy = ib - (ib - it) * j / N, got = f >= j / N - 1e-6; ctx.strokeStyle = got ? 'rgba(255,211,106,.8)' : 'rgba(255,255,255,.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px + pw - 6, yy); ctx.lineTo(px + pw - 2, yy); ctx.stroke(); }
+      icon(px + 24, py + ph / 2, 28, p.made || p.node, 1);
+      info(p, nx, st.shown, px + 48, py + 24, done);
+      if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.fillStyle = `rgba(255,255,255,${fl * .5})`; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 10); ctx.fill(); } }
+      const pop = done ? eBack(clamp((S.age - S.closeAt) / .3)) : 0; icon(ux, uy, 18 + pop * 6, nx.emo, done ? 1 : .5, done ? p.light : null);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  HG: { name: 'D. From one to the other', desc: 'An hourglass at the left: the top bulb holds the points still to go, the bottom bulb the points you’ve made on this stretch. Each skill-up runs a portion through the neck in the profession’s material (a stream of liquid, a drip of molten metal that cools below, seeds that sprout in the soil below, a strand of thread winding down, grit of ore), so the top empties as the bottom fills. The top runs empty = the unlock: a flash and the icon pops. Same tighter layout beside it.',
+    note: 'the top bulb is what’s to go, the bottom what’s done; each skill-up runs a portion through.',
+    draw(top) {
+      const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      const f = clamp((st.v - lo) / n), done = S.closeAt !== undefined, cx = px + 30, t0 = py + 7, nk = py + 33, b1 = py + 59, BH = nk - t0 - 1;
+      strikes(() => ({ x: cx, y: b1 - BH * f }));
+      if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(cx, nk); spawn({ x: cx, y: nk, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); });
+      ctx.save(); ctx.globalAlpha = a; pill(px, py, pw, ph);
+      const topP = () => { ctx.beginPath(); ctx.moveTo(cx - 15, t0); ctx.lineTo(cx + 15, t0); ctx.quadraticCurveTo(cx + 15, nk - 8, cx + 2, nk); ctx.lineTo(cx - 2, nk); ctx.quadraticCurveTo(cx - 15, nk - 8, cx - 15, t0); ctx.closePath(); };
+      const botP = () => { ctx.beginPath(); ctx.moveTo(cx - 2, nk); ctx.lineTo(cx + 2, nk); ctx.quadraticCurveTo(cx + 15, nk + 8, cx + 15, b1); ctx.lineTo(cx - 15, b1); ctx.quadraticCurveTo(cx - 15, nk + 8, cx - 2, nk); ctx.closePath(); };
+      ctx.save(); topP(); ctx.clip(); matFill(p, cx - 16, nk - BH * (1 - f), 32, BH * (1 - f) + 1, S.age, true); ctx.restore();
+      ctx.save(); botP(); ctx.clip(); matFill(p, cx - 16, b1 - BH * f, 32, BH * f, S.age, false); ctx.restore();
+      if (st.hitAge >= 0 && st.hitAge < .55 && f < 1.01) { const col = { liquid: '#d0a8ff', iron: '#ffb040', stem: '#a8763a', thread: '#fff4d8', stone: '#8a7e72' }[p.mat]; ctx.strokeStyle = col; ctx.lineWidth = p.mat === 'thread' ? 1.2 : 2; if (p.mat === 'stone' || p.mat === 'stem') ctx.setLineDash([2, 3]); ctx.lineDashOffset = -S.age * 40; ctx.beginPath(); ctx.moveTo(cx, nk - 2); ctx.lineTo(cx, b1 - BH * f); ctx.stroke(); ctx.setLineDash([]); }
+      ctx.strokeStyle = 'rgba(220,220,230,.55)'; ctx.lineWidth = 1.3; topP(); ctx.stroke(); botP(); ctx.stroke();
+      ctx.fillStyle = mix(p.col, '#3a2a18', .5); ctx.fillRect(cx - 18, t0 - 3, 36, 3); ctx.fillRect(cx - 18, b1, 36, 3);
+      if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; botP(); ctx.fill(); } }
+      info(p, nx, st.shown, px + 58, py + 24, done);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
 };
+// round 10 C: the material behind the text, from surf down to bot, across the module
+function panelFill(p, px, pw, surf, bot, t, hitAge) { const m = p.mat, sp = hitAge >= 0 && hitAge < .6 ? (1 - hitAge / .6) : 0; if (surf >= bot) return; ctx.save();
+  const wave = (i, amp) => surf + Math.sin(i * .08 + t * 3) * amp * (1 + sp * 2.5);
+  const body = col => { ctx.beginPath(); ctx.moveTo(px, bot); for (let i = 0; i <= pw; i += 4) ctx.lineTo(px + i, wave(i, 1)); ctx.lineTo(px + pw, bot); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); };
+  if (m === 'liquid') { const g = ctx.createLinearGradient(0, surf, 0, bot); g.addColorStop(0, 'rgba(154,90,224,.5)'); g.addColorStop(1, 'rgba(70,30,120,.55)'); body(g); ctx.fillStyle = 'rgba(232,216,255,.5)'; for (let k = 0; k < 14; k++) { const yy = bot - ((t * 9 + k * 13) % Math.max(4, bot - surf)), xx = px + 10 + (k * 41) % (pw - 20); if (yy > surf + 3) { ctx.beginPath(); ctx.arc(xx, yy, 1, 0, 7); ctx.fill(); } } }
+  else if (m === 'iron') { const g = ctx.createLinearGradient(0, surf, 0, bot); g.addColorStop(0, 'rgba(255,140,50,.55)'); g.addColorStop(.3, 'rgba(160,50,20,.5)'); g.addColorStop(1, 'rgba(60,20,10,.6)'); body(g); }
+  else if (m === 'stem') { ctx.fillStyle = 'rgba(74,52,32,.7)'; ctx.fillRect(px, bot - 8, pw, 8); const hgt = bot - 8 - surf;
+    for (let i = 4, k = 0; i < pw; i += 7, k++) { const hh = Math.max(0, hgt * (.75 + .25 * Math.sin(k * 2.3))), sw = Math.sin(t * 1.4 + k) * 1.5; ctx.strokeStyle = k % 3 ? 'rgba(63,168,58,.4)' : 'rgba(126,224,74,.4)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(px + i, bot - 8); ctx.quadraticCurveTo(px + i, bot - 8 - hh * .6, px + i + sw, bot - 8 - hh); ctx.stroke(); } }
+  else if (m === 'thread') { body('rgba(200,184,138,.18)'); ctx.strokeStyle = 'rgba(255,244,216,.35)'; ctx.lineWidth = 1; for (let yy = bot - 3; yy > surf + 2; yy -= 4) { ctx.beginPath(); for (let i = 0; i <= pw; i += 6) ctx.lineTo(px + i, yy + ((i / 6) % 2 ? 1 : -1)); ctx.stroke(); } }
+  else { body('rgba(90,82,74,.6)'); ctx.strokeStyle = 'rgba(40,36,32,.6)'; ctx.lineWidth = 1; for (let yy = bot - 6, r = 0; yy > surf + 3; yy -= 7, r++) { ctx.beginPath(); for (let i = 0; i <= pw; i += 10) ctx.lineTo(px + i, yy + ((i * 3 + r * 7) % 5 - 2) * .6); ctx.stroke(); }
+    for (let k = 0; k < 18; k++) { const xx = px + 8 + (k * 53) % (pw - 16), yy = bot - 4 - (k * 23) % Math.max(4, bot - surf - 6); ctx.fillStyle = `rgba(255,176,112,${.5 + .4 * Math.sin(t * 3 + k)})`; ctx.fillRect(xx, yy, 2, 2); } }
+  // the surface line, bright, the profession's color
+  ctx.strokeStyle = m === 'stem' ? 'rgba(159,240,138,.45)' : hexA(p.light, .5); ctx.lineWidth = 1; ctx.beginPath(); for (let i = 0; i <= pw; i += 4) ctx.lineTo(px + i, (m === 'stem' ? surf : wave(i, 1))); ctx.stroke();
+  ctx.restore(); }
+// round 10 D: the material in a bulb, filling the rect (x, y, w, h); top = the bulb of points still to go
+function matFill(p, x, y, w, h, t, top) { if (h <= .2) return; const m = p.mat;
+  if (m === 'liquid') { const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#d0a8ff'); g.addColorStop(1, '#6a30b4'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); }
+  else if (m === 'iron') { const g = ctx.createLinearGradient(0, y, 0, y + h); if (top) { g.addColorStop(0, '#fff4d8'); g.addColorStop(1, '#ff9a3a'); } else { g.addColorStop(0, '#ff8a30'); g.addColorStop(.4, '#8a2810'); g.addColorStop(1, '#3a1408'); } ctx.fillStyle = g; ctx.fillRect(x, y, w, h); }
+  else if (m === 'stem') { ctx.fillStyle = top ? '#a8763a' : '#4a3420'; ctx.fillRect(x, y, w, h); if (top) { ctx.fillStyle = '#6a4a2a'; for (let i = 0; i < 12; i++) ctx.fillRect(x + (i * 7) % w, y + (i * 5) % Math.max(1, h), 2, 1.5); }
+    else { for (let i = 0; i < 4; i++) { const sx = x + 9 + i * 5, sh = Math.min(7, h * .8); ctx.strokeStyle = '#5ac83a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(sx, y + 1); ctx.lineTo(sx + Math.sin(t * 2 + i), y + 1 - sh); ctx.stroke(); } } }
+  else if (m === 'thread') { ctx.fillStyle = 'rgba(200,184,138,.35)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#fff4d8'; ctx.lineWidth = 1; for (let yy = y + h - 1.5; yy > y; yy -= 2.5) { ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + w, yy - .8); ctx.stroke(); } }
+  else { ctx.fillStyle = '#5a5048'; ctx.fillRect(x, y, w, h); for (let i = 0; i < 30; i++) { const xx = x + (i * 7) % w, yy = y + (i * 11) % Math.max(1, h); ctx.fillStyle = i % 5 ? '#8a7e72' : '#ffb070'; ctx.fillRect(xx, yy, 2, 2); } } }
 // round 10: the tighter layout's text. head: name, skill / rank cap, rank; tail: next unlock, points to go, the two after it
 function rankOf(v) { return [[75, 'Apprentice'], [150, 'Journeyman'], [225, 'Expert'], [300, 'Artisan']].find(r => v < r[0]) || [300, 'Artisan']; }
 function head(p, shown, x, y) { const nf = '600 13px system-ui', w1 = text(profName, x, y, nf, p.light), wn = drawNum('n', String(shown), x + w1 + 6, y, 14, '#fff', 'left', 'roll'), rk = rankOf(shown);
@@ -1208,7 +1267,7 @@ function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now;
 
 // ---------- panel ----------
 const fEl = document.getElementById('fams'), pEl = document.getElementById('profs');
-['NV', 'GL'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
+['NV', 'GL', 'MF', 'HG'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
 Object.keys(PROF).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.dataset.p = k; b.onclick = () => setProf(k); pEl.appendChild(b); });
 function sync() { document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam)); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
   document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('fdesc').textContent = FAM[fam].desc; }
@@ -1216,7 +1275,7 @@ function setFam(k) { fam = k; sync(); play(); } function setProf(k) { profName =
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
 addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); }
-  const i = '12'.indexOf(e.key); if (i >= 0) setFam(['NV', 'GL'][i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
+  const i = '1234'.indexOf(e.key); if (i >= 0) setFam(['NV', 'GL', 'MF', 'HG'][i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
 sync(); play(); requestAnimationFrame(frame);
 </script>
 </body>

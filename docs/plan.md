@@ -638,6 +638,11 @@ Professions (from 1.3.0):
    unlock's icon at its end, a step per skill-up: a vine with leaves and a bud (Herbalism), a blade white-hot at the tip
    cooling to steel (Blacksmithing), a crystal growing facet by facet (Alchemy), a seam stitching itself (Tailoring), a
    vein of ore with glints (Mining); faint notches under it count the points.
+   The user expected four options (rounds have four; "fewer, bolder rounds" means fewer rounds, not fewer options), so
+   round 10 got two more (keys 3-4, all four now 300 wide): **C. The module fills** (the whole panel is the container:
+   the material rises behind the text, dim, with a surface line; notches on the right edge; full = the panel flashes and
+   the corner icon pops) and **D. From one to the other** (an hourglass: the top bulb is the points still to go, the
+   bottom the points done; each skill-up runs a portion through the neck in the profession's material).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
