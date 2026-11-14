@@ -30,11 +30,11 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up, Phase 2 round 11</h1>
+  <h1>Skill-up, per profession: round 12, gatherers</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  round 11: add-ons to round 10’s pick, the line that grows (A, as it is): B a flourish at the tip per skill-up, C the unlocks sit on the line and the view slides on, D at the unlock the growth is drawn into the icon and dresses it. Rounds 2-10 stay in the code.
+  the locked design, the line that grows, now per profession. Round 12: the gatherers (Herbalism, Mining, Skinning, Fishing), four ways each (A is the locked look); the options change with the profession. Crafters come next. Rounds 2-11 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
-  Space replays; keys 1-4 switch the design, Q-T the profession.</small>
+  Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
   <h2>Family</h2>
   <div id="fams"></div>
@@ -144,10 +144,20 @@ const PROF = {
     snd: k => { tone(620 * k, 0, .04, .08, 'sine', 980 * k); noise(0, .06, .015, 4000, 1); },
     hit(x, y) { for (let i = 0; i < 7; i++) spawn({ x, y, vx: (Math.random() - .5) * 50, vy: -15 - Math.random() * 25, life: 1, size: 1.3, col: '#fff27a' }); } },
   Mining: { col: '#c86a2a', light: '#ffb070', tool: 'ToolPick', motion: 'swing', mat: 'stone', span: [75, 125], cspan: [75, 150], v: 101, five: 110, unlockV: 124, verb: 'mine',
-    unlocks: [[125, 'Iron Ore', '🌑']], caps: [[150, 'Expert']],
+    unlocks: [[125, 'Iron Ore', '🌑'], [155, 'Gold Ore', '🟡'], [175, 'Mithril Ore', '🔷'], [230, 'Truesilver Ore', '💎']], caps: [[150, 'Expert']], past: [[1, 'Copper Ore', '#c87a3a'], [65, 'Tin Ore', '#b8c0c8'], [75, 'Silver Ore', '#e8ecf0'], [125, 'Iron Ore', '#9a8e86'], [155, 'Gold Ore', '#e8c040'], [175, 'Mithril Ore', '#6ab0d8']],
     snd: k => { noise(0, .03, .06, 2400 * k, 3, 'bandpass', true); metal(0, 900 * k, .012, .15, [1, 2.76], [1, .3]); },
     hit(x, y) { for (let i = 0; i < 8; i++) spawn({ x, y, vx: (Math.random() - .5) * 140, vy: -50 - Math.random() * 80, g: 420, life: .6, size: 1.5, shape: 'sq', vr: 9, col: i % 3 ? '#8a7e72' : '#ffb070' }); } },
+  // round 12: the other two gatherers (sample unlocks: beast levels you can skin, waters you can fish)
+  Skinning: { col: '#b07a4a', light: '#f0c890', tool: 'ToolPick', motion: 'swing', mat: 'hide', span: [105, 110], cspan: [75, 150], v: 107, five: 105, unlockV: 109, verb: 'skin',
+    unlocks: [[110, 'level 22 beasts', '\u{1F43A}'], [115, 'level 23 beasts', '\u{1F417}'], [120, 'level 24 beasts', '\u{1F43B}'], [125, 'level 25 beasts', '\u{1F981}']],
+    snd: k => { noise(0, .09, .035, 2600 * k, 1.5); noise(.02, .05, .02, 5200 * k, 3); },
+    hit(x, y) { for (let i = 0; i < 6; i++) spawn({ x, y, vx: (Math.random() - .5) * 60, vy: -20 - Math.random() * 30, g: 120, life: .7, size: 1.3, col: i % 2 ? '#8a5a32' : '#c89a6a' }); } },
+  Fishing: { col: '#3a8ac8', light: '#9ad8ff', tool: 'ToolDrop', motion: 'drip', mat: 'water', span: [100, 130], cspan: [75, 150], v: 121, five: 118, unlockV: 129, verb: 'fish in',
+    unlocks: [[130, 'Stranglethorn waters', '\u{1F420}'], [150, 'Arathi waters', '\u{1F421}'], [175, 'Swamp of Sorrows waters', '\u{1F991}'], [205, 'Tanaris waters', '\u{1F988}']],
+    snd: k => { tone(380 * k, 0, .04, .14, 'sine', 140 * k); noise(0, .06, .02, 1800, 1.2); },
+    hit(x, y) { spawn({ x, y, size: 2, shape: 'ring', grow: 12, life: .55, col: '#9ad8ff' }); for (let i = 0; i < 4; i++) spawn({ x, y, vx: (Math.random() - .5) * 50, vy: -40 - Math.random() * 30, g: 300, life: .45, size: 1.3, col: '#d8f0ff' }); } },
 };
+Object.assign(PROF.Skinning, { node: '\u{1F52A}' }); Object.assign(PROF.Fishing, { node: '\u{1F3A3}' });
 Object.assign(PROF.Blacksmithing, { made: '\u{1F5E1}️' }); Object.assign(PROF.Alchemy, { made: '\u{1F9EA}' }); Object.assign(PROF.Tailoring, { made: '\u{1F9E5}' }); Object.assign(PROF.Herbalism, { node: '\u{1F33F}' }); Object.assign(PROF.Mining, { node: '⛏️' });
 function nextOf(p, v) { // the next thing to reach: { lv, name, emo, cap }
   if (p.unlocks) for (const u of p.unlocks) if (u[0] > v) return { lv: u[0], name: u[1], emo: u[2] };
@@ -225,7 +235,7 @@ function cell(p, x, y, w, h, lit, age, now, i) {
   ctx.restore(); }
 
 // ---------- scene ----------
-let S = null, fam = 'G0', profName = 'Herbalism', moment = 'up';
+let S = null, fam = 'PA', profName = 'Herbalism', moment = 'up';
 function build() { const p = PROF[profName], hits = []; let v0;
   if (moment === 'up') { v0 = p.v; hits.push(.35); }
   else if (moment === 'five') { v0 = p.five; for (let k = 0; k < 5; k++) hits.push(.35 + k * .75); }
@@ -1069,14 +1079,15 @@ const FAM = {
 };
 // round 11: the grows-along-the-line module with its add-on (mode: plain, tip, road, unlock)
 function payoff(x, y) { [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(x, y); spawn({ x, y, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); }
-function growModule(top, mode) {
+function growModule(top, mode, V) { V = V || {};
   const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
-  const road = mode === 'road', fin = mode === 'unlock', x0 = px + 48, x1 = px + pw - (road ? 16 : 32), L = x1 - x0, ly = py + 37, done = S.closeAt !== undefined, ux = px + pw - 17, f = clamp((st.v - lo) / n);
-  let X = v => x0 + clamp((v - lo) / n) * L, marks = [], lo2 = lo;
+  const road = mode === 'road' || !!V.road, fin = mode === 'unlock', x0 = px + 48, x1 = px + pw - (road ? 16 : 32), L = x1 - x0, ly = py + 37, done = S.closeAt !== undefined, ux = px + pw - 17, f = clamp((st.v - lo) / n);
+  let X = v => x0 + clamp((v - lo) / n) * L, Xi = x => lo + (x - x0) / L * n, marks = [], lo2 = lo;
   if (road) { const ups = (p.unlocks || []).filter(u => u[0] > lo), win = ups.length ? ups.slice(0, 3) : [[nx.lv, nx.name, nx.emo]], hi = win[win.length - 1][0];
     const sl = done ? eOut(clamp((S.age - S.closeAt - .6) / .8)) : 0, hi2 = ups.length > 3 ? ups[3][0] : hi; lo2 = lerp(lo, nx.lv, sl); const hiN = lerp(hi, hi2, sl);
-    X = v => x0 + (v - lo2) / Math.max(1, hiN - lo2) * L; marks = ups.length ? ups.slice(0, 4) : win; }
-  const tipX = road ? X(st.v) : x0 + f * L, unX = road ? X(nx.lv) : ux;
+    X = v => x0 + (v - lo2) / Math.max(1, hiN - lo2) * L; Xi = x => lo2 + (x - x0) / L * Math.max(1, hiN - lo2); marks = ups.length ? ups.slice(0, 4) : win; }
+  const tipX = road ? X(st.v) : x0 + f * L, unX = road ? X(nx.lv) : ux, G = V.grow || grow;
+  const info = { x0, x1, ly, X, Xi, tipX, lo, v: st.v, N, hitAge: st.hitAge, done, f, road };
   strikes(() => ({ x: tipX, y: ly }));
   if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; if (fin) tone(300, 0, .035, .7, 'sine', 900); else payoff(unX, ly); });
   const k = fin && done ? clamp((S.age - S.closeAt) / .6) : 0, payAt = done ? S.closeAt + (fin ? .6 : 0) : 99;
@@ -1088,20 +1099,104 @@ function growModule(top, mode) {
   else for (let j = 1; j < N; j++) { const x = x0 + j / N * L, got = f >= j / N - 1e-6; ctx.strokeStyle = got ? 'rgba(255,211,106,.7)' : 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, ly + 6); ctx.lineTo(x, ly + 9); ctx.stroke(); }
   // the growth (road: from where the stretch began, so it slides off on the way to the next; finale: eaten from the left into the icon)
   ctx.save(); ctx.beginPath(); ctx.rect(fin ? x0 - 4 + (L + 4) * k : x0 - 4, ly - 14, (fin ? (L + 4) * (1 - k) : L + 8) + 4, 28); ctx.clip();
-  if (road) { ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); const s0 = X(lo); grow(p, s0, ly, Math.max(.5, tipX - s0), 1, S.age); }
-  else grow(p, x0, ly, L, f, S.age);
+  if (road) { ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); const s0 = X(lo); G(p, s0, ly, Math.max(.5, tipX - s0), 1, S.age, info); }
+  else G(p, x0, ly, L, f, S.age, info);
   ctx.restore();
   if (fin && done && k < 1) { const hx = x0 + L * k; ctx.save(); ctx.fillStyle = hexA(p.light, .8 * (1 - k)); ctx.shadowColor = p.light; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(hx, ly, 3, 0, 7); ctx.fill(); ctx.restore(); }
-  if (mode === 'tip') S.hits.forEach(h => flourish(p, tipX, ly, S.age - h - HIT));
+  const FL = typeof V.tip === 'function' ? V.tip : flourish; if (mode === 'tip' || V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
   if (done && !fin && !road) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.strokeStyle = `rgba(255,255,255,${fl})`; ctx.lineWidth = 5; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); ctx.shadowBlur = 0; } }
   const pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
   if (road) marks.forEach(u => { const x = X(u[0]), isNext = u[0] === nx.lv, fade = clamp((x - x0 + 4) / 14) * clamp((x1 + 8 - x) / 10); if (fade <= 0) return;
-      ctx.save(); ctx.globalAlpha *= fade * (isNext || lit ? 1 : .6); icon(x, ly, (isNext ? 18 : 13) + (isNext ? pop * 6 : 0), u[2], isNext && lit ? 1 : .5, isNext && lit ? p.light : null); ctx.restore(); });
+      ctx.save(); ctx.globalAlpha *= fade * (isNext || lit ? 1 : .6); if (V.mark) V.mark(p, u, x, ly, isNext, isNext && lit, isNext ? pop : 0, st.v >= u[0] - 1e-6, S.age - payAt); else icon(x, ly, (isNext ? 18 : 13) + (isNext ? pop * 6 : 0), u[2], isNext && lit ? 1 : .5, isNext && lit ? p.light : null); ctx.restore(); });
+  else if (V.unlockX) { const uxx = V.unlockX(info); icon(uxx, ly, 20 + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null); }
   else { icon(ux, ly, 20 + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null); if (fin && lit) dressIcon(p, ux, ly, 20 + pop * 6, clamp((S.age - payAt) / .8), S.age - payAt); }
   if (fin && done && !lit && p.mat === 'stone') { ctx.fillStyle = `rgba(90,82,74,${clamp((S.age - S.closeAt) / .3)})`; ctx.fillRect(ux - 12, ly - 12, 24, 24); }
   tail(p, nx, st.shown, x0, py + 58, lit, false, road);
   ctx.restore();
   if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + (fin ? 1 : road ? .5 : .35), '600 13px system-ui', false); }
+
+// ---------- round 12 (2026-11-15): per profession, gatherers: four ways the line grows for each ----------
+function band(I, y, h, col) { ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(I.x0 - 2, y - h / 2, I.x1 - I.x0 + 4, h, 3); ctx.fill(); }
+function fur(I, y, h, col, step) { ctx.strokeStyle = col; ctx.lineWidth = 1; for (let s = 0, i = 0; s < I.x1 - I.x0; s += step, i++) { const xx = I.x0 + s, yy = y - h / 2 + 1 + (i * 5) % (h - 3); ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx + 1.5, yy + 2.5); ctx.stroke(); } }
+function shortTrack(I, y, col) { ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(I.x0, y); ctx.lineTo(I.x1, y); ctx.stroke(); }
+function ripple(p, x, y, t) { if (t < 0 || t > .8) return; const u = t / .8; ctx.save(); ctx.strokeStyle = `rgba(154,216,255,${1 - u})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(x, y + 4, 3 + u * 16, 1 + u * 3.5, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+function glintTip(p, x, y, t) { if (t < 0 || t > .5) return; const e = 1 - t / .5; ctx.save(); ctx.globalAlpha *= e; ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; star4(x + 1, y - 2, 2 + e * 6, t * 3); ctx.restore(); }
+function scratchTip(p, x, y, t) { if (t < 0 || t > .6) return; const e = 1 - t / .6; ctx.save(); ctx.strokeStyle = `rgba(255,240,220,${e})`; ctx.lineWidth = 1.4; for (const o of [-3, 0, 3]) { ctx.beginPath(); ctx.moveTo(x + o - 2, y - 4); ctx.lineTo(x + o + 2, y + 4); ctx.stroke(); } ctx.restore(); }
+function oreAt(p, lv) { let c = p.past[0][2]; for (const q of p.past) if (lv >= q[0]) c = q[2]; return c; }
+const VAR = {
+  Herbalism: {
+    A: { name: 'Vine', desc: 'The locked look: a vine with leaves unfurling behind a bud at the tip.' },
+    B: { name: 'Roots and shoots', desc: 'A thin soil line; the line grows under it as a root with little rootlets, and a shoot pops up through the soil every few points, growing taller the further behind the tip it is.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; ctx.strokeStyle = 'rgba(168,118,58,.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(I.x0, y - 3); ctx.lineTo(I.x1, y - 3); ctx.stroke();
+        ctx.strokeStyle = '#a8763a'; ctx.lineWidth = 2; ctx.beginPath(); for (let s = 0; s <= g; s += 2) ctx.lineTo(x + s, y + 3 + Math.sin(s * .3) * 1.2); ctx.stroke();
+        ctx.lineWidth = 1; for (let s = 6; s < g; s += 9) { ctx.beginPath(); ctx.moveTo(x + s, y + 3 + Math.sin(s * .3) * 1.2); ctx.lineTo(x + s + 2, y + 7); ctx.stroke(); }
+        for (let s = 9; s < g; s += 18) { const gg = clamp((g - s) / 16), sw = Math.sin(t * 1.6 + s) * .8; ctx.strokeStyle = '#5ac83a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x + s, y - 3); ctx.lineTo(x + s + sw, y - 3 - 9 * gg); ctx.stroke(); ctx.fillStyle = '#7ee04a'; ctx.beginPath(); ctx.ellipse(x + s + sw + 2 * gg, y - 3 - 8 * gg, 2.6 * gg, 1.2 * gg, -.5, 0, 7); ctx.fill(); }
+        ctx.fillStyle = '#e8c890'; ctx.beginPath(); ctx.arc(x + g, y + 3 + Math.sin(g * .3) * 1.2, 1.4, 0, 7); ctx.fill(); } },
+    C: { name: 'Buds on the line', desc: 'The vine runs toward the next herbs, which wait on the line as closed buds at their levels (the next one biggest). When the vine reaches a bud it opens into that herb’s icon; then the view slides on to the next stretch.', road: true,
+      mark(p, u, x, y, isNext, on, pop, passed) { if (on || (passed && !isNext)) { icon(x, y, (isNext ? 18 : 13) + pop * 6, u[2], 1, on ? p.light : null); return; }
+        const s = isNext ? 1 : .75; ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, y + 1); ctx.lineTo(x, y - 3 * s); ctx.stroke();
+        ctx.fillStyle = '#4fb83a'; ctx.beginPath(); ctx.ellipse(x, y - 7 * s, 4 * s, 6 * s, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#ff9ad0'; ctx.beginPath(); ctx.ellipse(x, y - 11.5 * s, 2 * s, 2.4 * s, 0, 0, 7); ctx.fill(); } },
+    D: { name: 'A leaf per point', desc: 'The vine with the tip flourish: every skill-up unfurls a fresh leaf at the tip, and every fifth point a flower opens on the vine and stays, so the stretch you grew is in bloom.', tip: true,
+      grow(p, x, y, L, f, t, I) { grow(p, x, y, L, f, t); for (let v = Math.ceil((I.lo + .01) / 5) * 5; v <= I.v + 1e-6; v += 5) { const xx = I.X(v); if (xx > I.x0 && xx <= x + L * f + .5) bud(xx, y - 5, 1); } } },
+  },
+  Mining: {
+    A: { name: 'Ore vein', desc: 'The locked look: a vein of ore with glints, running to the next ore.' },
+    B: { name: 'The tunnel', desc: 'A band of rock; the line is a tunnel dug through it, the dig face at the tip. Each skill-up chips the face forward with falling chunks. The next ores sit ahead in the rock as pockets; the tunnel breaks into the next one and it lights; then the view slides on.', road: true,
+      grow(p, x, y, L, f, t, I) { ctx.fillStyle = '#4a443e'; ctx.fillRect(I.x0 - 4, y - 8, I.x1 - I.x0 + 12, 16); ctx.strokeStyle = 'rgba(30,26,22,.6)'; ctx.lineWidth = 1; for (const o of [-5, 5]) { ctx.beginPath(); for (let s = 0; s <= I.x1 - I.x0 + 12; s += 8) ctx.lineTo(I.x0 - 4 + s, y + o + ((s * 3) % 5 - 2) * .4); ctx.stroke(); }
+        const g = L * f; if (g <= 0) return; ctx.fillStyle = '#14110e'; ctx.beginPath(); ctx.moveTo(x, y + 5); for (let s = 0; s <= g; s += 4) ctx.lineTo(x + s, y - 4 + ((s * 7) % 5) * .4); ctx.lineTo(x + g, y + 5); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#a89e92'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x + g, y - 5); ctx.lineTo(x + g + 2, y - 2); ctx.lineTo(x + g, y + 1); ctx.lineTo(x + g + 2, y + 5); ctx.stroke();
+        ctx.fillStyle = '#5a524a'; for (let s = 5; s < g - 4; s += 11) ctx.fillRect(x + s, y + 3, 2, 1.5); },
+      mark(p, u, x, y, isNext, on, pop, passed) { if (on || (passed && !isNext)) { icon(x, y, (isNext ? 18 : 13) + pop * 6, u[2], 1, on ? p.light : null); return; }
+        const r = isNext ? 9 : 7; ctx.fillStyle = '#2a2420'; ctx.beginPath(); ctx.ellipse(x, y, r, r * .7, 0, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,176,112,.8)'; for (let i = 0; i < 5; i++) ctx.fillRect(x - r * .6 + (i * 7) % (r * 1.2), y - 3 + (i * 5) % 6, 1.6, 1.6);
+        ctx.save(); ctx.globalAlpha *= .4; icon(x, y, isNext ? 12 : 9, u[2], 1); ctx.restore(); } },
+    C: { name: 'The crack', desc: 'A band of stone with a crack running through it toward the next ore. Each skill-up the crack jumps forward with a little branch and a glint of ore at its tip (the tip flourish). Reaching the ore: the stone lights along the crack and the ore pops.', tip: true,
+      grow(p, x, y, L, f, t, I) { ctx.fillStyle = '#5a524a'; ctx.beginPath(); ctx.roundRect(I.x0 - 2, y - 6, I.x1 - I.x0 + 4, 12, 3); ctx.fill(); ctx.fillStyle = 'rgba(30,26,22,.35)'; for (let i = 0; i < 30; i++) ctx.fillRect(I.x0 + (i * 37) % (I.x1 - I.x0), y - 5 + (i * 7) % 10, 1.5, 1.5);
+        const g = L * f; if (g <= 0) return; const cy = s => y + (((s / 5) | 0) * 7 % 5 - 2) * 1.3;
+        ctx.strokeStyle = 'rgba(255,150,70,.5)'; ctx.lineWidth = 2.6; ctx.beginPath(); for (let s = 0; s <= g; s += 5) ctx.lineTo(x + s, cy(s)); ctx.lineTo(x + g, cy(g)); ctx.stroke();
+        ctx.strokeStyle = '#120e0a'; ctx.lineWidth = 1.3; ctx.beginPath(); for (let s = 0; s <= g; s += 5) ctx.lineTo(x + s, cy(s)); ctx.lineTo(x + g, cy(g)); ctx.stroke();
+        for (let s = 12, i = 0; s < g; s += 17, i++) { ctx.beginPath(); ctx.moveTo(x + s, cy(s)); ctx.lineTo(x + s + 3, cy(s) + (i % 2 ? 4 : -4)); ctx.stroke(); } } },
+    D: { name: 'Changing ore', desc: 'The line is packed with ore, and its color is the ore you could mine at that level: copper, then tin, silver, iron, gold, mithril. The next ores wait on the line at their levels; reaching one turns the ore after it to the new color, so the line shows your history. Then the view slides on.', road: true,
+      grow(p, x, y, L, f, t, I) { const g = L * f; for (let s = 2, i = 0; s < g; s += 5, i++) { const xx = x + s; ctx.fillStyle = oreAt(p, I.Xi(xx)); ctx.globalAlpha *= 1; ctx.beginPath(); ctx.arc(xx, y + (i % 2 ? 1.2 : -1.2), 3, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(xx + 1, y + (i % 2 ? 2 : -.4), 1.4, 0, 7); ctx.fill(); } } },
+  },
+  Skinning: {
+    A: { name: 'The cut', desc: 'A strip of hide with its fur; a clean knife cut runs along it toward the next beasts, the hide parting with light edges. Each skill-up the cut slides forward and the blade glints at its tip.', tip: glintTip,
+      grow(p, x, y, L, f, t, I) { band(I, y, 12, '#7a4e2a'); fur(I, y, 12, 'rgba(200,154,106,.55)', 4); const g = L * f; if (g <= 0) return;
+        ctx.strokeStyle = 'rgba(240,210,170,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y - 1.6); ctx.lineTo(x + g, y); ctx.moveTo(x, y + 1.6); ctx.lineTo(x + g, y); ctx.stroke(); ctx.strokeStyle = '#1e0e04'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + g, y); ctx.stroke(); } },
+    B: { name: 'Peeled strip', desc: 'The strip of hide peels back as the line grows: behind the tip the fur side is rolled away to show the pale inner side, and the peeled strip rolls up into a curl that rides the tip, getting fatter as you go.',
+      grow(p, x, y, L, f, t, I) { band(I, y, 12, '#7a4e2a'); fur(I, y, 12, 'rgba(200,154,106,.55)', 4); const g = L * f; if (g <= 0) return;
+        ctx.fillStyle = '#e8d0a8'; ctx.fillRect(x - 2, y - 6, g + 2, 12); ctx.strokeStyle = 'rgba(160,120,80,.35)'; ctx.lineWidth = 1; for (let yy = y - 3; yy <= y + 3; yy += 3) { ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + g, yy); ctx.stroke(); }
+        const r = 3 + Math.min(4, g / 45), cx = x + g, cyy = y - 6 - r + 2; ctx.fillStyle = '#a8784a'; ctx.beginPath(); ctx.arc(cx, cyy, r, 0, 7); ctx.fill(); ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 1; ctx.beginPath(); for (let a = 0; a < 9; a += .3) ctx.lineTo(cx + Math.cos(a + g * .1) * r * a / 9, cyy + Math.sin(a + g * .1) * r * a / 9); ctx.stroke(); } },
+    C: { name: 'Scraped clean', desc: 'The strip starts as rough fur; behind the tip it’s scraped down to smooth, shiny leather, a pale scraper edge at the tip. Each skill-up the edge moves on and a few flecks of fur come off.',
+      grow(p, x, y, L, f, t, I) { band(I, y, 12, '#4e3220'); fur(I, y, 12, 'rgba(150,110,74,.8)', 2.5); const g = L * f; if (g <= 0) return;
+        const gr = ctx.createLinearGradient(0, y - 6, 0, y + 6); gr.addColorStop(0, '#d8a070'); gr.addColorStop(1, '#a06a3a'); ctx.fillStyle = gr; ctx.fillRect(x - 2, y - 6, g + 2, 12); ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y - 3); ctx.lineTo(x + g, y - 3); ctx.stroke();
+        ctx.strokeStyle = '#ece4d4'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + g + 1, y - 7); ctx.lineTo(x + g + 1, y + 7); ctx.stroke(); } },
+    D: { name: 'Tracks', desc: 'Claw marks scratch along the line toward the next beasts, which wait on it at their levels (the beast you can skin next is biggest). Each skill-up leaves a fresh, bright set of marks; reaching the beast pops it, then the view slides on.', road: true, tip: scratchTip,
+      grow(p, x, y, L, f, t, I) { shortTrack(I, y, 'rgba(255,255,255,.08)'); const g = L * f; for (let s = 6; s < g; s += 14) { const fresh = clamp(1 - (g - s) / 40); ctx.strokeStyle = mix('#8a6040', '#e8c8a0', fresh); ctx.lineWidth = 1.2; for (const o of [-3, 0, 3]) { ctx.beginPath(); ctx.moveTo(x + s + o - 2, y - 4); ctx.lineTo(x + s + o + 2, y + 4); ctx.stroke(); } } } },
+  },
+  Fishing: {
+    A: { name: 'The cast', desc: 'Water along the line; your fishing line runs out over it with a bobber at the tip, bobbing. Each skill-up the bobber plops a little further with a ripple.', tip: ripple,
+      grow(p, x, y, L, f, t, I) { ctx.strokeStyle = 'rgba(90,170,230,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let s = 0; s <= I.x1 - I.x0; s += 3) ctx.lineTo(I.x0 + s, y + 4 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke();
+        const fx = x + L * f, bob = Math.sin(t * 3) * 1; ctx.strokeStyle = 'rgba(235,235,235,.75)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.quadraticCurveTo((x + fx) / 2, y + 1, fx, y + bob); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(fx, y + 1 + bob, 3, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#e0402a'; ctx.beginPath(); ctx.arc(fx, y + 1 + bob, 3, Math.PI, 7); ctx.fill(); } },
+    B: { name: 'The stream', desc: 'Water flows along the line toward the next waters, whose fish wait on it at their levels. Each skill-up the water runs further. Reaching one, the fish jumps out of the water and pops; then the view slides on.', road: true,
+      grow(p, x, y, L, f, t, I) { shortTrack(I, y, 'rgba(168,118,58,.25)'); const g = L * f; if (g <= 0) return; ctx.fillStyle = '#2a6aa8'; ctx.beginPath(); ctx.roundRect(x, y - 3, g, 6, 3); ctx.fill();
+        ctx.save(); ctx.beginPath(); ctx.rect(x, y - 3, g, 6); ctx.clip(); ctx.strokeStyle = 'rgba(154,216,255,.8)'; ctx.lineWidth = 1; ctx.setLineDash([4, 7]); ctx.lineDashOffset = -t * 30; ctx.beginPath(); ctx.moveTo(x, y - 1); ctx.lineTo(x + g, y - 1); ctx.stroke(); ctx.lineDashOffset = -t * 22 + 5; ctx.beginPath(); ctx.moveTo(x, y + 1.5); ctx.lineTo(x + g, y + 1.5); ctx.stroke(); ctx.restore(); },
+      mark(p, u, x, y, isNext, on, pop, passed, ts) { const jy = on ? -Math.sin(clamp(ts / .6) * Math.PI) * 12 : 0; icon(x, y + jy, (isNext ? 18 : 13) + pop * 6, u[2], on || passed ? 1 : .5, on ? p.light : null); } },
+    C: { name: 'Ripples', desc: 'A strip of dark water; behind the tip it’s lit up, shimmering, and each skill-up drops a ripple at the tip that spreads out. Faint rings stay where each notch was reached.', tip: ripple,
+      grow(p, x, y, L, f, t, I) { band(I, y, 10, 'rgba(16,40,58,.85)'); const g = L * f; if (g <= 0) return; const gr = ctx.createLinearGradient(x, 0, x + g, 0); gr.addColorStop(0, 'rgba(42,106,168,.7)'); gr.addColorStop(1, 'rgba(110,190,240,.9)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.roundRect(x - 2, y - 5, g + 2, 10, 3); ctx.fill();
+        ctx.strokeStyle = 'rgba(230,245,255,.6)'; ctx.lineWidth = 1; for (let k = 0; k < g / 16; k++) { const xx = x + ((k * 16 + t * 14) % Math.max(1, g)); ctx.beginPath(); ctx.moveTo(xx, y - 1 + (k % 2) * 2); ctx.lineTo(xx + 4, y - 1 + (k % 2) * 2); ctx.stroke(); }
+        ctx.strokeStyle = 'rgba(200,235,255,.35)'; for (let j = 1; j < I.N; j++) { const xx = I.x0 + j / I.N * (I.x1 - I.x0); if (xx > x + g) break; ctx.beginPath(); ctx.ellipse(xx, y, 5, 2, 0, 0, 7); ctx.stroke(); } } },
+    D: { name: 'The reel', desc: 'Nothing grows out: your reel sits at the start of the line and the next waters’ fish is on the hook at the far end. Each skill-up turns the reel and pulls the fish closer on a taut line; the reel fills with wound line. Reaching it, the fish arrives at the reel and pops.',
+      unlockX: I => lerp(I.x1 + 15, I.x0 + 34, I.f),
+      grow(p, x, y, L, f, t, I) { const rx = I.x0 + 7, ang = (I.v - I.lo) * 2.2, ix = lerp(I.x1 + 15, I.x0 + 34, I.f);
+        ctx.strokeStyle = 'rgba(235,235,235,.8)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.moveTo(rx, y - 6); ctx.lineTo(ix - 10, y); ctx.stroke();
+        ctx.fillStyle = 'rgba(235,235,235,.85)'; ctx.beginPath(); ctx.arc(rx, y, 2 + 3.5 * I.f, 0, 7); ctx.fill(); ctx.strokeStyle = '#c8b88a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(rx, y, 6.5, 0, 7); ctx.stroke();
+        ctx.lineWidth = 1; for (let i = 0; i < 3; i++) { const a2 = ang + i * 2.094; ctx.beginPath(); ctx.moveTo(rx, y); ctx.lineTo(rx + Math.cos(a2) * 6.5, y + Math.sin(a2) * 6.5); ctx.stroke(); } } },
+  },
+};
+function r12(L) { return { get name() { const v = VAR[profName]; return L + '. ' + (v ? v[L].name : 'gatherers only this round'); }, get desc() { const v = VAR[profName]; return v ? v[L].desc : 'Round 12 covers the gatherers (Herbalism, Mining, Skinning, Fishing); crafters come next. This shows the locked look.'; },
+  get note() { const v = VAR[profName]; return v ? v[L].name.toLowerCase() + '.' : 'the locked look.'; }, draw(top) { const v = VAR[profName]; growModule(top, 'plain', v ? v[L] : null); } }; }
+Object.assign(FAM, { PA: r12('A'), PB: r12('B'), PC: r12('C'), PD: r12('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
@@ -1332,15 +1427,15 @@ function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now;
 
 // ---------- panel ----------
 const fEl = document.getElementById('fams'), pEl = document.getElementById('profs');
-['G0', 'GT', 'GR', 'GU'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
+['PA', 'PB', 'PC', 'PD'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
 Object.keys(PROF).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.dataset.p = k; b.onclick = () => setProf(k); pEl.appendChild(b); });
-function sync() { document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam)); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
+function sync() { document.querySelectorAll('[data-f]').forEach((b, i) => { b.classList.toggle('on', b.dataset.f === fam); b.textContent = (i + 1) + '. ' + FAM[b.dataset.f].name; }); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
   document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('fdesc').textContent = FAM[fam].desc; }
 function setFam(k) { fam = k; sync(); play(); } function setProf(k) { profName = k; sync(); play(); }
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
 addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); }
-  const i = '1234'.indexOf(e.key); if (i >= 0) setFam(['G0', 'GT', 'GR', 'GU'][i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
+  const i = '1234'.indexOf(e.key); if (i >= 0) setFam(['PA', 'PB', 'PC', 'PD'][i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
 sync(); play(); requestAnimationFrame(frame);
 </script>
 </body>

@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); next: the per-profession pass, pitch first; kit 0.8.1. Read this
+_Last checkpoint: 2026-11-15, skill-up general design LOCKED (grows along the line); per-profession round 12 (gatherers) built, awaiting picks; kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -31,7 +31,8 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
 - **Skill-up gains: general design LOCKED 2026-11-15, "It grows along the line"** (round 11 A; the tip flourish and
   the unlocks-on-the-line are ideas to use per profession, not locked). **Next: the per-profession pass** for all
-  twelve (pitch first, four options per profession; plan.md "Round 11 → LOCKED").
+  twelve (pitch first, four options per profession; plan.md "Round 11 → LOCKED"). **Round 12 (gatherers) built,
+  awaiting picks**; then crafters, then secondary skills.
 - **Skill-up gains, Phase 2 record, 11 rounds** (`docs/mockups/skillup-p2.html`, the only page;
   there is no skillup-p3; the title says the round; older rounds stay in the code, off the panel; full record in
   plan.md under "2. Skill-up gains"). **Goal (the user): clear progression AND a frame easy to make unique, in fun

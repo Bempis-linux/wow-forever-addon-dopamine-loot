@@ -658,6 +658,16 @@ Professions (from 1.3.0):
    the line, the view slides on)** as **ideas to draw on per profession**, not locked into the general design. D (the
    growth turns into the unlock) not picked. Next: the per-profession pass (all twelve: Alchemy, Blacksmithing,
    Enchanting, Engineering, Leatherworking, Tailoring, Cooking, First Aid, Fishing, Herbalism, Mining, Skinning).
+   **Per-profession pass, round 12: the gatherers** (same page, keys 1-4; the option names change with the profession;
+   `VAR[prof][A-D]` hooks into `growModule(top, mode, V)`: `grow`, `road`, `tip`, `mark`, `unlockX`). Order: gatherers,
+   then crafters, then the secondary skills. Skinning (sample unlocks: beast levels) and Fishing (sample unlocks:
+   waters) added; Mining got its later ores and a `past` color list. Pitched first; the user swapped Skinning C (lacing:
+   **no zig-zag designs**, memory no-zigzag). Herbalism: A Vine, B Roots and shoots, C Buds on the line (open into the
+   herb), D A leaf per point (tip flourish, a flower every fifth point). Mining: A Ore vein, B The tunnel (dig face,
+   ore pockets ahead), C The crack (jumps forward, ore glint), D Changing ore (the line's ore color by level).
+   Skinning: A The cut (knife glint), B Peeled strip (curl rides the tip), C Scraped clean (fur to smooth leather),
+   D Tracks (claw marks to the beasts on the line). Fishing: A The cast (bobber, ripple), B The stream (the fish jumps),
+   C Ripples (lit water), D The reel (the fish is pulled in to the reel).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
