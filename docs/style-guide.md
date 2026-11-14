@@ -5,6 +5,19 @@ podge of random features" (the user). It records what's been picked so far and, 
 shipped 1.3 UI and the 1.4 designs disagree. Nothing changes in game until the user picks (docs/plan.md,
 "Cohesion pass"). The overview mockup is `docs/mockups/cohesion-r1.html`.
 
+## The theme in one line (2026-11-14)
+
+**The game's own interface, quietly made to feel earned.** The user asked for words on the theme; this is the
+test a new design must pass (round 3 of skill-ups: a puzzle assembling was "a little too playful", a rubber stamp
+"cool but not quite the theme").
+- **It belongs to the game**: the game's golds, fonts, item icons, coins and dark gold-lined panels; it looks like
+  something Blizzard could have shipped, never a toy laid on top.
+- **Craft and material**: progress is made of the work itself (heated iron, thread, liquid, stone); tools act,
+  beats land like real hits.
+- **Light and sound carry the reward**: rings, glints, ripples, chimes; simple shapes, not drawn props.
+- **Satisfying, not silly**: weighty and restrained; it calms down over long sessions and in combat; it adds to the
+  game's systems, never turns them into a gamble.
+
 ## Principles (from the user's picks)
 
 - **A supplement to the game's own systems.** Effects celebrate what the game already gave you; no lottery or

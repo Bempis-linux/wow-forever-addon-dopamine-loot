@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-14, skill-up Phase 2 round 2 built, waiting on the user's verdict; kit 0.8.1 (budget rule). Read this
+_Last checkpoint: 2026-11-14 night, skill-up Phase 2 round 9 judged, nothing locked; next: tighten the layout, then one bold round; kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -29,18 +29,26 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   then Phase 2 for skill-up gains, the Create All pile, gathering, the loot window (Picked-up rows / harvest window);
   build them; then Phase 2 for XP, rep, level-up; build; the dungeon recap last if the weekly budget allows (may slip to
   1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
-- **Skill-up gains, Phase 2 in progress** (`docs/mockups/skillup-p2.html`, keys 1-4; plan.md under "2. Skill-up
-  gains"). **Decided: skill-ups are their own draggable module**, apart from the craft rings (gatherers have no ring;
-  one place for every skill-up; an optional spark from the craft ring may link them). Round 1 (B Around the craft ring,
-  C Comet + impact, D Stepping stones) was "not very differing" and D not liked; its code stays in the page, off the
-  panel. **Round 2 is built, the user has NOT tested it yet:** A Ring + road (lock), B Odometer (big rolling counter +
-  material line), C It comes to you (the next unlock hops closer per point, snaps into your ring), D The tool charges
-  (the tool icon fills as the gauge, swings onto the unlock). **First thing next session: get the user's verdict per
-  option (keep / drop / mix).**
+- **Skill-up gains, Phase 2 in progress, 9 rounds, nothing locked** (`docs/mockups/skillup-p2.html`, the only page;
+  there is no skillup-p3; the title says the round; older rounds stay in the code, off the panel; full record in
+  plan.md under "2. Skill-up gains"). **Goal (the user): clear progression AND a frame easy to make unique, in fun
+  ways, per profession**; then a per-profession pass like crafting's. **Decided: its own draggable module**, apart from
+  the craft rings. **Rules learned:** progression first (an amount building toward a visible goal), sound and light are
+  add-ons; **no echo** (the skill-up must not share the craft ring's form: no ring, no tool riding; memory
+  no-echo-between-systems); compact (a quick progress update); no blocky square frame; the theme in words is in
+  `docs/style-guide.md` ("The theme in one line"). Dropped along the way: Ring + road (echo), whole journey (too big),
+  pips (repeated icons), countdown, icon colors in, stamp, bell, horizon, and more (plan.md).
+  **Round 9 (current panel, keys 1-4):** A One notched line ("simple, gets the point across"), B Poured in (the
+  profession's vessel, a portion poured per skill-up: "each one unique and can be built on"), C Lifted up (likes
+  only Herbalism's stalk lifting the icon), D The line is the container (likes only Herbalism's planter trough).
+  **"The one" isn't found yet.** The user: **the presentation needs work** (lots of unused space; could show more
+  info or design) but **don't over-design**. **Next session: tighten the layout first** (a compact module that uses its
+  space: more info or design), then one bold round built from what's liked (A's simplicity, B's per-profession
+  vessels, Herbalism's growing plant); pitch the one-liners first.
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.
-- Everything is committed and pushed (2026-11-14).
+- Everything is committed and pushed (2026-11-14 night).
 
 ## The compare page (how it works, for the next session)
 - Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
@@ -96,6 +104,8 @@ every round and pick). Older detail: git log, CHANGELOG.md._
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-14 night: skill-up Phase 2 rounds 3-9 (all in skillup-p2.html); rules learned: progression first, no echo with
+  the craft ring, compact, no blocky frame; the theme put into words (style guide); nothing locked yet.
 - 2026-11-14 1.4.0 order revised (professions first); crafting API checks done in game; skill-up Phase 2 rounds 1-2
   (own module decided); kit 0.8.1 budget rule.
 - 2026-11-14 Crafting phase 3 Polish done (3 beats, Leatherworking punchy, loudness Even).

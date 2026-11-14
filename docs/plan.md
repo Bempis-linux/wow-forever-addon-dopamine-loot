@@ -511,6 +511,11 @@ Professions (from 1.3.0):
    2152) = true, "Leatherworking". The burn grid works: 64 textures (8x8) of one image via SetTexCoord, every other one
    hidden, drew a clean checkerboard.
 2. Skill-up gains, Phase 2 (Phase 1 pick: Ring + road). Right after crafting: they share the Ring.
+   **Goal (the user, 2026-11-14): clear progression AND a frame that's easy to make unique, in fun ways, per
+   profession.** Two steps, like crafting: (a) lock the general skill-up design (as the craft Ring was locked);
+   (b) then a per-profession pass, rounds of unique designs for every profession (gatherers and secondary skills
+   too). Round 5 restated: A and B most on theme; C (Building up) "kind of cool, an alchemy bottle or liquid magma"
+   but seems less customizable as a general frame.
    Phase 2 round 1 (2026-11-14, `docs/mockups/skillup-p2.html`, built on skillup-r3's engine; what the crafting picks
    taught: a tool acting on the ring, punchy steps, the work's own place): **A. Ring + road** (the Phase 1 lock),
    **B. Around the craft ring** (no banner: a skill ring unspools around the craft ring at the cast bar, or around the
@@ -527,6 +532,102 @@ Professions (from 1.3.0):
    overshoot; a thin material line under it to the next unlock), **C. It comes to you** (no bar: the next unlock waits as
    far away as the points left and hops closer each skill-up, then snaps into your skill ring), **D. The tool charges**
    (the tool icon fills with color bottom-up as the gauge; full, it swings once onto the unlock icon).
+   Round 2 → "not fully feeling the new options" (not tested option by option; it was built before the budget rule was
+   applied). Round 3 (2026-11-14, same page, keys 1-4; round 2's code kept, off the panel), pitched first, each carried
+   by something no other option uses: A. Ring + road (the lock), **B. Piece by piece** (the next unlock's icon, faint
+   from the start in 16 pieces; each skill-up slams a piece in from below, the piece being earned fills from its
+   bottom; the last closes the seams, flash, the name lands), **C. The stamp** (no gauge: each skill-up stamps a round
+   seal with the new number, panel jolt, dust ring, thud; stamps pile askew; the unlock stamps a bigger gold seal with
+   its icon, double thud), **D. The bell** (only the profession's icon in a round frame; each skill-up strikes it like
+   a bell: swings, light rings ripple, a chime whose note climbs as the unlock nears (8 notes, a run a step each); the
+   unlock = the top note as a chord, the unlock rises out of it). Dropped at the pitch: the material piling up as real
+   icons (too close to the Create All pile).
+   Round 3 → **A still the favourite**, **D (the bell) liked**; B "a little too playful" (dropped); C "cool but not
+   quite the theme of this addon" (dropped).
+   The user then asked for new iterations in the A + D direction (resonance: sound and light) and for words on the
+   theme (now in docs/style-guide.md, "The theme in one line"). Round 4 (same page, keys 1-4; rounds 2-3 kept in the
+   code, off the panel), pitched first: A. Ring + road (the lock), **B. Singing ring** (A, but the ring is the bell:
+   on each strike the arc shimmers, a point of light runs from the seam to the head, light rings go out, a chime
+   climbs with the fill; closing = the chord + a wide gold ripple), **C. Ripple reach** (D's bell with the road as
+   faint circles around it, the next unlock nearest; each strike's ripple reaches further, leaving a soft light pool;
+   touching the next circle lights it, the icon pops, the chord), **D. Tightening string** (no ring: a string from
+   your skill to the next unlock, slack while far; each skill-up plucks it, it vibrates, tightens and sounds higher;
+   at the unlock it snaps taut with a flash). Shared: the 8-note scale (`SCALE8`, `noteDeg`: higher as the unlock
+   nears, a run a step each), the bell and pluck sounds.
+   **After the lock (the user, 2026-11-14): a per-profession pass for skill-ups**, like crafting's Phase 2 for all
+   ten: the locked skill-up design gets its own look per profession (material, tool, sound, finale; crafters and
+   gatherers incl. Skinning, Fishing, First Aid, Cooking), not just the five sample professions on the page.
+   Round 4 → "uniquely cool but don't give off a progression feel like A does"; B "just A with some more sound
+   effects, not bad but not what I was expecting on a new iteration". Learned: a skill-up design must read as
+   progression first (an amount building toward a visible goal, the road ahead); sound and light are add-ons.
+   The per-profession pass is run like crafting: first the general skill-up design (as the Ring was), then
+   rounds of unique designs per profession.
+   Round 5 (same page, keys 1-4; rounds 2-4 kept in the code, off the panel), pitched first, progression first:
+   A. Ring + road (the lock), **B. The whole journey** (the career 1-300 on one line in its four ranks, zoomed on your
+   stretch: the lit trail in the material, unlocks ahead as icons, the tool at the head; an unlock zooms out to the
+   whole career for ~1.5 s, then back), **C. Building up** (a column of the material, one block per point, the coming
+   unlocks as ledges on its side; each skill-up drops a block with weight (thud, puff, settle); the view climbs; the
+   ledge lights at the unlock), **D. The horizon** (a road into the distance, one mark per skill point flowing toward
+   you; the next unlock stands on it and grows as it nears, the later ones further back; at the unlock it arrives,
+   pops and steps aside).
+   Round 5 → "pretty cool options"; **A and B fit the theme** better than D (dropped). **C is a per-profession
+   idea**: "an alchemy bottle filling up, or a pile of molten metal". The user wants **customizability, or designs
+   unique per profession** (structure question for the next step: a general look + per-profession forms, and what
+   the player can choose).
+   Round 6 (same page, key 1; A and B plain on keys 2-3; rounds 2-5 kept in the code): **A vs B, dressed**, to
+   judge which frame customizes best before the lock. A (Ring + road) on top and B (The whole journey) below on one
+   clock, both dressed per profession through three hooks every frame calls (`DRESS[prof].head` at the head,
+   `.icon` on each unlock icon, `.unlock` at the unlock): Alchemy (the liquid bubbles at the head, a drop splashes in
+   per skill-up, reached unlocks bubble, the unlock boils over), Blacksmithing (white-hot head dripping molten metal,
+   reached unlocks glow with heat, a spark fountain + clang), Herbalism (a bud rides the head, reached unlocks bloom
+   with petals, a petal burst). Tailoring and Mining undressed.
+   Round 6 → **A still looks the cleanest**; B "takes up a lot of space for something I'd prefer to be a quick
+   progress update". Seeing both dressed together was "a little overwhelming": **the same look in two places feels
+   off** (the echo). That applies to A too: it shares the craft ring's form (a material arc with the tool at the head),
+   and the skill-up comes right after the craft. New rule: skill-ups get their own form, compact (a quick progress
+   update), sharing the colors and materials, not the ring and the tool. The user asked for new designs for this.
+   Round 7 (same page, keys 1-4; rounds 2-6 kept in the code), pitched first: compact quick updates, **no ring and
+   no tool** (no echo of the craft ring), each with an obvious per-profession slot: A. Ring + road (reference),
+   **B. Pips to the unlock** (a slim strip: profession icon, name + skill, a row of up to 12 pips counting down to the
+   next unlock's icon; a long stretch makes each pip a few points, filling partway; the pip is the profession's shape:
+   drops, sparks, leaves, stitches, ore chips; the unlock sweeps light along them), **C. The unlock fills up** (the
+   next unlock's icon in a game frame fills from the bottom with the material: bubbling liquid, molten metal with a
+   glowing top, a climbing vine, rows of thread, ore; a splash per skill-up; full = the icon lights), **D. Countdown**
+   (a big number of points left beside the unlock's icon; the digit changes per profession: Alchemy melts and drips,
+   Blacksmithing lands white-hot and cools to gold, Herbalism sprouts with two leaves, others roll; at zero the
+   unlock lights).
+   Round 7 → **A dropped for skill-ups** (the echo: "the Blacksmithing skill-up and the animation are basically the
+   same thing"); **D dropped**; **B and C are the direction** but "not 100% happy": B, "I don't like seeing a bunch
+   of the same icon over and over in a row"; C, "a cool idea but not quite implemented well".
+   Round 8 (same page, keys 1-3; rounds 2-7 kept in the code), pitched first: A. The unlock fills up (round 7 C, the
+   reference), **B. One notched line** (B without repeated icons: one slim line of the material to the next unlock's
+   icon, notches one per point (or per few, up to 15); the notch the material reaches does the profession's thing: a
+   drip, sparks, a bud opening, a stitch knot, an ore chip; the unlock flashes the line), **C. The icon colors in** (C
+   cleaner: nothing covers the icon; it starts grey and colors in from the bottom; a thin edge in the profession's
+   style marks the level: wavy liquid with bubbles, a white-hot edge with a heat tint, vine tips, a stitched seam, a
+   jagged ore seam; full = all color, pop).
+   Round 8 → **C "a big step backwards"** (dropped). What the user liked in A (round 7's fill): **a container filling
+   up with the materials inside**; they want *different ideas of that kind*, "not the same thing done a slightly
+   different way". **B (One notched line) is moving forward**: "I like that direction, looks like we could
+   personalize it". B becomes the reference for round 9.
+   Round 9 (same page, keys 1-4; rounds 2-8 kept in the code), pitched first; "the wall" the user disliked = a
+   literal blocky square frame (a shaped vessel is fine): A. One notched line (round 8 B, the reference),
+   **B. Poured in** (the profession's vessel beside your skill: flask, crucible, pot, cup, bin; each skill-up delivers
+   a portion from above: a drop, a molten stream from a ladle, a seed (the plant grows taller), a thread strand, an
+   ore chunk; it lands with the tool's sound and the level rises; the next unlock waits at the brim), **C. Lifted up**
+   (no container: the material builds up under the next unlock's icon and lifts it to a thin goal line: a liquid
+   column, stacked ingots cooling below a hot top, a stalk with leaves, thread winding up, a pillar of ore chunks; a
+   bounce per skill-up; touching the line lights it), **D. The line is the container** (the notched line becomes a
+   long, low container in the profession's look: a glass tube, a mould channel with a hot front, a planter trough
+   with sprouts, a seam being sewn, ore on a cart track; each skill-up surges the front forward; notches on the rim).
+   Round 9 → (the user, stopping for the night 2026-11-14) **A "pretty simple and gets the point across"**; **B "I
+   like how each one is unique and can be built on"**; C: "really like the Herbalism animation" (the stalk lifting the
+   icon), not the rest; D: likes Herbalism's (the planter trough with sprouts), "the others aren't bad but I'm not
+   fully feeling this one". Overall: **"the one" not found yet**, not all in on any option; **the presentation needs
+   work**: space is used poorly (a lot of empty space), it could show more info or more design; "I don't want to
+   over-design". Liked so far: A's simplicity, B's per-profession uniqueness, Herbalism's growing plant (in C and D).
+   Next session: tighten the layout first (use the space: a compact module that carries more info or design), then
+   one bold round built from those likes; pitch it first.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
