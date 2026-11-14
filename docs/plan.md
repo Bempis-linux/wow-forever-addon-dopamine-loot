@@ -496,6 +496,30 @@ No existing addon named "Dopamine Loot" was found.
 | after 1.0 | **Smarter upgrades**: usability via `C_PlayerInfo.CanUseItem`/tooltip, per-class stat weights (editable), Pawn when present; "upgrade at level N" |
 | later | Popup position (drag to move, like the rain landing height); per-style default zoom/tilt presets; dungeon recap show, screenshot mode, mail attachments, account-wide "never seen" view, sound packs, 3D props for non-model items, localization |
 
+### 1.4.0 order, revised 2026-11-14 (the user: nail down the 1.3 professions first)
+
+Everything designed so far counts as **Phase 1 done** (wow-design-rounds). 1.4.0 runs Phase 2 (Finalization) on what
+is left; **Phase 3 Polish for these moves to 1.4.1+** (crafting's polish took more context than expected; it is done).
+The dungeon recap stays in 1.4.0 for now, last, and may slip to 1.5.0 depending on the weekly budget.
+
+Professions (from 1.3.0):
+1. Crafting: the in-game API checks (Smelting window's name, is disenchant a trade-skill cast, the 8x8 burn grid).
+2. Skill-up gains, Phase 2 (Phase 1 pick: Ring + road). Right after crafting: they share the Ring.
+3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
+   handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
+4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
+5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
+6. Build the professions set (wow-mockup-to-addon), test in game.
+Leveling:
+7. XP, Phase 2 (Phase 1 pick: xp-r10, kills Rain, quests Comet + impact).
+8. Rep, Phase 2 (Sweep + faction rings).
+9. Level-up, Phase 2 (levelup-r4: Ascension, Cinematic every tenth level).
+10. Build leveling, test in game.
+Last, if the weekly budget allows (else 1.5.0):
+11. Dungeon recap, Phase 2 (Slim strip + Final medallion), then build.
+12. Release 1.4.0.
+1.4.1+: Phase 3 Polish for skill-up, gathering, the loot window, XP, rep and level-up.
+
 ### 1.4.0 scope, revised 2026-11-12: Leveling + the dungeon recap
 
 Brainstormed with the user 2026-11-12 after a CurseForge comment asking for "numbers go up" moments (XP, levels).

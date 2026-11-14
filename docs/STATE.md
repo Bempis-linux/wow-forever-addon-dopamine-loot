@@ -24,8 +24,10 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   Engineering, Cooking, Smelting, Leatherworking); ring widths, tool placement and finale lengths as picked (Alchemy's tube
   and Smelting's mould stay thicker); loudness **Even** (every profession about -29 dB at its loudest; per-profession gains
   in `LOUD_GAIN.even`, Blacksmithing x0.38, Tailoring x3.63). The page's Polish panel opens on the decided settings.
-- **Next up**: API checks in game (Smelting window's name on Forever; is disenchant a trade-skill cast; the burn as an
-  8x8 grid of icon slices via SetTexCoord), then the build with `wow-mockup-to-addon`.
+- **Next up (1.4.0 order, revised 2026-11-14; plan.md "1.4.0 order")**: professions first: crafting API checks in game,
+  then Phase 2 for skill-up gains, the Create All pile, gathering, the loot window (Picked-up rows / harvest window);
+  build them; then Phase 2 for XP, rep, level-up; build; the dungeon recap last if the weekly budget allows (may slip to
+  1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
 
 ## The compare page (how it works, for the next session)
 - Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
