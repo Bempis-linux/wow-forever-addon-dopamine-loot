@@ -710,6 +710,11 @@ Professions (from 1.3.0):
    small name/level and "N to X" over a thin line), C One slim row (26 px, like the Picked-up rows: icon, name, bar,
    unlock icon; fading row + gold hairline), D The edge is the bar (a small panel whose bottom gold hairline is the
    progress line; the unlock icon on its corner).
+   **Round 15 → B "Just a line" picked** (2026-11-15), but it must read on every ground: some text was hard to read on
+   bright ground, and Fishing's animation was hard to see there. **Round 16** (`VIS16`, `r16`, `visBack`; `text()` takes a
+   global `OUTLINE`, the growth and particles a drop-shadow `HALO` filter; the page opens on Bright): A Outlined (thick dark
+   text outline, a thin dark edge on the line, growth, particles and icon; no backing), B Soft shade (the 1.3 banner's
+   soft dark shade, no edges), C Fading strip (a dark strip fading out at both ends), D Outline + light shade.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).

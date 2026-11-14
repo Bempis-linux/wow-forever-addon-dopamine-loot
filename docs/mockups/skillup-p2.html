@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 15, a cleaner base</h1>
+  <h1>Skill-up: round 16, readable on any ground</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 15: four cleaner, quicker frames (the 1.3 banner was liked for being clean and a quick pass-by); the growth inside is each profession’s current base. Per-profession finales come in the profession rounds. Rounds 2-14 stay in the code.
+  the line that grows. Round 16: B “Just a line” picked (round 15); four ways to keep it readable on bright ground (the page opens on Bright; try Dark too). The growth is each profession’s current base. Rounds 2-15 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -79,6 +79,7 @@ function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(r
   for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
 function text(str, x, y, font, col, align = 'left', o = {}) {
   ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  if (typeof OUTLINE !== 'undefined' && OUTLINE) { ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.92)'; ctx.strokeText(str, x, y); }
   ctx.shadowColor = o.glow || 'rgba(0,0,0,.95)'; ctx.shadowBlur = o.glow ? 10 : 4; ctx.shadowOffsetY = o.glow ? 0 : 1; ctx.fillStyle = col; ctx.fillText(str, x, y);
   const w = ctx.measureText(str).width; ctx.restore(); return w; }
 function measure(str, font, ls = '0px') { ctx.save(); ctx.font = font; ctx.letterSpacing = ls; const w = ctx.measureText(str).width; ctx.restore(); return w; }
@@ -119,7 +120,7 @@ const IMG = {}; for (const k in ART) { const i = new Image(); i.src = 'data:imag
 let P = [];
 function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0, vr: 0 }, o)); }
 function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; } P = P.filter(p => p.age < p.life);
-  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; if (S && S.halo) ctx.filter = HALO; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
     if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
     else if (p.shape === 'sq') { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2); }
     else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
@@ -1483,18 +1484,33 @@ function cleanModule(top, lay) { const V = baseOf(), Lt = LAYOUT15[lay], g = Lt.
   strikes(() => ({ x: tipX, y: ly }));
   if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; payoff(ux, ly); });
   const payAt = done ? S.closeAt : 99, pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
-  ctx.save(); ctx.globalAlpha = a; Lt.frame(p, g, st, nx, lit, top, info);
+  ctx.save(); ctx.globalAlpha = a; S.halo = !!(VISK && VISK.halo); if (VISK) visBack(VISK, g, top); OUTLINE = !!(VISK && VISK.outline); Lt.frame(p, g, st, nx, lit, top, info); if (S.halo) ctx.filter = HALO;
   if (lay !== 'D') { ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); }
   ctx.save(); ctx.beginPath(); ctx.rect(x0 - 4, ly - 14, L + 12, 28); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore();
-  if (V.over) { V.over(p, info); }
+  if (V.over) { V.over(p, info); } ctx.filter = 'none';
   const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
   if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.save(); ctx.strokeStyle = `rgba(255,255,255,${fl})`; ctx.lineWidth = 4; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); ctx.restore(); } }
-  const uxx = V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux; icon(uxx, ly + (V.unlockY ? V.unlockY(info) : 0), g.us + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null);
+  if (S.halo) ctx.filter = HALO; const uxx = V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux; icon(uxx, ly + (V.unlockY ? V.unlockY(info) : 0), g.us + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null);
   ctx.restore();
   if (S.reaches) reveal(W / 2, ly + (lay === 'A' ? 40 : 22), (S.closeAt ?? 99) + .35, '600 13px system-ui', false); }
 function r15(L) { return { get name() { return L + '. ' + LAYOUT15[L].name; }, get desc() { return LAYOUT15[L].desc + ' (The growth is each profession’s current base: the vine, Breaks away, the cut + a stroke, rod and reel.)'; },
   get note() { return LAYOUT15[L].name.toLowerCase() + '.'; }, draw(top) { cleanModule(top, L); } }; }
 Object.assign(FAM, { PA: r15('A'), PB: r15('B'), PC: r15('C'), PD: r15('D') });
+
+// ---------- round 16 (2026-11-15): B "Just a line" picked; four ways to keep it readable on any ground ----------
+const VIS16 = {
+  A: { name: 'Outlined', desc: 'No backing at all: the text gets a thick dark outline (like the game’s outlined fonts) and the line, the growth and the bobber get a thin dark edge, so they read on bright ground and stay invisible as a frame.', outline: true, halo: true },
+  B: { name: 'Soft shade', desc: 'The 1.3 banner’s soft dark shade behind the line and text, fading out on every side (no edges, no panel); the text keeps its usual light shadow.', shade: .72 },
+  C: { name: 'Fading strip', desc: 'A dark strip behind the text and the line that fades out at both ends, like the loot rows but open on both sides. The most even backing; the closest to a panel.', strip: true },
+  D: { name: 'Outline + light shade', desc: 'Both: the dark outlines from A and a lighter shade behind. The strongest on very bright ground (snow, sand), still no panel.', outline: true, halo: true, shade: .45 },
+};
+let OUTLINE = false, VISK = null;
+const HALO = 'drop-shadow(0 0 .8px #000) drop-shadow(0 0 1px #000) drop-shadow(0 0 2.5px rgba(0,0,0,.6))';
+function visBack(v, g, top) { const cx = (g.x0 + g.x1) / 2, cy = g.ly - 7; ctx.save();  if (v.shade) { ctx.translate(cx, cy); ctx.scale(1, .34); const r = ctx.createRadialGradient(0, 0, 10, 0, 0, 175); r.addColorStop(0, `rgba(0,0,0,${v.shade})`); r.addColorStop(.6, `rgba(0,0,0,${v.shade * .6})`); r.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = r; ctx.fillRect(-180, -180, 360, 360); }  if (v.strip) { const gr = ctx.createLinearGradient(g.x0 - 40, 0, g.x1 + 50, 0); gr.addColorStop(0, 'rgba(6,8,12,0)'); gr.addColorStop(.15, 'rgba(6,8,12,.72)'); gr.addColorStop(.85, 'rgba(6,8,12,.72)'); gr.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = gr; ctx.fillRect(g.x0 - 40, top - 2, g.x1 - g.x0 + 90, 40); }  ctx.restore(); }
+function r16(K) { return { get name() { return K + '. ' + VIS16[K].name; }, get desc() { return VIS16[K].desc + ' (B “Just a line”; the page opens on Bright ground.)'; },
+  get note() { return 'just a line, ' + VIS16[K].name.toLowerCase() + '.'; }, draw(top) { VISK = VIS16[K]; cleanModule(top, 'B'); VISK = null; OUTLINE = false; } }; }
+Object.assign(FAM, { PA: r16('A'), PB: r16('B'), PC: r16('C'), PD: r16('D') });
+setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
