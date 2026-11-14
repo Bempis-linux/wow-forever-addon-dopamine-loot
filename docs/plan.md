@@ -672,6 +672,17 @@ Professions (from 1.3.0):
    the line's start, so the line doesn't come from nowhere), then add-ons to that. Skinning: happy with A The cut;
    add-ons next. Herbalism: A Vine the favorite, may stay; B-D read as variations of A, wants clearly different ideas.
    Mining: none clicked; all new. Round 13 pitched in chat first.
+   **Round 13: the gatherers again** (same page, keys 1-4; `VAR13`, `r13`; `growModule` gained `V.over` (drawn outside
+   the clip) and `V.unlockY`). Fishing (rod and reel + add-ons): A Rod and reel (the reel at the line's start pays out
+   line with clicks, the bobber hops on), B + Taut line (snaps tight with a twang, sags again), C + A bite (the bobber
+   dips under with a splash), D + The catch (at the unlock the reel spins in and the fish leaps into its place).
+   Skinning (the cut + add-ons): A as it is, B + It opens (the edges part in straight lines behind the glint), C + One
+   stroke per skill-up (a whoosh and the new piece flashes), D + Clean finish (the glint flicks off, a strip drops, the
+   beast's icon bounces in). Herbalism: A Vine, B Seed to bloom (one plant rides the tip: seed, sprout, bud, blooms at
+   the unlock), C Sap rising (a jointed reed fills with glowing sap, a light pulse per skill-up), D Herbalist's sketch
+   (ink draws the herb on a journal strip). Mining: A Breaks away (rock chips off to show the glowing seam), B Molten
+   vein (white-hot tip cooling behind, embers), C Geode (quartz crystals grow in, a gleam sweeps them), D Lantern in the
+   dark (the glow lights the vein, ore glints twinkle ahead).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
