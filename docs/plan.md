@@ -689,6 +689,18 @@ Professions (from 1.3.0):
    but doesn't feel like herbalism); add-ons to the vine next. Skinning: C (one stroke per skill-up) is good, the rest
    too weak; D looked like nothing changed. Mining: A Breaks away is a cool idea but not there yet; Molten vein reads as
    Blacksmithing. Round 14 pitched in chat first.
+   **Round 14** (`VAR14`, `r14`; `growModule` gained `V.iconK`, `fishCast` an `o.dx`). The user asked for more Mining
+   bases before add-ons. Fishing (on rod, reel, taut line, a bite): A the new base, B + The fight (bobber dragged with a
+   wake, a fin, the reel buzzes), C + The school (fish shadows gather, one per skill-up; at the unlock they scatter and a
+   big one bites), D + Landed (the fish hauled out, swings over, flops onto the module, flips into the unlock icon).
+   Skinning (on the cut + a stroke): A the new base, B + The flap (the hide flips back piece by piece with a slap), C +
+   The haul (leather pieces fly onto a pile at the end, the pile slides into the icon), D + New pelt (the hide rolls up
+   and off, the next beast's pelt rolls out). Herbalism (on the vine): A Vine, B + In bloom (a flower per skill-up, the
+   whole vine blossoms at the unlock, petals blow into the icon), C + Picking (a sprig flies into the Herbalism icon,
+   which bounces, "+1"), D + Rain (a shower from a small cloud, the leaves shake, the vine surges). Mining bases: A
+   Breaks away (reworked: bigger chunks, dust), B Sorting the rubble (stone tumbles off, the ore stays lined up), C
+   Shockwave (the band jolts, a wave runs ahead, ore jumps, the unlock icon rattles), D Ore cart (rails laid behind a
+   cart filling with ore; it dumps into the icon).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
