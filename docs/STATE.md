@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-14 night, skill-up Phase 2 round 9 judged, nothing locked; next: tighten the layout, then one bold round; kit 0.8.1. Read this
+_Last checkpoint: 2026-11-15, skill-up Phase 2 round 10 built (tighter layout, notched vessel vs. grows along the line), awaiting the verdict; kit 0.8.1. Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -29,7 +29,7 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   then Phase 2 for skill-up gains, the Create All pile, gathering, the loot window (Picked-up rows / harvest window);
   build them; then Phase 2 for XP, rep, level-up; build; the dungeon recap last if the weekly budget allows (may slip to
   1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
-- **Skill-up gains, Phase 2 in progress, 9 rounds, nothing locked** (`docs/mockups/skillup-p2.html`, the only page;
+- **Skill-up gains, Phase 2 in progress, 10 rounds, nothing locked** (`docs/mockups/skillup-p2.html`, the only page;
   there is no skillup-p3; the title says the round; older rounds stay in the code, off the panel; full record in
   plan.md under "2. Skill-up gains"). **Goal (the user): clear progression AND a frame easy to make unique, in fun
   ways, per profession**; then a per-profession pass like crafting's. **Decided: its own draggable module**, apart from
@@ -42,9 +42,11 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   profession's vessel, a portion poured per skill-up: "each one unique and can be built on"), C Lifted up (likes
   only Herbalism's stalk lifting the icon), D The line is the container (likes only Herbalism's planter trough).
   **"The one" isn't found yet.** The user: **the presentation needs work** (lots of unused space; could show more
-  info or design) but **don't over-design**. **Next session: tighten the layout first** (a compact module that uses its
-  space: more info or design), then one bold round built from what's liked (A's simplicity, B's per-profession
-  vessels, Herbalism's growing plant); pitch the one-liners first.
+  info or design) but **don't over-design**.
+  **Round 10 built, awaiting the user's verdict** (keys 1-2): the tighter layout (name, skill "/ 150 Journeyman", next
+  unlock + "N to go", then the two unlocks after it) with **A. The notched vessel** (B's vessel + A's notches up its
+  side, the brim = the unlock) and **B. It grows along the line** (A's line grows the profession's way: vine, blade,
+  crystal, seam, ore vein). Crafters have no third line (no unlock list), so their module is a line shorter in content.
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.

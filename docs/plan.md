@@ -628,6 +628,16 @@ Professions (from 1.3.0):
    over-design". Liked so far: A's simplicity, B's per-profession uniqueness, Herbalism's growing plant (in C and D).
    Next session: tighten the layout first (use the space: a compact module that carries more info or design), then
    one bold round built from those likes; pitch it first.
+   Round 10 (same page, keys 1-2; rounds 2-9 kept in the code, off the panel), pitched first. **The tighter layout**
+   (both options): one slim module (~282x66, no dead band): line 1 the name, the skill rolling, then "/ 150 Journeyman"
+   small (the rank cap and rank); the next unlock with its icon and "N to go" in gold (crafters: "Expert rank at 150");
+   gatherers add "then" and the two unlocks after it as small icons with levels. **A. The notched vessel** (round 9 B +
+   A): the profession's vessel at the left, as tall as the module, with A's notches up its side (up to 10, the top one
+   gold = the brim = the unlock); each skill-up pours a portion in and the notch it reaches lights and does the
+   profession's thing. **B. It grows along the line** (A + the Herbalism plant): A's line is alive and grows toward the
+   unlock's icon at its end, a step per skill-up: a vine with leaves and a bud (Herbalism), a blade white-hot at the tip
+   cooling to steel (Blacksmithing), a crystal growing facet by facet (Alchemy), a seam stitching itself (Tailoring), a
+   vein of ore with glints (Mining); faint notches under it count the points.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
