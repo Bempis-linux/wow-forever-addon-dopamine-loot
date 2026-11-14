@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill-up Phase 2</title>
+<style>
+  :root { --panel: rgba(12, 12, 18, 0.93); --text: #e8e2d0; --muted: #9a927e; --gold: #ffd100; }
+  html, body { margin: 0; height: 100%; background: #0b0b10; color: var(--text); font: 13px/1.35 system-ui, sans-serif; overflow: hidden; }
+  #panel { position: fixed; top: 10px; left: 10px; width: 310px; max-height: calc(100% - 20px); overflow: auto; z-index: 10;
+    background: var(--panel); border: 1px solid #3a3426; border-radius: 6px; padding: 10px 12px; box-sizing: border-box; }
+  #panel h1 { font-size: 14px; margin: 0 0 4px; color: var(--gold); font-weight: 600; }
+  #panel h2 { font-size: 11px; margin: 12px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  small { color: var(--muted); display: block; }
+  button { background: #2a2418; color: var(--text); border: 1px solid #5a4a28; border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; margin: 2px 2px 0 0; }
+  button:hover { background: #3a3020; }
+  button.on { background: #4a3c1c; border-color: #b08a3a; }
+  label.fx { display: grid; grid-template-columns: 18px 1fr; gap: 1px 4px; padding: 3px 0; cursor: pointer; }
+  label.fx small { grid-column: 2; }
+  #fdesc { margin-top: 4px; min-height: 44px; }
+  #screen { position: fixed; left: 330px; top: 10px; right: 10px; bottom: 10px; border: 1px solid #3a3426; border-radius: 6px; overflow: hidden; }
+  #screen.dark { background: radial-gradient(ellipse at 40% 70%, #26262e, #121218 60%, #08080b); }
+  #screen.dirt { background: radial-gradient(ellipse at 40% 70%, #6b5236, #4a3822 55%, #2c2114); }
+  #screen.grass { background: radial-gradient(ellipse at 40% 70%, #4f7a3a, #2f4f24 60%, #1b2c15); }
+  #screen.bright { background: radial-gradient(ellipse at 40% 70%, #e6dcc0, #c9bb96 55%, #9c8e6a); }
+  canvas { position: absolute; inset: 0; }
+  .char { position: absolute; left: 30%; top: 50%; width: 56px; height: 120px; background: linear-gradient(#6d5a44, #3b2f22); border-radius: 28px 28px 8px 8px; opacity: .9; }
+  .note { position: absolute; left: 12px; bottom: 10px; right: 12px; color: rgba(255,255,255,.6); font-size: 12px; text-shadow: 0 1px 2px #000; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Skill-up, Phase 2 round 2</h1>
+  <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. A is the
+  Phase 1 lock (Ring + road); B-D each show progress a different way: the number, the distance, the tool as the gauge.
+  Try Herbalism and Mining for unlocks; crafters go to the rank cap.
+  Space replays; keys 1-4 switch the design, Q-T the profession.</small>
+
+  <h2>Family</h2>
+  <div id="fams"></div>
+  <small id="fdesc"></small>
+
+  <h2>Profession</h2>
+  <div id="profs"></div>
+
+  <h2>Moment</h2>
+  <button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button>
+  <small>"Five in a row": a run of crafts or gathers, one banner climbing, the tool's sound a step higher each time.
+  "Next unlock": a new herb or ore for gatherers, the rank cap for crafters.</small>
+
+  <h2>Ground</h2>
+  <button data-g="dark" class="on">Dark</button><button data-g="dirt">Dirt</button><button data-g="grass">Grass</button><button data-g="bright">Bright</button>
+
+  <h2>Options</h2>
+  <label class="fx"><input type="checkbox" id="snd" checked><b>Sounds</b><small>The tool's sound on each strike (as in game now) and the family's payoff at an unlock.</small></label>
+  <label class="fx"><input type="checkbox" id="loop"><b>Loop</b><small>Replay when it ends.</small></label>
+</div>
+<div id="screen" class="dark">
+  <div class="char"></div>
+  <canvas id="cv"></canvas>
+  <div class="note" id="note"></div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), screenEl = document.getElementById('screen');
+let W = 0, H = 0; const DPR = window.devicePixelRatio || 1;
+function resize() { const r = screenEl.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+addEventListener('resize', resize); resize();
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const eOut = t => 1 - Math.pow(1 - t, 3), eBack = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function hex(h) { return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function mix(a, b, t) { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], t))).join(',')})`; }
+function grad3(stops, t) { // stops: [[pos, hex]...]
+  for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) return mix(stops[i - 1][1], stops[i][1], (t - stops[i - 1][0]) / (stops[i][0] - stops[i - 1][0]));
+  return stops[stops.length - 1][1]; }
+function star4(x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? s * .22 : s; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); }
+function text(str, x, y, font, col, align = 'left', o = {}) {
+  ctx.save(); ctx.font = font; ctx.textAlign = align; ctx.letterSpacing = o.ls || '0px'; if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+  ctx.shadowColor = o.glow || 'rgba(0,0,0,.95)'; ctx.shadowBlur = o.glow ? 10 : 4; ctx.shadowOffsetY = o.glow ? 0 : 1; ctx.fillStyle = col; ctx.fillText(str, x, y);
+  const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function measure(str, font, ls = '0px') { ctx.save(); ctx.font = font; ctx.letterSpacing = ls; const w = ctx.measureText(str).width; ctx.restore(); return w; }
+// an item icon stand-in: an emoji in a white (item quality) border; lit 0..1 (dark until reached)
+function icon(x, y, s, emo, lit = 1, glow = null) {
+  ctx.save(); const base = ctx.globalAlpha; if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 12; }
+  const g = ctx.createRadialGradient(x, y, 0, x, y, s * .7); g.addColorStop(0, '#3a3226'); g.addColorStop(1, '#14100a');
+  ctx.fillStyle = g; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.shadowBlur = 0;
+  ctx.globalAlpha *= lerp(.35, 1, lit); ctx.font = `${Math.round(s * .66)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emo, x, y + 1);
+  ctx.globalAlpha = base; ctx.strokeStyle = lit > .5 ? '#f0f0f0' : '#6a6a6a'; ctx.lineWidth = 1.5; ctx.strokeRect(x - s / 2 + .75, y - s / 2 + .75, s - 1.5, s - 1.5);
+  if (lit < 1) { ctx.fillStyle = `rgba(0,0,0,${.5 * (1 - lit)})`; ctx.fillRect(x - s / 2, y - s / 2, s, s); } ctx.restore(); }
+
+// ---------- sound: the mockups' helpers (tools/render-media.html), live ----------
+let AC = null, OUT = null;
+function ac() { if (!AC) { AC = new AudioContext(); OUT = AC.createGain(); OUT.gain.value = 1.6; OUT.connect(AC.destination); } return AC; }
+const on = () => document.getElementById('snd').checked;
+// (the scene autoplays on load, before any click, so the browser starts the audio paused: resume it on the first click or key)
+['pointerdown', 'keydown'].forEach(e => addEventListener(e, () => { if (AC && AC.state !== 'running') AC.resume(); }, true));
+function tone(f, t = 0, vol = .06, dec = .4, type = 'sine', f2, att = .004) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.exponentialRampToValueAtTime(f2, T + dec * .8); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + att); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(OUT); o.start(T); o.stop(T + dec + .05); }
+function noise(t = 0, dur = .2, vol = .04, f = 1500, q = 1, type = 'bandpass', hit) { if (!on()) return; const A = ac(), T = A.currentTime + t, n = Math.floor(A.sampleRate * dur), buf = A.createBuffer(1, n, A.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (hit ? Math.exp(-i / n * 6) : Math.sin(Math.PI * i / n)); const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = vol; s.connect(fl).connect(g).connect(OUT); s.start(T); }
+function click(t = 0, vol = .05, f = 3000, q = 6) { noise(t, .012, vol, f, q); }
+function metal(t, f, vol, dec, parts = [1, 2.76, 5.40, 8.93], amps = [1, .5, .3, .15]) { parts.forEach((p, i) => tone(f * p, t, vol * amps[i], dec / (1 + i * .6), 'sine', null, .002)); }
+const semi = n => Math.pow(2, n / 12);
+
+// ---------- the tools: the same drawings as in game (tools/render-media.html) ----------
+const OL = 'stroke="#1a1410" stroke-width="2.2" stroke-linejoin="round"';
+const ART = {
+  ToolNeedle: `<g transform="translate(26,1) scale(2.75)"><path d="M4 0 L5.4 17 Q4 21.5 2.6 17 Z" fill="#e8e8f0" stroke="#606070" stroke-width=".6"/><ellipse cx="4" cy="4" rx="1" ry="2" fill="#0e130b"/></g>`,
+  ToolDrop: `<defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e4ff"/><stop offset=".55" stop-color="#c8a0ff"/><stop offset="1" stop-color="#8a50e0"/></linearGradient></defs>
+    <g transform="translate(13,3) scale(3.2)"><path d="M6 0 C6 0 11 7 11 10.5 A5 5 0 0 1 1 10.5 C1 7 6 0 6 0 Z" fill="url(#dg)" stroke="#3a1a6a" stroke-width=".7"/><ellipse cx="4.2" cy="10" rx="1.2" ry="1.8" fill="rgba(255,255,255,.6)"/></g>`,
+  ToolHammer: `<g transform="rotate(-35 32 32)"><rect x="28" y="20" width="9" height="42" rx="3" fill="#a8672e" ${OL}/><line x1="31" y1="26" x2="31" y2="56" stroke="#d8955a" stroke-width="2"/><rect x="10" y="6" width="44" height="17" rx="3" fill="#8a96a4" ${OL}/><rect x="13" y="8" width="38" height="4" rx="2" fill="#c8d2dc"/></g>`,
+  ToolSprout: `<path d="M32 60 V30" stroke="#2e7a2a" stroke-width="5" stroke-linecap="round"/><path d="M32 34 C18 36 8 26 8 14 C22 12 32 20 32 34 Z" fill="#5ac83a" ${OL}/><path d="M32 30 C44 32 56 24 56 10 C42 8 32 16 32 30 Z" fill="#7ee04a" ${OL}/><path d="M12 16 C20 18 26 24 30 32" fill="none" stroke="#b8f090" stroke-width="2"/><path d="M52 12 C44 14 38 20 34 28" fill="none" stroke="#c8ff9a" stroke-width="2"/>`,
+  ToolPick: `<g transform="rotate(-30 32 32)"><rect x="28" y="16" width="8" height="46" rx="3" fill="#a8672e" ${OL}/><path d="M4 22 Q32 2 60 22 Q32 12 4 22 Z" fill="#9aa6b2" ${OL}/><rect x="26" y="9" width="12" height="12" rx="2" fill="#6a7684" ${OL}/></g>`,
+};
+const IMG = {}; for (const k in ART) { const i = new Image(); i.src = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">${ART[k]}</svg>`); IMG[k] = i; }
+
+// ---------- particles ----------
+let P = [];
+function spawn(o) { P.push(Object.assign({ vx: 0, vy: 0, g: 0, age: 0, life: 1, size: 2, shape: 'dot', rot: 0, vr: 0 }, o)); }
+function stepP(dt) { for (const p of P) { p.age += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; } P = P.filter(p => p.age < p.life);
+  for (const p of P) { const a = 1 - p.age / p.life; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = p.col; ctx.strokeStyle = p.col;
+    if (p.shape === 'dot') { ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+    else if (p.shape === 'sq') { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2); }
+    else if (p.shape === 'star') { ctx.shadowColor = p.col; ctx.shadowBlur = 8; star4(p.x, p.y, p.size * (.5 + a * .6), p.rot); }
+    else if (p.shape === 'ring') { ctx.lineWidth = 2 * a; ctx.beginPath(); ctx.arc(p.x, p.y, p.size + (1 - a) * p.grow, 0, 7); ctx.stroke(); }
+    else if (p.shape === 'leaf') { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.beginPath(); ctx.ellipse(0, 0, p.size * 1.8, p.size * .8, 0, 0, 7); ctx.fill(); }
+    ctx.restore(); } }
+
+// ---------- professions: material, tool and its motion, what's next ----------
+// span: what Ring and Segments fill (gatherers: last unlock -> next; crafters: the rank); cspan: Constellation's (the whole rank)
+const PROF = {
+  Blacksmithing: { col: '#e0883a', light: '#ffc890', tool: 'ToolHammer', motion: 'swing', mat: 'iron', span: [75, 150], cspan: [75, 150], v: 137, five: 140, unlockV: 149,
+    caps: [[150, 'Expert']], snd: k => { click(0, .05, 2500 * k, 2); metal(0, 1100 * k, .025, .5); },
+    hit(x, y) { for (let i = 0; i < 10; i++) spawn({ x, y, vx: (Math.random() - .5) * 160, vy: -60 - Math.random() * 90, g: 380, life: .5, size: 1.3, col: i % 2 ? '#ffd070' : '#ff8a30' }); } },
+  Alchemy: { col: '#9a5ae0', light: '#d0a8ff', tool: 'ToolDrop', motion: 'drip', mat: 'liquid', span: [75, 150], cspan: [75, 150], v: 112, five: 120, unlockV: 149,
+    caps: [[150, 'Expert']], snd: k => tone(300 * k, 0, .04, .15, 'sine', 180 * k),
+    hit(x, y) { spawn({ x, y, size: 2, shape: 'ring', grow: 14, life: .5, col: '#d0a8ff' }); for (let i = 0; i < 5; i++) spawn({ x, y, vx: (Math.random() - .5) * 70, vy: -50 - Math.random() * 50, g: 300, life: .5, size: 1.5, col: '#e8d8ff' }); } },
+  Tailoring: { col: '#c8b88a', light: '#fff4d8', tool: 'ToolNeedle', motion: 'stitch', mat: 'thread', span: [75, 150], cspan: [75, 150], v: 131, five: 131, unlockV: 149,
+    caps: [[150, 'Expert']], snd: k => noise(0, .05, .02, 5000 * k, 4),
+    hit(x, y) { for (let i = 0; i < 4; i++) spawn({ x, y, vx: (Math.random() - .5) * 50, vy: -20 - Math.random() * 30, g: 60, life: .6, size: 1, col: '#fff4d8' }); } },
+  Herbalism: { col: '#3fa83a', light: '#9ff08a', tool: 'ToolSprout', motion: 'pop', mat: 'stem', span: [100, 115], cspan: [75, 150], v: 108, five: 108, unlockV: 114, verb: 'gather',
+    unlocks: [[85, 'Stranglekelp', '🌾'], [100, 'Bruiseweed', '🌿'], [115, 'Wild Steelbloom', '🌼'], [120, 'Grave Moss', '🍀'], [125, 'Kingsblood', '🌺'], [150, 'Liferoot', '🌱']],
+    snd: k => { tone(620 * k, 0, .04, .08, 'sine', 980 * k); noise(0, .06, .015, 4000, 1); },
+    hit(x, y) { for (let i = 0; i < 7; i++) spawn({ x, y, vx: (Math.random() - .5) * 50, vy: -15 - Math.random() * 25, life: 1, size: 1.3, col: '#fff27a' }); } },
+  Mining: { col: '#c86a2a', light: '#ffb070', tool: 'ToolPick', motion: 'swing', mat: 'stone', span: [75, 125], cspan: [75, 150], v: 101, five: 110, unlockV: 124, verb: 'mine',
+    unlocks: [[125, 'Iron Ore', '🌑']], caps: [[150, 'Expert']],
+    snd: k => { noise(0, .03, .06, 2400 * k, 3, 'bandpass', true); metal(0, 900 * k, .012, .15, [1, 2.76], [1, .3]); },
+    hit(x, y) { for (let i = 0; i < 8; i++) spawn({ x, y, vx: (Math.random() - .5) * 140, vy: -50 - Math.random() * 80, g: 420, life: .6, size: 1.5, shape: 'sq', vr: 9, col: i % 3 ? '#8a7e72' : '#ffb070' }); } },
+};
+Object.assign(PROF.Blacksmithing, { made: '\u{1F5E1}️' }); Object.assign(PROF.Alchemy, { made: '\u{1F9EA}' }); Object.assign(PROF.Tailoring, { made: '\u{1F9E5}' }); Object.assign(PROF.Herbalism, { node: '\u{1F33F}' }); Object.assign(PROF.Mining, { node: '\u{1FAA8}' });
+function nextOf(p, v) { // the next thing to reach: { lv, name, emo, cap }
+  if (p.unlocks) for (const u of p.unlocks) if (u[0] > v) return { lv: u[0], name: u[1], emo: u[2] };
+  const c = (p.caps || [[150, 'Expert']]).find(c => c[0] >= v) || [150, 'Expert']; return { lv: c[0], name: c[1], emo: '⭐', cap: true }; }
+
+// the tool's motion: t seconds since the strike began (it lands at HIT); returns dx, dy, rot, sx, sy
+const HIT = .15;
+function motion(kind, t) { const u = t < HIT ? t / HIT : 0, r = t >= HIT ? clamp((t - HIT) / .3) : 1;
+  if (t > HIT + .3 || t < 0) return { dx: 0, dy: 0, rot: 0, sx: 1, sy: 1 };
+  if (kind === 'swing') return t < HIT ? { dx: 0, dy: -3 * u, rot: -.7 * eOut(u), sx: 1, sy: 1 } : { dx: 0, dy: 0, rot: .25 * (1 - eOut(r)), sx: 1, sy: 1 };
+  if (kind === 'drip') return t < HIT ? { dx: 0, dy: -9 * eOut(u), rot: 0, sx: 1, sy: 1 } : { dx: 0, dy: 0, rot: 0, sx: 1 + .25 * (1 - r), sy: 1 - .3 * (1 - r) };
+  if (kind === 'stitch') return t < HIT ? { dx: 0, dy: -8 * eOut(u), rot: 0, sx: 1, sy: 1 } : { dx: 0, dy: 5 * Math.sin(Math.PI * r), rot: 0, sx: 1, sy: 1 };
+  if (kind === 'pop') { const s = t < HIT ? lerp(1, .6, u) : lerp(.6, 1, eBack(r)); return { dx: 0, dy: 0, rot: 0, sx: s, sy: s }; } }
+function drawTool(p, x, y, size, since, fadeAt) { const m = motion(p.motion, since), img = IMG[p.tool]; if (!img.complete) return;
+  const fa = fadeAt === undefined ? 1 : clamp(1 - (S.age - fadeAt) / .3); if (fa <= 0) return; // (it steps aside for the unlock)
+  ctx.save(); ctx.globalAlpha *= fa; ctx.translate(x + m.dx, y + m.dy); ctx.rotate(m.rot); ctx.scale(m.sx, m.sy); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+  ctx.drawImage(img, -size / 2, -size, size, size); ctx.restore(); }
+
+// ---------- materials along a path (Ring's arc, Constellation's line) ----------
+// path: s (0..1) -> { x, y, a (tangent) }; L: its length in px
+function track(path, L, w) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath();
+  for (let i = 0, n = Math.ceil(L / 3); i <= n; i++) { const q = path(i / n); ctx.lineTo(q.x, q.y); } ctx.stroke(); ctx.restore(); }
+function poly(path, s0, s1, L) { ctx.beginPath(); const n = Math.max(2, Math.ceil(L * (s1 - s0) / 2)); for (let i = 0; i <= n; i++) { const q = path(lerp(s0, s1, i / n)); ctx.lineTo(q.x, q.y); } }
+function material(p, path, L, f, w, now, hitAge) {
+  if (f <= 0) return; ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const fresh = clamp(1 - hitAge / .8); // just struck: the tip glows
+  if (p.mat === 'iron') { // iron heating toward the tip: dark red, orange, then white-hot where the hammer just struck
+    const n = Math.max(2, Math.ceil(L * f / 3)); ctx.lineWidth = w;
+    for (let i = 0; i < n; i++) { const s0 = f * i / n, s1 = f * (i + 1) / n, d = (f - s1) * L, heat = clamp(1 - d / (50 + 40 * fresh));
+      ctx.strokeStyle = grad3([[0, '#4a1408'], [.45, '#c8401a'], [.8, '#ffb040'], [1, fresh > .2 ? '#fff6e0' : '#ffd890']], heat);
+      if (heat > .7) { ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 8; } else ctx.shadowBlur = 0; poly(path, s0, s1 + .002, L); ctx.stroke(); } }
+  else if (p.mat === 'liquid') { // glowing liquid in a glass tube, bubbles drifting along
+    ctx.strokeStyle = 'rgba(200,170,255,.18)'; ctx.lineWidth = w + 4; poly(path, 0, 1, L); ctx.stroke();
+    ctx.strokeStyle = p.col; ctx.lineWidth = w; ctx.shadowColor = p.col; ctx.shadowBlur = 8 + 8 * fresh; poly(path, 0, f, L); ctx.stroke(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.2; poly(path, 0, f, L); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; for (let k = 0; k < Math.ceil(L * f / 20); k++) { const s = ((k * .137 + now * .06) % 1) * f, q = path(s), o = Math.sin(k * 2.3 + now * 3) * w * .25; ctx.beginPath(); ctx.arc(q.x - Math.sin(q.a) * o, q.y + Math.cos(q.a) * o, .9 + (k % 3) * .4, 0, 7); ctx.fill(); } }
+  else if (p.mat === 'thread') { // a running stitch in cream thread
+    ctx.strokeStyle = 'rgba(255,244,216,.22)'; ctx.lineWidth = 1; poly(path, 0, f, L); ctx.stroke();
+    ctx.strokeStyle = '#fff4d8'; ctx.lineWidth = 2.6; ctx.setLineDash([6, 4]); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 2; poly(path, 0, f, L); ctx.stroke(); ctx.setLineDash([]);
+    if (fresh > 0) { ctx.strokeStyle = `rgba(255,255,255,${fresh})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; poly(path, Math.max(0, f - 14 / L), f, L); ctx.stroke(); } }
+  else if (p.mat === 'stem') { // a green stem growing, leaves along it (the newest unfurls)
+    ctx.strokeStyle = '#2e7a2a'; ctx.lineWidth = 3; poly(path, 0, f, L); ctx.stroke();
+    const step = 13 / L; let i = 0; for (let s = step; s < f; s += step, i++) { const q = path(s), side = i % 2 ? 1 : -1, grow = clamp((f - s) * L / 10);
+      ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.a + side * .7 + Math.sin(now * 2 + i) * .08); ctx.scale(grow, grow);
+      ctx.fillStyle = i % 3 ? '#5ac83a' : '#7ee04a'; ctx.beginPath(); ctx.ellipse(side * 0 + 5, 0, 5, 2.2, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#b8f090'; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(1, 0); ctx.lineTo(9, 0); ctx.stroke(); ctx.restore(); } }
+  else if (p.mat === 'stone') { // layered stone with flecks of ore
+    ctx.strokeStyle = '#5a5048'; ctx.lineWidth = w; poly(path, 0, f, L); ctx.stroke();
+    ctx.strokeStyle = '#8a7e72'; ctx.lineWidth = w * .4; poly(path, 0, f, L); ctx.stroke();
+    ctx.fillStyle = '#ffb070'; let i = 0; for (let s = 6 / L; s < f; s += 9 / L, i++) { const q = path(s), o = (i % 2 ? 1 : -1) * w * .28; ctx.shadowColor = '#ff9040'; ctx.shadowBlur = fresh > 0 && (f - s) * L < 20 ? 6 : 0; ctx.fillRect(q.x - Math.sin(q.a) * o - 1, q.y + Math.cos(q.a) * o - 1, 2, 2); }
+    if (fresh > 0) { ctx.strokeStyle = `rgba(255,200,140,${fresh * .8})`; ctx.lineWidth = w; poly(path, Math.max(0, f - 10 / L), f, L); ctx.stroke(); } }
+  ctx.restore(); }
+
+// a Segments cell drawn in the material: lit 0..1 (left to right), age since it was lit
+function cell(p, x, y, w, h, lit, age, now, i) {
+  const flash = clamp(1 - age / .4); ctx.save();
+  const shape = () => { ctx.beginPath();
+    if (p.mat === 'iron') { ctx.moveTo(x + 1.5, y); ctx.lineTo(x + w - 1.5, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); }
+    else if (p.mat === 'liquid') ctx.roundRect(x + .5, y, w - 1, h, [2, 2, w / 2, w / 2]);
+    else if (p.mat === 'stem') ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, 7);
+    else if (p.mat === 'stone') { const j = (i * 37 % 5) / 5; ctx.moveTo(x + w * .2, y + j); ctx.lineTo(x + w * .85, y + 1); ctx.lineTo(x + w, y + h * .55); ctx.lineTo(x + w * .75, y + h); ctx.lineTo(x + w * .1, y + h - j); ctx.lineTo(x, y + h * .4); ctx.closePath(); }
+    else ctx.rect(x, y, w, h); };
+  // empty
+  if (p.mat === 'thread') { ctx.strokeStyle = 'rgba(255,244,216,.2)'; ctx.lineWidth = 1; ctx.setLineDash([1.5, 2]); ctx.beginPath(); ctx.moveTo(x + 1, y + 1); ctx.lineTo(x + w - 1, y + h - 1); ctx.moveTo(x + w - 1, y + 1); ctx.lineTo(x + 1, y + h - 1); ctx.stroke(); ctx.setLineDash([]); }
+  else { shape(); ctx.fillStyle = p.mat === 'liquid' ? 'rgba(200,170,255,.08)' : p.mat === 'stem' ? 'rgba(20,50,20,.6)' : 'rgba(40,34,30,.85)'; ctx.fill(); ctx.strokeStyle = p.mat === 'liquid' ? 'rgba(220,200,255,.4)' : 'rgba(255,255,255,.12)'; ctx.lineWidth = 1; ctx.stroke(); }
+  if (lit > 0) { ctx.save(); ctx.beginPath(); ctx.rect(x - 2, y - 4, (w + 4) * lit, h + 8); ctx.clip();
+    if (p.mat === 'iron') { const heat = clamp(1 - age / 2.5); shape(); ctx.fillStyle = grad3([[0, '#a03818'], [.5, '#ff9a3a'], [1, '#fff4d8']], heat * .9 + .1); if (heat > .3) { ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 10 * heat; } ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x + 2, y + 1, w - 4, 1.5); }
+    else if (p.mat === 'liquid') { const lv = y + h * .25; ctx.beginPath(); ctx.roundRect(x + 1.5, lv, w - 3, y + h - lv - 1, [0, 0, w / 2, w / 2]); ctx.fillStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = 6; ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(x + 2, lv, w - 4, 1);
+      ctx.beginPath(); ctx.arc(x + w / 2 + Math.sin(now * 3 + i) * 1.5, y + h - 3 - ((now * 6 + i * 3) % (h * .6)), .8, 0, 7); ctx.fill(); }
+    else if (p.mat === 'thread') { ctx.strokeStyle = '#fff4d8'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 2; ctx.beginPath(); ctx.moveTo(x + 1.5, y + 1.5); ctx.lineTo(x + w - 1.5, y + h - 1.5); ctx.moveTo(x + w - 1.5, y + 1.5); ctx.lineTo(x + 1.5, y + h - 1.5); ctx.stroke(); }
+    else if (p.mat === 'stem') { ctx.translate(x + w / 2, y + h / 2); ctx.rotate(Math.sin(now * 2 + i) * .08 * clamp(1 - age / 2)); ctx.translate(-(x + w / 2), -(y + h / 2)); shape(); ctx.fillStyle = i % 2 ? '#5ac83a' : '#7ee04a'; ctx.fill(); ctx.strokeStyle = '#b8f090'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x + 1, y + h / 2); ctx.lineTo(x + w - 1, y + h / 2); ctx.stroke(); }
+    else if (p.mat === 'stone') { shape(); ctx.fillStyle = '#7a6e62'; ctx.fill(); ctx.fillStyle = '#9a8e82'; ctx.fillRect(x + w * .3, y + 2, w * .4, 1.5); ctx.fillStyle = '#ffb070'; ctx.shadowColor = '#ff9040'; ctx.shadowBlur = 4; ctx.fillRect(x + w * .55, y + h * .55, 2, 2); }
+    ctx.restore(); }
+  if (flash > 0 && lit >= 1) { shape(); ctx.fillStyle = `rgba(255,255,255,${flash * .9})`; ctx.fill(); }
+  ctx.restore(); }
+
+// ---------- scene ----------
+let S = null, fam = 'B', profName = 'Herbalism', moment = 'up';
+function build() { const p = PROF[profName], hits = []; let v0;
+  if (moment === 'up') { v0 = p.v; hits.push(.35); }
+  else if (moment === 'five') { v0 = p.five; for (let k = 0; k < 5; k++) hits.push(.35 + k * .75); }
+  else { v0 = p.unlockV; hits.push(.35); }
+  const end = hits[hits.length - 1], nx = nextOf(p, v0 + hits.length - 1), reaches = v0 + hits.length >= nx.lv;
+  return { p, v0, hits, reaches, nx: nextOf(p, v0), age: 0, fired: {}, nums: {}, lit: {}, dur: end + (reaches ? 4.4 : 2.6) }; }
+function play() { S = build(); P = []; document.getElementById('note').textContent = FAM[fam].name + ', ' + profName + ': ' + FAM[fam].note; }
+function once(k, fn) { if (!S.fired[k]) { S.fired[k] = true; fn(); } }
+// the skill value now (float while filling) and the time since the last strike began
+function state() { let v = S.v0, last = -9, k = 0;
+  S.hits.forEach((h, i) => { if (S.age >= h) { last = h; k = i; if (fam === 'K') { const t = clamp((S.age - h - HIT - .07) / .25); v = S.v0 + i + eBack(t); } else { const t = clamp((S.age - h - HIT) / .45); v = S.v0 + i + eOut(t); } } }); // (C: a 70 ms freeze, then a quick jump)
+  return { v, shown: Math.floor(v + 1e-6), since: S.age - last, hitAge: S.age - last - HIT, k }; }
+// strikes: the tool's sound (a step higher each in a row) and its particles, once per hit
+function strikes(tipFn) { S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('hit' + i, () => { S.p.snd(semi(i * 2)); const t = tipFn(); S.p.hit(t.x, t.y); }); }); }
+function drawNum(key, s, x, y, size, col, align, style) {
+  const n = S.nums[key] || (S.nums[key] = { v: s, prev: s, t: -9 }); if (n.v !== s) { n.prev = n.v; n.v = s; n.t = S.age; }
+  const since = S.age - n.t;
+  if (style === 'roll') { const t = eOut(clamp(since / .4)), font = `700 ${size}px system-ui`; const w = measure(s, font), pp = n.prev.padStart(s.length, ' '); let sx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+    ctx.save(); ctx.beginPath(); ctx.rect(sx - 3, y - size, w + 6, size * 1.3); ctx.clip();
+    for (let i = 0; i < s.length; i++) { const cw = measure(s[i], font); if (pp[i] !== s[i] && t < 1) { text(pp[i], sx, y - t * size, font, col); text(s[i], sx, y + (1 - t) * size, font, '#fff'); } else text(s[i], sx, y, font, col); sx += cw; }
+    ctx.restore(); return w; }
+  if (style === 'glint') { const font = `400 ${size}px Georgia, serif`, w = text(s, x, y, font, col, align, { ls: '2px' }), fl = clamp(1 - since / .6);
+    if (fl > 0) { const gx = align === 'center' ? x + w / 2 : align === 'right' ? x : x + w; ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 10; ctx.globalAlpha = fl; star4(gx - 2, y - size * .8, 4 + fl * 7, since * 3); ctx.restore(); } return w; }
+  const pop = since < .25 ? 1 - since / .25 : 0; ctx.save(); ctx.translate(x, y); ctx.scale(1 + pop * .35, 1 + pop * .35);
+  const w = text(s, 0, 0, `800 ${size}px system-ui`, pop > .3 ? '#fff' : col, align, { ls: '1px' }); ctx.restore(); return w; }
+
+// the reveal under the banner (shared): the new herb or ore drops in dark, lights with rings and glints
+function reveal(x, y, at, font, upper) {
+  const t = S.age - at; if (t < 0) return; const p = S.p, nx = S.nx, a = clamp(t / .2) * clamp((S.dur - S.age) / .4);
+  const drop = eOut(clamp(t / .35)), lit = clamp((t - .35) / .3);
+  once('rv', () => { tone(880, .35, .04, .5); tone(1318, .4, .03, .6); });
+  if (t > .35) once('rv2', () => { spawn({ x, y: y + 12, size: 10, shape: 'ring', grow: 30, life: .6, col: '#fff' }); for (let i = 0; i < 6; i++) spawn({ x: x + (Math.random() - .5) * 34, y: y + 12 + (Math.random() - .5) * 34, life: .8, size: 3, shape: 'star', vr: 3, col: '#fff' }); });
+  ctx.save(); ctx.globalAlpha = a; icon(x, lerp(y - 14, y + 12, drop), 30, nx.emo, lit, lit > 0 ? p.light : null);
+  const line = nx.cap ? `${profName} ${nx.lv}: train ${nx.name}` : `You can now ${p.verb} ${nx.name}!`;
+  text(upper ? line.toUpperCase() : line, x, y + 46, font, '#ffd36a', 'center', { alpha: lit, ls: upper ? '1px' : '0.5px' }); ctx.restore(); }
+
+// ---------- the families ----------
+const FAM = {
+  R: { name: 'Ring', desc: 'The skill in a dial. The ring is drawn in the profession\'s material; its tool rides the head of the arc and strikes; the next herb or ore waits at the top where the ring closes, and closing it sends out a shockwave.',
+    note: 'the arc is the material, the tool rides its head, the next unlock waits at the seam.',
+    draw(top, road) {
+      const p = S.p, st = state(), [lo, hi] = p.span, f = clamp((st.v - lo) / (hi - lo)), pw = 330, ph = road && p.unlocks ? 86 : 78, px = W / 2 - pw / 2, py = top;
+      const a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), cx = px + 44, cy = py + ph / 2, r = 27;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.82)'; ctx.beginPath(); ctx.roundRect(px + 34, py + 12, pw - 34, ph - 24, (ph - 24) / 2); ctx.fill();
+      ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(cx, cy, r + 9, 0, 7); ctx.fill();
+      const path = s => { const ang = -Math.PI / 2 + s * Math.PI * 2; return { x: cx + Math.cos(ang) * r, y: cy + Math.sin(ang) * r, a: ang + Math.PI / 2 }; }, L = Math.PI * 2 * r;
+      track(path, L, 6); material(p, path, L, f, 6, S.age, st.hitAge);
+      // closing: flash + shockwave
+      if (S.reaches && f >= 1) once('close', () => { S.closeAt = S.age; spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 60, life: .7, col: '#fff' }); spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 34, life: .9, col: p.light });
+        for (let i = 0; i < 12; i++) { const an = Math.random() * 7; spawn({ x: cx + Math.cos(an) * r, y: cy + Math.sin(an) * r, vx: Math.cos(an) * 80, vy: Math.sin(an) * 80, life: .6, size: 1.6, col: p.light }); }
+        [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), i * .05, .04, .5)); });
+      if (S.closeAt !== undefined) { const t = S.age - S.closeAt; if (t < .4) { ctx.strokeStyle = `rgba(255,255,255,${1 - t / .4})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke(); } }
+      drawNum('n', String(st.shown), cx, cy + 6, 16, '#fff', 'center', 'roll');
+      // the tool at the head, outside the ring (under the seam's icon)
+      const hp = path(Math.max(f, .001)), dir = Math.atan2(hp.y - cy, hp.x - cx); const tx = cx + Math.cos(dir) * (r + 4), ty = cy + Math.sin(dir) * (r + 4);
+      strikes(() => ({ x: hp.x, y: hp.y })); drawTool(p, tx, ty + 6, 26, st.since, S.closeAt);
+      // the seam: the next unlock waits where the ring closes
+      const nx = S.nx, seamPop = S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0;
+      icon(cx, cy - r - 1, 15 + seamPop * 5, nx.emo, f >= 1 ? 1 : .45 + .15 * Math.sin(S.age * 4), f >= 1 ? p.light : null);
+      if (road && p.unlocks) { // the road: the next unlocks in a row, the nearest first, their levels under them
+        text(profName, px + 90, py + 32, '600 16px system-ui', p.light, 'left');
+        const list = p.unlocks.filter(u => u[0] > S.v0).slice(0, 4), ry = py + 52, gap = 34;
+        ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px + 98, ry); ctx.lineTo(px + 98 + gap * (list.length - 1), ry); ctx.stroke();
+        list.forEach((u, i) => { const x = px + 98 + i * gap, got = st.v >= u[0] - 1e-6, isNext = i === 0 && !got, pop = got && S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0;
+          if (isNext) { ctx.save(); ctx.fillStyle = p.light; ctx.globalAlpha *= .25 + .2 * Math.sin(S.age * 4); ctx.beginPath(); ctx.arc(x, ry, 12, 0, 7); ctx.fill(); ctx.restore(); }
+          icon(x, ry, 16 + pop * 4, u[2], got ? 1 : isNext ? .65 : .3, got ? p.light : null);
+          text(String(u[0]), x, ry + 21, '600 9px system-ui', got || isNext ? '#cfc6b0' : '#7a7262', 'center'); });
+      } else {
+        text(profName, px + 90, py + 35, '600 16px system-ui', p.light, 'left');
+        const nt = nx.cap ? `${nx.name} at ${nx.lv}` : `Next: ${nx.name} at ${nx.lv}`; text(nt, px + 90, py + 54, '400 12px system-ui', '#cfc6b0', 'left');
+      }
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 12, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  B: { name: 'Ring + road', desc: 'The clean Ring as in round 2, and beside it the road: the next few herbs or ores in a row with their levels, the nearest one glowing. Reaching it closes the ring and that icon pops. Crafters have no unlocks to show, so they keep the text line.',
+    note: 'the Ring, plus the next unlocks in a row beside it (gatherers).',
+    draw(top) { FAM.R.draw(top, true); } },
+  M: { name: 'Milestone ring', desc: 'One ring for the whole rank, with the unlocks sitting on the ring at their levels like Constellation\'s stars. The material fills around, the tool rides the head, each unlock ignites as the arc reaches it, and the rank cap closes the ring.',
+    note: 'the whole rank around the ring, the unlocks on it at their levels.',
+    draw(top) {
+      const p = S.p, st = state(), [lo, hi] = p.cspan, f = clamp((st.v - lo) / (hi - lo)), pw = 340, ph = 92, px = W / 2 - pw / 2, py = top;
+      const a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), cx = px + 50, cy = py + ph / 2, r = 34;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.82)'; ctx.beginPath(); ctx.roundRect(px + 40, py + 18, pw - 40, ph - 36, (ph - 36) / 2); ctx.fill();
+      ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(cx, cy, r + 11, 0, 7); ctx.fill();
+      const path = s => { const ang = -Math.PI / 2 + s * Math.PI * 2; return { x: cx + Math.cos(ang) * r, y: cy + Math.sin(ang) * r, a: ang + Math.PI / 2 }; }, L = Math.PI * 2 * r;
+      track(path, L, 6); material(p, path, L, f, 6, S.age, st.hitAge);
+      drawNum('n', String(st.shown), cx, cy + 6, 17, '#fff', 'center', 'roll');
+      const hp = path(Math.max(f, .001)), dir = Math.atan2(hp.y - cy, hp.x - cx);
+      strikes(() => ({ x: hp.x, y: hp.y })); drawTool(p, cx + Math.cos(dir) * (r + 5), cy + Math.sin(dir) * (r + 5) + 6, 24, st.since, S.ignAt);
+      // the milestones on the ring
+      const nodes = (p.unlocks || []).filter(u => u[0] > lo && u[0] <= hi).map(u => ({ lv: u[0], emo: u[2] }));
+      if (!p.unlocks || !nodes.find(n => n.lv === hi)) { if (!p.unlocks) [100, 125].forEach(lv => nodes.push({ lv, dot: true })); nodes.push({ lv: hi, emo: '⭐', cap: true }); }
+      nodes.forEach((n, i) => { const q = path((n.lv - lo) / (hi - lo)), reached = st.v >= n.lv - 1e-6;
+        if (reached && S.v0 < n.lv) once('ign' + i, () => { S.ignAt = S.age; for (let k = 0; k < 10; k++) spawn({ x: q.x, y: q.y, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 90, life: .9, size: 3.5, shape: 'star', vr: 3, col: k % 2 ? '#fff' : p.light });
+          if (n.lv === hi) { spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 60, life: .7, col: '#fff' }); spawn({ x: cx, y: cy, size: r, shape: 'ring', grow: 34, life: .9, col: p.light }); }
+          [0, 7, 12, 19].forEach((m, j) => tone(523 * semi(m), j * .05, .04, .5)); });
+        if (n.dot) { ctx.fillStyle = reached ? '#fff' : 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(q.x, q.y, 2, 0, 7); ctx.fill(); return; }
+        const ign = reached && S.ignAt !== undefined && S.v0 < n.lv ? clamp(1 - (S.age - S.ignAt) / .7) : 0, isNext = n.lv === S.nx.lv && !reached;
+        if (ign > 0 || isNext) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = p.light; ctx.shadowBlur = 10; ctx.globalAlpha *= ign > 0 ? ign : .3 + .25 * Math.sin(S.age * 4); star4(q.x, q.y, 11 + ign * 12, S.age * .4); ctx.restore(); }
+        icon(q.x, q.y, 14 + ign * 6, n.emo, reached ? 1 : isNext ? .65 : .3, reached ? p.light : null); });
+      text(profName, px + 102, py + 41, '600 16px system-ui', p.light, 'left');
+      const nt = S.nx.cap ? `${S.nx.name} at ${S.nx.lv}` : `Next: ${S.nx.name} at ${S.nx.lv}`; text(nt, px + 102, py + 60, '400 12px system-ui', '#cfc6b0', 'left');
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 10, (S.ignAt ?? 99) + .3, '600 13px system-ui', false);
+    } },
+  C: { name: 'Constellation', desc: 'A line across the whole rank with the herbs and ores you\'ll unlock as stars along it, so you see the road ahead. The line is drawn in the profession\'s material, the tool travels at its tip, and reaching an unlock ignites its star.',
+    note: 'the whole rank as a line in the material; every unlock on the road is a star.',
+    draw(top) {
+      const p = S.p, st = state(), [lo, hi] = p.cspan, f = clamp((st.v - lo) / (hi - lo)), pw = 380, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      ctx.save(); ctx.globalAlpha = a;
+      const g = ctx.createRadialGradient(W / 2, py + 44, 0, W / 2, py + 44, pw * .6); g.addColorStop(0, 'rgba(0,0,8,.72)'); g.addColorStop(1, 'rgba(0,0,8,0)'); ctx.fillStyle = g; ctx.fillRect(px - 60, py - 30, pw + 120, 150);
+      const tw = measure(profName, '400 17px Georgia, serif', '2px') + 10 + measure(String(st.shown), '400 18px Georgia, serif', '2px'), tx0 = W / 2 - tw / 2;
+      const w1 = text(profName, tx0, py + 22, '400 17px Georgia, serif', p.light, 'left', { ls: '2px' }); drawNum('n', String(st.shown), tx0 + w1 + 10, py + 22, 18, '#fff', 'left', 'glint');
+      const lx = px + 26, lw = pw - 52, ly = py + 54, path = s => ({ x: lx + lw * s, y: ly, a: 0 });
+      track(path, lw, 2); material(p, path, lw, f, 6, S.age, st.hitAge);
+      // the stars: every unlock in the rank (crafters: milestones and the rank cap)
+      const nodes = (p.unlocks || []).filter(u => u[0] > lo && u[0] <= hi).map(u => ({ lv: u[0], emo: u[2] }));
+      if (!p.unlocks || !nodes.find(n => n.lv === hi)) { if (!p.unlocks) [100, 125].forEach(lv => nodes.push({ lv, dot: true })); nodes.push({ lv: hi, emo: '⭐', cap: true }); }
+      nodes.forEach((n, i) => { const x = lx + lw * (n.lv - lo) / (hi - lo), reached = st.v >= n.lv - 1e-6;
+        if (reached && S.v0 < n.lv) once('ign' + i, () => { S.ignAt = S.age; for (let k = 0; k < 10; k++) spawn({ x, y: ly, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 90, life: 1, size: 3.5, shape: 'star', vr: 3, col: k % 2 ? '#fff' : p.light });
+          [0, 4, 7, 11, 14].forEach((m, j) => { tone(1046 * semi(m), j * .07, .035, 1); tone(2093 * semi(m), j * .07, .01, .5); }); });
+        if (n.dot) { ctx.fillStyle = reached ? '#fff' : 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(x, ly, 2, 0, 7); ctx.fill(); return; }
+        const ign = reached && S.ignAt !== undefined && S.v0 < n.lv ? clamp(1 - (S.age - S.ignAt) / .7) : 0, isNext = n.lv === S.nx.lv && !reached;
+        if (reached || isNext) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = p.light; ctx.shadowBlur = 12; ctx.globalAlpha *= reached ? .9 : .35 + .25 * Math.sin(S.age * 4); star4(x, ly, 13 + ign * 16, S.age * .4); ctx.restore(); }
+        icon(x, ly, 18 + ign * 6, n.emo, reached ? 1 : isNext ? .6 : .3, reached ? p.light : null); });
+      text(String(lo), lx, ly + 22, '400 10px Georgia, serif', '#9a927e', 'center'); text(String(hi), lx + lw, ly + 22, '400 10px Georgia, serif', '#9a927e', 'center');
+      const nt = S.nx.cap ? `${S.nx.name} at ${S.nx.lv}` : `Next: ${S.nx.name} at ${S.nx.lv}`; text(nt, W / 2, ly + 26, '400 12px Georgia, serif', '#cfc6b0', 'center', { ls: '1px' });
+      const tip = path(f); strikes(() => tip); drawTool(p, tip.x, ly - 7, 24, st.since, S.ignAt);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + 96, (S.ignAt ?? 99) + .3, '400 14px Georgia, serif', false);
+    } },
+  S: { name: 'Segments', desc: 'A row of cells, one per skill point, each one a piece of the material: little ingots that glow white-hot and cool, vials, cross-stitches, leaves, chunks of ore. The tool strikes the cell it fills; the next unlock sits at the end of the row.',
+    note: 'one cell per skill point, each made of the material; the tool strikes the cell it fills.',
+    draw(top) {
+      const p = S.p, st = state(), [lo, hi] = p.span, span = hi - lo, per = Math.ceil(span / 25), N = Math.ceil(span / per), pw = 360, ph = 74, px = W / 2 - pw / 2, py = top;
+      const a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4); ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(8,8,12,.88)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 4); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.stroke(); ctx.fillStyle = p.col; ctx.fillRect(px, py, 3, ph);
+      const t1 = text(profName.toUpperCase(), px + 16, py + 22, '700 14px system-ui', p.light, 'left', { ls: '1.5px' }); drawNum('n', String(st.shown), px + 16 + t1 + 8, py + 22, 15, '#fff', 'left', 'pop');
+      const nx = S.nx, nt = (nx.cap ? `${nx.name} at ${nx.lv}` : `Next: ${nx.name} ${nx.lv}`).toUpperCase(); text(nt, px + pw - 44, py + 22, '700 10px system-ui', '#cfc6b0', 'right', { ls: '1px' });
+      const gx = px + 16, gw = pw - 16 - 44, gap = 2, cw = (gw - gap * (N - 1)) / N, cy = py + 48, ch = 16;
+      let cur = { x: gx, y: cy };
+      for (let i = 0; i < N; i++) { const x = gx + i * (cw + gap), amt = clamp((st.v - lo - i * per) / per);
+        if (amt >= 1 && S.lit[i] === undefined) S.lit[i] = S.v0 - lo >= (i + 1) * per ? -9 : S.age;
+        if (S.fullAt !== undefined) { const w = S.age - S.fullAt - i * .025; if (w > 0 && w < .25 && S.lit[i] < S.age - .3) S.lit[i] = S.age; }
+        cell(p, x, cy, cw, ch, amt, S.lit[i] !== undefined ? S.age - S.lit[i] : 9, S.age, i);
+        if (amt > 0 && amt <= 1 && (st.v - lo) <= (i + 1) * per + 1e-6) cur = { x: x + cw / 2, y: cy }; }
+      if (st.v - lo <= 0) cur = { x: gx + cw / 2, y: cy };
+      if (S.reaches && st.v >= hi - 1e-6) once('full', () => { S.fullAt = S.age + .05; [0, 2, 4, 7, 9, 12].forEach((n, i) => tone(660 * semi(n), i * .045, .03, .12, 'square'));
+        for (let i = 0; i < 14; i++) spawn({ x: gx + Math.random() * gw, y: cy + ch / 2, vx: (Math.random() - .5) * 60, vy: -40 - Math.random() * 70, g: 200, life: .7, size: 1.6, shape: 'sq', vr: 8, col: i % 2 ? '#fff' : p.light }); });
+      const endPop = S.fullAt !== undefined ? eBack(clamp((S.age - S.fullAt - N * .025) / .3)) : 0, done = st.v >= nx.lv - 1e-6;
+      icon(px + pw - 22, cy + ch / 2, 22 + endPop * 5, nx.emo, done ? 1 : .5, done ? p.light : null);
+      strikes(() => ({ x: cur.x, y: cur.y })); drawTool(p, cur.x, cy - 1, 20, st.since);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.fullAt ?? 99) + .45, '700 12px system-ui', true);
+    } },
+  // ---------- Phase 2 (2026-11-14): new designs from what the crafting picks taught (tools act on the ring, punchy beats,
+  // the ring as the material, the item in the middle); A is the Phase 1 lock (Ring + road)
+  O: { name: 'B. Around the craft ring', desc: 'The skill-up shows where the work happened, not in a banner: for crafters around the craft ring at the cast bar, for gatherers around the gathered herb or ore beside you. When the craft finishes (or the node is picked) a second ring unspools around it in the profession’s material, the tool rides its head and strikes, the number and the next unlocks sit beside it. Reaching an unlock closes the outer ring.',
+    note: 'a skill ring wraps the craft ring (or the gathered node) where the work happened.',
+    draw() {
+      const p = S.p, st = state(), gath = !!p.verb, [lo, hi] = p.span, f = clamp((st.v - lo) / (hi - lo));
+      const cx = gath ? W * .3 + 140 : W / 2, cy = gath ? H * .5 + 30 : H * .8, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      const h0 = S.hits[0], show = clamp((S.age - h0 - HIT) / .3), R = 36;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(cx, cy, 30 + 14 * eOut(show), 0, 7); ctx.fill();
+      if (!gath) { // the craft ring: each cast fills it, the made item flashes it white
+        const k = S.hits.findIndex(h => S.age < h + HIT), prev = k <= 0 ? h0 + HIT - 1.4 : S.hits[k - 1] + HIT + .12, cf = k < 0 ? 1 : clamp((S.age - prev) / (S.hits[k] + HIT - prev));
+        ctx.lineCap = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(cx, cy, 22, 0, 7); ctx.stroke();
+        ctx.strokeStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(cx, cy, 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * cf); ctx.stroke(); ctx.shadowBlur = 0;
+        const made = S.hits.filter(h => S.age >= h + HIT).length, fl = made ? clamp(1 - (S.age - S.hits[made - 1] - HIT) / .3) : 0;
+        if (fl > 0) { ctx.strokeStyle = `rgba(255,255,255,${fl})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(cx, cy, 22, 0, 7); ctx.stroke(); }
+        icon(cx, cy, 22, p.made, 1);
+      } else { const pick = S.hits.some(h => S.age >= h + HIT) ? eBack(clamp((S.age - h0 - HIT) / .3)) : 0; icon(cx, cy - 4 * pick, 24 + 4 * pick, p.node, 1, pick > 0 ? p.light : null); }
+      if (show > 0) { // the skill: the outer ring in the material
+        const path = s => { const ang = -Math.PI / 2 + s * Math.PI * 2; return { x: cx + Math.cos(ang) * R, y: cy + Math.sin(ang) * R, a: ang + Math.PI / 2 }; }, L = Math.PI * 2 * R, ff = f * eOut(show);
+        ctx.save(); ctx.globalAlpha *= show; track(path, L, 5); material(p, path, L, ff, 5, S.age, st.hitAge);
+        if (S.reaches && f >= 1) once('close', () => { S.closeAt = S.age; spawn({ x: cx, y: cy, size: R, shape: 'ring', grow: 60, life: .7, col: '#fff' }); spawn({ x: cx, y: cy, size: R, shape: 'ring', grow: 34, life: .9, col: p.light }); [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), i * .05, .04, .5)); });
+        if (S.closeAt !== undefined) { const t = S.age - S.closeAt; if (t < .4) { ctx.strokeStyle = `rgba(255,255,255,${1 - t / .4})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke(); } }
+        const hp = path(Math.max(ff, .001)), dir = Math.atan2(hp.y - cy, hp.x - cx); strikes(() => ({ x: hp.x, y: hp.y })); drawTool(p, cx + Math.cos(dir) * (R + 4), cy + Math.sin(dir) * (R + 4) + 6, 22, st.since, S.closeAt);
+        icon(cx, cy - R - 1, 14, S.nx.emo, f >= 1 ? 1 : .45 + .15 * Math.sin(S.age * 4), f >= 1 ? p.light : null);
+        ctx.restore();
+        // beside it: the name, the number and the road (gatherers) or the rank cap (crafters)
+        ctx.save(); ctx.globalAlpha *= show; const lx = cx + R + 22, nf = '600 14px system-ui';
+        text(profName, lx, cy - 4, nf, p.light, 'left'); drawNum('n', String(st.shown), lx + measure(profName, nf) + 8, cy - 4, 14, '#fff', 'left', 'roll');
+        if (p.unlocks) { const list = p.unlocks.filter(u => u[0] > S.v0).slice(0, 4); list.forEach((u, i) => { const x = lx + 8 + i * 28, got = st.v >= u[0] - 1e-6; icon(x, cy + 16, 14, u[2], got ? 1 : i === 0 ? .65 : .3, got ? p.light : null); text(String(u[0]), x, cy + 33, '600 9px system-ui', i === 0 || got ? '#cfc6b0' : '#7a7262', 'center'); }); }
+        else text(`${S.nx.name} at ${S.nx.lv}`, lx, cy + 14, '400 12px system-ui', '#cfc6b0', 'left');
+        ctx.restore(); }
+      ctx.restore();
+      if (S.reaches) reveal(cx, cy + 52, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  K: { name: 'C. Comet + impact', desc: 'The banner as in A, but each skill point travels to it: a spark leaves where the work happened (the cast bar for crafters, you for gatherers), arcs up to the ring and lands on its head; on impact a short freeze, the banner jolts, the arc jumps forward with a little overshoot and the tool strikes. The same language as the XP quest comet.',
+    note: 'each skill point flies from the work to the ring and punches it forward.',
+    draw(top) {
+      const p = S.p, gath = !!p.verb, sx = gath ? W * .3 + 28 : W / 2, sy = gath ? H * .5 + 10 : H * .8, [lo, hi] = p.span;
+      const ph = p.unlocks ? 86 : 78, cx = W / 2 - 165 + 44, cy = top + ph / 2, r = 27;
+      S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('imp' + i, () => { S.shake = S.age; const f = clamp((S.v0 + i + 1 - lo) / (hi - lo)), ang = -Math.PI / 2 + Math.PI * 2 * f, x = cx + Math.cos(ang) * r, y = cy + Math.sin(ang) * r;
+        spawn({ x, y, size: 3, shape: 'ring', grow: 26, life: .45, col: '#fff' }); for (let k = 0; k < 6; k++) spawn({ x, y, vx: (Math.random() - .5) * 120, vy: (Math.random() - .5) * 120, life: .5, size: 2.2, shape: 'star', vr: 4, col: k % 2 ? '#fff' : p.light }); }); });
+      const sh = S.shake !== undefined ? clamp(1 - (S.age - S.shake) / .2) : 0;
+      ctx.save(); ctx.translate((Math.random() - .5) * 5 * sh, (Math.random() - .5) * 5 * sh); FAM.R.draw(top, true); ctx.restore();
+      S.hits.forEach((h, i) => { const land = h + HIT, T = .5, u = (S.age - (land - T)) / T; if (u < 0 || u > 1) return;
+        once('wh' + i, () => { noise(0, .45, .025, 900, 1.5); tone(380 * semi(i * 2), 0, .012, .45, 'sine', 1100 * semi(i * 2)); });
+        const f = clamp((S.v0 + i + 1 - lo) / (hi - lo)), ang = -Math.PI / 2 + Math.PI * 2 * f, tx = cx + Math.cos(ang) * r, ty = cy + Math.sin(ang) * r, qx = (sx + tx) / 2 + 60, qy = Math.min(sy, ty) - 40;
+        const at = q => { const e = q * q; return { x: (1 - e) * (1 - e) * sx + 2 * (1 - e) * e * qx + e * e * tx, y: (1 - e) * (1 - e) * sy + 2 * (1 - e) * e * qy + e * e * ty }; };
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (let k = 10; k >= 0; k--) { const q = clamp(u - k * .025), pt = at(q); ctx.fillStyle = k ? p.light : '#fff'; ctx.globalAlpha = k ? .5 * (1 - k / 11) : 1; ctx.beginPath(); ctx.arc(pt.x, pt.y, k ? 3.2 * (1 - k / 12) : 4, 0, 7); ctx.fill(); } ctx.restore(); });
+    } },
+  T: { name: 'D. Stepping stones', desc: 'No ring: the road is the bar. A row of stones, one per skill point, leads to the next unlock; the tool stands on the stone for your skill and on each skill-up hops onto the next one, which lights up in the profession’s color as it lands (a thunk and a puff of dust). The last hop lands on the unlock’s icon, which pops. Crafters walk toward their rank cap.',
+    note: 'the tool hops stone to stone toward the next unlock.',
+    draw(top) {
+      const p = S.p, nx = S.nx, pw = 380, ph = 80, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), HOP = .35;
+      const lvl = S.v0 + S.hits.filter(h => S.age >= h + HIT).length, start = Math.max(p.span[0], S.v0 - 1), last = nx.lv - 1, gap = last - start > 8, shownEnd = gap ? start + 7 : last;
+      const x0 = px + 26, step = 30, y = py + 56, ux = x0 + (shownEnd - start + (gap ? 2 : 1)) * step;
+      const spot = l => l >= nx.lv ? { x: ux, y: y - 9 } : { x: x0 + (Math.min(l, shownEnd) - start) * step, y: y - 5 };
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.85)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.28)'; ctx.lineWidth = 1; ctx.stroke();
+      const nf = '600 14px system-ui'; text(profName, px + 16, py + 24, nf, p.light, 'left'); drawNum('n', String(lvl), px + 16 + measure(profName, nf) + 8, py + 24, 14, '#fff', 'left', 'roll');
+      text(nx.cap ? `${nx.name} at ${nx.lv}` : `Next: ${nx.name} at ${nx.lv}`, px + pw - 16, py + 24, '400 12px system-ui', '#cfc6b0', 'right');
+      for (let l = start; l <= shownEnd; l++) { const x = x0 + (l - start) * step, lit = lvl >= l; if (lit && S.lit[l] === undefined) S.lit[l] = l <= S.v0 ? -9 : S.age; const fresh = lit ? clamp(1 - (S.age - S.lit[l]) / .6) : 0;
+        ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, 9, 5, 0, 0, 7); ctx.fillStyle = lit ? p.col : 'rgba(40,34,30,.9)'; if (fresh > 0) { ctx.shadowColor = p.light; ctx.shadowBlur = 12 * fresh; } ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = lit ? p.light : 'rgba(255,255,255,.14)'; ctx.lineWidth = 1; ctx.stroke(); if (fresh > 0) { ctx.fillStyle = `rgba(255,255,255,${fresh * .8})`; ctx.fill(); } ctx.restore(); }
+      if (gap) text('···', x0 + (shownEnd - start + 1) * step, y + 4, '700 14px system-ui', '#7a7262', 'center');
+      const done = lvl >= nx.lv, pop = S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0; icon(ux, y - 6, 22 + pop * 5, nx.emo, done ? 1 : .5, done ? p.light : null);
+      // the tool: on its stone, hopping to the next one on each skill-up (lands at the strike)
+      let tp = spot(lvl), since = 9; S.hits.forEach((h, i) => { const land = h + HIT, u = (S.age - (land - HOP)) / HOP; if (u >= 0 && u < 1) { const A = spot(S.v0 + i), B = spot(S.v0 + i + 1); tp = { x: lerp(A.x, B.x, u), y: lerp(A.y, B.y, u) - 22 * Math.sin(Math.PI * u) }; }
+        if (S.age >= land) { since = Math.min(since, S.age - land + HIT); once('land' + i, () => { S.p.snd(semi(i * 2)); const B = spot(S.v0 + i + 1); for (let k = 0; k < 6; k++) spawn({ x: B.x + (Math.random() - .5) * 14, y: B.y + 4, vx: (Math.random() - .5) * 60, vy: -10 - Math.random() * 25, g: 60, life: .5, size: 1.6, col: 'rgba(200,190,170,.7)' }); spawn({ x: B.x, y: B.y + 4, size: 4, shape: 'ring', grow: 14, life: .35, col: p.light }); }); } });
+      drawTool(p, tp.x, tp.y, 20, since, undefined);
+      if (S.reaches && done) once('close', () => { S.closeAt = S.age; spawn({ x: ux, y: y - 6, size: 12, shape: 'ring', grow: 40, life: .7, col: '#fff' }); spawn({ x: ux, y: y - 6, size: 12, shape: 'ring', grow: 24, life: .9, col: p.light }); [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), i * .05, .04, .5)); });
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  // ---------- Phase 2 round 2 (2026-11-14): skill-ups as their own draggable module (shown at its default place), each
+  // option a different mechanism: the number (B), distance (C), the tool as the gauge (D)
+  Q: { name: 'B. Odometer', desc: 'The number is the star: a big skill number in a small panel rolls over like a mechanical counter, each digit snapping up with a tick and a little overshoot (the tool’s own sound under it). A thin line in the profession’s material underneath shows how far to the next unlock, its icon at the end. Reaching it: the digits flash gold, the line flashes and the icon pops.',
+    note: 'a big rolling counter, the material line under it to the next unlock.',
+    draw(top) {
+      const p = S.p, nx = S.nx, [lo, hi] = p.span, pw = 270, ph = 92, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      const k = S.hits.filter(h => S.age >= h + HIT).length, lvl = S.v0 + k, lastAt = k ? S.hits[k - 1] + HIT : -9, since = S.age - lastAt;
+      S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('tick' + i, () => { S.p.snd(semi(i * 2)); click(0, .07, 2200, 3); click(.03, .04, 3400, 5); }); });
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.85)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.28)'; ctx.lineWidth = 1; ctx.stroke();
+      text(profName.toUpperCase(), px + 18, py + 22, '700 11px system-ui', p.light, 'left', { ls: '1.5px' });
+      // the counter: each digit on its own drum
+      const font = '800 40px system-ui', s = String(lvl), prev = String(lvl - (k ? 1 : 0)).padStart(s.length, ' '), dw = measure('0', font), x0 = px + 18, by = py + 62, gold = S.closeAt !== undefined ? clamp(1 - (S.age - S.closeAt) / .8) : 0;
+      ctx.save(); ctx.beginPath(); ctx.rect(x0 - 4, by - 40, dw * s.length + 8, 50); ctx.clip();
+      for (let i = 0; i < s.length; i++) { const x = x0 + i * dw, changed = k && prev[i] !== s[i], t = clamp(since / .2), col = gold > 0 ? mix('#ffffff', '#ffd36a', gold) : '#fff';
+        if (changed && t < 1) { text(prev[i], x, by - eBack(t) * 44, font, '#cfc6b0'); text(s[i], x, by + (1 - eBack(t)) * 44, font, col); } else text(s[i], x, by, font, col); }
+      ctx.restore();
+      // the line to the next unlock, in the material
+      const lx = x0 + dw * s.length + 18, lw = px + pw - 44 - lx, ly = by - 14, f = clamp((lvl - lo) / (hi - lo)), fShown = clamp(f - (1 - eOut(clamp(since / .35))) / (hi - lo));
+      const path = q => ({ x: lx + q * lw, y: ly, a: 0 }); track(path, lw, 4); material(p, path, lw, fShown, 4, S.age, since);
+      text(`${nx.lv}`, px + pw - 26, ly + 22, '600 10px system-ui', '#cfc6b0', 'center');
+      if (S.reaches && lvl >= nx.lv) once('close', () => { S.closeAt = S.age; spawn({ x: px + pw - 26, y: ly, size: 10, shape: 'ring', grow: 36, life: .7, col: '#fff' }); [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), i * .05, .04, .5)); });
+      const pop = S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0; icon(px + pw - 26, ly, 18 + pop * 5, nx.emo, lvl >= nx.lv ? 1 : .5, lvl >= nx.lv ? p.light : null);
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  W: { name: 'C. It comes to you', desc: 'No bar: progress is distance. Your skill sits in a small ring at the left of the module; the next herb or ore (crafters: the rank cap) waits further along, as far away as the points you still need. Each skill-up pulls it a hop closer (the tool’s sound, a puff where it lands). At the unlock it reaches your ring, snaps in and pops.',
+    note: 'the next unlock hops closer with every point and snaps into your ring.',
+    draw(top) {
+      const p = S.p, nx = S.nx, [lo] = p.span, pw = 320, ph = 76, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+      const k = S.hits.filter(h => S.age >= h + HIT).length, lvl = S.v0 + k, since = k ? S.age - S.hits[k - 1] - HIT : 9, maxRem = Math.max(1, nx.lv - lo);
+      const ax = px + 40, ay = py + ph / 2, far = pw - 80, distAt = l => clamp((nx.lv - l) / maxRem) * far;
+      const hop = clamp(since / .32), d = k ? lerp(distAt(lvl - 1), distAt(lvl), eOut(hop)) : distAt(lvl), ix = ax + 26 + d, iy = ay - 16 * Math.sin(Math.PI * hop) * (k ? 1 : 0);
+      S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('pull' + i, () => S.p.snd(semi(i * 2))); if (S.age >= h + HIT + .32) once('land' + i, () => { for (let q = 0; q < 6; q++) spawn({ x: ix + (Math.random() - .5) * 12, y: ay + 10, vx: (Math.random() - .5) * 50, vy: -8 - Math.random() * 20, g: 50, life: .45, size: 1.5, col: 'rgba(200,190,170,.7)' }); }); });
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.85)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, ph / 2); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.28)'; ctx.lineWidth = 1; ctx.stroke();
+      // the dotted way still to go
+      ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.setLineDash([2, 5]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(ax + 26, ay); ctx.lineTo(ix - 14, ay); ctx.stroke(); ctx.setLineDash([]);
+      // your ring: the skill number in the profession's color
+      const snap = S.closeAt !== undefined ? clamp(1 - (S.age - S.closeAt) / .4) : 0;
+      ctx.fillStyle = 'rgba(6,8,12,.95)'; ctx.beginPath(); ctx.arc(ax, ay, 24, 0, 7); ctx.fill(); ctx.strokeStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = 8 + 14 * snap; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(ax, ay, 20, 0, 7); ctx.stroke(); ctx.shadowBlur = 0;
+      if (snap > 0) { ctx.strokeStyle = `rgba(255,255,255,${snap})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(ax, ay, 20, 0, 7); ctx.stroke(); }
+      drawNum('n', String(lvl), ax, ay + 6, 15, '#fff', 'center', 'roll');
+      text(profName, ax + 34, py + 18, '600 11px system-ui', p.light, 'left');
+      const done = lvl >= nx.lv; if (S.reaches && done && hop >= 1) once('close', () => { S.closeAt = S.age; spawn({ x: ax, y: ay, size: 20, shape: 'ring', grow: 50, life: .7, col: '#fff' }); spawn({ x: ax, y: ay, size: 20, shape: 'ring', grow: 30, life: .9, col: p.light }); [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), i * .05, .04, .5)); });
+      if (S.closeAt === undefined) { icon(ix, iy, 24, nx.emo, .55 + .45 * (1 - d / far), d < 30 ? p.light : null); text(`${nx.lv}`, ix, ay + 26, '600 9px system-ui', '#cfc6b0', 'center'); }
+      else { const pop = eBack(clamp((S.age - S.closeAt) / .3)); icon(ax, ay - 30 - 6 * pop, 18 + 6 * pop, nx.emo, 1, p.light); }
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+  X: { name: 'D. The tool charges', desc: 'The tool is the gauge: a big icon of the profession’s tool, dark, fills with its color from the bottom up, one step per skill point (it pulses and plays its sound). Beside it the name, the number and what’s next. At the unlock, full and glowing, it lifts and swings once onto the unlock’s icon: sparks, the icon pops.',
+    note: 'the tool fills up like a gauge and strikes the unlock when full.',
+    draw(top) {
+      const p = S.p, nx = S.nx, [lo, hi] = p.span, st = state(), pw = 300, ph = 92, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4), img = IMG[p.tool];
+      const f = clamp((st.v - lo) / (hi - lo)), tx = px + 50, ty = py + ph / 2, sz = 58, k = S.hits.filter(h => S.age >= h + HIT).length, since = k ? S.age - S.hits[k - 1] - HIT : 9;
+      S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('fill' + i, () => S.p.snd(semi(i * 2))); });
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(6,8,12,.85)'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.28)'; ctx.lineWidth = 1; ctx.stroke();
+      // the swing at the unlock: lifts, then strikes the icon to its right
+      const sw = S.fullAt !== undefined ? S.age - S.fullAt : -1, rot = sw < 0 ? 0 : sw < .25 ? -.6 * eOut(sw / .25) : sw < .37 ? lerp(-.6, .9, (sw - .25) / .12) : lerp(.9, 0, eOut(clamp((sw - .37) / .4)));
+      const pulse = 1 + .08 * clamp(1 - since / .25);
+      if (img.complete) { ctx.save(); ctx.translate(tx, ty + sz / 2); ctx.rotate(rot); ctx.scale(pulse, pulse); const x = -sz / 2, y = -sz;
+        ctx.globalAlpha *= .3; ctx.filter = 'grayscale(1) brightness(.55)'; ctx.drawImage(img, x, y, sz, sz); ctx.filter = 'none'; ctx.globalAlpha /= .3;
+        ctx.save(); ctx.beginPath(); ctx.rect(x - 4, y + sz * (1 - f), sz + 8, sz * f + 2); ctx.clip(); ctx.shadowColor = p.light; ctx.shadowBlur = 6 + 10 * clamp(1 - since / .4) + (f >= 1 ? 10 : 0); ctx.drawImage(img, x, y, sz, sz); ctx.restore();
+        ctx.restore(); }
+      const nf = '600 14px system-ui', lx = px + 112; text(profName, lx, py + 32, nf, p.light, 'left'); drawNum('n', String(st.shown), lx + measure(profName, nf) + 8, py + 32, 14, '#fff', 'left', 'roll');
+      text(nx.cap ? `${nx.name} at ${nx.lv}` : `Next: ${nx.name} at ${nx.lv}`, lx, py + 54, '400 12px system-ui', '#cfc6b0', 'left');
+      const ux = tx + 40, uy = ty + 16, hitAt = S.fullAt !== undefined ? S.fullAt + .37 : 99;
+      if (S.reaches && f >= 1) once('full', () => { S.fullAt = S.age + .15; });
+      if (S.age >= hitAt) once('close', () => { S.closeAt = S.age; S.p.snd(semi(12)); S.p.hit(ux, uy); spawn({ x: ux, y: uy, size: 12, shape: 'ring', grow: 40, life: .7, col: '#fff' }); spawn({ x: ux, y: uy, size: 12, shape: 'ring', grow: 24, life: .9, col: p.light }); [0, 7, 12, 19].forEach((n, i) => tone(523 * semi(n), .05 + i * .05, .04, .5)); });
+      if (S.reaches) { const pop = S.closeAt !== undefined ? eBack(clamp((S.age - S.closeAt) / .3)) : 0; icon(ux, uy, 24 + pop * 6, nx.emo, S.closeAt !== undefined ? 1 : .5, S.closeAt !== undefined ? p.light : null); }
+      ctx.restore();
+      if (S.reaches) reveal(W / 2, py + ph + 14, (S.closeAt ?? 99) + .35, '600 13px system-ui', false);
+    } },
+};
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (S) { S.age += dt; FAM[fam].draw(Math.max(20, H * .14)); stepP(dt); if (S.age > S.dur + .5 && document.getElementById('loop').checked) play(); }
+  requestAnimationFrame(frame); }
+
+// ---------- panel ----------
+const fEl = document.getElementById('fams'), pEl = document.getElementById('profs');
+['B', 'Q', 'W', 'X'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + (k === 'B' ? 'A. Ring + road (Phase 1)' : FAM[k].name); b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
+Object.keys(PROF).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.dataset.p = k; b.onclick = () => setProf(k); pEl.appendChild(b); });
+function sync() { document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam)); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
+  document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('fdesc').textContent = FAM[fam].desc; }
+function setFam(k) { fam = k; sync(); play(); } function setProf(k) { profName = k; sync(); play(); }
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); }
+  const i = '1234'.indexOf(e.key); if (i >= 0) setFam('BQWX'[i]); const j = 'qwert'.indexOf(e.key.toLowerCase()); if (j >= 0) setProf(Object.keys(PROF)[j]); });
+sync(); play(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -504,7 +504,29 @@ The dungeon recap stays in 1.4.0 for now, last, and may slip to 1.5.0 depending 
 
 Professions (from 1.3.0):
 1. Crafting: the in-game API checks (Smelting window's name, is disenchant a trade-skill cast, the 8x8 burn grid).
+   **Done 2026-11-14 (checked in game by the user, a UNIT_SPELLCAST_START watcher printing UnitCastingInfo + the
+   profession):** Smelting = "Smelt Copper" spell 2657, isTradeSkill **true**, professionName **"Mining"** (so the build
+   maps a Mining window cast to the Smelting look). Disenchanting = spell **13262**, isTradeSkill **false**, no profession
+   (no window): detect it by spell ID at UNIT_SPELLCAST_START, outside the window check. A normal craft (Light Armor Kit
+   2152) = true, "Leatherworking". The burn grid works: 64 textures (8x8) of one image via SetTexCoord, every other one
+   hidden, drew a clean checkerboard.
 2. Skill-up gains, Phase 2 (Phase 1 pick: Ring + road). Right after crafting: they share the Ring.
+   Phase 2 round 1 (2026-11-14, `docs/mockups/skillup-p2.html`, built on skillup-r3's engine; what the crafting picks
+   taught: a tool acting on the ring, punchy steps, the work's own place): **A. Ring + road** (the Phase 1 lock),
+   **B. Around the craft ring** (no banner: a skill ring unspools around the craft ring at the cast bar, or around the
+   gathered node beside you; number and road beside it), **C. Comet + impact** (A's banner, each point flies from the
+   work to the ring head; 70 ms freeze, jolt, overshoot; the XP quest comet's language), **D. Stepping stones** (no ring:
+   a row of stones to the next unlock, the tool hops one per skill-up and lights it; the last hop lands on the unlock).
+   Round 1 → "these options aren't very differing" (A-C all a ring in a banner); D (stepping stones) not liked. The
+   user asked: skill-ups inside the craft rings (one draggable module) or a separate draggable module (two)? Leaning
+   two ("we aren't restricted by the design of the crafting rings"). My view: two (gatherers have no craft ring, so
+   skill-ups need their own home anyway; one place for every skill-up; a Create All batch keeps the ring busy).
+   **Decided: two modules** (skill-ups are their own draggable module; an optional spark from the craft ring can link
+   them). Round 2 (same page, the round-1 options kept in the code but off the panel), each a different way to show
+   progress: A. Ring + road (the lock), **B. Odometer** (a big rolling counter, each digit snaps up with a tick and
+   overshoot; a thin material line under it to the next unlock), **C. It comes to you** (no bar: the next unlock waits as
+   far away as the points left and hops closer each skill-up, then snaps into your skill ring), **D. The tool charges**
+   (the tool icon fills with color bottom-up as the gauge; full, it swings once onto the unlock icon).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).

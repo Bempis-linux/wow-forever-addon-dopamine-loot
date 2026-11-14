@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-14, crafting Phase 3 Polish done (design only); next the in-game API checks and the build. Read this
+_Last checkpoint: 2026-11-14, skill-up Phase 2 round 2 built, waiting on the user's verdict; kit 0.8.1 (budget rule). Read this
 first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
 every round and pick). Older detail: git log, CHANGELOG.md._
 
@@ -24,10 +24,23 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   Engineering, Cooking, Smelting, Leatherworking); ring widths, tool placement and finale lengths as picked (Alchemy's tube
   and Smelting's mould stay thicker); loudness **Even** (every profession about -29 dB at its loudest; per-profession gains
   in `LOUD_GAIN.even`, Blacksmithing x0.38, Tailoring x3.63). The page's Polish panel opens on the decided settings.
-- **Next up (1.4.0 order, revised 2026-11-14; plan.md "1.4.0 order")**: professions first: crafting API checks in game,
+- **Next up (1.4.0 order, revised 2026-11-14; plan.md "1.4.0 order")**: professions first: crafting API checks DONE (Smelting
+  = a Mining window cast; Disenchant = spell 13262, not a trade-skill cast; burn grid works),
   then Phase 2 for skill-up gains, the Create All pile, gathering, the loot window (Picked-up rows / harvest window);
   build them; then Phase 2 for XP, rep, level-up; build; the dungeon recap last if the weekly budget allows (may slip to
   1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
+- **Skill-up gains, Phase 2 in progress** (`docs/mockups/skillup-p2.html`, keys 1-4; plan.md under "2. Skill-up
+  gains"). **Decided: skill-ups are their own draggable module**, apart from the craft rings (gatherers have no ring;
+  one place for every skill-up; an optional spark from the craft ring may link them). Round 1 (B Around the craft ring,
+  C Comet + impact, D Stepping stones) was "not very differing" and D not liked; its code stays in the page, off the
+  panel. **Round 2 is built, the user has NOT tested it yet:** A Ring + road (lock), B Odometer (big rolling counter +
+  material line), C It comes to you (the next unlock hops closer per point, snaps into your ring), D The tool charges
+  (the tool icon fills as the gauge, swings onto the unlock). **First thing next session: get the user's verdict per
+  option (keep / drop / mix).**
+- **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
+  session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
+  recap is the release valve.
+- **Not pushed yet:** dopamine-loot commit a1e7bd4 (1.4.0 order) and the uncommitted skill-up page, plan.md, STATE.md.
 
 ## The compare page (how it works, for the next session)
 - Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
@@ -73,7 +86,7 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   -f` on the privacy file crashes Git Bash's grep: check patterns one at a time.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
 - Never delete a junction with `rm -rf`. Browser pane: close old tabs when a file won't open.
-- Kit: **wow-addon-kit 0.8.0** (adds `wow-design-rounds`, `wow-mockup-to-addon`); update with
+- Kit: **wow-addon-kit 0.8.1** (adds `wow-design-rounds` with the budget rule, `wow-mockup-to-addon`); update with
   `claude plugin update wow-addon-kit@bempis --scope user` (CLI path in CLAUDE.local.md); restart to load.
 
 **Words the user uses:** treasure chest, ground, harvest window / loot column, the pile (Create All tray).
@@ -83,6 +96,8 @@ every round and pick). Older detail: git log, CHANGELOG.md._
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-14 1.4.0 order revised (professions first); crafting API checks done in game; skill-up Phase 2 rounds 1-2
+  (own module decided); kit 0.8.1 budget rule.
 - 2026-11-14 Crafting phase 3 Polish done (3 beats, Leatherworking punchy, loudness Even).
 - 2026-11-13 Crafting phase 2 second pass (all 8 locked), Smelting + Disenchanting added; kit 0.8.0.
 - 2026-11-12 1.4.0 design: scope, bars, XP, rep, level-up, recap, style guide, crafting phase 1.
