@@ -722,6 +722,14 @@ Professions (from 1.3.0):
    behind the reel): A Fading strip (as round 16 C), B Slim, soft strip (hugs the text and line, soft on all edges), C Two
    strips (one behind the text row, a thin band behind the line, the ground between), D Strip + gold hairline (the style
    guide's hairline along its bottom, fading with it).
+   Round 17 feedback: **no background on the header text**; the animations go **in a bar like the 1.3 skill-ups** ("the
+   clear show that a skill bar was increasing"); redesign professions that don't fit; **parts may reach outside the bar**,
+   like the tools and parts attached to the craft rings. **Round 18** (`FIT18`, `barModule`, `r18`; the 1.3 bar: centered
+   header with the game's text shadow, a dark track with a thin gold border, notches, the next unlock's icon at its end,
+   "N to X" under it; Fishing's water now fills only up to the bobber): A Inside the bar (clipped), B Breaking out (a 6 px
+   bar, the growth full size over it), C On the bar (a plain fill in the profession's color; the growth rides the top
+   edge), D Lively front (a plain fill; its last few points are the growth itself). Seen while checking: Mining's rock
+   band and Skinning's hide span the whole bar, so their progress shows only as the seam or the cut (rework candidates).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

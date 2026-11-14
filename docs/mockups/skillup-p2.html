@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 17, Just a line on a strip</h1>
+  <h1>Skill-up: round 18, back to a skill bar</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 17: B “Just a line” on a fading strip (round 16: no outlines, the shade looked too big); four strips; Fishing redrawn to read better. The page opens on Bright; try Dark too. Rounds 2-16 stay in the code.
+  the line that grows. Round 18: back to the 1.3 skill bar (the clear show that a bar went up): the header with no backing, the animation in the bar, parts may reach outside like the craft rings’ tools. Four ways each gatherer’s current base sits in the bar. The page opens on Bright; try Dark too. Rounds 2-17 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1210,7 +1210,7 @@ function reel(I, y, f, ang) { const rx = I.x0 + 4, ry = y - 2; if (FISHR) { ctx.
   ctx.lineWidth = 1; for (let i = 0; i < 3; i++) { const a2 = ang + i * 2.094; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + Math.cos(a2) * 6.5, ry + Math.sin(a2) * 6.5); ctx.stroke(); }
   ctx.fillStyle = '#8a6a3a'; ctx.beginPath(); ctx.arc(rx + Math.cos(ang) * 6.5, ry + Math.sin(ang) * 6.5, 1.8, 0, 7); ctx.fill(); return { x: rx, y: ry - 6.5 }; }
 function fishCast(p, x, y, L, f, t, I, o) { o = o || {}; const ha = I.hitAge, RD = FISHR;
-  if (RD) { ctx.fillStyle = 'rgba(28,84,140,.9)'; ctx.beginPath(); ctx.roundRect(I.x0 + 12, y + 1, I.x1 - I.x0 - 4, 7, 3.5); ctx.fill(); ctx.strokeStyle = 'rgba(170,225,255,.95)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (let s = 14; s <= I.x1 - I.x0 + 6; s += 3) ctx.lineTo(I.x0 + s, y + 3 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke(); } else {
+  if (RD) { const we = Math.max(14, x + L * f - I.x0 + 4); ctx.fillStyle = 'rgba(28,84,140,.9)'; ctx.beginPath(); ctx.roundRect(I.x0 + 12, y + 1, Math.max(0, we - 12), 7, 3.5); ctx.fill(); ctx.strokeStyle = 'rgba(170,225,255,.95)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (let s = 14; s <= we; s += 3) ctx.lineTo(I.x0 + s, y + 3 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke(); } else {
   ctx.strokeStyle = 'rgba(90,170,230,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let s = 14; s <= I.x1 - I.x0 + 6; s += 3) ctx.lineTo(I.x0 + s, y + 4 + Math.sin(s * .15 + t * 2) * .8); ctx.stroke(); }
   const fx = Math.max(I.x0 + 20, x + L * f) + (o.dx ? o.dx(ha) : 0), hop = !o.noHop && ha >= 0 && ha < .45 ? Math.sin(Math.PI * ha / .45) * 7 : 0, dip = o.dip ? o.dip(ha) : 0, by = y + Math.sin(t * 3) - hop + dip;
   const R = reel(I, y, f, -(I.v - I.lo) * 6 + (o.spin || 0)), slack = o.slack ? o.slack(ha) : 1, vib = o.vib ? o.vib(ha) : 0;
@@ -1528,6 +1528,47 @@ const VIS17 = {
 function r17(K) { return { get name() { return K + '. ' + VIS17[K].name; }, get desc() { return VIS17[K].desc + ' (B “Just a line”; Fishing redrawn to read better in every option: a water band, a thicker line, a bigger bobber.)'; },
   get note() { return 'just a line, ' + VIS17[K].name.toLowerCase() + '.'; }, draw(top) { VISK = VIS17[K]; FISHR = true; cleanModule(top, 'B'); VISK = null; FISHR = false; } }; }
 Object.assign(FAM, { PA: r17('A'), PB: r17('B'), PC: r17('C'), PD: r17('D') });
+
+// ---------- round 18 (2026-11-15): back to a skill bar, like 1.3 ("the clear show that a skill bar was increasing") ----------
+// The header has no backing (the game's text shadow); the bar is its own backing. Like the craft rings' tools, parts may
+// reach outside the bar. Four ways each profession's current base sits in the bar.
+const FIT18 = {
+  A: { name: 'Inside the bar', desc: 'The profession’s growth is the fill, clipped to the bar: nothing leaves the track except the short bursts at each skill-up (chips, splashes, sparks).' },
+  B: { name: 'Breaking out', desc: 'A slimmer bar (6 px) with the growth drawn at full size over it, so its parts reach past the edges: the vine’s leaves, the bobber and its line, falling rock, the cut’s edges. The bar is the frame; the growth is attached to it, like the tools on the craft rings.' },
+  C: { name: 'On the bar', desc: 'A plain fill in the profession’s color inside the bar (the clearest “the bar went up”), and the growth rides along the bar’s top edge as an attachment.' },
+  D: { name: 'Lively front', desc: 'A plain fill in the profession’s color up to the last few points; the front of the fill is the growth itself, reaching out of the bar there, so the action is at the tip and the rest stays clean.' },
+};
+function barModule(top, mode) { const V = baseOf(), cx = W / 2, p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+  const x0 = cx - 128, x1 = cx + 102, ly = top + 34, bh = mode === 'B' ? 6 : 12, ux = cx + 120, L = x1 - x0, done = S.closeAt !== undefined, f = clamp((st.v - lo) / n), tipX = x0 + f * L, G = V.grow || grow;
+  const X = v => x0 + clamp((v - lo) / n) * L, Xi = x => lo + (x - x0) / L * n;
+  const info = { x0, x1, ly, X, Xi, tipX, lo, v: st.v, N, hitAge: st.hitAge, done, f, road: false };
+  strikes(() => ({ x: tipX, y: ly }));
+  if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; payoff(ux, ly); });
+  const payAt = done ? S.closeAt : 99, pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
+  ctx.save(); ctx.globalAlpha = a;
+  // header: no backing, the game's text shadow
+  const font = '700 16px system-ui', w1 = measure(profName + ' ', font), w2 = measure(String(st.shown), font), hx = cx - (w1 + w2) / 2;
+  text(profName, hx, top + 14, font, '#fff'); drawNum('n', String(st.shown), hx + w1, top + 14, 16, p.light, 'left', 'roll');
+  // the bar: dark track, thin border
+  const track = () => { ctx.beginPath(); ctx.roundRect(x0 - 2, ly - bh / 2, L + 4, bh, 3); };
+  track(); ctx.fillStyle = 'rgba(8,8,12,.82)'; ctx.fill();
+  const plain = (end = tipX) => { if (end <= x0) return; const gr = ctx.createLinearGradient(x0, 0, end, 0); gr.addColorStop(0, mix(p.col, '#000000', .35)); gr.addColorStop(1, p.light); ctx.save(); track(); ctx.clip(); ctx.fillStyle = gr; ctx.fillRect(x0 - 2, ly - bh / 2, end - x0 + 2, bh); ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(x0 - 2, ly - bh / 2 + 1, end - x0 + 2, 2); ctx.restore(); };
+  if (mode === 'A') { ctx.save(); track(); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
+  else if (mode === 'B') { ctx.save(); ctx.beginPath(); ctx.rect(x0 - 6, ly - 22, L + 14, 44); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
+  else if (mode === 'C') { plain(); ctx.save(); ctx.translate(0, -bh / 2 - 7); ctx.beginPath(); ctx.rect(x0 - 6, ly - 22, L + 14, 28); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
+  else { const fx0 = Math.max(x0, tipX - 40); plain(fx0); ctx.save(); ctx.beginPath(); ctx.rect(fx0, ly - 22, tipX - fx0 + 14, 44); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
+  for (let j = 1; j < N; j++) { const x = x0 + j / N * L; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x - .5, ly - bh / 2 + 1, 1, bh - 2); }
+  track(); ctx.strokeStyle = 'rgba(255,211,106,.55)'; ctx.lineWidth = 1; ctx.stroke();
+  if (V.over) V.over(p, info);
+  const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
+  if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.save(); track(); ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fill(); ctx.restore(); } }
+  icon(V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux, ly + (V.unlockY ? V.unlockY(info) : 0), 20 + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null);
+  const left = Math.max(0, nx.lv - st.shown); text(lit ? 'Unlocked!' : `${left} to ${nx.cap ? nx.lv : nx.name}`, cx, ly + 22, '600 11px system-ui', '#f0ead8', 'center');
+  ctx.restore();
+  if (S.reaches) reveal(cx, ly + 34, (S.closeAt ?? 99) + .35, '600 13px system-ui', false); }
+function r18(K) { return { get name() { return K + '. ' + FIT18[K].name; }, get desc() { return FIT18[K].desc + ' (The 1.3 bar: header with no backing, a dark track with a thin gold border, the next unlock’s icon at its end, “N to X” under it. The growth is each profession’s current base.)'; },
+  get note() { return FIT18[K].name.toLowerCase() + '.'; }, draw(top) { FISHR = true; barModule(top, K); FISHR = false; } }; }
+Object.assign(FAM, { PA: r18('A'), PB: r18('B'), PC: r18('C'), PD: r18('D') });
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
