@@ -701,6 +701,15 @@ Professions (from 1.3.0):
    Breaks away (reworked: bigger chunks, dust), B Sorting the rubble (stone tumbles off, the ore stays lined up), C
    Shockwave (the band jolts, a wave runs ahead, ore jumps, the unlock icon rattles), D Ore cart (rails laid behind a
    cart filling with ore; it dumps into the icon).
+   Round 14 picks paused (2026-11-15): the user wants to reconsider the frame first. "I liked the old bars because it
+   was nice and clean and a nice quick popup... they should be a nice pass-by": a cleaner, simpler look that still
+   holds the animations. **Finales are per profession**, like the crafting ones (not one general finale); they come in
+   the profession rounds (round 14's unlock add-ons are finales already).
+   **Round 15** (`LAYOUT15`, `cleanModule`, `r15`; the growth is each profession's round 14 A): A The 1.3 banner back (no
+   panel, soft shade, glowing title, bar + next unlock's icon, "6 to Wild Steelbloom" under it), B Just a line (no panel,
+   small name/level and "N to X" over a thin line), C One slim row (26 px, like the Picked-up rows: icon, name, bar,
+   unlock icon; fading row + gold hairline), D The edge is the bar (a small panel whose bottom gold hairline is the
+   progress line; the unlock icon on its corner).
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).

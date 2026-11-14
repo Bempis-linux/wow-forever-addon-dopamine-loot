@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up, per profession: round 14, gatherers</h1>
+  <h1>Skill-up: round 15, a cleaner base</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the locked design, the line that grows, now per profession. Round 14: bolder add-ons (Fishing on rod, reel, taut line and a bite; Skinning on the cut + a stroke per skill-up; Herbalism on the vine) and four Mining bases to compare; the options change with the profession. Crafters come next. Rounds 2-13 stay in the code.
+  the line that grows. Round 15: four cleaner, quicker frames (the 1.3 banner was liked for being clean and a quick pass-by); the growth inside is each profession’s current base. Per-profession finales come in the profession rounds. Rounds 2-14 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1446,6 +1446,55 @@ const VAR14 = {
 function r14(L) { return { get name() { const v = VAR14[profName]; return L + '. ' + (v ? v[L].name : 'gatherers only this round'); }, get desc() { const v = VAR14[profName]; return v ? v[L].desc : 'Round 14 covers the gatherers (Herbalism, Mining, Skinning, Fishing); crafters come next. This shows the locked look.'; },
   get note() { const v = VAR14[profName]; return v ? v[L].name.toLowerCase() + '.' : 'the locked look.'; }, draw(top) { const v = VAR14[profName]; growModule(top, 'plain', v ? v[L] : null); } }; }
 Object.assign(FAM, { PA: r14('A'), PB: r14('B'), PC: r14('C'), PD: r14('D') });
+
+// ---------- round 15 (2026-11-15): a cleaner base. Four frames for the same growth (each profession's current base) ----------
+// The 1.3 banner was liked for being clean and quick: these strip the frame back; the growth and unlocks stay.
+function baseOf() { const v = VAR14[profName]; return v ? v.A : {}; }
+const LAYOUT15 = {
+  A: { name: 'The 1.3 banner back', desc: 'As shipped in 1.3: no panel, a soft shade, the name and level as a glowing title, the bar under it with the next unlock’s icon at its end, and "6 to Wild Steelbloom" under the bar. The profession’s growth replaces the flat fill.',
+    geo(top) { const cx = W / 2; return { x0: cx - 128, x1: cx + 102, ly: top + 34, ux: cx + 118, us: 20 }; },
+    frame(p, g, st, nx, lit, top) { const cx = W / 2; ctx.save(); const sh = ctx.createRadialGradient(cx, top + 34, 10, cx, top + 34, 190); sh.addColorStop(0, 'rgba(0,0,0,.5)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.fillRect(cx - 200, top - 30, 400, 130); ctx.restore();
+      const font = '700 17px system-ui', w1 = measure(profName + ' ', font), w2 = measure(String(st.shown), font), x = cx - (w1 + w2) / 2;
+      text(profName, x, top + 14, font, '#fff', 'left', { glow: p.col }); drawNum('n', String(st.shown), x + w1, top + 14, 17, p.light, 'left', 'roll');
+      const left = Math.max(0, nx.lv - st.shown); text(lit ? 'Unlocked!' : `${left} to ${nx.cap ? nx.lv : nx.name}`, cx, top + 60, '600 11px system-ui', '#f0ead8', 'center'); } },
+  B: { name: 'Just a line', desc: 'No panel and no shade: the name and level sit small over a thin line that grows, "6 to Wild Steelbloom" at its right end, the next unlock’s icon after it. The lightest one; it fades soon after.',
+    geo(top) { const cx = W / 2; return { x0: cx - 120, x1: cx + 104, ly: top + 24, ux: cx + 117, us: 16 }; },
+    frame(p, g, st, nx, lit) { const y = g.ly - 14; const w1 = text(profName, g.x0, y, '600 12px system-ui', p.light); drawNum('n', String(st.shown), g.x0 + w1 + 5, y, 12, '#fff', 'left', 'roll');
+      const left = Math.max(0, nx.lv - st.shown); text(lit ? `${nx.cap ? nx.name + ' rank' : nx.name} unlocked` : `${left} to ${nx.cap ? nx.lv : nx.name}`, g.x1, y, '400 10px system-ui', lit ? '#ffd36a' : '#bfb6a0', 'right'); } },
+  C: { name: 'One slim row', desc: 'One row, 26 px tall, like the Picked-up rows in the loot column: the profession’s icon, the name and level, then the bar with the next unlock’s icon at its end; a fading dark row with the gold hairline under it.',
+    geo(top) { const px = W / 2 - 160; return { x0: px + 132, x1: px + 290, ly: top + 13, ux: px + 306, us: 18, px }; },
+    frame(p, g, st, nx, lit, top, I) { const px = g.px, gr = ctx.createLinearGradient(px, 0, px + 330, 0); gr.addColorStop(0, 'rgba(6,8,12,.88)'); gr.addColorStop(.75, 'rgba(6,8,12,.7)'); gr.addColorStop(1, 'rgba(6,8,12,0)'); ctx.fillStyle = gr; ctx.fillRect(px, top, 330, 26);
+      const hl = ctx.createLinearGradient(px, 0, px + 330, 0); hl.addColorStop(0, 'rgba(255,211,106,.5)'); hl.addColorStop(1, 'rgba(255,211,106,0)'); ctx.fillStyle = hl; ctx.fillRect(px, top + 26, 330, 1);
+      icon(px + 14, top + 13, 20 * (I.iconK || 1), p.made || p.node, 1); const w1 = text(profName, px + 30, top + 17, '600 12px system-ui', p.light); drawNum('n', String(st.shown), px + 30 + w1 + 5, top + 17, 12, '#fff', 'left', 'roll'); } },
+  D: { name: 'The edge is the bar', desc: 'A small dark panel holds the icon, the name and level, and "6 to Wild Steelbloom". Its bottom edge, the gold hairline every panel has, is the progress line: the growth runs along that edge to the next unlock’s icon sitting on its corner.',
+    geo(top) { const pw = 260, px = W / 2 - pw / 2; return { x0: px + 10, x1: px + pw - 24, ly: top + 46, ux: px + pw - 10, us: 20, px, pw }; },
+    frame(p, g, st, nx, lit, top, I) { const px = g.px, pw = g.pw; ctx.fillStyle = 'rgba(6,8,12,.85)'; ctx.beginPath(); ctx.roundRect(px, top, pw, 46, [10, 10, 0, 0]); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,211,106,.28)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px, top + 46); ctx.lineTo(px, top + 10); ctx.arcTo(px, top, px + 10, top, 10); ctx.lineTo(px + pw - 10, top); ctx.arcTo(px + pw, top, px + pw, top + 10, 10); ctx.lineTo(px + pw, top + 36); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.moveTo(g.x0, g.ly); ctx.lineTo(g.x1, g.ly); ctx.stroke();
+      icon(px + 20, top + 20, 22 * (I.iconK || 1), p.made || p.node, 1); const w1 = text(profName, px + 38, top + 16, '600 13px system-ui', p.light); drawNum('n', String(st.shown), px + 38 + w1 + 6, top + 16, 13, '#fff', 'left', 'roll');
+      const left = Math.max(0, nx.lv - st.shown); text(lit ? `${nx.cap ? nx.name + ' rank' : nx.name} unlocked` : `${left} to ${nx.cap ? nx.lv : nx.name}`, px + 38, top + 30, lit ? '600 10px system-ui' : '400 10px system-ui', lit ? '#ffd36a' : '#bfb6a0'); } },
+};
+function cleanModule(top, lay) { const V = baseOf(), Lt = LAYOUT15[lay], g = Lt.geo(top);
+  const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+  const { x0, x1, ly, ux } = g, L = x1 - x0, done = S.closeAt !== undefined, f = clamp((st.v - lo) / n), tipX = x0 + f * L, G = V.grow || grow;
+  const X = v => x0 + clamp((v - lo) / n) * L, Xi = x => lo + (x - x0) / L * n;
+  const info = { x0, x1, ly, X, Xi, tipX, lo, v: st.v, N, hitAge: st.hitAge, done, f, road: false };
+  info.iconK = V.iconK ? V.iconK(info) : 1;
+  strikes(() => ({ x: tipX, y: ly }));
+  if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; payoff(ux, ly); });
+  const payAt = done ? S.closeAt : 99, pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
+  ctx.save(); ctx.globalAlpha = a; Lt.frame(p, g, st, nx, lit, top, info);
+  if (lay !== 'D') { ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); }
+  ctx.save(); ctx.beginPath(); ctx.rect(x0 - 4, ly - 14, L + 12, 28); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore();
+  if (V.over) { V.over(p, info); }
+  const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
+  if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.save(); ctx.strokeStyle = `rgba(255,255,255,${fl})`; ctx.lineWidth = 4; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1, ly); ctx.stroke(); ctx.restore(); } }
+  const uxx = V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux; icon(uxx, ly + (V.unlockY ? V.unlockY(info) : 0), g.us + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null);
+  ctx.restore();
+  if (S.reaches) reveal(W / 2, ly + (lay === 'A' ? 40 : 22), (S.closeAt ?? 99) + .35, '600 13px system-ui', false); }
+function r15(L) { return { get name() { return L + '. ' + LAYOUT15[L].name; }, get desc() { return LAYOUT15[L].desc + ' (The growth is each profession’s current base: the vine, Breaks away, the cut + a stroke, rod and reel.)'; },
+  get note() { return LAYOUT15[L].name.toLowerCase() + '.'; }, draw(top) { cleanModule(top, L); } }; }
+Object.assign(FAM, { PA: r15('A'), PB: r15('B'), PC: r15('C'), PD: r15('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
