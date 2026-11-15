@@ -744,6 +744,14 @@ Professions (from 1.3.0):
    then sags back toward the water; the bobber floats at the fill's front and dips with a splash.
    **Fishing LOCKED** (2026-11-15, round 20): the water bar, D surface, the reel and line. Next: new Mining options and
    one more pass for Herbalism and Skinning in the set bar (pitched first).
+   **Round 21** (`VAR21`, `r21`; `barModule(top, mode, V)`; pitched first, the user swapped Skinning's "Peel back"):
+   Mining (inside): A Breaks away (in the bar), B Ore stacks up (a chunk drops in from above per skill-up, thunk, dust),
+   C The mine shaft (a dark tunnel, beams, warm light; a new beam drops in at the front), D Nuggets fly (a nugget arcs
+   from the front onto a pile by the next unlock's icon). Herbalism (breaks out): A Vine, B Tall grass (blades out of the
+   top, a clump springs up), C A row of flowers (one opens on top per skill-up and stays), D Roots and shoots (the bar is
+   soil; shoots out of the top, roots out of the bottom). Skinning (inside): A The cut + a stroke, B Pegged out (pegs
+   punch in at the front, the hide pulls taut), C Laid down (a cut piece flips down into the bar with a slap, fur and
+   pale sides alternating), D Tanned (pale pink hide cures to tan under a bright sweep).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

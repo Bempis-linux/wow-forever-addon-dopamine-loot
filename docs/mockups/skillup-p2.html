@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 20, Fishing with its reel</h1>
+  <h1>Skill-up: round 21, Mining, Herbalism, Skinning in the bar</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 20: the set header and bar, the fit per profession; Fishing on D (the bright surface over the filled water) with the reel, line and twang from round 14 kept. A-D are the same this round. Opens on Fishing, Bright ground. Rounds 2-19 stay in the code.
+  the line that grows. Round 21: the set header and bar; Fishing locked (round 20). New Mining options (inside the bar) and one more pass for Herbalism (breaking out) and Skinning (inside); A is the current one for Herbalism and Skinning. Opens on Mining, Bright ground. Rounds 2-20 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1538,7 +1538,7 @@ const FIT18 = {
   C: { name: 'On the bar', desc: 'A plain fill in the profession’s color inside the bar (the clearest “the bar went up”), and the growth rides along the bar’s top edge as an attachment.' },
   D: { name: 'Lively front', desc: 'A plain fill in the profession’s color up to the last few points; the front of the fill is the growth itself, reaching out of the bar there, so the action is at the tip and the rest stays clean.' },
 };
-function barModule(top, mode) { const V = baseOf(), cx = W / 2, p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
+function barModule(top, mode, Vo) { const V = Vo || baseOf(), cx = W / 2, p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
   const x0 = cx - 128, x1 = cx + 102, ly = top + 34, bh = mode === 'B' ? 6 : 12, ux = cx + 120, L = x1 - x0, done = S.closeAt !== undefined, f = clamp((st.v - lo) / n), tipX = x0 + f * L, G = V.grow || grow;
   const X = v => x0 + clamp((v - lo) / n) * L, Xi = x => lo + (x - x0) / L * n;
   const info = { x0, x1, ly, X, Xi, tipX, lo, v: st.v, N, hitAge: st.hitAge, done, f, road: false };
@@ -1616,7 +1616,85 @@ Object.assign(FAM, { PA: r19('A'), PB: r19('B'), PC: r19('C'), PD: r19('D') });
 function r20(K) { return { get name() { return K + '. The set bar (same for A-D)'; }, get desc() { return 'The set header and bar, the fit per profession: Herbalism breaks out, Mining and Skinning inside, Fishing a water bar (D: the bright surface over the filled water) with the reel at its start paying out line, the line snapping taut with a twang each skill-up and sagging back, the bobber dipping. A-D are the same this round.'; },
   get note() { return 'the set bar, per profession.'; }, draw(top) { FISHR = true; FISHV = 'D'; barModule(top, FIT19[profName] || 'A'); FISHR = false; } }; }
 Object.assign(FAM, { PA: r20('A'), PB: r20('B'), PC: r20('C'), PD: r20('D') });
-setTimeout(() => { profName = 'Fishing'; if (typeof sync === 'function') { sync(); play(); } }, 0);
+
+// ---------- round 21 (2026-11-15): Fishing locked; new Mining options and one more pass for Herbalism and Skinning, in the set bar ----------
+// Herbalism breaks out (the 6 px bar), Mining and Skinning stay inside; parts may attach outside like Fishing's reel; no tool riding.
+function hitTo(i) { return S.v0 + i + 1; } // the level hit i reaches
+function landed(key, at, fn) { const k = lastHitIdx(); if (k >= 0 && S.age - S.hits[k] - HIT >= at) once(key + k, () => fn(k)); }
+function nugget(x, y, s, col) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x - s, y + s * .3); ctx.lineTo(x - s * .4, y - s * .8); ctx.lineTo(x + s * .7, y - s * .6); ctx.lineTo(x + s, y + s * .4); ctx.lineTo(x + s * .2, y + s * .9); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x - s * .3, y - s * .5, s * .5, s * .3); }
+const ORECOL = ['#c87a3a', '#d8904a', '#b8682e', '#e0a060'];
+const VAR21 = {
+  Mining: {
+    A: { name: 'Breaks away', desc: 'The idea you liked, now in the bar: the bar is rock with the ore seam inside; each skill-up a chunk cracks off the front and falls out of the bar with dust, and the glowing seam shows where the rock was.',
+      grow(p, x, y, L, f, t, I) { VAR14.Mining.A.grow(p, x, y, L, f, t, I); } },
+    B: { name: 'Ore stacks up', desc: 'Each skill-up a chunk of ore drops into the bar from above and lands with a heavy thunk and a puff of dust; the bar fills block by block, chunks of copper-colored ore packed side by side.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; for (let s = 0, i = 0; s < g; s += 8, i++) { nugget(x + s + 4, y + .5 + (i % 2) * .6, 4.6, ORECOL[i % 4]); } },
+      over(p, I) { const k = lastHitIdx(), ha = I.hitAge; if (k < 0) return; const tx = I.X(hitTo(k)) - 4, u = clamp(ha / .22);
+        if (ha >= 0 && u < 1) { ctx.save(); ctx.translate(tx, lerp(I.ly - 22, I.ly, u * u)); ctx.rotate((1 - u) * .8); nugget(0, 0, 5.2, ORECOL[k % 4]); ctx.restore(); }
+        landed('mbl', .22, () => { noise(0, .2, .06, 320, .8, 'bandpass', true); tone(90, 0, .05, .2, 'sine', 60); for (let q = 0; q < 8; q++) spawn({ x: tx + (Math.random() - .5) * 10, y: I.ly - 5, vx: (Math.random() - .5) * 70, vy: -15 - Math.random() * 25, life: .8, size: 2.4, col: 'rgba(180,165,150,.55)' }); }); } },
+    C: { name: 'The mine shaft', desc: 'The bar is a dark tunnel; wooden support beams stand along it and warm light fills the dug part. Each skill-up a new beam drops into place at the front with a thunk and the light spreads up to it.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; ctx.fillStyle = '#120e0b'; ctx.fillRect(I.x0 - 2, y - 6, I.x1 - I.x0 + 4, 12); if (g <= 0) return;
+        const lg = ctx.createLinearGradient(x, 0, x + g + 10, 0); lg.addColorStop(0, 'rgba(255,170,90,.25)'); lg.addColorStop(.85, 'rgba(255,200,120,.65)'); lg.addColorStop(1, 'rgba(255,200,120,0)'); ctx.fillStyle = lg; ctx.fillRect(x, y - 6, g + 10, 12);
+        ctx.fillStyle = 'rgba(60,44,30,.9)'; ctx.fillRect(x, y + 3, g, 3); // the floor
+        const k = lastHitIdx(), bx = k >= 0 ? I.X(hitTo(k)) - 2 : -99; for (let s = 10; s < g - 4; s += 18) { if (Math.abs(x + s - bx) < 9) continue; beam(x + s, y, 0); } } ,
+      over(p, I) { const k = lastHitIdx(); if (k < 0) return; const ha = I.hitAge, bx = I.X(hitTo(k)) - 2, u = clamp(ha / .16); if (ha < 0) return; ctx.save(); ctx.beginPath(); ctx.rect(I.x0 - 2, I.ly - 30, I.x1 - I.x0 + 4, 36); ctx.clip(); beam(bx, I.ly, (1 - u * u) * -22); ctx.restore();
+        landed('msb', .16, () => { tone(150, 0, .05, .16, 'triangle', 95); click(0, .05, 900, 2); }); } },
+    D: { name: 'Nuggets fly', desc: 'The fill is ore in the rock, glinting. Each skill-up a nugget pops out of the front, arcs over the bar and lands with a tink on a small pile growing next to the next unlock’s icon.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; ctx.fillStyle = '#4a443e'; ctx.fillRect(x - 2, y - 6, g + 2, 12); ctx.save(); const ba = ctx.globalAlpha; for (let s = 3, i = 0; s < g; s += 6, i++) { ctx.globalAlpha = ba * (.6 + .4 * Math.abs(Math.sin(t * 2 + i))); nugget(x + s, y + ((i * 5) % 7) - 3, 1.8, ORECOL[i % 4]); } ctx.restore(); },
+      over(p, I) { const px = I.x1 + 18, py = I.ly + 16, k = lastHitIdx(), ha = I.hitAge, base = Math.min(4, Math.floor((S.v0 - I.lo) / 6)), nl = base + (k >= 0 ? k + (ha >= .55 ? 1 : 0) : 0);
+        const spot = j => { const row = j < 3 ? 0 : j < 5 ? 1 : 2, col = j < 3 ? j : j < 5 ? j - 3 : 0; return [px - (row === 0 ? 7 : row === 1 ? 3.5 : 0) + col * 7, py - row * 4.5]; };
+        for (let j = 0; j < Math.min(6, nl); j++) { const s = spot(j); nugget(s[0], s[1], 3.6, ORECOL[j % 4]); }
+        if (k >= 0 && ha >= 0 && ha < .55) { const u = ha / .55, sx = I.X(hitTo(k)), s = spot(Math.min(5, nl)), xx = lerp(sx, s[0], u), yy = lerp(I.ly - 4, s[1], u) - Math.sin(Math.PI * u) * 26; ctx.save(); ctx.translate(xx, yy); ctx.rotate(u * 8); nugget(0, 0, 3.4, ORECOL[(base + k) % 4]); ctx.restore(); }
+        landed('mnl', .55, () => { metal(0, 1700, .02, .3, [1, 2.76], [1, .3]); const s = spot(Math.min(5, nl - 1)); for (let q = 0; q < 4; q++) spawn({ x: s[0], y: s[1], vx: (Math.random() - .5) * 40, vy: -20 - Math.random() * 20, g: 200, life: .4, size: 1.2, col: '#ffd890' }); }); } },
+  },
+  Herbalism: {
+    A: { name: 'Vine', desc: 'As it is: the vine over the slim bar, leaves unfurling behind a bud at the tip.' },
+    B: { name: 'Tall grass', desc: 'The fill is a meadow: grass blades stand up out of the bar and sway. Each skill-up a clump springs up at the front with a rustle.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; ctx.fillStyle = '#2e6a24'; ctx.fillRect(x - 2, y - 3, g + 2, 6); const ha = I.hitAge;
+        for (let s = 1, i = 0; s < g; s += 2.6, i++) { const fresh = clamp((g - s) / 12), spring = fresh < 1 && ha >= 0 && ha < .5 ? eBack(clamp(ha / .35)) : 1, h = (5 + (i * 7) % 9) * (fresh < 1 ? spring * (.4 + .6 * fresh) : 1), sw = Math.sin(t * 2 + i * .7) * 1.4;
+          ctx.strokeStyle = i % 3 ? '#5ac83a' : '#8ae05a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x + s, y + 2); ctx.quadraticCurveTo(x + s + sw * .3, y - h * .5, x + s + sw, y - h); ctx.stroke(); if (i % 7 === 3) { ctx.fillStyle = '#d8c070'; ctx.beginPath(); ctx.ellipse(x + s + sw, y - h - 1.5, 1, 2, 0, 0, 7); ctx.fill(); } }
+        onHits('hgr', () => noise(0, .25, .025, 5000, .6)); } },
+    C: { name: 'A row of flowers', desc: 'A green stem fills the bar; each skill-up a flower opens on top of the bar at the front and stays, so the bar carries a row of blooms up to where you are.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; ctx.fillStyle = '#3fa83a'; ctx.fillRect(x - 2, y - 3, g + 2, 6); ctx.fillStyle = 'rgba(200,255,170,.5)'; ctx.fillRect(x - 2, y - 2, g + 2, 1.2); const k = lastHitIdx(), ha = I.hitAge;
+        const at = []; for (let v = I.lo + 1; v <= S.v0; v++) at.push([I.X(v), 1]); S.hits.forEach((h, i) => { if (i <= k) at.push([I.X(hitTo(i)), i === k ? clamp((ha - .2) / .4) : 1]); });
+        at.forEach(([xx, o], j) => { if (o <= 0 || xx > x + g + 1) return; const sw = Math.sin(t * 1.6 + j) * .6; ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(xx - 3, y - 3); ctx.lineTo(xx - 3 + sw, y - 3 - 5 * o); ctx.stroke(); bud(xx - 3 + sw, y - 10 * Math.min(1, o + .3), o); });
+        landed('hfl', .25, () => { tone(880, 0, .02, .35); tone(1320, .06, .015, .3); }); } },
+    D: { name: 'Roots and shoots', desc: 'The bar is soil; as it fills, shoots push out of its top and roots out of its bottom, breaking out on both sides. Each skill-up a new shoot and root grow at the front.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - 2, y - 3, g + 2, 6); ctx.fillStyle = '#8a6a3a'; for (let s = 2; s < g; s += 5) ctx.fillRect(x + s, y - 1 + (s % 3), 1.4, 1.2);
+        for (let s = 7, i = 0; s < g; s += 11, i++) { const gr = clamp((g - s) / 10), sw = Math.sin(t * 1.8 + i) * .8, h = (7 + (i % 3) * 2) * gr, rl = (5 + (i % 2) * 3) * gr;
+          ctx.strokeStyle = '#4fb83a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x + s, y - 3); ctx.quadraticCurveTo(x + s, y - 3 - h * .6, x + s + sw, y - 3 - h); ctx.stroke(); ctx.fillStyle = '#7ee04a'; ctx.beginPath(); ctx.ellipse(x + s + sw + 2.2 * gr, y - 3 - h * .8, 2.4 * gr, 1.1 * gr, -.4, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x + s + sw - 2.2 * gr, y - 3 - h * .6, 2.2 * gr, 1 * gr, .4, 0, 7); ctx.fill();
+          ctx.strokeStyle = '#d8c090'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + s, y + 3); ctx.quadraticCurveTo(x + s - 1, y + 3 + rl * .6, x + s + (i % 2 ? 2 : -2), y + 3 + rl); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x + s, y + 3 + rl * .4); ctx.quadraticCurveTo(x + s + 2, y + 3 + rl * .6, x + s + 3.5, y + 3 + rl * .8); ctx.stroke(); } } },
+  },
+  Skinning: {
+    A: { name: 'The cut + a stroke', desc: 'As it is: the knife cut along the hide; each skill-up one quick straight slash with a whoosh, the new piece of the cut flashing.', tip: glintTip, grow: skinStroke },
+    B: { name: 'Pegged out', desc: 'The hide is stretched along the bar, held by wooden pegs at its top and bottom edge. Each skill-up a new pair of pegs punches in at the front with a tok, and the loose hide pulls taut to them.',
+      grow(p, x, y, L, f, t, I) { const g = L * f, k = lastHitIdx(), ha = I.hitAge, taut = clamp((ha - .1) / .25); ctx.fillStyle = '#9a6a3e'; ctx.beginPath(); ctx.moveTo(x - 2, y - 5); const pegs = []; for (let v = I.lo + 1; v <= S.v0; v++) pegs.push([I.X(v), 1]); S.hits.forEach((h, i) => { if (i <= k) pegs.push([I.X(hitTo(i)), i === k ? clamp(ha / .12) : 1]); });
+        let px = x - 2; pegs.forEach(([xx]) => { if (xx > x + g + 1) return; ctx.quadraticCurveTo((px + xx) / 2, y - 3.5, xx, y - 5); px = xx; }); ctx.quadraticCurveTo((px + x + g) / 2, y - 3 + (1 - taut) * 1.5, x + g, y - 3.5 + (1 - taut) * 2); ctx.lineTo(x + g, y + 3.5 - (1 - taut) * 2);
+        px = x + g; [...pegs].reverse().forEach(([xx]) => { if (xx > x + g + 1) return; ctx.quadraticCurveTo((px + xx) / 2, y + 3.5, xx, y + 5); px = xx; }); ctx.quadraticCurveTo((px + x) / 2, y + 3.5, x - 2, y + 5); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(232,200,150,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y - 1); ctx.lineTo(x + g, y - 1); ctx.stroke();
+        pegs.forEach(([xx, o]) => { if (xx > x + g + 1) return; const s = 1 + (1 - o) * .8; for (const sy of [-5, 5]) { ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.arc(xx, y + sy, 1.9 * s, 0, 7); ctx.fill(); ctx.fillStyle = '#e8c898'; ctx.beginPath(); ctx.arc(xx - .4, y + sy - .4, .8 * s, 0, 7); ctx.fill(); } });
+        landed('skp', .1, () => { tone(520, 0, .045, .08, 'triangle', 300); click(.02, .04, 1600, 3); }); } },
+    C: { name: 'Laid down', desc: 'Each skill-up a cut piece of hide flips down into the bar from above and lands with a slap, edge to edge with the last; the bar fills with pieces, fur side and pale side alternating.',
+      grow(p, x, y, L, f, t, I) { const k = lastHitIdx(), ha = I.hitAge, ends = []; for (let v = I.lo + 1; v <= S.v0; v++) ends.push(I.X(v)); S.hits.forEach((h, i) => { if (i < k || (i === k && ha >= .22)) ends.push(I.X(hitTo(i))); });
+        let px = x; ends.forEach((xx, j) => { skinPiece(px, xx, y, j); px = xx; }); },
+      over(p, I) { const k = lastHitIdx(), ha = I.hitAge; if (k < 0 || ha < 0 || ha >= .22) return; const xa = I.X(hitTo(k) - 1), xb = I.X(hitTo(k)), u = ha / .22; ctx.save(); ctx.translate(0, lerp(-26, 0, u * u)); ctx.translate((xa + xb) / 2, I.ly); ctx.scale(1, Math.cos((1 - u) * Math.PI)); ctx.translate(-(xa + xb) / 2, -I.ly); skinPiece(xa, xb, I.ly, k + 7); ctx.restore(); },
+      tip(p, x, y, t) { if (t < .22 || t > .5) return; once('sks' + lastHitIdx(), () => { noise(0, .08, .07, 1300, 1, 'bandpass', true); for (let q = 0; q < 5; q++) spawn({ x, y: y - 5, vx: (Math.random() - .5) * 60, vy: -20 - Math.random() * 30, g: 200, life: .5, size: 1.2, col: '#c89a6a' }); }); } },
+    D: { name: 'Tanned', desc: 'Fresh hide is pale pink; each skill-up a bright wave sweeps over the newest stretch and cures it to a rich tan, so the bar shows how much is cured, the newest part still settling into its color.',
+      grow(p, x, y, L, f, t, I) { const g = L * f, k = lastHitIdx(), ha = I.hitAge, xa = k >= 0 ? I.X(hitTo(k) - 1) : x + g, cure = clamp((ha - .1) / 1);
+        ctx.fillStyle = '#8a5a30'; ctx.fillRect(x - 2, y - 6, Math.max(0, xa - x + 2), 12); const gr = ctx.createLinearGradient(0, y - 6, 0, y + 6); gr.addColorStop(0, 'rgba(255,220,180,.25)'); gr.addColorStop(1, 'rgba(0,0,0,.2)'); ctx.fillStyle = gr; ctx.fillRect(x - 2, y - 6, g + 2, 12);
+        if (x + g > xa) { ctx.fillStyle = mix('#e8b0a0', '#8a5a30', cure); ctx.fillRect(xa, y - 6, x + g - xa, 12); if (ha >= 0 && ha < 1.1) { const sx = lerp(xa - 6, x + g + 6, clamp((ha - .1) / .8)); const sg = ctx.createLinearGradient(sx - 8, 0, sx + 8, 0); sg.addColorStop(0, 'rgba(255,240,200,0)'); sg.addColorStop(.5, 'rgba(255,240,200,.85)'); sg.addColorStop(1, 'rgba(255,240,200,0)'); ctx.fillStyle = sg; ctx.fillRect(sx - 8, y - 6, 16, 12); } }
+        ctx.strokeStyle = 'rgba(60,30,10,.25)'; ctx.lineWidth = 1; for (let s = 5; s < g; s += 7) { ctx.beginPath(); ctx.moveTo(x + s, y - 4); ctx.quadraticCurveTo(x + s + 2, y, x + s, y + 4); ctx.stroke(); }
+        landed('skd', .1, () => noise(0, .5, .02, 2200, .7)); } },
+  },
+};
+function beam(x, y, dy) { ctx.fillStyle = '#7a5230'; ctx.fillRect(x - 1.2, y - 6 + dy, 2.4, 12); ctx.fillRect(x - 4, y - 6 + dy, 8, 2); ctx.fillStyle = 'rgba(255,220,160,.35)'; ctx.fillRect(x - 1.2, y - 6 + dy, .8, 12); }
+function skinPiece(xa, xb, y, j) { const fur = j % 2 === 0; ctx.fillStyle = fur ? '#8a5a32' : '#e0c49a'; ctx.beginPath(); ctx.roundRect(xa + .6, y - 5, Math.max(0, xb - xa - 1.2), 10, 3); ctx.fill(); if (fur) { ctx.strokeStyle = 'rgba(200,154,106,.6)'; ctx.lineWidth = 1; for (let s = xa + 3, i = 0; s < xb - 2; s += 3.5, i++) { ctx.beginPath(); ctx.moveTo(s, y - 3 + (i * 3) % 6); ctx.lineTo(s + 1.4, y - 1 + (i * 3) % 6); ctx.stroke(); } } else { ctx.strokeStyle = 'rgba(150,110,70,.35)'; ctx.beginPath(); ctx.moveTo(xa + 2, y); ctx.lineTo(xb - 2, y); ctx.stroke(); } }
+function r21(K) { const v = () => VAR21[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'gatherers only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'Round 21 covers Mining, Herbalism and Skinning; crafters come next.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r21('A'), PB: r21('B'), PC: r21('C'), PD: r21('D') });
+setTimeout(() => { profName = 'Mining'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
