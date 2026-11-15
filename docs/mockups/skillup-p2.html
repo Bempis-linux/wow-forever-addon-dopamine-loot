@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 31, Skinning add-ons</h1>
+  <h1>Skill-up: round 32, Skinning finales</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 31: Skinning: A Fur flies stays; three new add-ons on top (each with its finale: try “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-30 stay in the code.
+  the line that grows. Round 32: Skinning is locked (the cut + Fur flies); four finales for when its bar fills (opens on “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-31 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2029,6 +2029,41 @@ function r31(K) { const v = () => VAR31[profName]; return { get name() { return 
   get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
 Object.assign(FAM, { PA: r31('A'), PB: r31('B'), PC: r31('C'), PD: r31('D') });
+// ---------- round 32 (2026-11-15): Skinning LOCKED as A, the cut + a stroke + Fur flies; four finales for when the bar fills ----------
+const skBase = { tip: glintTip, grow: skinStroke };
+function tuft(x, y, rot, s, c, a = 1) { ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(0, 0, s * 1.8, s * .8, 0, 0, 7); ctx.fill(); ctx.restore(); }
+const VAR32 = { Skinning: {
+  A: Object.assign({}, skBase, { name: 'Fur vortex', finAt: 1, desc: 'Skinning as locked (the cut + a stroke + Fur flies). Reaching the next beasts: fur lifts off the whole cut and swirls round in a tightening spiral, faster and faster, with a rising whoosh, until it all spins into the beasts’ icon.',
+    over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, ux = I.x1 + 18;
+      for (let q = 0; q < 44; q++) { const sx = lerp(I.x0, I.x1, skHash(q + .5)), u = clamp((ts - skHash(q + 7) * .25) / .75); if (u <= 0 || u >= 1) continue; const e = Math.pow(u, 1.6), rad = (6 + 10 * skHash(q + 5)) * Math.sin(Math.PI * Math.min(1, u * 1.2)), an = skHash(q + 3) * 6.283 + u * 18, bx = lerp(sx, ux, e);
+        tuft(bx + Math.cos(an) * rad, I.ly - 4 * (1 - e) + Math.sin(an) * rad * .7, an * 2, 1.6 + skHash(q) * 1.2, FUR[q % 3], clamp(u * 6)); }
+      once('skvx', () => { noise(0, 1, .035, 900, .6); tone(180, 0, .025, .95, 'sine', 760); }); } }),
+  B: Object.assign({}, skBase, { name: 'Big reveal', finAt: .8, desc: 'Skinning as locked. Reaching the next beasts: their icon looms up big and faint behind the whole module, like the beast stepping out of the dark, then drops down into its spot at the bar’s end with a heavy thump and a ring of fur.',
+    over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, ux = I.x1 + 18, cx = (I.x0 + I.x1) / 2;
+      if (ts < .8) { const a = ts < .45 ? clamp(ts / .25) * .4 : lerp(.4, 1, (ts - .45) / .35), u = clamp((ts - .45) / .35), e = u * u, s = ts < .45 ? 80 + ts * 16 : lerp(87, 20, e); ctx.save(); ctx.globalAlpha *= a; icon(lerp(cx, ux, e), lerp(I.ly - 8, I.ly, e), s, S.nx.emo, 1, null); ctx.restore(); }
+      once('skbr', () => { tone(110, 0, .02, .5, 'sine', 160); noise(0, .45, .015, 400, .6, 'lowpass'); });
+      if (ts >= .8) once('skbr2', () => { tone(60, 0, .12, .3, 'sine', 35); noise(0, .15, .07, 300, .8, 'lowpass'); for (let q = 0; q < 20; q++) { const an = q / 20 * 6.283; spawn({ x: ux, y: I.ly, vx: Math.cos(an) * 90, vy: Math.sin(an) * 60, g: 40, life: .7, size: 1.8, shape: 'leaf', vr: 8, col: FUR[q % 3] }); } }); } }),
+  C: Object.assign({}, skBase, { name: 'Beast roars', finAt: .85, desc: 'Skinning as locked. Reaching the next beasts: their icon shakes and lets out a roar, a low growl with three sound waves rolling out of it back along the bar; the bar rattles and the fur on it is blown back to the left; then the icon lights.',
+    shake(I) { if (!I.done) return [0, 0]; const ts = S.age - S.closeAt; return ts > .1 && ts < .75 ? [Math.sin(ts * 95) * 1.6 * (1 - ts / .75), 0] : [0, 0]; },
+    unlockX(I) { if (!I.done) return I.x1 + 15; const ts = S.age - S.closeAt; return I.x1 + 15 + (ts < .75 ? Math.sin(ts * 140) * 2 : 0); },
+    unlockY(I) { if (!I.done) return 0; const ts = S.age - S.closeAt; return ts < .75 ? Math.cos(ts * 120) * 1.5 : 0; },
+    over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, ux = I.x1 + 18;
+      for (let j = 0; j < 3; j++) { const u = clamp((ts - .08 - j * .14) / .6); if (u <= 0 || u >= 1) continue; ctx.save(); ctx.strokeStyle = `rgba(255,236,200,${.85 * (1 - u)})`; ctx.lineWidth = 2.4 - u; ctx.beginPath(); ctx.arc(ux, I.ly, 14 + u * 220, Math.PI - .32 + u * .25, Math.PI + .32 - u * .25); ctx.stroke(); ctx.restore(); }
+      once('skro', () => { noise(.05, .75, .09, 260, .7, 'lowpass'); tone(95, .05, .05, .7, 'sawtooth', 60); tone(140, .05, .02, .6, 'sawtooth', 90);
+        for (let q = 0; q < 34; q++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: I.ly - 4, vx: -90 - Math.random() * 120, vy: -15 - Math.random() * 35, g: 30, life: 1, size: 1.8 + Math.random(), shape: 'leaf', vr: (Math.random() - .5) * 8, col: FUR[q % 3] }); }); } }),
+  D: Object.assign({}, skBase, { name: 'Freeze-frame', finAt: .8, desc: 'Skinning as locked. Reaching the next beasts: one last slash bursts fur off the whole cut, and on the hit everything stops dead for a beat, an impact frame (the bar flashes white, a hard crack, then silence) with the fur hanging in the air; then it all zips into the beasts’ icon at once with a whoosh.',
+    over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, ux = I.x1 + 18;
+      once('skf0', () => { click(0, .1, 2200, 2); tone(70, 0, .1, .25, 'sine', 40); for (let q = 0; q < 46; q++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: I.ly - 3, vx: (Math.random() - .5) * 120, vy: -60 - Math.random() * 80, g: 45, life: 2, size: 1.8 + Math.random(), shape: 'leaf', vr: (Math.random() - .5) * 8, col: FUR[q % 3], skf: 1 }); });
+      if (ts >= .12) once('skf1', () => P.forEach(q => { if (q.skf) { q.fz = [q.vx, q.vy, q.g, q.vr]; q.vx = q.vy = q.g = q.vr = 0; } }));
+      if (ts >= .12 && ts < .5) { const a = ts < .2 ? 1 : .55, fa = 1 - clamp((ts - .12) / .12); ctx.save(); ctx.strokeStyle = `rgba(255,255,255,${.95 * a})`; ctx.lineWidth = 2; ctx.strokeRect(I.x0 - 6, I.ly - 10, I.x1 - I.x0 + 12, 20); ctx.fillStyle = `rgba(255,255,255,${.9 * fa})`; ctx.fillRect(I.x0 - 2, I.ly - 6, I.x1 - I.x0 + 4, 12); ctx.restore(); }
+      if (ts >= .5) once('skf2', () => { noise(0, .3, .05, 2400, .6); tone(300, 0, .025, .3, 'sine', 900); P.forEach(q => { if (q.skf) { q.vx = (ux - q.x) / .28; q.vy = (I.ly - q.y) / .28; q.g = 0; q.vr = 12; q.life = q.age + .28; } }); }); } }),
+} };
+function r32(K) { const v = () => VAR32[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r32('A'), PB: r32('B'), PC: r32('C'), PD: r32('D') });
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

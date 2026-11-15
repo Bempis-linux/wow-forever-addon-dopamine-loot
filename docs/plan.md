@@ -811,6 +811,12 @@ Professions (from 1.3.0):
    jolts the module down and back with a deep thunk, a dust ring, a flash where the blade went in; finale: three heavy
    chops along the bar), D + Streak (skill-ups in a row: x2, x3... at the cut, warmer and bigger, the new cut glowing,
    a climbing note; finale: the streak flies into the icon).
+   Round 31 pick: **Skinning LOCKED as A, the cut + a stroke + Fur flies** (no other add-on). **Round 32** (`VAR32`,
+   `r32`; finales): A Fur vortex (fur lifts off the cut and spins into the icon as a swarm, rising whoosh), B Big reveal
+   (the next beasts' icon looms big and faint over the module, then drops into its slot with a thump and a fur ring),
+   C Beast roars (the icon shakes and growls, three sound-wave arcs roll back along the bar, the bar rattles, fur blown
+   left), D Freeze-frame (a last burst of fur, an impact frame: the bar flashes white and everything stops a beat, then
+   the fur zips into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
