@@ -687,3 +687,41 @@ function r68(K) { const M = POP68[K], A = ACT67.D; return { get name() { return 
       over: (p, I) => { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil60(I, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); onHits('a68', i => anvClank60(i, fat45(i)));
         if (!I.surf) return; if (I.tipX > I.x0 + 20) bubbles68(I, I.surf, M); S.hits.forEach((h, i) => A.draw(I, i, hT53(i))); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
 Object.assign(FAM, { PA: r68('A'), PB: r68('B'), PC: r68('C'), PD: r68('D') });
+
+// Round 69 finales (FIN69, r69), moved out 2026-11-15; V69 and helpers stay.
+const FIN69 = {
+  A: { name: 'Eruption', finAt: 1.45, desc: 'The head starts boiling hard (bubbles crowding faster and faster, the surface heaving up), then erupts: a fountain of magma shoots up out of the head and arcs into the unlock’s icon, which fills with glowing magma and lights.',
+    lift: (I, ts) => { const hx = I.tipX - 4, a = ts < .6 ? 4 * (ts / .6) * (1 + .15 * Math.sin(ts * 40)) : ts < .8 ? 4 * (1 - (ts - .6) / .2) : 0; return x => a * Math.exp(-Math.pow((x - hx) / 7, 2)); },
+    fin(I, ts, sf) { const hx = I.tipX - 4, ux = ux69(I);
+      if (ts < .6) for (let k = 0; k < 7; k++) { const per = .5 - ts * .5, ph = ((ts + k * .13) % per) / per, x = hx - rnd53(k * 7 + Math.floor((ts + k * .13) / per)) * 18, r = 1 + ph * 2.6; if (ph < .85) dome68(x, sf(x), r); }
+      if (ts >= .6) { once('fA0', () => { rumble69(); splat66(hx, I.ly - 8, 10, true); }); for (let j = 0; j < 14; j++) { const u = clamp((ts - .6) * 2.2 - j * .05); if (u <= 0 || u >= 1) continue; glob67(lerp(hx, ux, u), lerp(I.ly - 8, I.ly - 2, u) - Math.sin(Math.PI * u) * 24, 2.6 - j * .1); } }
+      if (ts >= 1.05) { once('fA1', () => { splat66(ux, I.ly - 8, 6, true); tone(110, 0, .02, .5, 'sine', null, .02); }); } },
+    after: (I, ts) => iconFill69(I, clamp((ts - 1.05) / .4)) },
+  B: { name: 'The anvil’s big shower', finAt: 1.6, desc: 'The anvil flashes three times in quick succession (three clanks climbing), then throws one enormous shower of sparks: it rains along the whole bar, the whole surface fizzing with ripples where they land, and the last sparks hit the icon, which catches and blazes.',
+    lift: (I, ts) => { const P = []; for (let q = 0; q < 40; q++) { const d = .55 + .25 + q / 39 * .35, age = ts - d; if (age >= 0 && age < .8) P.push([lerp(I.x0 + 6, I.tipX - 2, rnd53(q * 5 + 77)), age, .3]); } return ripple66(P); },
+    anvilFlash: ts => [0, .2, .4].reduce((m, t0) => Math.max(m, ts >= t0 && ts < t0 + .16 ? 1 - (ts - t0) / .16 : 0), 0),
+    fin(I, ts) { const ax = I.x0 - 26, ux = ux69(I); [0, .2, .4].forEach((t0, n) => { if (ts >= t0) once('fB' + n, () => { anvClank60(n * 2, 1.1); anvilBurst67(I, 6 + n * 3); }); });
+      if (ts >= .55) for (let q = 0; q < 48; q++) { const toIcon = q >= 40, d = toIcon ? .5 + (q - 40) * .02 : .25 + q / 39 * .35, u = (ts - .55) / d; if (u < 0 || u >= 1) continue; const lx = toIcon ? ux + (q - 44) * 2 : lerp(I.x0 + 6, I.tipX - 2, rnd53(q * 5 + 77)), hh = 8 + rnd53(q + 3) * 6, P = w => [lerp(ax + 4, lx, w), lerp(I.ly - 7, toIcon ? I.ly - 4 : I.ly - 5, w) - Math.sin(Math.PI * w) * hh], [x, y] = P(u), [x2, y2] = P(Math.max(0, u - .07));
+        ctx.save(); ctx.strokeStyle = q % 3 ? '#ffb040' : '#fff0c0'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x, y); ctx.stroke(); ctx.restore(); }
+      if (ts >= 1.05) once('fB3', () => { rumble69(.6); }); },
+    after: (I, ts) => blaze69(ux69(I), I.ly, ts >= 1.05 ? Math.min(1, (ts - 1.05) / .2) * (ts > 1.5 ? Math.max(0, 1 - (ts - 1.5) / .5) : 1) : 0) },
+  C: { name: 'The great wave', finAt: 1.5, desc: 'The whole bar of magma swells into one big wave that rolls from the anvil to the end, building as it goes, and crashes over the icon in a burst of droplets, leaving it glowing with magma.',
+    lift: (I, ts) => { if (ts > 1.15) return () => 0; const u = clamp(ts / 1.05), wx = lerp(I.x0, I.tipX + 10, u * u * (3 - 2 * u)), a = 2.5 + 6.5 * u; return x => a * Math.exp(-Math.pow((x - wx) / (8 + u * 4), 2)) + a * .35 * Math.exp(-Math.pow((x - wx + 16) / 10, 2)); },
+    fin(I, ts, sf) { once('fC0', () => { noise(0, 1.1, .03, 260, .5, 'lowpass'); tone(65, 0, .02, 1.1, 'sine', 98, .3); }); if (ts < 1.05) { const u = clamp(ts / 1.05), wx = lerp(I.x0, I.tipX + 10, u * u * (3 - 2 * u)); if (wx < I.tipX) glow58(wx, sf(wx), 8 + u * 8, .5 + u * .3); } if (ts >= 1.05) once('fC1', () => { const ux = ux69(I); for (let q = 0; q < 16; q++) spawn({ x: ux - 6 + Math.random() * 10, y: I.ly - 6, vx: (Math.random() - .3) * 70, vy: -50 - Math.random() * 50, g: 300, life: .55, size: 1.2 + Math.random() * .8, col: Math.random() > .4 ? '#ff9a3a' : '#ffd890' }); tone(98, 0, .025, .5, 'sine', null, .02); }); },
+    after: (I, ts) => { iconFill69(I, ts >= 1.05 ? Math.min(.75, (ts - 1.05) / .15) : 0); if (ts >= 1.05) glow58(ux69(I), I.ly, 16, .6 * Math.max(0, 1 - (ts - 1.05) / .8)); } },
+  D: { name: 'Forged in the magma', finAt: 1.75, desc: 'The icon hops back and dips into the head of the magma, which boils up around it; then it rises back out glowing, dripping molten drops, settles back in its place and shines.',
+    pos: (I, ts) => { const ux = ux69(I), hx = I.tipX - 8; if (ts < .4) { const u = eOut(ts / .4); return [lerp(ux, hx, u), -Math.sin(Math.PI * u) * 8 + u * 4]; } if (ts < .95) return [hx, 4 + 2 * Math.sin((ts - .4) * 12) * .3]; if (ts < 1.4) { const u = eOut((ts - .95) / .45); return [lerp(hx, ux, u), lerp(4, 0, u) - Math.sin(Math.PI * u) * 9]; } return [ux, 0]; },
+    lift: (I, ts) => { const hx = I.tipX - 8, a = ts >= .38 && ts < 1.1 ? 2.5 * Math.sin(Math.PI * Math.min(1, (ts - .38) / .7)) : 0; return x => a * Math.exp(-Math.pow((x - hx) / 9, 2)); },
+    fin(I, ts, sf) { const hx = I.tipX - 8; if (ts >= .4) once('fD0', () => { splat66(hx, I.ly - 6, 8, true); tone(82, 0, .03, .5, 'sine', null, .02); });
+      if (ts >= .4 && ts < 1) for (let k = 0; k < 5; k++) { const ph = ((ts * 3 + k * .2) % 1), x = hx - 9 + k * 4.5; if (ph < .8) dome68(x, sf(x), 1 + ph * 2.2); }
+      if (ts >= .95 && ts < 1.6) once('fD' + Math.floor(ts / .09), () => { const [x, dy] = FIN69.D.pos(I, ts); spawn({ x: x + (Math.random() - .5) * 12, y: I.ly + dy + 9, vy: 10, g: 220, life: .5, size: 1.2, col: '#ff9a3a' }); }); },
+    after: (I, ts) => { const [x, dy] = FIN69.D.pos(I, ts), heat = ts >= .5 && ts < 1.75 ? Math.min(1, (ts - .5) / .3) : 0; if (heat > 0) { glow58(x, I.ly + dy, 16, .55 * heat); ctx.save(); ctx.globalAlpha *= .45 * heat; ctx.fillStyle = '#ff9a3a'; ctx.beginPath(); ctx.roundRect(x - 11, I.ly + dy - 11, 22, 22, 3); ctx.fill(); ctx.restore(); }
+      if (ts >= .4 && ts < 1) { const sf = I.surf, top = sf(x); ctx.save(); const g = ctx.createLinearGradient(0, top, 0, I.ly + 14); g.addColorStop(0, '#ffe08a'); g.addColorStop(.5, '#ff8424'); g.addColorStop(1, '#8a1c06'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - 13, I.ly + 14); for (let xx = x - 13; xx <= x + 13; xx += 2) ctx.lineTo(xx, sf(xx)); ctx.lineTo(x + 13, I.ly + 14); ctx.closePath(); ctx.fill(); ctx.restore(); } } },
+};
+function r69(K) { const F = FIN69[K], V = V69(F); return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'Blacksmithing as picked (the anvil, depth-band magma, Film burst bubbles, Sparks into the magma). Reaching the next unlock: ' + F.desc + ' (Pick “Reaching the next unlock” to see it; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'finale: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
+Object.assign(FAM, { PA: r69('A'), PB: r69('B'), PC: r69('C'), PD: r69('D') });

@@ -1084,6 +1084,12 @@ Professions (from 1.3.0):
    + clanks, then one huge shower along the whole bar, ripples everywhere, the last sparks set the icon blazing), **C. The
    great wave** (the magma swells into one wave rolling from the anvil to the end, crashing over the icon in droplets), **D.
    Forged in the magma** (the icon hops into the head, the magma boils up around it, it rises out glowing and dripping).
+   Round 69 → none; four new, one where **the magma drains**. Round 70: **A. The drain** (the level sinks and tilts, a glowing
+   stream spills from the end into the icon and fills it; the channel lies empty a breath, then fresh magma rushes back from
+   the anvil), **B. Crust and crack** (the bar crusts over dark, cracks open in a chain anvil to end with light bursting
+   through, the crust shatters into chips, the last crack blazes the icon), **C. Fire across the surface** (a spark from the
+   anvil lights the surface; flames race along the bar, the icon bursts into flame), **D. Overflow** (the level swells past
+   the bar’s top, spills over the lower edge in stretching drips, the overflow fills the icon, the level settles).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
