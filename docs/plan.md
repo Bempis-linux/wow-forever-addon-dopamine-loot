@@ -1090,6 +1090,13 @@ Professions (from 1.3.0):
    through, the crust shatters into chips, the last crack blazes the icon), **C. Fire across the surface** (a spark from the
    anvil lights the surface; flames race along the bar, the icon bursts into flame), **D. Overflow** (the level swells past
    the bar’s top, spills over the lower edge in stretching drips, the overflow fills the icon, the level settles).
+   Round 70 → **C kept as A**; three more ideas, one where the molten **hardens into ingots that get shipped off** (crate or
+   cart). Round 71: **A. Fire across the surface**, **B. Ingots, shipped** (seams split the bar into seven moulds, each cools
+   to an iron ingot; a crate drops in by the icon; the ingots hop in one by one from the end with clinks; the crate slides
+   off, the icon lights; fresh magma flows back from the anvil), **C. Ember swarm** (embers lift off the whole surface and
+   stream as a swirling ribbon into the icon), **D. The blade rises** (a sword rises out of the magma along the bar,
+   dripping, a shine runs its edge, it slides into the icon). Old gatherer rounds 20, 28, 33, 40 (nothing else used them)
+   moved to the archive file for page space.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

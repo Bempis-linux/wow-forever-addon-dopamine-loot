@@ -725,3 +725,92 @@ function r69(K) { const F = FIN69[K], V = V69(F); return { get name() { return K
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
 Object.assign(FAM, { PA: r69('A'), PB: r69('B'), PC: r69('C'), PD: r69('D') });
+
+// Rounds 20, 28, 33, 40 (gatherer rounds nothing else uses), moved out 2026-11-15 (page size limit).
+// ---------- round 20 (2026-11-15): Fishing picked D (a bright surface over the filled water) + the reel and line kept ----------
+function r20(K) { return { get name() { return K + '. The set bar (same for A-D)'; }, get desc() { return 'The set header and bar, the fit per profession: Herbalism breaks out, Mining and Skinning inside, Fishing a water bar (D: the bright surface over the filled water) with the reel at its start paying out line, the line snapping taut with a twang each skill-up and sagging back, the bobber dipping. A-D are the same this round.'; },
+  get note() { return 'the set bar, per profession.'; }, draw(top) { FISHR = true; FISHV = 'D'; barModule(top, FIT19[profName] || 'A'); FISHR = false; } }; }
+Object.assign(FAM, { PA: r20('A'), PB: r20('B'), PC: r20('C'), PD: r20('D') });
+
+// ---------- round 28 (2026-11-15): Herbalism, new add-ons to the Vine (round 27's picking designs out); the gust back ----------
+const VAR28 = { Herbalism: { A: VAR26.Herbalism.A,
+  B: { name: '+ The gust', desc: 'Each skill-up a gust of wind blows through: streaks race along the bar, the whole vine leans over and springs back, and a few leaves tear loose and tumble away to the right. Reaching the next herb, a big gust swirls a handful of leaves into its icon.',
+    grow(p, x, y, L, f, t, I) { const ha = I.hitAge, lean = ha >= 0 && ha < 1 ? Math.sin(Math.PI * clamp(ha / .5)) * .45 * (1 - clamp((ha - .5) / .5)) + (ha > .5 ? Math.sin((ha - .5) * 14) * .08 * (1 - ha) : 0) : 0;
+      ctx.save(); ctx.transform(1, 0, -lean, 1, lean * y, 0); grow(p, x, y, L, f, t); ctx.restore(); },
+    over(p, I) { const ha = I.hitAge; if (ha >= 0 && ha < .6) { const u = ha / .6; ctx.save(); ctx.strokeStyle = `rgba(235,250,235,${.7 * (1 - u)})`; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; for (let j = 0; j < 5; j++) { const yy = I.ly - 14 + j * 6, xs = lerp(I.x0 - 30, I.x1 + 10, u) - j * 18; ctx.beginPath(); ctx.moveTo(xs, yy); ctx.lineTo(xs + 26, yy - 1); ctx.stroke(); } ctx.restore(); }
+      onHits('hgu', () => { noise(0, .6, .04, 1200, .5); noise(.05, .5, .025, 3200, .6); for (let q = 0; q < 6; q++) spawn({ x: lerp(I.x0, I.tipX, Math.random()), y: I.ly - 5, vx: 90 + Math.random() * 80, vy: -30 - Math.random() * 30, g: 60, life: 1.1, size: 2, shape: 'leaf', vr: 8, col: q % 2 ? '#7ee04a' : '#5ac83a' }); });
+      if (I.done) once('hgud', () => { noise(0, .9, .05, 1000, .5); for (let q = 0; q < 18; q++) { const sx = lerp(I.x0, I.x1, Math.random()); spawn({ x: sx, y: I.ly - 6, vx: (I.x1 + 18 - sx) / .9, vy: -40 - Math.random() * 30, g: 90, life: .9, size: 2.2, shape: 'leaf', vr: 10, col: q % 2 ? '#7ee04a' : '#9ff08a' }); } }); } },
+  C: { name: '+ Tracking the herb', desc: 'Like Find Herbs on the minimap: the next herb’s icon carries a yellow tracking dot that grows brighter as you close in, and each skill-up it pings, two yellow rings sweeping out from it like radar with a soft ping. Reaching it, a big ping and the herb is found, glowing yellow.',
+    over(p, I) { const ux = I.x1 + 18, uy = I.ly, ha = I.hitAge; ctx.save(); const glow = .35 + .65 * I.f; ctx.fillStyle = `rgba(255,220,60,${glow})`; ctx.shadowColor = '#ffd84a'; ctx.shadowBlur = 6 + 8 * I.f; ctx.beginPath(); ctx.arc(ux + 11, uy - 11, 2.2 + I.f * 1.2, 0, 7); ctx.fill(); ctx.restore();
+      const ring = (t0, big) => { for (const d of [0, .18]) { const u = clamp((t0 - d) / (big ? 1 : .7)); if (u <= 0 || u >= 1) continue; ctx.save(); ctx.strokeStyle = `rgba(255,220,60,${(1 - u) * .9})`; ctx.lineWidth = big ? 2.4 : 1.6; ctx.beginPath(); ctx.arc(ux, uy, 10 + u * (big ? 60 : 34), 0, 7); ctx.stroke(); ctx.restore(); } };
+      if (ha >= 0 && !I.done) ring(ha, false); if (I.done) ring(S.age - S.closeAt, true);
+      onHits('htr', () => { tone(1568, 0, .025, .5); tone(1568, .18, .015, .4); }); if (I.done) once('htrd', () => { tone(1568, 0, .03, .7); tone(2093, .1, .025, .8); }); } },
+  D: { name: '+ Dew run', desc: 'Each skill-up a drop of dew slides along the whole vine from its start to the tip, every leaf dipping as it passes, and drips off the bud with a plink and a tiny splash. Reaching the next herb, a run of drops chases each other along and splash into its icon.',
+    grow(p, x, y, L, f, t, I) { const ha = I.hitAge, dx = ha >= 0 && ha < .8 && !I.done ? lerp(x, I.tipX, eOut(ha / .8)) : -999; ctx.save(); grow(p, x, y, L, f, t); ctx.restore();
+      if (dx > -999) { const dip = s => Math.exp(-((s - dx) * (s - dx)) / 60); ctx.save(); ctx.fillStyle = 'rgba(40,90,30,.0)'; ctx.restore(); ctx.save(); ctx.strokeStyle = 'rgba(200,240,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); for (let s = x; s <= dx; s += 3) ctx.lineTo(s, y - 3 + dip(s) * 2); ctx.stroke(); ctx.restore(); } },
+    over(p, I) { const ha = I.hitAge; const drop = (x, y, s) => { ctx.save(); ctx.fillStyle = 'rgba(210,240,255,.95)'; ctx.shadowColor = '#bfe8ff'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(x, y - 3.4 * s); ctx.quadraticCurveTo(x + 2.6 * s, y, x, y + 1.6 * s); ctx.quadraticCurveTo(x - 2.6 * s, y, x, y - 3.4 * s); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x - .7 * s, y - .6 * s, .6 * s, 0, 7); ctx.fill(); ctx.restore(); };
+      if (!I.done && ha >= 0 && ha < 1.1) { if (ha < .8) drop(lerp(I.x0, I.tipX, eOut(ha / .8)), I.ly - 5, 1.3); else { const u = (ha - .8) / .3; drop(I.tipX + 2, I.ly - 4 + u * u * 14, 1.2 * (1 - u * .3)); } }
+      landed('hdw', 1.05, () => { tone(1800, 0, .03, .12, 'sine', 900); for (let q = 0; q < 5; q++) spawn({ x: I.tipX + 2, y: I.ly + 8, vx: (Math.random() - .5) * 40, vy: -20 - Math.random() * 20, g: 300, life: .4, size: 1, col: '#d8f0ff' }); });
+      if (I.done) { const ts = S.age - S.closeAt; for (let j = 0; j < 4; j++) { const u = clamp((ts - j * .12) / .55); if (u > 0 && u < 1) drop(lerp(I.x0, I.x1 + 18, eOut(u)), I.ly - 5 - Math.sin(Math.PI * u) * (j % 2 ? 4 : 0), 1.2); } once('hdwd', () => { for (let j = 0; j < 4; j++) tone(1600 + j * 200, .5 + j * .12, .025, .14, 'sine', 900); }); } } },
+} };
+function r28(K) { const v = () => VAR28[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r28('A'), PB: r28('B'), PC: r28('C'), PD: r28('D') });
+setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } }, 0);
+setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
+// ---------- round 33 (2026-11-15): Skinning finales again, no fur (round 32 all read alike: hide and fur effects) ----------
+// V.after(p, info): drawn after the unlock icon (over it).
+const VAR33 = { Skinning: {
+  A: Object.assign({}, skBase, { name: 'Trap snaps', finAt: .6, desc: 'Skinning as locked (the cut + a stroke + Fur flies). Reaching the next beasts: two straight jaws swing up out of the bar’s end and clap shut on the beasts’ icon like a trap, with a hard metal clack and a jolt; they hold a beat, swing back open and fade, and the icon is lit.',
+    shake(I) { if (!I.done) return [0, 0]; const t = S.age - S.closeAt - .32; return t >= 0 && t < .3 ? [0, 2.5 * Math.exp(-t * 12) * Math.cos(t * 55)] : [0, 0]; },
+    after(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, hx = I.x1 - 6, ux = I.x1 + 18; if (ts > 1) return;
+      const open = ts < .2 ? 1.25 * eOut(ts / .2) : ts < .32 ? lerp(1.25, .1, Math.pow((ts - .2) / .12, 2)) : ts < .55 ? .1 : lerp(.1, 1.3, eOut(clamp((ts - .55) / .3))), a = clamp(ts / .1) * clamp((1 - ts) / .2);
+      const jaw = sgn => { ctx.save(); ctx.translate(hx, I.ly); ctx.rotate(-sgn * open); ctx.fillStyle = 'rgba(20,18,16,.95)'; ctx.beginPath(); ctx.roundRect(0, sgn > 0 ? -14 : 6, 44, 8, 2.5); ctx.fill(); ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 1.3; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(2, sgn > 0 ? -13 : 7, 40, 1.5); ctx.restore(); };
+      ctx.save(); ctx.globalAlpha *= a; jaw(1); jaw(-1); ctx.fillStyle = '#ffd36a'; ctx.beginPath(); ctx.arc(hx, I.ly, 2.5, 0, 7); ctx.fill(); ctx.restore();
+      once('sktr0', () => { noise(.02, .18, .02, 1500, 1); });
+      if (ts >= .32) once('sktr1', () => { metal(0, 420, .09, .5, [1, 2.4, 3.9], [1, .5, .25]); click(0, .12, 2600, 2); tone(70, 0, .08, .2, 'sine', 40); spawn({ x: ux, y: I.ly, size: 10, shape: 'ring', grow: 26, life: .3, col: '#fff' }); }); } }),
+  B: Object.assign({}, skBase, { name: 'Claw rake', finAt: .4, desc: 'Skinning as locked. Reaching the next beasts: the beast strikes back, three glowing gold claw marks rake across the whole module at once in a single swipe with a tearing hiss, and the icon lights where they end; the marks fade slowly.',
+    after(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt; if (ts > 1.4) return; const u = eOut(clamp(ts / .18)), a = 1 - clamp((ts - .5) / .9);
+      for (let j = 0; j < 3; j++) { const xa = I.x0 + 30 + j * 16, ya = I.ly - 30 + j * 3, xb = I.x1 + 24 + j * 4, yb = I.ly + 12 + j * 8, xe = lerp(xa, xb, u), ye = lerp(ya, yb, u), mx = (xa + xe) / 2, my = (ya + ye) / 2 - 10;
+        ctx.save(); ctx.globalAlpha *= a; ctx.lineCap = 'round'; ctx.shadowColor = '#ffb030'; ctx.shadowBlur = 8; ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.moveTo(xa, ya); ctx.quadraticCurveTo(mx, my, xe, ye); ctx.stroke(); ctx.shadowBlur = 0; ctx.strokeStyle = '#fff8e0'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
+      once('skcl', () => { noise(0, .22, .09, 3200, .5); noise(.04, .3, .05, 1200, .7); tone(500, 0, .03, .2, 'sawtooth', 160); }); } }),
+  C: Object.assign({}, skBase, { name: 'Target lock', finAt: .6, desc: 'Skinning as locked. Reaching the next beasts: a hunter’s reticle (a ring with four ticks) slides in from the bar’s start, turning as it goes, closes on the beasts’ icon and locks with a crisp click, snapping tight and turning gold; the icon lights.',
+    after(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, ux = I.x1 + 18; if (ts > 1.3) return; const u = clamp(ts / .45), e = eOut(u), locked = ts >= .45, k = locked ? eBack(clamp((ts - .45) / .15)) : 0;
+      const x = lerp(I.x0, ux, e), r = locked ? lerp(15, 13, k) : lerp(22, 15, e), rot = (1 - e) * 1.6, col = locked ? '#ffd36a' : '#f0ead8', a = clamp(ts / .1) * (1 - clamp((ts - .9) / .4));
+      ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, I.ly); ctx.rotate(rot); ctx.strokeStyle = col; ctx.lineWidth = locked ? 2 : 1.4; if (locked) { ctx.shadowColor = '#ffd36a'; ctx.shadowBlur = 6; }
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.stroke(); for (let q = 0; q < 4; q++) { const an = q * Math.PI / 2; ctx.beginPath(); ctx.moveTo(Math.cos(an) * (r - 4), Math.sin(an) * (r - 4)); ctx.lineTo(Math.cos(an) * (r + 5), Math.sin(an) * (r + 5)); ctx.stroke(); } ctx.restore();
+      once('sktg0', () => tone(880, 0, .012, .4, 'sine', 1320));
+      if (locked) once('sktg1', () => { click(0, .1, 3800, 4); tone(1760, 0, .03, .12); spawn({ x: ux, y: I.ly, size: 13, shape: 'ring', grow: 16, life: .3, col: '#ffd36a' }); }); } }),
+  D: Object.assign({}, skBase, { name: 'Rank refill', finAt: .9, desc: 'Skinning as locked. Reaching the next beasts: the bar’s notches light up one by one in a fast run of ticks; then the bar drains in a blink and refills in gold from end to end with a rising note, as if the skill moved up a tier, and the icon lights.',
+    over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, L = I.x1 - I.x0, N = Math.max(4, I.N);
+      if (ts < .5) for (let j = 1; j < N; j++) { const tj = j / N * .4; if (ts < tj) continue; const x = I.x0 + j / N * L, a = ts > .4 ? 1 - (ts - .4) / .1 : 1; ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = '#fff8d8'; ctx.shadowColor = '#ffd36a'; ctx.shadowBlur = 6; ctx.fillRect(x - 1, I.ly - 7, 2, 14); ctx.restore(); once('skrt' + j, () => click(0, .035, 2600 + j * 120, 5)); }
+      if (ts >= .4) { const dr = clamp((ts - .4) / .1), fl = clamp((ts - .55) / .3), a = 1 - clamp((ts - 1.6) / .6); ctx.save(); ctx.globalAlpha *= a;
+        ctx.fillStyle = 'rgba(8,8,12,.95)'; ctx.fillRect(I.x1 + 1 - (L + 2) * dr, I.ly - 5, (L + 2) * dr, 10);
+        if (fl > 0) { const w = (L + 2) * eOut(fl), g = ctx.createLinearGradient(I.x0, 0, I.x1, 0); g.addColorStop(0, '#9a6a10'); g.addColorStop(1, '#ffe08a'); ctx.fillStyle = g; ctx.fillRect(I.x0 - 1, I.ly - 5, w, 10); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(I.x0 - 1, I.ly - 4, w, 2); ctx.fillStyle = '#fff'; ctx.fillRect(I.x0 - 1 + w - 2, I.ly - 5, 2, 10); }
+        ctx.restore(); once('skrd', () => tone(330, 0, .03, .1, 'triangle', 120)); if (ts >= .55) once('skrf', () => { tone(330, 0, .03, .35, 'triangle', 990); noise(0, .3, .015, 3000, .6); }); } } }),
+} };
+function r33(K) { const v = () => VAR33[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r33('A'), PB: r33('B'), PC: r33('C'), PD: r33('D') });
+// ---------- round 40 (2026-11-15): Fishing skill-up sound = the natural plop (39 B); its splash, four ways ----------
+const plop40 = () => { noise(0, .09, .06, 500, .9, 'lowpass'); tone(170, 0, .035, .12, 'sine', 85); };
+const SPL40 = {
+  A: () => noise(.03, .25, .02, 2200, .6), // as round 39: a flat hiss of spray
+  B: () => { noise(.02, .14, .014, 2600, .7); [.13, .2, .26, .34, .45].forEach((t, k) => { const f = 2400 + skHash(k + S.age) * 1800; tone(f, t, .012 - k * .0015, .05, 'sine', f * .6); }); }, // droplets: a short spray, then droplets pattering back down (tiny falling plinks)
+  C: () => { noise(.02, .12, .016, 1800, .8); for (let k = 0; k < 5; k++) { const t = .06 + k * .055 + skHash(k + S.age) * .03, f = 900 + skHash(k + 7 + S.age) * 700; tone(f, t, .01, .06, 'sine', f * 1.8); } }, // bubbly: a soft splash, then little bubbles popping up (short rising blips)
+  D: () => { noise(.02, .12, .03, 3200, .6); noise(.06, .2, .028, 1500, .6); noise(.12, .3, .022, 650, .7, 'lowpass'); }, // fuller: a three-layer sploosh that darkens as it settles
+};
+const SPLNAME40 = { A: 'Spray hiss (as now)', B: 'Droplets falling back', C: 'Bubbles', D: 'A fuller sploosh' };
+const SPLDESC40 = { A: 'the round 39 splash, for comparison: a flat hiss of spray.', B: 'a short spray, then a few droplets pattering back down onto the water, tiny falling plinks.', C: 'a soft splash, then little bubbles popping up from where the bobber went under, short rising blips.', D: 'a bigger three-layer splash, bright at first and darkening as the water settles; no notes.' };
+function fish40(K) { const s = swell38('A'); return { name: SPLNAME40[K], tex: TEX38.B, snd: i => { plop40(); SPL40[K](); }, pre: s.pre, over: s.over,
+  desc: 'Fishing as picked: the swell, Depth bands, the soft low rush and the natural plop. Its splash: ' + SPLDESC40[K] }; }
+const VAR40 = { Fishing: { A: fish40('A'), B: fish40('B'), C: fish40('C'), D: fish40('D') } };
+function r40(K) { return { get name() { return K + '. ' + (VAR40[profName] ? VAR40[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR40[profName] ? VAR40[profName][K].desc + ' (Sound on; try “Five in a row”.)' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return VAR40[profName] ? VAR40[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing; VAR39.Fishing = VAR40.Fishing; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; } } }; }
+Object.assign(FAM, { PA: r40('A'), PB: r40('B'), PC: r40('C'), PD: r40('D') });
