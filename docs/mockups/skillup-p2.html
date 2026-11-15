@@ -1079,7 +1079,7 @@ const FAM = {
     note: 'at the unlock, the growth is drawn into the icon and dresses it.', draw(top) { growModule(top, 'unlock'); } },
 };
 // round 11: the grows-along-the-line module with its add-on (mode: plain, tip, road, unlock)
-function payoff(x, y) { [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(x, y); spawn({ x, y, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); }
+function payoff(x, y) { if (profName === 'Blacksmithing') { drum46(98, 0, .03); tone(147, .02, .014, .9, 'sine', null, .05); tone(220, .04, .006, .7, 'sine', null, .06); } else [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d) d.unlock(x, y); spawn({ x, y, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); }
 function growModule(top, mode, V) { V = V || {};
   const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
   const road = mode === 'road' || !!V.road, fin = mode === 'unlock', x0 = px + 48, x1 = px + pw - (road ? 16 : 32), L = x1 - x0, ly = py + 37, done = S.closeAt !== undefined, ux = px + pw - 17, f = clamp((st.v - lo) / n);

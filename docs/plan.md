@@ -1123,6 +1123,8 @@ Professions (from 1.3.0):
    and snap between seven wobbling blobs, each firms into an ingot, then cools), **C. Crust and shrink** (the bar skins over
    dark, seams crack open glowing, each piece shrinks as it cools into an ingot, the gap glow fading), **D. Rise from the
    depths** (glowing ingots rise one by one out of the magma in no set order, dripping, while its level sinks to empty).
+   The unlock “ding” (the shared payoff’s bright four-note arpeggio) was annoying: for Blacksmithing it is now a soft low
+   thump with a warm low hum (other professions unchanged; the real sound comes in the sound step).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
