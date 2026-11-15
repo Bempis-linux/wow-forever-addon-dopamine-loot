@@ -823,6 +823,12 @@ Professions (from 1.3.0):
    rake across the whole module in one swipe), C Target lock (a reticle slides from the bar's start, closes on the icon,
    locks gold with a click), D Rank refill (the notches light one by one in ticks, the bar drains in a blink and refills
    in gold, a rising note).
+   Round 33 feedback: mix C Target lock with D Rank refill, but instead of the refill **the hide gets chopped up** (at
+   the notches). **Round 34** (`VAR34`, `r34`, `retic`, `reticRun`, `chopPieces`, `chopGrow`): A Lock, then chop (the
+   reticle locks on the icon, then the hide is chopped notch by notch, pieces drop away, the bar left empty), B Chop,
+   then lock (pieces hop up and fly into the icon, the reticle locks as the last goes in), C The reticle chops (it steps
+   notch to notch, locking on each, and the hide is chopped there; ends locked on the icon), D Chop + gold refill
+   (pieces drop away, the empty bar refills gold while the reticle locks).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
