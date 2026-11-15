@@ -971,6 +971,12 @@ Professions (from 1.3.0):
    they press together, a sheen runs along the denser pattern), **C. Drawn out** (the steel stretches past its new mark,
    thinning, a bright streak, then springs back and settles), **D. Polished edge** (dark rough iron fill; a bright grinding
    point runs along the newest part leaving mirror steel, sparks fly off backwards out of the bar, a glint at the end).
+   Round 53 → **none; four new ideas** (the user). Round 54 (pitched first): **A. The blade** (the bar a sword blade
+   tapering to a point; each skill-up lengthens it, a glint slides to the point and sparkles), **B. Ringing steel** (a steel
+   rod that hums and shivers along its length on each skill-up, a soft tuning-fork tone), **C. Iron filings** (packed
+   filings; each skill-up a stream swirls in from around the bar as if by a magnet, packs on with a shiver, a few stand up at
+   the front), **D. Gold inlay** (dark steel; each skill-up engraves a gold line further, curls above and below, a bright
+   point leads, the new end gleams).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
