@@ -1031,6 +1031,13 @@ Professions (from 1.3.0):
    cooled rock with glowing veins; a heat pulse runs through them, the front cracks open further, chips fall).
    The pane loads the page as one snapshot (a data: URL), so a separate .js beside it doesn't load: all live code stays
    inline; unused rounds go to `skillup-p2-old-rounds.js`.
+   Round 61 → **the anvil designs are nice** (to iterate on later: Lingering sparks + Chain flare / Ember pile / The anvil
+   heats up). First **the magma's look itself, before its animations**: still not liked, and the bar showed behind the
+   waves; it should be open at the top like Fishing's. Round 62 (barModule mode `M`: border on the sides and bottom only,
+   the wavy surface is the bar's top edge, dark cooled lava ahead of the fill; a skill-up only eases the fill on): **A. Flow
+   streaks** (round 61's texture, as the reference), **B. Depth bands** (soft heat layers, pale yellow under the surface to
+   deep red at the bottom, edges swaying), **C. Marbled** (molten orange with long bright and dark swirls drifting), **D.
+   Painted** (like the game's lava textures: flat warm orange, big soft yellow highlights and dark red shadows drifting).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

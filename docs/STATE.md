@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up gains: **all four gatherers DONE** (rounds 29-52); **Blacksmithing round 61 shown (8 options: sparks add-ons 1-4 on the picked Lingering sparks + clank; magma reworks 5-8), waiting on the picks; the pane loads the page as one data: snapshot, so keep all live code inline; echo = mainly no hammer (magma, sparks, anvil OK); the page must stay under the pane’s 512 KiB limit (old rounds go to skillup-p2-old-rounds.js)**; then the rest of the **crafters, one at a
+_Last checkpoint: 2026-11-15, skill-up gains: **all four gatherers DONE** (rounds 29-52); **Blacksmithing round 62 shown (the magma LOOK only, open-top bar mode M like Fishing; sparks add-ons from round 61 parked for later), waiting on the pick; the pane loads the page as one data: snapshot, so keep all live code inline; echo = mainly no hammer (magma, sparks, anvil OK); the page must stay under the pane’s 512 KiB limit (old rounds go to skillup-p2-old-rounds.js)**; then the rest of the **crafters, one at a
 time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
 2026-11-12": every round and pick, newest at the end of "2. Skill-up gains"). Older detail: git log._
 
@@ -40,7 +40,7 @@ time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `d
 - Options are the `FAM` slots `PA`-`PD`, set by `Object.assign(FAM, {PA: rNN('A'), ...})`; the last assignment
   wins. Each `rNN(K)` returns `{name, desc, note, draw(top)}`, and draw routes the other professions to their
   done looks. The latest is `r52`.
-- `barModule(top, mode, V)`: modes `A` inside the bar, `B` breaks out (6 px), `F` the Fishing water.
+- `barModule(top, mode, V)`: modes `A` inside the bar, `B` breaks out (6 px), `F` the Fishing water, `M` open-top (sides + bottom border; the growth draws the whole bar). Slots `PA`-`PH` (keys 1-8); unassigned slots hide.
 - Hooks on V:
   - `grow`, `over`, `after` (drawn over the icon)
   - `tip`, `unlockX`, `unlockY`, `iconPulse`, `shake(info) -> [dx, dy]`
