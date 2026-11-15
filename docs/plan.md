@@ -910,6 +910,10 @@ Professions (from 1.3.0):
    tick; woody chop taps climbing), B Blade ring (a soft swish + the knife's gentle bell ring; bell chop taps, a two-bell
    chord), C Hunter's drum (a low frame-drum tap; the chops roll on the drum, one deep hit to end), D Low marimba (one low
    mallet note + soft swish; mallet chops climbing, a low chord).
+   Round 46 feedback: **the user prefers Skinning's original sounds** (the swishy strike, the stroke whoosh, the finale
+   chop clicks and the reticle tones). Kept as they were; for the long-session rule only the step-down applies (full for
+   the first two in a row, then quieter, floor .5) plus a slight pitch variation, not a new timbre. **Skinning DONE.**
+   Next: Mining.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
