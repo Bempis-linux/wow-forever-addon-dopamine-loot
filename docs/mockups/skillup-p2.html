@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 50, Mining finales</h1>
+  <h1>Skill-up: round 51, Mining finale: chain + ore shower</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast; four finales for when its bar fills (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast; its finale mixes the chain reaction with the ore shower, four ways (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2692,6 +2692,38 @@ function r50(K) { return { get name() { return K + '. ' + (profName === 'Mining'
   draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR50.Mining[K]); } finally { S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r50('A'), PB: r50('B'), PC: r50('C'), PD: r50('D') });
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
+// ---------- round 51 (2026-11-15): Mining finale = round 50 A Chain reaction mixed with D Ore shower, four ways ----------
+const flash51 = (I, x, t, s) => { if (t < 0 || t > .15) return; const r = s * (1 + t * 4), g = ctx.createRadialGradient(x, I.ly, 0, x, I.ly, r); g.addColorStop(0, `rgba(255,250,220,${1 - t / .15})`); g.addColorStop(1, 'rgba(255,170,60,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, I.ly, r, 0, 7); ctx.fill(); };
+const boom51 = (I, x, big, v = 1) => { thump48(0, (big ? 1.3 : .8) * v); spawn({ x, y: I.ly, size: big ? 8 : 5, shape: 'ring', grow: big ? 30 : 18, life: .3, col: '#ffd8a0' }); chunks50(x, I.ly, big ? 12 : 7, big ? 120 : 90, 40); for (let q = 0; q < 3; q++) spawn({ x: x + (Math.random() - .5) * 8, y: I.ly - 2, vx: (Math.random() - .5) * 20, vy: -12 - Math.random() * 10, life: .8, size: 3.5, col: 'rgba(170,150,130,.5)' }); };
+const hop51 = (xa, xb, ya, yb, u, h) => [lerp(xa, xb, u), lerp(ya, yb, u) - Math.sin(Math.PI * u) * h];
+const nug51 = (x, y, r, j) => { ctx.save(); ctx.translate(x, y); ctx.rotate(r); nugget(0, 0, 2.8, ORECOL[j % 4]); ctx.restore(); };
+// a nugget thrown from xa at t0 landing on the bar top at xb after d, a little bounce, then rolling to the icon; returns false when done
+function ore51(I, ts, t0, xa, xb, d, h, j, key) { const top = I.ly - 8.5, ux = I.x1 + 18, t = ts - t0; if (t < 0) return; let x, y;
+  if (t < d) [x, y] = hop51(xa, xb, I.ly, top, t / d, h); else if (t < d + .16) { once(key + 'l' + j, () => clink47(j, 0, .5)); [x, y] = hop51(xb, xb + 4, top, top, (t - d) / .16, 4); }
+  else { const w = clamp((t - d - .16) / .35); if (w >= 1) { once(key + 'i' + j, () => { if (j % 3 === 0) tone(1568 * semi(PENT42[j % 6]), 0, .005, .12, 'sine', null, .002); }); return; } x = lerp(xb + 4, ux - 3, w * w); y = top; }
+  nug51(x, y, t * 8, j); }
+const MIX51 = {
+  A: { name: 'Every blast throws ore', finAt: 1.2, desc: 'The chain of blasts runs down the bar, and every blast throws a few ore nuggets up out of it; they rain back onto the bar ahead with clinks and little bounces and roll along into the icon, which the last blast bursts open.',
+    fin(p, I, ts) { const ux = I.x1 + 18; for (let k = 0; k < 5; k++) { const x = k === 4 ? ux : lerp(I.x0 + 20, I.x1 - 10, k / 3), tk = k * .12; flash51(I, x, ts - tk, k === 4 ? 16 : 10); if (ts >= tk) once('ma' + k, () => boom51(I, x, k === 4));
+        if (k < 4) for (let q = 0; q < 3; q++) { const j = k * 3 + q; ore51(I, ts, tk, x, Math.min(ux - 8, x + 14 + q * 9), .36, 20 + q * 6, j, 'ma'); } } } },
+  B: { name: 'Chain, then the shower', finAt: 1.6, desc: 'The chain of blasts runs down the bar first; at the end one bigger blast throws the whole fountain of ore nuggets high, and they rain back down onto the bar with clinks and bounces and roll into the icon.',
+    fin(p, I, ts) { for (let k = 0; k < 4; k++) { const x = lerp(I.x0 + 20, I.x1 - 30, k / 3), tk = k * .1; flash51(I, x, ts - tk, 10); if (ts >= tk) once('mbc' + k, () => boom51(I, x, false, .8)); } flash51(I, I.x1 - 4, ts - .42, 15); if (ts >= .42) FIN50.D.fin(p, I, ts - .42); } },
+  C: { name: 'The shower sets off the chain', finAt: 1.15, desc: 'One blast at the bar’s start throws the ore up first; the nuggets come down one after another further and further along the bar, and each one that lands sets off a blast there, so the chain runs down the bar on the falling ore; the last nugget lands on the icon and bursts it open.',
+    fin(p, I, ts) { const ux = I.x1 + 18; flash51(I, I.x0 + 6, ts, 12); once('mcs', () => boom51(I, I.x0 + 6, false)); for (let k = 0; k < 5; k++) { const xb = k === 4 ? ux : lerp(I.x0 + 40, I.x1 - 10, k / 3), d = .3 + k * .14, u = ts / d;
+        if (u < 1) { const [x, y] = hop51(I.x0 + 6, xb, I.ly, I.ly - 3, u, 36 + k * 4); nug51(x, y, ts * 8, k); } else { flash51(I, xb, ts - d, k === 4 ? 16 : 10); once('mcl' + k, () => { boom51(I, xb, k === 4); clink47(k, 0, .6); }); } } } },
+  D: { name: 'The chain juggles the ore', finAt: 1.25, desc: 'A first blast at the bar’s start throws a bundle of ore nuggets up; each time they come down, the next blast in the chain throws them on again, so the ore is juggled down the bar hop by hop, a note climbing each hop, and the last blast throws them into the icon.',
+    fin(p, I, ts) { const ux = I.x1 + 18, hx = k => k >= 5 ? ux : lerp(I.x0 + 6, I.x1 - 10, k / 4), hd = .22;
+      for (let k = 0; k <= 5; k++) { const tk = k * hd; flash51(I, hx(k), ts - tk, k === 5 ? 16 : 10); if (ts >= tk) once('mdj' + k, () => { boom51(I, hx(k), k === 5, .8); if (k > 0) clink47(k * 2, 0, .7); }); }
+      const k = Math.floor(ts / hd); if (k < 5) { const u = (ts - k * hd) / hd; for (let q = 0; q < 4; q++) { const [x, y] = hop51(hx(k) + q * 2 - 3, hx(k + 1) + q * 2 - 3, I.ly - 2, I.ly - 2, u, 22 + q * 3); nug51(x, y - q, ts * 8 + q, q); } } } },
+};
+function fin51(K) { const f = MIX51[K]; return Object.assign({}, BL, { name: f.name, finAt: f.finAt, shake: I => { if (!I.done) return BL.shake(I); const ts = S.age - S.closeAt; return [0, Math.sin(ts * 55) * 1.4 * Math.max(0, 1 - ts / f.finAt)]; },
+  over(p, I) { if (!I.done) return BL.over(p, I); f.fin(p, I, S.age - S.closeAt); } }); }
+const VAR51 = { Mining: { A: fin51('A'), B: fin51('B'), C: fin51('C'), D: fin51('D') } };
+function r51(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? MIX51[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? 'Mining as picked (the Blast). Reaching the next ore: ' + MIX51[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Mining’s finale. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? MIX51[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR51.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r51('A'), PB: r51('B'), PC: r51('C'), PD: r51('D') });
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();

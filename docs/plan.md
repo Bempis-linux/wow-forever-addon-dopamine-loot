@@ -946,6 +946,11 @@ Professions (from 1.3.0):
    shockwave ring, a hard jolt, debris rains down, the icon revealed in the dust), C Breakthrough (the last blast breaks
    through at the end and warm gold rays pour out around the icon, a warm rising chord), D Ore shower (a fountain of ore
    nuggets rains onto the bar with clinks and bounces, then rolls into the icon).
+   Round 50 feedback: mix A Chain reaction with D Ore shower. **Round 51** (`MIX51`, `fin51`, `ore51`, `boom51`): A Every
+   blast throws ore (the chain runs; each blast throws nuggets that land ahead, bounce, roll into the icon), B Chain, then
+   the shower (the chain first, then one bigger blast throws the whole fountain), C The shower sets off the chain (one blast
+   at the start throws the ore; each nugget landing further along sets off a blast there; the last lands on the icon),
+   D The chain juggles the ore (a bundle of nuggets is thrown on from blast to blast down the bar, the last into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
