@@ -840,6 +840,9 @@ Professions (from 1.3.0):
    34 (not sucked into the reticle). **Round 36** (`VAR36`, `fin36(turn)`): the reticle locks, fast chops (.07 s) drop
    the pieces away, a note climbs per chop, the reticle tightens a step per chop; A turns 90 degrees in steps, B turns
    smoothly, C snaps the whole 90 on the last chop, D steps with an overshoot (ratchet).
+   Round 36 pick: **A, turning 90 degrees in steps. Skinning DONE**: the cut + a stroke + Fur flies; finale: the reticle
+   slides in and locks on the icon, fast chops (.07 s) drop the hide away notch by notch with a climbing note, the reticle
+   tightens and turns a step per chop (90 degrees in all), the icon lights after the last. Next: Mining.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
