@@ -1172,3 +1172,31 @@ function r79(K) { const B = r77('C'), S9 = SND79[K];
     get note() { return profName === 'Blacksmithing' ? 'finale sound: ' + S9.name.toLowerCase() + '.' : 'the set bar.'; },
     draw(top) { window.FINSND78 = () => S9.play(); try { B.draw(top); } finally { window.FINSND78 = null; } } }; }
 Object.assign(FAM, { PA: r79('A'), PB: r79('B'), PC: r79('C'), PD: r79('D') });
+
+// Round 81 (SET81, r81, pop81), moved out 2026-11-15; PS81 is re-declared by round 82.
+let PS81 = null;
+function pop81(t = 0, k = 1) { if (!on()) return; const T = ac().currentTime + t, B = bus79(.35, 1.2, 2.6); vox79(B, T, 'sine', 170 * k, 70 * k, .42, .4); vox79(B, T, 'triangle', 130 * k, 80 * k, .18, .2); nz79(B, T, .12, .4, 'bandpass', 1100, 400, 'hit', .9); }
+const SET81 = {
+  A: { name: 'Ting + boom', desc: 'As round 80 D: soft footstep scuffs, a dull thud on the grab, and when the icon lights the firing-pin ting and the punchy boom.', ps: null, fin: () => { ting80(); boom80(.13); } },
+  B: { name: 'Scamper + pop', desc: 'Light, quick wooden pitter-patter footsteps (two soft notes, left-right), a little “hup” as the peon hoists the crate, an airy whoosh as it dashes off, and a rounder, bouncier pop with a tiny ting when the icon lights: cheeky rather than epic.',
+    ps: { step: (i, fast) => mallet((i % 2 ? 392 : 330) * (fast ? 1.06 : 1), 0, .006), grab: () => { tone(170, 0, .02, .1, 'triangle', 230, .005); noise(0, .08, .012, 500, .8, 'lowpass'); }, dash: () => noise(0, .3, .016, 1400, .8, 'bandpass') },
+    fin: () => { ting80(); pop81(.1); } },
+  C: { name: 'Rattling crate', desc: 'Footsteps, and once the crate is up the ingots rattle and clatter inside it with every step (wooden and metal knocks, getting fainter as it runs off); a solid wooden thunk on the grab; the ting + punchy boom when the icon lights.',
+    ps: { step: (i, fast) => { noise(0, .03, .008, 600, .7, 'lowpass', true); if (fast) { noise(0, .04, .02, 1300, 2, 'bandpass', true); tone(520 * semi(PENT42[i % 5]), .01, .004, .05, 'triangle', null, .001); } }, grab: () => { drum46(130, 0, .03); noise(0, .06, .02, 900, 1, 'bandpass', true); }, dash: () => {} },
+    fin: () => { ting80(); boom80(.13); } },
+  D: { name: 'Drum steps into the boom', desc: 'The footsteps are little drum hits that climb in pitch and quicken as the peon runs off, a drum roll building, and it lands on the punchy boom (no ting) when the icon lights: a rhythmic build into one big hit.',
+    ps: { step: (i, fast) => drum46(fast ? 110 * semi((i % 8) * 1.5) : 98, 0, fast ? .016 + (i % 8) * .003 : .01), grab: () => drum46(82, 0, .03), dash: () => {} },
+    fin: () => boom80() },
+};
+function r81(K) { const B = r80('D'), Z = SET81[K];
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? Z.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+    get desc() { return profName === 'Blacksmithing' ? 'The finale as locked, with the peon running off with the crate. Its sounds: ' + Z.desc + ' (Sound on; pick “Reaching the next unlock”.)' : 'One profession at a time: this round is Blacksmithing’s finale sound. Others show their current look.'; },
+    get note() { return profName === 'Blacksmithing' ? 'peon sounds: ' + Z.name.toLowerCase() + '.' : 'the set bar.'; },
+    draw(top) { const p0 = SND80.D.play; SND80.D.play = Z.fin; PS81 = Z.ps; window.PS81 = Z.ps; try { B.draw(top); } finally { SND80.D.play = p0; PS81 = null; window.PS81 = null; } } }; }
+Object.assign(FAM, { PA: r81('A'), PB: r81('B'), PC: r81('C'), PD: r81('D') });
+
+// Round 80 sounds A-C and its slot assignment, moved out 2026-11-15 (D, the peon, stays).
+  A: { name: 'Punchy boom', desc: 'Round 79 A as is: a tight kick that punches and drops, a saturated mid thump, a short crunch, a medium reverb.', play: () => boom80() },
+  B: { name: 'Pin ting + boom', desc: 'A tiny, bright, dry “ting”, like a firing pin being struck, and a beat later the punchy boom goes off.', play: () => { ting80(); boom80(.13); } },
+  C: { name: 'Last strike + boom', desc: 'The last metal being forged: one short, damped anvil clang with a bit of grit (not a bell), and right behind it the punchy boom.', play: () => { clang80(); boom80(.16); } },
+Object.assign(FAM, { PA: r80('A'), PB: r80('B'), PC: r80('C'), PD: r80('D') });

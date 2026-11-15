@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 81, Blacksmithing finale: the peon’s sounds</h1>
+  <h1>Skill-up: round 82, Blacksmithing finale: the peon’s sounds (no boom)</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2919,9 +2919,6 @@ const PEON80 = (I, tsx) => { const ux = ux69(I), gy = I.ly + 9, inT = 1.85, grab
   if (tsx < grab) once('pr' + Math.floor(tsx / .1), () => window.PS81 ? PS81.step(Math.floor(tsx / .1), false) : noise(0, .04, .007, 600, .7, 'lowpass', true)); if (tsx >= grab) once('pg', () => window.PS81 ? PS81.grab() : (drum46(110, 0, .02), noise(0, .1, .012, 900, .8, 'lowpass'))); if (tsx >= off) once('po', () => window.PS81 && PS81.dash && PS81.dash());
   return { carried: tsx >= grab }; };
 const SND80 = {
-  A: { name: 'Punchy boom', desc: 'Round 79 A as is: a tight kick that punches and drops, a saturated mid thump, a short crunch, a medium reverb.', play: () => boom80() },
-  B: { name: 'Pin ting + boom', desc: 'A tiny, bright, dry “ting”, like a firing pin being struck, and a beat later the punchy boom goes off.', play: () => { ting80(); boom80(.13); } },
-  C: { name: 'Last strike + boom', desc: 'The last metal being forged: one short, damped anvil clang with a bit of grit (not a bell), and right behind it the punchy boom.', play: () => { clang80(); boom80(.16); } },
   D: { name: 'Peon runs off with it', peon: true, desc: 'Just for fun, with the pin ting + boom: as the lid drops, a little peon runs in from the right, hoists the crate over its head and runs off with it, kicking up dust; then the icon lights.', play: () => { ting80(); boom80(.13); } },
 };
 function r80(K) { const S0 = SND80[K], base = r77('C');
@@ -2931,28 +2928,34 @@ function r80(K) { const S0 = SND80[K], base = r77('C');
     draw(top) { window.FINSND78 = S0.play; const a0 = INGOTS72.after, c0 = crSt72;
       if (S0.peon && profName === 'Blacksmithing') { INGOTS72.after = (I, tsx) => { if (tsx < 1.85) return a0(I, tsx); const p = PEON80(I, tsx); if (!p || !p.carried) { const C = c0(I, Math.min(tsx, 2.2)); crate72(C.cx, C.cy, tsx > 2.1 ? 1 : 0); for (let j = 0; j < N72; j++) { const [sx, sy] = stackPos72(I, j, C.cx, C.cy); if (tsx < 2.12) ing72(sx - 3, sx + 3, sy, 1, .55); } } if (tsx >= 2.3) blaze69(ux69(I), I.ly, Math.min(1, (tsx - 2.35) / .2) * Math.max(0, 1 - Math.max(0, tsx - 2.7) / .4)); }; }
       try { base.draw(top); } finally { window.FINSND78 = null; INGOTS72.after = a0; } } }; }
-Object.assign(FAM, { PA: r80('A'), PB: r80('B'), PC: r80('C'), PD: r80('D') });
 // ---------- round 81 (2026-11-15): the peon ending LOCKED (round 80 D). Sounds that match it, four sets: footsteps, the grab, the dash, and the closing hit ----------
 let PS81 = null;
-function pop81(t = 0, k = 1) { if (!on()) return; const T = ac().currentTime + t, B = bus79(.35, 1.2, 2.6); vox79(B, T, 'sine', 170 * k, 70 * k, .42, .4); vox79(B, T, 'triangle', 130 * k, 80 * k, .18, .2); nz79(B, T, .12, .4, 'bandpass', 1100, 400, 'hit', .9); }
-const SET81 = {
-  A: { name: 'Ting + boom', desc: 'As round 80 D: soft footstep scuffs, a dull thud on the grab, and when the icon lights the firing-pin ting and the punchy boom.', ps: null, fin: () => { ting80(); boom80(.13); } },
-  B: { name: 'Scamper + pop', desc: 'Light, quick wooden pitter-patter footsteps (two soft notes, left-right), a little “hup” as the peon hoists the crate, an airy whoosh as it dashes off, and a rounder, bouncier pop with a tiny ting when the icon lights: cheeky rather than epic.',
-    ps: { step: (i, fast) => mallet((i % 2 ? 392 : 330) * (fast ? 1.06 : 1), 0, .006), grab: () => { tone(170, 0, .02, .1, 'triangle', 230, .005); noise(0, .08, .012, 500, .8, 'lowpass'); }, dash: () => noise(0, .3, .016, 1400, .8, 'bandpass') },
-    fin: () => { ting80(); pop81(.1); } },
-  C: { name: 'Rattling crate', desc: 'Footsteps, and once the crate is up the ingots rattle and clatter inside it with every step (wooden and metal knocks, getting fainter as it runs off); a solid wooden thunk on the grab; the ting + punchy boom when the icon lights.',
-    ps: { step: (i, fast) => { noise(0, .03, .008, 600, .7, 'lowpass', true); if (fast) { noise(0, .04, .02, 1300, 2, 'bandpass', true); tone(520 * semi(PENT42[i % 5]), .01, .004, .05, 'triangle', null, .001); } }, grab: () => { drum46(130, 0, .03); noise(0, .06, .02, 900, 1, 'bandpass', true); }, dash: () => {} },
-    fin: () => { ting80(); boom80(.13); } },
-  D: { name: 'Drum steps into the boom', desc: 'The footsteps are little drum hits that climb in pitch and quicken as the peon runs off, a drum roll building, and it lands on the punchy boom (no ting) when the icon lights: a rhythmic build into one big hit.',
-    ps: { step: (i, fast) => drum46(fast ? 110 * semi((i % 8) * 1.5) : 98, 0, fast ? .016 + (i % 8) * .003 : .01), grab: () => drum46(82, 0, .03), dash: () => {} },
-    fin: () => boom80() },
+// ---------- round 82 (2026-11-15): the peon’s sounds without any boom (round 81: “all sound the same, a boom as he runs away”): the running is the sound now,
+// louder and characterful, and the icon lighting is small. Four clearly different sets. ----------
+// a little grunt: a buzzy low voice through two vowel-ish band filters, short
+function grunt82(t = 0, f = 120, v = .03, len = .14) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f, T); o.frequency.linearRampToValueAtTime(f * .9, T + len);
+  g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(v, T + .015); g.gain.exponentialRampToValueAtTime(.0001, T + len); [[520, 6, 1], [1150, 8, .5]].forEach(([ff, q, a]) => { const bp = A.createBiquadFilter(), ga = A.createGain(); bp.type = 'bandpass'; bp.frequency.value = ff; bp.Q.value = q; ga.gain.value = a; o.connect(bp).connect(ga).connect(g); }); g.connect(OUT); o.start(T); o.stop(T + len + .05); }
+const thump82 = (v = .03, f = 90) => { drum46(f, 0, v); noise(0, .05, v * .7, 400, .7, 'lowpass', true); };
+const SET82 = {
+  A: { name: 'Scurry and whoosh', desc: 'Quick, light, clearly heard footsteps (soft thumps, left-right), the ingots jingling dully in the crate once it’s up, a grunt as it lifts, and a fast whoosh as the peon zips out of sight; the icon lights with only a soft airy puff.',
+    ps: { step: (i, fast) => { thump82(fast ? .022 : .016, i % 2 ? 120 : 100); if (fast) noise(.01, .035, .012, 1500, 2, 'bandpass', true); }, grab: () => { grunt82(0, 130, .03); thump82(.02, 80); }, dash: () => noise(.15, .35, .02, 1600, .9, 'bandpass') },
+    fin: () => noise(0, .25, .02, 500, .6, 'lowpass') },
+  B: { name: 'Heavy plod', desc: 'The crate is heavy: slower, deeper footfalls, a strained grunt on the lift and a small grunt every few steps, the wood creaking; when the icon lights, a distant solid thunk as the crate is set down somewhere off to the side.',
+    ps: { step: (i, fast) => { thump82(fast ? .03 : .018, 70); if (fast && i % 3 === 0) grunt82(.02, 105, .02, .1); if (fast && i % 2) noise(.03, .08, .008, 700, 4, 'bandpass'); }, grab: () => { grunt82(0, 110, .035, .25); thump82(.025, 70); }, dash: () => {} },
+    fin: () => { setTimeout(() => thump82(.02, 75), 120); noise(.12, .3, .01, 300, .6, 'lowpass'); } },
+  C: { name: 'Running tune', desc: 'The footsteps are a little plucked bass line that climbs a scale as the peon picks up speed (low, soft, wooden plucks, no chimes), a bump on the grab, and it lands on a warm two-note low pluck when the icon lights, like the end of a jaunty run.',
+    ps: { step: (i, fast) => pluck(98 * semi(fast ? [0, 2, 4, 7, 9, 12, 14, 16][i % 8] : 0), .03), grab: () => thump82(.02, 90), dash: () => {} },
+    fin: () => { pluck(98 * semi(12), .035); setTimeout(() => pluck(98 * semi(7), .03), 110); } },
+  D: { name: 'Distant crash', desc: 'Footsteps that fade as the peon runs off, a beat of quiet as the icon lights, and then, from off screen, a clattering crash (wood, ingots tumbling, a yelp) as it trips with the crate.',
+    ps: { step: (i, fast) => thump82(fast ? .02 * Math.max(.3, 1 - (i % 9) * .1) : .016, 105), grab: () => { grunt82(0, 135, .028); thump82(.018, 85); }, dash: () => {} },
+    fin: () => setTimeout(() => { if (!on()) return; thump82(.03, 75); noise(0, .25, .03, 1100, 1, 'bandpass', true); [0, 1, 2, 3, 4].forEach(q => { tone(300 * semi(PENT42[q]), .05 + q * .06, .008, .08, 'triangle', null, .001); noise(.05 + q * .06, .03, .015, 1600, 2, 'bandpass', true); }); grunt82(.02, 190, .022, .12); }, 450) },
 };
-function r81(K) { const B = r80('D'), Z = SET81[K];
+function r82(K) { const B = r80('D'), Z = SET82[K];
   return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? Z.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-    get desc() { return profName === 'Blacksmithing' ? 'The finale as locked, with the peon running off with the crate. Its sounds: ' + Z.desc + ' (Sound on; pick “Reaching the next unlock”.)' : 'One profession at a time: this round is Blacksmithing’s finale sound. Others show their current look.'; },
+    get desc() { return profName === 'Blacksmithing' ? 'The finale as locked, the peon running off with the crate. No boom: the running is the sound. ' + Z.desc + ' (Sound on; pick “Reaching the next unlock”.)' : 'One profession at a time: this round is Blacksmithing’s finale sound. Others show their current look.'; },
     get note() { return profName === 'Blacksmithing' ? 'peon sounds: ' + Z.name.toLowerCase() + '.' : 'the set bar.'; },
     draw(top) { const p0 = SND80.D.play; SND80.D.play = Z.fin; PS81 = Z.ps; window.PS81 = Z.ps; try { B.draw(top); } finally { SND80.D.play = p0; PS81 = null; window.PS81 = null; } } }; }
-Object.assign(FAM, { PA: r81('A'), PB: r81('B'), PC: r81('C'), PD: r81('D') });
+Object.assign(FAM, { PA: r82('A'), PB: r82('B'), PC: r82('C'), PD: r82('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

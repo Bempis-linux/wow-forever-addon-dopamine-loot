@@ -1159,6 +1159,12 @@ Professions (from 1.3.0):
    pop** (wooden pitter-patter, a little hup, an airy whoosh, a rounder pop + tiny ting), **C. Rattling crate** (the ingots
    clatter in the crate with each step; a wooden thunk on the grab; ting + boom), **D. Drum steps into the boom** (the steps
    are little drum hits climbing and quickening, landing on the punchy boom).
+   Round 81 → “all sound the same and don’t match the peon running away; they all sound like a boom”. Round 82 (no boom at
+   all; the running is the sound, louder; the icon lighting small): **A. Scurry and whoosh** (quick light footsteps, the
+   ingots jingling in the crate, a grunt on the lift, a whoosh as it zips off; a soft airy puff at the light), **B. Heavy
+   plod** (slow deep footfalls, a strained grunt and small grunts, creaking wood; a distant thunk as the crate is set down),
+   **C. Running tune** (the steps a low plucked bass line climbing a scale; a warm two-note low pluck at the light), **D.
+   Distant crash** (footsteps fading off, a beat of quiet, then an off-screen clattering crash and a yelp as it trips).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
