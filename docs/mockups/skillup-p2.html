@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 25, Herbalism</h1>
+  <h1>Skill-up: round 26, Herbalism add-ons</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 25: Herbalism only: A Vine, B Tall grass, and a C and D where nothing sprouts at each skill-up (gathering, and color brought by a butterfly). Fishing locked; the others show their current look. Opens on Herbalism, Bright ground. Rounds 2-24 stay in the code.
+  the line that grows. Round 26: Herbalism only: the Vine is the base (round 25 A); B-D are bold add-ons to it (the gust, a sunbeam, a butterfly). Try “Reaching the next unlock” for their finales. Fishing locked; the others show their current look. Rounds 2-25 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1825,6 +1825,34 @@ VAR23.Herbalism.D = { name: 'The butterfly', desc: 'Nothing grows either: the ba
     ctx.save(); ctx.globalAlpha *= h > 1.1 ? clamp(1 - (h - 1.1) / .3) : 1; butterfly(bx, by, fl, 1.45, rot); ctx.restore();
     landed('hbf', .25, () => { tone(1320, 0, .015, .25); tone(1760, .05, .012, .3); for (let q = 0; q < 10; q++) spawn({ x: lx, y: I.ly - 3, vx: (Math.random() - .5) * 50, vy: -10 - Math.random() * 30, life: .9, size: 1.2, col: q % 2 ? '#fff27a' : '#ffe8a0' }); }); } };
 Object.assign(FAM, { PA: r23('A'), PB: r23('B'), PC: r23('C'), PD: r23('D') });
+
+// ---------- round 26 (2026-11-15): Herbalism base = Vine (round 25 A); bold add-ons ----------
+const VAR26 = { Herbalism: {
+  A: { name: 'Vine', desc: 'The base, as it is: the vine over the slim bar, leaves unfurling behind a bud at the tip.' },
+  B: { name: '+ The gust', desc: 'Each skill-up a gust of wind blows through: streaks race along the bar, the whole vine leans over and springs back, and a few leaves tear loose and tumble away to the right. Reaching the next herb, a big gust swirls a handful of leaves into its icon.',
+    grow(p, x, y, L, f, t, I) { const ha = I.hitAge, lean = ha >= 0 && ha < 1 ? Math.sin(Math.PI * clamp(ha / .5)) * .45 * (1 - clamp((ha - .5) / .5)) + (ha > .5 ? Math.sin((ha - .5) * 14) * .08 * (1 - ha) : 0) : 0;
+      ctx.save(); ctx.transform(1, 0, -lean, 1, lean * y, 0); grow(p, x, y, L, f, t); ctx.restore(); },
+    over(p, I) { const ha = I.hitAge; if (ha >= 0 && ha < .6) { const u = ha / .6; ctx.save(); ctx.strokeStyle = `rgba(235,250,235,${.7 * (1 - u)})`; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; for (let j = 0; j < 5; j++) { const yy = I.ly - 14 + j * 6, xs = lerp(I.x0 - 30, I.x1 + 10, u) - j * 18; ctx.beginPath(); ctx.moveTo(xs, yy); ctx.lineTo(xs + 26, yy - 1); ctx.stroke(); } ctx.restore(); }
+      onHits('hgu', () => { noise(0, .6, .04, 1200, .5); noise(.05, .5, .025, 3200, .6); for (let q = 0; q < 6; q++) spawn({ x: lerp(I.x0, I.tipX, Math.random()), y: I.ly - 5, vx: 90 + Math.random() * 80, vy: -30 - Math.random() * 30, g: 60, life: 1.1, size: 2, shape: 'leaf', vr: 8, col: q % 2 ? '#7ee04a' : '#5ac83a' }); });
+      if (I.done) once('hgud', () => { noise(0, .9, .05, 1000, .5); for (let q = 0; q < 18; q++) { const sx = lerp(I.x0, I.x1, Math.random()); spawn({ x: sx, y: I.ly - 6, vx: (I.x1 + 18 - sx) / .9, vy: -40 - Math.random() * 30, g: 90, life: .9, size: 2.2, shape: 'leaf', vr: 10, col: q % 2 ? '#7ee04a' : '#9ff08a' }); } }); } },
+  C: { name: '+ Sunbeam', desc: 'Each skill-up a shaft of sunlight falls on the tip of the vine: the bud lights up and golden motes float up through the beam as the vine reaches on. Reaching the next herb, the sunlight sweeps along the whole vine to its icon.',
+    over(p, I) { const ha = I.hitAge; const shaft = (x, e) => { if (e <= 0) return; ctx.save(); const g = ctx.createLinearGradient(0, I.ly - 46, 0, I.ly + 4); g.addColorStop(0, 'rgba(255,240,170,0)'); g.addColorStop(1, `rgba(255,236,150,${.55 * e})`); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - 4 + 14, I.ly - 46); ctx.lineTo(x + 8 + 14, I.ly - 46); ctx.lineTo(x + 9, I.ly + 4); ctx.lineTo(x - 9, I.ly + 4); ctx.closePath(); ctx.fill(); ctx.fillStyle = `rgba(255,250,210,${.7 * e})`; ctx.beginPath(); ctx.ellipse(x, I.ly - 2, 8, 4, 0, 0, 7); ctx.fill(); ctx.restore(); };
+      if (ha >= 0 && ha < 1.2 && !I.done) shaft(I.tipX, Math.min(1, ha / .12) * (1 - clamp((ha - .7) / .5)));
+      if (I.done) { const ts = S.age - S.closeAt; shaft(lerp(I.x0, I.x1 + 16, clamp(ts / .7)), 1 - clamp((ts - .8) / .4)); }
+      onHits('hsb', () => { tone(660, 0, .02, .6); tone(990, .08, .015, .6); for (let q = 0; q < 8; q++) spawn({ x: I.tipX + (Math.random() - .5) * 12, y: I.ly - 2, vx: 6 + Math.random() * 8, vy: -20 - Math.random() * 20, life: 1.2, size: 1.2, col: '#ffe890' }); }); } },
+  D: { name: '+ The butterfly', desc: 'A visitor: each skill-up a butterfly flutters in and settles on the bud at the tip, its wings slowly opening and closing, then lifts off as the vine reaches on. Reaching the next herb, it flies to the herb’s icon and lands on it.',
+    over(p, I) { const k = lastHitIdx(), ha = I.hitAge, t = S.age; if (k < 0 || ha < 0) return; let bx, by, fl, rot = 0, h = ha;
+      if (I.done) { const ts = S.age - S.closeAt, u = clamp(ts / .6); bx = lerp(I.tipX, I.x1 + 18, eOut(u)); by = lerp(I.ly - 7, I.ly - 15, eOut(u)) - Math.sin(u * Math.PI) * 10; fl = u < 1 ? Math.sin(t * 38) : Math.sin(t * 5) * .6 + .4; }
+      else if (h < .25) { const u = h / .25; bx = lerp(I.tipX + 50, I.tipX, eOut(u)); by = lerp(I.ly - 40, I.ly - 7, eOut(u)) + Math.sin(u * 12) * 3; fl = Math.sin(t * 38); rot = .3; }
+      else if (h < .9) { bx = I.tipX; by = I.ly - 7; fl = Math.sin(t * 6) * .6 + .4; } else if (h < 1.7) { const u = (h - .9) / .8; bx = I.tipX + u * 55; by = I.ly - 7 - u * 42 + Math.sin(u * 10) * 3; fl = Math.sin(t * 38); rot = -.3; } else return;
+      ctx.save(); ctx.globalAlpha *= !I.done && h > 1.4 ? clamp(1 - (h - 1.4) / .3) : 1; butterfly(bx, by, fl, 1.45, rot); ctx.restore();
+      landed('hbt', .25, () => { tone(1320, 0, .015, .25); tone(1760, .05, .012, .3); }); } },
+} };
+function r26(K) { const v = () => VAR26[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r26('A'), PB: r26('B'), PC: r26('C'), PD: r26('D') });
 setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands

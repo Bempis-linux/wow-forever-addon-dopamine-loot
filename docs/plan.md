@@ -775,6 +775,11 @@ Professions (from 1.3.0):
    in (nothing grows: a picked herb is tossed in from above, tumbles and lands flat in the bar with a thump; the bar fills
    like a bundle), D The butterfly (the bar is a pale meadow and color is the progress: a butterfly flutters in, lands at
    the front, the meadow there turns vivid with blossoms in a puff of pollen, then it flies off).
+   **Round 25 → Herbalism base: A Vine** (breaking out of the slim bar); explore add-ons. **Round 26** (`VAR26`, `r26`):
+   A Vine, B + The gust (wind streaks race along, the whole vine leans and springs back, leaves tear loose; at the unlock
+   a big gust swirls leaves into the icon), C + Sunbeam (a shaft of light falls on the tip, the bud lights, golden motes;
+   at the unlock the light sweeps the whole vine), D + The butterfly (flutters in, settles on the bud, lifts off; at the
+   unlock it flies to the herb's icon and lands on it).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
