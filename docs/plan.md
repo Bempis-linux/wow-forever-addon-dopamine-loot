@@ -854,6 +854,10 @@ Professions (from 1.3.0):
    + a soft low rush, B Depth bands (two darker wavy layers sliding at different speeds) + a deep wave lap, C Sun glitter
    (glints near the surface twinkling) + three watery bloops, D Sheen + bubbles (a soft light band drifting, bubbles
    rising) + no extra sound.
+   Round 38 picks: **texture B Depth bands, swell sound A (the soft low rush)**. The sound disliked in round 37 was the
+   skill-up sound itself (the bobber dip: the triangle twang + the cartoon bloop 520 -> 180 Hz). **Round 39** (`VAR39`,
+   `FSND39`; `window.FSND(i)` replaces it): A the current sound, B a natural plop (low water burst + spray hiss),
+   C a plucked line (one string note rising per skill-up + light splash), D splash only (no tones).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
