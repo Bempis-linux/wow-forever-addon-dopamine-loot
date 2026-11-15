@@ -982,6 +982,12 @@ Professions (from 1.3.0):
    a shine runs along the gold; the new end gleams; the tuning-fork tone), four inlay designs: **A. Curls** (round 54 D's),
    **B. Braid** (two gold lines weaving, beads at the crossings), **C. Runes** (short gold runs with marks between: a dot, a
    pair of strokes, a diamond), **D. Leaf scroll** (one flowing gold scroll, a small leaf at each crest and dip).
+   Round 55 → keep A; the rest too close: the user named what they liked as hints for **new directions**, and gold isn't
+   required. Round 56 (pitched; Twisted bar swapped out): **A. Ringing steel, curls** (round 55 A), **B. Rust flakes off**
+   (a rust crust cracks on the newest part and flakes tumble below the bar, clean steel underneath), **C. Straightened**
+   (ahead of the fill, raw bent stock sags below the bar; each skill-up snaps the next section straight with a jolt),
+   **D. Raised ridge** (flat steel; the newest part's ridge swells up as if pushed from behind, a highlight runs the crest,
+   a soft thud).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
