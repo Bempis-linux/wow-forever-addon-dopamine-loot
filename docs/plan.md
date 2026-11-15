@@ -951,6 +951,8 @@ Professions (from 1.3.0):
    the shower (the chain first, then one bigger blast throws the whole fountain), C The shower sets off the chain (one blast
    at the start throws the ore; each nugget landing further along sets off a blast there; the last lands on the icon),
    D The chain juggles the ore (a bundle of nuggets is thrown on from blast to blast down the bar, the last into the icon).
+   Round 51 pick: **A Every blast throws ore** (Mining's finale). Next: Mining's sound (now: a muffled low thump + a soft
+   pebble patter per blast, nugget clinks; Mining's built-in hissy strike muted).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
