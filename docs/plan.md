@@ -800,6 +800,11 @@ Professions (from 1.3.0):
    whole vine slides into the icon, faster and faster, the icon bulging; the empty bar flashes).
    Round 29 pick: **Herbalism finale B, Sickle sweep. Herbalism DONE** (the Vine + Sickle sweep). Next: Skinning, on
    top of round 22 B + Fur flies (the user liked it; wants more add-ons over it, pitched first).
+   **Round 30** (`VAR30`, `r30`; Skinning, the cut + a stroke + Fur flies, add-ons on top, each with its finale):
+   A Fur flies (round 22 B as it is), B + Fur settles (the tufts land on the bar's top edge and stay, a fringe along the
+   cut; finale: shaken off in one cloud into the icon), C + Snap the pelt (a ripple runs the bar and cracks at the end
+   with a thwap; finale: a big snap flings fur into the icon), D + Pelt pile (a pelt pops from the cut onto a stack
+   beside the icon; finale: the stack slides into the icon). Paw prints were pitched for D; the user swapped it out.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
