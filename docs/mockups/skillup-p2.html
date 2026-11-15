@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 43, Fishing finales</h1>
+  <h1>Skill-up: round 44, Fishing finale: tidal wave + leaping school</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 43: Fishing (the swell, Depth bands, the Water drops sounds): four finales for when its bar fills (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 44: Fishing (the swell, Depth bands, the Water drops sounds): its finale mixes the tidal wave with the leaping school, four ways (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2424,6 +2424,39 @@ function r43(K) { return { get name() { return K + '. ' + (VAR43[profName] ? VAR
   get note() { return VAR43[profName] ? VAR43[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR43.Fishing; window.FREEL = fish ? false : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r43('A'), PB: r43('B'), PC: r43('C'), PD: r43('D') });
+// ---------- round 44 (2026-11-15): Fishing finale = round 43 B Tidal wave mixed with D Leaping school, four ways ----------
+const wSX = (I, u) => lerp(I.x0 - 22, I.x1 + 18, u); // the crest's x as the wave runs (u 0..1)
+function wave44(I, ts, t0, dur, key) { const u = (ts - t0) / dur, { top } = fishGeo(I), ux = I.x1 + 18; if (u < 0) return;
+  if (u < 1.03) { const sx = wSX(I, Math.min(1, u)), a = 1 - clamp((u - 1) / .03); ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = 'rgba(240,252,255,.95)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(sx + 4, top - 4, 6, Math.PI * 1.05, Math.PI * 1.9); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.9)'; for (let k = -6; k <= 2; k++) { const x = sx + k * 4; if (x < I.x0 || x > I.x1) continue; ctx.globalAlpha = a * (1 - Math.abs(k) * .12); ctx.fillRect(x - 1.5, top - 6 * Math.exp(-((x - sx) * (x - sx)) / 900) - 1.5, 3, 2); } ctx.restore(); if (u < 1 && Math.random() < .8) spawn({ x: sx + 4, y: top - 8, vx: 40 + Math.random() * 50, vy: -30 - Math.random() * 40, g: 220, life: .4, size: 1.2, col: '#e8f8ff' }); }
+  once(key + 'w0', () => { kal(110, 0, .02); dropRun(4, 392, dur / 5, .01); }); if (u >= 1) once(key + 'w1', () => { splash(ux, I.ly - 4, 26, 1.5); dropRun(5, 784, .035, .012); }); }
+const wavePre44 = (t0, dur) => () => { const ts = S.age - S.closeAt, u = (ts - t0) / dur; if (u < 0 || u > 1.05) return null; const sx = lerp(W / 2 - 150, W / 2 + 120, Math.min(1, u)); return x => -5.8 * Math.exp(-((x - sx) * (x - sx)) / 900) * (1 - clamp((u - 1) / .05)); };
+// one leap: from xa to xb starting at t0 for d seconds, h high; toIcon lands at the icon's height; s scale; k its note
+function leap44(I, ts, t0, d, xa, xb, h, toIcon, s, k, key) { const u = (ts - t0) / d, { top } = fishGeo(I); if (u < 0) return; once(key + 'a' + k, () => { splash(xa, top, 5, .7); drop(523 * semi(PENT42[k * 2 % 10]), 0, .016); });
+  if (u >= 1) { if (!toIcon) once(key + 'b' + k, () => splash(xb, top, 5, .6)); return; } const x = lerp(xa, xb, u), y = lerp(top + 1, toIcon ? I.ly : top + 1, u) - Math.sin(Math.PI * u) * h; fishShape(x, y, Math.atan2(-Math.cos(Math.PI * u) * h * Math.PI, xb - xa), s, Math.sin(ts * 40) * 1.2); }
+const FIN44 = {
+  A: { name: 'The school rides the wave', finAt: .97, pre: wavePre44(0, .7), desc: 'One big swell rolls the bar, and fish leap out of its crest one after another as it passes, just ahead of the foam; as it crashes over the icon, the last fish leaps from the spray into it.',
+    over(p, I) { const ts = S.age - S.closeAt, L0 = I.x0 - 22, L1 = I.x1 + 18; wave44(I, ts, 0, .7, 'a');
+      for (let k = 0; k < 4; k++) { const xa = I.x0 + 25 + k * 48, t0 = (xa - L0) / (L1 - L0) * .7; leap44(I, ts, t0, .35, xa, xa + 30, 18, false, 1, k, 'a'); }
+      leap44(I, ts, .62, .35, I.x1 - 6, I.x1 + 18, 26, true, 1.3, 4, 'a'); } },
+  B: { name: 'School, then the wave', finAt: 1.25, pre: wavePre44(.6, .6), desc: 'The school leaps along the bar first, one fish after another from the reel to the end, diving back in; then the big swell rolls up behind them and crashes over the icon in spray.',
+    over(p, I) { const ts = S.age - S.closeAt, n = 5, span = (I.x1 - I.x0) / n; for (let k = 0; k < n; k++) { const xa = I.x0 + 8 + k * span; leap44(I, ts, k * .1, .38, xa, xa + span * .9, 16, false, 1, k, 'b'); } wave44(I, ts, .6, .6, 'b'); } },
+  C: { name: 'The wave, then the school', finAt: 1.3, pre: wavePre44(0, .6), desc: 'The big swell rolls first and crashes over the icon; then, in its wake, the school leaps along the bar from the reel to the end, and the last fish leaps into the icon.',
+    over(p, I) { const ts = S.age - S.closeAt, n = 5, span = (I.x1 - I.x0) / n; wave44(I, ts, 0, .6, 'c'); for (let k = 0; k < n; k++) { const xa = I.x0 + 8 + k * span, last = k === n - 1; leap44(I, ts, .45 + k * .1, .4, xa, last ? I.x1 + 18 : xa + span * .9, last ? 24 : 16, last, last ? 1.3 : 1, k, 'c'); } } },
+  D: { name: 'A big fish surfs it', finAt: .95, pre: wavePre44(0, .65), desc: 'One big fish rides inside the swell’s crest the whole length of the bar, tilting with it, while small fish hop out alongside; when the wave crashes, the big fish is flung up out of the spray and lands in the icon.',
+    over(p, I) { const ts = S.age - S.closeAt, { top } = fishGeo(I), ux = I.x1 + 18; wave44(I, ts, 0, .65, 'd');
+      if (ts < .65) { const sx = wSX(I, ts / .65); fishShape(sx - 2, top - 7 + Math.sin(ts * 18) * 1.2, -.25 + Math.sin(ts * 12) * .12, 1.5, Math.sin(ts * 40) * 1.2); }
+      else if (ts < .95) { const u = (ts - .65) / .3, x = lerp(ux - 2, ux, u), y = lerp(top - 7, I.ly, u) - Math.sin(Math.PI * u) * 28; fishShape(x, y, -1.2 + u * 2.6, lerp(1.5, 1.1, u), Math.sin(ts * 40) * 1.2); once('dfl', () => { drop(392, 0, .02); drop(784, .08, .016); }); }
+      for (let k = 0; k < 3; k++) { const t0 = .1 + k * .17, xa = wSX(I, t0 / .65) - 14; leap44(I, ts, t0, .3, xa, xa - 22, 12, false, .8, k + 1, 'd'); } } },
+};
+function fin44(K) { const f = FIN44[K]; return { name: f.name, desc: 'Fishing as picked (the swell, Depth bands, the Water drops sounds). Reaching the next waters: ' + f.desc, tex: F43.tex, snd: F43.snd, reel: F43.reel, finAt: f.finAt,
+  pre: I => { if (S.closeAt !== undefined) { const g = f.pre(); if (g) return g; } return F43.pre(I); },
+  over(p, I) { F43.over(p, I); if (I.done) f.over(p, I); } }; }
+const VAR44 = { Fishing: { A: fin44('A'), B: fin44('B'), C: fin44('C'), D: fin44('D') } };
+function r44(K) { return { get name() { return K + '. ' + (VAR44[profName] ? VAR44[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR44[profName] ? VAR44[profName][K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Fishing’s finale. Others show their current look.'; },
+  get note() { return VAR44[profName] ? VAR44[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR44.Fishing; window.FREEL = fish ? false : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r44('A'), PB: r44('B'), PC: r44('C'), PD: r44('D') });
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();

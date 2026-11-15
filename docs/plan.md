@@ -882,6 +882,11 @@ Professions (from 1.3.0):
    slot), B Tidal wave (one big swell with a foaming curl rolls the whole bar and crashes over the icon in spray),
    C Ripples (three wide rings spread from the bobber across the module, a light shower of drops lands with tiny rings),
    D Leaping school (five fish leap along the bar one after another, the last into the icon).
+   Round 43 feedback: mix B Tidal wave with D Leaping school. **Round 44** (`VAR44`, `FIN44`, `wave44`, `leap44`): A The
+   school rides the wave (fish leap out of the crest as it passes; the last leaps from the crash into the icon), B School,
+   then the wave (the leaps first, then the swell crashes over the icon), C The wave, then the school (the swell crashes
+   first, the school leaps in its wake, the last into the icon), D A big fish surfs it (one big fish rides the crest, small
+   fish hop alongside, the crash flings it into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
