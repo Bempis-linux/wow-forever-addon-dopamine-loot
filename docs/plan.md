@@ -1038,6 +1038,10 @@ Professions (from 1.3.0):
    streaks** (round 61's texture, as the reference), **B. Depth bands** (soft heat layers, pale yellow under the surface to
    deep red at the bottom, edges swaying), **C. Marbled** (molten orange with long bright and dark swirls drifting), **D.
    Painted** (like the game's lava textures: flat warm orange, big soft yellow highlights and dark red shadows drifting).
+   Round 62 → **Depth bands kept as A**; iterate. Round 63: **A. Depth bands**, **B. Glowing core** (bands inside out: a
+   thin dark skin on top, the hottest pale layer mid-bar, cooling toward the bottom), **C. Crusted bands** (the bands under
+   dark crust islands drifting on the surface, bright magma in the gaps), **D. Flowing bands** (each layer slides toward the
+   front at its own speed, top fastest; a faint shine on each edge).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
