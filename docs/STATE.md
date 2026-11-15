@@ -1,121 +1,114 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up: all four gatherers DONE (Herbalism, Fishing, Skinning, Mining: look, finale, sound; rounds 29-52); next the crafters one at a time; sound fatigue is an addon-wide rule (CLAUDE.md); earlier: general design LOCKED (grows along the line); round 15 picked B "Just a line"; header + bar SET (round 18); Fishing LOCKED (round 20); one profession at a time now; Herbalism: picking, not growing (round 26 feedback); **Herbalism LOCKED: the Vine alone** (round 28 A); finale Sickle sweep (round 29 B): **Herbalism DONE**; **Skinning LOCKED: the cut + Fur flies** (round 31 A); round 32 finales all too alike (fur); finale: lock, chops drop the hide, the reticle tightens + turns 90 in steps (round 36 A): **Skinning DONE**; then Fishing (close to done): picked the swell (round 37 D); Depth bands texture + the soft low rush (round 38); sound reworked as whole gentle sets: round 41 too monotone; the Water drops sounds (round 42 B); finale: a big fish surfs the swell (round 44 D): **Fishing DONE**; sound fatigue is an addon-wide rule (CLAUDE.md); Herbalism sound: Thumb piano (round 45 D), **Herbalism DONE**; Skinning keeps its original sounds (round 46: the user preferred them; only the step-down + slight pitch variation for long sessions), **Skinning DONE**; **Mining base LOCKED: Blast** (round 48 A); no add-on (round 49 A); finale: every blast throws ore (round 51 A); sound as now (round 52 A): **Mining DONE. All four gatherers DONE**; next the crafters, one at a time (a fresh session is a good point to start them), then its finale; Mining after (round 22 tunnel + cart options, no pick yet) (round 14 picks paused); kit 0.8.1. Read this
-first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised 2026-11-12":
-every round and pick). Older detail: git log, CHANGELOG.md._
+_Last checkpoint: 2026-11-15, skill-up gains: **all four gatherers DONE** (rounds 29-52); next the **crafters, one at a
+time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
+2026-11-12": every round and pick, newest at the end of "2. Skill-up gains"). Older detail: git log._
 
 ## Where things stand
-- **1.3.1 is the latest release** (2026-11-10). **The game is on the RELEASED copy**: switch to dev before
-  testing new work (`tools/addon-mode.ps1`, command in CLAUDE.local.md; then `/reload`).
-- **1.4.0 = Leveling + the dungeon recap + the crafting redesign + a cohesion pass.** Design only; picks in
-  plan.md: bars family Ring + road; XP xp-r10 (kills Rain, quests Comet + impact); rep Sweep + faction rings;
-  level-up levelup-r4; dungeon recap Slim strip + Final medallion; style guide `docs/style-guide.md`.
-- **Crafting redesign, in progress** (`docs/mockups/craft-compare.html`; Ring + batch replaces the cast bar
-  during trade-skill casts). Run with the kit's **`wow-design-rounds`** skill (the user: keep using it):
-  Phase 1 Inspiration done; **Phase 2 Finalization done for all 10** (plan.md "Phase 2 done for all 10"):
-  Blacksmithing **F Hammer + heat**, Leatherworking **Burnished**, Alchemy **Boil over + bubbles**, Tailoring
-  **Plucked + runs down**, Engineering **Wrench 4 turns + it starts up**, Cooking **Toss the pan + burner +
-  sizzle**, Enchanting **F Motes + moon sparkle**, First Aid **E Splint + heft + relief**, **9 Smelting K**
-  (a mould turning clockwise under a fixed spout, 3 punchy beats, heat gradient, glug beats, crack + clatter
-  + tink finale), **10 Disenchanting H** (Burn away: the icon burns from its edges, embers feed the ring,
-  storm into implosion, then the dust; the feel: "the item is actually getting destroyed").
-- **Phase 3 Polish done** (2026-11-14; plan.md "Crafting Phase 3 Polish"): 3 beats + the finale for all ten; fill as
-  picked, plus Leatherworking now punchy (each punch slams the fill to its hole; punchy = the hits: Blacksmithing,
-  Engineering, Cooking, Smelting, Leatherworking); ring widths, tool placement and finale lengths as picked (Alchemy's tube
-  and Smelting's mould stay thicker); loudness **Even** (every profession about -29 dB at its loudest; per-profession gains
-  in `LOUD_GAIN.even`, Blacksmithing x0.38, Tailoring x3.63). The page's Polish panel opens on the decided settings.
-- **Next up (1.4.0 order, revised 2026-11-14; plan.md "1.4.0 order")**: professions first: crafting API checks DONE (Smelting
-  = a Mining window cast; Disenchant = spell 13262, not a trade-skill cast; burn grid works),
-  then Phase 2 for skill-up gains, the Create All pile, gathering, the loot window (Picked-up rows / harvest window);
-  build them; then Phase 2 for XP, rep, level-up; build; the dungeon recap last if the weekly budget allows (may slip to
-  1.5.0, not moved yet). Phase 3 Polish for everything but crafting moves to 1.4.1+.
-- **Skill-up gains: general design LOCKED 2026-11-15, "It grows along the line"** (round 11 A; the tip flourish and
-  the unlocks-on-the-line are ideas to use per profession, not locked). **Next: the per-profession pass** for all
-  twelve (pitch first, four options per profession; plan.md "Round 11 → LOCKED"). **Round 15 picked B "Just a line" (a clean, quick pass-by); round 16: no outlines, the shade too big; round 17: no header backing, animations in a bar like 1.3, parts may reach outside; **the header and the 1.3-style bar are SET** (round 18); fits per profession (Herbalism breaks out, Mining and Skinning inside, Fishing a water bar with the bobber on top); Fishing picked D (bright surface over the fill) + the reel and line kept; **Fishing LOCKED** (round 20); **one profession at a time now (the user); Herbalism: picking, not growing (round 26 feedback); **Herbalism LOCKED: the Vine alone** (round 28 A); finale Sickle sweep (round 29 B): **Herbalism DONE**; **Skinning LOCKED: the cut + Fur flies** (round 31 A); round 32 finales all too alike (fur); finale: lock, chops drop the hide, the reticle tightens + turns 90 in steps (round 36 A): **Skinning DONE**; then Fishing (close to done): picked the swell (round 37 D); Depth bands texture + the soft low rush (round 38); sound reworked as whole gentle sets: round 41 too monotone; the Water drops sounds (round 42 B); finale: a big fish surfs the swell (round 44 D): **Fishing DONE**; sound fatigue is an addon-wide rule (CLAUDE.md); Herbalism sound: Thumb piano (round 45 D), **Herbalism DONE**; Skinning keeps its original sounds (round 46: the user preferred them; only the step-down + slight pitch variation for long sessions), **Skinning DONE**; **Mining base LOCKED: Blast** (round 48 A); no add-on (round 49 A); finale: every blast throws ore (round 51 A); sound as now (round 52 A): **Mining DONE. All four gatherers DONE**; next the crafters, one at a time (a fresh session is a good point to start them), then its finale; Mining after (round 22 tunnel + cart options, no pick yet)**; Mining (round 22: tunnel + cart) and Skinning (round 22: add-ons to the cut) wait their turn; then add-ons and finales per profession in the bar; round 14 (gatherers) picks paused till then; finales are per profession like crafting. Round 14 built,
-  awaiting picks**; then crafters, then secondary skills.
-- **Skill-up gains, Phase 2 record, 11 rounds** (`docs/mockups/skillup-p2.html`, the only page;
-  there is no skillup-p3; the title says the round; older rounds stay in the code, off the panel; full record in
-  plan.md under "2. Skill-up gains"). **Goal (the user): clear progression AND a frame easy to make unique, in fun
-  ways, per profession**; then a per-profession pass like crafting's. **Decided: its own draggable module**, apart from
-  the craft rings. **Rules learned:** progression first (an amount building toward a visible goal), sound and light are
-  add-ons; **no echo** (the skill-up must not share the craft ring's form: no ring, no tool riding; memory
-  no-echo-between-systems); compact (a quick progress update); no blocky square frame; the theme in words is in
-  `docs/style-guide.md` ("The theme in one line"). Dropped along the way: Ring + road (echo), whole journey (too big),
-  pips (repeated icons), countdown, icon colors in, stamp, bell, horizon, and more (plan.md).
-  **Round 9 (current panel, keys 1-4):** A One notched line ("simple, gets the point across"), B Poured in (the
-  profession's vessel, a portion poured per skill-up: "each one unique and can be built on"), C Lifted up (likes
-  only Herbalism's stalk lifting the icon), D The line is the container (likes only Herbalism's planter trough).
-  **"The one" isn't found yet.** The user: **the presentation needs work** (lots of unused space; could show more
-  info or design) but **don't over-design**.
-  **Round 10 picked B "It grows along the line"** in the tighter layout (name, skill "/ 150 Journeyman", next unlock +
-  "N to go", then the two after it); **rounds have four options** (the user expects it). **Round 11** (keys 1-4, add-ons
-  to B; `growModule(top, mode)`): A as it is (**locked**), B a flourish at the tip per skill-up (idea), C the unlocks on
-  the line (idea), D the growth drawn into the unlock's icon (not picked). Show pages with the `/view` skill (`/view phone` or `/view pc` switches; on the phone it sends the page with
-  SendUserFile, as the user can't open repo files there).
-- **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
-  session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
-  recap is the release valve.
-- Everything is committed and pushed (2026-11-14 night).
+- **1.3.1 is the latest release** (2026-11-10). **The game is on the RELEASED copy**: switch to dev before testing new
+  work (`tools/addon-mode.ps1`, command in CLAUDE.local.md; then `/reload`). Everything is committed and pushed.
+- **1.4.0 = Leveling + the dungeon recap + the crafting redesign + a cohesion pass.** Design only so far. Order (plan.md
+  "1.4.0 order"): professions first (crafting DONE in design; skill-up gains now; then the Create All pile, gathering,
+  the loot window), build them; then XP, rep, level-up; the dungeon recap last (may slip to 1.5.0).
+- **Crafting redesign: design DONE** (`docs/mockups/craft-compare.html`; Phase 2 + Phase 3 Polish for all ten; picks in
+  plan.md "Phase 2 done for all 10" and "Crafting Phase 3 Polish"; loudness Even, `LOUD_GAIN.even`).
+- **Skill-up gains** (`docs/mockups/skillup-p2.html`, the only page; the `<h1>` says the round):
+  - SET: the 1.3-style header (no backing, the game's text shadow) and bar (dark track, thin gold border, notches,
+    the next unlock's icon at the end, "N to X" under it). Each profession uses the bar as a frame: parts may
+    reach outside it, like the craft rings' tools. Finales are per profession. The page's option buttons show
+    letters only.
+  - **Herbalism DONE:** the Vine breaking out of a slim 6 px bar (no add-on). Finale: Sickle sweep (a gold slash
+    runs the bar, leaves shear off). Sound: Thumb piano (a note + a soft fifth, varied).
+  - **Fishing DONE:** a water bar (bright surface over the fill, Depth bands texture), the reel at the start
+    paying out line, the bobber at the front. Add-on: the swell. Sound: Water drops (two plinks, varied; the
+    swell a shower; no reel sound; Fishing's built-in strike muted). Finale: a big fish surfs a big swell and is
+    flung into the icon.
+  - **Skinning DONE:** the cut + a stroke, + Fur flies. Finale: the reticle locks on the icon; fast chops drop
+    the hide away notch by notch; the reticle tightens and turns 90° in steps. Sound: its **original** sounds
+    (the user preferred them), with only the step-down and a slight pitch variation.
+  - **Mining DONE:** the Blast. The mined part is a dug channel and the rock ahead stays solid; each skill-up a
+    charge at the front (flash, muffled thump, chunks and dust, the bar kicks, a hot glow). No add-on. Finale:
+    every blast throws ore (the chain runs; nuggets land, bounce, roll into the icon). Sound: as now (thump +
+    pebbles, clinks).
+  - **Next: the crafters**, one at a time: Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering,
+    Enchanting; then Cooking, First Aid. Same steps per profession: base design (pitch first) → add-ons →
+    finale → sound. Rules from crafting still apply: **no echo** with the craft ring (no ring, no tool riding
+    at the tip); a crafting batch can be 100 casts.
+  - Unlocks per profession and the bar code are on the page. The full record is in plan.md.
 
-## The compare page (how it works, for the next session)
-- Profession buttons 1-10 (keys 1-9, 0); a Round switch: **Final round** (the FINAL sets) / Exploration (ITER).
-- Final round: A is always the current pick; `finalPick` sets what opens. `p2Start(prof)` began the second
-  pass (the first-pass sets live in `P2A`; `P2S(prof)` makes options that borrow from a sibling by letter use
-  their own set). Options are `{ name, desc, work, payoff, overlay, ownSound }`; `ownSound` silences the
-  1.3 side's beat sounds so the new side plays its own.
-- Checking: mute only the run (`play(); S.mute = true`), never untick the Sound box; one scene at a time.
-- Loudness check without playing: render a craft offline (log `Sound` calls over synthetic `frame()` steps, replay them into an
-  OfflineAudioContext behind a Proxy for `A` whose currentTime is the event time; loudest 50 ms RMS in dB).
-- Mockup perf: no `shadowBlur` inside rotated or mirrored transforms (Smelting dropped to 12 fps); use a soft wide
-  stroke or halo. The page timer now keeps timers added from inside a timer (nested effects used to vanish).
-- sed gotchas: an unescaped apostrophe in a JS string breaks the page (use ’); plan.md edits with quotes:
-  write the text to a scratch file and insert it with `sed "<line>r file"`.
+## How the skill-up page works (for the next session)
+- Options are the `FAM` slots `PA`-`PD`, set by `Object.assign(FAM, {PA: rNN('A'), ...})`; the last assignment
+  wins. Each `rNN(K)` returns `{name, desc, note, draw(top)}`, and draw routes the other professions to their
+  done looks. The latest is `r52`.
+- `barModule(top, mode, V)`: modes `A` inside the bar, `B` breaks out (6 px), `F` the Fishing water.
+- Hooks on V:
+  - `grow`, `over`, `after` (drawn over the icon)
+  - `tip`, `unlockX`, `unlockY`, `iconPulse`, `shake(info) -> [dx, dy]`
+  - `finAt`: seconds from the fill to the payoff (chime, lit icon, flash), so the finale plays first
+- Globals that override Fishing:
+  - `window.FSW(x)`: the surface lift
+  - `window.FTEX`: the texture
+  - `window.FSND(i)`: the skill-up sound
+  - `window.FREEL`: the reel clicks (`false` = silent)
+- Muting a profession's built-in strike: swap `S.p.snd` during the draw.
+- Muting a base's sounds: swap `window.tone`/`window.noise` with no-ops around the base `over`.
+- Sound helpers:
+  - `fat45(i)`: the step-down
+  - `pick45(i, span)`: varied scale notes
+  - instruments: `kal`, `mallet`, `drop`, `bell45`, `pluck`, `drum46`
+- Checking: `requestAnimationFrame = () => 0`, then step `S.age` by hand (a `stepTo(K, moment, T)` helper)
+  and zoom on [380, 50, 740, 200]. This freezes the tab and the user may be watching. Afterwards, close it
+  and reopen the page fresh (`preview_start` with the file URL). A new tab from `tabs_create` + `navigate`
+  still comes to the front.
+- No node or python on this machine: insert code with `sed "<line>r file"` from the scratchpad.
+
+## The compare page (crafting)
+- Profession buttons 1-10; Final round / Exploration. Mute only the run (`play(); S.mute = true`). Loudness check
+  offline via an OfflineAudioContext replay. No `shadowBlur` inside rotated transforms (perf).
 
 ## Verified in game (by the user)
-- Everything shipped in 1.0-1.3.1 (details in git history of this file).
+- Everything shipped in 1.0-1.3.1.
 ## Not yet verified
-- The recipe-color line after a real crafting skill-up; big batches (100+) sinking the pile; `/dl` in
-  combat; a dungeon (secret loot text?); vendor buys must not pop; gathering with Baganator's bags.
+- The recipe-color line after a real crafting skill-up; big batches (100+) sinking the pile; `/dl` in combat; a
+  dungeon (secret loot text?); vendor buys must not pop; gathering with Baganator's bags.
 
 ## User preferences (stated in chat; follow them)
-- **Privacy first**: the only public identity is **Bempis**; nothing else personal in tracked files or
-  commits. Never `--no-verify` unless the user says so.
-- **Only `/dl`**; everything is a control on a settings page (CLAUDE.md "Settings layout").
-- **Mockups first, the user picks.** Options must be **clearly different in mechanism and in structure**
-  (a round of "a tool, four even steps" ×3 was rejected; memory file). Keep the current pick as A; mixes on
-  request; don't lock until the user says so ("I wasn't done yet").
-- **Phase 2 means entirely new designs inspired by all the picks** (like the user's wrench sketch), not
-  add-ons; add-ons only once a new design is chosen. One sub-system at a time.
-- Feel notes: Enchanting = magical, not "science"; First Aid = patching yourself up after a fight, rough,
-  no glowing healer magic, and the user tired of bandage motifs except the splint; nothing that repeats
-  another profession's finale (item flying up = Cooking's). Steam that blooms at the end read as awkward.
-- **Simple shapes** over drawn objects; **polish only what the user names**; **no lottery/chance**; **info in
-  one place**; fatigue over long sessions (quiet repeats, sounds step down in batches).
-- **No bulk scripted runs in the browser pane**; mute, one scene. Answers concise.
-- Tag/publish only with the user's OK in chat. Process: preflight → reviewer → commit → push → test list.
+- **Privacy first**: the only public identity is **Bempis**. Never `--no-verify` unless the user says so. Tag or
+  publish only with the user's OK in chat.
+- **Only `/dl`**; everything is a control on a settings page.
+- **Mockups first, the user picks.** Four options per round, each a **clearly different mechanism**. Keep the
+  current pick as A when comparing; mixes on request. **Pitch one-liners before building** a new direction.
+  **One profession at a time.** **Bold add-ons**; destructive for Mining; picking, not cultivating, for Herbalism.
+- **Sound fatigue, always** (addon rule; CLAUDE.md; style guide "Sound"):
+  - gentle, but not monotone or boring
+  - no hiss, sharp clicks or cartoon pitch drops
+  - notes varied from a scale
+  - repeats step down across systems
+  - a skill-up folds under the craft sound in a batch
+  - rare milestones in full
+- **Simple shapes** over drawn objects; **no zig-zag**; no outlines; **polish only what's named**; **no
+  lottery**; **info in one place**; **no echo between systems**.
+- Show pages with the **`/view`** skill (`/view pc` = browser pane, `/view phone` = SendUserFile; the mode is in
+  memory). On Remote Control, send pages with SendUserFile.
+- No bulk scripted runs in the browser pane; one scene, sound off for checks. Answers concise.
 
 ## Gotchas and environment notes
-- **Media pipeline**: `tools/render-media.ps1` serves `tools/render-media.html` on :8765; in the browser
-  pane `await renderAll()`, then `bash tools/convert-media.sh` into `DopamineLoot/Media`.
-- Bash collapses `\\`: write Lua with Write/Edit. No python/node/lua on PATH; ffmpeg via winget. `grep -F -i
-  -f` on the privacy file crashes Git Bash's grep: check patterns one at a time.
+- Media pipeline: `tools/render-media.ps1` (serves `tools/render-media.html` on :8765), `await renderAll()` in the
+  pane, then `bash tools/convert-media.sh`.
+- Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep:
+  check patterns one at a time. sed: an unescaped apostrophe in a JS string breaks the page (use ’).
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
-- Never delete a junction with `rm -rf`. Browser pane: close old tabs when a file won't open.
-- Kit: **wow-addon-kit 0.8.1** (adds `wow-design-rounds` with the budget rule, `wow-mockup-to-addon`); update with
-  `claude plugin update wow-addon-kit@bempis --scope user` (CLI path in CLAUDE.local.md); restart to load.
-
-**Words the user uses:** "Leatherworking" sometimes means Skinning (the gatherer); treasure chest, ground, harvest window / loot column, the pile (Create All tray).
+- Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.8.1.
+- Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
 
 ## Open questions / waiting on the user
-- XP: With-loot handling; Calm-when-busy (maybe one addon-wide sound budget).
+- XP: with-loot handling; Calm-when-busy (maybe one addon-wide sound budget).
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
-- 2026-11-14 night: skill-up Phase 2 rounds 3-9 (all in skillup-p2.html); rules learned: progression first, no echo with
-  the craft ring, compact, no blocky frame; the theme put into words (style guide); nothing locked yet.
-- 2026-11-14 1.4.0 order revised (professions first); crafting API checks done in game; skill-up Phase 2 rounds 1-2
-  (own module decided); kit 0.8.1 budget rule.
-- 2026-11-14 Crafting phase 3 Polish done (3 beats, Leatherworking punchy, loudness Even).
-- 2026-11-13 Crafting phase 2 second pass (all 8 locked), Smelting + Disenchanting added; kit 0.8.0.
-- 2026-11-12 1.4.0 design: scope, bars, XP, rep, level-up, recap, style guide, crafting phase 1.
-- 2026-11-10 1.3.1. 2026-11-09 1.2.x. 2026-11-06 1.1.0. 2026-11-04 1.0.0 on WoW Forever.
+- 2026-11-15: skill-up gatherers DONE (rounds 15-52: header + bar set, Herbalism, Fishing, Skinning, Mining: look,
+  finale, sound); the sound-fatigue rule; the `/view` skill.
+- 2026-11-14: skill-up Phase 2 rounds 1-14 (own module, grows along the line); 1.4.0 order revised; crafting Phase 3
+  Polish done (3 beats, loudness Even).
+- 2026-11-13: crafting Phase 2 second pass, Smelting + Disenchanting. 2026-11-12: 1.4.0 design scope, style guide.
+- 2026-11-10 1.3.1. 2026-11-04 1.0.0 on WoW Forever.
