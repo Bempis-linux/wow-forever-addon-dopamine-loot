@@ -1137,6 +1137,12 @@ Professions (from 1.3.0):
    **A. Iron clank** (short damped low metal clank + soft crunch; a fan of spark streaks), **B. Heavy thud** (deep thud with
    gravel; a big high shower of sparks, harder kick), **C. Crunch + scale** (gritty crunch + low knock; sparks and dark scale
    flakes tumbling off), **D. Clank + ember spray** (the clank; embers spray sideways toward the next bead like a fuse).
+   Round 77 → **C LOCKED: the finale animation** = rising beads, struck to iron left to right with the crunch + scale, then
+   the crate (round 72 E’s ending). The ding was back: it was the old “dress” bell (metal 660 Hz) in the payoff; now off for
+   Blacksmithing, the crate lid a low thud. Finale sound, round 78 (a low pound with reverb, as asked; a WebAudio convolver
+   with a generated impulse): **A. Low pound, big hall** (one deep pound, a long dark reverb), **B. Double pound** (the second
+   lower and heavier, medium reverb), **C. Pound + forge breath** (the pound + a soft rush of air into the reverb), **D. Short
+   room pound** (tight, a short stone-room reverb).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
