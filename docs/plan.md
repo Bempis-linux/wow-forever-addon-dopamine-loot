@@ -1107,6 +1107,11 @@ Professions (from 1.3.0):
    **F. The blade rises (clean)** (a whole sword, fuller, gold crossguard, wrapped grip, pommel, rises smoothly, magma
    sheeting off in drips, its heat lifting as the swarm; cools to steel; a glint runs to the tip; it turns and flies into
    the icon).
+   Round 72 → iterate **the ingots and the blade, without the ember swarm**. Round 73: **A. Ingots into a crate** (72 E, no
+   swarm), **B. Ingots onto a cart** (same clean start; a mine cart rolls in on a short track under the bar’s end; the row of
+   ingots slides along the bar step by step like a conveyor, the end one tipping into the cart each time with a clink; the
+   cart rolls away), **C. The blade rises (lying)** (72 F, no swarm), **D. The blade rises upright** (point first out of the
+   head, standing upright, drips; a glint climbs to the point; it tips over toward the icon and flies in).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

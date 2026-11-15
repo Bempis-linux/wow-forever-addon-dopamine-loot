@@ -886,3 +886,31 @@ function r71(K) { const F = FIN71[K], V = V69(F), g0 = V.grow; V.grow = (p, x0, 
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; } } }; }
 Object.assign(FAM, { PA: r71('A'), PB: r71('B'), PC: r71('C'), PD: r71('D') });
+
+// Round 72 Ember swarm add-ons (FIN72, r72), moved out 2026-11-15; swarm72, INGOTS72, BLADE72 stay.
+// ---- add-ons on the Ember swarm
+const FIN72 = {
+  A: Object.assign({}, SW, { name: 'Ember swarm' }),
+  B: { name: 'Swarm + vortex', finAt: 2.05, desc: 'Add-on: the ribbon of embers doesn’t pour straight in: it whirls round the icon in a tightening vortex, faster and faster, then implodes into it with a flash.',
+    lift: () => () => 0, fin(I, ts, sf) { swarm72(I, ts, { src: surfSrc72(I, sf), spin: true }); once('vb', () => chime72()); if (ts > 1.75) once('vi', () => { rumble69(.5); bell45(1568, 0, .007); }); },
+    after: (I, ts) => { const ux = ux69(I); if (ts > .9 && ts < 1.9) glow58(ux, I.ly, 18, .25 + .3 * clamp((ts - .9) / .9)); blaze69(ux, I.ly, ts > 1.75 ? Math.min(1, (ts - 1.75) / .1) * Math.max(0, 1 - (ts - 1.85) / .5) : 0); } },
+  C: { name: 'Swarm + heat wake', desc: 'Add-on: the magma answers the swarm: where the embers lift off, the surface flares bright and ripples, and a glowing wake follows the ribbon along the bar to the end, so the whole bar lights up in a wave under it.', finAt: 1.75,
+    lift: (I, ts) => { const P = []; for (let q = 0; q < 70; q += 3) { const st = rnd53(q * 3 + 301) * .45, a = ts - st; if (a >= 0 && a < .8) P.push([lerp(I.x0 + 4, I.tipX - 2, rnd53(q * 3 + 300)), a, .35]); } return ripple66(P); },
+    fin(I, ts, sf) { const wx = lerp(I.x0, I.tipX + 20, clamp(ts / 1.2)), a = ts < 1.4 ? 1 : 1 - (ts - 1.4) / .3; if (a > 0) { ctx.save(); ctx.beginPath(); ctx.rect(I.x0 - 2, I.ly - 16, Math.min(wx, I.tipX) - I.x0 + 2, 23); ctx.clip(); const g = ctx.createLinearGradient(wx - 60, 0, wx, 0); g.addColorStop(0, 'rgba(255,240,180,0)'); g.addColorStop(1, `rgba(255,240,180,${.55 * a})`); ctx.fillStyle = g; ctx.fillRect(wx - 60, I.ly - 16, 60, 23); ctx.restore(); }
+      SW.fin(I, ts, sf); }, after: SW.after },
+  D: { name: 'Swarm + ash rain', desc: 'Add-on: when the embers have filled the icon and it lights, it breathes out a soft burst and the embers drift back down as glowing ash, swaying, settling onto the magma along the bar with tiny ripples where they land.', finAt: 1.75,
+    lift: (I, ts) => { const P = []; for (let q = 0; q < 26; q++) { const land = 1.85 + rnd53(q + 800) * 1 + .55, a = ts - land; if (a >= 0 && a < .7) P.push([ash72x(I, q), a, .3]); } return ripple66(P); },
+    fin(I, ts, sf) { SW.fin(I, ts, sf); if (ts < 1.85) return; for (let q = 0; q < 26; q++) { const st = 1.85 + rnd53(q + 800) * 1, a = ts - st; if (a < 0 || a > .55) continue; const u = a / .55, x0 = ux69(I) - 4, tx = ash72x(I, q), x = lerp(x0, tx, u) + Math.sin(a * 7 + q) * 3, y = lerp(I.ly - 14 - rnd53(q) * 6, sf(tx), u * u);
+        ctx.save(); ctx.globalAlpha *= .9; ctx.fillStyle = q % 2 ? '#ffb070' : '#ffe0b0'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 3; ctx.beginPath(); ctx.arc(x, y, 1, 0, 7); ctx.fill(); ctx.restore(); } if (ts >= 1.85) once('ar', () => [0, 1, 2].forEach(q => bell45(1046 * semi(PENT42[4 - q]), q * .3, .0025))); },
+    after: SW.after },
+  E: INGOTS72, F: BLADE72,
+};
+const ash72x = (I, q) => lerp(I.x0 + 6, I.tipX - 4, rnd53(q + 801));
+function r72(K) { const F = FIN72[K], V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'Blacksmithing as picked. Reaching the next unlock: ' + F.desc + ' (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'finale: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K > 'D' ? 'A' : K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; } } }; }
+Object.assign(FAM, { PA: r72('A'), PB: r72('B'), PC: r72('C'), PD: r72('D'), PE: r72('E'), PF: r72('F') });
