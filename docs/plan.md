@@ -988,6 +988,15 @@ Professions (from 1.3.0):
    (ahead of the fill, raw bent stock sags below the bar; each skill-up snaps the next section straight with a jolt),
    **D. Raised ridge** (flat steel; the newest part's ridge swells up as if pushed from behind, a highlight runs the crest,
    a soft thud).
+   Round 56 → "just a simple gray bar moving forward, nothing really blacksmithy". Lesson: avoiding the craft ring's
+   hammer, heat and sparks stripped out the blacksmithing; no-echo forbids shared **shapes**, not materials, so heat,
+   embers and the anvil come back in new forms (still no hammer). Round 57: **A. Ringing steel, curls** (kept), **B. Forge
+   coals** (a glowing coal bed, flickering, embers drifting up; each skill-up a gust flares a wave down the bar and puffs
+   embers at the new end), **C. On the anvil** (a dark anvil under the bar, horn to the left; each skill-up the bar jumps
+   and drops onto it, the face flashes, scale flakes bounce off), **D. Forged chain** (an iron chain; a red-hot link drops
+   onto the front, swings into place with a clink, darkens to iron).
+   The page hit the browser pane's 512 KiB limit: rejected rounds 53-54 moved to `docs/mockups/skillup-p2-old-rounds.js`
+   (not loaded). Keep the page under 512 KiB (move rejected rounds out as it grows).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
