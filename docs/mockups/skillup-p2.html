@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 76, Blacksmithing finale: beads and the blink</h1>
+  <h1>Skill-up: round 77, Blacksmithing finale: beads, blink to iron</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2856,7 +2856,7 @@ const INGOTS72 = { name: 'Ingots, shipped (clean)', finAt: 2.75, desc: 'Clean an
       if (ts < .37) { if (ts >= cut72(k) && k < N72 - 1) { ctx.fillStyle = 'rgba(30,10,4,.9)'; ctx.fillRect(xb + .1, I.ly - 7, 2.2, 13); } continue; }
       const cool = clamp((ts - cool72(k)) / .3), u = (ts - fly72(k)) / .3;
       if (u < 0) ing72(xa, xb, I.ly + .5, cool); else if (u < 1) { const [sx, sy] = stackPos72(I, N72 - 1 - k, cx, cy), e = u * u * (3 - 2 * u); ing72(lerp(xa, sx - 3, e), lerp(xb, sx + 3, e), lerp(I.ly + .5, sy, e) - Math.sin(Math.PI * u) * 10, 1, 1 - .45 * e); }
-      if (u >= 1) once('ld' + k, () => { mallet(587 * semi(PENT42[(N72 - 1 - k) % 7]), 0, .014); tone(1760 * semi(PENT42[k % 5]), .01, .0025, .15, 'sine', null, .002); }); }
+      if (u >= 1) once('ld' + k, () => { if (window.LDSND72) return window.LDSND72(k); mallet(587 * semi(PENT42[(N72 - 1 - k) % 7]), 0, .014); tone(1760 * semi(PENT42[k % 5]), .01, .0025, .15, 'sine', null, .002); }); }
     if (ts < .37) { const lx = lerp(I.x0, I.x1, clamp((ts - .05) / .3)); glow58(lx, I.ly, 8, .8); ctx.fillStyle = '#fff6d8'; ctx.fillRect(lx - .8, I.ly - 7, 1.6, 14); }
     swarm72(I, ts, { t0: .45, spread: .5, n: 56, src: q => { const k = q % N72, [xa, xb] = seg72(I, k); return [lerp(xa, xb, rnd53(q + 500)), I.ly - 4]; } }); if (ts >= .45) once('ech', () => chime72(.1));
 
@@ -2890,30 +2890,43 @@ function riseBead76(I, ts, sf, k, n) { const t0 = .05 + n * .1, u = eOut(clamp((
 // the beading-up from the whole bar (round 75 B): necks thin and snap
 function beadUp76(I, ts, k) { const [xa, xb] = seg72(I, k), w = (I.x1 - I.x0) / N72, cx = (xa + xb) / 2, u = clamp(ts / .45), B = beadAt76(I, k, ts, Math.exp(-Math.max(0, ts - .45) * 2)), bw = lerp(w + 1, B.bw, eOut(u)), r = lerp(1, 5, u);
   blob76(cx, I.ly + .5, bw, B.bh, r); if (u < 1 && k < N72 - 1) { const nh = 10 * (1 - eOut(u)); if (nh > .5) { ctx.fillStyle = '#ff9a34'; ctx.fillRect(xb - .9, I.ly + .5 - nh / 2, 3, nh); } } }
-const FORM76 = {
-  A: { name: 'Rising beads', desc: 'B + D: in no set order, molten beads rise up out of the magma (dripping, wobbling) while its level sinks; then each one firms into an ingot and cools to iron where it sits.',
-    sink: true, draw(I, ts, sf) { riseOrder75.forEach((k, n) => { const t0 = .05 + n * .1, firm = clamp((ts - t0 - .5) / .25); if (firm < 1) riseBead76(I, ts, sf, k, n); if (firm > 0) { const [xa, xb] = seg72(I, k); ctx.save(); ctx.globalAlpha *= firm; ing72(xa, xb, I.ly + .5, clamp((ts - t0 - .75) / .3)); ctx.restore(); } }); } },
-  B: { name: 'Beads, then the blink', desc: 'The magma beads up into seven wobbling molten beads and they sit glowing for a moment; then, fast, left to right, each is struck in a white blink and snaps into an ingot (a squash that springs back, a few sparks, a soft tap a step higher each), rat-a-tat along the bar; then a cooling wave turns them to iron.',
-    draw(I, ts) { for (let k = 0; k < N72; k++) { const b = blink76(I, k, ts, .8 + k * .08, false); if (!b) beadUp76(I, ts, k); else shaped76(I, k, ts, b, clamp((ts - 1.32 - k * .03) / .25)); } } },
-  C: { name: 'Rising beads, then the blink', desc: 'Both: molten beads rise out of the sinking magma in no set order and sit wobbling; then the blink runs left to right, each bead struck in a flash and snapped into an ingot; a quick cooling wave turns them to iron.',
-    sink: true, draw(I, ts, sf) { riseOrder75.forEach((k, n) => { const b = blink76(I, k, ts, 1.02 + k * .08, false); if (!b) riseBead76(I, ts, sf, k, n); else shaped76(I, k, ts, b, clamp((ts - 1.5 - k * .02) / .15)); }); } },
-  D: { name: 'Blink to iron', desc: 'Like B, but each blink does it all at once: the bead is struck, snaps into an ingot and goes from glowing orange to iron in the same flash, so a crisp line of finished iron ingots races left to right along the bar.',
-    draw(I, ts) { for (let k = 0; k < N72; k++) { const b = blink76(I, k, ts, .8 + k * .08, true); if (!b) beadUp76(I, ts, k); else shaped76(I, k, ts, b, 0); } } },
+// ---------- round 77 (2026-11-15): Rising beads (76 A) + Blink to iron (76 D), made SPARKY and CHUNKY, no chimes. Four strike sets (spark style + sound) ----------
+// the strike: a hard squash that springs back, the bar jolts, sparks burst, and the bead is iron in the same flash
+const SET77 = {
+  A: { name: 'Iron clank', desc: 'A short, dull metal clank (low and damped, the pitch varied) with a soft crunch; a fan of bright spark streaks bursting up and out from each ingot.',
+    snd: (k, v) => { const f = 190 * semi(pick45(k, 2) / 2); tone(f, 0, .03 * v, .09, 'triangle', null, .001); tone(f * 2.6, 0, .008 * v, .04, 'triangle', null, .001); noise(0, .05, .03 * v, 1200, .8, 'lowpass', true); drum46(110, 0, .02 * v); },
+    sparks: (x, y) => { for (let q = 0; q < 12; q++) { const an = -Math.PI / 2 + (q / 11 - .5) * 2.4, sp = 70 + Math.random() * 70; spawn({ x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, g: 340, life: .32 + Math.random() * .12, size: .9 + Math.random() * .5, col: q % 3 ? '#ffc060' : '#fff6d8' }); } } },
+  B: { name: 'Heavy thud', desc: 'A deep, heavy thud with gravel in it (felt more than heard); a big shower of sparks thrown high that rain back down, and the bar kicks harder.',
+    snd: (k, v) => { drum46(78 * semi(pick45(k, 2) / 3), 0, .04 * v); noise(0, .12, .035 * v, 520, .7, 'lowpass', true); tone(62, 0, .02 * v, .16, 'sine', null, .002); }, kick: 1.6,
+    sparks: (x, y) => { for (let q = 0; q < 16; q++) spawn({ x: x + (Math.random() - .5) * 10, y, vx: (Math.random() - .5) * 120, vy: -90 - Math.random() * 90, g: 420, life: .55 + Math.random() * .2, size: .9 + Math.random() * .6, col: q % 3 ? '#ffb040' : '#ffe8b0' }); } },
+  C: { name: 'Crunch + scale', desc: 'A gritty crunch with a low knock under it; sparks plus dark flakes of scale popping off each ingot and tumbling down off the bar.',
+    snd: (k, v) => { noise(0, .07, .035 * v, 1600, .9, 'bandpass', true); tone(140 * semi(pick45(k, 2) / 2), 0, .025 * v, .1, 'sine', null, .001); drum46(130, 0, .018 * v); },
+    sparks: (x, y) => { for (let q = 0; q < 8; q++) spawn({ x, y, vx: (Math.random() - .5) * 110, vy: -50 - Math.random() * 70, g: 360, life: .35, size: .9, col: '#ffd070' }); for (let q = 0; q < 6; q++) spawn({ x: x + (Math.random() - .5) * 16, y: y + 2, vx: (Math.random() - .5) * 50, vy: -20 - Math.random() * 30, g: 300, life: .6, size: 1.2 + Math.random(), shape: 'sq', vr: 12, col: q % 2 ? '#2e2a28' : '#4a3a30' }); } },
+  D: { name: 'Clank + ember spray', desc: 'The iron clank, but each strike also throws a short sideways spray of hot embers along the bar toward the next bead, so the sparks run ahead of the strikes like a fuse.',
+    snd: (k, v) => SET77.A.snd(k, v),
+    sparks: (x, y) => { for (let q = 0; q < 10; q++) spawn({ x, y: y + 1, vx: 60 + Math.random() * 90, vy: -30 - Math.random() * 40, g: 300, life: .3 + Math.random() * .15, size: .9 + Math.random() * .4, col: q % 3 ? '#ffb040' : '#fff0c0' }); for (let q = 0; q < 5; q++) spawn({ x, y, vx: (Math.random() - .5) * 60, vy: -70 - Math.random() * 40, g: 340, life: .3, size: .8, col: '#fff6d8' }); } },
 };
-function fin76(K) { const M = FORM76[K], X = INGOTS72;
-  return Object.assign({}, X, { name: M.name, desc: M.desc, finAt: X.finAt + SH76,
-    lift: M.sink ? ((I, ts) => { const d = 9 * eOut(clamp(ts / 1)); return x => -d; }) : X.lift,
-    tip: (I, ts) => M.sink ? (ts < 1 ? null : ts < 1.65 ? I.x0 : X.tip(I, ts - SH76)) : (ts < 1.65 ? I.x0 : X.tip(I, ts - SH76)),
+const strike77 = k => 1.05 + k * .085;
+function blink77(I, k, ts, S7) { const [xa, xb] = seg72(I, k), a = ts - strike77(k); if (a < 0) return null; once('bk' + k, () => { S7.snd(k, fat45(k) * (k === N72 - 1 ? 1.25 : 1)); S7.sparks((xa + xb) / 2, I.ly - 4); });
+  const sq = a < .14 ? Math.sin(Math.PI * a / .14) : 0; return { sq: sq * 1.5, flash: Math.max(0, 1 - a / .09), cool: clamp(a / .1) }; }
+const LAND77 = { A: (k, v) => SET77.A.snd(k + 3, .55), B: (k) => { drum46(90, 0, .022); noise(0, .08, .02, 500, .7, 'lowpass', true); }, C: (k) => { noise(0, .05, .02, 1400, .9, 'bandpass', true); drum46(120, 0, .014); }, D: (k, v) => SET77.A.snd(k + 3, .55) };
+function form77(K) { const S7 = SET77[K];
+  return { draw(I, ts, sf) { riseOrder75.forEach((k, n) => { const b = blink77(I, k, ts, S7); if (!b) riseBead76(I, ts, sf, k, n); else shaped76(I, k, ts, b, 0); }); },
+    shake: ts => { let s = 0; for (let k = 0; k < N72; k++) { const a = ts - strike77(k); if (a >= 0 && a < .1) s = Math.max(s, (1 - a / .1) * (S7.kick || 1)); } return s; } }; }
+function fin77(K) { const M = form77(K), X = INGOTS72;
+  return Object.assign({}, X, { name: SET77[K].name, desc: SET77[K].desc, finAt: X.finAt + SH76,
+    lift: (I, ts) => { const d = 9 * eOut(clamp(ts / 1)); return x => -d; }, tip: (I, ts) => ts < 1 ? null : ts < 1.65 ? I.x0 : X.tip(I, ts - SH76),
     fin(I, ts, sf) { for (let k = 0; k < N72; k++) once('ct' + k, () => {}); if (ts < 1.65) { M.draw(I, ts, sf); return; } X.fin(I, ts - SH76, sf); },
-    after: (I, ts) => X.after(I, ts - SH76) }); }
-function r76(K) { const F = fin76(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+    after: (I, ts) => X.after(I, ts - SH76), shakeAt: M.shake }); }
+function r77(K) { const F = fin77(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+  V.shake = I => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; if (ts < 0) return [0, 0]; const s = F.shakeAt(ts); return [(Math.random() - .5) * 1.2 * s, 1.6 * s]; };
   return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-  get desc() { return profName === 'Blacksmithing' ? 'Reaching the next unlock: how the ingots are made. ' + F.desc + ' Then the same crate ending for all four. (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
-  get note() { return profName === 'Blacksmithing' ? 'ingots: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  get desc() { return profName === 'Blacksmithing' ? 'Reaching the next unlock: molten beads rise out of the sinking magma (76 A), then left to right each is struck and turns to an iron ingot in the same flash (76 D), harder now: a deeper squash, the bar jolts with each strike, no chimes. ' + F.desc + ' The crate ending uses the same sound family. (Sound on; pick “Reaching the next unlock”.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'strike: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
-    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
-    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
-Object.assign(FAM, { PA: r76('A'), PB: r76('B'), PC: r76('C'), PD: r76('D') });
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; window.LDSND72 = LAND77[K]; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; window.LDSND72 = null; } } }; }
+Object.assign(FAM, { PA: r77('A'), PB: r77('B'), PC: r77('C'), PD: r77('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

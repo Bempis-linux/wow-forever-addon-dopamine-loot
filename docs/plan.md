@@ -1132,6 +1132,11 @@ Professions (from 1.3.0):
    blink** (the bar beads up, the beads sit glowing, then rat-a-tat left to right each is struck in a white flash and snaps
    into an ingot: squash + spring back, three sparks, a soft tap a step higher; then a cooling wave), **C. Rising beads, then
    the blink**, **D. Blink to iron** (each blink shapes and cools at once: a line of finished iron races left to right).
+   Round 76 → **A (rising beads) + D (blink to iron)**, more **sparky and chunky**, the sound “too chime-y”. Round 77 (the
+   combination; harder strikes: deeper squash, the bar jolts each strike; no chimes, the crate landings in the same family):
+   **A. Iron clank** (short damped low metal clank + soft crunch; a fan of spark streaks), **B. Heavy thud** (deep thud with
+   gravel; a big high shower of sparks, harder kick), **C. Crunch + scale** (gritty crunch + low knock; sparks and dark scale
+   flakes tumbling off), **D. Clank + ember spray** (the clank; embers spray sideways toward the next bead like a fuse).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

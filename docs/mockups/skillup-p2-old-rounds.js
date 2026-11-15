@@ -1060,3 +1060,29 @@ function r75(K) { const F = fin75(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, 
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
 Object.assign(FAM, { PA: r75('A'), PB: r75('B'), PC: r75('C'), PD: r75('D') });
+
+// Round 76 options (FORM76, fin76, r76), moved out 2026-11-15; blob76, riseBead76, shaped76, beadUp76 stay.
+const FORM76 = {
+  A: { name: 'Rising beads', desc: 'B + D: in no set order, molten beads rise up out of the magma (dripping, wobbling) while its level sinks; then each one firms into an ingot and cools to iron where it sits.',
+    sink: true, draw(I, ts, sf) { riseOrder75.forEach((k, n) => { const t0 = .05 + n * .1, firm = clamp((ts - t0 - .5) / .25); if (firm < 1) riseBead76(I, ts, sf, k, n); if (firm > 0) { const [xa, xb] = seg72(I, k); ctx.save(); ctx.globalAlpha *= firm; ing72(xa, xb, I.ly + .5, clamp((ts - t0 - .75) / .3)); ctx.restore(); } }); } },
+  B: { name: 'Beads, then the blink', desc: 'The magma beads up into seven wobbling molten beads and they sit glowing for a moment; then, fast, left to right, each is struck in a white blink and snaps into an ingot (a squash that springs back, a few sparks, a soft tap a step higher each), rat-a-tat along the bar; then a cooling wave turns them to iron.',
+    draw(I, ts) { for (let k = 0; k < N72; k++) { const b = blink76(I, k, ts, .8 + k * .08, false); if (!b) beadUp76(I, ts, k); else shaped76(I, k, ts, b, clamp((ts - 1.32 - k * .03) / .25)); } } },
+  C: { name: 'Rising beads, then the blink', desc: 'Both: molten beads rise out of the sinking magma in no set order and sit wobbling; then the blink runs left to right, each bead struck in a flash and snapped into an ingot; a quick cooling wave turns them to iron.',
+    sink: true, draw(I, ts, sf) { riseOrder75.forEach((k, n) => { const b = blink76(I, k, ts, 1.02 + k * .08, false); if (!b) riseBead76(I, ts, sf, k, n); else shaped76(I, k, ts, b, clamp((ts - 1.5 - k * .02) / .15)); }); } },
+  D: { name: 'Blink to iron', desc: 'Like B, but each blink does it all at once: the bead is struck, snaps into an ingot and goes from glowing orange to iron in the same flash, so a crisp line of finished iron ingots races left to right along the bar.',
+    draw(I, ts) { for (let k = 0; k < N72; k++) { const b = blink76(I, k, ts, .8 + k * .08, true); if (!b) beadUp76(I, ts, k); else shaped76(I, k, ts, b, 0); } } },
+};
+function fin76(K) { const M = FORM76[K], X = INGOTS72;
+  return Object.assign({}, X, { name: M.name, desc: M.desc, finAt: X.finAt + SH76,
+    lift: M.sink ? ((I, ts) => { const d = 9 * eOut(clamp(ts / 1)); return x => -d; }) : X.lift,
+    tip: (I, ts) => M.sink ? (ts < 1 ? null : ts < 1.65 ? I.x0 : X.tip(I, ts - SH76)) : (ts < 1.65 ? I.x0 : X.tip(I, ts - SH76)),
+    fin(I, ts, sf) { for (let k = 0; k < N72; k++) once('ct' + k, () => {}); if (ts < 1.65) { M.draw(I, ts, sf); return; } X.fin(I, ts - SH76, sf); },
+    after: (I, ts) => X.after(I, ts - SH76) }); }
+function r76(K) { const F = fin76(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'Reaching the next unlock: how the ingots are made. ' + F.desc + ' Then the same crate ending for all four. (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'ingots: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
+Object.assign(FAM, { PA: r76('A'), PB: r76('B'), PC: r76('C'), PD: r76('D') });
