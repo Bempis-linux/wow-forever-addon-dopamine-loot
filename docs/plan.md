@@ -1154,6 +1154,11 @@ Professions (from 1.3.0):
    clang with grit, not a bell, then the boom), **D. Peon runs off with it** (B’s sound; as the lid drops a little peon,
    simple shapes, runs in, hoists the crate overhead and runs off kicking up dust; the icon lights). Dead helpers moved to
    the archive file.
+   Round 80 → **D LOCKED: the peon runs off with the crate.** Its sounds, round 81 (footsteps, the grab, the dash and the
+   closing hit; the footsteps stop just before the hit so the run builds into it): **A. Ting + boom** (as 80 D), **B. Scamper +
+   pop** (wooden pitter-patter, a little hup, an airy whoosh, a rounder pop + tiny ting), **C. Rattling crate** (the ingots
+   clatter in the crate with each step; a wooden thunk on the grab; ting + boom), **D. Drum steps into the boom** (the steps
+   are little drum hits climbing and quickening, landing on the punchy boom).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

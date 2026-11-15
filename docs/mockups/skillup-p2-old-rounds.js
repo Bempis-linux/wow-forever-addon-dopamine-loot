@@ -1153,3 +1153,22 @@ function blink76(I, k, ts, tb, toIron) { const [xa, xb] = seg72(I, k), a = ts - 
   const sq = a < .12 ? Math.sin(Math.PI * a / .12) : 0; return { sq, flash: Math.max(0, 1 - a / .1), cool: toIron ? clamp(a / .12) : 0 }; }
 function beadUp76(I, ts, k) { const [xa, xb] = seg72(I, k), w = (I.x1 - I.x0) / N72, cx = (xa + xb) / 2, u = clamp(ts / .45), B = beadAt76(I, k, ts, Math.exp(-Math.max(0, ts - .45) * 2)), bw = lerp(w + 1, B.bw, eOut(u)), r = lerp(1, 5, u);
   blob76(cx, I.ly + .5, bw, B.bh, r); if (u < 1 && k < N72 - 1) { const nh = 10 * (1 - eOut(u)); if (nh > .5) { ctx.fillStyle = '#ff9a34'; ctx.fillRect(xb - .9, I.ly + .5 - nh / 2, 3, nh); } } }
+
+// Round 79 booms (SND79, r79), moved out 2026-11-15; bus79/vox79/nz79 stay.
+const SND79 = {
+  A: { name: 'Punchy boom', desc: 'A tight, chunky boom: a kick that punches and drops, a saturated mid-range thump (the chunk you feel in your chest), a short crunchy burst, all in a medium reverb.',
+    play() { if (!on()) return; const T = ac().currentTime, B = bus79(.45, 1.6, 3); vox79(B, T, 'sine', 150, 52, .5, .55); vox79(B, T, 'triangle', 110, 70, .22, .25); nz79(B, T, .18, .5, 'bandpass', 900, 300, 'hit', .9); nz79(B, T, .5, .3, 'lowpass', 180, 90, 'hit'); } },
+  B: { name: 'Blast', desc: 'An explosion: a burst of noise that sweeps down from bright to dark like a blast wave, a deep rumble under it, a long rolling tail.',
+    play() { if (!on()) return; const T = ac().currentTime, B = bus79(.7, 2.6, 2); nz79(B, T, .9, .55, 'lowpass', 2600, 160, 'hit', .7); vox79(B, T, 'sine', 90, 38, .45, 1.2, .01); nz79(B, T + .05, 1.6, .25, 'lowpass', 140, 60, 'flat'); } },
+  C: { name: 'Swell + slam', desc: 'A short rising rush (half a second sucked in) that slams into a big chunky boom, like a trailer impact: the build makes the hit land harder.',
+    play() { if (!on()) return; const T = ac().currentTime, B = bus79(.55, 2, 3); nz79(B, T, .45, .28, 'bandpass', 250, 1800, 'swell', 1.2); vox79(B, T, 'sawtooth', 55, 110, .06, .45, .4); const H = T + .45; vox79(B, H, 'sine', 160, 48, .55, .7); vox79(B, H, 'triangle', 120, 65, .25, .3); nz79(B, H, .22, .5, 'bandpass', 1000, 250, 'hit', .8); } },
+  D: { name: 'Boss falls', desc: 'Like a JRPG boss dying: a low crumbling rumble that flickers in fast pulses (as if the thing flashes and breaks apart) and sinks, for about a second, then one last deep boom that rolls out into a long reverb.',
+    play() { if (!on()) return; const T = ac().currentTime, B = bus79(.6, 2.8, 2.2); nz79(B, T, 1.1, .38, 'lowpass', 1400, 220, 'flat', .7, 14); vox79(B, T, 'sawtooth', 72, 40, .07, 1.1, .2); vox79(B, T, 'square', 36, 30, .04, 1.1, .3);
+      const H = T + 1.05; vox79(B, H, 'sine', 140, 42, .55, 1); nz79(B, H, .3, .45, 'lowpass', 900, 150, 'hit'); } },
+};
+function r79(K) { const B = r77('C'), S9 = SND79[K];
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? S9.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+    get desc() { return profName === 'Blacksmithing' ? 'The finale as locked. Its closing sound, when the icon lights: ' + S9.desc + ' (Sound on; pick “Reaching the next unlock”.)' : 'One profession at a time: this round is Blacksmithing’s finale sound. Others show their current look.'; },
+    get note() { return profName === 'Blacksmithing' ? 'finale sound: ' + S9.name.toLowerCase() + '.' : 'the set bar.'; },
+    draw(top) { window.FINSND78 = () => S9.play(); try { B.draw(top); } finally { window.FINSND78 = null; } } }; }
+Object.assign(FAM, { PA: r79('A'), PB: r79('B'), PC: r79('C'), PD: r79('D') });
