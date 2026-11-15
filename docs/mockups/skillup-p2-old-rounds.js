@@ -465,3 +465,54 @@ function r63(K) { const L = LOOK63[K]; return { get name() { return K + '. ' + (
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
     try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => mag62(L.key, I, t), over: (p, I) => onHits('m63', i => lsnd61(i, fat45(i))) }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
 Object.assign(FAM, { PA: r63('A'), PB: r63('B'), PC: r63('C'), PD: r63('D') });
+
+// Round 62 looks A/C/D + r62, round 64 C/D + r64 (magma looks), moved out 2026-11-15.
+  // A: round 61's look: hot vertical gradient, bright and dark streaks flowing toward the front
+  A(xa, xb, ly, bot, t) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#ffe08a'); g.addColorStop(.3, '#ff8a24'); g.addColorStop(.7, '#b8300a'); g.addColorStop(1, '#4a0e04'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    ctx.lineCap = 'round'; for (let k = 0; k < 46; k++) { const sp = 14 + rnd53(k) * 22, len = 5 + rnd53(k + 1) * 11, x = xa - 12 + ((rnd53(k + 2) * 260 + t * sp) % 260), y = ly - 4 + rnd53(k + 3) * 9; if (x > xb) continue;
+      ctx.strokeStyle = k % 3 ? `rgba(255,232,160,${.35 + rnd53(k + 4) * .3})` : 'rgba(80,14,4,.45)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + Math.sin(x * .1) * .6); ctx.stroke(); } },
+  // C: marbled: molten orange with long bright and dark swirls drifting through it, like stirred metal
+  C(xa, xb, ly, bot, t) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#ff9a34'); g.addColorStop(1, '#a8280a'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (let k = 0; k < 14; k++) { const a = xa - 40 + ((rnd53(k + 90) * 290 + t * (5 + rnd53(k + 91) * 4)) % 290), len = 30 + rnd53(k + 92) * 30, yc = ly - 2 + rnd53(k + 93) * 6, amp = 1.5 + rnd53(k + 94) * 2, fr = .12 + rnd53(k + 95) * .1, ph = rnd53(k + 96) * 6 + t * .4;
+      ctx.strokeStyle = k % 3 === 0 ? 'rgba(90,16,4,.55)' : `rgba(255,236,170,${.45 + rnd53(k + 97) * .35})`; ctx.lineWidth = k % 3 === 0 ? 1.4 : 1 + rnd53(k + 98) * .8; ctx.beginPath(); for (let x = a; x <= a + len; x += 2) { const u = (x - a) / len; ctx.lineTo(x, yc + amp * Math.sin((x - a) * fr + ph) * Math.sin(Math.PI * u) + Math.sin(u * 3 + ph) * 1.2); } ctx.stroke(); } },
+  // D: painted, the way the game's own lava textures are: flat warm orange, big soft yellow highlight blobs and dark red shadow blobs that slowly drift and swell
+  D(xa, xb, ly, bot, t) { ctx.fillStyle = '#f07a22'; ctx.fillRect(xa, ly - 16, xb - xa, 30); const sh = ctx.createLinearGradient(0, ly - 4, 0, bot); sh.addColorStop(0, 'rgba(120,20,0,0)'); sh.addColorStop(1, 'rgba(120,20,0,.55)'); ctx.fillStyle = sh; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    for (let k = 0; k < 16; k++) { const hot = k % 2 === 0, x = xa - 10 + ((rnd53(k + 120) * 250 + t * 3) % 250), y = ly - 2 + rnd53(k + 121) * 7 + (hot ? -1.5 : 1.5), r = (hot ? 4 : 5) + rnd53(k + 122) * 4 + Math.sin(t * .9 + k) * 1; if (x > xb + r) continue;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, hot ? 'rgba(255,236,140,.9)' : 'rgba(150,26,4,.55)'); g.addColorStop(.6, hot ? 'rgba(255,214,100,.5)' : 'rgba(150,26,4,.25)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, r * 1.6, r * .7, 0, 0, 7); ctx.fill(); }
+  },
+const LOOK62 = {
+  A: { name: 'Flow streaks', desc: 'Round 61’s look in the new bar: a hot gradient (yellow at the surface, deep red below) with bright and dark streaks flowing toward the front.' },
+  B: { name: 'Depth bands', desc: 'The heat in soft layers, like the Fishing bar’s depth bands: pale yellow just under the surface, then gold, orange, red, deep red at the bottom; the band edges sway slowly. Clean and calm.' },
+  C: { name: 'Marbled', desc: 'Molten orange with long bright and dark swirls drifting through it, like stirred molten metal or marble.' },
+  D: { name: 'Painted', desc: 'Like the game’s own lava textures: a flat warm orange with big soft yellow highlights and dark red shadows that drift and swell slowly; a thicker bright rim on the surface.' },
+};
+function r62(K) { return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? LOOK62[K].name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'The magma’s look only (animations come after): the bar is open at the top like Fishing’s, the wavy surface is its top edge, dark cooled lava ahead of the fill. ' + LOOK62[K].desc + ' (A skill-up just eases the fill on with a small swell; placeholder sound.)' : 'One profession at a time: this round is Blacksmithing’s magma look. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'magma look: ' + LOOK62[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
+    try { barModule(top, 'M', { grow: (p, x0, y, L, f, t, I) => mag62(K, I, t), over: (p, I) => onHits('m62', i => lsnd61(i, fat45(i))) }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
+Object.assign(FAM, { PA: r62('A'), PB: r62('B'), PC: r62('C'), PD: r62('D') });
+  // C: convection cells: bright rounded cells of magma packed together, dark cooler seams between them, slowly drifting and breathing
+  C64(xa, xb, ly, bot, t) { ctx.fillStyle = '#4a1206'; ctx.fillRect(xa, ly - 16, xb - xa, 30); const off = t * 2.5, sh = Math.floor(off / 9);
+    for (let row = 0; row < 3; row++) for (let k = -1; k < 30; k++) { const id = (k - sh) * 3 + row, x = xa + k * 9 + (off % 9) + (row % 2) * 4.5 + (rnd53(id + 500) - .5) * 3, y = ly - 4 + row * 4 + (rnd53(id + 501) - .5) * 1.5; if (x > xb + 6) continue;
+      const br = .75 + .25 * Math.sin(t * (.8 + rnd53(id + 502)) + id), rx = 4.2 + rnd53(id + 503) * 1, ry = 2.2 + rnd53(id + 504) * .6, g = ctx.createRadialGradient(x, y - .5, 0, x, y, rx);
+      g.addColorStop(0, mix('#ff9a34', '#fff0b0', br * .8)); g.addColorStop(.7, '#f06a1a'); g.addColorStop(1, '#a8300c'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill(); } },
+  // D: glossy molten metal: smooth and deep, a bright mirror highlight riding the waves (strongest on the crests), a slow sheen, a warm rim light below
+  D64(xa, xb, ly, bot, t, surf) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#ff9a3a'); g.addColorStop(.45, '#d8460e'); g.addColorStop(1, '#4a0e04'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    ctx.lineCap = 'round'; for (let x = xa; x < xb; x += 2) { const s = surf(x + 1) - surf(x - 1), a = clamp(.25 + (-s) * .5 + .2 * Math.sin(x * .05 - t * .7)); if (a < .05) continue; ctx.strokeStyle = `rgba(255,252,235,${a})`; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x, surf(x) + 2.2); ctx.lineTo(x + 2, surf(x + 2) + 2.2); ctx.stroke(); }
+    const sx = xa + ((t * 22) % (xb - xa + 60)) - 30, sg = ctx.createLinearGradient(sx - 20, 0, sx + 20, 0); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,240,210,.28)'); sg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = sg; ctx.fillRect(sx - 20, ly - 16, 40, 30);
+    ctx.fillStyle = 'rgba(255,170,90,.45)'; ctx.fillRect(xa, bot - 1.6, xb - xa, 1); },
+const LOOK64 = {
+  A: { key: 'B', name: 'Depth bands', desc: 'Round 62 B as picked: soft heat layers, pale yellow under the surface to deep red at the bottom, the edges swaying slowly.' },
+  B: { key: 'B64', name: 'Bubbling', over: bub64, desc: 'Plain, deep molten orange with soft warm patches, and bubbles on the surface: now and then one swells up slowly as a glossy dome (about a second and a half), then pops: a bright flash and two little droplets. Only a few at a time, here and there.' },
+  C: { key: 'C64', name: 'Convection cells', desc: 'Rounded cells of bright magma packed together with dark, cooler seams between them, drifting slowly toward the front, each one breathing brighter and dimmer on its own.' },
+  D: { key: 'D64', name: 'Glossy molten', desc: 'Smooth, deep molten metal with a mirror shine: a bright highlight rides the waves just under the surface (strongest on the crests), a slow sheen sweeps along, a warm rim of light along the bottom.' },
+};
+function r64(K) { const L = LOOK64[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? L.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'The magma’s look only (animations come after), in the open-top bar. ' + L.desc + ' (A skill-up just eases the fill on with a small swell; placeholder sound.)' : 'One profession at a time: this round is Blacksmithing’s magma look. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'magma look: ' + L.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
+    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => mag62(L.key, I, t), over: (p, I) => { onHits('m64', i => lsnd61(i, fat45(i))); if (L.over) L.over(I); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
+Object.assign(FAM, { PA: r64('A'), PB: r64('B'), PC: r64('C'), PD: r64('D') });

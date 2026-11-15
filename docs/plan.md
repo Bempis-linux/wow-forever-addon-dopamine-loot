@@ -1048,6 +1048,12 @@ Professions (from 1.3.0):
    flash and two droplets; a few at a time), **C. Convection cells** (bright rounded cells packed with dark cooler seams,
    drifting, each breathing), **D. Glossy molten** (smooth deep molten metal, a mirror highlight riding the wave crests, a
    slow sheen, a warm rim light below).
+   Round 64 → **Bubbling liked**; wants bubbling designs that differ in **both the bubbles and the magma** (again, not
+   slight variations). Round 65 (unused 62/64 looks archived): **A. Bubbling** (as picked), **B. Crust blisters** (dark crust
+   with a web of glowing cracks; rarely a big crust blister swells 2-3 s, cracks glowing hotter, splits: flash, a gout of
+   lava, a bright patch that crusts over), **C. Boiling patch** (deep red calm magma; one hot spot wanders the bar and boils
+   there: many quick small bubbles, tiny glints, heat shimmer), **D. Thick gloops** (matte molten rock; slow bulbs rise and
+   stretch tall on a neck, burst with a thick splat, rings of ripples run both ways along the surface).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
