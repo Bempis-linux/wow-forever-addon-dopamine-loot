@@ -1018,6 +1018,19 @@ Professions (from 1.3.0):
    bubbling** (59 C in a new magma: a wavy glowing surface, bubbles rising, doming and popping; the pour mounds the surface,
    it slumps forward, a swell runs back), **D. Gloops** (the same magma; an opening above drips now and then; each skill-up
    a big glob drops and plops in: the surface dips and rebounds, splash, swell back, the front grows).
+   Round 60 → **B nice: keep adding on to it** (Lingering sparks + clank). Magma "much better" but the bubbles are awkward
+   and the texture still not liked; wants a better lava-fall feel, or a wave from the left that grows. **Two tracks at once
+   → 8 options** (the page now has slots 1-8; keys 1-8). Round 61: sparks (add-ons on 60 B): **A. Lingering sparks** (as
+   picked), **B. Chain flare** (once landed, a flare runs speck to speck to the front and bursts in a fan), **C. Ember pile**
+   (the sparks roll to the front and gather into a glowing pile riding on it; each skill-up adds), **D. The anvil heats up**
+   (the anvil's face glows hotter through a run, bigger showers; cools between runs). Magma (no bubbles; three textures):
+   **E. Lava curtain** (a wide glowing sheet with streaks falls onto the front; crust plates over glowing cracks; mound,
+   slump, swell), **F. Wave from the left** (no fall; flowing streak texture; each skill-up a wave rises at the start and
+   rolls along growing, crashes at the front with spray), **G. Ironforge fall at the start** (the sheet falls into the start;
+   the lava flows to the front; each skill-up the fall surges and a swell rides to the front), **H. Veined lava rock** (dark
+   cooled rock with glowing veins; a heat pulse runs through them, the front cracks open further, chips fall).
+   The pane loads the page as one snapshot (a data: URL), so a separate .js beside it doesn't load: all live code stays
+   inline; unused rounds go to `skillup-p2-old-rounds.js`.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
