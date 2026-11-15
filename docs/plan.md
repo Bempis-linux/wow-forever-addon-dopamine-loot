@@ -843,6 +843,11 @@ Professions (from 1.3.0):
    Round 36 pick: **A, turning 90 degrees in steps. Skinning DONE**: the cut + a stroke + Fur flies; finale: the reticle
    slides in and locks on the icon, fast chops (.07 s) drop the hide away notch by notch with a climbing note, the reticle
    tightens and turns a step per chop (90 degrees in all), the icon lights after the last. Next: Mining.
+   Then Fishing, as it was close to done (the user: bold, unique add-ons, then its finale). **Round 37** (`VAR37`,
+   `r37`, `fishShape`; `window.FSW(x)` lifts the water surface): A as locked, B + Fish jumps (a fish leaps out ahead of
+   the bobber, arcs over with a glint, dives back in with a plop), C + Reeled in (the bobber is yanked under, a fish is
+   hauled out and zips back along the line into the reel, a wet slap and clicks), D + The swell (a hump of water with
+   foam rolls from the reel along the filled water, lifting the line and heaving the bobber).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

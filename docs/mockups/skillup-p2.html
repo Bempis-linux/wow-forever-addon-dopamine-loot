@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 36, Skinning finale: the reticle tightens + turns</h1>
+  <h1>Skill-up: round 37, Fishing add-ons</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 36: Skinning is locked (the cut + Fur flies); its finale: the reticle locks, fast chops drop the hide away and the reticle tightens and turns 90° (A), with three ways to turn (opens on “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-35 stay in the code.
+  the line that grows. Round 37: Fishing (the locked water bar) gets bold add-ons (try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1584,7 +1584,7 @@ const SURF19 = {
   C: { name: 'A faint border behind the waves', desc: 'The gold border runs along the top too, but faint, and the waves wash up over it.' },
   D: { name: 'A bright surface over the fill', desc: 'The surface is a bright line only over the filled water (the deep, unfilled water’s surface stays dim), so the edge itself shows how far you are.' },
 };
-function fishBar(p, x0, x1, ly, bh, f, tipX, t, I, v) { const top = ly - bh / 2 + 1, bot = ly + bh / 2, wa = v === 'B' ? 1.8 : 1, surf = x => top + (Math.sin(x * .16 + t * 2.4) * .9 + Math.sin(x * .07 - t * 1.3) * .5) * wa, ha = I.hitAge;
+function fishBar(p, x0, x1, ly, bh, f, tipX, t, I, v) { const top = ly - bh / 2 + 1, bot = ly + bh / 2, wa = v === 'B' ? 1.8 : 1, surf = x => top + (Math.sin(x * .16 + t * 2.4) * .9 + Math.sin(x * .07 - t * 1.3) * .5) * wa + (window.FSW ? window.FSW(x) : 0), ha = I.hitAge;
   const body = (xa, xb) => { ctx.beginPath(); ctx.moveTo(xa, bot); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x)); ctx.lineTo(xb, surf(xb)); ctx.lineTo(xb, bot); ctx.closePath(); };
   ctx.save(); ctx.beginPath(); ctx.roundRect(x0 - 2, top - 6, x1 - x0 + 4, bot - top + 6, [0, 0, 3, 3]); ctx.clip();
   body(x0 - 2, x1 + 2); ctx.fillStyle = 'rgba(10,30,52,.9)'; ctx.fill(); // the deep water ahead
@@ -2228,6 +2228,41 @@ function r36(K) { const v = () => VAR36[profName]; return { get name() { return 
     if (o && v()) { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * DT36 + .2 }); }
     barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
 Object.assign(FAM, { PA: r36('A'), PB: r36('B'), PC: r36('C'), PD: r36('D') });
+// ---------- round 37 (2026-11-15): Skinning DONE; Fishing (locked bar) add-ons, bold ones; the finale comes after ----------
+// window.FSW(x): extra height added to the water surface (negative = up), set per draw by an add-on and cleared after.
+function fishShape(x, y, ang, s, wig = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s);
+  const g = ctx.createLinearGradient(0, -3, 0, 3); g.addColorStop(0, '#d8eef8'); g.addColorStop(.5, '#8ab8d0'); g.addColorStop(1, '#4a7890'); ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, 0, 7, 2.8, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-11, -3.4 + wig); ctx.lineTo(-11, 3.4 + wig); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#10202a'; ctx.beginPath(); ctx.arc(4.2, -.6, .8, 0, 7); ctx.fill(); ctx.restore(); }
+const fishGeo = I => { const top = I.ly - 5, bx = Math.max(I.x0 + 4, I.tipX); return { top, bx, rx: I.x0 - 14, ry: I.ly - 14.5 }; };
+const splash = (x, y, n, sp = 1) => { for (let k = 0; k < n; k++) spawn({ x, y, vx: (Math.random() - .5) * 80 * sp, vy: (-40 - Math.random() * 60) * sp, g: 360, life: .5, size: 1.3, col: k % 2 ? '#d8f0ff' : '#9ad8ff' }); };
+const VAR37 = { Fishing: {
+  A: { name: 'As locked', desc: 'The locked Fishing bar, as it is: the whole bar is water, a bright surface over the filled water, the reel at the start paying out line, the line snapping taut with a twang each skill-up, the bobber at the front dipping with a splash.' },
+  B: { name: '+ Fish jumps', desc: 'Each skill-up a fish leaps out of the water just ahead of the bobber: it bursts out with a splash, arcs high over the bar with a glint at the top, and dives back in further on with a plop and a ring of droplets.',
+    over(p, I) { const { top, bx } = fishGeo(I), ha = I.hitAge; if (ha < .1 || ha > .85) return; const u = (ha - .1) / .65, x = bx + 6 + u * 44, y = top + 1 - Math.sin(Math.PI * u) * 28, ang = Math.atan2(-Math.cos(Math.PI * u) * 28 * Math.PI, 44);
+      ctx.save(); ctx.beginPath(); ctx.rect(I.x0 - 30, top - 60, I.x1 - I.x0 + 80, 60 + (u < .1 || u > .9 ? 1 : 12)); ctx.clip(); fishShape(x, y, ang, 1.5, Math.sin(ha * 40) * 1.2); ctx.restore();
+      if (u > .45 && u < .6) { ctx.save(); ctx.fillStyle = '#fff'; ctx.globalAlpha *= 1 - Math.abs(u - .52) / .08; star4(x + 2, y - 3, 4, 0); ctx.restore(); }
+      landed('fj0', .1, () => { splash(bx + 6, top, 8); noise(0, .14, .05, 1600, .7); });
+      landed('fj1', .75, () => { splash(bx + 50, top, 10, 1.1); spawn({ x: bx + 50, y: top + 1, size: 3, shape: 'ring', grow: 12, life: .4, col: '#d8f0ff' }); tone(300, 0, .05, .15, 'sine', 120); noise(0, .12, .04, 900, .8); }); } },
+  C: { name: '+ Reeled in', desc: 'Each skill-up there’s a catch: the bobber is yanked under, a fish is hauled up out of the water on the line, wriggling, and zips back along the line into the reel, which lands it with a wet slap and a quick spin of clicks.',
+    over(p, I) { const { top, bx, rx, ry } = fishGeo(I), ha = I.hitAge; if (ha < .12 || ha > .72) return; const u = (ha - .12) / .6, e = u * u * (3 - 2 * u), cxp = (bx + rx) / 2, cyp = I.ly - 34, x = (1 - e) * (1 - e) * bx + 2 * (1 - e) * e * cxp + e * e * rx, y = (1 - e) * (1 - e) * top + 2 * (1 - e) * e * cyp + e * e * ry;
+      const dx = 2 * (1 - e) * (cxp - bx) + 2 * e * (rx - cxp), dy = 2 * (1 - e) * (cyp - top) + 2 * e * (ry - cyp); fishShape(x, y, Math.atan2(dy, dx) + Math.PI + Math.sin(ha * 50) * .35, lerp(1.45, .8, e), Math.sin(ha * 60) * 1.5);
+      landed('fr0', .12, () => { splash(bx, top, 10); tone(700, 0, .03, .3, 'sine', 1400); noise(0, .12, .05, 1400, .7); });
+      landed('fr1', .7, () => { noise(0, .06, .08, 700, 1); tone(160, 0, .05, .08, 'triangle', 90); for (let k = 0; k < 6; k++) noise(.05 + k * .03, .012, .03, 4200, 6, 'bandpass', true); splash(rx, ry, 5, .6); }); } },
+  D: { name: '+ The swell', desc: 'Each skill-up a swell rolls out from the reel along the whole stretch of water you’ve filled: a smooth hump of water with foam on its crest that lifts the line as it passes and heaves the bobber up high, which splashes down as it goes by.',
+    pre(I) { const ha = I.hitAge; if (ha < 0 || ha > .75) return null; const sx = lerp(I.x0 - 10, Math.max(I.x0 + 20, I.tipX) + 20, ha / .7); return x => -5.5 * Math.exp(-((x - sx) * (x - sx)) / 420) * (1 - clamp((ha - .6) / .15)); },
+    over(p, I) { const ha = I.hitAge, { top, bx } = fishGeo(I); if (ha >= 0 && ha < .7) { const sx = lerp(I.x0 - 10, bx + 20, ha / .7); ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.9)'; for (let k = -3; k <= 3; k++) { const x = sx + k * 4; if (x < I.x0 || x > I.x1) continue; ctx.globalAlpha = 1 - Math.abs(k) * .22; ctx.fillRect(x - 1.5, top - 5.6 * Math.exp(-((x - sx) * (x - sx)) / 420) - 1.5, 3, 2); } ctx.restore(); if (Math.random() < .5 && sx > I.x0 && sx < I.x1) spawn({ x: sx + 3, y: top - 6, vx: 30 + Math.random() * 40, vy: -20 - Math.random() * 30, g: 200, life: .35, size: 1.1, col: "#e8f8ff" }); }
+      onHits('fsw', () => { noise(0, .7, .03, 500, .5); noise(.1, .5, .02, 1800, .6); }); landed('fsw1', .55, () => splash(bx, top, 8, .9)); } },
+} };
+function r37(K) { const v = () => VAR37[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Five in a row”.)' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : profName === 'Skinning' ? 'Done: the cut + Fur flies, and the reticle chop when the bar fills.' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : profName === 'Skinning' ? VAR36.Skinning.A : v() ? v()[K] : null;
+    if (o === VAR36.Skinning.A) { const n = Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15), N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * DT36 + .2 }); }
+    window.FSW = null; if (o && o.pre) { const st = state(), lo = S.p.span[0], n = Math.max(1, S.nx.lv - lo), x0 = W / 2 - 128, L = 230; window.FSW = o.pre({ hitAge: st.hitAge, x0, x1: x0 + L, tipX: x0 + clamp((st.v - lo) / n) * L }); }
+    barModule(top, FIT19[profName] || 'A', o); window.FSW = null; FISHR = false; } }; }
+Object.assign(FAM, { PA: r37('A'), PB: r37('B'), PC: r37('C'), PD: r37('D') });
+setTimeout(() => { profName = 'Fishing'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
