@@ -1115,3 +1115,41 @@ Object.assign(FAM, { PA: r78('A'), PB: r78('B'), PC: r78('C'), PD: r78('D') });
   D: { name: 'Clank + ember spray', desc: 'The iron clank, but each strike also throws a short sideways spray of hot embers along the bar toward the next bead, so the sparks run ahead of the strikes like a fuse.',
     snd: (k, v) => SET77.A.snd(k, v),
     sparks: (x, y) => { for (let q = 0; q < 10; q++) spawn({ x, y: y + 1, vx: 60 + Math.random() * 90, vy: -30 - Math.random() * 40, g: 300, life: .3 + Math.random() * .15, size: .9 + Math.random() * .4, col: q % 3 ? '#ffb040' : '#fff0c0' }); for (let q = 0; q < 5; q++) spawn({ x, y, vx: (Math.random() - .5) * 60, vy: -70 - Math.random() * 40, g: 340, life: .3, size: .8, col: '#fff6d8' }); } },
+
+// Dead Blacksmithing helpers (no longer used by live rounds), moved out 2026-11-15.
+const heat58 = h => h < .5 ? mix('#2a0a04', '#c83a12', h / .5) : mix('#c83a12', '#ffc860', Math.min(1, (h - .5) / .5));
+const iron59 = (x0, end, y) => { if (end <= x0) return; const g = ctx.createLinearGradient(x0, 0, end, 0); g.addColorStop(0, '#2a2c30'); g.addColorStop(Math.max(0, 1 - 24 / (end - x0)), '#3a3c42'); g.addColorStop(1, '#d0602a'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 5, end - x0 + 2, 10); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x0 - 2, y - 5, end - x0 + 2, 1.5); };
+const spot65 = (I, k, c, seed, lo = 0, hi = 1) => I.x0 + 8 + lerp(lo, hi, rnd53(k * 13 + c * 7 + seed)) * (I.tipX - I.x0 - 16);
+const BOIL65 = (xa, xb, t) => xa + (xb - xa) * (.5 + .38 * Math.sin(t * .23 + 1));
+function headPops67(I) { const out = [], t = S.age; for (let k = 0; k < HB67.n; k++) { const s = slot65(k, HB67.per, HB67.spread, HB67.seed, t); for (let j = 0; j < 2; j++) { const age = (s.ph - HB67.rise) * s.per + j * s.per; if (age >= 0 && age < 1.2) out.push([hbX67(I, k, s.c - j), age, .7]); } } return out; }
+function headBubbles67(I, sf) { for (let k = 0; k < HB67.n; k++) { const { c, ph } = slot65(k, HB67.per, HB67.spread, HB67.seed, S.age), x = hbX67(I, k, c), y = sf(x); if (x < I.x0 + 4) continue;
+    if (ph < HB67.rise) { const u = ph / HB67.rise, r = .8 + eOut(u) * 2.6; ctx.fillStyle = 'rgba(255,214,120,.95)'; ctx.beginPath(); ctx.arc(x, y + .3, r, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(255,255,235,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .4, Math.max(.3, r * .25), 0, 7); ctx.fill(); }
+    else once('h67' + k + '_' + c, () => splat66(x, y, 3, false)); } }
+const anvilBurst67 = (I, n = 8, big) => { const ax = I.x0 - 24; for (let q = 0; q < n; q++) spawn({ x: ax + 2, y: I.ly - 8, vx: 10 + Math.random() * (big ? 90 : 60), vy: -40 - Math.random() * (big ? 70 : 45), g: 260, life: .45, size: 1, col: q % 3 ? '#ffb040' : '#fff0c0' }); };
+const glob67 = (x, y, r) => { ctx.save(); ctx.fillStyle = '#ffc860'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,230,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .35, r * .35, 0, 7); ctx.fill(); ctx.restore(); };
+const SHOT67 = .35;
+function shot67(I, i, t) { if (t < 0 || t >= SHOT67) return; const u = t / SHOT67, ax = I.x0 - 22, hx = I.X(S.v0 + i) - 3, x = lerp(ax, hx, u), y = lerp(I.ly - 9, I.ly - 7, u) - Math.sin(Math.PI * u) * 5;
+  for (let q = 1; q <= 4; q++) { const v = Math.max(0, u - q * .05); glob67(lerp(ax, hx, v), lerp(I.ly - 9, I.ly - 7, v) - Math.sin(Math.PI * v) * 5, 2.4 - q * .45); } glob67(x, y, 2.8); }
+const waveLeft67 = (I, i, t, ta, tb, a = 4.5) => { if (t < ta || t > tb + .1) return () => 0; const u = clamp((t - ta) / (tb - ta)), hx = I.X(S.v0 + i), wx = lerp(hx, I.x0, u * (2 - u)), amp = a * (u < .1 ? u / .1 : 1) * (t > tb ? 1 - (t - tb) / .1 : 1); return x => amp * Math.exp(-Math.pow((x - wx) / 8, 2)) + amp * .4 * Math.exp(-Math.pow((x - wx - 12) / 8, 2)); };
+function iconFill69(I, k, dy = 0) { if (k <= 0) return; const x = ux69(I), y = I.ly + dy, s = 22, h = s * Math.min(1, k); ctx.save(); ctx.beginPath(); ctx.roundRect(x - s / 2, y - s / 2, s, s, 3); ctx.clip();
+  const g = ctx.createLinearGradient(0, y + s / 2 - h, 0, y + s / 2); g.addColorStop(0, 'rgba(255,240,170,.85)'); g.addColorStop(.4, 'rgba(255,150,50,.75)'); g.addColorStop(1, 'rgba(200,60,14,.75)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - s / 2, y + s / 2);
+  for (let xx = x - s / 2; xx <= x + s / 2; xx += 2) ctx.lineTo(xx, y + s / 2 - h + Math.sin(xx * .6 + S.age * 8) * .8); ctx.lineTo(x + s / 2, y + s / 2); ctx.closePath(); ctx.fill(); ctx.restore(); }
+const rumble69 = (v = 1) => { noise(0, .7, .035 * v, 180, .6, 'lowpass'); tone(55, 0, .03 * v, .9, 'sine', null, .08); };
+const flame70 = (x, y, h, a, ph) => { if (a <= 0 || h <= .5) return; const w = h * .42 * (1 + .15 * Math.sin(ph * 9)), g = ctx.createLinearGradient(0, y - h, 0, y); g.addColorStop(0, 'rgba(255,240,170,0)'); g.addColorStop(.35, `rgba(255,210,110,${.85 * a})`); g.addColorStop(1, `rgba(255,110,30,${.9 * a})`);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - w, y); ctx.quadraticCurveTo(x - w, y - h * .55, x + Math.sin(ph * 6) * w * .5, y - h); ctx.quadraticCurveTo(x + w, y - h * .55, x + w, y); ctx.closePath(); ctx.fill(); };
+const FIN71 = {
+  C: { name: 'Ember swarm', finAt: 1.75, desc: 'Embers lift off the whole surface of the magma, hundreds of them, rise and gather into a swirling ribbon that streams along above the bar and pours into the icon, which glows hotter as they arrive and lights.',
+    lift: () => () => 0,
+    fin(I, ts, sf) { const ux = ux69(I); once('ec', () => [0, 1, 2, 3, 4].forEach(q => bell45(784 * semi(PENT42[q + 1]), .15 + q * .17, .004)));
+      for (let q = 0; q < 70; q++) { const sx = lerp(I.x0 + 4, I.tipX - 2, rnd53(q * 3 + 300)), st = rnd53(q * 3 + 301) * .45, a = ts - st; if (a < 0) continue; const u = clamp((a - .2) / .85), y0 = sf(sx) - 1;
+        if (u >= 1) continue; const lift = Math.min(1, a / .2) * 6, x = lerp(sx, ux, u * u), y = lerp(y0 - lift, I.ly, u * u) - Math.sin(Math.PI * u) * (3 + rnd53(q) * 4) + Math.sin(a * 9 + q) * 2 * (1 - u);
+        ctx.save(); ctx.fillStyle = q % 3 ? '#ffb040' : '#fff0c0'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 4; ctx.beginPath(); ctx.arc(x, y, .9 + rnd53(q + 7) * .6, 0, 7); ctx.fill(); ctx.restore(); } },
+    after: (I, ts) => blaze69(ux69(I), I.ly, clamp((ts - .55) / .9) * (ts > 1.6 ? Math.max(0, 1 - (ts - 1.6) / .4) : 1)) },
+const surfSrc72 = (I, sf) => q => { const x = lerp(I.x0 + 4, I.tipX - 2, rnd53(q * 3 + 300)); return [x, sf(x) - 1]; };
+const SW = FIN71.C;
+const segCx75 = (I, k) => { const [xa, xb] = seg72(I, k); return (xa + xb) / 2; };
+function blink76(I, k, ts, tb, toIron) { const [xa, xb] = seg72(I, k), a = ts - tb; if (a < 0) return null; once('bk' + k, () => { mallet(330 * semi(PENT42[k]), 0, .016); tone(1318 * semi(PENT42[k]), 0, .003, .08, 'sine', null, .001);
+    for (let q = 0; q < 3; q++) spawn({ x: (xa + xb) / 2 + (q - 1) * 6, y: I.ly - 5, vx: (q - 1) * 30, vy: -30 - Math.random() * 20, g: 300, life: .3, size: .9, col: '#fff0c0' }); });
+  const sq = a < .12 ? Math.sin(Math.PI * a / .12) : 0; return { sq, flash: Math.max(0, 1 - a / .1), cool: toIron ? clamp(a / .12) : 0 }; }
+function beadUp76(I, ts, k) { const [xa, xb] = seg72(I, k), w = (I.x1 - I.x0) / N72, cx = (xa + xb) / 2, u = clamp(ts / .45), B = beadAt76(I, k, ts, Math.exp(-Math.max(0, ts - .45) * 2)), bw = lerp(w + 1, B.bw, eOut(u)), r = lerp(1, 5, u);
+  blob76(cx, I.ly + .5, bw, B.bh, r); if (u < 1 && k < N72 - 1) { const nh = 10 * (1 - eOut(u)); if (nh > .5) { ctx.fillStyle = '#ff9a34'; ctx.fillRect(xb - .9, I.ly + .5 - nh / 2, 3, nh); } } }
