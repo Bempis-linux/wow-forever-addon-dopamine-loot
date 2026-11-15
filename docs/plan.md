@@ -1054,6 +1054,12 @@ Professions (from 1.3.0):
    lava, a bright patch that crusts over), **C. Boiling patch** (deep red calm magma; one hot spot wanders the bar and boils
    there: many quick small bubbles, tiny glints, heat shimmer), **D. Thick gloops** (matte molten rock; slow bulbs rise and
    stretch tall on a neck, burst with a thick splat, rings of ripples run both ways along the surface).
+   Round 65 → **mix C + D: C's bubbles (Boiling patch), D's pops (thick splat + ripples)**; D's rising bulb not liked
+   (improve the rise); the magma: **Depth bands with more of a gradient** between the bands. Round 66 (all: gradient depth
+   bands, the boiling hot spot wandering, small bubbles each popping D's way): **A. Boil, every pop a splat**, **B. + a big
+   bubble: round** (every few seconds a glossy round bubble inflates smoothly, wobbles, bursts: bigger splat, strong
+   ripples), **C. + a big heave** (the surface itself heaves into a smooth mound with a bright stretched skin, bursts), **D.
+   Heave + heat plume** (C, and the bands bow upward over the hot spot).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

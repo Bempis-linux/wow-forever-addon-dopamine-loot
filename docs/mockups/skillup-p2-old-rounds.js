@@ -516,3 +516,68 @@ function r64(K) { const L = LOOK64[K]; return { get name() { return K + '. ' + (
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
     try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => mag62(L.key, I, t), over: (p, I) => { onHits('m64', i => lsnd61(i, fat45(i))); if (L.over) L.over(I); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
 Object.assign(FAM, { PA: r64('A'), PB: r64('B'), PC: r64('C'), PD: r64('D') });
+
+// Round 64 B (Bubbling) + round 65 looks, moved out 2026-11-15 (page size limit); slot65/spot65/BOIL65/MAGLIFT stay in the page.
+// ---------- round 64 (2026-11-15): magma look: Depth bands (A) + three DIFFERENT designs; B is bubbly (bubbles swell slowly on the surface and pop) ----------
+Object.assign(TEX62, {
+  // B: plain molten orange, warm and deep; the bubbles are drawn on the surface by over() (bub64)
+  B64(xa, xb, ly, bot, t) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#ffb44a'); g.addColorStop(.35, '#f06a1a'); g.addColorStop(1, '#7a1806'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    for (let k = 0; k < 6; k++) { const x = xa + ((rnd53(k + 400) * 240 + t * 2) % 240), r = 10 + rnd53(k + 401) * 8, gg = ctx.createRadialGradient(x, ly, 0, x, ly, r); gg.addColorStop(0, 'rgba(255,220,130,.35)'); gg.addColorStop(1, 'rgba(255,220,130,0)'); ctx.fillStyle = gg; ctx.fillRect(x - r, ly - 8, r * 2, 16); } },
+});
+Object.assign(CREST62, { B64: 'rgba(255,214,140,.9)', C64: 'rgba(255,190,110,.75)', D64: '#fff6dc' });
+// B's bubbles, on the surface: one at a time here and there, a dome that swells slowly (about 1.4 s), then pops: the dome is gone, a bright spot, two droplets
+function bub64(I) { const t = S.age, sf = I.surf, end = I.tipX; if (!sf || end <= I.x0 + 8) return;
+  for (let k = 0; k < 7; k++) { const per = 2.6 + rnd53(k + 600) * 2.4, c = Math.floor((t + rnd53(k + 601) * per) / per), ph = ((t + rnd53(k + 601) * per) % per) / per, x = I.x0 + 6 + rnd53(k * 13 + c * 7 + 602) * (end - I.x0 - 14), grow = .55, y = sf(x);
+    if (ph < grow) { const u = ph / grow, r = 1 + u * u * 4; ctx.save(); const g = ctx.createRadialGradient(x - r * .35, y - r * .5, 0, x, y, r); g.addColorStop(0, 'rgba(255,248,215,.95)'); g.addColorStop(.5, 'rgba(255,190,90,.95)'); g.addColorStop(1, 'rgba(210,80,20,.95)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y + .4, r, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,240,.85)'; ctx.beginPath(); ctx.arc(x - r * .4, y - r * .45, Math.max(.4, r * .2), 0, 7); ctx.fill(); ctx.restore(); }
+    else if (ph < grow + .12) { const u = (ph - grow) / .12; glow58(x, y, 3 + u * 5, .7 * (1 - u)); once('bub64' + k + '_' + c, () => { for (let q = 0; q < 2; q++) spawn({ x, y: y - 1, vx: (q ? 1 : -1) * (10 + Math.random() * 8), vy: -24 - Math.random() * 10, g: 220, life: .35, size: .9, col: '#ffc070' }); }); } } }
+Object.assign(TEX62, {
+  // B: a dark cooled crust with a web of glowing cracks; blisters push up through it
+  B65(xa, xb, ly, bot, t, surf) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#3a160c'); g.addColorStop(1, '#1e0a06'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = 4; const glow = .75 + .25 * Math.sin(t * 1.3);
+    ctx.strokeStyle = `rgba(255,${130 + 40 * glow},40,.9)`; ctx.lineWidth = 1; ctx.beginPath(); for (let x = xa; x <= xb; x += 3) ctx.lineTo(x, ly + 1 + Math.sin(x * .13) * 1.4 + Math.sin(x * .41) * .6); ctx.stroke();
+    for (let x = xa + 6, k = 0; x < xb; x += 9 + rnd53(k + 700) * 7, k++) { const up = k % 2 === 0, y0 = ly + 1 + Math.sin(x * .13) * 1.4 + Math.sin(x * .41) * .6; ctx.beginPath(); ctx.moveTo(x, y0); ctx.quadraticCurveTo(x + (rnd53(k + 701) - .5) * 4, (y0 + (up ? surf(x) : bot)) / 2, x + (rnd53(k + 702) - .5) * 5, up ? surf(x) + .5 : bot); ctx.stroke(); }
+    ctx.restore(); },
+  // C: deep red magma, calm, with a hot spot that wanders slowly along the bar where it boils
+  C65(xa, xb, ly, bot, t) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#e8501a'); g.addColorStop(.5, '#a82a0a'); g.addColorStop(1, '#4a0c04'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    const px = BOIL65(xa, xb, t), hg = ctx.createRadialGradient(px, ly - 2, 0, px, ly - 2, 26); hg.addColorStop(0, 'rgba(255,236,150,.85)'); hg.addColorStop(.5, 'rgba(255,170,60,.45)'); hg.addColorStop(1, 'rgba(255,120,40,0)'); ctx.fillStyle = hg; ctx.fillRect(px - 26, ly - 16, 52, 30); },
+  // D: thick, matte molten rock: dull orange to brown, slow darker blotches, a soft dull sheen
+  D65(xa, xb, ly, bot, t) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#d8642a'); g.addColorStop(.45, '#8a2e0e'); g.addColorStop(1, '#3a1206'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    for (let k = 0; k < 9; k++) { const x = xa + ((rnd53(k + 800) * 250 + t * 1.5) % 250), r = 8 + rnd53(k + 801) * 6, gg = ctx.createRadialGradient(x, ly + 1, 0, x, ly + 1, r); gg.addColorStop(0, 'rgba(60,14,4,.35)'); gg.addColorStop(1, 'rgba(60,14,4,0)'); ctx.fillStyle = gg; ctx.fillRect(x - r, ly - 8, r * 2, 16); }
+    ctx.fillStyle = 'rgba(255,200,150,.12)'; ctx.fillRect(xa, ly - 4, xb - xa, 2); },
+});
+Object.assign(CREST62, { B65: 'rgba(255,120,50,.55)', C65: 'rgba(255,200,120,.85)', D65: 'rgba(255,190,140,.55)' });
+// B: blisters: rare, big; a dark dome of crust swells (~2.5 s) with cracks glowing brighter, then splits: a flash, a gout of lava, a bright molten patch that slowly crusts over
+function blister65(I) { const t = S.age, sf = I.surf; if (!sf || I.tipX <= I.x0 + 20) return;
+  for (let k = 0; k < 3; k++) { const { c, ph, per } = slot65(k, 4.5, 2.5, 900, t), x = spot65(I, k, c, 902), y = sf(x), grow = .55, age = (ph - grow) * per;
+    if (ph < grow) { const u = ph / grow, r = 1.5 + u * u * 5; ctx.save(); ctx.fillStyle = '#3a160c'; ctx.beginPath(); ctx.ellipse(x, y + .5, r * 1.2, r, 0, Math.PI, 0); ctx.fill();
+      ctx.strokeStyle = `rgba(255,${120 + 100 * u},50,${.4 + u * .6})`; ctx.lineWidth = .9; ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = 2 + u * 5; ctx.beginPath(); ctx.moveTo(x - r * .8, y - r * .3); ctx.quadraticCurveTo(x, y - r * 1.1, x + r * .7, y - r * .4); ctx.moveTo(x - r * .2, y - r * .9); ctx.lineTo(x + r * .1, y - r * .2); ctx.stroke(); ctx.restore(); }
+    else { const spot = clamp(1 - age / 1.8); if (age < .15) glow58(x, y - 2, 6 + age * 60, .9 * (1 - age / .15)); once('bl65' + k + '_' + c, () => { for (let q = 0; q < 7; q++) spawn({ x, y: y - 2, vx: (Math.random() - .5) * 40, vy: -55 - Math.random() * 40, g: 300, life: .55, size: 1 + Math.random(), col: Math.random() > .4 ? '#ffa040' : '#ffe0a0' }); });
+      if (spot > 0) { ctx.save(); ctx.fillStyle = mix('#5a1e0c', '#ffd070', spot); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6 * spot; ctx.beginPath(); ctx.ellipse(x, y + 1, 5, 1.8, 0, 0, 7); ctx.fill(); ctx.restore(); } } } }
+// C: the boiling patch: quick small bubbles crowd where the hot spot is, popping fast; heat shimmer rises over it
+function boil65(I) { const t = S.age, sf = I.surf; if (!sf || I.tipX <= I.x0 + 20) return; const px = BOIL65(I.x0 - 2, I.tipX, t);
+  for (let k = 0; k < 11; k++) { const { c, ph } = slot65(k, .55, .5, 1000, t), x = clamp(px + (rnd53(k * 11 + c * 5 + 1002) - .5) * 30, I.x0 + 4, I.tipX - 4), y = sf(x);
+    if (ph < .7) { const u = ph / .7, r = .6 + u * 1.9; ctx.fillStyle = 'rgba(255,214,120,.95)'; ctx.beginPath(); ctx.arc(x, y + .3, r, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(255,255,235,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .4, Math.max(.3, r * .25), 0, 7); ctx.fill(); }
+    else if (ph < .8) { ctx.save(); ctx.fillStyle = '#fff6d0'; ctx.shadowColor = '#ffb040'; ctx.shadowBlur = 4; star4(x, y - 1, 1.6, 0); ctx.restore(); } }
+  ctx.save(); ctx.strokeStyle = 'rgba(255,220,170,.16)'; ctx.lineWidth = 1; for (let q = 0; q < 4; q++) { const ph = (t * .7 + q * .25) % 1, sx = px - 12 + q * 8; ctx.beginPath(); for (let yy = 0; yy < 9; yy += 1.5) ctx.lineTo(sx + Math.sin(yy * .9 + t * 5 + q) * 1.2, sf(px) - 3 - ph * 12 - yy); ctx.stroke(); } ctx.restore(); }
+// D: gloops: slow, few; a bulb rises and stretches tall on a neck, bursts with a thick splat, and rings of ripples spread both ways along the surface
+const gloopSlots65 = I => [0, 1, 2].map(k => { const s = slot65(k, 4, 2, 1100, S.age); return Object.assign(s, { k, x: spot65(I, k, s.c, 1102), age: (s.ph - .5) * s.per }); });
+const gloopLift65 = I => { const G = gloopSlots65(I); return x => { let l = 0; for (const g of G) if (g.ph >= .5 && g.age < 1.6) { const d = Math.abs(x - g.x) - g.age * 34; l += 1.5 * Math.exp(-g.age * 2.2) * Math.cos(d * .55) * Math.exp(-d * d / 50); } return l; }; };
+function gloop65(I) { const sf = I.surf; if (!sf || I.tipX <= I.x0 + 20) return;
+  for (const g of gloopSlots65(I)) { const y = sf(g.x);
+    if (g.ph < .5) { const u = g.ph / .5, rx = 2.2 + u * 1.6, ry = 1 + u * u * 5.5, cy = y - ry * .8; ctx.save(); const gr = ctx.createLinearGradient(0, cy - ry, 0, y); gr.addColorStop(0, '#f08a3a'); gr.addColorStop(1, '#8a2e0e'); ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(g.x, cy, rx, ry, 0, 0, 7); ctx.fill();
+      ctx.fillRect(g.x - rx * .55, cy, rx * 1.1, y - cy + .5); ctx.fillStyle = 'rgba(255,220,180,.45)'; ctx.beginPath(); ctx.ellipse(g.x - rx * .35, cy - ry * .45, rx * .25, ry * .25, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    else once('gl65' + g.k + '_' + g.c, () => { for (let q = 0; q < 4; q++) spawn({ x: g.x, y: y - 3, vx: (Math.random() - .5) * 30, vy: -30 - Math.random() * 20, g: 200, life: .5, size: 1.4 + Math.random() * .6, col: '#c8541e' }); }); } }
+const LOOK65 = {
+  A: { key: 'B64', name: 'Bubbling', over: bub64, desc: 'Round 64 B as picked: plain deep molten orange; now and then a glossy dome swells slowly on the surface and pops (a flash, two droplets); a few at a time.' },
+  B: { key: 'B65', name: 'Crust blisters', over: blister65, desc: 'Dark cooled crust with a web of glowing cracks. Rarely, a big blister of crust swells up slowly (2-3 s), its cracks glowing hotter, then splits open: a flash, a gout of lava thrown up, and a bright molten patch left on the surface that slowly crusts over again.' },
+  C: { key: 'C65', name: 'Boiling patch', over: boil65, desc: 'Deep red, calm magma with one hot spot that wanders slowly along the bar; there it boils: many small quick bubbles crowding and popping with tiny glints, a heat shimmer rising over it. The rest stays still.' },
+  D: { key: 'D65', name: 'Thick gloops', over: gloop65, lift: gloopLift65, desc: 'Thick, matte molten rock (dull orange to brown). Slow, heavy bubbles: a bulb rises and stretches tall on a neck, bursts with a thick splat, and rings of ripples run out both ways along the surface.' },
+};
+function r65(K) { const L = LOOK65[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? L.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'The magma’s look only (animations come after), in the open-top bar. ' + L.desc + ' (A skill-up just eases the fill on with a small swell; placeholder sound.)' : 'One profession at a time: this round is Blacksmithing’s magma look. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'magma look: ' + L.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
+    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => { MAGLIFT = L.lift ? L.lift(I) : null; mag62(L.key, I, t); }, over: (p, I) => { onHits('m65', i => lsnd61(i, fat45(i))); if (L.over) L.over(I); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
+Object.assign(FAM, { PA: r65('A'), PB: r65('B'), PC: r65('C'), PD: r65('D') });
