@@ -817,6 +817,12 @@ Professions (from 1.3.0):
    C Beast roars (the icon shakes and growls, three sound-wave arcs roll back along the bar, the bar rattles, fur blown
    left), D Freeze-frame (a last burst of fur, an impact frame: the bar flashes white and everything stops a beat, then
    the fur zips into the icon).
+   Round 32 feedback: not liked, all similar (hide and fur effects; Fur flies already throws fur every skill-up).
+   **Round 33** (`VAR33`, `r33`; no fur; `V.after` draws over the icon): A Trap snaps (two straight jaws swing up from
+   the bar's end and clap shut on the icon, metal clack + jolt, then open), B Claw rake (three glowing gold claw marks
+   rake across the whole module in one swipe), C Target lock (a reticle slides from the bar's start, closes on the icon,
+   locks gold with a click), D Rank refill (the notches light one by one in ticks, the bar drains in a blink and refills
+   in gold, a rising note).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 32, Skinning finales</h1>
+  <h1>Skill-up: round 33, Skinning finales</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 32: Skinning is locked (the cut + Fur flies); four finales for when its bar fills (opens on “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-31 stay in the code.
+  the line that grows. Round 33: Skinning is locked (the cut + Fur flies); four new finales without fur for when its bar fills (opens on “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-32 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1565,6 +1565,7 @@ function barModule(top, mode, Vo) { const V = Vo || baseOf(), cx = W / 2, p = S.
   const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
   if (done && S.age >= payAt) { const fl = clamp(1 - (S.age - payAt) / .5); if (fl > 0) { ctx.save(); track(); ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fill(); ctx.restore(); } }
   icon(V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux, ly + (V.unlockY ? V.unlockY(info) : 0), 20 + pop * 6 + (V.iconPulse ? V.iconPulse(info) : 0), nx.emo, lit ? 1 : .5, lit ? p.light : null);
+  if (V.after) V.after(p, info);
   const left = Math.max(0, nx.lv - st.shown); text(lit ? 'Unlocked!' : `${left} to ${nx.cap ? nx.lv : nx.name}`, cx, ly + 22, '600 11px system-ui', '#f0ead8', 'center');
   ctx.restore();
   if (S.reaches) reveal(cx, ly + 34, (S.closeAt === undefined ? 99 : S.closeAt + (V.finAt || 0)) + .35, '600 13px system-ui', false); }
@@ -2064,6 +2065,42 @@ function r32(K) { const v = () => VAR32[profName]; return { get name() { return 
   draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
 Object.assign(FAM, { PA: r32('A'), PB: r32('B'), PC: r32('C'), PD: r32('D') });
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
+// ---------- round 33 (2026-11-15): Skinning finales again, no fur (round 32 all read alike: hide and fur effects) ----------
+// V.after(p, info): drawn after the unlock icon (over it).
+const VAR33 = { Skinning: {
+  A: Object.assign({}, skBase, { name: 'Trap snaps', finAt: .6, desc: 'Skinning as locked (the cut + a stroke + Fur flies). Reaching the next beasts: two straight jaws swing up out of the bar’s end and clap shut on the beasts’ icon like a trap, with a hard metal clack and a jolt; they hold a beat, swing back open and fade, and the icon is lit.',
+    shake(I) { if (!I.done) return [0, 0]; const t = S.age - S.closeAt - .32; return t >= 0 && t < .3 ? [0, 2.5 * Math.exp(-t * 12) * Math.cos(t * 55)] : [0, 0]; },
+    after(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, hx = I.x1 - 6, ux = I.x1 + 18; if (ts > 1) return;
+      const open = ts < .2 ? 1.25 * eOut(ts / .2) : ts < .32 ? lerp(1.25, .1, Math.pow((ts - .2) / .12, 2)) : ts < .55 ? .1 : lerp(.1, 1.3, eOut(clamp((ts - .55) / .3))), a = clamp(ts / .1) * clamp((1 - ts) / .2);
+      const jaw = sgn => { ctx.save(); ctx.translate(hx, I.ly); ctx.rotate(-sgn * open); ctx.fillStyle = 'rgba(20,18,16,.95)'; ctx.beginPath(); ctx.roundRect(0, sgn > 0 ? -14 : 6, 44, 8, 2.5); ctx.fill(); ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 1.3; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(2, sgn > 0 ? -13 : 7, 40, 1.5); ctx.restore(); };
+      ctx.save(); ctx.globalAlpha *= a; jaw(1); jaw(-1); ctx.fillStyle = '#ffd36a'; ctx.beginPath(); ctx.arc(hx, I.ly, 2.5, 0, 7); ctx.fill(); ctx.restore();
+      once('sktr0', () => { noise(.02, .18, .02, 1500, 1); });
+      if (ts >= .32) once('sktr1', () => { metal(0, 420, .09, .5, [1, 2.4, 3.9], [1, .5, .25]); click(0, .12, 2600, 2); tone(70, 0, .08, .2, 'sine', 40); spawn({ x: ux, y: I.ly, size: 10, shape: 'ring', grow: 26, life: .3, col: '#fff' }); }); } }),
+  B: Object.assign({}, skBase, { name: 'Claw rake', finAt: .4, desc: 'Skinning as locked. Reaching the next beasts: the beast strikes back, three glowing gold claw marks rake across the whole module at once in a single swipe with a tearing hiss, and the icon lights where they end; the marks fade slowly.',
+    after(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt; if (ts > 1.4) return; const u = eOut(clamp(ts / .18)), a = 1 - clamp((ts - .5) / .9);
+      for (let j = 0; j < 3; j++) { const xa = I.x0 + 30 + j * 16, ya = I.ly - 30 + j * 3, xb = I.x1 + 24 + j * 4, yb = I.ly + 12 + j * 8, xe = lerp(xa, xb, u), ye = lerp(ya, yb, u), mx = (xa + xe) / 2, my = (ya + ye) / 2 - 10;
+        ctx.save(); ctx.globalAlpha *= a; ctx.lineCap = 'round'; ctx.shadowColor = '#ffb030'; ctx.shadowBlur = 8; ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.moveTo(xa, ya); ctx.quadraticCurveTo(mx, my, xe, ye); ctx.stroke(); ctx.shadowBlur = 0; ctx.strokeStyle = '#fff8e0'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
+      once('skcl', () => { noise(0, .22, .09, 3200, .5); noise(.04, .3, .05, 1200, .7); tone(500, 0, .03, .2, 'sawtooth', 160); }); } }),
+  C: Object.assign({}, skBase, { name: 'Target lock', finAt: .6, desc: 'Skinning as locked. Reaching the next beasts: a hunter’s reticle (a ring with four ticks) slides in from the bar’s start, turning as it goes, closes on the beasts’ icon and locks with a crisp click, snapping tight and turning gold; the icon lights.',
+    after(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, ux = I.x1 + 18; if (ts > 1.3) return; const u = clamp(ts / .45), e = eOut(u), locked = ts >= .45, k = locked ? eBack(clamp((ts - .45) / .15)) : 0;
+      const x = lerp(I.x0, ux, e), r = locked ? lerp(15, 13, k) : lerp(22, 15, e), rot = (1 - e) * 1.6, col = locked ? '#ffd36a' : '#f0ead8', a = clamp(ts / .1) * (1 - clamp((ts - .9) / .4));
+      ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, I.ly); ctx.rotate(rot); ctx.strokeStyle = col; ctx.lineWidth = locked ? 2 : 1.4; if (locked) { ctx.shadowColor = '#ffd36a'; ctx.shadowBlur = 6; }
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.stroke(); for (let q = 0; q < 4; q++) { const an = q * Math.PI / 2; ctx.beginPath(); ctx.moveTo(Math.cos(an) * (r - 4), Math.sin(an) * (r - 4)); ctx.lineTo(Math.cos(an) * (r + 5), Math.sin(an) * (r + 5)); ctx.stroke(); } ctx.restore();
+      once('sktg0', () => tone(880, 0, .012, .4, 'sine', 1320));
+      if (locked) once('sktg1', () => { click(0, .1, 3800, 4); tone(1760, 0, .03, .12); spawn({ x: ux, y: I.ly, size: 13, shape: 'ring', grow: 16, life: .3, col: '#ffd36a' }); }); } }),
+  D: Object.assign({}, skBase, { name: 'Rank refill', finAt: .9, desc: 'Skinning as locked. Reaching the next beasts: the bar’s notches light up one by one in a fast run of ticks; then the bar drains in a blink and refills in gold from end to end with a rising note, as if the skill moved up a tier, and the icon lights.',
+    over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, L = I.x1 - I.x0, N = Math.max(4, I.N);
+      if (ts < .5) for (let j = 1; j < N; j++) { const tj = j / N * .4; if (ts < tj) continue; const x = I.x0 + j / N * L, a = ts > .4 ? 1 - (ts - .4) / .1 : 1; ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = '#fff8d8'; ctx.shadowColor = '#ffd36a'; ctx.shadowBlur = 6; ctx.fillRect(x - 1, I.ly - 7, 2, 14); ctx.restore(); once('skrt' + j, () => click(0, .035, 2600 + j * 120, 5)); }
+      if (ts >= .4) { const dr = clamp((ts - .4) / .1), fl = clamp((ts - .55) / .3), a = 1 - clamp((ts - 1.6) / .6); ctx.save(); ctx.globalAlpha *= a;
+        ctx.fillStyle = 'rgba(8,8,12,.95)'; ctx.fillRect(I.x1 + 1 - (L + 2) * dr, I.ly - 5, (L + 2) * dr, 10);
+        if (fl > 0) { const w = (L + 2) * eOut(fl), g = ctx.createLinearGradient(I.x0, 0, I.x1, 0); g.addColorStop(0, '#9a6a10'); g.addColorStop(1, '#ffe08a'); ctx.fillStyle = g; ctx.fillRect(I.x0 - 1, I.ly - 5, w, 10); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(I.x0 - 1, I.ly - 4, w, 2); ctx.fillStyle = '#fff'; ctx.fillRect(I.x0 - 1 + w - 2, I.ly - 5, 2, 10); }
+        ctx.restore(); once('skrd', () => tone(330, 0, .03, .1, 'triangle', 120)); if (ts >= .55) once('skrf', () => { tone(330, 0, .03, .35, 'triangle', 990); noise(0, .3, .015, 3000, .6); }); } } }),
+} };
+function r33(K) { const v = () => VAR33[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r33('A'), PB: r33('B'), PC: r33('C'), PD: r33('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
