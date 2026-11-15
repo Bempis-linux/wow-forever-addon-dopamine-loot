@@ -953,6 +953,11 @@ Professions (from 1.3.0):
    D The chain juggles the ore (a bundle of nuggets is thrown on from blast to blast down the bar, the last into the icon).
    Round 51 pick: **A Every blast throws ore** (Mining's finale). Next: Mining's sound (now: a muffled low thump + a soft
    pebble patter per blast, nugget clinks; Mining's built-in hissy strike muted).
+   **Round 52** (`SET52`, `mine52`; Mining sound; the base's own sounds muted under each set): A As now (a muffled thump +
+   pebble patter; small high clinks), B Deep drum (a deep soft drum hit, pitch varying, low gravel rustle; the chain rolls
+   on the drum climbing; wooden-tap landings), C Rumble + glint (a short low rumble with a soft bell glint, varying; the
+   chain rumbles with glints climbing; tiny bell taps), D Stone knock (a soft-edged hammer-on-stone knock + two pebbles;
+   the chain knocks up a scale with a low chord at the icon; small knocks). All step down after two in a row.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

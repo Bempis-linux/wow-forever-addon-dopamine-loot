@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 51, Mining finale: chain + ore shower</h1>
+  <h1>Skill-up: round 52, Mining sound</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast; its finale mixes the chain reaction with the ore shower, four ways (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2724,6 +2724,30 @@ function r51(K) { return { get name() { return K + '. ' + (profName === 'Mining'
   get note() { return profName === 'Mining' ? MIX51[K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR51.Mining[K]); } finally { S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r51('A'), PB: r51('B'), PC: r51('C'), PD: r51('D') });
+// ---------- round 52 (2026-11-15): Mining = the Blast + finale "every blast throws ore" (round 51 A); its sound, four sets ----------
+// Each set: up(i, v) = the skill-up blast, blast(k) = each blast of the finale chain (k 0..4, 4 = the icon), clink(j) = a nugget landing.
+const SET52 = {
+  A: { name: 'As now', desc: 'The current sound, for comparison: a muffled low thump and a soft patter of falling pebbles per blast; the nuggets land with small high clinks.',
+    up: (i, v) => { thump48(0, v); pebbles48(0, v); }, blast: k => { thump48(0, k === 4 ? 1.3 : .8); }, clink: j => clink47(j, 0, .5) },
+  B: { name: 'Deep drum', desc: 'Each blast a deep, soft drum hit whose pitch moves a little each time, with a low gravel rustle; the finale chain rolls on the drum, climbing, and the nuggets land as soft wooden taps.',
+    up: (i, v) => { drum46(82 * semi(pick45(i, 2) / 2), 0, .05 * v); noise(.02, .2, .015 * v, 350, .6, 'lowpass'); }, blast: k => drum46(73 * semi(PENT42[k] / 2), 0, k === 4 ? .06 : .04), clink: j => mallet(523 * semi(PENT42[j % 7]), 0, .007) },
+  C: { name: 'Rumble + glint', desc: 'Each blast a short low rumble with a soft bell glint on top (the ore catching the light), the glint’s note varying and climbing; the finale chain rumbles with the glints climbing a scale, and the nuggets land with tiny bell taps.',
+    up: (i, v) => { noise(0, .3, .04 * v, 140, .6, 'lowpass'); tone(60, 0, .03 * v, .25, 'sine', 45, .004); bell45(1046 * semi(pick45(i, 3)), .06, .007 * v); }, blast: k => { noise(0, .3, .035, 140, .6, 'lowpass'); bell45(784 * semi(PENT42[k + 1]), .05, k === 4 ? .011 : .007); }, clink: j => bell45(1568 * semi(PENT42[j % 6]), 0, .004) },
+  D: { name: 'Stone knock', desc: 'Each blast a hard but soft-edged knock, like a hammer on stone, its note varying, with two tiny pebbles after; the finale chain knocks up a scale with a low chord at the icon, and the nuggets land as small knocks.',
+    up: (i, v) => { mallet(147 * semi(pick45(i, 3)), 0, .03 * v); noise(0, .06, .02 * v, 400, .8, 'lowpass'); pebbles48(.05, v * .7, 2); }, blast: k => { mallet(131 * semi(PENT42[k]), 0, .024); if (k === 4) { mallet(98, .02, .022); mallet(147, .03, .016); } }, clink: j => mallet(784 * semi(PENT42[j % 6]), 0, .006) },
+};
+const BASE52 = VAR51.Mining.A;
+function mine52(K) { const c = SET52[K]; return Object.assign({}, BASE52, { name: c.name,
+  over(p, I) { const t0 = window.tone, n0 = window.noise; window.tone = () => {}; window.noise = () => {}; try { BASE52.over(p, I); } finally { window.tone = t0; window.noise = n0; }
+    onHits('m52', i => c.up(i, fat45(i))); if (!I.done) return; const ts = S.age - S.closeAt;
+    for (let k = 0; k < 5; k++) { const tk = k * .12; if (ts >= tk) once('m52b' + k, () => c.blast(k)); if (k < 4) for (let q = 0; q < 3; q++) { const j = k * 3 + q; if (ts >= tk + .36) once('m52c' + j, () => c.clink(j)); } } } }); }
+const VAR52 = { Mining: { A: mine52('A'), B: mine52('B'), C: mine52('C'), D: mine52('D') } };
+function r52(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? SET52[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? 'Mining as picked (the Blast; finale: every blast throws ore), with a sound set. ' + SET52[K].desc + ' Long sessions: notes vary, and after two in a row each is a step quieter. (Sound on; try “Five in a row” and “Reaching the next unlock”.)' : 'One profession at a time: this round is Mining’s sound. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? SET52[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR52.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r52('A'), PB: r52('B'), PC: r52('C'), PD: r52('D') });
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
