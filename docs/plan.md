@@ -893,6 +893,13 @@ Professions (from 1.3.0):
    gone); finale: one big swell with a big fish riding its crest, small fish hopping alongside, the crash flings it into
    the icon. Next (the user): revisit Herbalism's sound the same way, then Mining. New rule for sound over long sessions
    (Skinning/Mining in quick succession, craft batches of 100, Disenchanting): see docs/style-guide.md "Long sessions".
+   The user then made **sound fatigue an addon-wide rule** (every repeated sound: XP, skill-ups, loot, craft beats;
+   CLAUDE.md + style guide "Sound"). **Round 45** (`SET45`, `r45`; Herbalism's sound; the old one was a chirpy upward
+   glide + a 4 kHz hiss, and the sickle a noise swish): four gentle sets, notes varied from a scale, the first two
+   skill-ups full then a step quieter each (floor .5), each with the Sickle sweep finale sound: A Stem pluck (a soft
+   plucked note; the sweep a pluck run up + a low pluck), B Garden bells (a small soft bell; a bell run down + a two-bell
+   chord), C Wooden marimba (two mallet notes; a mallet run up + a low note), D Thumb piano (a note + a soft fifth; a
+   run up + a chord with an echo).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

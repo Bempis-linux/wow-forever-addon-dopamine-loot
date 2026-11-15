@@ -122,6 +122,10 @@ Decisions (don't undo without asking; details in `docs/plan.md`):
   as one: two golds (accent `#ffd36a`, game `#ffd100`), Morpheus only for item names and the biggest titles
   (Friz Quadrata for the rest), dark rounded panels with a gold hairline (fading rows for lists), one Ring
   recipe, and **money always with the game's coins as in the bags** (`GetCoinTextureString`, never "2g 39s").
+- **Sound fatigue, always** (user, 2026-11-15): every repeated sound (XP gains, skill-ups, loot, rain, craft beats)
+  is designed for hours of repeats: gentle timbres (no hiss, sharp clicks or cartoon pitch drops) but not monotone,
+  notes varied from a scale, repeats stepping down in volume across systems, a skill-up folded under the craft sound
+  in a batch, rare milestones in full. Details: style guide "Sound".
 - Visual changes: show mockups first, the user picks, then build. Generated art comes from
   `tools/gen_textures.lua` (check it rendered with ffmpeg before pushing).
 - Assets: Blizzard's game assets (models, textures, icons, sounds, referenced by path or ID) and our

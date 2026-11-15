@@ -101,6 +101,9 @@ Three styles exist today:
 
 - Soft taps and chimes climbing in pitch for repeats; quiet copies after the first few (Create All, kills).
 - One reward chime at a time ("Calm when busy", still open for XP; maybe addon-wide).
+- **Sound fatigue, always (the user's rule for the whole addon, 2026-11-15).** Every repeated sound (XP gains, skill-ups,
+  loot popups, rain, craft beats, kills) is designed for hours of repeats, not one listen; the long-session rules below
+  apply to all of them.
 - **Long sessions (the user, 2026-11-15).** Skill-up sounds must stay pleasant after hours: Skinning (several mobs in
   one spot) and Mining (one vein mined several times) fire in quick succession, and a crafting batch (up to 100 casts,
   Disenchanting too) plays the craft sound every cast and can add a skill-up every cast. So: gentle timbres (no hiss,

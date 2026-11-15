@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 44, Fishing finale: tidal wave + leaping school</h1>
+  <h1>Skill-up: round 45, Herbalism sound</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 44: Fishing (the swell, Depth bands, the Water drops sounds): its finale mixes the tidal wave with the leaping school, four ways (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 45: Fishing done; Herbalism’s sound revisited, four gentle sets for the skill-up and the Sickle sweep (sound on) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2457,6 +2457,30 @@ function r44(K) { return { get name() { return K + '. ' + (VAR44[profName] ? VAR
   get note() { return VAR44[profName] ? VAR44[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR44.Fishing; window.FREEL = fish ? false : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r44('A'), PB: r44('B'), PC: r44('C'), PD: r44('D') });
+// ---------- round 45 (2026-11-15): Fishing DONE (big fish surfs the swell); Herbalism's sound revisited: four gentle sets ----------
+// Each set: up(i, v) = the skill-up (v = volume after the long-session step-down), fin() = the Sickle sweep finale.
+// Long sessions (style guide): notes vary from a scale; the first two skill-ups full, then each a step quieter (floor .5).
+const fat45 = i => i < 2 ? 1 : Math.max(.5, 1 - (i - 1) * .15);
+const pick45 = (i, span) => PENT42[(i + Math.floor(skHash(i * 7 + S.age) * span)) % 10];
+const bell45 = (f, t, v) => { tone(f, t, v, .9, 'sine', null, .004); tone(f * 2.76, t, v * .14, .35, 'sine', null, .003); tone(f * 5.4, t, v * .04, .15, 'sine', null, .002); };
+const SET45 = {
+  A: { name: 'Stem pluck', desc: 'Each skill-up a soft plucked note, like a stem being picked, on a varied note that climbs as you go; the sickle sweep is a quick run of plucks up the scale as the slash crosses the bar, landing on a low warm pluck.',
+    up: (i, v) => pluck(196 * semi(pick45(i, 3)), .02 * v), fin: () => { for (let k = 0; k < 7; k++) pluck(196 * semi(PENT42[k + 1]), .012, k * .06); pluck(98, .02, .45); } },
+  B: { name: 'Garden bells', desc: 'Each skill-up a small soft bell, a clear note with a gentle ring that fades, varied and climbing; the sickle sweep rings a fast run of bells down the scale as it crosses, ending on a soft two-bell chord.',
+    up: (i, v) => bell45(659 * semi(pick45(i, 3)), 0, .016 * v), fin: () => { for (let k = 0; k < 6; k++) bell45(1046 * semi(-PENT42[k]), k * .065, .008); bell45(523, .45, .014); bell45(784, .46, .01); } },
+  C: { name: 'Wooden marimba', desc: 'Each skill-up two soft wooden mallet notes, the second a step up, varied and climbing; the sickle sweep is a rolling mallet run up eight notes as the slash crosses, then a low note.',
+    up: (i, v) => { const f = 330 * semi(pick45(i, 3)); mallet(f, 0, .02 * v); mallet(f * semi(3), .08, .014 * v); }, fin: () => { for (let k = 0; k < 8; k++) mallet(262 * semi(PENT42[k]), k * .05, .011); mallet(131, .42, .02); } },
+  D: { name: 'Thumb piano', desc: 'Each skill-up a warm thumb-piano note with a soft fifth above it, varied and climbing; the sickle sweep is a quick thumb-piano run up, landing on a chord with a soft echo.',
+    up: (i, v) => { const f = 262 * semi(pick45(i, 3)); kal(f, 0, .02 * v); kal(f * 1.5, .012, .01 * v); }, fin: () => { for (let k = 0; k < 6; k++) kal(262 * semi(PENT42[k]), k * .06, .012); [262, 392, 523].forEach(f => { kal(f, .42, .012); kal(f, .62, .005); }); } },
+};
+function r45(K) { const c = SET45[K]; return { get name() { return K + '. ' + (profName === 'Herbalism' ? c.name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Herbalism only this round'); },
+  get desc() { return profName === 'Herbalism' ? 'Herbalism as picked (the Vine, the Sickle sweep finale) with a new sound set. ' + c.desc + ' Long sessions: the notes vary, and after two skill-ups in a row each is a step quieter. (Sound on; try “Five in a row” and “Reaching the next unlock”.)' : 'One profession at a time: this round is Herbalism’s sound. Others show their current look.'; },
+  get note() { return profName === 'Herbalism' ? c.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Fishing') return r44('D').draw(top); if (profName !== 'Herbalism') return r42('B').draw(top);
+    const base = VAR29.Herbalism.B, o = Object.assign({}, base, { over(p, I) { S.fired.hsk = true; base.over(p, I); onHits('hup45', i => c.up(i, fat45(i))); if (I.done) once('hfin45', c.fin); } });
+    const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, FIT19[profName] || 'A', o); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r45('A'), PB: r45('B'), PC: r45('C'), PD: r45('D') });
+setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
