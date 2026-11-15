@@ -1068,6 +1068,12 @@ Professions (from 1.3.0):
    back to the anvil and crashes in sparks), **C. Throw, then the wave back** (A then B), **D. Sparks into the magma** (the
    Lingering sparks shower lands on the magma, each spark a tiny ring of ripples). Gotcha: anything arcing more than ~5 px
    above the bar passes behind the header text.
+   Round 67 → **D LOCKED: Sparks into the magma** (the anvil's Lingering-sparks shower lands on the magma, tiny ripples;
+   the clank). Next: the head's bubbles and splat should feel like **swamp bubble pops**. Round 68 (all: a thin glossy film
+   dome swells slowly at the head, pops; a dimple and soft ripples; silent): **A. Film burst** (a thin bright ring flicks out
+   flat, tiny droplets), **B. Gas puff** (a little puff of smoky swamp gas curls up and fades, no droplets), **C. Blub-blub
+   cluster** (one pop then a few smaller ones beside it in quick succession), **D. Thick blorp** (the dome stretches up into
+   a peak, bursts with one fat droplet that falls back with a plip; the surface dips then bounces up past level).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
