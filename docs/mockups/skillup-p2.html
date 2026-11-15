@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 45, Herbalism sound</h1>
+  <h1>Skill-up: round 46, Skinning sound</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 45: Fishing done; Herbalism’s sound revisited, four gentle sets for the skill-up and the Sickle sweep (sound on) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 46: Fishing and Herbalism done; Skinning’s sound revisited, four gentle sets for the cut and the reticle chop (sound on) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2481,6 +2481,36 @@ function r45(K) { const c = SET45[K]; return { get name() { return K + '. ' + (p
     const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, FIT19[profName] || 'A', o); } finally { S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r45('A'), PB: r45('B'), PC: r45('C'), PD: r45('D') });
 setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
+// ---------- round 46 (2026-11-15): Herbalism DONE (thumb piano); Skinning's sound revisited (it was all hiss: the strike 2.6/5.2 kHz noise, the stroke 2.2 kHz, the finale clicks) ----------
+// Each set: up(i, v) = the skill-up (the cut), lock() = the reticle locking, chop(j, n) = each chop, last() = after the last chop.
+const swish46 = (t, v) => noise(t, .1, v, 700, .8); // a soft low swish of air, no hiss (700 Hz band)
+const drum46 = (f, t, v) => { tone(f, t, v, .22, 'sine', f * .6, .002); noise(t, .05, v * .5, 300, .8, 'lowpass'); };
+const SET46 = {
+  A: { name: 'Soft leather', desc: 'Each cut a muted leather “thup” (a low soft slap) with a low wooden tick on a varied note; the reticle locks with two low soft notes; each chop a woody tap climbing the scale; a low warm tap after the last.',
+    up: (i, v) => { noise(0, .06, .03 * v, 500, .8, 'lowpass'); tone(140, 0, .03 * v, .1, 'sine', 100, .002); mallet(262 * semi(pick45(i, 3)), .03, .012 * v); },
+    lock: () => { mallet(196, 0, .016); mallet(294, .07, .014); }, chop: (j, n) => mallet(196 * semi(PENT42[Math.min(9, j)]), 0, .012), last: () => mallet(98, 0, .02) },
+  B: { name: 'Blade ring', desc: 'Each cut a soft low swish of air and the knife’s gentle ring, a quiet bell-like note that varies and climbs; the reticle locks with a soft bell; each chop a small bell tap climbing; a two-bell chord after the last.',
+    up: (i, v) => { swish46(0, .025 * v); bell45(880 * semi(pick45(i, 3)), .02, .01 * v); },
+    lock: () => bell45(1175, 0, .012), chop: (j, n) => bell45(587 * semi(PENT42[Math.min(9, j)]), 0, .008), last: () => { bell45(587, 0, .012); bell45(880, .01, .009); } },
+  C: { name: 'Hunter’s drum', desc: 'Each cut a low soft frame-drum tap, its pitch varying a little, with a soft swish; the reticle locks with a light high tap; the chops roll on the drum, climbing; one deep hit after the last.',
+    up: (i, v) => { drum46(110 * semi(pick45(i, 2) / 2), 0, .04 * v); swish46(0, .015 * v); },
+    lock: () => tone(880, 0, .01, .12, 'sine', null, .003), chop: (j, n) => drum46(98 * semi(PENT42[Math.min(9, j)] / 2), 0, .03), last: () => drum46(65, 0, .05) },
+  D: { name: 'Low marimba', desc: 'Each cut one low wooden mallet note on a varied note, climbing, with a soft swish; the reticle locks with two quick mallet notes up; each chop a mallet note climbing the scale fast; a low chord after the last.',
+    up: (i, v) => { mallet(196 * semi(pick45(i, 3)), 0, .022 * v); swish46(0, .012 * v); },
+    lock: () => { mallet(392, 0, .012); mallet(587, .05, .012); }, chop: (j, n) => mallet(262 * semi(PENT42[Math.min(9, j)]), 0, .013), last: () => { mallet(131, 0, .018); mallet(196, .01, .012); } },
+};
+function r46(K) { const c = SET46[K]; return { get name() { return K + '. ' + (profName === 'Skinning' ? c.name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return profName === 'Skinning' ? 'Skinning as picked (the cut + Fur flies, the reticle chop finale) with a new sound set. ' + c.desc + ' Long sessions: the notes vary, and after two skill-ups in a row each is a step quieter. (Sound on; try “Five in a row” and “Reaching the next unlock”.)' : 'One profession at a time: this round is Skinning’s sound. Others show their current look.'; },
+  get note() { return profName === 'Skinning' ? c.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Fishing') return r44('D').draw(top); if (profName === 'Herbalism') return r45('D').draw(top); if (profName !== 'Skinning') return r42('B').draw(top);
+    const n = Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15), N = n >= 4 ? n : 6, base = VAR36.Skinning.A, cc = { dt: DT36, rtl: false };
+    S.hits.forEach((h, i) => { S.fired['sk' + i] = true; }); ['r36r0', 'r36r1', 'r36d'].forEach(k => S.fired[k] = true); for (let j = 0; j < 15; j++) S.fired['c36' + j] = true;
+    const o = Object.assign({}, base, { finAt: CHOP35 + (N - 1) * DT36 + .2,
+      over(p, I) { base.over(p, I); onHits('sup46', i => c.up(i, fat45(i))); if (!I.done) return; const ts = S.age - S.closeAt, { n: m, at } = ch35(I, cc);
+        if (ts >= LOCK35) once('slk46', c.lock); for (let j = 0; j < m; j++) if (ts >= at(j)) once('sch46' + j, () => c.chop(j, m)); if (ts >= at(m - 1) + .12) once('sla46', c.last); } });
+    const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, FIT19[profName] || 'A', o); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r46('A'), PB: r46('B'), PC: r46('C'), PD: r46('D') });
+setTimeout(() => { profName = 'Skinning'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();

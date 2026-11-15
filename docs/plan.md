@@ -904,6 +904,12 @@ Professions (from 1.3.0):
    soft fifth per skill-up on varied scale notes, stepping down after two in a row; the sweep a quick run up landing on a
    chord with an echo). Skinning's sounds were made before the fatigue rule (the slash whoosh, the chop clicks); revisit them
    too.
+   **Round 46** (`SET46`, `r46`; Skinning's sound: all hiss before, the strike 2.6/5.2 kHz noise, the stroke 2.2 kHz, the
+   finale clicks 2-3.8 kHz; now only soft low noise bands, 300-700 Hz): four sets for the cut, the reticle lock, each
+   chop and after the last, notes varied, stepping down after two in a row: A Soft leather (a muted low slap + a low wooden
+   tick; woody chop taps climbing), B Blade ring (a soft swish + the knife's gentle bell ring; bell chop taps, a two-bell
+   chord), C Hunter's drum (a low frame-drum tap; the chops roll on the drum, one deep hit to end), D Low marimba (one low
+   mallet note + soft swish; mallet chops climbing, a low chord).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
