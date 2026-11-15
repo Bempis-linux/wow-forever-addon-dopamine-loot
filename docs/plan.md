@@ -923,6 +923,14 @@ Professions (from 1.3.0):
    rock; finale: a big swing splits the slab, ore flies into the icon), D Crystals (ore crystals jut up and down out of
    the bar; a new cluster with a glint each skill-up; finale: they ring and flash in turn, shatter into sparkles into the
    icon).
+   Round 47 feedback: new ideas; A, C, D too similar (ridge, crack, crystals); options must all differ; **destructive,
+   like mining is**. **Round 48** (`MIN48`, `r48`, `dug48` for the mined channel, `rockAhead` for the rock still ahead):
+   A Blast (a charge at the front: flash, muffled thump, chunks blown out, dust, the bar kicks, the blasted part glows hot;
+   finale: a chain of blasts, the last bursts the icon open), B Collapse (the rock ahead is a wall of blocks; its blocks
+   drop out of the bar into a rubble pile below with soft thuds; finale: a rumble, a dust cloud rolls along and clears to
+   show the icon), C Shatter (a web of straight cracks and shards flying; faint crack marks stay; finale: the whole bar
+   shatters, shards funnel into the icon), D Crushed to gravel (gravel pours from the bar's bottom into a mound beneath;
+   finale: the mound slides along and pours into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
