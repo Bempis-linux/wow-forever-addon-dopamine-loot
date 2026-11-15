@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 26, Herbalism add-ons</h1>
+  <h1>Skill-up: round 27, Herbalism, picking</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 26: Herbalism only: the Vine is the base (round 25 A); B-D are bold add-ons to it (the gust, a sunbeam, a butterfly). Try “Reaching the next unlock” for their finales. Fishing locked; the others show their current look. Rounds 2-25 stay in the code.
+  the line that grows. Round 27: Herbalism only, about picking herbs, not growing them: A the Vine (current); B and C new picking designs; D the vine, plucked. Try “Reaching the next unlock” for the finales. Fishing locked. Rounds 2-26 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1852,6 +1852,37 @@ function r26(K) { const v = () => VAR26[profName]; return { get name() { return 
   get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism. Others show their current look.'; },
   get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+
+// ---------- round 27 (2026-11-15): Herbalism vine add-ons about picking herbs, not cultivating (sunbeam, butterfly out) ----------
+function satchel(x, y, full, squash) { ctx.save(); ctx.translate(x, y); ctx.scale(1 + squash * .25, 1 - squash * .2); const w = 7 + 3 * full;
+  ctx.fillStyle = '#8a5a30'; ctx.beginPath(); ctx.moveTo(-w, -4); ctx.quadraticCurveTo(-w - 1.5, 6, 0, 7.5); ctx.quadraticCurveTo(w + 1.5, 6, w, -4); ctx.closePath(); ctx.fill();
+  const n = Math.round(full * 6); for (let j = 0; j < n; j++) { ctx.fillStyle = j % 2 ? '#7ee04a' : '#5ac83a'; ctx.beginPath(); ctx.ellipse(-w + 3 + j * (2 * w - 6) / 5, -5 - (j % 3) * 1.2, 1.4, 3, (j - 2.5) * .35, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#6a4220'; ctx.fillRect(-w, -5, 2 * w, 2.2); ctx.strokeStyle = '#c89a5a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-w + 1, -4.5); ctx.quadraticCurveTo(0, -14, w - 1, -4.5); ctx.stroke(); ctx.restore(); }
+VAR26.Herbalism.C = { name: '+ Plucked', desc: 'Each skill-up the herb at the tip is plucked: a snap, the bud pops off in a spray of leaf bits and the vine whips back and wobbles before it reaches on. Reaching the next herb, the whole vine is pulled up from the left, leaves flying, and yanked into the herb’s icon.',
+  grow(p, x, y, L, f, t, I) { const ha = I.hitAge, rec = ha >= 0 && ha < .7 ? Math.sin(ha * 26) * 5 * (1 - ha / .7) : 0; if (I.done) { const ts = S.age - S.closeAt, cut = lerp(x, I.x1 + 6, eOut(clamp(ts / .6))); if (cut >= I.x1 + 5) return; ctx.save(); ctx.beginPath(); ctx.rect(cut, y - 30, I.x1 + 30 - cut, 60); ctx.clip(); ctx.translate(0, -ts * 10); grow(p, x, y, L, f, t); ctx.restore(); return; }
+    ctx.save(); ctx.translate(I.tipX, y); ctx.transform(1, 0, 0, 1, 0, 0); ctx.translate(-I.tipX, -y); ctx.save(); ctx.beginPath(); ctx.rect(x - 4, y - 30, Math.max(0, I.tipX - 22 - x), 60); ctx.clip(); grow(p, x, y, L, f, t); ctx.restore();
+    ctx.beginPath(); ctx.rect(I.tipX - 22, y - 30, 40, 60); ctx.clip(); ctx.translate(0, rec * clamp((I.tipX - 22 - x) / 22)); grow(p, x, y, L, f, t); ctx.restore(); },
+  over(p, I) { onHits('hpl', () => { click(0, .08, 2600, 4); noise(.01, .12, .03, 4000, 1); for (let q = 0; q < 10; q++) spawn({ x: I.tipX, y: I.ly - 3, vx: (Math.random() - .3) * 90, vy: -40 - Math.random() * 50, g: 260, life: .7, size: q < 3 ? 2.4 : 1.4, shape: 'leaf', vr: 9, col: q < 2 ? '#ff9ad0' : q % 2 ? '#7ee04a' : '#5ac83a' }); });
+    if (I.done) { const ts = S.age - S.closeAt; once('hplu', () => { noise(0, .5, .04, 900, .7); click(.05, .06, 1800, 3); }); if (ts < .6) for (let q = 0; q < 2; q++) spawn({ x: lerp(I.x0, I.x1, eOut(ts / .6)), y: I.ly - 4, vx: 60 + Math.random() * 80, vy: -50 - Math.random() * 40, g: 200, life: .7, size: 2, shape: 'leaf', vr: 9, col: q % 2 ? '#7ee04a' : '#5ac83a' }); } } };
+VAR26.Herbalism.D = { name: '+ Into the satchel', desc: 'A gathering satchel hangs at the start of the bar. Each skill-up a leaf is plucked from the tip and flies back along the vine into it with a soft pat; the satchel squashes as it lands and fills up, leaves poking out. Reaching the next herb, the stuffed satchel bounces and a leaf pops up from it into the herb’s icon.',
+  over(p, I) { const k = lastHitIdx(), ha = I.hitAge, sx = I.x0 - 16, sy = I.ly + 1, full = clamp((S.v0 - I.lo + Math.max(0, k + (ha >= .55 ? 1 : 0))) / Math.max(1, S.nx.lv - I.lo)), squash = ha >= .55 && ha < .85 ? Math.sin(Math.PI * (ha - .55) / .3) : 0;
+    let bounce = 0; if (I.done) { const ts = S.age - S.closeAt; bounce = Math.abs(Math.sin(ts * 9)) * 4 * (1 - clamp(ts / .8)); once('hsat', () => { noise(0, .2, .04, 1500, .8); for (let q = 0; q < 1; q++) spawn({ x: sx, y: sy - 8, vx: (I.x1 + 18 - sx) / .7, vy: -90, g: 240, life: .7, size: 2.6, shape: 'leaf', vr: 6, col: '#7ee04a' }); }); }
+    satchel(sx, sy - bounce, full, squash);
+    if (k >= 0 && ha >= 0 && ha < .55 && !I.done) { const u = ha / .55, xx = lerp(I.tipX, sx, u), yy = lerp(I.ly - 4, sy - 6, u) - Math.sin(Math.PI * u) * 18; ctx.save(); ctx.fillStyle = '#7ee04a'; ctx.translate(xx, yy); ctx.rotate(u * 9); ctx.beginPath(); ctx.ellipse(0, 0, 3.4, 1.5, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    onHits('hsp', () => click(0, .06, 3000, 4)); landed('hsl', .55, () => noise(0, .1, .05, 700, .9, 'bandpass', true)); } };
+// (the user, mid-round: picking may be a new design rather than an add-on. B and C are new picking designs; D keeps the vine, plucked)
+VAR26.Herbalism.D = VAR26.Herbalism.C; VAR26.Herbalism.D.name = 'Plucked (the vine, picked)';
+VAR26.Herbalism.B = { name: 'The harvest row (new design)', desc: 'Nothing grows: herbs already stand along the whole bar, waiting. Progress is how many you’ve picked: each skill-up the herb at the front is plucked with a snap and flies up out of the bar, leaving a short cut stem behind; the picked part of the bar glows the herb’s green.',
+  grow(p, x, y, L, f, t, I) { const g = L * f, k = lastHitIdx(), ha = I.hitAge; ctx.fillStyle = 'rgba(40,70,30,.9)'; ctx.fillRect(I.x0 - 2, y - 3, I.x1 - I.x0 + 4, 6); if (g > 0) { const gr = ctx.createLinearGradient(0, y - 3, 0, y + 3); gr.addColorStop(0, '#9ff08a'); gr.addColorStop(1, '#3fa83a'); ctx.fillStyle = gr; ctx.fillRect(x - 2, y - 3, g + 2, 6); }
+    for (let s = 5, i = 0; x + s < I.x1; s += 9, i++) { const xx = x + s; if (xx <= x + g) { ctx.strokeStyle = '#2e6a24'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(xx, y - 2); ctx.lineTo(xx + .5, y - 5); ctx.stroke(); } else sprig(xx, y + 1, .7, i % 3, Math.sin(t * 1.5 + i) * .07); } },
+  over(p, I) { const k = lastHitIdx(), ha = I.hitAge; if (k < 0 || ha < 0 || ha > .7) return; const xa = I.X(hitTo(k) - 1), xb = I.X(hitTo(k)); for (let s = 5, i = 0; I.x0 + s < I.x1; s += 9, i++) { const xx = I.x0 + s; if (xx > xa && xx <= xb + .5) { const u = ha / .7; ctx.save(); ctx.globalAlpha *= 1 - clamp((u - .6) / .4); sprig(xx + u * 20, I.ly + 1 - u * 34 + u * u * 14, .8, i % 3, u * 5); ctx.restore(); } }
+    landed('hhr', 0, () => { click(0, .08, 2600, 4); noise(.01, .12, .03, 4000, 1); }); } };
+VAR26.Herbalism.C = { name: 'Tied in bundles (new design)', desc: 'Nothing grows: you gather. Each skill-up a handful of picked herbs drops in at the front and a twine wraps round its middle with a quick pull, so the bar fills with tied bundles standing side by side, leaves fanning out above the bar.',
+  grow(p, x, y, L, f, t, I) { const k = lastHitIdx(), ha = I.hitAge, ends = []; for (let v = I.lo + 1; v <= S.v0; v++) ends.push(I.X(v)); S.hits.forEach((h, i) => { if (i <= k) ends.push(I.X(hitTo(i))); });
+    let px = x; ends.forEach((xx, j) => { const newest = j === ends.length - 1 && k >= 0 && ha >= 0 && ha < .6, drop = newest ? eOut(clamp(ha / .2)) : 1, tie = newest ? clamp((ha - .2) / .25) : 1, cx = (px + xx) / 2, w = Math.max(4, xx - px - 2);
+      ctx.save(); ctx.translate(cx, lerp(-22, 0, drop)); for (let q = 0; q < 5; q++) { const a = (q - 2) * .22; ctx.save(); ctx.translate(0, y + 3); ctx.rotate(a); ctx.strokeStyle = '#3f7a2a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -12); ctx.stroke(); ctx.fillStyle = q % 2 ? '#7ee04a' : '#5ac83a'; ctx.beginPath(); ctx.ellipse(0, -13, 1.8, 3.6, 0, 0, 7); ctx.fill(); if (q === 2) { ctx.fillStyle = ['#ff9ad0', '#ffffff', '#fff27a'][j % 3]; ctx.beginPath(); ctx.arc(0, -16.5, 1.6, 0, 7); ctx.fill(); } ctx.restore(); }
+      ctx.fillStyle = '#d8b878'; ctx.fillRect(-Math.min(w / 2, 4) * tie, y - 2.2, Math.min(w, 8) * tie, 2); ctx.restore(); px = xx; });
+    landed('hbt1', .2, () => noise(0, .1, .04, 900, .9, 'bandpass', true)); landed('hbt2', .42, () => { noise(0, .06, .03, 3500, 3); click(.02, .04, 2200, 3); }); } };
 Object.assign(FAM, { PA: r26('A'), PB: r26('B'), PC: r26('C'), PD: r26('D') });
 setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);

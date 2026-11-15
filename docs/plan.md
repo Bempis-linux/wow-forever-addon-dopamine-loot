@@ -780,6 +780,12 @@ Professions (from 1.3.0):
    a big gust swirls leaves into the icon), C + Sunbeam (a shaft of light falls on the tip, the bud lights, golden motes;
    at the unlock the light sweeps the whole vine), D + The butterfly (flutters in, settles on the bud, lifts off; at the
    unlock it flies to the herb's icon and lands on it).
+   Round 26 feedback: no butterfly, no sunbeam; add-ons should be about **herbs being picked, not cultivated**; mid-round:
+   "it may be a new design instead of an add-on". **Round 27** (`VAR26.Herbalism.B/C/D` replaced; `satchel` kept unused): A
+   Vine, B The harvest row (new design: herbs stand along the whole bar; each skill-up the one at the front is plucked and
+   flies up, a cut stem left; the picked part glows green), C Tied in bundles (new design: a handful drops in at the front
+   and a twine wraps it; tied bundles side by side), D Plucked (the vine kept; each skill-up the herb at its tip snaps off
+   in a leaf spray and the vine whips back; at the unlock the whole vine is pulled up into the icon). The gust is out.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
