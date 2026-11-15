@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 39, Fishing: the skill-up sound</h1>
+  <h1>Skill-up: round 40, Fishing: the splash</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 39: Fishing is the swell + Depth bands + the soft low rush; four skill-up sounds for the bobber dip (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 40: Fishing is the swell + Depth bands + the soft low rush + the natural plop; four splash sounds after the plop (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2321,6 +2321,24 @@ function r39(K) { const v = () => VAR39[profName]; return { get name() { return 
     window.FSW = null; window.FTEX = o && o.tex ? o.tex : null; window.FSND = o && o.snd ? o.snd : null; if (o && o.pre) { const st = state(), lo = S.p.span[0], n = Math.max(1, S.nx.lv - lo), x0 = W / 2 - 128, L = 230; window.FSW = o.pre({ hitAge: st.hitAge, x0, x1: x0 + L, tipX: x0 + clamp((st.v - lo) / n) * L }); }
     barModule(top, FIT19[profName] || 'A', o); window.FSW = null; window.FTEX = null; window.FSND = null; FISHR = false; } }; }
 Object.assign(FAM, { PA: r39('A'), PB: r39('B'), PC: r39('C'), PD: r39('D') });
+// ---------- round 40 (2026-11-15): Fishing skill-up sound = the natural plop (39 B); its splash, four ways ----------
+const plop40 = () => { noise(0, .09, .06, 500, .9, 'lowpass'); tone(170, 0, .035, .12, 'sine', 85); };
+const SPL40 = {
+  A: () => noise(.03, .25, .02, 2200, .6), // as round 39: a flat hiss of spray
+  B: () => { noise(.02, .14, .014, 2600, .7); [.13, .2, .26, .34, .45].forEach((t, k) => { const f = 2400 + skHash(k + S.age) * 1800; tone(f, t, .012 - k * .0015, .05, 'sine', f * .6); }); }, // droplets: a short spray, then droplets pattering back down (tiny falling plinks)
+  C: () => { noise(.02, .12, .016, 1800, .8); for (let k = 0; k < 5; k++) { const t = .06 + k * .055 + skHash(k + S.age) * .03, f = 900 + skHash(k + 7 + S.age) * 700; tone(f, t, .01, .06, 'sine', f * 1.8); } }, // bubbly: a soft splash, then little bubbles popping up (short rising blips)
+  D: () => { noise(.02, .12, .03, 3200, .6); noise(.06, .2, .028, 1500, .6); noise(.12, .3, .022, 650, .7, 'lowpass'); }, // fuller: a three-layer sploosh that darkens as it settles
+};
+const SPLNAME40 = { A: 'Spray hiss (as now)', B: 'Droplets falling back', C: 'Bubbles', D: 'A fuller sploosh' };
+const SPLDESC40 = { A: 'the round 39 splash, for comparison: a flat hiss of spray.', B: 'a short spray, then a few droplets pattering back down onto the water, tiny falling plinks.', C: 'a soft splash, then little bubbles popping up from where the bobber went under, short rising blips.', D: 'a bigger three-layer splash, bright at first and darkening as the water settles; no notes.' };
+function fish40(K) { const s = swell38('A'); return { name: SPLNAME40[K], tex: TEX38.B, snd: i => { plop40(); SPL40[K](); }, pre: s.pre, over: s.over,
+  desc: 'Fishing as picked: the swell, Depth bands, the soft low rush and the natural plop. Its splash: ' + SPLDESC40[K] }; }
+const VAR40 = { Fishing: { A: fish40('A'), B: fish40('B'), C: fish40('C'), D: fish40('D') } };
+function r40(K) { return { get name() { return K + '. ' + (VAR40[profName] ? VAR40[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR40[profName] ? VAR40[profName][K].desc + ' (Sound on; try “Five in a row”.)' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return VAR40[profName] ? VAR40[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing; VAR39.Fishing = VAR40.Fishing; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; } } }; }
+Object.assign(FAM, { PA: r40('A'), PB: r40('B'), PC: r40('C'), PD: r40('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

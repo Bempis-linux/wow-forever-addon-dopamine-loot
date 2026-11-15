@@ -858,6 +858,9 @@ Professions (from 1.3.0):
    skill-up sound itself (the bobber dip: the triangle twang + the cartoon bloop 520 -> 180 Hz). **Round 39** (`VAR39`,
    `FSND39`; `window.FSND(i)` replaces it): A the current sound, B a natural plop (low water burst + spray hiss),
    C a plucked line (one string note rising per skill-up + light splash), D splash only (no tones).
+   Round 39 pick: **B the natural plop**; improve its splash. **Round 40** (`VAR40`, `SPL40`, `plop40`): the plop, then
+   A spray hiss (as round 39), B droplets falling back (short spray, then tiny falling plinks), C bubbles (soft splash,
+   then little rising blips), D a fuller sploosh (three noise layers, bright to dark, no notes).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
