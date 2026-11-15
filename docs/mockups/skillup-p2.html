@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 19, the bar per profession</h1>
+  <h1>Skill-up: round 20, Fishing with its reel</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 19: the header and the bar are set (round 18); how the growth sits in the bar is per profession: Herbalism breaks out, Mining and Skinning inside, Fishing a water bar with the bobber on top. A-D are four water surfaces for Fishing (the others are the same in all four). Opens on Fishing, Bright ground. Rounds 2-18 stay in the code.
+  the line that grows. Round 20: the set header and bar, the fit per profession; Fishing on D (the bright surface over the filled water) with the reel, line and twang from round 14 kept. A-D are the same this round. Opens on Fishing, Bright ground. Rounds 2-19 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1596,15 +1596,26 @@ function fishBar(p, x0, x1, ly, bh, f, tipX, t, I, v) { const top = ly - bh / 2 
   else { crest(x0 - 1, x1 + 1, 'rgba(120,170,210,.35)', 1); if (tipX > x0) crest(x0 - 1, tipX, '#e8f8ff', 2); }
   // the bobber floats on the surface at the fill's front; each skill-up it dips under with a splash
   const dip = ha >= 0 && ha < .45 ? Math.sin(Math.PI * ha / .45) * 4 : 0, bx = Math.max(x0 + 4, tipX), by = surf(bx) - 1 + Math.sin(t * 3) * .6 + dip, br = 4.4;
-  ctx.save(); ctx.strokeStyle = 'rgba(150,140,120,.85)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(bx, by - br); ctx.quadraticCurveTo(bx - 10, by - 16, bx - 26, by - 22); ctx.stroke(); // its line, up to the rod off-frame
+  // round 20: the reel and line from round 14 A, attached at the bar's start (like the tools on the craft rings): the reel
+  // pays out line with clicks; each skill-up the line snaps taut with a twang and shivers, then slowly sags to the water
+  const R = reel({ x0: x0 - 18 }, ly - 6, f, -(I.v - I.lo) * 6), slack = ha < 0 ? 1 : clamp((ha - .1) / 1.2), vib = ha >= 0 && ha < .5 ? Math.sin(ha * 70) * 2.2 * (1 - ha / .5) : 0;
+  const mx = (R.x + bx) / 2, my = lerp((R.y + by - br) / 2, Math.max(surf(mx) - 1, (R.y + by - br) / 2), slack) + vib;
+  ctx.strokeStyle = '#fff6dc'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(R.x, R.y); ctx.quadraticCurveTo(mx, my, bx, by - br); ctx.stroke();
+  reelClicks();
+  ctx.save();
   ctx.beginPath(); ctx.rect(bx - 8, by - 10, 16, Math.max(0, surf(bx) - (by - 10)) + 1.5); ctx.clip(); // (the part under the surface is hidden)
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#ff3a1a'; ctx.beginPath(); ctx.arc(bx, by, br, Math.PI, 7); ctx.fill(); ctx.fillStyle = '#ffd36a'; ctx.fillRect(bx - .7, by - br - 3, 1.4, 3); ctx.restore();
-  onHits('fbar', i => { tone(196 * semi(i * 2), 0, .03, .5, 'triangle'); noise(0, .16, .045, 800, .8); tone(520, 0, .03, .18, 'sine', 180);
+  onHits('fbar', i => { tone(196 * semi(i * 2), 0, .03, .5, 'triangle'); tone(392 * semi(i * 2), 0, .012, .35); noise(0, .16, .045, 800, .8); tone(520, 0, .03, .18, 'sine', 180);
     for (let k = 0; k < 9; k++) spawn({ x: bx, y: top, vx: (Math.random() - .5) * 90, vy: -50 - Math.random() * 60, g: 360, life: .55, size: 1.3, col: k % 2 ? '#d8f0ff' : '#9ad8ff' }); }); }
 function r19(K) { return { get name() { return profName === 'Fishing' ? K + '. ' + SURF19[K].name : K + '. (same for A-D)'; },
   get desc() { const fit = FIT19[profName]; return profName === 'Fishing' ? SURF19[K].desc + ' The whole bar is water, the bobber floats on it at the fill’s front and dips with a splash each skill-up.' : (fit === 'B' ? 'Herbalism breaks out: the vine full size over a slimmer bar, its leaves reaching past the edges.' : 'Inside the bar: the growth is the fill, clipped to the bar.') + ' The four options only differ for Fishing (its water surface).'; },
   get note() { return profName === 'Fishing' ? SURF19[K].name.toLowerCase() + '.' : 'the set bar, per profession.'; }, draw(top) { FISHR = true; FISHV = K; barModule(top, FIT19[profName] || 'A'); FISHR = false; } }; }
 Object.assign(FAM, { PA: r19('A'), PB: r19('B'), PC: r19('C'), PD: r19('D') });
+
+// ---------- round 20 (2026-11-15): Fishing picked D (a bright surface over the filled water) + the reel and line kept ----------
+function r20(K) { return { get name() { return K + '. The set bar (same for A-D)'; }, get desc() { return 'The set header and bar, the fit per profession: Herbalism breaks out, Mining and Skinning inside, Fishing a water bar (D: the bright surface over the filled water) with the reel at its start paying out line, the line snapping taut with a twang each skill-up and sagging back, the bobber dipping. A-D are the same this round.'; },
+  get note() { return 'the set bar, per profession.'; }, draw(top) { FISHR = true; FISHV = 'D'; barModule(top, FIT19[profName] || 'A'); FISHR = false; } }; }
+Object.assign(FAM, { PA: r20('A'), PB: r20('B'), PC: r20('C'), PD: r20('D') });
 setTimeout(() => { profName = 'Fishing'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands

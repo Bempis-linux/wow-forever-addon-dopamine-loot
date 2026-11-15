@@ -738,6 +738,10 @@ Professions (from 1.3.0):
    surfaces A a light line under the crests, B the waves are the edge (bigger waves, foam glints), C a faint gold border
    the waves wash over, D a bright surface over the filled water only. The bobber floats at the fill's front, its line
    runs up-left to an off-frame rod, it dips with a splash each skill-up.
+   **Round 19 → Fishing D** (the bright surface over the filled water), **keeping the reel, rod and line animations** from
+   round 14 A ("I really liked those"). **Round 20** (`r20`, A-D the same): the reel sits at the bar's left end (attached,
+   like the craft rings' tools), pays out line with clicks; each skill-up the line snaps taut with a twang and shivers,
+   then sags back toward the water; the bobber floats at the fill's front and dips with a splash.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
