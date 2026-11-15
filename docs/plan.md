@@ -958,6 +958,12 @@ Professions (from 1.3.0):
    on the drum climbing; wooden-tap landings), C Rumble + glint (a short low rumble with a soft bell glint, varying; the
    chain rumbles with glints climbing; tiny bell taps), D Stone knock (a soft-edged hammer-on-stone knock + two pebbles;
    the chain knocks up a scale with a low chord at the icon; small knocks). All step down after two in a row.
+   Round 52 pick: **A As now. Mining DONE**: the Blast (the mined part a dug channel, the rock ahead solid; each skill-up a
+   charge at the front: flash, muffled thump, chunks and dust, the bar kicks, the blasted part glows hot), no add-on;
+   finale: every blast throws ore (the chain runs down the bar, each blast throws nuggets that land, bounce and roll into the
+   icon, the last bursts it open); sound: the muffled thump + pebble patter, high clinks for nuggets, stepping down after two
+   in a row. **All four gatherers DONE** (Herbalism, Fishing, Skinning, Mining). Next: the crafters, one at a time, then
+   Cooking and First Aid.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
