@@ -793,6 +793,11 @@ Professions (from 1.3.0):
    splashes into the icon).
    Round 28 pick: **Herbalism LOCKED as A, the Vine on its own** (breaking out of the slim bar; no add-on). The gust,
    tracking the herb and the dew run are out. Next for Herbalism: its finale when the bar fills (pitched first).
+   **Round 29** (`VAR29`, `r29`; finales for the locked Vine; `V.finAt` delays the payoff so the finale plays first,
+   `V.iconPulse` swells the icon): A The pick (the tip bud swells into the herb, tugs, snaps off, arcs into the icon; the
+   vine whips back), B Sickle sweep (a gold slash runs the bar, leaves shear off and scatter, cut stem left), C Leaf wave
+   (light runs root to tip, each leaf flicks up and sends a green spark into the icon, rising notes), D Pulled in (the
+   whole vine slides into the icon, faster and faster, the icon bulging; the empty bar flashes).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 28, Herbalism add-ons</h1>
+  <h1>Skill-up: round 29, Herbalism finales</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 28: Herbalism only: the Vine base and new add-ons (the gust back; tracking the herb; a dew run). Try “Reaching the next unlock” for the finales. Fishing locked. Rounds 2-27 stay in the code.
+  the line that grows. Round 29: Herbalism is locked as the Vine; four finales for when its bar fills (pick “Reaching the next unlock”). Fishing locked. Rounds 2-28 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1543,8 +1543,9 @@ function barModule(top, mode, Vo) { const V = Vo || baseOf(), cx = W / 2, p = S.
   const X = v => x0 + clamp((v - lo) / n) * L, Xi = x => lo + (x - x0) / L * n;
   const info = { x0, x1, ly, X, Xi, tipX, lo, v: st.v, N, hitAge: st.hitAge, done, f, road: false };
   strikes(() => ({ x: tipX, y: ly }));
-  if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; payoff(ux, ly); });
-  const payAt = done ? S.closeAt : 99, pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
+  if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; if (!V.finAt) payoff(ux, ly); });
+  if (S.closeAt !== undefined && V.finAt && S.age >= S.closeAt + V.finAt) once('finpay', () => payoff(ux, ly));
+  const payAt = done ? S.closeAt + (V.finAt || 0) : 99, pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
   ctx.save(); ctx.globalAlpha = a;
   // header: no backing, the game's text shadow
   const font = '700 16px system-ui', w1 = measure(profName + ' ', font), w2 = measure(String(st.shown), font), hx = cx - (w1 + w2) / 2;
@@ -1562,11 +1563,11 @@ function barModule(top, mode, Vo) { const V = Vo || baseOf(), cx = W / 2, p = S.
   if (mode === 'F') { ctx.beginPath(); ctx.moveTo(x0 - 2, ly - 2); ctx.lineTo(x0 - 2, ly + bh / 2 - 3); ctx.arcTo(x0 - 2, ly + bh / 2, x0 + 1, ly + bh / 2, 3); ctx.lineTo(x1 - 1, ly + bh / 2); ctx.arcTo(x1 + 2, ly + bh / 2, x1 + 2, ly + bh / 2 - 3, 3); ctx.lineTo(x1 + 2, ly - 2); } else track(); ctx.strokeStyle = 'rgba(255,211,106,.55)'; ctx.lineWidth = 1; ctx.stroke();
   if (V.over) V.over(p, info);
   const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
-  if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.save(); track(); ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fill(); ctx.restore(); } }
-  icon(V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux, ly + (V.unlockY ? V.unlockY(info) : 0), 20 + pop * 6, nx.emo, lit ? 1 : .5, lit ? p.light : null);
+  if (done && S.age >= payAt) { const fl = clamp(1 - (S.age - payAt) / .5); if (fl > 0) { ctx.save(); track(); ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fill(); ctx.restore(); } }
+  icon(V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux, ly + (V.unlockY ? V.unlockY(info) : 0), 20 + pop * 6 + (V.iconPulse ? V.iconPulse(info) : 0), nx.emo, lit ? 1 : .5, lit ? p.light : null);
   const left = Math.max(0, nx.lv - st.shown); text(lit ? 'Unlocked!' : `${left} to ${nx.cap ? nx.lv : nx.name}`, cx, ly + 22, '600 11px system-ui', '#f0ead8', 'center');
   ctx.restore();
-  if (S.reaches) reveal(cx, ly + 34, (S.closeAt ?? 99) + .35, '600 13px system-ui', false); }
+  if (S.reaches) reveal(cx, ly + 34, (S.closeAt === undefined ? 99 : S.closeAt + (V.finAt || 0)) + .35, '600 13px system-ui', false); }
 function r18(K) { return { get name() { return K + '. ' + FIT18[K].name; }, get desc() { return FIT18[K].desc + ' (The 1.3 bar: header with no backing, a dark track with a thin gold border, the next unlock’s icon at its end, “N to X” under it. The growth is each profession’s current base.)'; },
   get note() { return FIT18[K].name.toLowerCase() + '.'; }, draw(top) { FISHR = true; barModule(top, K); FISHR = false; } }; }
 Object.assign(FAM, { PA: r18('A'), PB: r18('B'), PC: r18('C'), PD: r18('D') });
@@ -1913,6 +1914,50 @@ function r28(K) { const v = () => VAR28[profName]; return { get name() { return 
 Object.assign(FAM, { PA: r28('A'), PB: r28('B'), PC: r28('C'), PD: r28('D') });
 setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
+// ---------- round 29 (2026-11-15): Herbalism LOCKED as the Vine (round 28 A); four finales for when the bar fills ----------
+// V.finAt: seconds from the bar filling to the payoff (chime, icon lit, bar flash, "Unlocked!"), so the finale plays first.
+const hwy = (I, s) => I.ly + Math.sin(s * .22 - S.age * 1.5) * 1.6; // the vine's wave, s from its start
+const hLeaves = I => { const o = []; for (let s = 7, i = 0; s < I.x1 - I.x0; s += 9, i++) o.push({ s, i, side: i % 2 ? 1 : -1 }); return o; };
+const VAR29 = { Herbalism: {
+  A: { name: 'The pick', finAt: .8, desc: 'The Vine as locked. Reaching the next herb: the bud at the tip swells into the herb itself, tugs, and snaps off with a pop and a puff of leaf bits; it arcs into the herb’s spot at the bar’s end and lands, lighting it up, while the vine whips back and settles.',
+    grow(p, x, y, L, f, t, I) { if (!I.done) return grow(p, x, y, L, f, t); const ts = S.age - S.closeAt, w = ts > .4 ? Math.sin((ts - .4) * 18) * .07 * Math.exp(-(ts - .4) * 4) : 0;
+      ctx.save(); ctx.transform(1, w, 0, 1, 0, -w * x); grow(p, x, y, L, f, t); if (ts > .4) { ctx.fillStyle = '#3fa83a'; ctx.beginPath(); ctx.arc(x + L, hwy(I, L), 2.8, 0, 7); ctx.fill(); } ctx.restore(); },
+    over(p, I) { if (!I.done) return; const ts = S.age - S.closeAt, bx = I.x1, by = hwy(I, I.x1 - I.x0), ux = I.x1 + 18;
+      if (ts < .4) { const u = clamp(ts / .3), tug = ts > .25 ? Math.sin(ts * 90) * 1.2 : 0; ctx.save(); ctx.fillStyle = `rgba(255,240,170,${.5 * u})`; ctx.beginPath(); ctx.arc(bx + tug, by - 2, 4 + 8 * u, 0, 7); ctx.fill(); ctx.restore(); icon(bx + tug, by - 2 * u, 4 + 12 * eBack(u), S.nx.emo, 1, null); }
+      else if (ts < .8) { const u = (ts - .4) / .4, e = eOut(u); ctx.save(); ctx.translate(lerp(bx, ux, e), lerp(by - 2, I.ly, e) - Math.sin(Math.PI * u) * 22); ctx.rotate(u * 6.283); icon(0, 0, 16 + 4 * u, S.nx.emo, 1, null); ctx.restore(); }
+      once('hpk0', () => { noise(.05, .3, .02, 700, .7); tone(220, .1, .02, .25, 'triangle', 330); });
+      if (ts >= .4) once('hpk1', () => { click(0, .09, 2400, 3); noise(0, .08, .06, 3000, 1, 'highpass'); tone(900, 0, .04, .12, 'sine', 300); for (let q = 0; q < 8; q++) spawn({ x: bx, y: by, vx: (Math.random() - .3) * 90, vy: -30 - Math.random() * 60, g: 220, life: .6, size: 1.6, shape: 'leaf', vr: 12, col: q % 2 ? '#7ee04a' : '#5ac83a' }); }); } },
+  B: { name: 'Sickle sweep', finAt: .55, desc: 'The Vine as locked. Reaching the next herb: a gold sickle slash sweeps the whole bar from start to end in one stroke; every leaf it passes shears off and scatters up in the wind, leaving the cut stem, and the herb’s icon lights as the slash reaches it.',
+    grow(p, x, y, L, f, t, I) { if (!I.done) return grow(p, x, y, L, f, t); const sx = lerp(x - 10, x + L + 12, clamp((S.age - S.closeAt) / .45));
+      ctx.save(); ctx.beginPath(); ctx.rect(sx, y - 30, x + L + 40 - sx, 60); ctx.clip(); grow(p, x, y, L, f, t); ctx.restore();
+      const e = Math.min(sx, x + L) - x; if (e > 0) { ctx.save(); ctx.strokeStyle = '#2e7a2a'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); for (let s = 0; s <= e; s += 2) ctx.lineTo(x + s, hwy(I, s)); ctx.stroke();
+        ctx.strokeStyle = '#4a9a3a'; ctx.lineWidth = 1; for (const l of hLeaves(I)) if (l.s < e) { ctx.beginPath(); ctx.moveTo(x + l.s, hwy(I, l.s)); ctx.lineTo(x + l.s + 1, hwy(I, l.s) + l.side * 2); ctx.stroke(); } ctx.restore(); } },
+    over(p, I) { if (!I.done) return; const ts = S.age - S.closeAt, u = clamp(ts / .45), sx = lerp(I.x0 - 10, I.x1 + 12, u);
+      if (ts < .6) { const a = 1 - clamp((ts - .45) / .15); ctx.save(); const g = ctx.createLinearGradient(sx - 70, 0, sx, 0); g.addColorStop(0, 'rgba(255,211,106,0)'); g.addColorStop(1, `rgba(255,236,170,${.7 * a})`); ctx.strokeStyle = g; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx - 70, I.ly - 1); ctx.lineTo(sx, I.ly - 1); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,211,106,${a})`; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(sx - 12, I.ly, 16, -1.1, 1.1); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.8 * a})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(sx - 12, I.ly, 16, -.9, .9); ctx.stroke(); ctx.restore(); }
+      once('hsk', () => { noise(0, .4, .06, 2600, .6); tone(1700, 0, .02, .35, 'sine', 700); noise(.2, .6, .025, 900, .5); });
+      for (const l of hLeaves(I)) if (I.x0 + l.s <= sx) once('hsl' + l.i, () => spawn({ x: I.x0 + l.s, y: hwy(I, l.s) + l.side * 4, vx: 50 + Math.random() * 70, vy: -50 - Math.random() * 50, g: 120, life: 1, size: 2, shape: 'leaf', vr: 10, col: l.i % 3 ? '#5ac83a' : '#7ee04a' })); } },
+  C: { name: 'Leaf wave', finAt: 1, desc: 'The Vine as locked. Reaching the next herb: a wave of light runs along the vine from its root to the tip; each leaf flicks up bright as it passes and lets go a green spark, and the sparks stream one after another into the herb’s icon with a rising run of notes until it lights.',
+    over(p, I) { if (!I.done) return; const ts = S.age - S.closeAt, L = I.x1 - I.x0, ws = lerp(-10, L + 10, clamp(ts / .6)), ux = I.x1 + 18, notes = [0, 2, 4, 7, 9, 12, 14, 16, 19];
+      if (ts < .7) { ctx.save(); const g = ctx.createRadialGradient(I.x0 + ws, I.ly, 0, I.x0 + ws, I.ly, 16); g.addColorStop(0, `rgba(230,255,170,${.55 * (1 - clamp((ts - .6) / .1))})`); g.addColorStop(1, 'rgba(230,255,170,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(I.x0 + ws, I.ly, 16, 0, 7); ctx.fill(); ctx.restore(); }
+      for (const l of hLeaves(I)) { const d = ws - l.s, k = d > 0 && d < 16 ? Math.sin(Math.PI * d / 16) : 0, lx = I.x0 + l.s + 1.5, ly = hwy(I, l.s) + l.side * 4;
+        if (k > 0) { ctx.save(); ctx.fillStyle = mix('#7ee04a', '#f4ffd0', k); ctx.beginPath(); ctx.ellipse(lx, ly - 3 * k, 4.2 * (1 + .3 * k), 1.8 * (1 + .3 * k), l.side * .6 - l.side * k * .7, 0, 7); ctx.fill(); ctx.restore(); }
+        const tb = (l.s + 10) / (L + 20) * .6, u = (ts - tb) / .4; if (u > 0 && u < 1) { const e = eOut(u), mx = (lx + ux) / 2, my = I.ly - 26, px = (1 - e) * (1 - e) * lx + 2 * (1 - e) * e * mx + e * e * ux, py = (1 - e) * (1 - e) * ly + 2 * (1 - e) * e * my + e * e * I.ly;
+          ctx.save(); ctx.fillStyle = '#eaffc8'; ctx.shadowColor = '#7ee04a'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(px, py, 1.7, 0, 7); ctx.fill(); ctx.restore(); }
+        if (ts >= tb && l.i % 3 === 0) once('hlw' + l.i, () => tone(660 * semi(notes[(l.i / 3) % notes.length]), 0, .018, .25, 'sine')); } } },
+  D: { name: 'Pulled in', finAt: .8, desc: 'The Vine as locked. Reaching the next herb: the whole vine is pulled into the herb’s icon like reeling in a long stem by hand, sliding right from its root, faster and faster, leaves vanishing into the icon as it bulges with each one; the empty bar flashes and the herb lights.',
+    grow(p, x, y, L, f, t, I) { if (!I.done) return grow(p, x, y, L, f, t); const u = clamp((S.age - S.closeAt) / .75), d = (L + 30) * u * u;
+      ctx.save(); ctx.beginPath(); ctx.rect(x - 10, y - 30, I.x1 + 9 - (x - 10), 60); ctx.clip(); ctx.translate(d, 0); grow(p, x, y, L, f, t); ctx.restore(); },
+    iconPulse(I) { if (!I.done) return 0; const ts = S.age - S.closeAt; return ts > .1 && ts < .8 ? 3 * Math.abs(Math.sin(ts * 32)) * clamp((ts - .1) / .3) : 0; },
+    over(p, I) { if (!I.done) return; const ts = S.age - S.closeAt, u = clamp(ts / .75), d = (I.x1 - I.x0 + 30) * u * u;
+      once('hpl', () => { noise(0, .8, .035, 500, .6, 'bandpass'); tone(160, 0, .02, .8, 'triangle', 520); });
+      for (const l of hLeaves(I)) if (I.x0 + l.s + d >= I.x1 + 9) once('hpi' + l.i, () => { spawn({ x: I.x1 + 10, y: I.ly + l.side * 3, vx: 40, vy: l.side * 10, life: .25, size: 1.5, shape: 'leaf', vr: 8, col: '#7ee04a' }); if (l.i % 4 === 0) click(0, .03, 1800, 4); }); } },
+} };
+function r29(K) { const v = () => VAR29[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r29('A'), PB: r29('B'), PC: r29('C'), PD: r29('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
