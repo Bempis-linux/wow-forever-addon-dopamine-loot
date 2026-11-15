@@ -868,6 +868,11 @@ Professions (from 1.3.0):
    two-note bloop with no pitch drop + low water; faint low rush; three soft wooden ticks), B Chimes (a soft bell note per
    skill-up up a five-note scale; a quiet warm chord for the swell; no reel), C Deep pond (a deep soft thoomp; low
    rumble; slow low ratchet), D Minimal (one soft rising note per skill-up, nothing else).
+   Round 41 feedback: A-C a little too monotone/boring. **Round 42** (`VAR42`, `SET42`, `mallet`, `drop`, `kal`): livelier
+   but gentle, varying per skill-up: A Water marimba (a three-note rising mallet motif per skill-up, climbing; the swell a
+   soft run up and down; the reel a tiny rising zip), B Water drops (two plinking drops per skill-up on varied scale notes;
+   the swell a light shower of tiny drops; no reel), C Thumb piano (a two-note fifth with a soft echo, moving up per
+   skill-up; the swell a low pluck + two high notes; two soft reel taps), D Minimal (round 41 D, for comparison).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

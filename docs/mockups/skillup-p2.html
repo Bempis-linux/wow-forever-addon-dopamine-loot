@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 41, Fishing: the whole sound</h1>
+  <h1>Skill-up: round 42, Fishing: livelier sound sets</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 41: Fishing (the swell + Depth bands) gets four whole gentle sound sets: the skill-up, the swell and the reel (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 42: Fishing (the swell + Depth bands): livelier but gentle sound sets (little tunes, drops, echoes) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2363,6 +2363,32 @@ function r41(K) { return { get name() { return K + '. ' + (VAR41[profName] ? VAR
   get note() { return VAR41[profName] ? VAR41[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR41.Fishing; window.FREEL = fish ? VAR41.Fishing[K].reel : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r41('A'), PB: r41('B'), PC: r41('C'), PD: r41('D') });
+// ---------- round 42 (2026-11-15): Fishing sound sets, livelier but still gentle (round 41 A-C too monotone/boring) ----------
+const PENT42 = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21];
+const mallet = (f, t, v) => { tone(f, t, v, .45, 'sine', null, .003); tone(f * 4, t, v * .18, .06, 'sine', null, .002); tone(f * 2.01, t, v * .25, .2, 'sine', null, .003); }; // soft wooden mallet: body + a short knock
+const drop = (f, t, v) => tone(f, t, v, .14, 'sine', f * 1.9, .004); // a water drop: a quick upward glide
+const kal = (f, t, v) => { tone(f, t, v, .8, 'triangle', null, .003); tone(f * 3.01, t, v * .12, .15, 'sine', null, .002); }; // thumb piano
+const SET42 = {
+  A: { name: 'Water marimba', desc: 'Each skill-up a little three-note rising motif on soft wooden mallets, starting a step higher every skill-up, so five in a row climb like a tune; the swell rolls with a quick soft run of notes up and back down; the reel gives a tiny rising zip of three mallet taps.',
+    up: i => { const b = 392 * semi(PENT42[i % 6]); [0, 2, 4].forEach((d, k) => mallet(b * semi(PENT42[d] - PENT42[0] + (k === 2 ? 0 : 0)), k * .07, .022 - k * .003)); },
+    swell: () => { [0, 2, 4, 5, 4, 2].forEach((d, k) => mallet(262 * semi(PENT42[d]), .05 + k * .06, .009)); }, reel: () => { [0, 4, 7].forEach((s, k) => mallet(784 * semi(s), k * .035, .006)); } },
+  B: { name: 'Water drops', desc: 'Playful: each skill-up two water drops plink one after the other (soft upward “blip”s), on notes picked from a calm scale so they never repeat the same way, climbing with each skill-up; the swell is a light shower of four tiny drops; no reel.',
+    up: i => { const a = PENT42[(i + Math.floor(skHash(i + S.age) * 3)) % 8], b = PENT42[Math.min(9, (i + 2 + Math.floor(skHash(i * 3 + S.age) * 3)) % 10)]; drop(523 * semi(a), 0, .024); drop(523 * semi(b), .11, .018); },
+    swell: () => { for (let k = 0; k < 4; k++) drop(784 * semi(PENT42[Math.floor(skHash(k + S.age) * 6)]), .08 + k * .09 + skHash(k + 4 + S.age) * .04, .008); }, reel: false },
+  C: { name: 'Thumb piano', desc: 'Warm and plucky: each skill-up a thumb-piano chord of two notes (a gentle fifth) with a soft echo a moment later, the chord moving up the scale every skill-up; the swell is a low plucked bass note with a shimmer of two high notes; the reel gives two soft taps.',
+    up: i => { const f = 330 * semi(PENT42[i % 7]); kal(f, 0, .02); kal(f * 1.5, .01, .014); kal(f, .17, .008); kal(f * 1.5, .18, .006); },
+    swell: () => { kal(110, 0, .022); kal(880, .18, .006); kal(1320, .26, .005); }, reel: () => { kal(660, 0, .006); kal(740, .05, .005); } },
+  D: Object.assign({}, SET41.D, { name: 'Minimal (round 41 D)', desc: 'As round 41 D, for comparison: one soft quiet note per skill-up rising a step each time, nothing else.' }),
+};
+function fish42(K) { const s = swell38('D'), c = SET42[K]; return { name: c.name, tex: TEX38.B, snd: c.up, reel: c.reel, pre: s.pre,
+  over(p, I) { s.over(p, I); if (c.swell) onHits('fsw42', () => c.swell()); },
+  desc: 'Fishing as picked (the swell, Depth bands), with a new sound set. ' + c.desc }; }
+const VAR42 = { Fishing: { A: fish42('A'), B: fish42('B'), C: fish42('C'), D: fish42('D') } };
+function r42(K) { return { get name() { return K + '. ' + (VAR42[profName] ? VAR42[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR42[profName] ? VAR42[profName][K].desc + ' (Sound on; try “Five in a row”.)' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return VAR42[profName] ? VAR42[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR42.Fishing; window.FREEL = fish ? VAR42.Fishing[K].reel : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r42('A'), PB: r42('B'), PC: r42('C'), PD: r42('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
