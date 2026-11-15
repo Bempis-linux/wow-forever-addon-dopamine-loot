@@ -829,6 +829,13 @@ Professions (from 1.3.0):
    then lock (pieces hop up and fly into the icon, the reticle locks as the last goes in), C The reticle chops (it steps
    notch to notch, locking on each, and the hide is chopped there; ends locked on the icon), D Chop + gold refill
    (pieces drop away, the empty bar refills gold while the reticle locks).
+   Round 34 feedback: likes all; the fast chops (A, B, D) are the most satisfying. Recommended A's order (lock first:
+   aim, then strike) with B's pieces flying into the icon (they land on the reward instead of falling away; D's refill
+   is one beat too many). **Round 35** (`VAR35`, `fin35(cfg)`, `CFG35`): A Lock, then chop into it (the reticle locks,
+   fast chops left to right, each piece flies into the locked icon, the reticle pulses and a note climbs per landing,
+   the icon lights on the last), B Faster chops (.045 s apart, shorter hop), C Chopped from the icon end (right to
+   left, the nearest piece first), D The reticle tightens (a step tighter and a little turn per landing, fully closed at
+   the last).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

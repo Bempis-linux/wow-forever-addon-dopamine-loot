@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 34, Skinning finale: lock + chop</h1>
+  <h1>Skill-up: round 35, Skinning finale: lock, then chop into it</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 34: Skinning is locked (the cut + Fur flies); its finale mixes the target lock with the hide chopped up at the notches, four ways (opens on “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-33 stay in the code.
+  the line that grows. Round 35: Skinning is locked (the cut + Fur flies); its finale: the reticle locks on the icon, then fast chops fly the hide into it (A), with three variations (opens on “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-34 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2151,6 +2151,44 @@ function r34(K) { const v = () => VAR34[profName]; return { get name() { return 
     if (o && v() && K === 'C') { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: (N + 1) * .12 + .05 }); }
     barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
 Object.assign(FAM, { PA: r34('A'), PB: r34('B'), PC: r34('C'), PD: r34('D') });
+// ---------- round 35 (2026-11-15): Skinning finale = lock first (round 34 A's order), then fast chops whose pieces fly into the locked icon (34 B) ----------
+// cfg: dt (between chops), fly (piece flight time), rtl (chop from the icon end back), react ('pulse' | 'tighten')
+const LOCK35 = .45, CHOP35 = .55;
+const ch35 = (I, c) => { const n = chopN(I), at = j => CHOP35 + (c.rtl ? n - 1 - j : j) * c.dt; return { n, at, end: CHOP35 + (n - 1) * c.dt + c.fly }; };
+function fin35(c) { return Object.assign({}, skBase, {
+  grow(p, x, y, L, f, t, I) { if (!I.done) return skinStroke(p, x, y, L, f, t, I); const ts = S.age - S.closeAt, { n, at } = ch35(I, c), sl = L / n; let lo = x, hi = x + L;
+    for (let j = 0; j < n; j++) if (ts >= at(j)) { if (c.rtl) hi = Math.min(hi, x + j * sl); else lo = Math.max(lo, x + (j + 1) * sl); }
+    ctx.save(); ctx.beginPath(); ctx.rect(lo, y - 30, Math.max(0, hi - lo), 60); ctx.clip(); skinStroke(p, x, y, L, f, t, I); ctx.restore(); },
+  iconPulse(I) { if (!I.done) return 0; const ts = S.age - S.closeAt, { n, at } = ch35(I, c); let last = -9; for (let j = 0; j < n; j++) { const l = at(j) + c.fly; if (ts >= l) last = Math.max(last, l); } return 2.5 * Math.exp(-(ts - last) * 16); },
+  over(p, I) { skFurOnly(I); if (!I.done) return; const ts = S.age - S.closeAt, { n, at } = ch35(I, c), L = I.x1 - I.x0, sl = L / n, ux = I.x1 + 18;
+    for (let j = 0; j < n; j++) { const u = ts - at(j); if (u < 0) continue; const sx = I.x0 + j * sl, cx = sx + sl / 2, cut = c.rtl ? sx : sx + sl;
+      if (u < .12) { ctx.save(); ctx.strokeStyle = `rgba(255,246,230,${1 - u / .12})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cut, I.ly - 10); ctx.lineTo(cut, I.ly + 10); ctx.stroke(); ctx.restore(); }
+      once('c35' + j, () => { click(0, .07, 2000 + j * 90, 2); tone(95, 0, .04, .1, 'sine', 50); });
+      if (u >= c.fly) { once('l35' + j, () => tone(523 * semi([0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33][Math.min(14, c.rtl ? n - 1 - j : j)]), 0, .02, .1)); continue; }
+      const e = eOut(u / c.fly), dx = (ux - cx) * e, dy = -Math.sin(Math.PI * e) * (c.dt < .06 ? 10 : 16), sc = lerp(1, .3, e);
+      ctx.save(); ctx.translate(cx + dx, I.ly + dy); ctx.rotate(e * 3); ctx.scale(sc, sc); ctx.translate(-cx, -I.ly); ctx.beginPath(); ctx.roundRect(sx, I.ly - 6, sl, 12, 2); ctx.clip(); skinStroke(p, I.x0, I.ly, L, 1, S.age, I); ctx.restore(); } },
+  after(p, I) { if (!I.done) return; const ts = S.age - S.closeAt, { n, at, end } = ch35(I, c), ux = I.x1 + 18, a = clamp(ts / .1) * (1 - clamp((ts - end - .7) / .4));
+    if (ts < LOCK35) { const e = eOut(ts / LOCK35); retic(lerp(I.x0, ux, e), I.ly, lerp(22, 15, e), (1 - e) * 1.6, false, a); once('r35r0', () => tone(880, 0, .012, LOCK35, 'sine', 1320)); return; }
+    once('r35r1', () => { click(0, .1, 3800, 4); tone(1760, 0, .03, .12); });
+    let m = 0, last = -9; for (let j = 0; j < n; j++) { const l = at(j) + c.fly; if (ts >= l) { m++; last = Math.max(last, l); } }
+    const k = eBack(clamp((ts - LOCK35) / .15)), base = lerp(15, 14, k), r = c.react === 'tighten' ? lerp(16, 10.5, m / n) + 1.5 * Math.exp(-(ts - last) * 18) : base + 3 * Math.exp(-(ts - last) * 14);
+    retic(ux, I.ly, r, c.react === 'tighten' ? -m * .2 : 0, true, a);
+    if (m === n) once('r35d', () => spawn({ x: ux, y: I.ly, size: 13, shape: 'ring', grow: 22, life: .35, col: '#ffd36a' })); },
+  finAt: 0 }); }
+const CFG35 = { A: { dt: .07, fly: .38, rtl: false, react: 'pulse' }, B: { dt: .045, fly: .26, rtl: false, react: 'pulse' }, C: { dt: .07, fly: .38, rtl: true, react: 'pulse' }, D: { dt: .07, fly: .38, rtl: false, react: 'tighten' } };
+const VAR35 = { Skinning: {
+  A: Object.assign(fin35(CFG35.A), { name: 'Lock, then chop into it', desc: 'Skinning as locked. Reaching the next beasts: the reticle slides in and locks on the beasts’ icon; then the hide is chopped notch by notch from the start, fast, and each piece flies into the locked icon, the reticle pulsing and a note climbing as each one lands; the icon lights on the last.' }),
+  B: Object.assign(fin35(CFG35.B), { name: 'Faster chops', desc: 'A, but the chops come faster (a quick rattle) and the pieces fly in a shorter, snappier hop.' }),
+  C: Object.assign(fin35(CFG35.C), { name: 'Chopped from the icon end', desc: 'A, but the chops run backwards, from the bar’s end next to the icon back to its start: the nearest piece flies in first and the bar is eaten away toward the left.' }),
+  D: Object.assign(fin35(CFG35.D), { name: 'The reticle tightens', desc: 'A, but instead of a pulse, the reticle closes in a step tighter (and turns a little) with every piece that lands, so it’s fully closed when the last one goes in.' }),
+} };
+function r35(K) { const v = () => VAR35[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null;
+    if (o && v()) { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6, c = CFG35[K]; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * c.dt + c.fly + .02 }); }
+    barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r35('A'), PB: r35('B'), PC: r35('C'), PD: r35('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
