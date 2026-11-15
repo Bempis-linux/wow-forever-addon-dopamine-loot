@@ -977,6 +977,11 @@ Professions (from 1.3.0):
    filings; each skill-up a stream swirls in from around the bar as if by a magnet, packs on with a shiver, a few stand up at
    the front), **D. Gold inlay** (dark steel; each skill-up engraves a gold line further, curls above and below, a bright
    point leads, the new end gleams).
+   Round 54 → "I like the ringing steel animation"; the gold inlay "pretty cool, I like the coloring and the design but I
+   want to see more options". Round 55: **B's ringing on D's dark steel + gold** (the whole bar, inlay included, shivers;
+   a shine runs along the gold; the new end gleams; the tuning-fork tone), four inlay designs: **A. Curls** (round 54 D's),
+   **B. Braid** (two gold lines weaving, beads at the crossings), **C. Runes** (short gold runs with marks between: a dot, a
+   pair of strokes, a diamond), **D. Leaf scroll** (one flowing gold scroll, a small leaf at each crest and dip).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

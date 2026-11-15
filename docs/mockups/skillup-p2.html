@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 54, Blacksmithing base (new ideas)</h1>
+  <h1>Skill-up: round 55, Blacksmithing: ringing steel + inlay designs</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2870,6 +2870,43 @@ function r54(K) { return { get name() { return K + '. ' + (profName === 'Blacksm
   draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', BS54[K].V); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
 Object.assign(FAM, { PA: r54('A'), PB: r54('B'), PC: r54('C'), PD: r54('D') });
+// ---------- round 55 (2026-11-15): Blacksmithing = round 54 B's ringing on round 54 D's dark steel + gold; four inlay designs ----------
+// The bar (dark steel + its gold pattern) is drawn flat on an offscreen canvas, then copied in 2 px columns shifted by the
+// standing wave, so the whole inlay shivers with the steel.
+const OFF55 = document.createElement('canvas'), OCX55 = OFF55.getContext('2d');
+const G55 = '#ffd36a';
+const PAT55 = {
+  A: { name: 'Curls', desc: 'Round 54’s inlay: one gold line with small curls, above then below.', draw(c, x0, end, y) { c.beginPath(); c.moveTo(x0, y); c.lineTo(end, y); c.stroke();
+      for (let k = 0, cx = x0 + 9; cx < end; k++, cx += 15) { const s = k % 2 ? 1 : -1, g = clamp((end - cx) / 7), a0 = s < 0 ? Math.PI / 2 : -Math.PI / 2; c.beginPath(); c.arc(cx, y + s * 3, 3, a0, a0 + 4.6 * g * (s < 0 ? 1 : -1), s > 0); c.stroke(); } } },
+  B: { name: 'Braid', desc: 'Two gold lines weaving over and under each other along the bar, a small gold bead where they cross.', draw(c, x0, end, y) { [0, Math.PI].forEach(ph => { c.beginPath(); for (let x = x0; x <= end; x += 1.5) c.lineTo(x, y + 3.2 * Math.sin((x - x0) * Math.PI / 9 + ph)); c.stroke(); });
+      c.fillStyle = '#fff0b8'; for (let x = x0 + 9; x < end - 1; x += 9) { c.beginPath(); c.arc(x, y, 1.1, 0, 7); c.fill(); } } },
+  C: { name: 'Runes', desc: 'A gold line broken into short runs, with small engraved marks between them in turn: a dot, a pair of strokes, a diamond.', draw(c, x0, end, y) { for (let k = 0, x = x0; x < end; k++, x += 14) { const e = Math.min(end, x + 7); c.beginPath(); c.moveTo(x, y); c.lineTo(e, y); c.stroke(); const m = x + 10.5; if (m > end) break;
+      if (k % 3 === 0) { c.beginPath(); c.arc(m, y, 1.4, 0, 7); c.fill(); } else if (k % 3 === 1) { c.beginPath(); c.moveTo(m - 1.3, y - 3.5); c.lineTo(m - 1.3, y + 3.5); c.moveTo(m + 1.3, y - 3.5); c.lineTo(m + 1.3, y + 3.5); c.stroke(); }
+      else { c.beginPath(); c.moveTo(m, y - 3.5); c.lineTo(m + 2.2, y); c.lineTo(m, y + 3.5); c.lineTo(m - 2.2, y); c.closePath(); c.fill(); } } } },
+  D: { name: 'Leaf scroll', desc: 'One long flowing gold scroll along the bar, a small gold leaf at every crest and dip.', draw(c, x0, end, y) { c.beginPath(); for (let x = x0; x <= end; x += 1.5) c.lineTo(x, y + 2.6 * Math.sin((x - x0) * Math.PI / 12)); c.stroke();
+      for (let k = 0, x = x0 + 6; x < end - 2; k++, x += 12) { const s = k % 2 ? 1 : -1, g = clamp((end - x) / 5); c.save(); c.translate(x, y + s * 2.6); c.rotate(s * .6); c.beginPath(); c.ellipse(2.2 * g, s * 1.2 * g, 2.6 * g, 1.1 * g, s * .5, 0, 7); c.fill(); c.restore(); } } },
+};
+function bar55(K, x0, end, y, amp, ph, shine) { if (end <= x0 + 1) return; const w = Math.ceil(end - x0) + 4, h = 16, d = DPR;
+  if (OFF55.width < w * d || OFF55.height < h * d) { OFF55.width = Math.max(OFF55.width, w * d); OFF55.height = h * d; }
+  const c = OCX55; c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, w, h);
+  const g = c.createLinearGradient(0, 3, 0, 13); g.addColorStop(0, '#4a5462'); g.addColorStop(.5, '#2a303a'); g.addColorStop(1, '#1c2028'); c.fillStyle = g; c.beginPath(); c.roundRect(0, 3, end - x0, 10, 2); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(1, 4, end - x0 - 2, 1);
+  c.strokeStyle = G55; c.fillStyle = G55; c.lineWidth = 1.3; c.lineCap = 'round'; c.lineJoin = 'round'; c.save(); c.beginPath(); c.rect(0, 3, end - x0, 10); c.clip(); PAT55[K].draw(c, 1, end - x0 - 1, 8);
+  if (shine) { c.globalCompositeOperation = 'source-atop'; const sx = shine * (end - x0 + 40) - 20, s = c.createLinearGradient(sx - 16, 0, sx + 16, 0); s.addColorStop(0, 'rgba(255,255,255,0)'); s.addColorStop(.5, 'rgba(255,250,225,.75)'); s.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = s; c.fillRect(sx - 16, 0, 32, h); }
+  c.restore();
+  const len = end - x0; for (let x = 0; x < len; x += 2) { const off = amp * Math.sin(Math.PI * 3 * x / len) * Math.sin(ph); ctx.drawImage(OFF55, x * d, 0, 2 * d, h * d, x0 + x, y - 8 + off, 2, h); } }
+function V55(K) { return {
+  grow(p, x0, y, L, f, t, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k), amp = ft >= 0 && ft < 1.2 ? 1.8 * Math.exp(-ft * 3.2) : 0, shine = ft >= .05 && ft < .75 ? (ft - .05) / .7 : 0;
+    if (amp > .05) { ctx.save(); ctx.globalAlpha *= .25; bar55(K, x0, I.tipX, y, amp, ft * 70 + 1.6, 0); bar55(K, x0, I.tipX, y, amp, ft * 70 - 1.6, 0); ctx.restore(); }
+    bar55(K, x0, I.tipX, y, amp, ft * 70, shine); },
+  over(p, I) { onHits('e55', i => BS54.B.snd(i, fat45(i))); S.hits.forEach((h, i) => { const t = hT53(i); if (t >= .4 && t < .85) { const a = 1 - (t - .4) / .45, x = I.X(S.v0 + i + 1) - 1; ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = '#fff6d8'; ctx.shadowColor = G55; ctx.shadowBlur = 8; star4(x, I.ly, 2 + a * 4, 0); ctx.restore(); } }); } }; }
+const VAR55 = { A: V55('A'), B: V55('B'), C: V55('C'), D: V55('D') };
+function r55(K) { return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? PAT55[K].name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'Ringing steel (round 54 B) on the gold inlay’s dark steel (round 54 D): each skill-up the bar hums and shivers along its length, the gold catching a shine that runs along it, the fill moving forward while it rings, and the new end gleams. The inlay: ' + PAT55[K].desc + ' (Placeholder sound: the soft tuning-fork tone, varied, stepping down. Try “Five in a row”.)' : 'One profession at a time: this round is Blacksmithing’s base. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'ringing steel, ' + PAT55[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', VAR55[K]); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
+Object.assign(FAM, { PA: r55('A'), PB: r55('B'), PC: r55('C'), PD: r55('D') });
 setTimeout(() => { profName = 'Blacksmithing'; const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); if (typeof sync === 'function') sync(); play(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
