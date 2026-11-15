@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 24, Herbalism</h1>
+  <h1>Skill-up: round 25, Herbalism</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 24: Herbalism only: A Vine, B Tall grass, and a new C and D (the mix and Picked herbs are out). Fishing locked; the others show their current look. Opens on Herbalism, Bright ground. Rounds 2-23 stay in the code.
+  the line that grows. Round 25: Herbalism only: A Vine, B Tall grass, and a C and D where nothing sprouts at each skill-up (gathering, and color brought by a butterfly). Fishing locked; the others show their current look. Opens on Herbalism, Bright ground. Rounds 2-24 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1803,6 +1803,27 @@ VAR23.Herbalism.D = { name: 'Broad leaves', desc: 'Big leaves rise out of the ba
   grow(p, x, y, L, f, t, I) { const g = L * f, ha = I.hitAge, k = lastHitIdx(); ctx.fillStyle = '#2e6a24'; ctx.fillRect(x - 2, y - 3, g + 2, 6);
     const at = []; for (let s = 5; s < g - 1; s += 11) at.push(x + s); at.forEach((xx, i) => { const newest = i === at.length - 1 && k >= 0 && ha >= 0, open = newest ? eBack(clamp((ha - .1) / .45)) : 1, rise = newest ? eOut(clamp(ha / .25)) : 1; broadLeaf(xx, y - 1, clamp(open, 0, 1.15), (i % 2 ? .35 : -.25) + Math.sin(t * 1.3 + i) * .05, (.75 + (i % 3) * .08) * (.35 + .65 * rise), i % 2 ? '#4fb83a' : '#5ac83a', i % 2 ? '#3a9a30' : '#48ac34'); });
     onHits('hbl', () => noise(.1, .3, .03, 2500, .6)); } };
+
+// ---------- round 25 (2026-11-15): Herbalism C and D that are NOT something sprouting at each tick ----------
+function butterfly(x, y, flap, s, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot || 0); ctx.scale(s, s); const k = .25 + .75 * Math.abs(flap);
+  for (const sd of [-1, 1]) { ctx.save(); ctx.scale(sd * k, 1); ctx.fillStyle = '#ff9a3a'; ctx.beginPath(); ctx.ellipse(3.2, -2.2, 3.4, 2.6, -.4, 0, 7); ctx.fill(); ctx.fillStyle = '#c86ad8'; ctx.beginPath(); ctx.ellipse(2.4, 1.8, 2.2, 1.8, .5, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(4.2, -2.6, .7, 0, 7); ctx.fill(); ctx.restore(); }
+  ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(0, 3); ctx.stroke(); ctx.restore(); }
+VAR23.Herbalism.C = { name: 'Gathered in', desc: 'Nothing grows: you’re gathering. Each skill-up a picked herb is tossed in from above, tumbles through the air and lands in the bar with a soft thump, laid flat with the others, leaves sticking out; the bar fills up like a bundle of gathered herbs.',
+  grow(p, x, y, L, f, t, I) { const k = lastHitIdx(), ha = I.hitAge, slots = []; for (let s = 6; s < L * f + 3; s += 10) slots.push(x + s); const flying = k >= 0 && ha >= 0 && ha < .42;
+    ctx.fillStyle = '#4a3a22'; ctx.fillRect(x - 2, y - 3, L * f + 2, 6);
+    slots.forEach((sx, i) => { if (flying && i === slots.length - 1) return; sprig(sx - 6, y + 1, .78, i % 3, 1.42 + (i % 2 ? .08 : -.06)); }); },
+  over(p, I) { const k = lastHitIdx(), ha = I.hitAge; if (k < 0 || ha < 0 || ha >= .42) return; const slots = []; for (let s = 6; s < I.tipX - I.x0 + 3; s += 10) slots.push(I.x0 + s); if (!slots.length) return;
+    const n = slots.length - 1, tx = slots[n] - 6, u = ha / .42, xx = lerp(tx + 34, tx, u), yy = lerp(I.ly - 34, I.ly + 1, u * u); sprig(xx, yy, .78, n % 3, lerp(-1.2, 1.42, u) + Math.sin(u * 9) * .3);
+    landed('hgl', .42, () => { noise(0, .14, .05, 700, .9, 'bandpass', true); noise(.02, .2, .02, 4500, .7); for (let q = 0; q < 6; q++) spawn({ x: tx + 6, y: I.ly - 3, vx: (Math.random() - .5) * 50, vy: -20 - Math.random() * 25, g: 90, life: .8, size: 1.4, shape: 'leaf', vr: 5, col: q % 2 ? '#7ee04a' : '#5ac83a' }); }); } };
+VAR23.Herbalism.D = { name: 'The butterfly', desc: 'Nothing grows either: the bar is a pale, sleepy meadow and color is the progress. Each skill-up a butterfly flutters in, lands at the front, and where it lands the meadow wakes up: vivid green and dotted with blossoms in a little puff of pollen; then it flies off.',
+  grow(p, x, y, L, f, t, I) { ctx.fillStyle = '#8a9a7a'; ctx.fillRect(I.x0 - 2, y - 3, I.x1 - I.x0 + 4, 6); const g = L * f; if (g <= 0) return;
+    const gr = ctx.createLinearGradient(0, y - 3, 0, y + 3); gr.addColorStop(0, '#7ee04a'); gr.addColorStop(1, '#3fa83a'); ctx.fillStyle = gr; ctx.fillRect(x - 2, y - 3, g + 2, 6);
+    const C = ['#ff9ad0', '#fff27a', '#c8a0ff', '#ffffff']; for (let s = 3, i = 0; s < g - 1; s += 4.5, i++) { ctx.fillStyle = C[i % 4]; ctx.beginPath(); ctx.arc(x + s, y - 3.5 + ((i * 5) % 7) * .9, 1.15, 0, 7); ctx.fill(); } },
+  over(p, I) { const k = lastHitIdx(), ha = I.hitAge, t = S.age; if (k < 0 || ha < 0) return; const lx = I.X(hitTo(k)), ly = I.ly - 6, h = ha - .25;
+    let bx, by, fl, rot = 0; if (h < 0) { const u = clamp((h + .25) / .25); bx = lerp(I.x1 + 40, lx, eOut(u)); by = lerp(I.ly - 34, ly, eOut(u)) + Math.sin(u * 12) * 3; fl = Math.sin(t * 38); rot = .3; }
+    else if (h < .6) { bx = lx; by = ly; fl = Math.sin(t * 6) * .6 + .4; } else if (h < 1.4) { const u = (h - .6) / .8; bx = lx + u * 50; by = ly - u * 40 + Math.sin(u * 10) * 3; fl = Math.sin(t * 38); rot = -.3; } else return;
+    ctx.save(); ctx.globalAlpha *= h > 1.1 ? clamp(1 - (h - 1.1) / .3) : 1; butterfly(bx, by, fl, 1.45, rot); ctx.restore();
+    landed('hbf', .25, () => { tone(1320, 0, .015, .25); tone(1760, .05, .012, .3); for (let q = 0; q < 10; q++) spawn({ x: lx, y: I.ly - 3, vx: (Math.random() - .5) * 50, vy: -10 - Math.random() * 30, life: .9, size: 1.2, col: q % 2 ? '#fff27a' : '#ffe8a0' }); }); } };
 Object.assign(FAM, { PA: r23('A'), PB: r23('B'), PC: r23('C'), PD: r23('D') });
 setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);

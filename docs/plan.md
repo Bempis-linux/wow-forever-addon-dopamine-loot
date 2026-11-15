@@ -770,6 +770,11 @@ Professions (from 1.3.0):
    replaced; `frond`, `broadLeaf`): A Vine, B Tall grass, C Unfurling ferns (a fiddlehead coil pushes up at the front each
    skill-up and unrolls into a frond, leaflets opening), D Broad leaves (big overlapping leaves; a folded one rises and opens
    wide at the front each skill-up).
+   Round 24 feedback: C and D were "completely similar to previous": every Herbalism option so far was some kind of
+   sprout growing at each tick. **Round 25** (`VAR23.Herbalism.C/D` replaced; `butterfly`): A Vine, B Tall grass, C Gathered
+   in (nothing grows: a picked herb is tossed in from above, tumbles and lands flat in the bar with a thump; the bar fills
+   like a bundle), D The butterfly (the bar is a pale meadow and color is the progress: a butterfly flutters in, lands at
+   the front, the meadow there turns vivid with blossoms in a puff of pollen, then it flies off).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
