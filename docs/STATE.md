@@ -50,8 +50,8 @@ every round and pick). Older detail: git log, CHANGELOG.md._
   **Round 10 picked B "It grows along the line"** in the tighter layout (name, skill "/ 150 Journeyman", next unlock +
   "N to go", then the two after it); **rounds have four options** (the user expects it). **Round 11** (keys 1-4, add-ons
   to B; `growModule(top, mode)`): A as it is (**locked**), B a flourish at the tip per skill-up (idea), C the unlocks on
-  the line (idea), D the growth drawn into the unlock's icon (not picked). On the phone app, send the page with
-  SendUserFile (the user can't open repo files there).
+  the line (idea), D the growth drawn into the unlock's icon (not picked). Show pages with the `/view` skill (`/view phone` or `/view pc` switches; on the phone it sends the page with
+  SendUserFile, as the user can't open repo files there).
 - **Budget (the user, 2026-11-14):** fewer, bolder rounds; pitch one-liners in chat before building a round; a fresh
   session per sub-system with a checkpoint at each lock (kit 0.8.1 `wow-design-rounds` "budget rule"). The dungeon
   recap is the release valve.
