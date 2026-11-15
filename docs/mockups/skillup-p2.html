@@ -2388,6 +2388,9 @@ function r42(K) { return { get name() { return K + '. ' + (VAR42[profName] ? VAR
   get desc() { return VAR42[profName] ? VAR42[profName][K].desc + ' (Sound on; try “Five in a row”.)' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
   get note() { return VAR42[profName] ? VAR42[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR42.Fishing; window.FREEL = fish ? VAR42.Fishing[K].reel : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+// round 42 D replaced (the user): the hybrid, B's water drops for the skill-ups + C's swell (a low pluck + two high notes), no reel
+SET42.D = { name: 'Drops + thumb-piano swell', desc: 'The hybrid: B’s two water drops per skill-up (varied scale notes, climbing), and C’s swell, a low plucked bass note with a shimmer of two high notes; no reel.', up: SET42.B.up, swell: SET42.C.swell, reel: false };
+VAR42.Fishing.D = fish42('D');
 Object.assign(FAM, { PA: r42('A'), PB: r42('B'), PC: r42('C'), PD: r42('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
@@ -2619,9 +2622,9 @@ function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now;
 
 // ---------- panel ----------
 const fEl = document.getElementById('fams'), pEl = document.getElementById('profs');
-['PA', 'PB', 'PC', 'PD'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
+['PA', 'PB', 'PC', 'PD'].forEach((k, i) => { const b = document.createElement('button'); b.textContent = FAM[k].name; b.dataset.f = k; b.onclick = () => setFam(k); fEl.appendChild(b); });
 Object.keys(PROF).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.dataset.p = k; b.onclick = () => setProf(k); pEl.appendChild(b); });
-function sync() { document.querySelectorAll('[data-f]').forEach((b, i) => { b.classList.toggle('on', b.dataset.f === fam); b.textContent = (i + 1) + '. ' + FAM[b.dataset.f].name; }); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
+function sync() { document.querySelectorAll('[data-f]').forEach((b, i) => { b.classList.toggle('on', b.dataset.f === fam); b.textContent = FAM[b.dataset.f].name; }); document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === profName));
   document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment)); document.getElementById('fdesc').textContent = FAM[fam].desc; }
 function setFam(k) { fam = k; sync(); play(); } function setProf(k) { profName = k; sync(); play(); }
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });

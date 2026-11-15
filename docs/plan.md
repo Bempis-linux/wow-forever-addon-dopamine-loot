@@ -873,6 +873,9 @@ Professions (from 1.3.0):
    soft run up and down; the reel a tiny rising zip), B Water drops (two plinking drops per skill-up on varied scale notes;
    the swell a light shower of tiny drops; no reel), C Thumb piano (a two-note fifth with a soft echo, moving up per
    skill-up; the swell a low pluck + two high notes; two soft reel taps), D Minimal (round 41 D, for comparison).
+   Round 42 feedback: much better; torn between B and C. Recommended B (fits the water on screen, stays light when
+   skill-ups stack, never repeats the same way) with C's warmer swell; **D replaced by that hybrid** (B's drops + C's swell,
+   no reel). The option buttons now show letters only ("A. Water marimba", no "1.").
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
