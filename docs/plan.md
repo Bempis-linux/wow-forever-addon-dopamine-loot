@@ -762,6 +762,10 @@ Professions (from 1.3.0):
    darker brown). Skinning A the base, B + Fur flies (tufts burst up and drift down; a big burst at the unlock), C + The
    hide parts (the cut springs open, pale edges lift out of the bar, settles a little open), D + Swoosh (a bright crescent
    trail bigger than the bar per slash; an X of two slashes at the unlock).
+   Round 22 feedback: **one profession at a time from now on** (several at once is too time consuming): Herbalism first,
+   torn between Vine and Tall grass, wants two more options to help pick. **Round 23** (`VAR23`, `r23`, `sprig`): A Vine,
+   B Tall grass, C Vine through the meadow (both together, the vine in front of the grass), D Picked herbs (herb sprigs
+   of three kinds stand side by side out of the bar; a fresh one pops up at the front each skill-up).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

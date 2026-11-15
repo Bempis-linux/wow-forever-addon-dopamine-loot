@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 22, tunnel + cart, grass + roots, the cut’s add-ons</h1>
+  <h1>Skill-up: round 23, Herbalism</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 22: the set header and bar; Fishing locked. Mining: the tunnel with the mine cart, four ways. Herbalism: Vine, Tall grass, the two mixed, Roots and shoots. Skinning: the cut + a stroke and three add-ons. Opens on Mining, Bright ground. Rounds 2-21 stay in the code.
+  the line that grows. Round 23: one profession at a time, Herbalism first: Vine or Tall grass, plus two more to help decide. Fishing locked; the others show their current look. Opens on Herbalism, Bright ground. Rounds 2-22 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1764,7 +1764,28 @@ function r22(K) { const v = () => VAR22[profName]; return { get name() { return 
   get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
 Object.assign(FAM, { PA: r22('A'), PB: r22('B'), PC: r22('C'), PD: r22('D') });
-setTimeout(() => { profName = 'Mining'; if (typeof sync === 'function') { sync(); play(); } }, 0);
+
+// ---------- round 23 (2026-11-15): one profession at a time. Herbalism: Vine or Tall grass? Two more to help decide ----------
+function sprig(x, y, s, kind, sw) { ctx.save(); ctx.translate(x, y); ctx.rotate(sw); ctx.scale(s, s); const C = [['#5ac83a', '#8ae05a', '#ff9ad0'], ['#9ab8a0', '#d8e8dc', '#ffffff'], ['#3f8a3a', '#6ab04a', '#fff27a']][kind];
+  ctx.strokeStyle = '#3f7a2a'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(0, 2); ctx.lineTo(0, -9); ctx.stroke();
+  for (const [a, l] of [[-.9, 6], [.9, 6], [-.4, 7.5], [.4, 7.5]]) { ctx.save(); ctx.translate(0, -3 - (Math.abs(a) < .5 ? 3 : 0)); ctx.rotate(a); ctx.fillStyle = Math.abs(a) < .5 ? C[1] : C[0]; ctx.beginPath(); ctx.ellipse(0, -l / 2, 1.6, l / 2, 0, 0, 7); ctx.fill(); ctx.restore(); }
+  ctx.fillStyle = C[2]; ctx.beginPath(); ctx.arc(0, -10, 1.7, 0, 7); ctx.fill(); ctx.restore(); }
+const VAR23 = { Herbalism: {
+  A: { name: 'Vine', desc: 'As it is: the vine over the slim bar, leaves unfurling behind a bud at the tip.' },
+  B: { name: 'Tall grass', desc: 'A meadow: grass blades stand up out of the bar and sway; each skill-up a clump springs up at the front with a rustle.', grow(p, x, y, L, f, t, I) { VAR21.Herbalism.B.grow(p, x, y, L, f, t, I); } },
+  C: { name: 'Vine through the meadow', desc: 'The two together: the meadow of grass fills the bar and the vine runs along it in front of the blades, its bud leading at the tip; each skill-up the vine reaches on and a clump of grass springs up behind the bud.',
+    grow(p, x, y, L, f, t, I) { VAR21.Herbalism.B.grow(p, x, y, L, f, t, I); grow(p, x, y, L, f, t); } },
+  D: { name: 'Picked herbs', desc: 'Something new: the bar fills with picked herb sprigs laid side by side, standing up out of it, a mix of herbs (green with pink buds, silver-leaved, dark green with yellow). Each skill-up a fresh sprig pops up at the front with a little bounce.',
+    grow(p, x, y, L, f, t, I) { const g = L * f, ha = I.hitAge; ctx.fillStyle = '#2e6a24'; ctx.fillRect(x - 2, y - 3, g + 2, 6);
+      for (let s = 4, i = 0; s < g; s += 7, i++) { const fresh = clamp((g - s) / 7), pop = fresh < 1 && ha >= 0 && ha < .5 ? eBack(clamp(ha / .3)) : 1, sc = (.85 + (i % 3) * .1) * (fresh < 1 ? pop * (.3 + .7 * fresh) : 1); sprig(x + s, y + 1, sc, (i * 2) % 3, Math.sin(t * 1.6 + i) * .06 + (i % 2 ? .12 : -.12)); }
+      onHits('hpk', () => { noise(0, .08, .03, 4000, 1); tone(700, .02, .02, .12, 'sine', 1000); }); } },
+} };
+function r23(K) { const v = () => VAR23[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r23('A'), PB: r23('B'), PC: r23('C'), PD: r23('D') });
+setTimeout(() => { profName = 'Herbalism'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
