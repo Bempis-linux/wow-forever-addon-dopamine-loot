@@ -267,7 +267,7 @@ function drawNum(key, s, x, y, size, col, align, style) {
 function reveal(x, y, at, font, upper) {
   const t = S.age - at; if (t < 0) return; const p = S.p, nx = S.nx, a = clamp(t / .2) * clamp((S.dur - S.age) / .4);
   const drop = eOut(clamp(t / .35)), lit = clamp((t - .35) / .3);
-  once('rv', () => { tone(880, .35, .04, .5); tone(1318, .4, .03, .6); });
+  once('rv', () => { if (profName !== 'Blacksmithing') { tone(880, .35, .04, .5); tone(1318, .4, .03, .6); } });
   if (t > .35) once('rv2', () => { spawn({ x, y: y + 12, size: 10, shape: 'ring', grow: 30, life: .6, col: '#fff' }); for (let i = 0; i < 6; i++) spawn({ x: x + (Math.random() - .5) * 34, y: y + 12 + (Math.random() - .5) * 34, life: .8, size: 3, shape: 'star', vr: 3, col: '#fff' }); });
   ctx.save(); ctx.globalAlpha = a; icon(x, lerp(y - 14, y + 12, drop), 30, nx.emo, lit, lit > 0 ? p.light : null);
   const line = nx.cap ? `${profName} ${nx.lv}: train ${nx.name}` : `You can now ${p.verb} ${nx.name}!`;
