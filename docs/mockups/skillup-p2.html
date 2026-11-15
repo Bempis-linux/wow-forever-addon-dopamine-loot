@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 40, Fishing: the splash</h1>
+  <h1>Skill-up: round 41, Fishing: the whole sound</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 40: Fishing is the swell + Depth bands + the soft low rush + the natural plop; four splash sounds after the plop (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 41: Fishing (the swell + Depth bands) gets four whole gentle sound sets: the skill-up, the swell and the reel (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1217,7 +1217,7 @@ function fishCast(p, x, y, L, f, t, I, o) { o = o || {}; const ha = I.hitAge, RD
   ctx.strokeStyle = RD ? '#fff6dc' : 'rgba(235,235,235,.75)'; ctx.lineWidth = RD ? 1.5 : .8; ctx.beginPath(); ctx.moveTo(R.x, R.y); ctx.quadraticCurveTo((R.x + fx) / 2, lerp((R.y + by - 2) / 2, Math.max(R.y, by) + 5, slack) + vib, fx, by - 2); ctx.stroke();
   ctx.save(); if (dip > 2) ctx.globalAlpha *= .6; const br = RD ? 4.6 : 3; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(fx, by + 1, br, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#ff3a1a'; ctx.beginPath(); ctx.arc(fx, by + 1, br, Math.PI, 7); ctx.fill(); if (RD) { ctx.fillStyle = '#ffd36a'; ctx.fillRect(fx - .7, by + 1 - br - 3, 1.4, 3); } ctx.restore();
   return { fx, by }; }
-function reelClicks() { onHits('fr', () => { for (let k = 0; k < 4; k++) noise(k * .045, .012, .03, 4200, 6, 'bandpass', true); }); }
+function reelClicks() { if (window.FREEL !== undefined && window.FREEL !== null) { if (window.FREEL) onHits('fr', window.FREEL); return; } onHits('fr', () => { for (let k = 0; k < 4; k++) noise(k * .045, .012, .03, 4200, 6, 'bandpass', true); }); }
 // Skinning: the cut as round 12 drew it
 function skinCut(p, x, y, L, f, t, I) { VAR.Skinning.A.grow(p, x, y, L, f, t, I); }
 // Herbalism B: the plant at the tip, stage by how near the unlock is (f), bl = bloom 0..1
@@ -2339,6 +2339,30 @@ function r40(K) { return { get name() { return K + '. ' + (VAR40[profName] ? VAR
   get note() { return VAR40[profName] ? VAR40[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { const keep = VAR39.Fishing; VAR39.Fishing = VAR40.Fishing; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; } } }; }
 Object.assign(FAM, { PA: r40('A'), PB: r40('B'), PC: r40('C'), PD: r40('D') });
+// ---------- round 41 (2026-11-15): Fishing's whole sound reworked, four gentle sets (no hiss, no sharp clicks, nothing high or buzzy) ----------
+// Each set: up(i) = the skill-up (the bobber dipping), swell() = the swell rolling, reel = the reel's clicks per skill-up (false = silent).
+const SET41 = {
+  A: { name: 'Calm water', desc: 'Soft and natural, all low: the bobber dips with a warm, rounded “bloop” (two soft low notes, no pitch drop) and a quiet low water sound; the swell is a faint low rush; the reel gives three soft wooden ticks.',
+    up: i => { tone(196, 0, .03, .4, 'sine', null, .015); tone(294, .02, .012, .35, 'sine', null, .02); noise(0, .18, .015, 350, .7, 'lowpass'); },
+    swell: () => noise(0, .9, .02, 220, .5, 'lowpass'), reel: () => { for (let k = 0; k < 3; k++) tone(420, k * .06, .008, .03, 'triangle'); } },
+  B: { name: 'Chimes', desc: 'Musical: each skill-up a soft chime note (a gentle bell-like tone that fades slowly), climbing a calm five-note scale with each skill-up; the swell is a quiet warm chord swelling in and out; no reel sound.',
+    up: i => { const f = 523 * semi([0, 2, 4, 7, 9, 12][i % 6]); tone(f, 0, .025, .7, 'sine', null, .008); tone(f * 2, 0, .006, .4, 'sine', null, .008); },
+    swell: () => { tone(131, 0, .018, 1, 'sine', null, .25); tone(196, 0, .012, 1, 'sine', null, .25); }, reel: false },
+  C: { name: 'Deep pond', desc: 'Low and muffled, like hearing it from under the surface: the bobber dips with a deep soft “thoomp”; the swell is a low rumble; the reel gives a slow, low, soft ratchet.',
+    up: i => { tone(110, 0, .05, .3, 'sine', 70, .01); noise(0, .15, .03, 250, .8, 'lowpass'); },
+    swell: () => noise(0, 1, .03, 160, .5, 'lowpass'), reel: () => { for (let k = 0; k < 3; k++) tone(260, k * .07, .01, .04, 'triangle'); } },
+  D: { name: 'Minimal', desc: 'Almost silent: one soft, quiet note per skill-up (rising a step each time) and nothing else, no swell sound and no reel.',
+    up: i => tone(660 * semi(i * 2), 0, .016, .6, 'sine', null, .02), swell: null, reel: false },
+};
+function fish41(K) { const s = swell38('D'), c = SET41[K]; return { name: c.name, tex: TEX38.B, snd: c.up, reel: c.reel, pre: s.pre,
+  over(p, I) { s.over(p, I); if (c.swell) onHits('fsw41', () => c.swell()); },
+  desc: 'Fishing as picked (the swell, Depth bands), with a whole new sound set. ' + c.desc }; }
+const VAR41 = { Fishing: { A: fish41('A'), B: fish41('B'), C: fish41('C'), D: fish41('D') } };
+function r41(K) { return { get name() { return K + '. ' + (VAR41[profName] ? VAR41[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR41[profName] ? VAR41[profName][K].desc + ' (Sound on; try “Five in a row”.)' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return VAR41[profName] ? VAR41[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR41.Fishing; window.FREEL = fish ? VAR41.Fishing[K].reel : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r41('A'), PB: r41('B'), PC: r41('C'), PD: r41('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

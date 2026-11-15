@@ -861,6 +861,13 @@ Professions (from 1.3.0):
    Round 39 pick: **B the natural plop**; improve its splash. **Round 40** (`VAR40`, `SPL40`, `plop40`): the plop, then
    A spray hiss (as round 39), B droplets falling back (short spray, then tiny falling plinks), C bubbles (soft splash,
    then little rising blips), D a fuller sploosh (three noise layers, bright to dark, no notes).
+   Round 40 feedback: rework Fishing's whole sound as four options, **gentle, not grating** (the bobber already sounded
+   annoying; no hiss after the splash). Found: the "bobber" sound was mostly Fishing's built-in strike sound (`PROF.Fishing.snd`:
+   a 380 -> 140 Hz drop + a 1800 Hz noise) plus the reel's 4.2 kHz clicks, under everything. **Round 41** (`VAR41`,
+   `SET41`; `window.FREEL` replaces the reel clicks, `S.p.snd` muted during the draw): A Calm water (a warm low
+   two-note bloop with no pitch drop + low water; faint low rush; three soft wooden ticks), B Chimes (a soft bell note per
+   skill-up up a five-note scale; a quiet warm chord for the swell; no reel), C Deep pond (a deep soft thoomp; low
+   rumble; slow low ratchet), D Minimal (one soft rising note per skill-up, nothing else).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
