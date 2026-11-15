@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 30, Skinning add-ons</h1>
+  <h1>Skill-up: round 31, Skinning add-ons</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 30: Skinning: the cut + Fur flies, and add-ons on top (each with its finale: try “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-29 stay in the code.
+  the line that grows. Round 31: Skinning: A Fur flies stays; three new add-ons on top (each with its finale: try “Reaching the next unlock”). Herbalism done, Fishing locked. Rounds 2-30 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1546,7 +1546,7 @@ function barModule(top, mode, Vo) { const V = Vo || baseOf(), cx = W / 2, p = S.
   if (S.reaches && f >= 1 && st.hitAge > .4) once('close', () => { S.closeAt = S.age; if (!V.finAt) payoff(ux, ly); });
   if (S.closeAt !== undefined && V.finAt && S.age >= S.closeAt + V.finAt) once('finpay', () => payoff(ux, ly));
   const payAt = done ? S.closeAt + (V.finAt || 0) : 99, pop = S.age >= payAt ? eBack(clamp((S.age - payAt) / .3)) : 0, lit = S.age >= payAt;
-  ctx.save(); ctx.globalAlpha = a;
+  ctx.save(); ctx.globalAlpha = a; if (V.shake) { const sh = V.shake(info); ctx.translate(sh[0], sh[1]); }
   // header: no backing, the game's text shadow
   const font = '700 16px system-ui', w1 = measure(profName + ' ', font), w2 = measure(String(st.shown), font), hx = cx - (w1 + w2) / 2;
   text(profName, hx, top + 14, font, '#fff'); drawNum('n', String(st.shown), hx + w1, top + 14, 16, p.light, 'left', 'roll');
@@ -1996,6 +1996,39 @@ function r30(K) { const v = () => VAR30[profName]; return { get name() { return 
   draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
 Object.assign(FAM, { PA: r30('A'), PB: r30('B'), PC: r30('C'), PD: r30('D') });
 setTimeout(() => { profName = 'Skinning'; if (typeof sync === 'function') { sync(); play(); } }, 0);
+// ---------- round 31 (2026-11-15): Skinning keeps A Fur flies; three new add-ons on top (round 30 B-D not liked) ----------
+// V.shake(info) -> [dx, dy]: moves the whole bar module (header, bar, icon) for a jolt.
+function leatherChip(x, y, s, a) { ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = 'rgba(14,12,10,.92)'; ctx.beginPath(); ctx.roundRect(-8, -8, 16, 16, 3); ctx.fill(); ctx.strokeStyle = '#e8e0d0'; ctx.lineWidth = 1.2; ctx.stroke(); pelt(0, 0, 10, -.35, '#a87444'); ctx.restore(); }
+const skFurOnly = I => onHits('sfo', i => furBurst(I, i));
+const VAR31 = { Skinning: {
+  A: VAR30.Skinning.A,
+  B: { name: '+ Leather pops', finAt: .8, desc: 'Fur flies, and each skill-up a piece of leather pops out of the cut like loot: a small item square with the leather in it rises from the new piece of the cut with a “+1” and a soft loot tick, then fades. Reaching the next beasts, a run of leather pieces leaps from along the cut into the icon.', tip: glintTip, grow: skinStroke,
+    over(p, I) { const ux = I.x1 + 18; skFurOnly(I);
+      S.hits.forEach((h, i) => { const t = S.age - h - HIT; if (t < 0 || t > 1.3 || I.done) return; const x = I.X(hitTo(i)) - 4, y = I.ly - 7 - eOut(clamp(t / 1.3)) * 6, a = clamp(t / .1) * clamp((1.3 - t) / .4), s = .45 + .25 * eBack(clamp(t / .22)); leatherChip(x, y, s, a); text('+1', x + 8, y + 3.5, '700 10px system-ui', '#fff', 'left', { alpha: a }); });
+      onHits('slp', () => { tone(1046, 0, .02, .14); tone(1568, .06, .016, .18); });
+      if (I.done) { const ts = S.age - S.closeAt; for (let j = 0; j < 5; j++) { const u = clamp((ts - j * .08) / .45); if (u <= 0 || u >= 1) continue; const sx = lerp(I.x0 + 20, I.x1 - 10, j / 4), e = eOut(u); leatherChip(lerp(sx, ux, e), lerp(I.ly - 4, I.ly, e) - Math.sin(Math.PI * u) * 26, .8, 1); }
+        for (let j = 0; j < 5; j++) if (ts >= j * .08 + .45) once('slpd' + j, () => tone(784 * semi(j * 2), 0, .018, .12)); } } },
+  C: { name: '+ Heavy cuts', finAt: .75, desc: 'Fur flies, and every cut lands with weight: the whole skill-up jolts down and bounces back with a deep thunk, a ring of dust bursts from the cut and the hide flashes where the blade went in. Reaching the next beasts, three heavy chops land along the bar, one, two, three, the last throwing the fur into the icon.', tip: glintTip, grow: skinStroke,
+    shake(I) { const j = (t, amp) => t >= 0 && t < .35 ? amp * Math.exp(-t * 12) * Math.cos(t * 50) : 0; if (I.done) { const ts = S.age - S.closeAt; return [0, j(ts, 3) + j(ts - .2, 3.5) + j(ts - .4, 5)]; } return [0, j(I.hitAge, 3)]; },
+    over(p, I) { const ux = I.x1 + 18; skFurOnly(I);
+      const chop = (x, big) => { tone(big ? 55 : 70, 0, big ? .11 : .08, .22, 'sine', 35); noise(0, .14, .06, 380, .8, 'lowpass'); click(0, .05, 1800, 2); spawn({ x, y: I.ly, size: 4, shape: 'ring', grow: big ? 34 : 22, life: .35, col: '#f0d8b8' }); for (let q = 0; q < 6; q++) spawn({ x, y: I.ly + 5, vx: (Math.random() - .5) * 70, vy: -10 - Math.random() * 25, g: 160, life: .45, size: 1.3, col: '#c8a880' }); };
+      const flash = (x, t) => { if (t < 0 || t > .15) return; ctx.save(); ctx.strokeStyle = `rgba(255,246,230,${1 - t / .15})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, I.ly - 9); ctx.lineTo(x, I.ly + 9); ctx.stroke(); ctx.restore(); };
+      onHits('shc', i => chop(I.X(hitTo(i)), false)); if (!I.done) flash(I.tipX, I.hitAge);
+      if (I.done) { const ts = S.age - S.closeAt; [1 / 3, 2 / 3, 1].forEach((q, j) => { const x = lerp(I.x0, I.x1, q) - (j === 2 ? 2 : 0); flash(x, ts - j * .2); if (ts >= j * .2) once('shcd' + j, () => { chop(x, j === 2); if (j === 2) furTo(I, () => I.x1 - Math.random() * 30, 30, ux, I.ly, .4); }); }); } } },
+  D: { name: '+ Streak', finAt: .55, desc: 'Fur flies, and skill-ups in a row build a streak: from the second one a “×2” punches up at the cut, then ×3, ×4, each bigger and warmer (white to gold to orange), the new piece of the cut glowing in the streak’s color, the fur bursts growing and a note climbing each time. Reaching the next beasts, the streak flies into the icon. (Try “Five in a row”.)', tip: glintTip, grow: skinStroke,
+    over(p, I) { const ux = I.x1 + 18, k = lastHitIdx(), n = k + 1, ha = I.hitAge, col = c => mix('#ffffff', c >= 4 ? '#ff8a30' : '#ffd36a', clamp((c - 1) / 3));
+      onHits('sst', i => { furBurst(I, i, 14 + i * 6); if (i > 0) tone(392 * semi(i * 3), 0, .03, .22, 'triangle'); });
+      if (k >= 1 && !I.done && ha >= 0 && ha < .7) { const xa = I.X(hitTo(k) - 1), xb = I.X(hitTo(k)); ctx.save(); ctx.strokeStyle = col(n); ctx.globalAlpha *= 1 - ha / .7; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.shadowColor = col(n); ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(xa, I.ly); ctx.lineTo(xb, I.ly); ctx.stroke(); ctx.restore(); }
+      const draw = (x, y, sc, a) => { ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); text('×' + n, 0, 0, `800 ${10 + n * 1.5}px system-ui`, col(n), 'left', { alpha: a }); ctx.restore(); };
+      if (n >= 2 && !I.done && ha >= 0) draw(I.tipX + 6, I.ly + 4, 1 + .6 * (1 - eOut(clamp(ha / .25))), clamp((ha < 1.4 || k < S.hits.length - 1) ? 1 : 1 - (ha - 1.4) / .4));
+      if (I.done) { const ts = S.age - S.closeAt, u = clamp(ts / .45); if (n >= 2 && u < 1) draw(lerp(I.tipX + 6, ux - 6, eOut(u)), lerp(I.ly + 4, I.ly + 4, eOut(u)) - Math.sin(Math.PI * u) * 12, 1.4 - .8 * u, 1);
+        once('sstd', () => { furTo(I, () => lerp(I.x0, I.x1, Math.random()), 24, ux, I.ly, .5); tone(392 * semi(n * 3), 0, .03, .3, 'triangle'); }); } } },
+} };
+function r31(K) { const v = () => VAR31[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Reaching the next unlock” for the finale.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r31('A'), PB: r31('B'), PC: r31('C'), PD: r31('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

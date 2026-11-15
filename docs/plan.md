@@ -805,6 +805,12 @@ Professions (from 1.3.0):
    cut; finale: shaken off in one cloud into the icon), C + Snap the pelt (a ripple runs the bar and cracks at the end
    with a thwap; finale: a big snap flings fur into the icon), D + Pelt pile (a pelt pops from the cut onto a stack
    beside the icon; finale: the stack slides into the icon). Paw prints were pitched for D; the user swapped it out.
+   Round 30 feedback: B-D not liked; **A Fur flies kept for sure**; three more, then probably move on. **Round 31**
+   (`VAR31`, `r31`; `V.shake` jolts the whole module): A Fur flies, B + Leather pops (a small leather item square rises
+   from the cut with "+1" and a loot tick; finale: a run of leather leaps into the icon), C + Heavy cuts (each cut
+   jolts the module down and back with a deep thunk, a dust ring, a flash where the blade went in; finale: three heavy
+   chops along the bar), D + Streak (skill-ups in a row: x2, x3... at the cut, warmer and bigger, the new cut glowing,
+   a climbing note; finale: the streak flies into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
