@@ -934,6 +934,11 @@ Professions (from 1.3.0):
    Round 48 pick: **Mining base LOCKED: A Blast** (the mined part a dug-out channel, the rock ahead solid; each skill-up a
    charge at the front: flash, muffled thump, chunks and dust, the bar kicks, the blasted part glows hot; its finale for now
    a chain of blasts ending in the icon). Next: add-ons on top of it, then its finale and sound, like the others.
+   **Round 49** (`ADD49`, `blast49`, `vein49`; add-ons on the Blast): A Blast as is, B + Ore pops (each blast throws a
+   shining nugget up; it lands ahead with a clink, bounces, rolls along the bar top into the icon, which bumps), C + The
+   fuse (before each blast a lit spark races along the bar from its start to the front, fizzing softly, a faint burnt line),
+   D + Veins revealed (each blast uncovers a gold vein streak in the dug channel, flashing with a soft glint; they stay and
+   glint now and then).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
