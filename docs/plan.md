@@ -766,6 +766,10 @@ Professions (from 1.3.0):
    torn between Vine and Tall grass, wants two more options to help pick. **Round 23** (`VAR23`, `r23`, `sprig`): A Vine,
    B Tall grass, C Vine through the meadow (both together, the vine in front of the grass), D Picked herbs (herb sprigs
    of three kinds stand side by side out of the bar; a fresh one pops up at the front each skill-up).
+   Round 23 feedback: C (the mix) was not liked; new C and D wanted (Picked herbs out too). **Round 24** (`VAR23.Herbalism.C/D`
+   replaced; `frond`, `broadLeaf`): A Vine, B Tall grass, C Unfurling ferns (a fiddlehead coil pushes up at the front each
+   skill-up and unrolls into a frond, leaflets opening), D Broad leaves (big overlapping leaves; a folded one rises and opens
+   wide at the front each skill-up).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
