@@ -964,6 +964,13 @@ Professions (from 1.3.0):
    icon, the last bursts it open); sound: the muffled thump + pebble patter, high clinks for nuggets, stepping down after two
    in a row. **All four gatherers DONE** (Herbalism, Fishing, Skinning, Mining). Next: the crafters, one at a time, then
    Cooking and First Aid.
+   **Crafters, Blacksmithing first.** Round 53 (2026-11-15, base design, pitched first; no ring, no hammer, no tool at the
+   tip, no white-hot cooling, since the craft ring has those; sound a gentle placeholder): **A. Plate by plate** (overlapping
+   steel plates with gold rivets; each skill-up drops a plate in from above, a thud, the bar kicks, dust, the rivet glints),
+   **B. Folded steel** (layered steel; each skill-up a copy comes down from above while the bar squeezes into its lower half,
+   they press together, a sheen runs along the denser pattern), **C. Drawn out** (the steel stretches past its new mark,
+   thinning, a bright streak, then springs back and settles), **D. Polished edge** (dark rough iron fill; a bright grinding
+   point runs along the newest part leaving mirror steel, sparks fly off backwards out of the bar, a glint at the end).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
