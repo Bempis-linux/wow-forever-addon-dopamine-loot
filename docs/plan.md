@@ -730,6 +730,14 @@ Professions (from 1.3.0):
    bar, the growth full size over it), C On the bar (a plain fill in the profession's color; the growth rides the top
    edge), D Lively front (a plain fill; its last few points are the growth itself). Seen while checking: Mining's rock
    band and Skinning's hide span the whole bar, so their progress shows only as the seam or the cut (rework candidates).
+   **Round 18 → the header and the bar are SET** (2026-11-15; the user: "the design of the header and the bar themselves
+   I like"); the four fits were meant per profession, not one for all: **Herbalism breaks out** (round 18 B, the 6 px
+   bar), **Mining inside**, **Skinning inside** (the user wrote "Leatherworking"), **Fishing: the whole bar is water, the
+   bobber sits on top, the bar's top is the water's surface** (no border there; maybe a light line toward the top that
+   doesn't fight the waves). **Round 19** (`FIT19`, `SURF19`, `fishBar`, `r19`; FAM A-D differ only for Fishing): Fishing
+   surfaces A a light line under the crests, B the waves are the edge (bigger waves, foam glints), C a faint gold border
+   the waves wash over, D a bright surface over the filled water only. The bobber floats at the fill's front, its line
+   runs up-left to an off-frame rod, it dips with a splash each skill-up.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

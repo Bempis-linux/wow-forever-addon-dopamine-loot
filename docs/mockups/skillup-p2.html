@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 18, back to a skill bar</h1>
+  <h1>Skill-up: round 19, the bar per profession</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 18: back to the 1.3 skill bar (the clear show that a bar went up): the header with no backing, the animation in the bar, parts may reach outside like the craft rings’ tools. Four ways each gatherer’s current base sits in the bar. The page opens on Bright; try Dark too. Rounds 2-17 stay in the code.
+  the line that grows. Round 19: the header and the bar are set (round 18); how the growth sits in the bar is per profession: Herbalism breaks out, Mining and Skinning inside, Fishing a water bar with the bobber on top. A-D are four water surfaces for Fishing (the others are the same in all four). Opens on Fishing, Bright ground. Rounds 2-18 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1551,14 +1551,15 @@ function barModule(top, mode) { const V = baseOf(), cx = W / 2, p = S.p, nx = S.
   text(profName, hx, top + 14, font, '#fff'); drawNum('n', String(st.shown), hx + w1, top + 14, 16, p.light, 'left', 'roll');
   // the bar: dark track, thin border
   const track = () => { ctx.beginPath(); ctx.roundRect(x0 - 2, ly - bh / 2, L + 4, bh, 3); };
-  track(); ctx.fillStyle = 'rgba(8,8,12,.82)'; ctx.fill();
+  if (mode !== 'F') { track(); ctx.fillStyle = 'rgba(8,8,12,.82)'; ctx.fill(); }
   const plain = (end = tipX) => { if (end <= x0) return; const gr = ctx.createLinearGradient(x0, 0, end, 0); gr.addColorStop(0, mix(p.col, '#000000', .35)); gr.addColorStop(1, p.light); ctx.save(); track(); ctx.clip(); ctx.fillStyle = gr; ctx.fillRect(x0 - 2, ly - bh / 2, end - x0 + 2, bh); ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(x0 - 2, ly - bh / 2 + 1, end - x0 + 2, 2); ctx.restore(); };
-  if (mode === 'A') { ctx.save(); track(); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
+  if (mode === 'F') fishBar(p, x0, x1, ly, bh, f, tipX, S.age, info, FISHV);
+  else if (mode === 'A') { ctx.save(); track(); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
   else if (mode === 'B') { ctx.save(); ctx.beginPath(); ctx.rect(x0 - 6, ly - 22, L + 14, 44); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
   else if (mode === 'C') { plain(); ctx.save(); ctx.translate(0, -bh / 2 - 7); ctx.beginPath(); ctx.rect(x0 - 6, ly - 22, L + 14, 28); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
   else { const fx0 = Math.max(x0, tipX - 40); plain(fx0); ctx.save(); ctx.beginPath(); ctx.rect(fx0, ly - 22, tipX - fx0 + 14, 44); ctx.clip(); G(p, x0, ly, L, f, S.age, info); ctx.restore(); }
-  for (let j = 1; j < N; j++) { const x = x0 + j / N * L; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x - .5, ly - bh / 2 + 1, 1, bh - 2); }
-  track(); ctx.strokeStyle = 'rgba(255,211,106,.55)'; ctx.lineWidth = 1; ctx.stroke();
+  if (mode !== 'F') for (let j = 1; j < N; j++) { const x = x0 + j / N * L; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x - .5, ly - bh / 2 + 1, 1, bh - 2); }
+  if (mode === 'F') { ctx.beginPath(); ctx.moveTo(x0 - 2, ly - 2); ctx.lineTo(x0 - 2, ly + bh / 2 - 3); ctx.arcTo(x0 - 2, ly + bh / 2, x0 + 1, ly + bh / 2, 3); ctx.lineTo(x1 - 1, ly + bh / 2); ctx.arcTo(x1 + 2, ly + bh / 2, x1 + 2, ly + bh / 2 - 3, 3); ctx.lineTo(x1 + 2, ly - 2); } else track(); ctx.strokeStyle = 'rgba(255,211,106,.55)'; ctx.lineWidth = 1; ctx.stroke();
   if (V.over) V.over(p, info);
   const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.forEach(h => FL(p, tipX, ly, S.age - h - HIT));
   if (done) { const fl = clamp(1 - (S.age - S.closeAt) / .5); if (fl > 0) { ctx.save(); track(); ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fill(); ctx.restore(); } }
@@ -1569,6 +1570,42 @@ function barModule(top, mode) { const V = baseOf(), cx = W / 2, p = S.p, nx = S.
 function r18(K) { return { get name() { return K + '. ' + FIT18[K].name; }, get desc() { return FIT18[K].desc + ' (The 1.3 bar: header with no backing, a dark track with a thin gold border, the next unlock’s icon at its end, “N to X” under it. The growth is each profession’s current base.)'; },
   get note() { return FIT18[K].name.toLowerCase() + '.'; }, draw(top) { FISHR = true; barModule(top, K); FISHR = false; } }; }
 Object.assign(FAM, { PA: r18('A'), PB: r18('B'), PC: r18('C'), PD: r18('D') });
+
+// ---------- round 19 (2026-11-15): the header and the bar are set (round 18); how the growth sits in it is per profession ----------
+// Herbalism breaks out (round 18 B), Mining and Skinning stay inside (A), Fishing: the whole bar is water, its top is the
+// water's surface (no border there) and the bobber floats on it at the fill's front. A-D: four ways to draw that surface.
+let FISHV = 'A';
+const FIT19 = { Herbalism: 'B', Mining: 'A', Skinning: 'A', Fishing: 'F' };
+const SURF19 = {
+  A: { name: 'A light line under the waves', desc: 'A faint light line just under the wave crests, following them, so the bar’s top reads without a border cutting the water.' },
+  B: { name: 'The waves are the edge', desc: 'No line at all: the wave crests are the top of the bar, with foam glints on the crests over the filled water.' },
+  C: { name: 'A faint border behind the waves', desc: 'The gold border runs along the top too, but faint, and the waves wash up over it.' },
+  D: { name: 'A bright surface over the fill', desc: 'The surface is a bright line only over the filled water (the deep, unfilled water’s surface stays dim), so the edge itself shows how far you are.' },
+};
+function fishBar(p, x0, x1, ly, bh, f, tipX, t, I, v) { const top = ly - bh / 2 + 1, bot = ly + bh / 2, wa = v === 'B' ? 1.8 : 1, surf = x => top + (Math.sin(x * .16 + t * 2.4) * .9 + Math.sin(x * .07 - t * 1.3) * .5) * wa, ha = I.hitAge;
+  const body = (xa, xb) => { ctx.beginPath(); ctx.moveTo(xa, bot); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x)); ctx.lineTo(xb, surf(xb)); ctx.lineTo(xb, bot); ctx.closePath(); };
+  ctx.save(); ctx.beginPath(); ctx.roundRect(x0 - 2, top - 6, x1 - x0 + 4, bot - top + 6, [0, 0, 3, 3]); ctx.clip();
+  body(x0 - 2, x1 + 2); ctx.fillStyle = 'rgba(10,30,52,.9)'; ctx.fill(); // the deep water ahead
+  if (tipX > x0) { body(x0 - 2, tipX); const g = ctx.createLinearGradient(0, top, 0, bot); g.addColorStop(0, '#6ac4f4'); g.addColorStop(1, '#1e5a96'); ctx.fillStyle = g; ctx.fill(); // the filled water, with drifting light
+    ctx.strokeStyle = 'rgba(220,245,255,.55)'; ctx.lineWidth = 1; for (let k = 0; k < (tipX - x0) / 18; k++) { const xx = x0 + ((k * 18 + t * 16) % Math.max(1, tipX - x0)), yy = ly + 1 + (k % 2) * 2.5; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(Math.min(tipX, xx + 5), yy); ctx.stroke(); } }
+  ctx.restore();
+  const crest = (xa, xb, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x)); ctx.stroke(); };
+  if (v === 'A') { ctx.strokeStyle = 'rgba(210,240,255,.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let x = x0 - 1; x <= x1 + 1; x += 2) ctx.lineTo(x, surf(x) + 2.2); ctx.stroke(); }
+  else if (v === 'B') { ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let x = x0 + 4; x < tipX - 2; x += 9) { const c = Math.sin(x * .16 + t * 2.4); if (c > .45) ctx.fillRect(x - 1, surf(x) - 1, 3, 1.6); } }
+  else if (v === 'C') { ctx.strokeStyle = 'rgba(255,211,106,.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 2, top + .5); ctx.lineTo(x1 + 2, top + .5); ctx.stroke(); crest(x0 - 1, tipX, 'rgba(160,220,255,.6)', 1); }
+  else { crest(x0 - 1, x1 + 1, 'rgba(120,170,210,.35)', 1); if (tipX > x0) crest(x0 - 1, tipX, '#e8f8ff', 2); }
+  // the bobber floats on the surface at the fill's front; each skill-up it dips under with a splash
+  const dip = ha >= 0 && ha < .45 ? Math.sin(Math.PI * ha / .45) * 4 : 0, bx = Math.max(x0 + 4, tipX), by = surf(bx) - 1 + Math.sin(t * 3) * .6 + dip, br = 4.4;
+  ctx.save(); ctx.strokeStyle = 'rgba(150,140,120,.85)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(bx, by - br); ctx.quadraticCurveTo(bx - 10, by - 16, bx - 26, by - 22); ctx.stroke(); // its line, up to the rod off-frame
+  ctx.beginPath(); ctx.rect(bx - 8, by - 10, 16, Math.max(0, surf(bx) - (by - 10)) + 1.5); ctx.clip(); // (the part under the surface is hidden)
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#ff3a1a'; ctx.beginPath(); ctx.arc(bx, by, br, Math.PI, 7); ctx.fill(); ctx.fillStyle = '#ffd36a'; ctx.fillRect(bx - .7, by - br - 3, 1.4, 3); ctx.restore();
+  onHits('fbar', i => { tone(196 * semi(i * 2), 0, .03, .5, 'triangle'); noise(0, .16, .045, 800, .8); tone(520, 0, .03, .18, 'sine', 180);
+    for (let k = 0; k < 9; k++) spawn({ x: bx, y: top, vx: (Math.random() - .5) * 90, vy: -50 - Math.random() * 60, g: 360, life: .55, size: 1.3, col: k % 2 ? '#d8f0ff' : '#9ad8ff' }); }); }
+function r19(K) { return { get name() { return profName === 'Fishing' ? K + '. ' + SURF19[K].name : K + '. (same for A-D)'; },
+  get desc() { const fit = FIT19[profName]; return profName === 'Fishing' ? SURF19[K].desc + ' The whole bar is water, the bobber floats on it at the fill’s front and dips with a splash each skill-up.' : (fit === 'B' ? 'Herbalism breaks out: the vine full size over a slimmer bar, its leaves reaching past the edges.' : 'Inside the bar: the growth is the fill, clipped to the bar.') + ' The four options only differ for Fishing (its water surface).'; },
+  get note() { return profName === 'Fishing' ? SURF19[K].name.toLowerCase() + '.' : 'the set bar, per profession.'; }, draw(top) { FISHR = true; FISHV = K; barModule(top, FIT19[profName] || 'A'); FISHR = false; } }; }
+Object.assign(FAM, { PA: r19('A'), PB: r19('B'), PC: r19('C'), PD: r19('D') });
+setTimeout(() => { profName = 'Fishing'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
