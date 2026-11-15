@@ -1005,6 +1005,12 @@ Professions (from 1.3.0):
    hottest; each skill-up a surge rolls down from the start and pushes the front on), **D. Ironforge falls** (a thin stream
    of magma falls from above onto the front; each skill-up it pours heavier, the front splashes, spits droplets and grows,
    then back to a trickle).
+   Round 58 → "improve on B and D, see where we can go". Round 59: **A. Spark fuse** (the anvil flashes; a spark runs along
+   the bar's top like a lit fuse, crackling, and bursts in a fan at the front), **B. Spark shower** (the anvil flings a spray
+   that rains along the whole bar, each spark glinting where it lands, the last past the front), **C. Falls and mound** (the
+   stream falls from a glowing opening above onto the front; each skill-up it pours heavier and piles a glowing mound, heat
+   shimmers, the mound slumps forward into the bar), **D. Forge at the start** (both: magma falls onto the anvil at the start
+   and overflows into the bar; each skill-up a heavier pour, sparks off the anvil, a surge rolls down and pushes the front).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
