@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 49, Mining: Blast add-ons</h1>
+  <h1>Skill-up: round 50, Mining finales</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is locked as Blast; add-ons on top (try “Five in a row”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast; four finales for when its bar fills (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2659,6 +2659,39 @@ function r49(K) { return { get name() { return K + '. ' + (profName === 'Mining'
   get note() { return profName === 'Mining' ? ADD49[K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR49.Mining[K]); } finally { S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r49('A'), PB: r49('B'), PC: r49('C'), PD: r49('D') });
+// ---------- round 50 (2026-11-15): Mining = the Blast, no add-on (round 49 A); four finales ----------
+const chunks50 = (x, y, n, sp, up) => { for (let q = 0; q < n; q++) { const an = Math.random() * 6.283, s = sp * (.5 + Math.random() * .7); spawn({ x, y, vx: Math.cos(an) * s, vy: Math.sin(an) * s - up, g: 380, life: .9, size: 1.8 + Math.random() * 1.6, shape: 'sq', vr: 10, col: q % 3 ? '#8a7e72' : '#c8a070' }); } };
+const dust50 = (x, y, n, r) => { for (let q = 0; q < n; q++) spawn({ x: x + (Math.random() - .5) * r, y: y + (Math.random() - .5) * r * .4, vx: (Math.random() - .5) * 24, vy: -6 - Math.random() * 10, life: 1.1, size: 4 + Math.random() * 3, col: 'rgba(175,155,135,.45)' }); };
+const FIN50 = {
+  A: { name: 'Chain reaction', finAt: .75, desc: 'The current one, for comparison: a chain of blasts runs down the bar, each kicking it, and the last bursts the icon open.' },
+  B: { name: 'The big one', finAt: .75, desc: 'A charge glows at the end of the bar for a beat, then one huge blast: everything flashes white, a shockwave ring rolls out across the module, the bar jolts hard and debris rains down onto it; the icon is revealed, lit, as the dust settles.',
+    shake(I) { const t = S.age - S.closeAt - .2; return t >= 0 && t < .5 ? [Math.sin(t * 70) * 2.5 * Math.exp(-t * 7), 3.5 * Math.exp(-t * 8) * Math.cos(t * 55)] : [0, 0]; },
+    fin(p, I, ts) { const ux = I.x1 + 18, x = I.x1 - 2; if (ts < .2) { const g = ctx.createRadialGradient(x, I.ly, 0, x, I.ly, 4 + ts * 40); g.addColorStop(0, 'rgba(255,240,200,.9)'); g.addColorStop(1, 'rgba(255,140,50,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, I.ly, 4 + ts * 40, 0, 7); ctx.fill(); }
+      if (ts >= .2 && ts < .55) { const fa = .85 * (1 - (ts - .2) / .35), fg = ctx.createRadialGradient(x, I.ly, 0, x, I.ly, 170); fg.addColorStop(0, `rgba(255,252,240,${fa})`); fg.addColorStop(.35, `rgba(255,240,210,${fa * .5})`); fg.addColorStop(1, "rgba(255,240,210,0)"); ctx.save(); ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(x, I.ly, 170, 0, 7); ctx.fill(); ctx.restore(); }
+      once('mbg0', () => { tone(60, 0, .02, .2, 'sine', 90, .15); }); if (ts >= .2) once('mbg1', () => { thump48(0, 1.6); kal(98, .02, .02); pebbles48(.2, 1, 8); spawn({ x, y: I.ly, size: 10, shape: 'ring', grow: 120, life: .5, col: '#fff2d0' }); spawn({ x, y: I.ly, size: 6, shape: 'ring', grow: 70, life: .4, col: '#ffc070' }); chunks50(x, I.ly, 22, 160, 120); dust50(lerp(I.x0, ux, .7), I.ly, 14, 160); }); } },
+  C: { name: 'Breakthrough', finAt: .35, desc: 'The last blast breaks through the rock at the end of the bar and warm gold light pours out from behind it in slow-turning rays, rock bits flying outward, the icon glowing in the opening like a hidden chamber blasted open; a muffled thump and a warm rising chord.',
+    shake(I) { const t = S.age - S.closeAt; return t >= 0 && t < .3 ? [0, 2 * Math.exp(-t * 12) * Math.cos(t * 60)] : [0, 0]; },
+    fin(p, I, ts) { const ux = I.x1 + 18, a = clamp((ts - .1) / .3) * (1 - clamp((ts - 1.6) / .6)); if (a > 0) { ctx.save(); ctx.translate(ux, I.ly); ctx.rotate(ts * .4); for (let q = 0; q < 10; q++) { const an = q / 10 * 6.283, l = (28 + skHash(q) * 26) * clamp((ts - .1) / .4), g = ctx.createLinearGradient(0, 0, Math.cos(an) * l, Math.sin(an) * l); g.addColorStop(0, `rgba(255,220,130,${.75 * a})`); g.addColorStop(1, 'rgba(255,200,90,0)'); ctx.strokeStyle = g; ctx.lineWidth = 4 - (q % 2) * 1.6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(an) * l, Math.sin(an) * l * .7); ctx.stroke(); } ctx.restore();
+        const g = ctx.createRadialGradient(ux, I.ly, 0, ux, I.ly, 20); g.addColorStop(0, `rgba(255,236,170,${.6 * a})`); g.addColorStop(1, 'rgba(255,200,90,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ux, I.ly, 20, 0, 7); ctx.fill(); }
+      once('mbt', () => { thump48(0, 1.1); chunks50(ux - 6, I.ly, 12, 110, 40); dust50(ux - 8, I.ly, 5, 30); [196, 247, 294, 392].forEach((f, q) => kal(f, .12 + q * .07, .013)); bell45(1568, .45, .006); }); } },
+  D: { name: 'Ore shower', finAt: 1.2, desc: 'The last blast throws a fountain of ore nuggets high into the air; they rain back down onto the bar, each landing with a soft clink and a little bounce, then all roll along the top of the bar into the icon, a little ore payout.',
+    shake(I) { const t = S.age - S.closeAt; return t >= 0 && t < .3 ? [0, 2.2 * Math.exp(-t * 12) * Math.cos(t * 60)] : [0, 0]; },
+    fin(p, I, ts) { const ux = I.x1 + 18, top = I.ly - 8.5, g = 420; once('mos', () => { thump48(0, 1.1); chunks50(I.x1 - 4, I.ly, 8, 90, 60); });
+      for (let j = 0; j < 12; j++) { const t0 = j * .025, t = ts - t0; if (t < 0) continue; const vx = -95 + skHash(j + 1) * 110, vy = -170 - skHash(j + 2) * 70, x0 = I.x1 - 4, tl = (-vy + Math.sqrt(vy * vy + 2 * g * (top - I.ly + 1e-3 + 0))) / g + 0;
+        let x, y, r = t * 8; const T1 = Math.max(.2, (-2 * vy) / g * .98);
+        if (t < T1) { x = x0 + vx * t; y = I.ly + vy * t + g * t * t / 2; if (y > top && t > .1) y = top; }
+        else { const xl = x0 + vx * T1, u = t - T1; if (u < .18) { x = xl + vx * .2 * u; y = top - Math.sin(Math.PI * u / .18) * 5; once('moc' + j, () => clink47(j, 0, .55)); } else { const xb = xl + vx * .2 * .18, w = clamp((u - .18) / .4); x = lerp(xb, ux - 3, w * w); y = top; if (w >= 1) { once('mod' + j, () => { if (j % 3 === 0) tone(1568 * semi(PENT42[j % 6]), 0, .005, .12, 'sine', null, .002); }); continue; } } }
+        ctx.save(); ctx.translate(x, y); ctx.rotate(r); nugget(0, 0, 2.8, ORECOL[j % 4]); ctx.restore(); } } },
+};
+function fin50(K) { const f = FIN50[K]; if (!f.fin) return Object.assign({}, BL, { name: f.name }); return Object.assign({}, BL, { name: f.name, finAt: f.finAt, shake: I => I.done ? f.shake(I) : BL.shake(I),
+  over(p, I) { if (!I.done) return BL.over(p, I); f.fin(p, I, S.age - S.closeAt); } }); }
+const VAR50 = { Mining: { A: fin50('A'), B: fin50('B'), C: fin50('C'), D: fin50('D') } };
+function r50(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? FIN50[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? 'Mining as picked (the Blast). Reaching the next ore: ' + FIN50[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Mining’s finale. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? FIN50[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR50.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r50('A'), PB: r50('B'), PC: r50('C'), PD: r50('D') });
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();

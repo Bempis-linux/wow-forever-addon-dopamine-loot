@@ -941,6 +941,11 @@ Professions (from 1.3.0):
    glint now and then).
    Round 49 pick: **A, the Blast with no add-on**. Next: Mining's finale (the chain of blasts is the placeholder), then its
    sound.
+   **Round 50** (`FIN50`, `fin50`; Mining finales on the Blast): A Chain reaction (the placeholder: blasts run down the
+   bar, the last bursts the icon open), B The big one (a charge glows at the end, one huge blast: a soft white flash, a
+   shockwave ring, a hard jolt, debris rains down, the icon revealed in the dust), C Breakthrough (the last blast breaks
+   through at the end and warm gold rays pour out around the icon, a warm rising chord), D Ore shower (a fountain of ore
+   nuggets rains onto the bar with clinks and bounces, then rolls into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
