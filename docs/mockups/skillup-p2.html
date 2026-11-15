@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 21, Mining, Herbalism, Skinning in the bar</h1>
+  <h1>Skill-up: round 22, tunnel + cart, grass + roots, the cut’s add-ons</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 21: the set header and bar; Fishing locked (round 20). New Mining options (inside the bar) and one more pass for Herbalism (breaking out) and Skinning (inside); A is the current one for Herbalism and Skinning. Opens on Mining, Bright ground. Rounds 2-20 stay in the code.
+  the line that grows. Round 22: the set header and bar; Fishing locked. Mining: the tunnel with the mine cart, four ways. Herbalism: Vine, Tall grass, the two mixed, Roots and shoots. Skinning: the cut + a stroke and three add-ons. Opens on Mining, Bright ground. Rounds 2-21 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1663,7 +1663,7 @@ const VAR21 = {
       grow(p, x, y, L, f, t, I) { const g = L * f; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - 2, y - 3, g + 2, 6); ctx.fillStyle = '#8a6a3a'; for (let s = 2; s < g; s += 5) ctx.fillRect(x + s, y - 1 + (s % 3), 1.4, 1.2);
         for (let s = 7, i = 0; s < g; s += 11, i++) { const gr = clamp((g - s) / 10), sw = Math.sin(t * 1.8 + i) * .8, h = (7 + (i % 3) * 2) * gr, rl = (5 + (i % 2) * 3) * gr;
           ctx.strokeStyle = '#4fb83a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x + s, y - 3); ctx.quadraticCurveTo(x + s, y - 3 - h * .6, x + s + sw, y - 3 - h); ctx.stroke(); ctx.fillStyle = '#7ee04a'; ctx.beginPath(); ctx.ellipse(x + s + sw + 2.2 * gr, y - 3 - h * .8, 2.4 * gr, 1.1 * gr, -.4, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x + s + sw - 2.2 * gr, y - 3 - h * .6, 2.2 * gr, 1 * gr, .4, 0, 7); ctx.fill();
-          ctx.strokeStyle = '#d8c090'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + s, y + 3); ctx.quadraticCurveTo(x + s - 1, y + 3 + rl * .6, x + s + (i % 2 ? 2 : -2), y + 3 + rl); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x + s, y + 3 + rl * .4); ctx.quadraticCurveTo(x + s + 2, y + 3 + rl * .6, x + s + 3.5, y + 3 + rl * .8); ctx.stroke(); } } },
+          ctx.strokeStyle = '#9a7040'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x + s, y + 3); ctx.quadraticCurveTo(x + s - 1, y + 3 + rl * .6, x + s + (i % 2 ? 2 : -2), y + 3 + rl); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x + s, y + 3 + rl * .4); ctx.quadraticCurveTo(x + s + 2, y + 3 + rl * .6, x + s + 3.5, y + 3 + rl * .8); ctx.stroke(); } } },
   },
   Skinning: {
     A: { name: 'The cut + a stroke', desc: 'As it is: the knife cut along the hide; each skill-up one quick straight slash with a whoosh, the new piece of the cut flashing.', tip: glintTip, grow: skinStroke },
@@ -1694,6 +1694,76 @@ function r21(K) { const v = () => VAR21[profName]; return { get name() { return 
   get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
 Object.assign(FAM, { PA: r21('A'), PB: r21('B'), PC: r21('C'), PD: r21('D') });
+
+// ---------- round 22 (2026-11-15): Mining = the tunnel + the mine cart (four ways); Herbalism grass, roots and a mix; Skinning add-ons to the cut ----------
+function tunnelBase(x, y, g, I, t) { ctx.fillStyle = '#120e0b'; ctx.fillRect(I.x0 - 2, y - 6, I.x1 - I.x0 + 4, 12); if (g > 0) {
+    const lg = ctx.createLinearGradient(x, 0, x + g + 10, 0); lg.addColorStop(0, 'rgba(255,170,90,.22)'); lg.addColorStop(.85, 'rgba(255,200,120,.6)'); lg.addColorStop(1, 'rgba(255,200,120,0)'); ctx.fillStyle = lg; ctx.fillRect(x, y - 6, g + 10, 12);
+    for (let s = 10; s < g - 4; s += 18) beam(x + s, y, 0); }
+  const ry = y + 4.5; for (const [a, b, al] of [[I.x0 - 2, x + g, .95], [x + g, I.x1 + 2, .25]]) { if (b <= a) continue; ctx.strokeStyle = `rgba(170,160,150,${al})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a, ry); ctx.lineTo(b, ry); ctx.stroke(); ctx.strokeStyle = `rgba(120,86,54,${al})`; ctx.lineWidth = 1.4; for (let s = Math.ceil((a - I.x0) / 6) * 6; I.x0 + s < b; s += 6) { ctx.beginPath(); ctx.moveTo(I.x0 + s, ry + .4); ctx.lineTo(I.x0 + s, ry + 1.6); ctx.stroke(); } } }
+// a mine cart standing on the rail at (x, ry): load 0..1 heaps ore over its rim; tilt (radians, forward); ang turns the wheels
+function mcart(x, ry, load, tilt, ang) { ctx.save(); ctx.translate(x, ry - 1.6); ctx.rotate(tilt);
+  for (const wx of [-3.6, 3.6]) { ctx.fillStyle = '#2a2420'; ctx.beginPath(); ctx.arc(wx, 0, 1.7, 0, 7); ctx.fill(); ctx.strokeStyle = '#c8c0b8'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(wx - Math.cos(ang) * 1.7, -Math.sin(ang) * 1.7); ctx.lineTo(wx + Math.cos(ang) * 1.7, Math.sin(ang) * 1.7); ctx.stroke(); }
+  const n = Math.round(load * 9); for (let j = 0; j < n; j++) { ctx.fillStyle = ORECOL[j % 4]; ctx.beginPath(); ctx.arc(-4.5 + (j * 2.6) % 9.5, -7 - Math.floor(j / 4) * 1.6, 1.6, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#7a5434'; ctx.strokeStyle = '#2e2014'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-5.5, -1.2); ctx.lineTo(5.5, -1.2); ctx.lineTo(7, -7); ctx.lineTo(-7, -7); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,220,170,.35)'; ctx.fillRect(-6.5, -7, 13, 1); ctx.restore(); }
+function clack(t = 0) { noise(t, .03, .04, 1800, 3, 'bandpass', true); noise(t + .1, .03, .04, 1700, 3, 'bandpass', true); }
+function dumpInto(I, x, key) { if (!I.done) return 0; const ts = S.age - S.closeAt; once(key, () => { noise(.15, .35, .05, 1500, .8, 'bandpass', true); for (let k = 0; k < 10; k++) spawn({ x: x + 6, y: I.ly - 8, vx: 50 + Math.random() * 60, vy: -50 - Math.random() * 30, g: 320, life: .6, size: 1.7, shape: 'sq', vr: 8, col: ORECOL[k % 4] }); }); return .75 * eOut(clamp(ts / .3)) * (1 - clamp((ts - .9) / .3)); }
+const VAR22 = {
+  Mining: {
+    A: { name: 'The cart at the front', desc: 'The mine shaft (dark tunnel, beams, warm light where it’s dug) with rails laid along its floor. The cart stands at the front: each skill-up it rolls on with a clack-clack and its heap of ore grows. Reaching the next ore, it tips and dumps the load into the ore’s icon.',
+      grow(p, x, y, L, f, t, I) { tunnelBase(x, y, L * f, I, t); onHits('mca', () => clack()); },
+      over(p, I) { const cx = Math.max(I.x0 + 7, I.tipX - 6); mcart(cx, I.ly + 4.5, .2 + .8 * I.f, dumpInto(I, cx, 'mcad'), (cx - I.x0) / 1.7); } },
+    B: { name: 'The ore train', desc: 'The tunnel fills with a train of loaded carts. Each skill-up a new cart rolls in from the mine mouth at the left, all the way along the rails, and couples on at the front with a clank.',
+      grow(p, x, y, L, f, t, I) { tunnelBase(x, y, L * f, I, t); },
+      over(p, I) { const k = lastHitIdx(), ha = I.hitAge, slots = []; for (let sx = I.x0 + 7; sx <= I.tipX - 5; sx += 15) slots.push(sx); const rolling = k >= 0 && ha >= 0 && ha < .5;
+        slots.forEach((sx, j) => { if (rolling && j === slots.length - 1) return; mcart(sx, I.ly + 4.5, .55 + (j % 3) * .2, 0, sx / 1.7); });
+        if (rolling && slots.length) { const tx = slots[slots.length - 1], xx = lerp(I.x0 - 14, tx, eOut(ha / .5)); mcart(xx, I.ly + 4.5, .8, 0, xx / 1.7); }
+        onHits('mtb', () => clack()); landed('mtc', .5, () => { metal(0, 700, .02, .25, [1, 2.76], [1, .4]); click(0, .05, 1200, 3); }); } },
+    C: { name: 'The shuttle', desc: 'One cart works the tunnel: each skill-up it rolls from the mine mouth out to the dig face, tips its load onto the heap of ore that fills the tunnel floor, and rolls back empty.',
+      grow(p, x, y, L, f, t, I) { const g = L * f; tunnelBase(x, y, g, I, t); for (let s = 2, i = 0; s < g - 1; s += 3.5, i++) nugget(x + s, y + 1.8 - (i % 3) * 1.4, 1.9, ORECOL[i % 4]); },
+      over(p, I) { const k = lastHitIdx(), ha = I.hitAge, home = I.x0 + 7, front = Math.max(home, I.tipX - 8); let cx = home, tilt = 0, load = 0;
+        if (k >= 0 && ha >= 0 && ha < 1) { if (ha < .3) { cx = lerp(home, front, eOut(ha / .3)); load = .8; } else if (ha < .5) { cx = front; tilt = .8 * Math.sin(Math.PI * (ha - .3) / .2); load = .8 * (1 - (ha - .3) / .2); } else { cx = lerp(front, home, eOut((ha - .5) / .5)); } }
+        mcart(cx, I.ly + 4.5, load, tilt + dumpInto(I, cx, 'mcsd'), cx / 1.7);
+        onHits('msh', () => clack()); landed('msd', .38, () => noise(0, .2, .05, 1100, .8, 'bandpass', true)); } },
+    D: { name: 'Loading the cart', desc: 'The tunnel is dug ahead; the cart waits outside the mine mouth at the bar’s left end. Each skill-up a chunk of ore rolls back down the rails from the dig face and drops into it with a clunk, its heap growing. Reaching the next ore, the full cart rolls the whole length and dumps into the ore’s icon.',
+      grow(p, x, y, L, f, t, I) { tunnelBase(x, y, L * f, I, t); },
+      over(p, I) { const k = lastHitIdx(), ha = I.hitAge, home = I.x0 - 15, ry = I.ly + 4.5; ctx.strokeStyle = 'rgba(170,160,150,.95)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(home - 9, ry); ctx.lineTo(I.x0 - 2, ry); ctx.stroke();
+        let cx = home, tilt = 0; if (I.done) { const ts = S.age - S.closeAt; cx = lerp(home, I.x1 - 4, eOut(clamp(ts / .6))); if (ts > .6) { const tt = S.age; S.age = S.closeAt + ts - .6; tilt = dumpInto(I, cx, 'mcld'); S.age = tt; } }
+        const done = k >= 0 && (ha >= .5 || I.done) ? k + 1 : k >= 0 ? k : 0; mcart(cx, ry, Math.min(1, .15 + (S.v0 - I.lo + done) / Math.max(1, S.nx.lv - I.lo) * .85), tilt, cx / 1.7);
+        if (k >= 0 && ha >= 0 && ha < .5 && !I.done) { const u = ha / .5, sx = I.X(hitTo(k)), xx = lerp(sx, home, u), yy = u < .85 ? ry - 2.5 : lerp(ry - 2.5, ry - 9, (u - .85) / .15); ctx.save(); ctx.translate(xx, yy); ctx.rotate(-u * 14); nugget(0, 0, 2.4, ORECOL[k % 4]); ctx.restore(); }
+        onHits('mlr', () => noise(0, .45, .02, 900, 1.2)); landed('mll', .5, () => { noise(0, .12, .06, 500, .8, 'bandpass', true); tone(110, 0, .04, .15, 'sine', 70); }); } },
+  },
+  Herbalism: {
+    A: { name: 'Vine', desc: 'As it is: the vine over the slim bar, leaves unfurling behind a bud at the tip.' },
+    B: { name: 'Tall grass', desc: 'Round 21 B: a meadow, blades standing up out of the bar and swaying; each skill-up a clump springs up at the front.', grow(p, x, y, L, f, t, I) { VAR21.Herbalism.B.grow(p, x, y, L, f, t, I); } },
+    C: { name: 'Meadow over roots (B + D)', desc: 'The two mixed: the bar is soil; tall grass stands out of its top and roots reach out of its bottom. Each skill-up a clump of grass springs up at the front and a root pushes down under it.',
+      grow(p, x, y, L, f, t, I) { const g = L * f, ha = I.hitAge; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - 2, y - 3, g + 2, 6); ctx.fillStyle = '#8a6a3a'; for (let s = 2; s < g; s += 5) ctx.fillRect(x + s, y - 1 + (s % 3), 1.4, 1.2);
+        for (let s = 6, i = 0; s < g; s += 9, i++) { const gr = clamp((g - s) / 8), rl = (4 + (i % 3) * 2.5) * gr; ctx.strokeStyle = '#9a7040'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x + s, y + 3); ctx.quadraticCurveTo(x + s - 1, y + 3 + rl * .6, x + s + (i % 2 ? 2 : -2), y + 3 + rl); ctx.stroke(); if (i % 2) { ctx.beginPath(); ctx.moveTo(x + s, y + 3 + rl * .45); ctx.quadraticCurveTo(x + s + 2, y + 3 + rl * .6, x + s + 3.2, y + 3 + rl * .85); ctx.stroke(); } }
+        for (let s = 1, i = 0; s < g; s += 2.6, i++) { const fresh = clamp((g - s) / 12), spring = fresh < 1 && ha >= 0 && ha < .5 ? eBack(clamp(ha / .35)) : 1, h = (5 + (i * 7) % 9) * (fresh < 1 ? spring * (.4 + .6 * fresh) : 1), sw = Math.sin(t * 2 + i * .7) * 1.4;
+          ctx.strokeStyle = i % 3 ? '#5ac83a' : '#8ae05a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x + s, y - 2); ctx.quadraticCurveTo(x + s + sw * .3, y - 2 - h * .5, x + s + sw, y - 2 - h); ctx.stroke(); }
+        onHits('hmx', () => noise(0, .25, .025, 5000, .6)); } },
+    D: { name: 'Roots and shoots', desc: 'Round 21 D: the bar is soil; shoots push out of its top and roots out of its bottom.', grow(p, x, y, L, f, t, I) { VAR21.Herbalism.D.grow(p, x, y, L, f, t, I); } },
+  },
+  Skinning: {
+    A: { name: 'The cut + a stroke', desc: 'The base, as it is: the knife cut along the hide; each skill-up one quick straight slash with a whoosh, the new piece of the cut flashing.', tip: glintTip, grow: skinStroke },
+    B: { name: '+ Fur flies', desc: 'Each slash throws a burst of fur tufts up out of the bar that drift down slowly; reaching the next beasts, a big burst from the whole cut.', tip: glintTip, grow: skinStroke,
+      over(p, I) { onHits('sff', i => { const xa = I.X(hitTo(i) - 1), xb = I.X(hitTo(i)); for (let q = 0; q < 14; q++) spawn({ x: lerp(xa, xb, Math.random()), y: I.ly - 3, vx: (Math.random() - .5) * 50, vy: -40 - Math.random() * 45, g: 45, life: 1.5, size: 1.6 + Math.random(), shape: 'leaf', vr: (Math.random() - .5) * 6, col: ['#8a5a32', '#c89a6a', '#a87444'][q % 3] }); });
+        if (I.done) once('sffd', () => { for (let q = 0; q < 40; q++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: I.ly - 3, vx: (Math.random() - .5) * 70, vy: -50 - Math.random() * 60, g: 45, life: 1.8, size: 1.8 + Math.random(), shape: 'leaf', vr: (Math.random() - .5) * 6, col: ['#8a5a32', '#c89a6a', '#a87444'][q % 3] }); noise(0, .5, .03, 3000, .7); }); } },
+    C: { name: '+ The hide parts', desc: 'The cut opens up: behind each slash the hide springs apart, its two edges lifting out of the bar and curling back to show the pale inner side, then settling a little open, so the cut you’ve made gapes along the bar.', tip: glintTip, grow: skinStroke,
+      over(p, I) { const ha = I.hitAge, k = lastHitIdx(); if (I.tipX <= I.x0 + 2) return; ctx.save();
+        for (let s = I.x0; s < I.tipX; s += 2) { const fresh = k >= 0 && s > I.X(hitTo(k) - 1) - 2 ? clamp(1 - Math.max(0, ha) / .8) : 0, op = 1.6 + 4.5 * fresh * (ha >= 0 ? Math.sin(Math.PI * clamp(ha / .25)) * .6 + .4 : 0);
+          ctx.fillStyle = '#1e0e04'; ctx.fillRect(s, I.ly - op * .5, 2.2, op); ctx.fillStyle = '#ecd2a8'; ctx.fillRect(s, I.ly - op * .5 - 1.6 - fresh * 3, 2.2, 1.4); ctx.fillRect(s, I.ly + op * .5 + .2 + fresh * 3, 2.2, 1.4); }
+        ctx.restore(); onHits('shp', () => noise(.05, .12, .03, 900, 1)); } },
+    D: { name: '+ Swoosh', desc: 'Each slash leaves a bright crescent trail sweeping over the bar, bigger than the bar itself, with a hiss; reaching the next beasts, two big slashes cross the whole bar in an X.', tip: glintTip, grow: skinStroke,
+      over(p, I) { const ha = I.hitAge, k = lastHitIdx(); const arc = (xa, xb, up, e, w) => { if (e <= 0) return; ctx.save(); ctx.strokeStyle = `rgba(255,248,230,${e})`; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(xa, I.ly + (up ? 10 : -12)); ctx.quadraticCurveTo((xa + xb) / 2, I.ly + (up ? -22 : 20), xb, I.ly + (up ? -12 : 10)); ctx.stroke(); ctx.restore(); };
+        if (k >= 0 && ha >= -.05 && ha < .4) { const xa = I.X(hitTo(k) - 1) - 14, xb = I.X(hitTo(k)) + 14, u = clamp((ha + .05) / .15); arc(xa, lerp(xa, xb, u), true, 1 - clamp((ha - .1) / .3), 2.4); }
+        if (I.done) { const ts = S.age - S.closeAt; arc(I.x0 - 6, lerp(I.x0, I.x1 + 6, clamp(ts / .15)), true, 1 - clamp((ts - .15) / .4), 3); arc(I.x0 - 6, lerp(I.x0, I.x1 + 6, clamp((ts - .2) / .15)), false, ts > .2 ? 1 - clamp((ts - .35) / .4) : 0, 3); once('ssx', () => { noise(0, .18, .05, 4500, 1); noise(.2, .18, .05, 4000, 1); }); } } },
+  },
+};
+function r22(K) { const v = () => VAR22[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'gatherers only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'Round 22 covers Mining, Herbalism and Skinning; crafters come next.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r22('A'), PB: r22('B'), PC: r22('C'), PD: r22('D') });
 setTimeout(() => { profName = 'Mining'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = document.querySelector('[data-g="bright"]'); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands

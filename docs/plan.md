@@ -752,6 +752,16 @@ Professions (from 1.3.0):
    soil; shoots out of the top, roots out of the bottom). Skinning (inside): A The cut + a stroke, B Pegged out (pegs
    punch in at the front, the hide pulls taut), C Laid down (a cut piece flips down into the bar with a slap, fur and
    pale sides alternating), D Tanned (pale pink hide cures to tan under a bright sweep).
+   Round 21 feedback: Mining: the tunnel combined with the mine cart. Herbalism: likes B Tall grass and D Roots and
+   shoots, wants a mix of both (in place of the flowers). Skinning: Laid down is cool but reads as Leatherworking; stay on
+   A The cut + a stroke and show add-ons. **Round 22** (`VAR22`, `r22`, `tunnelBase`, `mcart`): Mining A The cart at the
+   front (rolls on each skill-up, heap grows, dumps into the icon at the unlock), B The ore train (a new cart rolls in from
+   the mine mouth and couples on), C The shuttle (one cart runs out to the dig face, tips onto the ore heap, rolls back),
+   D Loading the cart (the cart waits outside the mouth; a chunk rolls back into it each skill-up; at the unlock it rolls
+   the length and dumps). Herbalism A Vine, B Tall grass, C Meadow over roots (B + D), D Roots and shoots (roots now a
+   darker brown). Skinning A the base, B + Fur flies (tufts burst up and drift down; a big burst at the unlock), C + The
+   hide parts (the cut springs open, pale edges lift out of the bar, settles a little open), D + Swoosh (a bright crescent
+   trail bigger than the bar per slash; an X of two slashes at the unlock).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
