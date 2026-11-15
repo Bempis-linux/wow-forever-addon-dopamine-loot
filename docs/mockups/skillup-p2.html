@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 59, Blacksmithing: anvil and falls, evolved</h1>
+  <h1>Skill-up: round 60, Blacksmithing: spark shower + bubbling magma</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2806,38 +2806,6 @@ function glow58(x, y, r, a) { const g = ctx.createRadialGradient(x, y, 0, x, y, 
 function anvil58(x, y, flash) { ctx.save(); ctx.translate(x, y); ctx.scale(1.4, 1.4); const ag = ctx.createLinearGradient(0, -5, 0, 6); ag.addColorStop(0, '#4a4d56'); ag.addColorStop(.3, '#1e1f24'); ag.addColorStop(1, '#0e0e10'); ctx.fillStyle = ag; ctx.beginPath(); ctx.moveTo(-3, -5); ctx.lineTo(9, -5); ctx.lineTo(9, -2); ctx.lineTo(5, 0); ctx.lineTo(5, 3); ctx.lineTo(9, 6); ctx.lineTo(-5, 6); ctx.lineTo(-1, 3); ctx.lineTo(-1, 0); ctx.lineTo(-3, -2); ctx.quadraticCurveTo(-8, -3, -12, -4.6); ctx.quadraticCurveTo(-8, -5.2, -3, -5); ctx.closePath(); ctx.fill();
   ctx.strokeStyle = `rgba(190,200,215,${.8 + flash * .2})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-12, -4.6); ctx.quadraticCurveTo(-8, -5.2, -3, -5); ctx.lineTo(9, -5); ctx.stroke();
   if (flash > 0) glow58(3, -5, 9, flash * .8); ctx.restore(); }
-const spark58 = (I, i, q) => ({ d: .28 + rnd53(q * 3 + i) * .12, h: 5 + rnd53(q * 5 + i) * 8, dx: (rnd53(q * 7 + i) - .5) * 8 });
-const BS58 = {
-  A: { name: 'Ringing steel, curls', desc: 'Kept: dark steel with a gold line and curls; each skill-up the bar hums and shivers along its length, a shine runs along the gold, the new end gleams.', V: VAR55.A },
-  B: { name: 'Anvil at the start', desc: 'A small black anvil sits just left of the bar’s start. The fill is dark iron, warm at its front. Each skill-up the anvil’s face flashes and throws an arc of sparks along the bar; they land on the front, which flares, and the fill has grown where they hit.',
-    snd: (i, v, k) => k ? drum46(110 * semi(pick45(i, 2) / 3), 0, .02 * v) : [0, 1, 2].forEach(q => bell45(2349 * semi(PENT42[(i + q * 3) % 10]), q * .04, .003 * v)),
-    V: { grow(p, x0, y, L, f, t, I) { const end = I.X(S.v0 + land53(.32)); if (end <= x0) return; const g = ctx.createLinearGradient(x0, 0, end, 0); g.addColorStop(0, '#2a2c30'); g.addColorStop(Math.max(0, 1 - 24 / (end - x0)), '#3a3c42'); g.addColorStop(1, '#d0602a'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 5, end - x0 + 2, 10); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x0 - 2, y - 5, end - x0 + 2, 1.5); },
-      over(p, I) { const ax = I.x0 - 26, k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil58(ax, I.ly, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0);
-        S.hits.forEach((h, i) => { const t = hT53(i), tx = I.X(S.v0 + i + 1); if (t >= 0) once('b58a' + i, () => BS58.B.snd(i, fat45(i), 0)); if (t >= .32) once('b58b' + i, () => BS58.B.snd(i, fat45(i), 1));
-          if (t >= 0 && t < .45) { ctx.save(); ctx.lineCap = 'round'; for (let q = 0; q < 10; q++) { const s = spark58(I, i, q), u = t / s.d; if (u >= 1) continue; const pos = w => [lerp(ax + 3, tx + s.dx, w), lerp(I.ly - 6, I.ly - 2, w) - Math.sin(Math.PI * w) * s.h];
-              const [x1, y1] = pos(u), [x2, y2] = pos(Math.max(0, u - .08)); ctx.strokeStyle = q % 3 ? '#ffb040' : '#fff0c0'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x1, y1); ctx.stroke(); } ctx.restore(); }
-          if (t >= .3 && t < .7) glow58(tx, I.ly, 12, .7 * (1 - (t - .3) / .4)); }); } } },
-  C: { name: 'Magma channel', desc: 'The fill is magma flowing slowly along the channel, dark crust drifting on it, the rounded front hottest. Each skill-up a surge rolls down the channel from the start, brightening as it goes; it reaches the front and pushes it forward with a glow.',
-    snd: (i, v) => { tone(73 * semi(pick45(i, 2) / 2), 0, .03 * v, .6, 'sine', null, .06); noise(.05, .4, .02 * v, 220, .6, 'lowpass'); },
-    V: { grow(p, x0, y, L, f, t, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k), sx = lerp(x0, I.X(S.v0 + Math.max(0, k) + 1), clamp(ft / .4)), on = ft >= 0 && ft < .6 ? 1 - clamp((ft - .4) / .2) : 0;
-        let end = I.X(S.v0 + land53(.4)); if (k >= 0 && ft >= .4 && ft < .7) end = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), eOut((ft - .4) / .3));
-        magma58(x0, end, y, t, x => on * .5 * Math.exp(-Math.pow((x - sx) / 14, 2)), true); },
-      over(p, I) { onHits('c58', i => BS58.C.snd(i, fat45(i))); const k = lastHit53(), ft = k < 0 ? 9 : hT53(k), end = I.X(S.v0 + land53(.4)); glow58(end, I.ly, 10 + (ft >= .4 && ft < .9 ? 6 * (1 - (ft - .4) / .5) : 0), .35 + .1 * Math.sin(S.age * 3)); } } },
-  D: { name: 'Ironforge falls', desc: 'Like the Great Forge’s magma pouring down from the mountain: a thin stream of magma falls from above onto the front of the bar. Each skill-up it pours heavier; the front splashes, spits droplets and grows; then it slows back to a trickle.',
-    snd: (i, v) => { noise(0, .45, .025 * v, 300, .5, 'lowpass'); tone(98 * semi(pick45(i, 2) / 2), .05, .016 * v, .35, 'sine', null, .02); },
-    V: { grow(p, x0, y, L, f, t, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); let end = I.X(S.v0 + land53(.45)); if (k >= 0 && ft >= 0 && ft < .45) end = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), ft / .45); I.mEnd = end;
-        magma58(x0, end, y, t, x => 0, true); },
-      over(p, I) { onHits('d58', i => BS58.D.snd(i, fat45(i))); const k = lastHit53(), ft = k < 0 ? 9 : hT53(k), pour = ft >= 0 && ft < .6 ? Math.sin(Math.PI * Math.min(1, ft / .6)) : 0, x = (I.mEnd || I.tipX) - 3, top = I.ly - 46, w = 1.4 + pour * 3.2;
-        if (I.mEnd > I.x0 + 2) { const g = ctx.createLinearGradient(0, top, 0, I.ly); g.addColorStop(0, 'rgba(255,140,40,0)'); g.addColorStop(.3, 'rgba(255,140,40,.9)'); g.addColorStop(1, 'rgba(255,220,140,1)'); ctx.save(); ctx.strokeStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath();
-          for (let yy = top; yy <= I.ly - 2; yy += 3) ctx.lineTo(x + Math.sin(yy * .3 + S.age * 9) * .6 * (1 - pour * .5), yy); ctx.stroke(); ctx.restore(); glow58(x, I.ly - 3, 8 + pour * 8, .45 + pour * .4);
-          if (pour > .2) once('d58s' + Math.floor(S.age / .04), () => spawn({ x, y: I.ly - 5, vx: (Math.random() - .3) * 70, vy: -40 - Math.random() * 50, g: 320, life: .4, size: 1 + Math.random() * .8, col: Math.random() > .4 ? '#ff9a3a' : '#ffd890' })); } } } },
-};
-function r58(K) { return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? BS58[K].name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-  get desc() { return profName === 'Blacksmithing' ? BS58[K].desc + ' (The base only; the sound is a gentle placeholder that varies and steps down. Try “Five in a row”.)' : 'One profession at a time: this round is Blacksmithing’s base. Others show their current look.'; },
-  get note() { return profName === 'Blacksmithing' ? BS58[K].name.toLowerCase() + '.' : 'the set bar.'; },
-  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
-    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', BS58[K].V); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
-Object.assign(FAM, { PA: r58('A'), PB: r58('B'), PC: r58('C'), PD: r58('D') });
 // ---------- round 59 (2026-11-15): Blacksmithing, where round 58 B (anvil at the start) and D (Ironforge falls) can go ----------
 const iron59 = (x0, end, y) => { if (end <= x0) return; const g = ctx.createLinearGradient(x0, 0, end, 0); g.addColorStop(0, '#2a2c30'); g.addColorStop(Math.max(0, 1 - 24 / (end - x0)), '#3a3c42'); g.addColorStop(1, '#d0602a'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 5, end - x0 + 2, 10); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x0 - 2, y - 5, end - x0 + 2, 1.5); };
 const glint59 = (x, y, a, s = 4) => { if (a <= 0) return; ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = '#fff0c0'; ctx.shadowColor = '#ffb040'; ctx.shadowBlur = 6; star4(x, y, 1.5 + a * s, 0); ctx.restore(); };
@@ -2845,51 +2813,65 @@ const glint59 = (x, y, a, s = 4) => { if (a <= 0) return; ctx.save(); ctx.global
 function stream59(x, top, yb, w, t, slit) { const g = ctx.createLinearGradient(0, top, 0, yb); g.addColorStop(0, slit ? 'rgba(255,170,60,.9)' : 'rgba(255,140,40,0)'); g.addColorStop(.3, 'rgba(255,140,40,.9)'); g.addColorStop(1, 'rgba(255,220,140,1)');
   ctx.save(); ctx.strokeStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); for (let yy = top; yy <= yb; yy += 3) ctx.lineTo(x + Math.sin(yy * .3 + t * 9) * .6, yy); ctx.lineTo(x, yb); ctx.stroke();
   if (slit) { ctx.fillStyle = 'rgba(255,200,110,.9)'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.ellipse(x, top, 7, 1.6, 0, 0, 7); ctx.fill(); } ctx.restore(); }
-const BS59 = {
-  A: { name: 'Spark fuse', desc: 'The anvil at the start; the fill dark iron, warm at its front. Each skill-up the anvil’s face flashes and a spark runs along the top of the bar like a lit fuse, crackling small sparks up behind it; at the front it bursts in a fan of sparks and the fill grows.',
-    snd: (i, v, k) => k ? drum46(110 * semi(pick45(i, 2) / 3), 0, .022 * v) : [0, 1, 2].forEach(q => bell45(1760 * semi(PENT42[(i + q * 2) % 10]), q * .1, .003 * v)),
-    V: { grow(p, x0, y, L, f, t, I) { iron59(x0, I.X(S.v0 + land53(.4)), y); },
-      over(p, I) { const ax = I.x0 - 26, k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil58(ax, I.ly, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0);
-        S.hits.forEach((h, i) => { const t = hT53(i), tx = I.X(S.v0 + i + 1); if (t >= 0) once('a59a' + i, () => BS59.A.snd(i, fat45(i), 0));
-          if (t >= .05 && t < .4) { const x = lerp(ax + 6, tx, (t - .05) / .35), y = I.ly - 6; glow58(x, y, 6, .8); glint59(x, y, 1, 2); once('a59s' + i + '_' + Math.floor(t / .03), () => spawn({ x, y, vx: (Math.random() - .5) * 30, vy: -25 - Math.random() * 30, g: 200, life: .3, size: .8, col: Math.random() > .5 ? '#ffb040' : '#fff0c0' })); }
-          if (t >= .4) once('a59b' + i, () => { BS59.A.snd(i, fat45(i), 1); for (let q = 0; q < 12; q++) { const an = -Math.PI / 2 + (q / 11 - .5) * 2.2; spawn({ x: tx, y: I.ly - 3, vx: Math.cos(an) * (50 + Math.random() * 40), vy: Math.sin(an) * (50 + Math.random() * 40), g: 260, life: .45, size: 1, col: q % 3 ? '#ffb040' : '#fff0c0' }); } });
-          if (t >= .4 && t < .8) glow58(tx, I.ly, 12, .7 * (1 - (t - .4) / .4)); }); } } },
-  B: { name: 'Spark shower', desc: 'The anvil at the start. Each skill-up the anvil flings a spray of sparks; they rain down along the whole bar, each one glinting where it lands, and the last few land past the front, lighting it, and the fill has grown.',
-    snd: (i, v, k) => k ? drum46(110 * semi(pick45(i, 2) / 3), 0, .02 * v) : bell45(2093 * semi(pick45(i, 3)), 0, .004 * v),
-    V: { grow(p, x0, y, L, f, t, I) { iron59(x0, I.X(S.v0 + land53(.42)), y); },
-      over(p, I) { const ax = I.x0 - 26, k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil58(ax, I.ly, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0);
-        S.hits.forEach((h, i) => { const t = hT53(i), tx = I.X(S.v0 + i + 1); if (t >= 0) once('b59a' + i, () => BS59.B.snd(i, fat45(i), 0)); if (t >= .42) once('b59b' + i, () => BS59.B.snd(i, fat45(i), 1));
-          for (let q = 0; q < 16; q++) { const last = q >= 13, d = .22 + q / 15 * .2, lx = last ? tx + (q - 14) * 2 : lerp(I.x0 + 6, tx - 6, rnd53(q * 3 + i)), u = t / d;
-            if (u >= 0 && u < 1) { const x = lerp(ax + 4, lx, u), y = lerp(I.ly - 7, I.ly - 5, u) - Math.sin(Math.PI * u) * (9 + rnd53(q + i * 5) * 6), x2 = lerp(ax + 4, lx, Math.max(0, u - .07)), y2 = lerp(I.ly - 7, I.ly - 5, Math.max(0, u - .07)) - Math.sin(Math.PI * Math.max(0, u - .07)) * (9 + rnd53(q + i * 5) * 6);
-              ctx.save(); ctx.strokeStyle = q % 3 ? '#ffb040' : '#fff0c0'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x, y); ctx.stroke(); ctx.restore(); }
-            else if (u >= 1) glint59(lx, I.ly - 4, 1 - (t - d) / .3, last ? 5 : 3); }
-          if (t >= .42 && t < .8) glow58(tx, I.ly, 12, .7 * (1 - (t - .42) / .38)); }); } } },
-  C: { name: 'Falls and mound', desc: 'Ironforge’s falls, bolder: the stream of magma falls from a glowing opening above onto the front of the bar. Each skill-up it pours heavier and piles a glowing mound on the front; heat shimmers above it; then the mound slumps forward into the bar and the front has grown.',
-    snd: (i, v) => { noise(0, .45, .025 * v, 300, .5, 'lowpass'); tone(98 * semi(pick45(i, 2) / 2), .3, .018 * v, .4, 'sine', null, .02); },
-    V: { grow(p, x0, y, L, f, t, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); let end = I.X(S.v0 + land53(.6)); if (k >= 0 && ft >= .3 && ft < .6) end = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), eOut((ft - .3) / .3)); I.mEnd = end; magma58(x0, end, y, t, () => 0, true); },
-      over(p, I) { onHits('c59', i => BS59.C.snd(i, fat45(i))); if (!(I.mEnd > I.x0 + 2)) return; const k = lastHit53(), ft = k < 0 ? 9 : hT53(k), pour = ft >= 0 && ft < .55 ? Math.sin(Math.PI * Math.min(1, ft / .55)) : 0,
-          mound = ft >= 0 && ft < .3 ? eOut(ft / .3) : ft >= .3 && ft < .6 ? 1 - eOut((ft - .3) / .3) : 0, x = I.mEnd - 3, mh = 1 + mound * 6;
-        for (let q = 0; q < 3; q++) { const sx = x - 6 + q * 6, ph = (S.age * .8 + q * .33) % 1; ctx.save(); ctx.globalAlpha *= .18 * Math.sin(Math.PI * ph) * (.4 + mound); ctx.strokeStyle = '#ffd8a0'; ctx.lineWidth = 1; ctx.beginPath(); for (let yy = 0; yy < 10; yy += 2) ctx.lineTo(sx + Math.sin(yy * .8 + S.age * 6 + q) * 1.2, I.ly - 8 - ph * 14 - yy); ctx.stroke(); ctx.restore(); }
-        ctx.save(); ctx.fillStyle = heat58(.8); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.ellipse(x, I.ly - 5, 5 + mound * 3, mh, 0, Math.PI, 0); ctx.fill(); ctx.restore();
-        stream59(x, I.ly - 46, I.ly - 5 - mh, 1.4 + pour * 3.4, S.age, true); glow58(x, I.ly - 4, 8 + pour * 9, .45 + pour * .4);
-        if (pour > .3) once('c59s' + Math.floor(S.age / .05), () => spawn({ x, y: I.ly - 5 - mh, vx: (Math.random() - .5) * 60, vy: -35 - Math.random() * 40, g: 320, life: .4, size: 1 + Math.random() * .8, col: Math.random() > .4 ? '#ff9a3a' : '#ffd890' })); } } },
-  D: { name: 'Forge at the start', desc: 'Both together: a stream of magma falls from above onto the anvil at the bar’s start, and it overflows into the bar, the magma running along to the front. Each skill-up the pour comes heavier, the splash throws sparks off the anvil, and a surge rolls down the bar and pushes the front on.',
-    snd: (i, v) => { noise(0, .4, .022 * v, 280, .5, 'lowpass'); bell45(1760 * semi(pick45(i, 3)), .05, .003 * v); tone(82 * semi(pick45(i, 2) / 2), .35, .02 * v, .5, 'sine', null, .04); },
-    V: { grow(p, x0, y, L, f, t, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k), sx = lerp(x0, I.X(S.v0 + Math.max(0, k) + 1), clamp((ft - .1) / .35)), on = ft >= .1 && ft < .7 ? 1 - clamp((ft - .45) / .25) : 0;
-        let end = I.X(S.v0 + land53(.45)); if (k >= 0 && ft >= .45 && ft < .75) end = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), eOut((ft - .45) / .3)); magma58(x0, end, y, t, x => on * .5 * Math.exp(-Math.pow((x - sx) / 14, 2)), true); },
-      over(p, I) { onHits('d59', i => BS59.D.snd(i, fat45(i))); const ax = I.x0 - 26, k = lastHit53(), ft = k < 0 ? 9 : hT53(k), pour = ft >= 0 && ft < .5 ? Math.sin(Math.PI * Math.min(1, ft / .5)) : 0, fx = ax + 4;
-        anvil58(ax, I.ly, pour * .6); ctx.save(); ctx.strokeStyle = heat58(.75); ctx.lineWidth = 2 + pour * 1.5; ctx.lineCap = 'round'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(ax + 8, I.ly - 7); ctx.quadraticCurveTo(ax + 18, I.ly - 7, I.x0, I.ly - 1); ctx.stroke(); ctx.restore();
-        stream59(fx, I.ly - 46, I.ly - 8, 1.4 + pour * 3.4, S.age, true); glow58(fx, I.ly - 7, 8 + pour * 8, .4 + pour * .4);
-        if (pour > .3) once('d59s' + Math.floor(S.age / .045), () => spawn({ x: fx, y: I.ly - 8, vx: (Math.random() - .5) * 90, vy: -40 - Math.random() * 50, g: 320, life: .4, size: .9, col: Math.random() > .5 ? '#ffb040' : '#fff0c0' }));
-        glow58(I.X(S.v0 + land53(.45)), I.ly, 9, .3 + .08 * Math.sin(S.age * 3)); } } },
-};
-function r59(K) { return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? BS59[K].name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-  get desc() { return profName === 'Blacksmithing' ? BS59[K].desc + ' (The base only; the sound is a gentle placeholder that varies and steps down. Try “Five in a row”.)' : 'One profession at a time: this round is Blacksmithing’s base. Others show their current look.'; },
-  get note() { return profName === 'Blacksmithing' ? BS59[K].name.toLowerCase() + '.' : 'the set bar.'; },
-  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
-    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', BS59[K].V); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
-Object.assign(FAM, { PA: r59('A'), PB: r59('B'), PC: r59('C'), PD: r59('D') });
 setTimeout(() => { profName = 'Blacksmithing'; const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); if (typeof sync === 'function') sync(); play(); }, 0);
+// ---------- round 60 (2026-11-15): Blacksmithing, round 59 B (Spark shower) and C (Falls and mound) improved ----------
+// The anvil's sound: struck metal, short and damped (round 59's bell tones were "too chimey for an anvil getting hit").
+const anvTink60 = (i, v) => { const f = 640 * semi(pick45(i, 2) / 2); tone(f, 0, .02 * v, .09, 'triangle', null, .001); tone(f * 2.76, 0, .006 * v, .05, 'sine', null, .001); noise(0, .04, .02 * v, 1400, 1, 'lowpass', true); drum46(150, 0, .012 * v); };
+const anvClank60 = (i, v) => { const f = 230 * semi(pick45(i, 2) / 2); tone(f, 0, .028 * v, .16, 'sine', null, .001); tone(f * 2.4, 0, .01 * v, .07, 'triangle', null, .001); tone(f * 4.1, 0, .003 * v, .04, 'sine', null, .001); noise(0, .05, .03 * v, 900, 1, 'bandpass', true); drum46(90, 0, .022 * v); };
+// a warm glow behind the anvil so the black anvil reads on dark ground
+const anvil60 = (I, flash) => { const ax = I.x0 - 26; glow58(ax + 2, I.ly - 2, 16, .22 + flash * .5); anvil58(ax, I.ly, flash); return ax; };
+function shower60(I, i, t, linger) { const ax = I.x0 - 26, tx = I.X(S.v0 + i + 1);
+  for (let q = 0; q < 16; q++) { const last = q >= 13, d = .22 + q / 15 * .2, lx = last ? tx + (q - 14) * 2 : lerp(I.x0 + 6, tx - 6, rnd53(q * 3 + i)), hh = 9 + rnd53(q + i * 5) * 6, u = t / d, P = w => [lerp(ax + 4, lx, w), lerp(I.ly - 7, I.ly - 5, w) - Math.sin(Math.PI * w) * hh];
+    if (u >= 0 && u < 1) { const [x, y] = P(u), [x2, y2] = P(Math.max(0, u - .07)); ctx.save(); ctx.strokeStyle = q % 3 ? '#ffb040' : '#fff0c0'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x, y); ctx.stroke(); ctx.restore(); }
+    else if (u >= 1) { const age = t - d; if (!linger) glint59(lx, I.ly - 4, 1 - age / .3, last ? 5 : 3);
+      else { const a = 1 - age / 1.6; if (a > 0) { const tw = .6 + .4 * Math.sin(age * 14 + q * 2); ctx.save(); ctx.fillStyle = mix('#ff6a20', '#fff0c0', a * tw); ctx.globalAlpha *= a; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.arc(lx, I.ly - 3 + rnd53(q + 3) * 6, last ? 1.6 : 1.1, 0, 7); ctx.fill(); ctx.restore(); } if (age < .2) glint59(lx, I.ly - 4, 1 - age / .2, last ? 5 : 2.5); } } } }
+// bubbly magma with a wavy surface (like Fishing's water): from x0 to end; lift(x) adds to the surface (mounds, ripples)
+function magma60(I, end, t, lift) { const x0 = I.x0, bot = I.ly + 6, top = I.ly - 5; if (end <= x0 + 1) return;
+  const surf = x => top - (Math.sin(x * .17 - t * 2.2) * .8 + Math.sin(x * .41 + t * 1.4) * .5) - lift(x) + bub60(x, t, end, true);
+  const body = () => { ctx.beginPath(); ctx.moveTo(x0 - 2, bot); for (let x = x0 - 2; x <= end - 4; x += 2) ctx.lineTo(x, surf(x)); ctx.quadraticCurveTo(end + 1, surf(end - 4), end + 1, (surf(end - 4) + bot) / 2 + 1); ctx.quadraticCurveTo(end + 1, bot, end - 4, bot); ctx.closePath(); };
+  ctx.save(); body(); ctx.clip(); for (let x = x0 - 2; x < end + 2; x += 2) { const h = .5 + .13 * Math.sin(x * .15 - t * 2) + .08 * Math.sin(x * .37 - t * 3.1) + .25 * clamp(1 - (end - x) / 22); const g = ctx.createLinearGradient(0, top - 3, 0, bot); g.addColorStop(0, heat58(clamp(h + .25))); g.addColorStop(1, heat58(clamp(h - .25))); ctx.fillStyle = g; ctx.fillRect(x, top - 10, 2.2, bot - top + 10); }
+  for (let k = 0; k < 9; k++) { const x = x0 + ((rnd53(k + 70) * 240 + t * 4) % 240); if (x > end - 14) continue; ctx.fillStyle = 'rgba(40,12,4,.75)'; ctx.beginPath(); ctx.roundRect(x, surf(x) + .5, 4 + rnd53(k + 80) * 5, 1.8, .9); ctx.fill(); }
+  bub60(0, t, end, false, I); ctx.restore();
+  ctx.save(); ctx.strokeStyle = 'rgba(255,224,150,.9)'; ctx.lineWidth = 1.1; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 4; ctx.beginPath(); for (let x = x0 - 1; x <= end - 4; x += 2) ctx.lineTo(x, surf(x)); ctx.stroke(); ctx.restore(); return surf; }
+// bubbles: each rises from the bottom over its period, swelling, then domes the surface and pops (two droplets)
+function bub60(x, t, end, dome, I) { let lift = 0; for (let k = 0; k < 12; k++) { const per = 1.3 + rnd53(k + 5) * 1.2, ph = ((t + rnd53(k + 9) * per) % per) / per, bx = I ? I.x0 + rnd53(k + 13) * 228 : (I60 ? I60.x0 : 0) + rnd53(k + 13) * 228; if (bx > end - 6) continue;
+    if (dome) { if (ph > .82) lift -= 1.8 * Math.sin(Math.PI * (ph - .82) / .18) * Math.exp(-Math.pow((x - bx) / 2.5, 2)); continue; }
+    if (ph < .82) { const r = .8 + ph * 1.6, y = lerp(I.ly + 5, I.ly - 3, ph / .82); ctx.fillStyle = 'rgba(255,240,190,.55)'; ctx.beginPath(); ctx.arc(bx, y, r, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(120,30,8,.5)'; ctx.beginPath(); ctx.arc(bx + .3, y + .3, r * .55, 0, 7); ctx.fill(); }
+    else once('bp60' + k + '_' + Math.floor((t + rnd53(k + 9) * per) / per), () => { for (let q = 0; q < 2; q++) spawn({ x: bx, y: I.ly - 6, vx: (q ? 1 : -1) * (8 + Math.random() * 10), vy: -25 - Math.random() * 15, g: 260, life: .3, size: .8, col: '#ffb050' }); }); }
+  return lift; }
+let I60 = null;
+const BS60 = {
+  A: { name: 'Shower, anvil tink', desc: 'Round 59’s Spark shower, the anvil easier to see (a warm glow behind it). Sound: a short, damped strike of metal (a tink with a soft thud under it), its pitch varied.',
+    V: { grow(p, x0, y, L, f, t, I) { iron59(x0, I.X(S.v0 + land53(.42)), y); },
+      over(p, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil60(I, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); onHits('a60', i => anvTink60(i, fat45(i)));
+        S.hits.forEach((h, i) => { const t = hT53(i); shower60(I, i, t, false); if (t >= .42 && t < .8) glow58(I.X(S.v0 + i + 1), I.ly, 12, .7 * (1 - (t - .42) / .38)); }); } } },
+  B: { name: 'Lingering sparks, clank', desc: 'The Spark shower, but the sparks stay where they land as hot specks that twinkle and fade over a second and a half, so the bar glitters after each skill-up (a run of five keeps it lit), the front brightest. Sound: a lower, fuller clank of metal with a thud.',
+    V: { grow(p, x0, y, L, f, t, I) { iron59(x0, I.X(S.v0 + land53(.42)), y); },
+      over(p, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil60(I, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); onHits('b60', i => anvClank60(i, fat45(i)));
+        S.hits.forEach((h, i) => { const t = hT53(i); shower60(I, i, t, true); if (t >= .42 && t < .8) glow58(I.X(S.v0 + i + 1), I.ly, 12, .7 * (1 - (t - .42) / .38)); }); } } },
+  C: { name: 'Falls, bubbling', desc: 'Round 59’s Falls and mound in a new magma: a wavy surface like Fishing’s water, glowing along its crest, bubbles rising, swelling, doming the surface and popping. The stream falls onto the front; each skill-up it pours heavier, the surface mounds up under it, slumps forward into the bar, and a swell runs back along the surface.',
+    snd: (i, v) => { noise(0, .45, .025 * v, 300, .5, 'lowpass'); tone(110 * semi(pick45(i, 2) / 2), .3, .016 * v, .25, 'sine', 140 * semi(pick45(i, 2) / 2), .02); },
+    V: { grow() {}, over(p, I) { I60 = I; onHits('c60', i => BS60.C.snd(i, fat45(i))); const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); let end = I.X(S.v0 + land53(.6)); if (k >= 0 && ft >= .3 && ft < .6) end = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), eOut((ft - .3) / .3));
+        const pour = ft >= 0 && ft < .55 ? Math.sin(Math.PI * Math.min(1, ft / .55)) : 0, mound = ft >= 0 && ft < .3 ? eOut(ft / .3) : ft >= .3 && ft < .6 ? 1 - eOut((ft - .3) / .3) : 0, sw = ft >= .4 && ft < 1.4 ? end - (ft - .4) * 160 : -999, swA = ft >= .4 && ft < 1.4 ? 2.2 * (1 - (ft - .4)) : 0;
+        if (end <= I.x0 + 2) return; const surf = magma60(I, end, S.age, x => .8 + mound * 5 * Math.exp(-Math.pow((x - end + 4) / 6, 2)) + swA * Math.exp(-Math.pow((x - sw) / 7, 2))), x = end - 4;
+        stream59(x, I.ly - 46, surf(x) - 1, 1.4 + pour * 3.4, S.age, true); glow58(x, I.ly - 5, 8 + pour * 9, .45 + pour * .4);
+        if (pour > .3) once('c60s' + Math.floor(S.age / .05), () => spawn({ x, y: surf(x) - 1, vx: (Math.random() - .5) * 60, vy: -35 - Math.random() * 40, g: 320, life: .4, size: 1 + Math.random() * .8, col: Math.random() > .4 ? '#ff9a3a' : '#ffd890' })); } } },
+  D: { name: 'Gloops', desc: 'The same bubbling magma, but no steady stream: a glowing opening above the front drips now and then, and each skill-up a big glob of magma gathers, drops and plops into the front: the surface dips and rebounds, droplets splash up, a swell runs back along the bar, and the front grows.',
+    snd: (i, v) => { tone(98 * semi(pick45(i, 2) / 2), 0, .03 * v, .22, 'sine', 130 * semi(pick45(i, 2) / 2), .01); noise(0, .2, .02 * v, 400, .6, 'lowpass'); },
+    V: { grow() {}, over(p, I) { I60 = I; const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); let end = I.X(S.v0 + land53(.5)); if (k >= 0 && ft >= .25 && ft < .5) end = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), eOut((ft - .25) / .25));
+        if (end <= I.x0 + 2) return; const pl = ft - .25, dip = pl >= 0 && pl < .5 ? -3 * Math.sin(pl * 18) * Math.exp(-pl * 7) : 0, sw = pl >= .1 && pl < 1.1 ? end - (pl - .1) * 160 : -999, swA = pl >= .1 && pl < 1.1 ? 2.2 * (1 - (pl - .1)) : 0, x = end - 4, top = I.ly - 46;
+        const surf = magma60(I, end, S.age, xx => .8 + dip * Math.exp(-Math.pow((xx - x) / 6, 2)) + swA * Math.exp(-Math.pow((xx - sw) / 7, 2)));
+        ctx.save(); ctx.fillStyle = 'rgba(255,200,110,.9)'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.ellipse(x, top, 7, 1.6, 0, 0, 7); ctx.fill(); ctx.restore(); glow58(x, I.ly - 4, 8, .4);
+        const dp = (S.age % 1.3) / 1.3; if (dp < .35) { const yy = lerp(top, surf(x), (dp / .35) * (dp / .35)); ctx.fillStyle = heat58(.85); ctx.beginPath(); ctx.arc(x, yy, 1, 0, 7); ctx.fill(); }
+        S.hits.forEach((h, i) => { const t = hT53(i), xi = I.X(S.v0 + i) - 4; if (t >= -.1 && t < .25) { const g = t < 0 ? (t + .1) / .1 : 1, u = t < 0 ? 0 : t / .25, yy = lerp(top + 3, surf(xi) - 2, u * u); ctx.save(); ctx.fillStyle = heat58(.9); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.ellipse(xi, yy, 2.6 * g, (2.6 + u * 1.6) * g, 0, 0, 7); ctx.fill(); ctx.restore(); }
+          if (t >= .25) once('d60' + i, () => { BS60.D.snd(i, fat45(i)); for (let q = 0; q < 8; q++) spawn({ x: xi, y: I.ly - 6, vx: (Math.random() - .5) * 70, vy: -40 - Math.random() * 40, g: 320, life: .45, size: 1 + Math.random() * .8, col: Math.random() > .4 ? '#ff9a3a' : '#ffd890' }); }); }); } } },
+};
+function r60(K) { return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? BS60[K].name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? BS60[K].desc + ' (The base only; sounds step down after two in a row. Try “Five in a row”.)' : 'One profession at a time: this round is Blacksmithing’s base. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? BS60[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', BS60[K].V); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
+Object.assign(FAM, { PA: r60('A'), PB: r60('B'), PC: r60('C'), PD: r60('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

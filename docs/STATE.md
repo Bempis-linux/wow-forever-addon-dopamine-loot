@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up gains: **all four gatherers DONE** (rounds 29-52); **Blacksmithing round 59 (round 58 anvil + falls evolved: Spark fuse, Spark shower, Falls and mound, Forge at the start) shown, waiting on the pick; echo = mainly no hammer (magma, sparks, anvil OK); the page must stay under the pane’s 512 KiB limit (old rounds go to skillup-p2-old-rounds.js)**; then the rest of the **crafters, one at a
+_Last checkpoint: 2026-11-15, skill-up gains: **all four gatherers DONE** (rounds 29-52); **Blacksmithing round 60 (Spark shower with anvil sounds; bubbling magma falls and gloops) shown, waiting on the pick; echo = mainly no hammer (magma, sparks, anvil OK); the page must stay under the pane’s 512 KiB limit (old rounds go to skillup-p2-old-rounds.js)**; then the rest of the **crafters, one at a
 time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
 2026-11-12": every round and pick, newest at the end of "2. Skill-up gains"). Older detail: git log._
 

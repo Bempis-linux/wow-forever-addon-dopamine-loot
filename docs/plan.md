@@ -1011,6 +1011,13 @@ Professions (from 1.3.0):
    stream falls from a glowing opening above onto the front; each skill-up it pours heavier and piles a glowing mound, heat
    shimmers, the mound slumps forward into the bar), **D. Forge at the start** (both: magma falls onto the anvil at the start
    and overflows into the bar; each skill-up a heavier pour, sparks off the anvil, a surge rolls down and pushes the front).
+   Round 59 → improve B and C. B's sound "too chimey for an anvil getting hit"; C's magma texture should be more bubbly,
+   with a wavy top like Fishing's water. Round 60 (rounds 58-59 options moved to the archive file): **A. Shower, anvil
+   tink** (59 B, a warm glow behind the anvil; sound: a short damped metal strike + soft thud), **B. Lingering sparks,
+   clank** (the sparks stay as hot specks that twinkle and fade over 1.5 s; sound: a lower, fuller clank), **C. Falls,
+   bubbling** (59 C in a new magma: a wavy glowing surface, bubbles rising, doming and popping; the pour mounds the surface,
+   it slumps forward, a swell runs back), **D. Gloops** (the same magma; an opening above drips now and then; each skill-up
+   a big glob drops and plops in: the surface dips and rebounds, splash, swell back, the front grows).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
