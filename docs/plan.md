@@ -1079,6 +1079,11 @@ Professions (from 1.3.0):
    **Bubbles picked: A. Film burst + the thick splat of round 65 D** (the pop also throws a thick splat). Blacksmithing base
    so far: the anvil at the start; gradient depth-band magma in the open-top bar; swamp bubbles at the head (film burst +
    splat); skill-up = Sparks into the magma. Next: finale, then sound.
+   Round 69 (finale, pitched first; "Reaching the next unlock"): **A. Eruption** (the head boils harder and heaves, then a
+   fountain of magma arcs into the icon, which fills with glowing magma), **B. The anvil’s big shower** (three quick flashes
+   + clanks, then one huge shower along the whole bar, ripples everywhere, the last sparks set the icon blazing), **C. The
+   great wave** (the magma swells into one wave rolling from the anvil to the end, crashing over the icon in droplets), **D.
+   Forged in the magma** (the icon hops into the head, the magma boils up around it, it rises out glowing and dripping).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
