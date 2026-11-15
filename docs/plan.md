@@ -786,6 +786,11 @@ Professions (from 1.3.0):
    flies up, a cut stem left; the picked part glows green), C Tied in bundles (new design: a handful drops in at the front
    and a twine wraps it; tied bundles side by side), D Plucked (the vine kept; each skill-up the herb at its tip snaps off
    in a leaf spray and the vine whips back; at the unlock the whole vine is pulled up into the icon). The gust is out.
+   Round 27 feedback: none of the picking designs liked; back to add-ons to the Vine. **Round 28** (`VAR28`, `r28`): A Vine,
+   B + The gust (back from round 26, not rejected), C + Tracking the herb (Find Herbs: a yellow tracking dot on the next
+   herb's icon brightens as you close in; each skill-up two radar rings ping out of it; at the unlock a big ping, found),
+   D + Dew run (a dew drop slides the whole vine to the tip and drips off with a plink; at the unlock a run of drops
+   splashes into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
