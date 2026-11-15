@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 74, Blacksmithing finale (ingots)</h1>
+  <h1>Skill-up: round 75, Blacksmithing finale: how the ingots form</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2865,51 +2865,45 @@ const INGOTS72 = { name: 'Ingots, shipped (clean)', finAt: 2.75, desc: 'Clean an
     if (ts >= 2.3) blaze69(ux69(I), I.ly, Math.min(1, (ts - 2.35) / .2) * Math.max(0, 1 - Math.max(0, ts - 2.7) / .4)); } };
 const crSt72 = (I, ts) => { const drop = clamp((ts - .95) / .22), dip = Math.max(0, ...[...Array(N72).keys()].map(k => { const a = ts - fly72(k) - .3; return a >= 0 && a < .18 ? Math.sin(Math.PI * a / .18) * 2 : 0; })), slide = ts > 2.3 ? eOut(clamp((ts - 2.3) / .4)) : 0; return { drop, slide, cy: I.ly - 1 - (1 - eBack(drop)) * 16 + dip, cx: ux69(I) + slide * 46 }; };
 let NOSWARM72 = false; { const s0 = swarm72, c0 = chime72; swarm72 = (...a) => NOSWARM72 ? undefined : s0(...a); chime72 = (...a) => NOSWARM72 ? undefined : c0(...a); }
-// ---------- round 74 (2026-11-15): the blade scrapped; ingot finales that differ in what the ingots DO. A = into a crate (round 73 A); B dominoes;
-// C slide together and fuse into one big ingot; D stack into a pyramid on top of the icon ----------
-// the shared start: the cut sweeps the bar into seven moulds (0..0.37), a cooling wave turns them to iron (0.4..0.9); returns false while still magma
-function form74(I, ts, k) { const [xa, xb] = seg72(I, k); if (ts >= cut72(k)) once('ct' + k, () => tone(1318 * semi(PENT42[k]), 0, .003, .12, 'sine', null, .002));
-  if (ts < .37) { if (ts >= cut72(k) && k < N72 - 1) { ctx.fillStyle = 'rgba(30,10,4,.9)'; ctx.fillRect(xb + .1, I.ly - 7, 2.2, 13); } if (k === 0) { const lx = lerp(I.x0, I.x1, clamp((ts - .05) / .3)); glow58(lx, I.ly, 8, .8); ctx.fillStyle = '#fff6d8'; ctx.fillRect(lx - .8, I.ly - 7, 1.6, 14); } return false; }
-  return clamp((ts - cool72(k)) / .3); }
-const tip74 = end => (I, ts) => ts < .37 ? null : ts < end ? I.x0 : lerp(I.x0, I.tipX, eOut(clamp((ts - end) / .5)));
-const clack74 = k => { mallet(523 * semi(PENT42[k % 7]), 0, .013); tone(1568 * semi(PENT42[(k + 2) % 7]), .005, .002, .1, 'sine', null, .002); };
-// B: dominoes: the ingots stand up on end one by one, then topple in a chain toward the end; the last falls onto the icon
-const stand74 = k => .95 + k * .06, fall74 = k => 1.55 + k * .11;
-const DOM74 = { name: 'Dominoes', finAt: 2.45, desc: 'The ingots stand up on end one by one along the bar like dominoes; then the first tips over and knocks down the next, a chain of clacks running toward the end, each a note higher, and the last one falls onto the icon, which lights.',
-  lift: () => () => 0, tip: tip74(2.45),
-  fin(I, ts) { for (let k = 0; k < N72; k++) { const cool = form74(I, ts, k); if (cool === false) continue; const [xa, xb] = seg72(I, k), cx = (xa + xb) / 2, up = eOut(clamp((ts - stand74(k)) / .18)), f = clamp((ts - fall74(k)) / .16), fe = f * f;
-      if (up <= 0) { ing72(xa, xb, I.ly + .5, cool); continue; } if (f >= 1) once('dm' + k, () => clack74(k));
-      const ang = (Math.PI / 2) * (up - fe), px = cx - 6, py = I.ly + 5; ctx.save(); ctx.translate(px, py); ctx.rotate(-ang); ing72(0, 20, -4.5, cool, .9); ctx.restore(); } },
-  after: (I, ts) => { if (ts >= fall74(N72 - 1) + .16) blaze69(ux69(I), I.ly, Math.min(1, (ts - fall74(N72 - 1) - .16) / .15) * Math.max(0, 1 - Math.max(0, ts - 2.3) / .4)); } };
-// C: the ingots slide together toward the end, clacking into a row, then fuse with a flash into one big gleaming ingot that hops into the icon
-const slide74 = k => .95 + (N72 - 1 - k) * .07;
-const FUSE74 = { name: 'Fuse into one', finAt: 2.35, desc: 'The ingots slide together toward the end of the bar, each clacking into the one ahead, until they sit in a tight row; they fuse with a flash into one big, gleaming ingot (a shine runs across it), which hops into the icon; the icon lights.',
-  lift: () => () => 0, tip: tip74(2.35),
-  fin(I, ts) { const w = (I.x1 - I.x0) / N72, gx = I.x1 - 4; if (ts < 1.55) { for (let k = 0; k < N72; k++) { const cool = form74(I, ts, k); if (cool === false) continue; const [xa, xb] = seg72(I, k), tx = gx - (N72 - k) * 9, u = eOut(clamp((ts - slide74(k)) / .22)), ox = lerp(xa, tx, u), sc = lerp(1, 9 / (xb - xa), u);
-        ing72(ox, ox + (xb - xa) * sc, I.ly + .5, cool); if (u >= 1) once('fs' + k, () => clack74(N72 - 1 - k)); } return; }
-    const f = clamp((ts - 1.55) / .15), hop = ts > 1.95 ? clamp((ts - 1.95) / .35) : 0, e = hop * hop * (3 - 2 * hop), ux = ux69(I), cx = lerp(gx - 31, ux, e), cy = lerp(I.ly - 1, I.ly - 2, e) - Math.sin(Math.PI * hop) * 12, s = 1 - e * .6;
-    if (hop >= 1) return; once('fu', () => { bell45(784, 0, .008); tone(392, 0, .012, .6, 'sine', null, .02); }); if (f < 1) glow58(gx - 31, I.ly, 26, .9 * (1 - f));
-    ing72(cx - 21.4, cx + 21.4, cy, 1, 1.45 * s); if (ts > 1.65 && ts < 1.95) { const sx = lerp(cx - 26, cx + 26, (ts - 1.65) / .3); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(sx - 4, cy - 5, 4, 2); } },
-  after: (I, ts) => { if (ts >= 2.28) blaze69(ux69(I), I.ly, Math.min(1, (ts - 2.28) / .1) * Math.max(0, 1 - (ts - 2.4) / .4)); } };
-// D: the ingots hop one by one from the end onto the top of the icon and stack into a little pyramid (4, 2, 1); a shine runs over it; the icon lights under it
-const hop74 = k => 1 + (N72 - 1 - k) * .15, PYR74 = [[-9, 0], [-3, 0], [3, 0], [9, 0], [-3, -4.4], [3, -4.4], [0, -8.8]];
-const PYRAMID74 = { name: 'Pyramid on the icon', finAt: 2.6, desc: 'One by one from the end, the ingots hop up off the bar and land on top of the icon, stacking into a neat little pyramid (four, then two, then one on top), each landing with a clack a note higher; a shine runs over the finished stack and the icon lights beneath it like a trophy.',
-  lift: () => () => 0, tip: tip74(2.6),
-  fin(I, ts) { const ux = ux69(I), base = I.ly - 15; for (let k = 0; k < N72; k++) { const cool = form74(I, ts, k); if (cool === false) continue; const [xa, xb] = seg72(I, k), j = N72 - 1 - k, u = (ts - hop74(k)) / .3;
-      if (u < 0) ing72(xa, xb, I.ly + .5, cool); else if (u < 1) { const [px, py] = PYR74[j], e = u * u * (3 - 2 * u), x = lerp((xa + xb) / 2, ux + px, e), y = lerp(I.ly + .5, base + py, e) - Math.sin(Math.PI * u) * 12, hw = lerp((xb - xa) / 2, 5.6, e); ing72(x - hw, x + hw, y, 1, lerp(1, .5, e)); }
-      else once('py' + k, () => clack74(j)); } },
-  after: (I, ts) => { const ux = ux69(I), base = I.ly - 15; for (let k = 0; k < N72; k++) { const j = N72 - 1 - k; if (ts >= hop74(k) + .3) { const [px, py] = PYR74[j]; ing72(ux + px - 5.6, ux + px + 5.6, base + py, 1, .5); } }
-    if (ts > 2.1 && ts < 2.45) { const sx = lerp(ux - 14, ux + 14, (ts - 2.1) / .35); ctx.save(); ctx.beginPath(); ctx.rect(ux - 13, base - 12, 26, 15); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(sx - 3, base - 12, 3, 15); ctx.restore(); }
-    if (ts >= 2.4) blaze69(ux, I.ly, Math.min(1, (ts - 2.4) / .15) * Math.max(0, 1 - Math.max(0, ts - 2.7) / .5)); } };
-const FIN74 = { A: Object.assign({}, INGOTS72, { name: 'Into a crate' }), B: DOM74, C: FUSE74, D: PYRAMID74 };
-function r74(K) { const F = FIN74[K], V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+// ---------- round 75 (2026-11-15): four ways the INGOTS ARE CREATED (the rest as round 72 E: crate, fly in, lid, glide off). A = the cut + cooling wave ----------
+// each formation runs 0..1.15 s; from 1.15 the shared exit (INGOTS72.fin) takes over with the seven cooled ingots in their places
+const hotGrad75 = (y0, y1) => { const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#ffe08a'); g.addColorStop(.45, '#ff8424'); g.addColorStop(1, '#b8300a'); return g; };
+const segCx75 = (I, k) => { const [xa, xb] = seg72(I, k); return (xa + xb) / 2; };
+// B: the magma beads up: it pulls apart into seven wobbling blobs (necks thinning and snapping), each firms up into an ingot, then cools to iron
+function bead75(I, ts) { const w = (I.x1 - I.x0) / N72;
+  for (let k = 0; k < N72; k++) { const [xa, xb] = seg72(I, k), cx = (xa + xb) / 2, iw = xb - xa, u = clamp(ts / .45), firm = clamp((ts - .5) / .25), cool = clamp((ts - .78 - k * .04) / .3);
+    if (firm < 1) { const bw = lerp(w + 1, iw * .9, eOut(u)), wob = 1 + .18 * Math.sin(ts * 26 + k) * Math.exp(-ts * 4) * u, bh = 11 * wob, r = lerp(1, 5, u); ctx.save(); ctx.globalAlpha *= 1 - firm; ctx.fillStyle = hotGrad75(I.ly - bh / 2, I.ly + bh / 2); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.roundRect(cx - bw / 2 / wob, I.ly + 6 - bh, bw / wob, bh, r); ctx.fill(); ctx.restore();
+      if (u < 1 && k < N72 - 1) { const nx = xb + .6, nh = 10 * (1 - eOut(u)); if (nh > .5) { ctx.fillStyle = '#ff9a34'; ctx.fillRect(nx - 1.5, I.ly + .5 - nh / 2, 3, nh); } } }
+    if (firm > 0) ing72(xa, xb, I.ly + .5, cool, lerp(.85, 1, firm)); if (u >= 1) once('bd' + k, () => tone(1318 * semi(PENT42[k]), 0, .003, .12, 'sine', null, .002)); } }
+// C: crust and shrink: the whole bar skins over dark, splits along seven seams (glowing cracks), then each piece shrinks as it cools, pulling into ingot shape, the glow in the gaps fading
+function crack75(I, ts, sf) { const order = [3, 1, 5, 0, 6, 2, 4], crust = clamp(ts / .3);
+  if (ts < .62) { ctx.save(); ctx.globalAlpha *= crust * .95; ctx.fillStyle = '#3a1a10'; ctx.beginPath(); ctx.moveTo(I.x0 - 2, I.ly + 6); for (let x = I.x0 - 2; x <= I.x1; x += 2) ctx.lineTo(x, sf(x) - .5); ctx.lineTo(I.x1, I.ly + 6); ctx.closePath(); ctx.fill(); ctx.restore();
+    order.forEach((k, n) => { if (k === N72 - 1) return; const t0 = .3 + n * .045; if (ts < t0) return; once('ck' + k, () => mallet(220 * semi(PENT42[n]), 0, .01)); const [, xb] = seg72(I, k), x = xb + 1.2; ctx.save(); ctx.strokeStyle = '#ffd070'; ctx.lineWidth = 1.3; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(x, sf(x)); ctx.quadraticCurveTo(x + 1.5, I.ly, x - .5, I.ly + 6); ctx.stroke(); ctx.restore(); }); return; }
+  const sh = eOut(clamp((ts - .62) / .3)), gap = 1 - clamp((ts - .8) / .3); for (let k = 0; k < N72; k++) { const [xa, xb] = seg72(I, k), w = (I.x1 - I.x0) / N72, cx = (xa + xb) / 2, hw = lerp(w / 2 + .3, (xb - xa) / 2, sh);
+    if (gap > 0 && k < N72 - 1) glow58(xb + 1.2, I.ly, 5, .6 * gap); ing72(cx - hw, cx + hw, I.ly + .5, lerp(.55, 1, clamp((ts - .7) / .4)), lerp(1.2, 1, sh)); } }
+// D: rise from the depths: one by one, glowing ingots rise up out of the magma while its level sinks, magma sliding off them, until they sit in the empty channel and cool
+const riseOrder75 = [2, 5, 0, 4, 6, 1, 3];
+function rise75(I, ts, sf) { for (let n = 0; n < N72; n++) { const k = riseOrder75[n], t0 = .05 + n * .1, u = eOut(clamp((ts - t0) / .35)); if (u <= 0) continue; const [xa, xb] = seg72(I, k), cx = (xa + xb) / 2, y = lerp(I.ly + 12, I.ly + .5, u), cool = clamp((ts - t0 - .4) / .35);
+    ctx.save(); if (ts < 1) { ctx.beginPath(); ctx.moveTo(xa - 2, I.ly - 30); ctx.lineTo(xa - 2, sf(xa)); for (let x = xa; x <= xb + 2; x += 2) ctx.lineTo(x, sf(x)); ctx.lineTo(xb + 2, I.ly - 30); ctx.closePath(); ctx.clip(); } ing72(xa, xb, y, cool); ctx.restore();
+    if (u > .1 && u < 1) once('rd' + k + '_' + Math.floor(ts / .07), () => spawn({ x: lerp(xa + 3, xb - 3, Math.random()), y: y + 2, vy: 6, g: 220, life: .3, size: 1, col: '#ff9a3a' })); if (u >= 1) once('rs' + k, () => tone(1046 * semi(PENT42[n]), 0, .003, .15, 'sine', null, .002)); } }
+const FORM75 = {
+  A: { name: 'Cut and cool', desc: 'As round 72 E: a bright cut sweeps along the bar and splits it into seven moulds, then a cooling wave runs along them, each turning from glowing orange to iron.' },
+  B: { name: 'Beading up', desc: 'The magma pulls itself apart: necks thin and snap between seven wobbling blobs (like molten metal beading), each blob firms up into an ingot shape, then cools to iron.', draw: bead75, tip: (I, ts) => ts < 1.4 ? I.x0 : null },
+  C: { name: 'Crust and shrink', desc: 'The whole bar skins over dark; seams crack open in it one after another, glowing; then each piece shrinks as it cools, pulling into an ingot’s shape, the glow in the gaps between them fading out.', draw: crack75, tip: (I, ts) => ts < .62 ? null : ts < 1.4 ? I.x0 : null },
+  D: { name: 'Rise from the depths', desc: 'One by one, in no set order, glowing ingots rise up out of the magma, magma sliding off them in drips, while its level sinks; by the time the last one is up the channel is empty, and they cool to iron where they sit.', draw: rise75, lift: (I, ts) => { const d = 9 * eOut(clamp(ts / 1)); return x => -d; }, tip: (I, ts) => ts < 1 ? null : ts < 1.4 ? I.x0 : null },
+};
+function fin75(K) { const M = FORM75[K]; if (K === 'A') return Object.assign({}, INGOTS72, { name: M.name, desc: M.desc });
+  return Object.assign({}, INGOTS72, { name: M.name, desc: M.desc, lift: M.lift || INGOTS72.lift,
+    tip: (I, ts) => { const t = M.tip(I, ts); return t !== null ? t : ts >= 1.4 ? INGOTS72.tip(I, ts) : null; },
+    fin(I, ts, sf) { for (let k = 0; k < N72; k++) once('ct' + k, () => {}); if (ts < 1.15) { M.draw(I, ts, sf); return; } INGOTS72.fin(I, ts, sf); } }); }
+function r75(K) { const F = fin75(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
   return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-  get desc() { return profName === 'Blacksmithing' ? 'Blacksmithing as picked. Reaching the next unlock: the magma hardens into ingots (a bright cut into seven moulds, a cooling wave to iron), then: ' + F.desc + ' (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
-  get note() { return profName === 'Blacksmithing' ? 'finale: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  get desc() { return profName === 'Blacksmithing' ? 'Reaching the next unlock: how the ingots are made. ' + F.desc + ' Then the same ending for all four: a crate drops in, the ingots fly in and stack, a lid, the crate glides off, the icon lights. (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'ingots: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
-Object.assign(FAM, { PA: r74('A'), PB: r74('B'), PC: r74('C'), PD: r74('D') });
+Object.assign(FAM, { PA: r75('A'), PB: r75('B'), PC: r75('C'), PD: r75('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

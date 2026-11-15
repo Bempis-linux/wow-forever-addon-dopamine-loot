@@ -1118,6 +1118,11 @@ Professions (from 1.3.0):
    **C. Fuse into one** (they slide together into a tight row, clacking, and fuse with a flash into one big gleaming ingot
    that hops into the icon), **D. Pyramid on the icon** (they hop one by one onto the top of the icon and stack 4-2-1, a
    shine runs over it, the icon lights under it like a trophy).
+   Round 74 → the user expected **different animations of the ingots being CREATED**. Round 75 (the ending shared: round 72
+   E’s crate): **A. Cut and cool** (the bright cut, the cooling wave), **B. Beading up** (the magma pulls apart, necks thin
+   and snap between seven wobbling blobs, each firms into an ingot, then cools), **C. Crust and shrink** (the bar skins over
+   dark, seams crack open glowing, each piece shrinks as it cools into an ingot, the gap glow fading), **D. Rise from the
+   depths** (glowing ingots rise one by one out of the magma in no set order, dripping, while its level sinks to empty).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
