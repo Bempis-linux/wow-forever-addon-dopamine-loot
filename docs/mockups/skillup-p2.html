@@ -2864,35 +2864,35 @@ function r67(K) { const A = ACT67[K]; return { get name() { return K + '. ' + (p
 Object.assign(FAM, { PA: r67('A'), PB: r67('B'), PC: r67('C'), PD: r67('D') });
 // ---------- round 68 (2026-11-15): round 67 D (Sparks into the magma) LOCKED as the skill-up; the head's bubbles reworked to feel like swamp bubbles popping, four ways ----------
 // A bubble at the head: a glossy film dome swells slowly, then pops; the surface dimples where it was and rings of ripples run out.
-const HB68 = { n: 4, per: 2.4, spread: 1.8, seed: 1700, rise: .78 };
+const HB68 = { n: 5, per: 2.2, spread: 1.6, seed: 1700, rise: .78 };
 const hbX68 = (I, k, c) => I.tipX - 5 - rnd53(k * 11 + c * 5 + 1702) * 24;
 // pops of the last 1.4 s: { x, age, k, c, s (size 0.7..1.2) }
 function pops68(I) { const out = [], t = S.age; for (let k = 0; k < HB68.n; k++) { const s = slot65(k, HB68.per, HB68.spread, HB68.seed, t); for (let j = 0; j < 2; j++) { const age = (s.ph - HB68.rise) * s.per + j * s.per, c = s.c - j; if (age >= 0 && age < 1.4) out.push({ x: hbX68(I, k, c), age, k, c, s: .7 + rnd53(k + c * 3 + 1703) * .5 }); } } return out; }
 const cluster68 = p => [[.2, -4, .45], [.34, 5, .35], [.47, -7, .3]].map(([d, dx, s]) => ({ x: p.x + dx * p.s, age: p.age - d, s }));
 // the surface's response: a dimple where the film was, a soft ring of ripples; D also bounces back up
 function lift68(I, mode) { const P = pops68(I).flatMap(p => mode === 'C' ? [p, ...cluster68(p).filter(q => q.age >= 0)] : [p]);
-  return x => { let l = 0; for (const p of P) { const dx = x - p.x, d = Math.abs(dx) - p.age * 26; l -= 2.2 * p.s * Math.exp(-p.age * 7) * Math.exp(-dx * dx / 9);
+  return x => { let l = 0; for (const p of P) { const dx = x - p.x, d = Math.abs(dx) - p.age * 26; l -= 3.2 * p.s * Math.exp(-p.age * 7) * Math.exp(-dx * dx / 9);
       if (mode === 'D' && p.age > .08) l += 1.6 * p.s * Math.sin(Math.min(1, (p.age - .08) / .3) * Math.PI) * Math.exp(-(p.age - .08) * 3) * Math.exp(-dx * dx / 12);
-      l += .8 * p.s * Math.exp(-p.age * 2.6) * Math.cos(d * .7) * Math.exp(-d * d / 30); } return l; }; }
+      l += 1.2 * p.s * Math.exp(-p.age * 2.6) * Math.cos(d * .7) * Math.exp(-d * d / 30); } return l; }; }
 // the dome: a thin glossy film, see-through at the middle, a bright rim and a highlight
-function dome68(x, y, r, stretch = 0) { ctx.save(); const h = r * (1 + stretch * .7), g = ctx.createRadialGradient(x - r * .3, y - h * .55, 0, x, y, r * 1.1); g.addColorStop(0, 'rgba(255,250,225,.9)'); g.addColorStop(.35, 'rgba(255,200,110,.45)'); g.addColorStop(.85, 'rgba(255,170,80,.55)'); g.addColorStop(1, 'rgba(255,230,170,.9)');
+function dome68(x, y, r, stretch = 0) { ctx.save(); const h = r * (1 + stretch * .7), g = ctx.createRadialGradient(x - r * .3, y - h * .55, 0, x, y, r * 1.1); g.addColorStop(0, 'rgba(255,250,225,.9)'); g.addColorStop(.35, 'rgba(255,200,110,.7)'); g.addColorStop(.85, 'rgba(255,170,80,.8)'); g.addColorStop(1, 'rgba(255,236,180,1)');
   ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - r, y + .4); ctx.bezierCurveTo(x - r, y - h * 1.1, x + r, y - h * 1.1, x + r, y + .4); ctx.closePath(); ctx.fill();
   if (stretch > 0) { ctx.fillStyle = 'rgba(255,214,140,.85)'; ctx.beginPath(); ctx.ellipse(x, y - h * .85, r * .28, r * .35 * (1 + stretch), 0, 0, 7); ctx.fill(); }
   ctx.fillStyle = 'rgba(255,255,240,.95)'; ctx.beginPath(); ctx.ellipse(x - r * .38, y - h * .55, r * .2, r * .13, -.6, 0, 7); ctx.fill(); ctx.restore(); }
 const drops68 = (x, y, n, up = 22) => { for (let q = 0; q < n; q++) spawn({ x, y: y - 1, vx: (Math.random() - .5) * 22, vy: -up - Math.random() * 12, g: 220, life: .35, size: .8 + Math.random() * .4, col: Math.random() > .5 ? '#ffb050' : '#ffe0a0' }); };
 const POP68 = {
   A: { name: 'Film burst', desc: 'The film tears: the dome vanishes into a thin bright ring that flicks out flat across the surface, a small dimple where it stood, two or three tiny droplets, a soft ring of ripples.',
-    pop: (p, y) => drops68(p.x, y, 3), draw: (p, y) => { if (p.age < .22) { const u = p.age / .22; ctx.save(); ctx.strokeStyle = `rgba(255,240,200,${.9 * (1 - u)})`; ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(p.x, y + .3, 2.5 * p.s + u * 9, (2.5 * p.s + u * 9) * .28, 0, 0, 7); ctx.stroke(); ctx.restore(); } } },
+    pop: (p, y) => drops68(p.x, y, 3), draw: (p, y) => { if (p.age < .22) { const u = p.age / .22; ctx.save(); ctx.strokeStyle = `rgba(255,240,200,${.9 * (1 - u)})`; ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(p.x, y + .3, 4 * p.s + u * 12, (4 * p.s + u * 12) * .28, 0, 0, 7); ctx.stroke(); ctx.restore(); } } },
   B: { name: 'Gas puff', desc: 'Swamp gas: when the dome pops it lets out a little puff of smoky gas that curls up off the surface and fades (warm underneath, grey-brown on top), a dimple, soft ripples; no droplets.',
-    pop: () => {}, draw: (p, y) => { if (p.age >= 1.3) return; for (let q = 0; q < 3; q++) { const a = Math.max(0, p.age - q * .08), u = a / 1.3, px = p.x + Math.sin(a * 4 + q * 2) * (1.5 + a * 3), py = y - 2 - a * 13 - q * 1.5, r = (2 + a * 4.5) * p.s;
+    pop: () => {}, draw: (p, y) => { if (p.age >= 1.3) return; for (let q = 0; q < 3; q++) { const a = Math.max(0, p.age - q * .08), u = a / 1.3, px = p.x + Math.sin(a * 4 + q * 2) * (1.5 + a * 3), py = y - 2 - a * 13 - q * 1.5, r = (3 + a * 6) * p.s;
       const g = ctx.createRadialGradient(px, py + r * .3, 0, px, py, r); g.addColorStop(0, `rgba(255,170,90,${.3 * (1 - u)})`); g.addColorStop(.5, `rgba(130,105,90,${.28 * (1 - u)})`); g.addColorStop(1, 'rgba(110,95,85,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r, 0, 7); ctx.fill(); } } },
   C: { name: 'Blub-blub cluster', desc: 'Like a bog: one bubble pops, then a few smaller ones follow right beside it, blub-blub-blub, each smaller, their dimples and ripples overlapping.',
-    pop: (p, y) => drops68(p.x, y, 2, 18), draw: (p, y, sf) => { for (const q of cluster68(p)) { if (q.age < 0 && q.age > -.12) { dome68(q.x, sf(q.x), (1 + (q.age + .12) / .12 * 2) * q.s * 1.6); } else if (q.age >= 0) once('c68' + p.k + '_' + p.c + '_' + q.s, () => drops68(q.x, sf(q.x), 1, 14)); } } },
+    pop: (p, y) => drops68(p.x, y, 2, 18), draw: (p, y, sf) => { for (const q of cluster68(p)) { if (q.age < 0 && q.age > -.12) { dome68(q.x, sf(q.x), (1.4 + (q.age + .12) / .12 * 3) * q.s * 1.6); } else if (q.age >= 0) once('c68' + p.k + '_' + p.c + '_' + q.s, () => drops68(q.x, sf(q.x), 1, 14)); } } },
   D: { name: 'Thick blorp', desc: 'Thick and slow: just before it pops, the dome stretches up into a little peak; it bursts with one fat droplet thrown up that falls back with a tiny plip, and the surface dips, then bounces back up past level before it settles.',
     stretch: true, pop: (p, y) => spawn({ x: p.x, y: y - 3, vx: (Math.random() - .5) * 8, vy: -42, g: 260, life: .32, size: 1.5, col: '#ffc060' }), draw: (p, y) => { if (p.age > .3 && p.age < .45) { const u = (p.age - .3) / .15; ctx.save(); ctx.strokeStyle = `rgba(255,236,190,${.8 * (1 - u)})`; ctx.lineWidth = .8; ctx.beginPath(); ctx.ellipse(p.x, y + .3, 1 + u * 4, (1 + u * 4) * .3, 0, 0, 7); ctx.stroke(); ctx.restore(); } } },
 };
 function bubbles68(I, sf, M) { for (let k = 0; k < HB68.n; k++) { const { c, ph } = slot65(k, HB68.per, HB68.spread, HB68.seed, S.age), x = hbX68(I, k, c), s = .7 + rnd53(k + c * 3 + 1703) * .5; if (x < I.x0 + 4) continue;
-    if (ph < HB68.rise) { const u = ph / HB68.rise, r = (1 + eOut(u) * 3) * s, st = M.stretch && u > .82 ? (u - .82) / .18 : 0; dome68(x, sf(x), r, st); } }
+    if (ph < HB68.rise) { const u = ph / HB68.rise, r = (1.6 + eOut(u) * 4.4) * s, st = M.stretch && u > .82 ? (u - .82) / .18 : 0; dome68(x, sf(x), r, st); } }
   for (const p of pops68(I)) { const y = sf(p.x); once('p68' + p.k + '_' + p.c, () => M.pop(p, y)); M.draw(p, y, sf); } }
 function r68(K) { const M = POP68[K], A = ACT67.D; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? M.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
   get desc() { return profName === 'Blacksmithing' ? 'Round 67 D as picked (the anvil’s sparks shower into the magma, each landing with a tiny ring of ripples). The bubbles at the head, swamp-style: a thin glossy film swells slowly into a dome, then pops. ' + M.desc + ' (The bubbles are silent; the skill-up has the clank.)' : 'One profession at a time: this round is Blacksmithing. Others show their current look.'; },
