@@ -581,3 +581,73 @@ function r65(K) { const L = LOOK65[K]; return { get name() { return K + '. ' + (
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
     try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => { MAGLIFT = L.lift ? L.lift(I) : null; mag62(L.key, I, t); }, over: (p, I) => { onHits('m65', i => lsnd61(i, fat45(i))); if (L.over) L.over(I); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
 Object.assign(FAM, { PA: r65('A'), PB: r65('B'), PC: r65('C'), PD: r65('D') });
+
+// Round 61 spark options (SP61, BS61, r61) and round 66 parts, moved out 2026-11-15; sparks61, bandsGrad66, ripple66, splat66 stay.
+const SP61 = (name, desc, extra) => ({ name, desc, V: { grow(p, x0, y, L, f, t, I) { iron59(x0, I.X(S.v0 + land53(.42)), y); },
+  over(p, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); extra.anvil ? extra.anvil(I, ft) : anvil60(I, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); onHits('s61' + name, i => anvClank60(i, fat45(i)));
+    S.hits.forEach((h, i) => { const t = hT53(i); extra.each(I, i, t); if (t >= .42 && t < .8) glow58(I.X(S.v0 + i + 1), I.ly, 12, .7 * (1 - (t - .42) / .38)); }); if (extra.after) extra.after(I); } } });
+// the run's heat: each skill-up adds, it fades over a few seconds
+const runHeat61 = () => Math.min(1.4, S.hits.reduce((s, h) => { const a = S.age - h - HIT; return a >= 0 ? s + .35 * Math.exp(-a / 3) : s; }, 0));
+const BS61 = {
+  A: SP61('Lingering sparks', 'Round 60 B as picked: the anvil flings a shower of sparks along the bar; they stay where they land as hot specks that twinkle and fade over a second and a half; the clank.', { each: (I, i, t) => sparks61(I, i, t, 16) }),
+  B: SP61('Chain flare', 'Add-on: once the sparks have landed, a flare runs along the bar from speck to speck like a chain reaction; each one flashes as it passes, and at the front it bursts in a fan of sparks.', {
+    each: (I, i, t) => { sparks61(I, i, t, 16, { flare: true }); if (t >= .62 && t < 1) { const rx = lerp(I.x0, I.X(S.v0 + i + 1), (t - .62) / .38), g = ctx.createLinearGradient(rx - 22, 0, rx, 0); g.addColorStop(0, 'rgba(255,200,120,0)'); g.addColorStop(1, 'rgba(255,240,200,.8)'); ctx.fillStyle = g; ctx.fillRect(Math.max(I.x0, rx - 22), I.ly - 5.5, Math.min(22, rx - I.x0), 1.6); }
+      if (t >= 1) once('b61' + i, () => { const tx = I.X(S.v0 + i + 1); [0, 1].forEach(q => bell45(784 * semi(pick45(i, 2) + q * 7), q * .03, .0035 * fat45(i))); for (let q = 0; q < 12; q++) { const an = -Math.PI / 2 + (q / 11 - .5) * 2.4; spawn({ x: tx, y: I.ly - 3, vx: Math.cos(an) * (40 + Math.random() * 50), vy: Math.sin(an) * (40 + Math.random() * 50), g: 260, life: .5, size: 1, col: q % 3 ? '#ffb040' : '#fff0c0' }); } });
+      if (t >= 1 && t < 1.4) glow58(I.X(S.v0 + i + 1), I.ly, 14, .8 * (1 - (t - 1) / .4)); } }),
+  C: SP61('Ember pile', 'Add-on: the sparks land and roll along the top of the bar to the front, where they gather into a small glowing pile of embers sitting on the front; every skill-up adds to it (a run of five builds a heap), and it rides along as the bar grows.', {
+    each: (I, i, t) => sparks61(I, i, t, 16, { roll: true }),
+    after: I => { const n = Math.min(14, S.hits.filter(h => S.age >= h + HIT + .7).length * 3 + 2), tx = I.X(S.v0 + land53(.42)); if (tx <= I.x0 + 3) return;
+      for (let q = 0; q < n; q++) { const row = q < 5 ? 0 : q < 9 ? 1 : q < 12 ? 2 : 3, inRow = [5, 4, 3, 2][row], j = q - [0, 5, 9, 12][row], x = tx - 6 + (j - (inRow - 1) / 2) * 2.4, y = I.ly - 7 - row * 2, tw = .55 + .45 * Math.sin(S.age * 5 + q * 1.7);
+        ctx.save(); ctx.fillStyle = mix('#c83a12', '#ffe0a0', tw); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 4; ctx.beginPath(); ctx.arc(x, y, 1.3, 0, 7); ctx.fill(); ctx.restore(); }
+      glow58(tx - 6, I.ly - 8, 7 + n * .5, .25 + .03 * n); } }),
+  D: SP61('The anvil heats up', 'Add-on: the anvil’s face heats with every skill-up and cools between runs: in a run of five it glows hotter each time, throws bigger, higher showers, and its clank rings a little brighter; one skill-up on its own stays modest.', {
+    anvil: (I, ft) => { const H = runHeat61(), ax = I.x0 - 26; glow58(ax + 2, I.ly - 4, 14 + H * 10, .2 + H * .35); anvil58(ax, I.ly, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); if (H > .05) { ctx.save(); ctx.fillStyle = heat58(Math.min(1, .45 + H * .4)); ctx.globalAlpha *= Math.min(1, H * 1.2); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6 * H; ctx.fillRect(ax - 4, I.ly - 7.6, 17, 2.2); ctx.restore(); } },
+    each: (I, i, t) => { const H = Math.min(1.4, S.hits.slice(0, i + 1).reduce((s, h) => s + .35 * Math.exp(-(S.hits[i] - h) / 3), 0)); sparks61(I, i, t, Math.round(10 + H * 12), { hs: .8 + H * .5 }); } }),
+};
+function r61(K) { const D = BS61[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? D.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? D.desc + (BS61[K] ? ' (1-4: the sparks; sound: the clank, varied, stepping down.)' : ' (5-8: the magma; placeholder sound.)') + ' Try “Five in a row”.' : 'One profession at a time: this round is Blacksmithing’s base. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? D.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K > 'D' ? 'A' : K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', D.V); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
+Object.assign(FAM, { PA: r61('A'), PB: r61('B'), PC: r61('C'), PD: r61('D') });
+// the small boiling bubbles (round 65 C): domes crowding at the hot spot; pops: a thick splat (D) and a small ring of ripples
+const SMALL66 = { n: 11, per: .55, spread: .5, seed: 1000, rise: .7 };
+const BIG66 = { per: 3.4, spread: 1.2, seed: 1300, rise: .6 };
+const smallX66 = (I, k, c) => clamp(BOIL65(I.x0 - 2, I.tipX, S.age) + (rnd53(k * 11 + c * 5 + 1002) - .5) * 30, I.x0 + 4, I.tipX - 4);
+const bigX66 = (I, c) => clamp(BOIL65(I.x0 - 2, I.tipX, S.age) + (rnd53(c * 3 + 1302) - .5) * 14, I.x0 + 8, I.tipX - 8);
+// the pops of the last ~1.2 s: [x, age, size]
+function pops66(I, big, small) { const out = [], t = S.age;
+  if (small) for (let k = 0; k < SMALL66.n; k++) { const s = slot65(k, SMALL66.per, SMALL66.spread, SMALL66.seed, t); for (let j = 0; j < 3; j++) { const age = (s.ph - SMALL66.rise) * s.per + j * s.per; if (age >= 0 && age < 1.2) out.push([smallX66(I, k, s.c - j), age, .45]); } }
+  if (big) { const s = slot65(0, BIG66.per, BIG66.spread, BIG66.seed, t); for (let j = 0; j < 2; j++) { const age = (s.ph - BIG66.rise) * s.per + j * s.per; if (age >= 0 && age < 1.6) out.push([bigX66(I, s.c - j), age, 1.6]); } }
+  return out; }
+function small66(I, sf) { const t = S.age; for (let k = 0; k < SMALL66.n; k++) { const { c, ph } = slot65(k, SMALL66.per, SMALL66.spread, SMALL66.seed, t), x = smallX66(I, k, c), y = sf(x);
+    if (ph < SMALL66.rise) { const u = ph / SMALL66.rise, r = .6 + u * 1.9; ctx.fillStyle = 'rgba(255,214,120,.95)'; ctx.beginPath(); ctx.arc(x, y + .3, r, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(255,255,235,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .4, Math.max(.3, r * .25), 0, 7); ctx.fill(); }
+    else once('s66' + k + '_' + c, () => splat66(x, y, 2, false)); } }
+// the big bubble's rise, three ways; then its pop: a bigger splat and a stronger ring of ripples
+const RISE66 = {
+  // a glossy round bubble that inflates smoothly out of the surface, wobbling a little
+  sphere(x, y, u, t) { const r = 1 + 5 * eOut(u), w = 1 + .06 * Math.sin(t * 18) * u, cy = y + r * .25; ctx.save(); const g = ctx.createRadialGradient(x - r * .35, cy - r * .5, 0, x, cy, r); g.addColorStop(0, 'rgba(255,250,225,.95)'); g.addColorStop(.45, 'rgba(255,196,96,.92)'); g.addColorStop(1, 'rgba(226,96,26,.95)'); ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(x, cy, r * w, r / w, 0, Math.PI, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,240,.9)'; ctx.beginPath(); ctx.ellipse(x - r * .38, cy - r * .55, r * .22, r * .14, -.5, 0, 7); ctx.fill(); ctx.restore(); },
+  // the surface itself heaves up into a smooth mound (drawn by the lift), a stretched bright skin on top
+  heave: null,
+};
+const heaveLift66 = I => { const s = slot65(0, BIG66.per, BIG66.spread, BIG66.seed, S.age); if (s.ph >= BIG66.rise) return () => 0; const u = s.ph / BIG66.rise, x0 = bigX66(I, s.c), h = 6 * (u < .85 ? Math.sin(Math.PI / 2 * u / .85) : 1) * (1 + .05 * Math.sin(S.age * 20) * u), w = 4 + u * 3; return x => h * Math.exp(-Math.pow((x - x0) / w, 2)); };
+function big66(I, sf, mode) { const s = slot65(0, BIG66.per, BIG66.spread, BIG66.seed, S.age), x = bigX66(I, s.c), y = sf(x);
+  if (s.ph < BIG66.rise) { const u = s.ph / BIG66.rise; if (mode === 'sphere') RISE66.sphere(x, y, u, S.age); else { ctx.save(); ctx.strokeStyle = `rgba(255,252,230,${.4 + u * .5})`; ctx.lineWidth = 1.2; ctx.shadowColor = '#ffd070'; ctx.shadowBlur = 4 + u * 4; ctx.beginPath(); for (let xx = x - 5; xx <= x + 5; xx += 1) ctx.lineTo(xx, sf(xx) + .4); ctx.stroke(); ctx.restore(); } }
+  else { const age = (s.ph - BIG66.rise) * s.per; if (age < .15) glow58(x, y - 2, 5 + age * 50, .8 * (1 - age / .15)); once('b66' + s.c, () => splat66(x, y, 6, true)); } }
+const MIX66 = {
+  A: { name: 'Boil, every pop a splat', desc: 'The hot spot boils with round 65 C’s small bubbles, and every one pops round 65 D’s way: a thick little splat and a small ring of ripples running out along the surface, so the patch churns.', small: true, big: null },
+  B: { name: '+ a big bubble: round', desc: 'The small boiling bubbles (each a tiny splat, small ripples), and every few seconds one big bubble in the patch: a glossy round bubble inflates smoothly out of the surface, wobbling a little, then bursts with D’s bigger splat and a strong ring of ripples both ways.', small: true, big: 'sphere' },
+  C: { name: '+ a big heave', desc: 'The small boiling bubbles, and every few seconds the surface itself heaves up into a smooth mound in the patch (no separate bubble), a stretched bright skin on top; it bursts with the big splat and a strong ring of ripples.', small: true, big: 'heave' },
+  D: { name: 'Heave + heat plume', desc: 'As C, and the depth bands bow upward over the hot spot, so you see the heat rising from below into the boil (the bright layers thicken and climb there, the deep red pushed up).', small: true, big: 'heave', plume: true },
+};
+function r66(K) { const M = MIX66[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? M.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'The magma’s look only (animations come after): Depth bands with soft gradient edges (the layers blend into each other), in the open-top bar. ' + M.desc + ' (A skill-up just eases the fill on with a small swell; placeholder sound.)' : 'One profession at a time: this round is Blacksmithing’s magma look. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'magma: ' + M.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
+    TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, M.plume ? (x => Math.exp(-Math.pow((x - BOIL65(xa, xb, t)) / 16, 2))) : null);
+    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => { if (I.tipX > I.x0 + 20) { const R = ripple66(pops66(I, !!M.big, M.small)), H = M.big === 'heave' ? heaveLift66(I) : () => 0; MAGLIFT = x => R(x) + H(x); } mag62('G66', I, t); },
+      over: (p, I) => { onHits('m66', i => lsnd61(i, fat45(i))); if (!I.surf || I.tipX <= I.x0 + 20) return; small66(I, I.surf); if (M.big) big66(I, I.surf, M.big); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
+Object.assign(FAM, { PA: r66('A'), PB: r66('B'), PC: r66('C'), PD: r66('D') });

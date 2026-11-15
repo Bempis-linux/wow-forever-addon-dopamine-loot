@@ -1060,6 +1060,14 @@ Professions (from 1.3.0):
    bubble: round** (every few seconds a glossy round bubble inflates smoothly, wobbles, bursts: bigger splat, strong
    ripples), **C. + a big heave** (the surface itself heaves into a smooth mound with a bright stretched skin, bursts), **D.
    Heave + heat plume** (C, and the bands bow upward over the hot spot).
+   Round 66 → the user expected **just slower bubbles that pop and splat, concentrated at the head** (no wandering patch, no
+   big bubble). And **mix the anvil with this magma**: each skill-up the anvil sparks and shoots magma into the bar, or a
+   big wave rolls toward the left. Round 67 (all: the anvil at the start, gradient depth bands, slow bubbles only at the
+   head popping with a splat + ripples; the anvil's clank): **A. The anvil throws magma** (sparks, a glob skims along the
+   bar onto the head: big splat, ripples, the head moves on), **B. Big wave to the left** (the head heaves, a big wave rolls
+   back to the anvil and crashes in sparks), **C. Throw, then the wave back** (A then B), **D. Sparks into the magma** (the
+   Lingering sparks shower lands on the magma, each spark a tiny ring of ripples). Gotcha: anything arcing more than ~5 px
+   above the bar passes behind the header text.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

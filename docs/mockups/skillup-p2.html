@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 66, Blacksmithing: boiling + gloop pops</h1>
+  <h1>Skill-up: round 67, Blacksmithing: the anvil + the magma</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2786,36 +2786,9 @@ function sparks61(I, i, t, n, opt = {}) { const ax = I.x0 - 26;
     if (opt.flare) { const rx = lerp(I.x0, I.X(S.v0 + i + 1), clamp((t - .62) / .38)); if (t >= .62 && Math.abs(x - rx) < 7) big = 1 - Math.abs(x - rx) / 7; if (t > 1.02) a = Math.min(a, .25 * (1 - (t - 1.02) / .5)); }
     if (a <= 0) continue; const tw = .6 + .4 * Math.sin(age * 14 + q * 2); ctx.save(); ctx.fillStyle = mix('#ff6a20', '#fff0c0', Math.min(1, a * tw + big)); ctx.globalAlpha *= Math.min(1, a + big); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 5 + big * 6; ctx.beginPath(); ctx.arc(x, y, (last ? 1.6 : 1.1) + big * 1.4, 0, 7); ctx.fill(); ctx.restore();
     if (age < .2) glint59(x, I.ly - 4, 1 - age / .2, last ? 5 : 2.5); } }
-const SP61 = (name, desc, extra) => ({ name, desc, V: { grow(p, x0, y, L, f, t, I) { iron59(x0, I.X(S.v0 + land53(.42)), y); },
-  over(p, I) { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); extra.anvil ? extra.anvil(I, ft) : anvil60(I, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); onHits('s61' + name, i => anvClank60(i, fat45(i)));
-    S.hits.forEach((h, i) => { const t = hT53(i); extra.each(I, i, t); if (t >= .42 && t < .8) glow58(I.X(S.v0 + i + 1), I.ly, 12, .7 * (1 - (t - .42) / .38)); }); if (extra.after) extra.after(I); } } });
-// the run's heat: each skill-up adds, it fades over a few seconds
-const runHeat61 = () => Math.min(1.4, S.hits.reduce((s, h) => { const a = S.age - h - HIT; return a >= 0 ? s + .35 * Math.exp(-a / 3) : s; }, 0));
-const BS61 = {
-  A: SP61('Lingering sparks', 'Round 60 B as picked: the anvil flings a shower of sparks along the bar; they stay where they land as hot specks that twinkle and fade over a second and a half; the clank.', { each: (I, i, t) => sparks61(I, i, t, 16) }),
-  B: SP61('Chain flare', 'Add-on: once the sparks have landed, a flare runs along the bar from speck to speck like a chain reaction; each one flashes as it passes, and at the front it bursts in a fan of sparks.', {
-    each: (I, i, t) => { sparks61(I, i, t, 16, { flare: true }); if (t >= .62 && t < 1) { const rx = lerp(I.x0, I.X(S.v0 + i + 1), (t - .62) / .38), g = ctx.createLinearGradient(rx - 22, 0, rx, 0); g.addColorStop(0, 'rgba(255,200,120,0)'); g.addColorStop(1, 'rgba(255,240,200,.8)'); ctx.fillStyle = g; ctx.fillRect(Math.max(I.x0, rx - 22), I.ly - 5.5, Math.min(22, rx - I.x0), 1.6); }
-      if (t >= 1) once('b61' + i, () => { const tx = I.X(S.v0 + i + 1); [0, 1].forEach(q => bell45(784 * semi(pick45(i, 2) + q * 7), q * .03, .0035 * fat45(i))); for (let q = 0; q < 12; q++) { const an = -Math.PI / 2 + (q / 11 - .5) * 2.4; spawn({ x: tx, y: I.ly - 3, vx: Math.cos(an) * (40 + Math.random() * 50), vy: Math.sin(an) * (40 + Math.random() * 50), g: 260, life: .5, size: 1, col: q % 3 ? '#ffb040' : '#fff0c0' }); } });
-      if (t >= 1 && t < 1.4) glow58(I.X(S.v0 + i + 1), I.ly, 14, .8 * (1 - (t - 1) / .4)); } }),
-  C: SP61('Ember pile', 'Add-on: the sparks land and roll along the top of the bar to the front, where they gather into a small glowing pile of embers sitting on the front; every skill-up adds to it (a run of five builds a heap), and it rides along as the bar grows.', {
-    each: (I, i, t) => sparks61(I, i, t, 16, { roll: true }),
-    after: I => { const n = Math.min(14, S.hits.filter(h => S.age >= h + HIT + .7).length * 3 + 2), tx = I.X(S.v0 + land53(.42)); if (tx <= I.x0 + 3) return;
-      for (let q = 0; q < n; q++) { const row = q < 5 ? 0 : q < 9 ? 1 : q < 12 ? 2 : 3, inRow = [5, 4, 3, 2][row], j = q - [0, 5, 9, 12][row], x = tx - 6 + (j - (inRow - 1) / 2) * 2.4, y = I.ly - 7 - row * 2, tw = .55 + .45 * Math.sin(S.age * 5 + q * 1.7);
-        ctx.save(); ctx.fillStyle = mix('#c83a12', '#ffe0a0', tw); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 4; ctx.beginPath(); ctx.arc(x, y, 1.3, 0, 7); ctx.fill(); ctx.restore(); }
-      glow58(tx - 6, I.ly - 8, 7 + n * .5, .25 + .03 * n); } }),
-  D: SP61('The anvil heats up', 'Add-on: the anvil’s face heats with every skill-up and cools between runs: in a run of five it glows hotter each time, throws bigger, higher showers, and its clank rings a little brighter; one skill-up on its own stays modest.', {
-    anvil: (I, ft) => { const H = runHeat61(), ax = I.x0 - 26; glow58(ax + 2, I.ly - 4, 14 + H * 10, .2 + H * .35); anvil58(ax, I.ly, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); if (H > .05) { ctx.save(); ctx.fillStyle = heat58(Math.min(1, .45 + H * .4)); ctx.globalAlpha *= Math.min(1, H * 1.2); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6 * H; ctx.fillRect(ax - 4, I.ly - 7.6, 17, 2.2); ctx.restore(); } },
-    each: (I, i, t) => { const H = Math.min(1.4, S.hits.slice(0, i + 1).reduce((s, h) => s + .35 * Math.exp(-(S.hits[i] - h) / 3), 0)); sparks61(I, i, t, Math.round(10 + H * 12), { hs: .8 + H * .5 }); } }),
-};
 // ---- magma, reworked: no bubbles; three textures (crust plates over glowing cracks, flow streaks, veined rock) ----
 const lsnd61 = (i, v) => { noise(0, .5, .026 * v, 260, .5, 'lowpass'); tone(87 * semi(pick45(i, 2) / 2), .25, .018 * v, .45, 'sine', null, .05); };
 const splash61 = (x, y, n = 8) => { for (let q = 0; q < n; q++) spawn({ x, y, vx: (Math.random() - .5) * 70, vy: -35 - Math.random() * 45, g: 320, life: .45, size: 1 + Math.random() * .8, col: Math.random() > .4 ? '#ff9a3a' : '#ffd890' }); };
-function r61(K) { const D = BS61[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? D.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-  get desc() { return profName === 'Blacksmithing' ? D.desc + (BS61[K] ? ' (1-4: the sparks; sound: the clank, varied, stepping down.)' : ' (5-8: the magma; placeholder sound.)') + ' Try “Five in a row”.' : 'One profession at a time: this round is Blacksmithing’s base. Others show their current look.'; },
-  get note() { return profName === 'Blacksmithing' ? D.name.toLowerCase() + '.' : 'the set bar.'; },
-  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K > 'D' ? 'A' : K).draw(top);
-    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; try { barModule(top, 'A', D.V); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
-Object.assign(FAM, { PA: r61('A'), PB: r61('B'), PC: r61('C'), PD: r61('D') });
 // ---------- round 62 (2026-11-15): Blacksmithing magma, the LOOK only (animations later). The bar is open at the top like Fishing's:
 // the magma's wavy surface is the bar's top edge (no track or border showing behind it); ahead of the fill, dark cooled lava at the same level.
 // A = round 61's flow texture; B-D three different looks. Mode 'M' in barModule: border on the sides and bottom only, the growth draws the whole bar.
@@ -2848,51 +2821,47 @@ const BOIL65 = (xa, xb, t) => xa + (xb - xa) * (.5 + .38 * Math.sin(t * .23 + 1)
 function bandsGrad66(xa, xb, ly, bot, t, surf, plume) { const cols = ['#fff0a8', '#ffc24a', '#ff8424', '#d8460e', '#8a1c06', '#5a1004'];
   for (let x = Math.floor(xa); x < xb + 2; x += 2) { const s = surf(x + 1), pl = plume ? plume(x + 1) : 0, g = ctx.createLinearGradient(0, s, 0, s + 15);
     cols.forEach((c, b) => g.addColorStop(clamp((b * 2.6 + (b ? .8 * Math.sin(x * .09 + t * .8 + b * 1.7) : 0) - pl * b * .9) / 15), c)); ctx.fillStyle = g; ctx.fillRect(x, s - 2, 3, bot - s + 3); }
-  const px = BOIL65(xa, xb, t), hg = ctx.createRadialGradient(px, ly - 3, 0, px, ly - 3, 22); hg.addColorStop(0, 'rgba(255,250,210,.4)'); hg.addColorStop(1, 'rgba(255,240,180,0)'); ctx.fillStyle = hg; ctx.fillRect(px - 22, ly - 16, 44, 30); }
+  const px = xb - 8, hg = ctx.createRadialGradient(px, ly - 3, 0, px, ly - 3, 22); hg.addColorStop(0, 'rgba(255,250,210,.4)'); hg.addColorStop(1, 'rgba(255,240,180,0)'); ctx.fillStyle = hg; ctx.fillRect(px - 22, ly - 16, 44, 30); }
 Object.assign(CREST62, { G66: '#fff2b0' });
-// the small boiling bubbles (round 65 C): domes crowding at the hot spot; pops: a thick splat (D) and a small ring of ripples
-const SMALL66 = { n: 11, per: .55, spread: .5, seed: 1000, rise: .7 };
-const BIG66 = { per: 3.4, spread: 1.2, seed: 1300, rise: .6 };
-const smallX66 = (I, k, c) => clamp(BOIL65(I.x0 - 2, I.tipX, S.age) + (rnd53(k * 11 + c * 5 + 1002) - .5) * 30, I.x0 + 4, I.tipX - 4);
-const bigX66 = (I, c) => clamp(BOIL65(I.x0 - 2, I.tipX, S.age) + (rnd53(c * 3 + 1302) - .5) * 14, I.x0 + 8, I.tipX - 8);
-// the pops of the last ~1.2 s: [x, age, size]
-function pops66(I, big, small) { const out = [], t = S.age;
-  if (small) for (let k = 0; k < SMALL66.n; k++) { const s = slot65(k, SMALL66.per, SMALL66.spread, SMALL66.seed, t); for (let j = 0; j < 3; j++) { const age = (s.ph - SMALL66.rise) * s.per + j * s.per; if (age >= 0 && age < 1.2) out.push([smallX66(I, k, s.c - j), age, .45]); } }
-  if (big) { const s = slot65(0, BIG66.per, BIG66.spread, BIG66.seed, t); for (let j = 0; j < 2; j++) { const age = (s.ph - BIG66.rise) * s.per + j * s.per; if (age >= 0 && age < 1.6) out.push([bigX66(I, s.c - j), age, 1.6]); } }
-  return out; }
 const ripple66 = P => x => { let l = 0; for (const [px, age, sz] of P) { const d = Math.abs(x - px) - age * 30; l += sz * Math.exp(-age * 2.4) * Math.cos(d * .6) * Math.exp(-d * d / 40); } return l; };
 const splat66 = (x, y, n, big) => { for (let q = 0; q < n; q++) spawn({ x, y: y - 1, vx: (Math.random() - .5) * (big ? 44 : 26), vy: -(big ? 32 : 20) - Math.random() * (big ? 26 : 12), g: 200, life: big ? .55 : .4, size: big ? 1.4 + Math.random() * .6 : 1 + Math.random() * .4, col: Math.random() > .5 ? '#e8642a' : '#ffa850' }); };
-function small66(I, sf) { const t = S.age; for (let k = 0; k < SMALL66.n; k++) { const { c, ph } = slot65(k, SMALL66.per, SMALL66.spread, SMALL66.seed, t), x = smallX66(I, k, c), y = sf(x);
-    if (ph < SMALL66.rise) { const u = ph / SMALL66.rise, r = .6 + u * 1.9; ctx.fillStyle = 'rgba(255,214,120,.95)'; ctx.beginPath(); ctx.arc(x, y + .3, r, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(255,255,235,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .4, Math.max(.3, r * .25), 0, 7); ctx.fill(); }
-    else once('s66' + k + '_' + c, () => splat66(x, y, 2, false)); } }
-// the big bubble's rise, three ways; then its pop: a bigger splat and a stronger ring of ripples
-const RISE66 = {
-  // a glossy round bubble that inflates smoothly out of the surface, wobbling a little
-  sphere(x, y, u, t) { const r = 1 + 5 * eOut(u), w = 1 + .06 * Math.sin(t * 18) * u, cy = y + r * .25; ctx.save(); const g = ctx.createRadialGradient(x - r * .35, cy - r * .5, 0, x, cy, r); g.addColorStop(0, 'rgba(255,250,225,.95)'); g.addColorStop(.45, 'rgba(255,196,96,.92)'); g.addColorStop(1, 'rgba(226,96,26,.95)'); ctx.fillStyle = g;
-    ctx.beginPath(); ctx.ellipse(x, cy, r * w, r / w, 0, Math.PI, Math.PI * 2); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,240,.9)'; ctx.beginPath(); ctx.ellipse(x - r * .38, cy - r * .55, r * .22, r * .14, -.5, 0, 7); ctx.fill(); ctx.restore(); },
-  // the surface itself heaves up into a smooth mound (drawn by the lift), a stretched bright skin on top
-  heave: null,
+// ---------- round 67 (2026-11-15): the anvil + the magma. Gradient depth bands; slow bubbles only at the head (the fill's front), each popping with a splat + ripples.
+// Each skill-up the anvil (at the bar's start) acts, four ways.
+const HB67 = { n: 4, per: 1.9, spread: 1.6, seed: 1500, rise: .7 };
+const hbX67 = (I, k, c) => I.tipX - 5 - rnd53(k * 11 + c * 5 + 1502) * 26;
+function headPops67(I) { const out = [], t = S.age; for (let k = 0; k < HB67.n; k++) { const s = slot65(k, HB67.per, HB67.spread, HB67.seed, t); for (let j = 0; j < 2; j++) { const age = (s.ph - HB67.rise) * s.per + j * s.per; if (age >= 0 && age < 1.2) out.push([hbX67(I, k, s.c - j), age, .7]); } } return out; }
+function headBubbles67(I, sf) { for (let k = 0; k < HB67.n; k++) { const { c, ph } = slot65(k, HB67.per, HB67.spread, HB67.seed, S.age), x = hbX67(I, k, c), y = sf(x); if (x < I.x0 + 4) continue;
+    if (ph < HB67.rise) { const u = ph / HB67.rise, r = .8 + eOut(u) * 2.6; ctx.fillStyle = 'rgba(255,214,120,.95)'; ctx.beginPath(); ctx.arc(x, y + .3, r, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(255,255,235,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .4, Math.max(.3, r * .25), 0, 7); ctx.fill(); }
+    else once('h67' + k + '_' + c, () => splat66(x, y, 3, false)); } }
+const anvilBurst67 = (I, n = 8, big) => { const ax = I.x0 - 24; for (let q = 0; q < n; q++) spawn({ x: ax + 2, y: I.ly - 8, vx: 10 + Math.random() * (big ? 90 : 60), vy: -40 - Math.random() * (big ? 70 : 45), g: 260, life: .45, size: 1, col: q % 3 ? '#ffb040' : '#fff0c0' }); };
+const glob67 = (x, y, r) => { ctx.save(); ctx.fillStyle = '#ffc860'; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,230,.9)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .35, r * .35, 0, 7); ctx.fill(); ctx.restore(); };
+// the anvil throws a glob of magma along the bar onto the head: t 0..SHOT
+const SHOT67 = .35;
+function shot67(I, i, t) { if (t < 0 || t >= SHOT67) return; const u = t / SHOT67, ax = I.x0 - 22, hx = I.X(S.v0 + i) - 3, x = lerp(ax, hx, u), y = lerp(I.ly - 9, I.ly - 7, u) - Math.sin(Math.PI * u) * 5;
+  for (let q = 1; q <= 4; q++) { const v = Math.max(0, u - q * .05); glob67(lerp(ax, hx, v), lerp(I.ly - 9, I.ly - 7, v) - Math.sin(Math.PI * v) * 5, 2.4 - q * .45); } glob67(x, y, 2.8); }
+// a big wave rolling left from the head to the anvil, between ta and tb; returns the lift
+const waveLeft67 = (I, i, t, ta, tb, a = 4.5) => { if (t < ta || t > tb + .1) return () => 0; const u = clamp((t - ta) / (tb - ta)), hx = I.X(S.v0 + i), wx = lerp(hx, I.x0, u * (2 - u)), amp = a * (u < .1 ? u / .1 : 1) * (t > tb ? 1 - (t - tb) / .1 : 1); return x => amp * Math.exp(-Math.pow((x - wx) / 8, 2)) + amp * .4 * Math.exp(-Math.pow((x - wx - 12) / 8, 2)); };
+const ACT67 = {
+  A: { name: 'The anvil throws magma', desc: 'Each skill-up the anvil’s face flashes with a burst of sparks and it flings a glob of magma along the bar; it lands on the head with a big splat and a ring of ripples, and the head moves on.', land: SHOT67,
+    lift: (I, i, t) => () => 0, draw: (I, i, t) => shot67(I, i, t), at: { 0: I => anvilBurst67(I), [SHOT67]: (I, i) => { splat66(I.X(S.v0 + i) - 3, I.ly - 6, 7, true); } }, pop: SHOT67 },
+  B: { name: 'Big wave to the left', desc: 'Each skill-up the head heaves up and the anvil answers: a big wave rolls back from the head along the bar toward the anvil and crashes against it in a burst of sparks; the head has moved on.', land: .15,
+    lift: (I, i, t) => { const h = t >= 0 && t < .2 ? 3 * Math.sin(Math.PI * t / .2) : 0, hx = I.X(S.v0 + i), W = waveLeft67(I, i, t, .15, .8); return x => h * Math.exp(-Math.pow((x - hx) / 7, 2)) + W(x); }, draw: () => {}, at: { .8: I => { anvilBurst67(I, 12, true); splat66(I.x0 + 4, I.ly - 6, 6, true); } } },
+  C: { name: 'Throw, then the wave back', desc: 'Both: the anvil flings the glob of magma onto the head (splat, the head moves on), and the impact sends a big wave rolling back along the bar to the anvil, which crashes against it in a burst of sparks.', land: SHOT67,
+    lift: (I, i, t) => waveLeft67(I, i, t, SHOT67, SHOT67 + .6), draw: (I, i, t) => shot67(I, i, t), at: { 0: I => anvilBurst67(I, 5), [SHOT67]: (I, i) => splat66(I.X(S.v0 + i) - 3, I.ly - 6, 7, true), [SHOT67 + .6]: I => { anvilBurst67(I, 12, true); splat66(I.x0 + 4, I.ly - 6, 5, true); } } },
+  D: { name: 'Sparks into the magma', desc: 'The picked Lingering sparks shower: the anvil flings its sparks along the bar, and where each one lands on the magma it hisses a tiny ring of ripples (the specks still twinkle a moment); the last land on the head, which swells and moves on.', land: .42,
+    lift: (I, i, t) => { const P = []; for (let q = 0; q < 16; q++) { const age = t - ld61(q, 16); if (age >= 0 && age < .8) P.push([lx61(I, i, q, 16), age, .35]); } return ripple66(P); }, draw: (I, i, t) => sparks61(I, i, t, 16), at: {} },
 };
-const heaveLift66 = I => { const s = slot65(0, BIG66.per, BIG66.spread, BIG66.seed, S.age); if (s.ph >= BIG66.rise) return () => 0; const u = s.ph / BIG66.rise, x0 = bigX66(I, s.c), h = 6 * (u < .85 ? Math.sin(Math.PI / 2 * u / .85) : 1) * (1 + .05 * Math.sin(S.age * 20) * u), w = 4 + u * 3; return x => h * Math.exp(-Math.pow((x - x0) / w, 2)); };
-function big66(I, sf, mode) { const s = slot65(0, BIG66.per, BIG66.spread, BIG66.seed, S.age), x = bigX66(I, s.c), y = sf(x);
-  if (s.ph < BIG66.rise) { const u = s.ph / BIG66.rise; if (mode === 'sphere') RISE66.sphere(x, y, u, S.age); else { ctx.save(); ctx.strokeStyle = `rgba(255,252,230,${.4 + u * .5})`; ctx.lineWidth = 1.2; ctx.shadowColor = '#ffd070'; ctx.shadowBlur = 4 + u * 4; ctx.beginPath(); for (let xx = x - 5; xx <= x + 5; xx += 1) ctx.lineTo(xx, sf(xx) + .4); ctx.stroke(); ctx.restore(); } }
-  else { const age = (s.ph - BIG66.rise) * s.per; if (age < .15) glow58(x, y - 2, 5 + age * 50, .8 * (1 - age / .15)); once('b66' + s.c, () => splat66(x, y, 6, true)); } }
-const MIX66 = {
-  A: { name: 'Boil, every pop a splat', desc: 'The hot spot boils with round 65 C’s small bubbles, and every one pops round 65 D’s way: a thick little splat and a small ring of ripples running out along the surface, so the patch churns.', small: true, big: null },
-  B: { name: '+ a big bubble: round', desc: 'The small boiling bubbles (each a tiny splat, small ripples), and every few seconds one big bubble in the patch: a glossy round bubble inflates smoothly out of the surface, wobbling a little, then bursts with D’s bigger splat and a strong ring of ripples both ways.', small: true, big: 'sphere' },
-  C: { name: '+ a big heave', desc: 'The small boiling bubbles, and every few seconds the surface itself heaves up into a smooth mound in the patch (no separate bubble), a stretched bright skin on top; it bursts with the big splat and a strong ring of ripples.', small: true, big: 'heave' },
-  D: { name: 'Heave + heat plume', desc: 'As C, and the depth bands bow upward over the hot spot, so you see the heat rising from below into the boil (the bright layers thicken and climb there, the deep red pushed up).', small: true, big: 'heave', plume: true },
-};
-function r66(K) { const M = MIX66[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? M.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
-  get desc() { return profName === 'Blacksmithing' ? 'The magma’s look only (animations come after): Depth bands with soft gradient edges (the layers blend into each other), in the open-top bar. ' + M.desc + ' (A skill-up just eases the fill on with a small swell; placeholder sound.)' : 'One profession at a time: this round is Blacksmithing’s magma look. Others show their current look.'; },
-  get note() { return profName === 'Blacksmithing' ? 'magma: ' + M.name.toLowerCase() + '.' : 'the set bar.'; },
+function r67(K) { const A = ACT67[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? A.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'The anvil + the magma: gradient depth bands; slow bubbles rise only at the head (the fill’s front) and pop with a splat and a ring of ripples. ' + A.desc + ' (Sound: the anvil’s clank + a placeholder for the magma. Try “Five in a row”.)' : 'One profession at a time: this round is Blacksmithing. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? A.name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
-    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
-    TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, M.plume ? (x => Math.exp(-Math.pow((x - BOIL65(xa, xb, t)) / 16, 2))) : null);
-    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => { if (I.tipX > I.x0 + 20) { const R = ripple66(pops66(I, !!M.big, M.small)), H = M.big === 'heave' ? heaveLift66(I) : () => 0; MAGLIFT = x => R(x) + H(x); } mag62('G66', I, t); },
-      over: (p, I) => { onHits('m66', i => lsnd61(i, fat45(i))); if (!I.surf || I.tipX <= I.x0 + 20) return; small66(I, I.surf); if (M.big) big66(I, I.surf, M.big); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
-Object.assign(FAM, { PA: r66('A'), PB: r66('B'), PC: r66('C'), PD: r66('D') });
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    const fill = I => { const k = lastHit53(); let e = I.X(S.v0 + land53(A.land)); if (k >= 0) { const ft = hT53(k) - A.land; if (ft >= 0 && ft < .3) e = lerp(I.X(S.v0 + k), I.X(S.v0 + k + 1), eOut(ft / .3)); } return e; };
+    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => { I.tipX = fill(I); if (I.tipX > I.x0 + 20) { const R = ripple66(headPops67(I)), L = S.hits.map((h, i) => A.lift(I, i, hT53(i))); MAGLIFT = x => R(x) + L.reduce((s, l) => s + l(x), 0); } mag62('G66', I, t); },
+      over: (p, I) => { const k = lastHit53(), ft = k < 0 ? 9 : hT53(k); anvil60(I, ft >= 0 && ft < .3 ? 1 - ft / .3 : 0); onHits('a67', i => { anvClank60(i, fat45(i)); lsnd61(i, fat45(i) * .6); });
+        if (!I.surf) return; if (I.tipX > I.x0 + 20) headBubbles67(I, I.surf);
+        S.hits.forEach((h, i) => { const t = hT53(i); A.draw(I, i, t); for (const at in A.at) if (t >= +at) once('at67' + K + i + '_' + at, () => A.at[at](I, i)); }); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; } } }; }
+Object.assign(FAM, { PA: r67('A'), PB: r67('B'), PC: r67('C'), PD: r67('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
