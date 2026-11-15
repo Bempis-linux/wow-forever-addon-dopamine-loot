@@ -791,6 +791,8 @@ Professions (from 1.3.0):
    herb's icon brightens as you close in; each skill-up two radar rings ping out of it; at the unlock a big ping, found),
    D + Dew run (a dew drop slides the whole vine to the tip and drips off with a plink; at the unlock a run of drops
    splashes into the icon).
+   Round 28 pick: **Herbalism LOCKED as A, the Vine on its own** (breaking out of the slim bar; no add-on). The gust,
+   tracking the herb and the dew run are out. Next for Herbalism: its finale when the bar fills (pitched first).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
