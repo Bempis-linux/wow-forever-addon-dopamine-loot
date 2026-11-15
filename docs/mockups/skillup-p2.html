@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 63, Blacksmithing: the magma look (from Depth bands)</h1>
+  <h1>Skill-up: round 64, Blacksmithing: the magma look</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2821,7 +2821,7 @@ Object.assign(FAM, { PA: r61('A'), PB: r61('B'), PC: r61('C'), PD: r61('D') });
 // A = round 61's flow texture; B-D three different looks. Mode 'M' in barModule: border on the sides and bottom only, the growth draws the whole bar.
 function mag62(K, I, t) { const x0 = I.x0, x1 = I.x1, ly = I.ly, bot = ly + 6, end = I.tipX, k = lastHit53(), ft = k < 0 ? 9 : hT53(k), kick = ft >= 0 && ft < .6 ? Math.sin(Math.PI * ft / .6) : 0;
   const surf = x => ly - 5 - (Math.sin(x * .16 - t * 1.8) * .8 + Math.sin(x * .07 + t * 1.1) * .5) * (x <= end ? 1 : .45) - 1.6 * kick * Math.exp(-Math.pow((x - end) / 10, 2));
-  const body = (xa, xb) => { ctx.beginPath(); ctx.moveTo(xa, bot); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x)); ctx.lineTo(xb, surf(xb)); ctx.lineTo(xb, bot); ctx.closePath(); };
+  I.surf = surf; const body = (xa, xb) => { ctx.beginPath(); ctx.moveTo(xa, bot); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x)); ctx.lineTo(xb, surf(xb)); ctx.lineTo(xb, bot); ctx.closePath(); };
   ctx.save(); ctx.beginPath(); ctx.roundRect(x0 - 2, ly - 16, x1 - x0 + 4, bot - ly + 16, [0, 0, 3, 3]); ctx.clip();
   // ahead: dark cooled lava, a faint ember glow deep down
   body(x0 - 2, x1 + 2); const dg = ctx.createLinearGradient(0, ly - 6, 0, bot); dg.addColorStop(0, '#2a1610'); dg.addColorStop(1, '#3a1208'); ctx.fillStyle = dg; ctx.fill();
@@ -2863,39 +2863,42 @@ function r62(K) { return { get name() { return K + '. ' + (profName === 'Blacksm
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
     try { barModule(top, 'M', { grow: (p, x0, y, L, f, t, I) => mag62(K, I, t), over: (p, I) => onHits('m62', i => lsnd61(i, fat45(i))) }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
 Object.assign(FAM, { PA: r62('A'), PB: r62('B'), PC: r62('C'), PD: r62('D') });
-// ---------- round 63 (2026-11-15): magma look, iterating from Depth bands (round 62 B, kept as A) ----------
-// layered bands under the surface: cols top to bottom, th = each band's thickness, edge(b, x) = the sway of the edge under band b
-function bands63(xa, xb, surf, cols, th, edge) { let d = 0; const ds = th.map(v => (d += v, d - v));
-  for (let b = 0; b < cols.length; b++) { const d0 = ds[b], d1 = b === cols.length - 1 ? 40 : ds[b] + th[b]; ctx.fillStyle = cols[b]; ctx.beginPath();
-    for (let x = xa; x <= xb + 2; x += 2) ctx.lineTo(x, surf(x) + d0 + (b ? edge(b, x) : 0)); for (let x = xb + 2; x >= xa; x -= 2) ctx.lineTo(x, surf(x) + d1 + edge(b + 1, x)); ctx.closePath(); ctx.fill(); } }
+// ---------- round 64 (2026-11-15): magma look: Depth bands (A) + three DIFFERENT designs; B is bubbly (bubbles swell slowly on the surface and pop) ----------
 Object.assign(TEX62, {
-  // B: a glowing core: a thin dark skin at the surface, the hottest layer in the middle, cooling again toward the bottom
-  B63(xa, xb, ly, bot, t, surf) { bands63(xa, xb, surf, ['#7a2208', '#e8641a', '#ffc24a', '#fff4c0', '#ffc24a', '#d0420e', '#6a1406'], [1.3, 1.6, 1.6, 1.8, 1.6, 2, 3], (b, x) => .6 * Math.sin(x * .09 + t * .8 + b * 1.7));
-    const g = ctx.createLinearGradient(0, ly - 3, 0, ly + 3); g.addColorStop(0, 'rgba(255,250,220,0)'); g.addColorStop(.5, 'rgba(255,250,220,.35)'); g.addColorStop(1, 'rgba(255,250,220,0)'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 4, xb - xa, 8); },
-  // C: the depth bands under a cooled skin: dark crust islands float on the surface, drifting, the bright magma showing in the gaps
-  C63(xa, xb, ly, bot, t, surf) { TEX62.B(xa, xb, ly, bot, t, surf); const off = t * 3, sh = Math.floor(off / 16);
-    for (let k = -1; k < 18; k++) { const id = k - sh, x = xa + k * 16 + (off % 16), w = 9 + rnd53(id * 3 + 200) * 5; if (x > xb - 10) continue; ctx.fillStyle = '#3a1408'; ctx.beginPath();
-      for (let xx = x; xx <= x + w; xx += 1.5) ctx.lineTo(xx, surf(xx) - .4); for (let xx = x + w; xx >= x; xx -= 1.5) ctx.lineTo(xx, surf(xx) + 2 + .8 * Math.sin((xx - x) / w * Math.PI) + rnd53(id + 300) * .6); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(160,80,50,.6)'; ctx.lineWidth = .6; ctx.beginPath(); for (let xx = x + 1; xx <= x + w - 1; xx += 1.5) ctx.lineTo(xx, surf(xx) + .3); ctx.stroke(); } },
-  // D: flowing bands: each layer slides toward the front at its own speed (the top fastest, the deep ones slow), a faint shine on each edge
-  D63(xa, xb, ly, bot, t, surf) { const sp = [0, 9, 6, 4, 2.5, 1.5], edge = (b, x) => .9 * Math.sin((x - t * (sp[b] || 1)) * .1 + b * 1.7); const cols = ['#fff0a8', '#ffc24a', '#ff8424', '#d8460e', '#8a1c06'];
-    bands63(xa, xb, surf, cols, [2.3, 2.3, 2.3, 2.3, 4], edge);
-    for (let b = 1; b < cols.length; b++) { ctx.strokeStyle = `rgba(255,240,190,${.4 - b * .06})`; ctx.lineWidth = .6; ctx.beginPath(); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x) + b * 2.3 + edge(b, x)); ctx.stroke(); } },
+  // B: plain molten orange, warm and deep; the bubbles are drawn on the surface by over() (bub64)
+  B64(xa, xb, ly, bot, t) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#ffb44a'); g.addColorStop(.35, '#f06a1a'); g.addColorStop(1, '#7a1806'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    for (let k = 0; k < 6; k++) { const x = xa + ((rnd53(k + 400) * 240 + t * 2) % 240), r = 10 + rnd53(k + 401) * 8, gg = ctx.createRadialGradient(x, ly, 0, x, ly, r); gg.addColorStop(0, 'rgba(255,220,130,.35)'); gg.addColorStop(1, 'rgba(255,220,130,0)'); ctx.fillStyle = gg; ctx.fillRect(x - r, ly - 8, r * 2, 16); } },
+  // C: convection cells: bright rounded cells of magma packed together, dark cooler seams between them, slowly drifting and breathing
+  C64(xa, xb, ly, bot, t) { ctx.fillStyle = '#4a1206'; ctx.fillRect(xa, ly - 16, xb - xa, 30); const off = t * 2.5, sh = Math.floor(off / 9);
+    for (let row = 0; row < 3; row++) for (let k = -1; k < 30; k++) { const id = (k - sh) * 3 + row, x = xa + k * 9 + (off % 9) + (row % 2) * 4.5 + (rnd53(id + 500) - .5) * 3, y = ly - 4 + row * 4 + (rnd53(id + 501) - .5) * 1.5; if (x > xb + 6) continue;
+      const br = .75 + .25 * Math.sin(t * (.8 + rnd53(id + 502)) + id), rx = 4.2 + rnd53(id + 503) * 1, ry = 2.2 + rnd53(id + 504) * .6, g = ctx.createRadialGradient(x, y - .5, 0, x, y, rx);
+      g.addColorStop(0, mix('#ff9a34', '#fff0b0', br * .8)); g.addColorStop(.7, '#f06a1a'); g.addColorStop(1, '#a8300c'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill(); } },
+  // D: glossy molten metal: smooth and deep, a bright mirror highlight riding the waves (strongest on the crests), a slow sheen, a warm rim light below
+  D64(xa, xb, ly, bot, t, surf) { const g = ctx.createLinearGradient(0, ly - 7, 0, bot); g.addColorStop(0, '#ff9a3a'); g.addColorStop(.45, '#d8460e'); g.addColorStop(1, '#4a0e04'); ctx.fillStyle = g; ctx.fillRect(xa, ly - 16, xb - xa, 30);
+    ctx.lineCap = 'round'; for (let x = xa; x < xb; x += 2) { const s = surf(x + 1) - surf(x - 1), a = clamp(.25 + (-s) * .5 + .2 * Math.sin(x * .05 - t * .7)); if (a < .05) continue; ctx.strokeStyle = `rgba(255,252,235,${a})`; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x, surf(x) + 2.2); ctx.lineTo(x + 2, surf(x + 2) + 2.2); ctx.stroke(); }
+    const sx = xa + ((t * 22) % (xb - xa + 60)) - 30, sg = ctx.createLinearGradient(sx - 20, 0, sx + 20, 0); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,240,210,.28)'); sg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = sg; ctx.fillRect(sx - 20, ly - 16, 40, 30);
+    ctx.fillStyle = 'rgba(255,170,90,.45)'; ctx.fillRect(xa, bot - 1.6, xb - xa, 1); },
 });
-Object.assign(CREST62, { B63: '#ffb070', C63: 'rgba(255,214,140,.55)', D63: '#fff2b0' });
-const LOOK63 = {
+Object.assign(CREST62, { B64: 'rgba(255,214,140,.9)', C64: 'rgba(255,190,110,.75)', D64: '#fff6dc' });
+// B's bubbles, on the surface: one at a time here and there, a dome that swells slowly (about 1.4 s), then pops: the dome is gone, a bright spot, two droplets
+function bub64(I) { const t = S.age, sf = I.surf, end = I.tipX; if (!sf || end <= I.x0 + 8) return;
+  for (let k = 0; k < 7; k++) { const per = 2.6 + rnd53(k + 600) * 2.4, c = Math.floor((t + rnd53(k + 601) * per) / per), ph = ((t + rnd53(k + 601) * per) % per) / per, x = I.x0 + 6 + rnd53(k * 13 + c * 7 + 602) * (end - I.x0 - 14), grow = .55, y = sf(x);
+    if (ph < grow) { const u = ph / grow, r = 1 + u * u * 4; ctx.save(); const g = ctx.createRadialGradient(x - r * .35, y - r * .5, 0, x, y, r); g.addColorStop(0, 'rgba(255,248,215,.95)'); g.addColorStop(.5, 'rgba(255,190,90,.95)'); g.addColorStop(1, 'rgba(210,80,20,.95)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y + .4, r, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,240,.85)'; ctx.beginPath(); ctx.arc(x - r * .4, y - r * .45, Math.max(.4, r * .2), 0, 7); ctx.fill(); ctx.restore(); }
+    else if (ph < grow + .12) { const u = (ph - grow) / .12; glow58(x, y, 3 + u * 5, .7 * (1 - u)); once('bub64' + k + '_' + c, () => { for (let q = 0; q < 2; q++) spawn({ x, y: y - 1, vx: (q ? 1 : -1) * (10 + Math.random() * 8), vy: -24 - Math.random() * 10, g: 220, life: .35, size: .9, col: '#ffc070' }); }); } } }
+const LOOK64 = {
   A: { key: 'B', name: 'Depth bands', desc: 'Round 62 B as picked: soft heat layers, pale yellow under the surface to deep red at the bottom, the edges swaying slowly.' },
-  B: { key: 'B63', name: 'Glowing core', desc: 'The bands turned inside out: a thin dark skin at the surface, the hottest pale layer in the middle of the bar, cooling again toward the bottom, so it glows from the inside like a forge’s heart.' },
-  C: { key: 'C63', name: 'Crusted bands', desc: 'The depth bands under a cooled skin: dark crust islands float on the surface and drift slowly, the bright magma showing in the gaps between them.' },
-  D: { key: 'D63', name: 'Flowing bands', desc: 'The depth bands in motion: each layer slides toward the front at its own speed (the top fastest, the deep ones slowest), with a faint shine along each edge.' },
+  B: { key: 'B64', name: 'Bubbling', over: bub64, desc: 'Plain, deep molten orange with soft warm patches, and bubbles on the surface: now and then one swells up slowly as a glossy dome (about a second and a half), then pops: a bright flash and two little droplets. Only a few at a time, here and there.' },
+  C: { key: 'C64', name: 'Convection cells', desc: 'Rounded cells of bright magma packed together with dark, cooler seams between them, drifting slowly toward the front, each one breathing brighter and dimmer on its own.' },
+  D: { key: 'D64', name: 'Glossy molten', desc: 'Smooth, deep molten metal with a mirror shine: a bright highlight rides the waves just under the surface (strongest on the crests), a slow sheen sweeps along, a warm rim of light along the bottom.' },
 };
-function r63(K) { const L = LOOK63[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? L.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+function r64(K) { const L = LOOK64[K]; return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? L.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
   get desc() { return profName === 'Blacksmithing' ? 'The magma’s look only (animations come after), in the open-top bar. ' + L.desc + ' (A skill-up just eases the fill on with a small swell; placeholder sound.)' : 'One profession at a time: this round is Blacksmithing’s magma look. Others show their current look.'; },
   get note() { return profName === 'Blacksmithing' ? 'magma look: ' + L.name.toLowerCase() + '.' : 'the set bar.'; },
   draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {};
-    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => mag62(L.key, I, t), over: (p, I) => onHits('m63', i => lsnd61(i, fat45(i))) }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
-Object.assign(FAM, { PA: r63('A'), PB: r63('B'), PC: r63('C'), PD: r63('D') });
+    try { barModule(top, 'M', { grow: (p, x0, y, Ln, f, t, I) => mag62(L.key, I, t), over: (p, I) => { onHits('m64', i => lsnd61(i, fat45(i))); if (L.over) L.over(I); } }); } finally { S.p.snd = snd0; S.p.hit = hit0; } } }; }
+Object.assign(FAM, { PA: r64('A'), PB: r64('B'), PC: r64('C'), PD: r64('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

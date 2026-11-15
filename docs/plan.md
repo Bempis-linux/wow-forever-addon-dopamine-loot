@@ -1042,6 +1042,12 @@ Professions (from 1.3.0):
    thin dark skin on top, the hottest pale layer mid-bar, cooling toward the bottom), **C. Crusted bands** (the bands under
    dark crust islands drifting on the surface, bright magma in the gaps), **D. Flowing bands** (each layer slides toward the
    front at its own speed, top fastest; a faint shine on each edge).
+   Round 63 → "just variations of depth bands": the user wanted **three different designs** (not variations), one of them
+   **bubbly: bubbles appear slowly on the top and pop**. Round 64 (63 moved to the archive): **A. Depth bands**, **B.
+   Bubbling** (plain deep molten orange; now and then a glossy dome swells slowly on the surface for ~1.5 s, then pops: a
+   flash and two droplets; a few at a time), **C. Convection cells** (bright rounded cells packed with dark cooler seams,
+   drifting, each breathing), **D. Glossy molten** (smooth deep molten metal, a mirror highlight riding the wave crests, a
+   slow sheen, a warm rim light below).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
