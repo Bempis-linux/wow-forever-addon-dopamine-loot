@@ -914,6 +914,15 @@ Professions (from 1.3.0):
    chop clicks and the reticle tones). Kept as they were; for the long-session rule only the step-down applies (full for
    the first two in a row, then quieter, floor .5) plus a slight pitch variation, not a new timbre. **Skinning DONE.**
    Next: Mining.
+   Mining pitches: the user asked for designs that use the bar as a frame, not confined to it (like the reel, bobber,
+   vine). **Round 47** (`MIN47`, `r47`, `rockFill`, `pickaxe`, `crystal`; sounds by the fatigue rule, Mining's built-in
+   strike muted): A Ore ridge (a chunk breaks off at the front, nuggets burst up and land on the bar's top edge, a lumpy
+   ridge; finale: a glint runs along it, the nuggets roll into the icon), B Cart on the rails (the bar is the track; a cart
+   on top at the front rolls on each skill-up, a nugget drops in; finale: it rolls to the end and tips into the icon),
+   C The pick at the start (a pickaxe hangs at the bar's start like the reel; each swing sends a gold crack along the
+   rock; finale: a big swing splits the slab, ore flies into the icon), D Crystals (ore crystals jut up and down out of
+   the bar; a new cluster with a glint each skill-up; finale: they ring and flash in turn, shatter into sparkles into the
+   icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

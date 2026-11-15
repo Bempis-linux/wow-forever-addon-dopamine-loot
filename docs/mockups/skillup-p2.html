@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 46, Skinning sound</h1>
+  <h1>Skill-up: round 47, Mining</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 46: Fishing and Herbalism done; Skinning’s sound revisited, four gentle sets for the cut and the reticle chop (sound on) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining: four new designs using the bar as a frame (parts outside it), each with its finale (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2511,6 +2511,72 @@ function r46(K) { const c = SET46[K]; return { get name() { return K + '. ' + (p
     const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, FIT19[profName] || 'A', o); } finally { S.p.snd = snd0; } } }; }
 Object.assign(FAM, { PA: r46('A'), PB: r46('B'), PC: r46('C'), PD: r46('D') });
 setTimeout(() => { profName = 'Skinning'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
+// ---------- round 47 (2026-11-15): Skinning DONE (original sounds); Mining, four new designs that use the bar as a frame (parts outside it, like the reel/bobber/vine) ----------
+const rockFill = (x0, xe, y, t) => { if (xe <= x0) return; const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, '#8a7e72'); g.addColorStop(1, '#4a4038'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 6, xe - x0 + 2, 12);
+  for (let k = 0; k < (xe - x0) / 5; k++) { const x = x0 + k * 5 + skHash(k) * 4, yy = y - 4 + skHash(k + 3) * 8; ctx.fillStyle = skHash(k + 7) > .8 ? 'rgba(255,190,120,.7)' : 'rgba(30,24,20,.45)'; ctx.fillRect(x, yy, 1.4, 1.2); }
+  ctx.fillStyle = 'rgba(255,240,220,.2)'; ctx.fillRect(x0 - 2, y - 5, xe - x0 + 2, 1.5); };
+const ridge47 = I => { const o = []; for (let x = I.x0 + 4, j = 0; x < I.tipX - 1; x += 7, j++) o.push({ x, j, s: 3 + skHash(j + 1) * 1.6, c: ORECOL[j % 4] }); return o; };
+const stone47 = (t, v) => { tone(150, t, .03 * v, .12, 'sine', 110, .002); noise(t, .06, .025 * v, 400, .8, 'lowpass'); };
+const clink47 = (i, t, v) => tone(1046 * semi(pick45(i, 4)), t, .008 * v, .12, 'sine', null, .002);
+function pickaxe(x, y, ang, s = 1) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s); ctx.strokeStyle = '#8a6438'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -15); ctx.stroke();
+  ctx.strokeStyle = '#b8b0a8'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.arc(0, -8, 8, -Math.PI * .85, -Math.PI * .15); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.arc(0, -8.6, 8, -Math.PI * .8, -Math.PI * .5); ctx.stroke(); ctx.restore(); }
+function crystal(x, y, len, ang, col, sc = 1, flash = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(sc, sc); ctx.fillStyle = mix(col, '#ffffff', flash); ctx.beginPath(); ctx.moveTo(-2.2, 0); ctx.lineTo(0, -len); ctx.lineTo(2.2, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = `rgba(255,255,255,${.55 + .45 * flash})`; ctx.beginPath(); ctx.moveTo(-.4, 0); ctx.lineTo(0, -len); ctx.lineTo(.9, 0); ctx.closePath(); ctx.fill(); ctx.restore(); }
+const CRY = ['#e8a060', '#ffc890', '#d88a4a'];
+const MIN47 = {
+  A: { name: 'Ore ridge', finAt: .95, desc: 'The bar is rock. Each skill-up a chunk breaks off at the front with a soft stone knock and a few ore nuggets burst up out of it and land on the bar’s top edge with little clinks, building a lumpy ridge of ore along the bar. Reaching the next ore, a glint runs along the ridge and the nuggets roll down into the icon, nearest first.',
+    grow(p, x, y, L, f, t, I) { rockFill(x, I.tipX, y, t); },
+    over(p, I) { const k = lastHitIdx(), ha = I.hitAge, ux = I.x1 + 18, pv = k >= 0 ? I.X(hitTo(k) - 1) : I.x0, top = I.ly - 6;
+      onHits('mr', i => { stone47(0, fat45(i)); for (let q = 0; q < 3; q++) clink47(i + q, .25 + q * .06, fat45(i)); for (let q = 0; q < 6; q++) spawn({ x: I.tipX, y: I.ly, vx: (Math.random() - .5) * 70, vy: -40 - Math.random() * 50, g: 300, life: .45, size: 1.3, shape: 'sq', vr: 8, col: '#8a7e72' }); });
+      const ts = I.done ? S.age - S.closeAt : -1;
+      for (const n of ridge47(I)) { let x = n.x, y = top - n.s * .4;
+        if (!I.done && k >= 0 && n.x > pv && ha < .7) { const u = clamp((ha - .05) / .45); if (u <= 0) continue; x = lerp(I.tipX, n.x, u); y = lerp(I.ly, y, u) - Math.sin(Math.PI * u) * 16; }
+        if (ts >= 0) { const t0 = .2 + (I.x1 - n.x) / (I.x1 - I.x0) * .35, u = clamp((ts - t0) / .35); if (u >= 1) continue; x = lerp(n.x, ux, u * u); y = lerp(y, I.ly, u * u) - Math.sin(Math.PI * u) * 5; once('mrd' + n.j, () => { if (n.j % 3 === 0) clink47(n.j, 0, .8); }); }
+        nugget(x, y, n.s, n.c); }
+      if (ts >= 0 && ts < .25) { ctx.save(); ctx.fillStyle = '#fff'; star4(lerp(I.x0, I.x1, ts / .25), top - 4, 4, 0); ctx.restore(); } once('mrg', () => { if (I.done) for (let q = 0; q < 5; q++) tone(784 * semi(PENT42[q]), q * .04, .007, .2, 'sine', null, .003); }); } },
+  B: { name: 'Cart on the rails', finAt: .95, desc: 'The bar is the track, rails and sleepers laid as far as you’ve mined. A mine cart sits on top at the front, like the bobber on Fishing’s water: each skill-up it rolls forward with a soft wooden clack-clack and a nugget drops into it with a clink, the heap rising over the rim. Reaching the next ore, the cart rolls to the end and tips its load into the icon.',
+    grow(p, x, y, L, f, t, I) { ctx.fillStyle = '#1a1612'; ctx.fillRect(x - 2, y - 6, L + 4, 12); for (let s = 3; s < L; s += 7) { const on = x + s < I.tipX; ctx.fillStyle = on ? '#6a4a2e' : 'rgba(106,74,46,.25)'; ctx.fillRect(x + s, y - 5, 3, 10); }
+      ctx.fillStyle = 'rgba(200,192,184,.25)'; ctx.fillRect(x, y - 3, L, 1); ctx.fillRect(x, y + 2, L, 1); if (I.tipX > x) { ctx.fillStyle = '#d8d0c8'; ctx.fillRect(x, y - 3, I.tipX - x, 1.2); ctx.fillRect(x, y + 2, I.tipX - x, 1.2); } },
+    over(p, I) { const k = lastHitIdx(), ha = I.hitAge, ux = I.x1 + 18, pv = k >= 0 ? I.X(hitTo(k) - 1) : I.tipX, ts = I.done ? S.age - S.closeAt : -1;
+      let cx = !I.done && k >= 0 && ha < .5 ? lerp(pv, I.tipX, eOut(clamp(ha / .45))) : I.tipX, tilt = 0, load = .2 + .8 * I.f;
+      if (ts >= 0) { cx = lerp(I.tipX, I.x1 + 4, eOut(clamp(ts / .3))); tilt = ts > .35 ? -1 * eOut(clamp((ts - .35) / .2)) * (1 - clamp((ts - .8) / .2)) : 0; load = ts > .45 ? 0 : load; }
+      ctx.save(); ctx.translate(cx, I.ly - 6); ctx.scale(1.5, 1.5); mcart(0, 0, load, tilt, cx * .5); ctx.restore();
+      if (!I.done && k >= 0 && ha > .25 && ha < .5) { const u = (ha - .25) / .25; nugget(cx + 1, lerp(I.ly - 40, I.ly - 16, u * u), 2.6, ORECOL[k % 4]); }
+      onHits('mc', i => { const v = fat45(i); mallet(196, 0, .012 * v); mallet(196, .09, .01 * v); clink47(i, .5, v); });
+      if (ts >= .45 && ts < .95) for (let q = 0; q < 6; q++) { const u = clamp((ts - .45 - q * .04) / .35); if (u <= 0 || u >= 1) continue; nugget(lerp(cx - 4, ux, u), lerp(I.ly - 14, I.ly, u) - Math.sin(Math.PI * u) * 10, 2.4, ORECOL[q % 4]); }
+      if (ts >= 0) once('mcd0', () => { for (let q = 0; q < 4; q++) mallet(196, q * .07, .01); }); if (ts >= .45) once('mcd1', () => { for (let q = 0; q < 6; q++) clink47(q, q * .04, .9); stone47(.3, 1); }); } },
+  C: { name: 'The pick at the start', finAt: .8, desc: 'A pickaxe hangs at the bar’s start, like Fishing’s reel. Each skill-up it swings down into the stone with a soft knock, a glowing gold crack runs along the rock to the front and chips spray up there. Reaching the next ore, one big swing splits the whole slab open along the crack, gold light pouring out, and ore flies from it into the icon.',
+    grow(p, x, y, L, f, t, I) { const ts = I.done ? S.age - S.closeAt : -1, sp = ts > .25 ? eOut(clamp((ts - .25) / .2)) * 2.5 : 0;
+      ctx.save(); ctx.translate(0, -sp); ctx.beginPath(); ctx.rect(x - 2, y - 7, L + 4, 7); ctx.clip(); rockFill(x, I.tipX, y, t); ctx.restore(); ctx.save(); ctx.translate(0, sp); ctx.beginPath(); ctx.rect(x - 2, y, L + 4, 7); ctx.clip(); rockFill(x, I.tipX, y, t); ctx.restore();
+      const k = lastHitIdx(), ha = I.hitAge, run = !I.done && k >= 0 && ha < .35 ? lerp(x, I.tipX, eOut(clamp((ha - .08) / .22))) : I.tipX, cr = s => y + Math.sin(s * .13) * .7 + Math.sin(s * .05) * .9;
+      if (I.tipX > x) { ctx.strokeStyle = sp > 0 ? '#fff0b0' : 'rgba(255,200,90,.55)'; ctx.lineWidth = sp > 0 ? 1 + sp : 1.1; if (sp > 0) { ctx.shadowColor = '#ffc860'; ctx.shadowBlur = 8; } ctx.beginPath(); for (let s = 0; s <= I.tipX - x; s += 2) ctx.lineTo(x + s, cr(s)); ctx.stroke(); ctx.shadowBlur = 0;
+        if (run < I.tipX) { ctx.strokeStyle = '#fff4c0'; ctx.lineWidth = 1.6; ctx.beginPath(); for (let s = Math.max(0, run - x - 30); s <= run - x; s += 2) ctx.lineTo(x + s, cr(s)); ctx.stroke(); } } },
+    over(p, I) { const ha = I.hitAge, ts = I.done ? S.age - S.closeAt : -1, ux = I.x1 + 18; let a = -1.1;
+      if (ts >= 0) a = ts < .15 ? lerp(-1.1, -2, ts / .15) : ts < .25 ? lerp(-2, .45, (ts - .15) / .1) : lerp(.45, -1.1, clamp((ts - .25) / .5)); else if (ha >= 0 && ha < .5) a = ha < .08 ? lerp(-1.1, .35, ha / .08) : lerp(.35, -1.1, clamp((ha - .08) / .4));
+      pickaxe(I.x0 - 14, I.ly + 5, a, ts >= 0 ? 1.55 : 1.3);
+      onHits('mp', i => { const v = fat45(i); stone47(0, v); tone(1175 * semi(pick45(i, 3) - 12), .1, .006 * v, .25, 'sine', null, .01); });
+      landed('mpc', .3, () => { for (let q = 0; q < 6; q++) spawn({ x: I.tipX, y: I.ly - 2, vx: (Math.random() - .3) * 80, vy: -40 - Math.random() * 50, g: 320, life: .5, size: 1.3, shape: 'sq', vr: 9, col: q % 2 ? '#8a7e72' : '#ffb070' }); });
+      if (ts >= .25) { once('mpd', () => { stone47(0, 1.4); kal(131, .02, .02); for (let q = 0; q < 6; q++) tone(523 * semi(PENT42[q]), .1 + q * .05, .008, .25, 'sine', null, .003); });
+        for (let q = 0; q < 7; q++) { const u = clamp((ts - .3 - q * .04) / .4); if (u <= 0 || u >= 1) continue; const sx = lerp(I.x0 + 20, I.x1 - 10, q / 6); nugget(lerp(sx, ux, u), lerp(I.ly, I.ly, u) - Math.sin(Math.PI * u) * 18, 2.4, ORECOL[q % 4]); } } } },
+  D: { name: 'Crystals', finAt: .95, desc: 'The bar is rock, and angular ore crystals jut up and down out of it, like the vine’s leaves breaking out of Herbalism’s bar. Each skill-up a new cluster shoots out at the front with a glint and a soft crystal ting, on a varied note. Reaching the next ore, the crystals ring one after another along the bar, flashing white, and shatter into sparkles that fly into the icon.',
+    grow(p, x, y, L, f, t, I) { rockFill(x, I.tipX, y, t); },
+    over(p, I) { const k = lastHitIdx(), ha = I.hitAge, ux = I.x1 + 18, pv = k >= 0 ? I.X(hitTo(k) - 1) : I.x0, ts = I.done ? S.age - S.closeAt : -1;
+      for (let x = I.x0 + 6, j = 0; x < I.tipX; x += 13, j++) { const up = j % 2 === 0, by = up ? I.ly - 5 : I.ly + 5, base = up ? 0 : Math.PI; let sc = 1, fl = 0;
+        if (!I.done && k >= 0 && x > pv && ha < .4) sc = eBack(clamp(ha / .25));
+        if (ts >= 0) { const tj = (x - I.x0) / (I.x1 - I.x0) * .4; fl = clamp(1 - Math.abs(ts - tj) / .08); if (ts > tj + .08) { once('mxs' + j, () => { for (let q = 0; q < 4; q++) spawn({ x, y: by, vx: (ux - x) / .45 + (Math.random() - .5) * 30, vy: (I.ly - by) / .45 - 20 + (Math.random() - .5) * 30, g: 40, life: .45, size: 1.6, shape: 'star', vr: 6, col: q % 2 ? '#fff' : '#ffd8a0' }); if (j % 2 === 0) bell45(1046 * semi(PENT42[Math.min(9, j / 2)]), 0, .006); }); continue; } }
+        if (sc <= 0) continue; const c = CRY[j % 3]; crystal(x, by, 10 + skHash(j) * 5, base - .25, c, sc * 1.25, fl); crystal(x + 4, by, 7 + skHash(j + 2) * 4, base + .35, c, sc * 1.25, fl); if (j % 3 === 0) crystal(x - 3, by, 6, base - .7, c, sc * 1.1, fl); }
+      if (!I.done && k >= 0 && ha >= 0 && ha < .35) { ctx.save(); ctx.fillStyle = '#fff'; ctx.globalAlpha *= 1 - ha / .35; star4(I.tipX - 2, I.ly - 10, 3 + 4 * (1 - ha / .35), ha * 3); ctx.restore(); }
+      onHits('mx', i => { const v = fat45(i); stone47(0, v * .7); bell45(1175 * semi(pick45(i, 3)), .03, .009 * v); }); } },
+};
+function mine47(K) { const m = MIN47[K]; return Object.assign({}, m, { desc: m.desc }); }
+const VAR47 = { Mining: { A: mine47('A'), B: mine47('B'), C: mine47('C'), D: mine47('D') } };
+function r47(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? MIN47[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? MIN47[K].desc + ' Sounds follow the fatigue rule (gentle, varied, stepping down after two in a row). (Try “Five in a row” and “Reaching the next unlock”.)' : 'One profession at a time: this round is Mining. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? MIN47[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Fishing') return r44('D').draw(top); if (profName === 'Herbalism') return r45('D').draw(top); if (profName === 'Skinning') return r42('B').draw(top); if (profName !== 'Mining') return r42('B').draw(top);
+    const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR47.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r47('A'), PB: r47('B'), PC: r47('C'), PD: r47('D') });
+setTimeout(() => { profName = 'Mining'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
