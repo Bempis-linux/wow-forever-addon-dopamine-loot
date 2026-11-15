@@ -931,6 +931,9 @@ Professions (from 1.3.0):
    show the icon), C Shatter (a web of straight cracks and shards flying; faint crack marks stay; finale: the whole bar
    shatters, shards funnel into the icon), D Crushed to gravel (gravel pours from the bar's bottom into a mound beneath;
    finale: the mound slides along and pours into the icon).
+   Round 48 pick: **Mining base LOCKED: A Blast** (the mined part a dug-out channel, the rock ahead solid; each skill-up a
+   charge at the front: flash, muffled thump, chunks and dust, the bar kicks, the blasted part glows hot; its finale for now
+   a chain of blasts ending in the icon). Next: add-ons on top of it, then its finale and sound, like the others.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
