@@ -1076,6 +1076,9 @@ Professions (from 1.3.0):
    a peak, bursts with one fat droplet that falls back with a plip; the surface dips then bounces up past level).
    → "a little more noticeable": domes ~1.5x bigger and more opaque, five slots a bit more often, deeper dimples, bigger
    ripples, rings and puffs.
+   **Bubbles picked: A. Film burst + the thick splat of round 65 D** (the pop also throws a thick splat). Blacksmithing base
+   so far: the anvil at the start; gradient depth-band magma in the open-top bar; swamp bubbles at the head (film burst +
+   splat); skill-up = Sparks into the magma. Next: finale, then sound.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
