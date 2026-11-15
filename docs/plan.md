@@ -1143,6 +1143,11 @@ Professions (from 1.3.0):
    with a generated impulse): **A. Low pound, big hall** (one deep pound, a long dark reverb), **B. Double pound** (the second
    lower and heavier, medium reverb), **C. Pound + forge breath** (the pound + a soft rush of air into the reverb), **D. Short
    room pound** (tight, a short stone-room reverb).
+   Round 78 → “a little too low and they all sound the same”; wants **a chunky boom**, and one option **like a boss dying in
+   Final Fantasy**. Round 79 (a saturated bus + reverb; louder mids): **A. Punchy boom** (a kick that punches and drops, a
+   saturated mid thump, a short crunch, medium reverb), **B. Blast** (noise sweeping bright to dark like a blast wave, deep
+   rumble, long tail), **C. Swell + slam** (a half-second rising rush into a big chunky boom), **D. Boss falls** (a low
+   crumbling rumble flickering in fast pulses and sinking for ~1 s, then one last deep boom into a long reverb).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

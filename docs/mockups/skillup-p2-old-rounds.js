@@ -1086,3 +1086,32 @@ function r76(K) { const F = fin76(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, 
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
 Object.assign(FAM, { PA: r76('A'), PB: r76('B'), PC: r76('C'), PD: r76('D') });
+
+// Round 78 pounds (pound78, SND78, r78), moved out 2026-11-15; rev78 stays.
+// one pound: a low sine body with a small natural drop, a muffled noise thump; dry to the output and a send into the reverb
+function pound78(t, f, vol, send, len = 2.2) { if (!on()) return; const A = ac(), T = A.currentTime + t, R = rev78(len), g = A.createGain(), s = A.createGain(); g.connect(OUT); s.gain.value = send; g.connect(s).connect(R.cv);
+  const o = A.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f * 1.25, T); o.frequency.exponentialRampToValueAtTime(f, T + .08); const og = A.createGain(); og.gain.setValueAtTime(0, T); og.gain.linearRampToValueAtTime(vol, T + .004); og.gain.exponentialRampToValueAtTime(.0001, T + .7); o.connect(og).connect(g); o.start(T); o.stop(T + .75);
+  const n = Math.floor(A.sampleRate * .12), nb = A.createBuffer(1, n, A.sampleRate), d = nb.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / n * 7); const ns = A.createBufferSource(), lp = A.createBiquadFilter(), ng = A.createGain(); ns.buffer = nb; lp.type = 'lowpass'; lp.frequency.value = 280; ng.gain.value = vol * 1.4; ns.connect(lp).connect(ng).connect(g); ns.start(T); }
+const SND78 = {
+  A: { name: 'Low pound, big hall', desc: 'One deep, low pound (a soft body, no ring) that blooms into a long dark reverb, like a hammer-fall heard across the Great Forge.', play: () => pound78(0, 52, .09, .9, 2.6) },
+  B: { name: 'Double pound', desc: 'Two pounds, the second lower and heavier (doom… DOOM), in a medium reverb.', play: () => { pound78(0, 62, .06, .6, 1.8); pound78(.2, 46, .095, .8, 1.8); } },
+  C: { name: 'Pound + forge breath', desc: 'The low pound with reverb, and under it a soft rush of air, like the forge’s bellows exhaling, swelling and fading into the reverb.', play: () => { pound78(0, 52, .085, .8, 2.2); noise(.02, 1.1, .022, 220, .5, 'lowpass'); } },
+  D: { name: 'Short room pound', desc: 'A tighter version: the low pound in a small stone room (a short, close reverb), punchy and done quickly.', play: () => pound78(0, 56, .1, .7, .9) },
+};
+function r78(K) { const B = r77('C'), S8 = SND78[K];
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? S8.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+    get desc() { return profName === 'Blacksmithing' ? 'The finale as locked (rising beads, struck to iron with crunch + scale, the crate). Its closing sound, when the icon lights: ' + S8.desc + ' (Sound on; pick “Reaching the next unlock”.)' : 'One profession at a time: this round is Blacksmithing’s finale sound. Others show their current look.'; },
+    get note() { return profName === 'Blacksmithing' ? 'finale sound: ' + S8.name.toLowerCase() + '.' : 'the set bar.'; },
+    draw(top) { window.FINSND78 = S8.play; try { B.draw(top); } finally { window.FINSND78 = null; } } }; }
+Object.assign(FAM, { PA: r78('A'), PB: r78('B'), PC: r78('C'), PD: r78('D') });
+
+// Round 77 strike sets A, B, D (C locked), moved out 2026-11-15.
+  A: { name: 'Iron clank', desc: 'A short, dull metal clank (low and damped, the pitch varied) with a soft crunch; a fan of bright spark streaks bursting up and out from each ingot.',
+    snd: (k, v) => { const f = 190 * semi(pick45(k, 2) / 2); tone(f, 0, .03 * v, .09, 'triangle', null, .001); tone(f * 2.6, 0, .008 * v, .04, 'triangle', null, .001); noise(0, .05, .03 * v, 1200, .8, 'lowpass', true); drum46(110, 0, .02 * v); },
+    sparks: (x, y) => { for (let q = 0; q < 12; q++) { const an = -Math.PI / 2 + (q / 11 - .5) * 2.4, sp = 70 + Math.random() * 70; spawn({ x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, g: 340, life: .32 + Math.random() * .12, size: .9 + Math.random() * .5, col: q % 3 ? '#ffc060' : '#fff6d8' }); } } },
+  B: { name: 'Heavy thud', desc: 'A deep, heavy thud with gravel in it (felt more than heard); a big shower of sparks thrown high that rain back down, and the bar kicks harder.',
+    snd: (k, v) => { drum46(78 * semi(pick45(k, 2) / 3), 0, .04 * v); noise(0, .12, .035 * v, 520, .7, 'lowpass', true); tone(62, 0, .02 * v, .16, 'sine', null, .002); }, kick: 1.6,
+    sparks: (x, y) => { for (let q = 0; q < 16; q++) spawn({ x: x + (Math.random() - .5) * 10, y, vx: (Math.random() - .5) * 120, vy: -90 - Math.random() * 90, g: 420, life: .55 + Math.random() * .2, size: .9 + Math.random() * .6, col: q % 3 ? '#ffb040' : '#ffe8b0' }); } },
+  D: { name: 'Clank + ember spray', desc: 'The iron clank, but each strike also throws a short sideways spray of hot embers along the bar toward the next bead, so the sparks run ahead of the strikes like a fuse.',
+    snd: (k, v) => SET77.A.snd(k, v),
+    sparks: (x, y) => { for (let q = 0; q < 10; q++) spawn({ x, y: y + 1, vx: 60 + Math.random() * 90, vy: -30 - Math.random() * 40, g: 300, life: .3 + Math.random() * .15, size: .9 + Math.random() * .4, col: q % 3 ? '#ffb040' : '#fff0c0' }); for (let q = 0; q < 5; q++) spawn({ x, y, vx: (Math.random() - .5) * 60, vy: -70 - Math.random() * 40, g: 340, life: .3, size: .8, col: '#fff6d8' }); } },
