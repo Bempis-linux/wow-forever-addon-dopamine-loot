@@ -900,6 +900,10 @@ Professions (from 1.3.0):
    plucked note; the sweep a pluck run up + a low pluck), B Garden bells (a small soft bell; a bell run down + a two-bell
    chord), C Wooden marimba (two mallet notes; a mallet run up + a low note), D Thumb piano (a note + a soft fifth; a
    run up + a chord with an echo).
+   Round 45 pick: **D Thumb piano. Herbalism DONE** (the Vine; Sickle sweep finale; sounds: a warm thumb-piano note + a
+   soft fifth per skill-up on varied scale notes, stepping down after two in a row; the sweep a quick run up landing on a
+   chord with an echo). Skinning's sounds were made before the fatigue rule (the slash whoosh, the chop clicks); revisit them
+   too.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
