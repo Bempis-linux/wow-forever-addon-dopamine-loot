@@ -1125,7 +1125,13 @@ Professions (from 1.3.0):
    depths** (glowing ingots rise one by one out of the magma in no set order, dripping, while its level sinks to empty).
    The unlock “ding” (the shared payoff’s bright four-note arpeggio) was annoying: for Blacksmithing it is now a soft low
    thump with a warm low hum (other professions unchanged; the real sound comes in the sound step). The banner’s own two-note
-   chime (reveal) was the ding the user meant: silenced for Blacksmithing.
+   chime (reveal) was the ding the user meant: silenced for Blacksmithing (confirmed gone).
+   Round 75 → **mix B and D**, plus an option where the ingots stay molten beads and then, fast, left to right, each is hit
+   and shaped into an ingot (a satisfying “blink”). Round 76 (formation 0-1.65 s, then the crate ending shifted .5 s): **A.
+   Rising beads** (beads rise out of the sinking magma in no set order, then firm into ingots and cool), **B. Beads, then the
+   blink** (the bar beads up, the beads sit glowing, then rat-a-tat left to right each is struck in a white flash and snaps
+   into an ingot: squash + spring back, three sparks, a soft tap a step higher; then a cooling wave), **C. Rising beads, then
+   the blink**, **D. Blink to iron** (each blink shapes and cools at once: a line of finished iron races left to right).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

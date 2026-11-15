@@ -1024,3 +1024,39 @@ function r74(K) { const F = FIN74[K], V = V69(F), g0 = V.grow; V.grow = (p, x0, 
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
 Object.assign(FAM, { PA: r74('A'), PB: r74('B'), PC: r74('C'), PD: r74('D') });
+
+// Round 75 formations (bead75, crack75, rise75, FORM75, r75), moved out 2026-11-15; hotGrad75 and riseOrder75 stay.
+// B: the magma beads up: it pulls apart into seven wobbling blobs (necks thinning and snapping), each firms up into an ingot, then cools to iron
+function bead75(I, ts) { const w = (I.x1 - I.x0) / N72;
+  for (let k = 0; k < N72; k++) { const [xa, xb] = seg72(I, k), cx = (xa + xb) / 2, iw = xb - xa, u = clamp(ts / .45), firm = clamp((ts - .5) / .25), cool = clamp((ts - .78 - k * .04) / .3);
+    if (firm < 1) { const bw = lerp(w + 1, iw * .9, eOut(u)), wob = 1 + .18 * Math.sin(ts * 26 + k) * Math.exp(-ts * 4) * u, bh = 11 * wob, r = lerp(1, 5, u); ctx.save(); ctx.globalAlpha *= 1 - firm; ctx.fillStyle = hotGrad75(I.ly - bh / 2, I.ly + bh / 2); ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.roundRect(cx - bw / 2 / wob, I.ly + 6 - bh, bw / wob, bh, r); ctx.fill(); ctx.restore();
+      if (u < 1 && k < N72 - 1) { const nx = xb + .6, nh = 10 * (1 - eOut(u)); if (nh > .5) { ctx.fillStyle = '#ff9a34'; ctx.fillRect(nx - 1.5, I.ly + .5 - nh / 2, 3, nh); } } }
+    if (firm > 0) ing72(xa, xb, I.ly + .5, cool, lerp(.85, 1, firm)); if (u >= 1) once('bd' + k, () => tone(1318 * semi(PENT42[k]), 0, .003, .12, 'sine', null, .002)); } }
+// C: crust and shrink: the whole bar skins over dark, splits along seven seams (glowing cracks), then each piece shrinks as it cools, pulling into ingot shape, the glow in the gaps fading
+function crack75(I, ts, sf) { const order = [3, 1, 5, 0, 6, 2, 4], crust = clamp(ts / .3);
+  if (ts < .62) { ctx.save(); ctx.globalAlpha *= crust * .95; ctx.fillStyle = '#3a1a10'; ctx.beginPath(); ctx.moveTo(I.x0 - 2, I.ly + 6); for (let x = I.x0 - 2; x <= I.x1; x += 2) ctx.lineTo(x, sf(x) - .5); ctx.lineTo(I.x1, I.ly + 6); ctx.closePath(); ctx.fill(); ctx.restore();
+    order.forEach((k, n) => { if (k === N72 - 1) return; const t0 = .3 + n * .045; if (ts < t0) return; once('ck' + k, () => mallet(220 * semi(PENT42[n]), 0, .01)); const [, xb] = seg72(I, k), x = xb + 1.2; ctx.save(); ctx.strokeStyle = '#ffd070'; ctx.lineWidth = 1.3; ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(x, sf(x)); ctx.quadraticCurveTo(x + 1.5, I.ly, x - .5, I.ly + 6); ctx.stroke(); ctx.restore(); }); return; }
+  const sh = eOut(clamp((ts - .62) / .3)), gap = 1 - clamp((ts - .8) / .3); for (let k = 0; k < N72; k++) { const [xa, xb] = seg72(I, k), w = (I.x1 - I.x0) / N72, cx = (xa + xb) / 2, hw = lerp(w / 2 + .3, (xb - xa) / 2, sh);
+    if (gap > 0 && k < N72 - 1) glow58(xb + 1.2, I.ly, 5, .6 * gap); ing72(cx - hw, cx + hw, I.ly + .5, lerp(.55, 1, clamp((ts - .7) / .4)), lerp(1.2, 1, sh)); } }
+// D: rise from the depths: one by one, glowing ingots rise up out of the magma while its level sinks, magma sliding off them, until they sit in the empty channel and cool
+function rise75(I, ts, sf) { for (let n = 0; n < N72; n++) { const k = riseOrder75[n], t0 = .05 + n * .1, u = eOut(clamp((ts - t0) / .35)); if (u <= 0) continue; const [xa, xb] = seg72(I, k), cx = (xa + xb) / 2, y = lerp(I.ly + 12, I.ly + .5, u), cool = clamp((ts - t0 - .4) / .35);
+    ctx.save(); if (ts < 1) { ctx.beginPath(); ctx.moveTo(xa - 2, I.ly - 30); ctx.lineTo(xa - 2, sf(xa)); for (let x = xa; x <= xb + 2; x += 2) ctx.lineTo(x, sf(x)); ctx.lineTo(xb + 2, I.ly - 30); ctx.closePath(); ctx.clip(); } ing72(xa, xb, y, cool); ctx.restore();
+    if (u > .1 && u < 1) once('rd' + k + '_' + Math.floor(ts / .07), () => spawn({ x: lerp(xa + 3, xb - 3, Math.random()), y: y + 2, vy: 6, g: 220, life: .3, size: 1, col: '#ff9a3a' })); if (u >= 1) once('rs' + k, () => tone(1046 * semi(PENT42[n]), 0, .003, .15, 'sine', null, .002)); } }
+const FORM75 = {
+  A: { name: 'Cut and cool', desc: 'As round 72 E: a bright cut sweeps along the bar and splits it into seven moulds, then a cooling wave runs along them, each turning from glowing orange to iron.' },
+  B: { name: 'Beading up', desc: 'The magma pulls itself apart: necks thin and snap between seven wobbling blobs (like molten metal beading), each blob firms up into an ingot shape, then cools to iron.', draw: bead75, tip: (I, ts) => ts < 1.4 ? I.x0 : null },
+  C: { name: 'Crust and shrink', desc: 'The whole bar skins over dark; seams crack open in it one after another, glowing; then each piece shrinks as it cools, pulling into an ingot’s shape, the glow in the gaps between them fading out.', draw: crack75, tip: (I, ts) => ts < .62 ? null : ts < 1.4 ? I.x0 : null },
+  D: { name: 'Rise from the depths', desc: 'One by one, in no set order, glowing ingots rise up out of the magma, magma sliding off them in drips, while its level sinks; by the time the last one is up the channel is empty, and they cool to iron where they sit.', draw: rise75, lift: (I, ts) => { const d = 9 * eOut(clamp(ts / 1)); return x => -d; }, tip: (I, ts) => ts < 1 ? null : ts < 1.4 ? I.x0 : null },
+};
+function fin75(K) { const M = FORM75[K]; if (K === 'A') return Object.assign({}, INGOTS72, { name: M.name, desc: M.desc });
+  return Object.assign({}, INGOTS72, { name: M.name, desc: M.desc, lift: M.lift || INGOTS72.lift,
+    tip: (I, ts) => { const t = M.tip(I, ts); return t !== null ? t : ts >= 1.4 ? INGOTS72.tip(I, ts) : null; },
+    fin(I, ts, sf) { for (let k = 0; k < N72; k++) once('ct' + k, () => {}); if (ts < 1.15) { M.draw(I, ts, sf); return; } INGOTS72.fin(I, ts, sf); } }); }
+function r75(K) { const F = fin75(K), V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'Reaching the next unlock: how the ingots are made. ' + F.desc + ' Then the same ending for all four: a crate drops in, the ingots fly in and stack, a lid, the crate glides off, the icon lights. (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'ingots: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
+Object.assign(FAM, { PA: r75('A'), PB: r75('B'), PC: r75('C'), PD: r75('D') });
