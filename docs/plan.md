@@ -1097,6 +1097,16 @@ Professions (from 1.3.0):
    stream as a swirling ribbon into the icon), **D. The blade rises** (a sword rises out of the magma along the bar,
    dripping, a shine runs its edge, it slides into the icon). Old gatherer rounds 20, 28, 33, 40 (nothing else used them)
    moved to the archive file for page space.
+   Round 71 → **Ember swarm kept as A**; explore add-ons on it; the ingots and the blade cleaned up and more satisfying,
+   each with the ember swarm. Round 72 (six options, keys 1-6): **A. Ember swarm**, **B. + vortex** (the ribbon whirls round
+   the icon tightening, then implodes into it with a flash), **C. + heat wake** (the surface flares and ripples where embers
+   lift; a glowing wake follows the ribbon down the bar), **D. + ash rain** (once lit, the icon breathes the embers back out
+   as glowing ash that drifts down onto the magma with tiny ripples), **E. Ingots, shipped (clean)** (a bright cut sweeps the
+   bar into seven moulds; a cooling wave turns them to iron, their heat lifting as the swarm; a crate drops in; the ingots
+   fly in one by one in an even rhythm and stack 4 + 3, the crate dipping each time; a lid thunks on; the crate glides off),
+   **F. The blade rises (clean)** (a whole sword, fuller, gold crossguard, wrapped grip, pommel, rises smoothly, magma
+   sheeting off in drips, its heat lifting as the swarm; cools to steel; a glint runs to the tip; it turns and flies into
+   the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
