@@ -1112,6 +1112,12 @@ Professions (from 1.3.0):
    ingots slides along the bar step by step like a conveyor, the end one tipping into the cart each time with a clink; the
    cart rolls away), **C. The blade rises (lying)** (72 F, no swarm), **D. The blade rises upright** (point first out of the
    head, standing upright, drips; a glint climbs to the point; it tips over toward the icon and flies in).
+   Round 73 → **the blade scrapped**; more ingot variations that differ in what the ingots do (not the same animation
+   slightly changed). Round 74 (all start the same: the cut into seven moulds, the cooling wave): **A. Into a crate**, **B.
+   Dominoes** (they stand up on end one by one, then topple in a chain of clacks toward the end, the last onto the icon),
+   **C. Fuse into one** (they slide together into a tight row, clacking, and fuse with a flash into one big gleaming ingot
+   that hops into the icon), **D. Pyramid on the icon** (they hop one by one onto the top of the icon and stack 4-2-1, a
+   shine runs over it, the icon lights under it like a trophy).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

@@ -914,3 +914,66 @@ function r72(K) { const F = FIN72[K], V = V69(F), g0 = V.grow; V.grow = (p, x0, 
     const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
     try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; } } }; }
 Object.assign(FAM, { PA: r72('A'), PB: r72('B'), PC: r72('C'), PD: r72('D'), PE: r72('E'), PF: r72('F') });
+
+// The blade (BLADE72, sword72) and round 73 (cart, upright blade, r73), moved out 2026-11-15; the ingots and NOSWARM72 stay.
+// ---- F: the blade, clean: a whole sword (blade with a fuller, gold crossguard, wrapped grip, pommel) rises smoothly out of the magma, the magma sheeting off
+// in drips and its heat lifting off as an ember swarm; it cools to steel; a glint runs down the edge to the tip; it turns its point to the icon and flies in.
+function sword72(x0, x1, y, hot, rot = 0, sc = 1) { const L = x1 - x0, cx = (x0 + x1) / 2; ctx.save(); ctx.translate(cx, y); ctx.rotate(rot); ctx.scale(sc, sc); const a = -L / 2, b = L / 2, gx = a + 13;
+  const g = ctx.createLinearGradient(0, -2.6, 0, 2.6); g.addColorStop(0, mix('#f0f4f8', '#fff4c8', hot)); g.addColorStop(.5, mix('#aab4be', '#ffa040', hot)); g.addColorStop(1, mix('#6a7480', '#d8460e', hot)); if (hot > 0) { ctx.shadowColor = '#ff8a30'; ctx.shadowBlur = 8 * hot; }
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(gx, -2.5); ctx.lineTo(b - 9, -2.5); ctx.lineTo(b, 0); ctx.lineTo(b - 9, 2.5); ctx.lineTo(gx, 2.5); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = `rgba(40,46,54,${.5 - hot * .3})`; ctx.fillRect(gx + 3, -.5, L - 30, 1); ctx.fillStyle = mix('#c89a40', '#ffd890', hot * .5); ctx.beginPath(); ctx.roundRect(gx - 2.5, -6, 2.8, 12, 1); ctx.fill();
+  ctx.fillStyle = '#3a2416'; ctx.fillRect(a + 3, -1.6, gx - a - 5.5, 3.2); ctx.fillStyle = '#6a4a2a'; for (let k = 0; k < 3; k++) ctx.fillRect(a + 4 + k * 2.6, -1.6, 1, 3.2); ctx.fillStyle = '#c89a40'; ctx.beginPath(); ctx.arc(a + 2.2, 0, 2.2, 0, 7); ctx.fill(); ctx.restore(); }
+const BLADE72 = { name: 'The blade rises (clean)', finAt: 2.15, desc: 'Clean and satisfying: a whole sword (a blade with a fuller, a gold crossguard, a wrapped grip and pommel) rises smoothly out of the magma along the bar, the magma sheeting off it in drips and its heat lifting off as an ember swarm into the icon; it cools from glowing orange to steel; a glint runs down the edge and sparkles at the tip; then it turns its point to the icon and flies in, and the icon lights.',
+  lift: (I, ts) => { const a = ts < .7 ? 1.4 * Math.sin(Math.PI * ts / .7) : 0; return x => a; },
+  fin(I, ts, sf) { const xa = I.x0 + 18, xb = Math.min(I.x1 - 12, I.tipX - 6), ux = ux69(I), rise = eOut(clamp(ts / .7)), hot = clamp(1 - (ts - .35) / .75), fly = ts > 1.5 ? clamp((ts - 1.5) / .45) : 0; if (fly >= 1) return;
+    const e = fly * fly * (3 - 2 * fly), y = lerp(I.ly + 8 - rise * 18, I.ly - 2, e), dx = lerp(0, ux - (xa + xb) / 2, e), rot = ts > 1.35 ? -.18 * Math.sin(Math.PI * clamp((ts - 1.35) / .6)) : 0, sc = 1 - e * .8;
+    ctx.save(); if (ts < .75) { ctx.beginPath(); ctx.rect(I.x0 - 40, I.ly - 40, I.x1 - I.x0 + 100, 40 - 5 + (ts > .7 ? 20 : 0)); ctx.clip(); } sword72(xa + dx, xb + dx, y, hot, rot, sc); ctx.restore();
+    if (ts > .2 && ts < 1) once('dr' + Math.floor(ts / .06), () => spawn({ x: lerp(xa + 14, xb, Math.random()), y: y + 3, vy: 6, g: 240, life: .35, size: 1.1, col: '#ff9a3a' }));
+    if (ts > .85 && ts < 1.25) { const gx = lerp(xa + 14, xb - 2, (ts - .85) / .4); ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillRect(gx - 5, y - 2.5, 5, 1.1); } if (ts > 1.2 && ts < 1.5) glint59(xb, y, 1 - (ts - 1.2) / .3, 5);
+    if (fly > 0) for (let q = 0; q < 6; q++) { const v = Math.max(0, e - q * .05); glow58(lerp((xa + xb) / 2, ux, v), lerp(I.ly - 10, I.ly - 2, v), 3, .5 - q * .07); }
+    swarm72(I, ts, { t0: .35, spread: .6, n: 50, src: q => [lerp(xa + 14, xb, rnd53(q + 600)), I.ly - 9] }); if (ts >= .35) once('bch', () => chime72(.05));
+    if (ts > .85) once('bs', () => { bell45(1568, 0, .006); tone(2093, .05, .003, .3, 'sine', null, .002); }); if (ts > 1.5) once('bw', () => noise(0, .35, .018, 1100, .6, 'lowpass')); },
+  after: (I, ts) => blaze69(ux69(I), I.ly, ts > 1.92 ? Math.min(1, (ts - 1.92) / .12) * Math.max(0, 1 - (ts - 2.04) / .5) : 0) };
+// ---------- round 73 (2026-11-15): iterate the ingots and the blade, WITHOUT the ember swarm. A/B the ingots (crate / mine cart), C/D the blade (lying / upright) ----------
+// B: a mine cart below the bar's end; the row of ingots slides along the bar step by step like a conveyor, and each one tips off the end into the cart
+function cart73(x, y, n, wheel) { ctx.save(); ctx.fillStyle = '#3a3c42'; ctx.beginPath(); ctx.moveTo(x - 14, y - 7); ctx.lineTo(x + 14, y - 7); ctx.lineTo(x + 11, y + 3); ctx.lineTo(x - 11, y + 3); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#5a5e68'; ctx.fillRect(x - 14, y - 7, 28, 2); ctx.fillStyle = '#7a4a24'; ctx.fillRect(x - 10, y - 3, 20, 1.2);
+  for (let j = 0; j < Math.min(n, 7); j++) { const row = j < 4 ? 0 : 1, col = row ? j - 4 : j, m = row ? 3 : 4; ing72(x + (col - (m - 1) / 2) * 6 - 3, x + (col - (m - 1) / 2) * 6 + 3, y - 8.5 - row * 3, 1, .55); }
+  [-7, 7].forEach(dx => { ctx.fillStyle = '#1e2024'; ctx.beginPath(); ctx.arc(x + dx, y + 4.5, 2.6, 0, 7); ctx.fill(); ctx.strokeStyle = '#8a8e96'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x + dx, y + 4.5); ctx.lineTo(x + dx + Math.cos(wheel) * 2.2, y + 4.5 + Math.sin(wheel) * 2.2); ctx.stroke(); }); ctx.restore(); }
+const step73 = j => 1.15 + j * .15;
+const steps73 = ts => { let s = 0; for (let j = 0; j < N72; j++) s += eOut(clamp((ts - step73(j)) / .12)); return s; };
+const CART73 = { name: 'Ingots onto a cart', finAt: 2.75, desc: 'The same clean start (a bright cut sweeps the bar into seven moulds, a cooling wave turns them to iron, a shine runs along them). A mine cart rolls in on a short track under the bar’s end; then the row of ingots slides along the bar step by step like a conveyor, and each time the end one tips off and drops into the cart with a clink, the cart dipping; the cart fills, then rolls away on its track and the icon lights.',
+  lift: () => () => 0, tip: (I, ts) => ts < .37 ? null : ts < 2.75 ? I.x0 : lerp(I.x0, I.tipX, eOut(clamp((ts - 2.75) / .5))),
+  cart: (I, ts) => { const ux = ux69(I), into = eOut(clamp((ts - .85) / .3)), away = ts > 2.3 ? clamp((ts - 2.3) / .45) : 0, n = Math.floor(clamp(steps73(ts) - .55, 0, 7) + (steps73(ts) >= 7 ? 1 : 0)), dip = [...Array(N72).keys()].reduce((m, j) => { const a = ts - step73(j) - .2; return Math.max(m, a >= 0 && a < .16 ? Math.sin(Math.PI * a / .16) * 1.6 : 0); }, 0);
+    return { x: ux + 40 * (1 - into) + 50 * away * away, y: I.ly + 15 + dip, n: Math.min(7, Math.floor(steps73(ts))), a: 1 - away, wheel: ts * 9 * ((1 - into) > .01 || away > 0 ? 1 : 0) }; },
+  fin(I, ts) { const w = (I.x1 - I.x0) / N72, end = I.x1 + 1, st = steps73(ts);
+    for (let k = 0; k < N72; k++) { const [xa, xb] = seg72(I, k); if (ts >= cut72(k)) once('ct' + k, () => tone(1318 * semi(PENT42[k]), 0, .003, .12, 'sine', null, .002));
+      if (ts < .37) { if (ts >= cut72(k) && k < N72 - 1) { ctx.fillStyle = 'rgba(30,10,4,.9)'; ctx.fillRect(xb + .1, I.ly - 7, 2.2, 13); } continue; }
+      const cool = clamp((ts - cool72(k)) / .3), off = Math.min(st, N72 - 1 - k) * w, tp = st - (N72 - 1 - k);
+      if (tp <= 0) ing72(xa + off, xb + off, I.ly + .5, cool); else if (tp < 1) { const C = CART73.cart(I, ts), sx = xb + off - 2, u = tp; ctx.save(); ctx.translate(lerp(sx, C.x, u), lerp(I.ly + .5, C.y - 9, u * u)); ctx.rotate(u * 1.2); ing72(-(xb - xa) / 2, (xb - xa) / 2, 0, 1, 1 - u * .45); ctx.restore(); }
+      else once('cl' + k, () => { mallet(587 * semi(PENT42[(N72 - 1 - k) % 7]), 0, .014); tone(1760 * semi(PENT42[k % 5]), .01, .0025, .15, 'sine', null, .002); }); }
+    if (ts < .37) { const lx = lerp(I.x0, I.x1, clamp((ts - .05) / .3)); glow58(lx, I.ly, 8, .8); ctx.fillStyle = '#fff6d8'; ctx.fillRect(lx - .8, I.ly - 7, 1.6, 14); }
+    if (ts > .75 && ts < 1.05) { const sx = lerp(I.x0, I.x1, (ts - .75) / .3); ctx.save(); ctx.beginPath(); ctx.rect(I.x0, I.ly - 6, I.x1 - I.x0, 13); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(sx - 8, I.ly - 5, 8, 2); ctx.restore(); }
+    if (ts > .85) once('cr', () => noise(0, .35, .014, 700, .6, 'lowpass')); if (ts > 2.3) once('ca', () => noise(0, .5, .014, 600, .6, 'lowpass')); },
+  after: (I, ts) => { if (ts > .85 && ts < 2.75) { const C = CART73.cart(I, ts), ux = ux69(I); ctx.save(); ctx.globalAlpha *= C.a; ctx.fillStyle = 'rgba(90,70,50,.7)'; ctx.fillRect(ux - 22, I.ly + 22.5, 70, 1.3); cart73(C.x, C.y, C.n, C.wheel); ctx.restore(); }
+    if (ts >= 2.4) blaze69(ux69(I), I.ly, Math.min(1, (ts - 2.4) / .2) * Math.max(0, 1 - Math.max(0, ts - 2.75) / .4)); } };
+// D: the sword rises UPRIGHT, point first, out of the head of the magma; a glint climbs its edge; it tips over and flies into the icon
+const UPRIGHT73 = { name: 'The blade rises upright', finAt: 2.1, desc: 'The sword rises point first out of the magma at the head of the bar and stands upright (glowing, magma sliding down it in drips), cools to steel; a glint climbs the edge to the point and sparkles; then it tips over, turning its point to the icon, and flies in; the icon lights.',
+  lift: (I, ts) => { const hx = I.tipX - 12, a = ts < .7 ? 2.5 * Math.sin(Math.PI * ts / .7) : 0; return x => a * Math.exp(-Math.pow((x - hx) / 8, 2)); },
+  fin(I, ts) { const hx = Math.min(I.x1 - 16, I.tipX - 12), ux = ux69(I), rise = eOut(clamp(ts / .75)), hot = clamp(1 - (ts - .35) / .75), fly = ts > 1.45 ? clamp((ts - 1.45) / .45) : 0; if (fly >= 1) return; const e = fly * fly * (3 - 2 * fly), L = 30;
+    const cx = lerp(hx, ux, e), cy = lerp(I.ly + 22 - rise * 32, I.ly - 2, e), rot = -Math.PI / 2 + (ts > 1.3 ? Math.PI / 2 * eOut(clamp((ts - 1.3) / .4)) : 0), sc = 1 - e * .8;
+    ctx.save(); if (ts < .8) { ctx.beginPath(); ctx.rect(I.x0 - 40, I.ly - 60, I.x1 - I.x0 + 100, 55); ctx.clip(); } sword72(cx - L / 2, cx + L / 2, cy, hot, rot, sc); ctx.restore();
+    if (ts > .2 && ts < 1) once('ud' + Math.floor(ts / .07), () => spawn({ x: hx + (Math.random() - .5) * 4, y: cy - Math.random() * 10, vy: 12, g: 240, life: .4, size: 1.1, col: '#ff9a3a' }));
+    if (ts > .85 && ts < 1.2) { const gy = lerp(cy + 10, cy - 13, (ts - .85) / .35); ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillRect(hx - 2.5, gy, 1.2, 5); } if (ts > 1.15 && ts < 1.45) glint59(hx, cy - L / 2 + 1, 1 - (ts - 1.15) / .3, 5);
+    if (ts > .85) once('us', () => { bell45(1568, 0, .006); tone(2093, .05, .003, .3, 'sine', null, .002); }); if (ts > 1.45) once('uw', () => noise(0, .35, .018, 1100, .6, 'lowpass')); if (ts > .05) once('ur', () => { noise(0, .6, .02, 300, .5, 'lowpass'); tone(98, .1, .015, .6, 'sine', null, .1); }); },
+  after: (I, ts) => blaze69(ux69(I), I.ly, ts > 1.88 ? Math.min(1, (ts - 1.88) / .12) * Math.max(0, 1 - (ts - 2) / .5) : 0) };
+const FIN73 = { A: Object.assign({}, INGOTS72, { name: 'Ingots into a crate' }), B: CART73, C: Object.assign({}, BLADE72, { name: 'The blade rises (lying)' }), D: UPRIGHT73 };
+function r73(K) { const F = FIN73[K], V = V69(F), g0 = V.grow; V.grow = (p, x0, y, Ln, f, t, I) => { const ts = S.closeAt === undefined ? -1 : S.age - S.closeAt; FILL70 = F.tip && ts >= 0 ? F.tip(I, ts) : null; g0(p, x0, y, Ln, f, t, I); };
+  return { get name() { return K + '. ' + (profName === 'Blacksmithing' ? F.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining'].includes(profName) ? profName + ' (done)' : 'Blacksmithing only this round'); },
+  get desc() { return profName === 'Blacksmithing' ? 'Blacksmithing as picked. Reaching the next unlock (no ember swarm this round): ' + F.desc + ' (Pick “Reaching the next unlock”; placeholder sounds.)' : 'One profession at a time: this round is Blacksmithing’s finale. Others show their current look.'; },
+  get note() { return profName === 'Blacksmithing' ? 'finale: ' + F.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Mining') return r52('A').draw(top); if (profName !== 'Blacksmithing') return r47(K).draw(top);
+    const snd0 = S.p.snd, hit0 = S.p.hit; S.p.snd = () => {}; S.p.hit = () => {}; NOSWARM72 = true; TEX62.G66 = (xa, xb, ly, bot, t, surf) => bandsGrad66(xa, xb, ly, bot, t, surf, null);
+    try { barModule(top, 'M', V); } finally { S.p.snd = snd0; S.p.hit = hit0; MAGLIFT = null; FILL70 = null; NOSWARM72 = false; } } }; }
+Object.assign(FAM, { PA: r73('A'), PB: r73('B'), PC: r73('C'), PD: r73('D') });
+delete FAM.PE; delete FAM.PF;
