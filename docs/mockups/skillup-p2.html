@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 42, Fishing: livelier sound sets</h1>
+  <h1>Skill-up: round 43, Fishing finales</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 42: Fishing (the swell + Depth bands): livelier but gentle sound sets (little tunes, drops, echoes) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 43: Fishing (the swell, Depth bands, the Water drops sounds): four finales for when its bar fills (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -2392,6 +2392,39 @@ function r42(K) { return { get name() { return K + '. ' + (VAR42[profName] ? VAR
 SET42.D = { name: 'Drops + thumb-piano swell', desc: 'The hybrid: B’s two water drops per skill-up (varied scale notes, climbing), and C’s swell, a low plucked bass note with a shimmer of two high notes; no reel.', up: SET42.B.up, swell: SET42.C.swell, reel: false };
 VAR42.Fishing.D = fish42('D');
 Object.assign(FAM, { PA: r42('A'), PB: r42('B'), PC: r42('C'), PD: r42('D') });
+// ---------- round 43 (2026-11-15): Fishing set (the swell, Depth bands, the Water drops sounds: round 42 B); four finales ----------
+const F43 = VAR42.Fishing.B;
+const dropRun = (n, f0, gap, v) => { for (let k = 0; k < n; k++) drop(f0 * semi(PENT42[k % 10]), k * gap, v); };
+const FIN43 = {
+  A: { name: 'The big catch', finAt: .8, desc: 'Fishing as picked. Reaching the next waters: the reel spins fast (a quick run of drops), the line snaps taut, and the next waters’ fish is hauled up out of the water at the bobber with a splash, arcs over and lands in its spot at the bar’s end, lit.',
+    over(p, I) { const ts = S.age - S.closeAt, { top } = fishGeo(I), ux = I.x1 + 18;
+      if (ts >= .25 && ts < .8) { const u = (ts - .25) / .55, e = eOut(u), x = lerp(I.x1 - 4, ux, e), y = lerp(top + 2, I.ly, e) - Math.sin(Math.PI * u) * 30; ctx.save(); ctx.strokeStyle = '#fff6dc'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(I.x0 - 14, I.ly - 14.5); ctx.quadraticCurveTo((I.x0 + x) / 2, Math.min(y, I.ly - 20) - 6, x, y - 8); ctx.stroke(); ctx.translate(x, y); ctx.rotate(Math.sin(ts * 30) * .25 * (1 - u)); icon(0, 0, 14 + 6 * e, S.nx.emo, 1, null); ctx.restore(); }
+      once('fc0', () => dropRun(6, 523, .04, .012)); if (ts >= .25) once('fc1', () => { splash(I.x1 - 4, top, 14, 1.2); drop(392, 0, .024); drop(587, .06, .02); }); } },
+  B: { name: 'Tidal wave', finAt: .75, desc: 'Fishing as picked. Reaching the next waters: one big swell, twice the usual, rolls the whole bar from the reel to its end with a long foaming crest, lifts the bobber high and crashes over the next waters’ icon in a burst of spray, lighting it.',
+    pre: () => { const ts = S.age - S.closeAt; if (ts < 0 || ts > .7) return null; const sx = lerp(W / 2 - 150, W / 2 + 120, ts / .6); return x => -5.8 * Math.exp(-((x - sx) * (x - sx)) / 900); },
+    over(p, I) { const ts = S.age - S.closeAt, { top } = fishGeo(I), ux = I.x1 + 18;
+      if (ts < .62) { const sx = lerp(I.x0 - 22, I.x1 + 18, ts / .6); ctx.save(); ctx.strokeStyle = 'rgba(240,252,255,.95)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(sx + 4, top - 4, 6, Math.PI * 1.05, Math.PI * 1.9); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.9)'; for (let k = -6; k <= 2; k++) { const x = sx + k * 4; if (x < I.x0 || x > I.x1) continue; ctx.globalAlpha = 1 - Math.abs(k) * .12; ctx.fillRect(x - 1.5, top - 6 * Math.exp(-((x - sx) * (x - sx)) / 900) - 1.5, 3, 2); } ctx.restore(); if (Math.random() < .8) spawn({ x: sx + 4, y: top - 8, vx: 40 + Math.random() * 50, vy: -30 - Math.random() * 40, g: 220, life: .4, size: 1.2, col: '#e8f8ff' }); }
+      once('fw0', () => { kal(110, 0, .02); dropRun(4, 392, .12, .01); }); if (ts >= .6) once('fw1', () => { splash(ux, I.ly - 4, 26, 1.5); dropRun(5, 784, .035, .012); }); } },
+  C: { name: 'Ripples', finAt: .8, desc: 'Fishing as picked. Reaching the next waters: the bobber goes still, then three wide rings of ripples spread out from it one after another across the whole module, and a light shower of drops falls onto the water, each landing with a tiny ring; the icon lights as the last ripple passes it.',
+    over(p, I) { const ts = S.age - S.closeAt, { top } = fishGeo(I), bx = I.x1;
+      for (let j = 0; j < 3; j++) { const u = clamp((ts - j * .15) / .8); if (u <= 0 || u >= 1) continue; ctx.save(); ctx.strokeStyle = `rgba(220,245,255,${.8 * (1 - u)})`; ctx.lineWidth = 1.6 - u; ctx.beginPath(); ctx.ellipse(bx, top + 1, 8 + u * 170, 3 + u * 22, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+      for (let k = 0; k < 9; k++) { const tk = .1 + k * .07, x = I.x0 + 10 + skHash(k + 11) * (I.x1 - I.x0 - 20); if (ts >= tk) once('frd' + k, () => { spawn({ x, y: top - 40, vx: 0, vy: 160, g: 300, life: .22, size: 1.4, col: '#d8f0ff' }); }); if (ts >= tk + .2 && ts < tk + .55) { const v = (ts - tk - .2) / .35; ctx.save(); ctx.strokeStyle = `rgba(220,245,255,${.7 * (1 - v)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, top + 1, 2 + v * 9, 1 + v * 2.5, 0, 0, 7); ctx.stroke(); ctx.restore(); } }
+      once('fr0', () => { drop(784, 0, .02); drop(587, .15, .016); drop(440, .3, .013); for (let k = 0; k < 9; k++) drop(1046 * semi(PENT42[Math.floor(skHash(k + 3) * 6)]), .3 + k * .07, .006); }); } },
+  D: { name: 'Leaping school', finAt: .95, desc: 'Fishing as picked. Reaching the next waters: a school of fish leaps along the bar one after another from the reel to the end, each arcing over and diving back in with a little splash and a drop note climbing; the last one leaps into the next waters’ icon, lighting it.',
+    over(p, I) { const ts = S.age - S.closeAt, { top } = fishGeo(I), ux = I.x1 + 18, n = 5, span = (I.x1 - I.x0) / n;
+      for (let k = 0; k < n; k++) { const t0 = k * .12, u = (ts - t0) / .4; if (u < 0 || u >= 1) continue; const last = k === n - 1, xa = I.x0 + 8 + k * span, xb = last ? ux : xa + span * .9, x = lerp(xa, xb, u), h = last ? 24 : 16, y = lerp(top + 1, last ? I.ly : top + 1, u) - Math.sin(Math.PI * u) * h, ang = Math.atan2(-Math.cos(Math.PI * u) * h * Math.PI, xb - xa); fishShape(x, y, ang, last ? 1.3 : 1, Math.sin(ts * 40) * 1.2); }
+      for (let k = 0; k < n; k++) { if (ts >= k * .12) once('fl0' + k, () => { splash(I.x0 + 8 + k * span, top, 5, .7); drop(523 * semi(PENT42[k * 2 % 10]), 0, .016); }); if (k < n - 1 && ts >= k * .12 + .4) once('fl1' + k, () => splash(I.x0 + 8 + k * span + span * .9, top, 5, .6)); } } },
+};
+function fin43(K) { const f = FIN43[K]; return { name: f.name, desc: 'Fishing as picked (the swell, Depth bands, the Water drops sounds). ' + f.desc, tex: F43.tex, snd: F43.snd, reel: F43.reel, finAt: f.finAt,
+  pre: I => { if (S.closeAt !== undefined && f.pre) { const g = f.pre(); if (g) return g; } return F43.pre(I); },
+  over(p, I) { F43.over(p, I); if (I.done) f.over(p, I); } }; }
+const VAR43 = { Fishing: { A: fin43('A'), B: fin43('B'), C: fin43('C'), D: fin43('D') } };
+function r43(K) { return { get name() { return K + '. ' + (VAR43[profName] ? VAR43[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR43[profName] ? VAR43[profName][K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Fishing’s finale. Others show their current look.'; },
+  get note() { return VAR43[profName] ? VAR43[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR43.Fishing; window.FREEL = fish ? false : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r43('A'), PB: r43('B'), PC: r43('C'), PD: r43('D') });
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 0);
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }

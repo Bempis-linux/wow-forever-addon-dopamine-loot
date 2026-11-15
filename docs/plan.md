@@ -876,6 +876,12 @@ Professions (from 1.3.0):
    Round 42 feedback: much better; torn between B and C. Recommended B (fits the water on screen, stays light when
    skill-ups stack, never repeats the same way) with C's warmer swell; **D replaced by that hybrid** (B's drops + C's swell,
    no reel). The option buttons now show letters only ("A. Water marimba", no "1.").
+   Round 42 pick: **B Water drops** (two plinking drops per skill-up on varied scale notes, climbing; the swell a light
+   shower of tiny drops; no reel sound; Fishing's built-in strike sound muted). **Round 43** (`VAR43`, `FIN43`, finales):
+   A The big catch (the reel spins in a run of drops, the next waters' fish is hauled out at the bobber and lands in its
+   slot), B Tidal wave (one big swell with a foaming curl rolls the whole bar and crashes over the icon in spray),
+   C Ripples (three wide rings spread from the bobber across the module, a light shower of drops lands with tiny rings),
+   D Leaping school (five fish leap along the bar one after another, the last into the icon).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
