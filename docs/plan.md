@@ -997,6 +997,14 @@ Professions (from 1.3.0):
    onto the front, swings into place with a clink, darkens to iron).
    The page hit the browser pane's 512 KiB limit: rejected rounds 53-54 moved to `docs/mockups/skillup-p2-old-rounds.js`
    (not loaded). Keep the page under 512 KiB (move rejected rounds out as it grows).
+   Round 57 → C "way too big"; Forge coals not liked. **Echo, clarified (the user): mainly don't replicate the hammer**;
+   a magma-like liquid is fine (instead of white-hot metal); idea: Ironforge's forges fed with magma from the mountain.
+   Round 58 (rounds 56-57 moved to the archive file): **A. Ringing steel, curls** (kept), **B. Anvil at the start** (a small
+   black anvil just left of the bar; each skill-up its face flashes and throws a low arc of sparks along the bar onto the
+   front, which flares and grows), **C. Magma channel** (magma flowing in the bar with dark crust drifting, the rounded front
+   hottest; each skill-up a surge rolls down from the start and pushes the front on), **D. Ironforge falls** (a thin stream
+   of magma falls from above onto the front; each skill-up it pours heavier, the front splashes, spits droplets and grows,
+   then back to a trickle).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
