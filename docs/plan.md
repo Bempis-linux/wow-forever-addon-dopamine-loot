@@ -798,6 +798,8 @@ Professions (from 1.3.0):
    vine whips back), B Sickle sweep (a gold slash runs the bar, leaves shear off and scatter, cut stem left), C Leaf wave
    (light runs root to tip, each leaf flicks up and sends a green spark into the icon, rising notes), D Pulled in (the
    whole vine slides into the icon, faster and faster, the icon bulging; the empty bar flashes).
+   Round 29 pick: **Herbalism finale B, Sickle sweep. Herbalism DONE** (the Vine + Sickle sweep). Next: Skinning, on
+   top of round 22 B + Fur flies (the user liked it; wants more add-ons over it, pitched first).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
