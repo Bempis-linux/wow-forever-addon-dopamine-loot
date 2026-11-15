@@ -848,6 +848,12 @@ Professions (from 1.3.0):
    the bobber, arcs over with a glint, dives back in with a plop), C + Reeled in (the bobber is yanked under, a fish is
    hauled out and zips back along the line into the reel, a wet slap and clicks), D + The swell (a hump of water with
    foam rolls from the reel along the filled water, lifting the line and heaving the bobber).
+   Round 37 pick: **D The swell**, but not its sound; also improve the waves texture inside the water (the drifting
+   white dashes don't look good). **Round 38** (`VAR38`, `swell38`, `TEX38`, `SND38`; `window.FTEX` replaces the dashes):
+   texture + sound paired only to keep four options (pick each separately): A Caustics (two thin weaving lines of light)
+   + a soft low rush, B Depth bands (two darker wavy layers sliding at different speeds) + a deep wave lap, C Sun glitter
+   (glints near the surface twinkling) + three watery bloops, D Sheen + bubbles (a soft light band drifting, bubbles
+   rising) + no extra sound.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

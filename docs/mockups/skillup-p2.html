@@ -30,9 +30,9 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 37, Fishing add-ons</h1>
+  <h1>Skill-up: round 38, Fishing: the swell, water texture + sound</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
-  the line that grows. Round 37: Fishing (the locked water bar) gets bold add-ons (try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
+  the line that grows. Round 38: Fishing picked the swell; four water textures inside the filled water, each with a swell sound (try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
   Space replays; keys 1-4 switch the design, Q-T the first five professions.</small>
 
@@ -1589,7 +1589,7 @@ function fishBar(p, x0, x1, ly, bh, f, tipX, t, I, v) { const top = ly - bh / 2 
   ctx.save(); ctx.beginPath(); ctx.roundRect(x0 - 2, top - 6, x1 - x0 + 4, bot - top + 6, [0, 0, 3, 3]); ctx.clip();
   body(x0 - 2, x1 + 2); ctx.fillStyle = 'rgba(10,30,52,.9)'; ctx.fill(); // the deep water ahead
   if (tipX > x0) { body(x0 - 2, tipX); const g = ctx.createLinearGradient(0, top, 0, bot); g.addColorStop(0, '#6ac4f4'); g.addColorStop(1, '#1e5a96'); ctx.fillStyle = g; ctx.fill(); // the filled water, with drifting light
-    ctx.strokeStyle = 'rgba(220,245,255,.55)'; ctx.lineWidth = 1; for (let k = 0; k < (tipX - x0) / 18; k++) { const xx = x0 + ((k * 18 + t * 16) % Math.max(1, tipX - x0)), yy = ly + 1 + (k % 2) * 2.5; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(Math.min(tipX, xx + 5), yy); ctx.stroke(); } }
+    if (window.FTEX) window.FTEX(x0, tipX, top, bot, ly, t, () => body(x0 - 2, tipX)); else { ctx.strokeStyle = 'rgba(220,245,255,.55)'; ctx.lineWidth = 1; for (let k = 0; k < (tipX - x0) / 18; k++) { const xx = x0 + ((k * 18 + t * 16) % Math.max(1, tipX - x0)), yy = ly + 1 + (k % 2) * 2.5; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(Math.min(tipX, xx + 5), yy); ctx.stroke(); } } }
   ctx.restore();
   const crest = (xa, xb, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, surf(x)); ctx.stroke(); };
   if (v === 'A') { ctx.strokeStyle = 'rgba(210,240,255,.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let x = x0 - 1; x <= x1 + 1; x += 2) ctx.lineTo(x, surf(x) + 2.2); ctx.stroke(); }
@@ -2263,6 +2263,43 @@ function r37(K) { const v = () => VAR37[profName]; return { get name() { return 
     barModule(top, FIT19[profName] || 'A', o); window.FSW = null; FISHR = false; } }; }
 Object.assign(FAM, { PA: r37('A'), PB: r37('B'), PC: r37('C'), PD: r37('D') });
 setTimeout(() => { profName = 'Fishing'; if (typeof sync === 'function') { sync(); play(); } const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
+// ---------- round 38 (2026-11-15): Fishing picks D The swell (round 37); new water textures inside the filled water + new swell sounds ----------
+// window.FTEX(x0, tipX, top, bot, ly, t, body): draws the texture inside the filled water (body() traces its shape).
+const TEX38 = {
+  A(x0, xe, top, bot, ly, t, body) { ctx.save(); body(); ctx.clip(); ctx.lineWidth = 1; // caustics: a drifting net of thin light curves
+    for (let r = 0; r < 2; r++) { ctx.strokeStyle = r ? 'rgba(220,245,255,.28)' : 'rgba(220,245,255,.42)'; ctx.beginPath(); for (let x = x0 - 2; x <= xe; x += 2) { const y = ly + (r ? 2.5 : -.5) + Math.sin(x * .19 + t * (r ? -1.6 : 1.3)) * 1.6 + Math.sin(x * .07 + t * .7 + r) * .9; x === x0 - 2 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); }
+    ctx.restore(); },
+  B(x0, xe, top, bot, ly, t, body) { ctx.save(); body(); ctx.clip(); // depth bands: two layers with wavy edges sliding at different speeds
+    const band = (y0, sp, a, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0 - 2, bot); for (let x = x0 - 2; x <= xe; x += 2) ctx.lineTo(x, y0 + Math.sin(x * .11 + t * sp) * a); ctx.lineTo(xe, bot); ctx.closePath(); ctx.fill(); };
+    band(ly - .5, 1.1, 1.2, 'rgba(40,120,190,.45)'); band(ly + 2.5, -1.6, 1, 'rgba(20,70,130,.55)'); ctx.restore(); },
+  C(x0, xe, top, bot, ly, t, body) { ctx.save(); body(); ctx.clip(); // sun glitter: small glints near the surface twinkling in and out
+    for (let k = 0; k < (xe - x0) / 7; k++) { const x = x0 + k * 7 + skHash(k) * 5, ph = (t * (.8 + skHash(k + 9) * .7) + skHash(k + 3)) % 1, a = Math.sin(Math.PI * ph); if (a < .15) continue;
+      ctx.fillStyle = `rgba(255,255,255,${.85 * a * a})`; ctx.fillRect(x - .5 - a, top + 2 + skHash(k + 5) * 3, 1 + 2 * a, 1); } ctx.restore(); },
+  D(x0, xe, top, bot, ly, t, body) { ctx.save(); body(); ctx.clip(); // a soft sheen drifting along + a few bubbles rising
+    const sx = x0 + ((t * 40) % (xe - x0 + 60)) - 30, g = ctx.createLinearGradient(sx - 25, 0, sx + 25, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(230,248,255,.35)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 25, top - 2, 50, bot - top + 2);
+    ctx.strokeStyle = 'rgba(230,248,255,.6)'; ctx.lineWidth = .8; for (let k = 0; k < (xe - x0) / 30; k++) { const ph = (t * .5 + skHash(k + 2)) % 1, x = x0 + k * 30 + skHash(k) * 20, y = lerp(bot - 1, top + 2, ph); ctx.beginPath(); ctx.arc(x + Math.sin(ph * 9) * 1, y, .9 + ph * .6, 0, 7); ctx.stroke(); } ctx.restore(); },
+};
+const SND38 = {
+  A: () => { noise(0, .9, .035, 280, .5, 'lowpass'); noise(.15, .6, .012, 900, .4); }, // a soft low rush that swells and fades
+  B: () => { tone(98, 0, .05, .7, 'sine', 147); noise(.05, .55, .02, 600, .5, 'lowpass'); }, // a deep wave lap rising in pitch
+  C: () => { tone(523, 0, .025, .35, 'sine', 784); tone(659, .12, .02, .35, 'sine', 988); tone(784, .24, .018, .4, 'sine', 1175); }, // three watery bloops climbing
+  D: () => {}, // none: only the locked skill-up sounds (twang, splash)
+};
+const SNDNAME38 = { A: 'a soft low rush', B: 'a deep wave lap', C: 'three watery bloops', D: 'no extra sound' }, TEXNAME38 = { A: 'Caustics', B: 'Depth bands', C: 'Sun glitter', D: 'Sheen + bubbles' };
+const TEXDESC38 = { A: 'two thin lines of light weaving through the water like caustics on a pool floor', B: 'no lines: two darker layers with wavy edges sliding at different speeds, so the water has depth', C: 'no lines: small sun glints near the surface twinkling in and out', D: 'a soft band of light drifting along the water, and a few bubbles rising' };
+function swell38(K) { const base = VAR37.Fishing.D; return { name: TEXNAME38[K] + ' + ' + SNDNAME38[K], tex: TEX38[K],
+  desc: 'The swell, with ' + TEXDESC38[K] + ' inside the filled water; the swell sounds ' + (K === 'D' ? 'nothing of its own (just the skill-up’s twang and splash)' : 'like ' + SNDNAME38[K]) + '. Texture and sound are paired only to keep it to four: pick each on its own.',
+  pre: base.pre, over(p, I) { const ha = I.hitAge, { top, bx } = fishGeo(I); if (ha >= 0 && ha < .7) { const sx = lerp(I.x0 - 10, bx + 20, ha / .7); ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.9)'; for (let k = -3; k <= 3; k++) { const x = sx + k * 4; if (x < I.x0 || x > I.x1) continue; ctx.globalAlpha = 1 - Math.abs(k) * .22; ctx.fillRect(x - 1.5, top - 5.6 * Math.exp(-((x - sx) * (x - sx)) / 420) - 1.5, 3, 2); } ctx.restore(); if (Math.random() < .5 && sx > I.x0 && sx < I.x1) spawn({ x: sx + 3, y: top - 6, vx: 30 + Math.random() * 40, vy: -20 - Math.random() * 30, g: 200, life: .35, size: 1.1, col: '#e8f8ff' }); }
+    onHits('fsw38', () => SND38[K]()); landed('fsw1', .55, () => splash(bx, top, 8, .9)); } }; }
+const VAR38 = { Fishing: { A: swell38('A'), B: swell38('B'), C: swell38('C'), D: swell38('D') } };
+function r38(K) { const v = () => VAR38[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Five in a row”.)' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : profName === 'Skinning' ? 'Done: the cut + Fur flies, and the reticle chop when the bar fills.' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : profName === 'Skinning' ? VAR36.Skinning.A : v() ? v()[K] : null;
+    if (o === VAR36.Skinning.A) { const n = Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15), N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * DT36 + .2 }); }
+    window.FSW = null; window.FTEX = o && o.tex ? o.tex : null; if (o && o.pre) { const st = state(), lo = S.p.span[0], n = Math.max(1, S.nx.lv - lo), x0 = W / 2 - 128, L = 230; window.FSW = o.pre({ hitAge: st.hitAge, x0, x1: x0 + L, tipX: x0 + clamp((st.v - lo) / n) * L }); }
+    barModule(top, FIT19[profName] || 'A', o); window.FSW = null; window.FTEX = null; FISHR = false; } }; }
+Object.assign(FAM, { PA: r38('A'), PB: r38('B'), PC: r38('C'), PD: r38('D') });
 // round 11 B: the flourish at the tip, t seconds after the strike lands
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();
   if (m === 'stem') { ctx.globalAlpha *= Math.min(1, e * 2); ctx.translate(x, y - 2); ctx.rotate(-1 + eOut(clamp(t / .35)) * .6); const s = eBack(clamp(t / .3)); ctx.scale(s, s); ctx.fillStyle = '#9ff08a'; ctx.beginPath(); ctx.ellipse(5, 0, 6, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3fa83a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); }
