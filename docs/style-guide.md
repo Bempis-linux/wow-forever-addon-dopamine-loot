@@ -101,6 +101,13 @@ Three styles exist today:
 
 - Soft taps and chimes climbing in pitch for repeats; quiet copies after the first few (Create All, kills).
 - One reward chime at a time ("Calm when busy", still open for XP; maybe addon-wide).
+- **Long sessions (the user, 2026-11-15).** Skill-up sounds must stay pleasant after hours: Skinning (several mobs in
+  one spot) and Mining (one vein mined several times) fire in quick succession, and a crafting batch (up to 100 casts,
+  Disenchanting too) plays the craft sound every cast and can add a skill-up every cast. So: gentle timbres (no hiss,
+  no sharp clicks, no cartoon pitch drops); the notes vary (picked from a scale) so repeats never sound identical;
+  repeats step down in volume (the first few full, then quieter, with a floor) across skill-ups and craft sounds
+  together; during a craft batch the skill-up's own sound folds under the craft's (a quiet note, not a second
+  full sound); the unlock finale (rare) always plays in full.
 - No level-up or quest sounds of our own (the game plays its own); the impact thump is the exception for
   punch on quest turn-ins.
 

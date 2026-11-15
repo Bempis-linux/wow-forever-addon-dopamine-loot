@@ -887,6 +887,12 @@ Professions (from 1.3.0):
    then the wave (the leaps first, then the swell crashes over the icon), C The wave, then the school (the swell crashes
    first, the school leaps in its wake, the last into the icon), D A big fish surfs it (one big fish rides the crest, small
    fish hop alongside, the crash flings it into the icon).
+   Round 44 pick: **D A big fish surfs it. Fishing DONE**: the water bar (bright surface over the fill, Depth bands
+   texture), the reel and line, the bobber; + the swell each skill-up; sounds: Water drops (round 42 B: two plinking
+   drops per skill-up on varied scale notes, a light shower for the swell, no reel; Fishing's built-in strike sound
+   gone); finale: one big swell with a big fish riding its crest, small fish hopping alongside, the crash flings it into
+   the icon. Next (the user): revisit Herbalism's sound the same way, then Mining. New rule for sound over long sessions
+   (Skinning/Mining in quick succession, craft batches of 100, Disenchanting): see docs/style-guide.md "Long sessions".
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
