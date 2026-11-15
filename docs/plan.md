@@ -836,6 +836,10 @@ Professions (from 1.3.0):
    the icon lights on the last), B Faster chops (.045 s apart, shorter hop), C Chopped from the icon end (right to
    left, the nearest piece first), D The reticle tightens (a step tighter and a little turn per landing, fully closed at
    the last).
+   Round 35 pick: D The reticle tightens, but turning 90 degrees in all, and the leather pieces just fall away like round
+   34 (not sucked into the reticle). **Round 36** (`VAR36`, `fin36(turn)`): the reticle locks, fast chops (.07 s) drop
+   the pieces away, a note climbs per chop, the reticle tightens a step per chop; A turns 90 degrees in steps, B turns
+   smoothly, C snaps the whole 90 on the last chop, D steps with an overshoot (ratchet).
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.
