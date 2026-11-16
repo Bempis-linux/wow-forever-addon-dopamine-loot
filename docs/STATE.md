@@ -1,7 +1,9 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15, skill-up gains: **all four gatherers DONE** (rounds 29-52); **Blacksmithing: skill-up = Sparks into the magma (round 67 D, LOCKED); bubbles = Film burst + thick splat (round 68 A, picked); round 70 finales shown (Drain, Crust and crack, Fire across the surface, Overflow; round 69 rejected), then the sound; options must be different designs, not variations; open-top bar mode M like Fishing; sparks add-ons from round 61 parked for later), waiting on the pick; the pane loads the page as one data: snapshot, so keep all live code inline; echo = mainly no hammer (magma, sparks, anvil OK); the page must stay under the pane’s 512 KiB limit (old rounds go to skillup-p2-old-rounds.js)**; then the rest of the **crafters, one at a
-time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
+_Last checkpoint: 2026-11-15 (stop point), skill-up gains: **all four gatherers DONE**; **Blacksmithing nearly done**
+(rounds 53-82): everything locked except the finale's **sound** (round 82 shown: four peon sound sets, no boom, waiting
+on the pick). Once the user locks it: a stop point, and the user starts a **new session for the other crafters**, one at
+a time. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
 2026-11-12": every round and pick, newest at the end of "2. Skill-up gains"). Older detail: git log._
 
 ## Where things stand
@@ -31,16 +33,42 @@ time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `d
     charge at the front (flash, muffled thump, chunks and dust, the bar kicks, a hot glow). No add-on. Finale:
     every blast throws ore (the chain runs; nuggets land, bounce, roll into the icon). Sound: as now (thump +
     pebbles, clinks).
-  - **Next: the crafters**, one at a time: Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering,
-    Enchanting; then Cooking, First Aid. Same steps per profession: base design (pitch first) → add-ons →
-    finale → sound. Rules from crafting still apply: **no echo** with the craft ring (no ring, no tool riding
-    at the tip); a crafting batch can be 100 casts.
+  - **Blacksmithing (all locked but the finale sound):**
+    - The bar: open at the top like Fishing's (mode `M`): the magma's wavy glowing surface is the top edge, dark
+      cooled lava ahead of the fill. Magma = **depth bands blended as a gradient** (`bandsGrad66`).
+    - A small black **anvil** just left of the bar (rim light, warm glow behind).
+    - Idle: slow **swamp bubbles at the head** only: a glossy film dome swells (~1.5 s) and pops as a **Film
+      burst** (a flat bright ring) + a **thick splat** + a dimple and ripples. Silent.
+    - Skill-up: **Sparks into the magma**: the anvil flings its Lingering-sparks shower along the bar; each spark
+      lands with a tiny ring of ripples; the head moves on. Sound: the anvil **clank** (`anvClank60`).
+    - Finale (reaching the next unlock): **molten beads rise** out of the sinking magma in no set order, then
+      left to right each is **struck to iron** in one flash (squash, the bar jolts) with **crunch + scale**
+      (gritty crunch + low knock; sparks and dark scale flakes); a **crate** drops in, the ingots fly in and
+      stack 4 + 3, a lid thunks on; then **a peon runs in, hoists the crate and runs off with it**; the icon
+      lights. The ding is gone (banner chime + old dress bell muted for Blacksmithing).
+    - Open: the finale's sound (round 82: A Scurry and whoosh, B Heavy plod, C Running tune, D Distant crash).
+      The user disliked every boom here (it drowned the peon) and every chime/ding.
+  - **Next: the other crafters** in a new session, one at a time: Leatherworking, Alchemy, Tailoring,
+    Engineering, Enchanting; then Cooking, First Aid. Same steps per profession: base design (pitch first) →
+    add-ons → finale → sound. Rules: **no echo** with the craft ring = mainly don't copy its **tool**
+    (materials, heat, sparks are fine); a crafting batch can be 100 casts. Lessons from Blacksmithing: options
+    must be **clearly different designs, not variations** of one; when the user names what they like it's a
+    hint for new directions; keep the profession's identity (avoiding everything the ring uses made "a gray
+    bar, nothing blacksmithy"); show **8 options** (keys 1-8) when iterating two things at once.
   - Unlocks per profession and the bar code are on the page. The full record is in plan.md.
 
 ## How the skill-up page works (for the next session)
-- Options are the `FAM` slots `PA`-`PD`, set by `Object.assign(FAM, {PA: rNN('A'), ...})`; the last assignment
-  wins. Each `rNN(K)` returns `{name, desc, note, draw(top)}`, and draw routes the other professions to their
-  done looks. The latest is `r52`.
+- Options are the `FAM` slots `PA`-`PH` (keys 1-8; slots left unset hide), set by `Object.assign(FAM, {PA:
+  rNN('A'), ...})`; the last assignment wins. Each `rNN(K)` returns `{name, desc, note, draw(top)}`, and draw
+  routes the other professions to their done looks. The latest is `r82`.
+- **Size limit:** the pane loads the page as one `data:` snapshot (a separate .js beside it does NOT load) and
+  refuses pages over **512 KiB** (524,288 bytes). Check `wc -c`; move rejected rounds and dead helpers to
+  `docs/mockups/skillup-p2-old-rounds.js` (not loaded) as you go. Watch for a stray `};` when cutting objects.
+- Blacksmithing plumbing: `V69(F)` builds a finale V from `{finAt, lift, tip, fin, after}`; `mag62` draws the
+  magma (`TEX62.G66` = gradient bands), `MAGLIFT(x)` lifts its surface, `FILL70` overrides where the fill ends;
+  `INGOTS72` is the crate ending, `r77('C')` the locked formation (shifted by `SH76`), `r80('D')` the peon;
+  sound hooks: `window.FINSND78` (the payoff sound), `PS81` (peon step/grab/dash), `LDSND72` (crate landings),
+  `NOSWARM72` (no ember swarm).
 - `barModule(top, mode, V)`: modes `A` inside the bar, `B` breaks out (6 px), `F` the Fishing water, `M` open-top (sides + bottom border; the growth draws the whole bar). Slots `PA`-`PH` (keys 1-8); unassigned slots hide.
 - Hooks on V:
   - `grow`, `over`, `after` (drawn over the icon)
@@ -107,6 +135,9 @@ time**. Read this first (the `session-resume` skill does), then CLAUDE.md and `d
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-15 (later): skill-up Blacksmithing rounds 53-82: base (anvil + gradient-band magma in an open-top bar, swamp
+  bubbles at the head, skill-up Sparks into the magma), finale (rising beads struck to iron, crate, the peon runs off
+  with it); its sound open. The page outgrew the pane's 512 KiB: old rounds to skillup-p2-old-rounds.js; leveling-all.html.
 - 2026-11-15: skill-up gatherers DONE (rounds 15-52: header + bar set, Herbalism, Fishing, Skinning, Mining: look,
   finale, sound); the sound-fatigue rule; the `/view` skill.
 - 2026-11-14: skill-up Phase 2 rounds 1-14 (own module, grows along the line); 1.4.0 order revised; crafting Phase 3
