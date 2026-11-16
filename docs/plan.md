@@ -1165,6 +1165,11 @@ Professions (from 1.3.0):
    plod** (slow deep footfalls, a strained grunt and small grunts, creaking wood; a distant thunk as the crate is set down),
    **C. Running tune** (the steps a low plucked bass line climbing a scale; a warm two-note low pluck at the light), **D.
    Distant crash** (footsteps fading off, a beat of quiet, then an off-screen clattering crash and a yelp as it trips).
+   Round 82 → **A without the whoosh. BLACKSMITHING DONE (2026-11-16).** Finale sound: Scurry (quick light footsteps, the
+   ingots jingling in the crate, a grunt on the lift, no whoosh; a soft airy puff when the icon lights). Full Blacksmithing
+   skill-up: the anvil + gradient depth-band magma in the open-top bar; swamp bubbles at the head (film burst + thick
+   splat); skill-up = Sparks into the magma (clank); finale = rising beads struck to iron (crunch + scale) → crate → the
+   peon runs off with it; no chimes or dings anywhere. Next: the other crafters, in a new session.
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).
 5. The loot window ("Picked up" rows / harvest window, the loot column), Phase 2. After gathering: gathering feeds it.

@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up: round 82, Blacksmithing finale: the peon’s sounds (no boom)</h1>
+  <h1>Skill-up: Blacksmithing DONE (key 1 = the locked finale sound)</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -2937,8 +2937,8 @@ function grunt82(t = 0, f = 120, v = .03, len = .14) { if (!on()) return; const 
   g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(v, T + .015); g.gain.exponentialRampToValueAtTime(.0001, T + len); [[520, 6, 1], [1150, 8, .5]].forEach(([ff, q, a]) => { const bp = A.createBiquadFilter(), ga = A.createGain(); bp.type = 'bandpass'; bp.frequency.value = ff; bp.Q.value = q; ga.gain.value = a; o.connect(bp).connect(ga).connect(g); }); g.connect(OUT); o.start(T); o.stop(T + len + .05); }
 const thump82 = (v = .03, f = 90) => { drum46(f, 0, v); noise(0, .05, v * .7, 400, .7, 'lowpass', true); };
 const SET82 = {
-  A: { name: 'Scurry and whoosh', desc: 'Quick, light, clearly heard footsteps (soft thumps, left-right), the ingots jingling dully in the crate once it’s up, a grunt as it lifts, and a fast whoosh as the peon zips out of sight; the icon lights with only a soft airy puff.',
-    ps: { step: (i, fast) => { thump82(fast ? .022 : .016, i % 2 ? 120 : 100); if (fast) noise(.01, .035, .012, 1500, 2, 'bandpass', true); }, grab: () => { grunt82(0, 130, .03); thump82(.02, 80); }, dash: () => noise(.15, .35, .02, 1600, .9, 'bandpass') },
+  A: { name: 'Scurry (LOCKED)', desc: 'LOCKED: quick, light, clearly heard footsteps (soft thumps, left-right), the ingots jingling dully in the crate once it’s up, a grunt as it lifts; no whoosh; the icon lights with only a soft airy puff.',
+    ps: { step: (i, fast) => { thump82(fast ? .022 : .016, i % 2 ? 120 : 100); if (fast) noise(.01, .035, .012, 1500, 2, 'bandpass', true); }, grab: () => { grunt82(0, 130, .03); thump82(.02, 80); }, dash: () => {} },
     fin: () => noise(0, .25, .02, 500, .6, 'lowpass') },
   B: { name: 'Heavy plod', desc: 'The crate is heavy: slower, deeper footfalls, a strained grunt on the lift and a small grunt every few steps, the wood creaking; when the icon lights, a distant solid thunk as the crate is set down somewhere off to the side.',
     ps: { step: (i, fast) => { thump82(fast ? .03 : .018, 70); if (fast && i % 3 === 0) grunt82(.02, 105, .02, .1); if (fast && i % 2) noise(.03, .08, .008, 700, 4, 'bandpass'); }, grab: () => { grunt82(0, 110, .035, .25); thump82(.025, 70); }, dash: () => {} },

@@ -1,8 +1,7 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-15 (stop point), skill-up gains: **all four gatherers DONE**; **Blacksmithing nearly done**
-(rounds 53-82): everything locked except the finale's **sound** (round 82 shown: four peon sound sets, no boom, waiting
-on the pick). Once the user locks it: a stop point, and the user starts a **new session for the other crafters**, one at
+_Last checkpoint: 2026-11-16 (stop point), skill-up gains: **all four gatherers DONE**; **Blacksmithing DONE**
+(rounds 53-82). Next: the user starts a **new session for the other crafters**, one at
 a time. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
 2026-11-12": every round and pick, newest at the end of "2. Skill-up gains"). Older detail: git log._
 
@@ -33,7 +32,7 @@ a time. Read this first (the `session-resume` skill does), then CLAUDE.md and `d
     charge at the front (flash, muffled thump, chunks and dust, the bar kicks, a hot glow). No add-on. Finale:
     every blast throws ore (the chain runs; nuggets land, bounce, roll into the icon). Sound: as now (thump +
     pebbles, clinks).
-  - **Blacksmithing (all locked but the finale sound):**
+  - **Blacksmithing DONE (2026-11-16):**
     - The bar: open at the top like Fishing's (mode `M`): the magma's wavy glowing surface is the top edge, dark
       cooled lava ahead of the fill. Magma = **depth bands blended as a gradient** (`bandsGrad66`).
     - A small black **anvil** just left of the bar (rim light, warm glow behind).
@@ -46,8 +45,9 @@ a time. Read this first (the `session-resume` skill does), then CLAUDE.md and `d
       (gritty crunch + low knock; sparks and dark scale flakes); a **crate** drops in, the ingots fly in and
       stack 4 + 3, a lid thunks on; then **a peon runs in, hoists the crate and runs off with it**; the icon
       lights. The ding is gone (banner chime + old dress bell muted for Blacksmithing).
-    - Open: the finale's sound (round 82: A Scurry and whoosh, B Heavy plod, C Running tune, D Distant crash).
-      The user disliked every boom here (it drowned the peon) and every chime/ding.
+    - Finale sound: **Scurry** (round 82 A, no whoosh): quick light footsteps, the ingots jingling in the crate,
+      a grunt on the lift, a soft airy puff when the icon lights. The user disliked every boom here (it drowned the
+      peon) and every chime/ding.
   - **Next: the other crafters** in a new session, one at a time: Leatherworking, Alchemy, Tailoring,
     Engineering, Enchanting; then Cooking, First Aid. Same steps per profession: base design (pitch first) →
     add-ons → finale → sound. Rules: **no echo** with the craft ring = mainly don't copy its **tool**
