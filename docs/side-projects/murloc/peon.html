@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peon design</title>
+<style>
+  :root { --bg: #0e0d12; --panel: #17151d; --line: rgba(255, 211, 106, .35); --gold: #ffd36a; --text: #e9e4d8; --dim: #a59f92; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; padding: 16px; }
+  h1 { font-size: 18px; color: var(--gold); margin: 0 0 4px; }
+  p.lead { margin: 0 0 12px; color: var(--dim); max-width: 900px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .ctrl { flex: 0 0 240px; }
+  .ctrl h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin: 10px 0 4px; }
+  .ctrl h2:first-child { margin-top: 0; }
+  button { background: #24212b; color: var(--text); border: 1px solid #3a3644; border-radius: 6px; padding: 4px 9px; margin: 0 4px 4px 0; cursor: pointer; font: inherit; font-size: 13px; }
+  button.on { border-color: var(--gold); color: var(--gold); background: #2e2918; }
+  button.act { border-color: #6fbf4a; }
+  canvas { display: block; image-rendering: pixelated; background: #1b1922; border-radius: 8px; }
+  .views { display: flex; flex-direction: column; gap: 14px; flex: 1 1 560px; min-width: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .cell canvas { width: 100%; height: auto; max-width: 300px; margin: 0 auto 6px; }
+  .cell b { display: block; color: var(--gold); }
+  .cell small { display: block; color: var(--dim); }
+  #game { max-width: 100%; }
+  label { display: block; margin-top: 8px; color: var(--dim); }
+</style></head><body>
+<h1>Orc peon: the design, round 1</h1>
+<p class="lead">An orc peon drawn the way the murloc was (side-on, facing left, Medium pixels, a pixel outline), standing and idling: breathing, blinking, shifting its weight. Four designs from scratch; <b>Work work!</b> plays each one's action. The murloc stays as it is. Below: all four at their size in game, over the XP bar.</p>
+<div class="wrap">
+  <div class="panel ctrl">
+    <h2>Size in game</h2><div data-g="size"><button data-v="0.8">Small</button><button data-v="1" class="on">Medium</button><button data-v="1.3">Large</button></div>
+    <h2>Pixel outline</h2><div data-g="outline"><button data-v="1" class="on">On</button><button data-v="0">Off</button></div>
+    <h2>Facing</h2><div data-g="face"><button data-v="1" class="on">Left</button><button data-v="-1">Right</button></div>
+    <h2>Action</h2><button class="act" id="work">Work work!</button>
+    <label><input type="checkbox" id="snd" checked> Sound (the grunt only)</label>
+  </div>
+  <div class="views">
+    <div class="grid" id="grid"></div>
+    <div class="panel"><small>In game, over the XP bar (all four, real size)</small><canvas id="game" width="560" height="200"></canvas></div>
+  </div>
+</div>
+<script>
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const O = { px: 2, size: 1, outline: 1, face: 1 };
+document.querySelectorAll('[data-g]').forEach(grp => grp.querySelectorAll('button').forEach(b => b.onclick = () => { grp.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); O[grp.dataset.g] = parseFloat(b.dataset.v); }));
+// ---------- sound: "zug zug", two low grunts ----------
+let AC = null; function tone(f, t, vol, dec, type = 'triangle', f2) { if (!document.getElementById('snd').checked) return; AC = AC || new AudioContext(); const T = AC.currentTime + t, o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.linearRampToValueAtTime(f2, T + dec * .6); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .01); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(AC.destination); o.start(T); o.stop(T + dec + .05); }
+function zug() { for (const d of [0, .22]) { tone(118, d, .07, .16, 'triangle', 132); tone(236, d, .02, .1, 'square'); } }
+let now = 0, workAt = -9; document.getElementById('work').onclick = () => { workAt = now; zug(); };
+
+// ---------- shared drawing helpers (model units 120 x 120, ground y = 104, facing left) ----------
+function shade(hex, k) { const n = parseInt(hex.slice(1), 16), r = (n >> 16) * k, gg = ((n >> 8) % 256) * k, b = (n % 256) * k; return `rgb(${Math.min(255, r) | 0},${Math.min(255, gg) | 0},${Math.min(255, b) | 0})`; }
+function seg(g, x0, y0, x1, y1, w0, w1, col, hi) { const a = Math.atan2(y1 - y0, x1 - x0), nx = -Math.sin(a), ny = Math.cos(a); g.fillStyle = col; g.beginPath(); g.moveTo(x0 + nx * w0 / 2, y0 + ny * w0 / 2); g.lineTo(x1 + nx * w1 / 2, y1 + ny * w1 / 2); g.lineTo(x1 - nx * w1 / 2, y1 - ny * w1 / 2); g.lineTo(x0 - nx * w0 / 2, y0 - ny * w0 / 2); g.fill(); g.beginPath(); g.arc(x0, y0, w0 / 2, 0, 7); g.arc(x1, y1, w1 / 2, 0, 7); g.fill();
+  if (hi) { g.strokeStyle = hi; g.lineWidth = Math.max(.6, w1 * .25); g.beginPath(); g.moveTo(x0 - nx * w0 * .28, y0 - ny * w0 * .28); g.lineTo(x1 - nx * w1 * .28, y1 - ny * w1 * .28); g.stroke(); } }
+function blob(g, x, y, rx, ry, col, rot = 0) { const gr = g.createRadialGradient(x - rx * .35, y - ry * .4, 1, x, y, Math.max(rx, ry)); gr.addColorStop(0, shade(col, 1.25)); gr.addColorStop(.6, col); gr.addColorStop(1, shade(col, .62)); g.fillStyle = gr; g.beginPath(); g.ellipse(x, y, rx, ry, rot, 0, 7); g.fill(); }
+function fistAt(g, x, y, r, col) { blob(g, x, y, r, r * .9, col); g.fillStyle = shade(col, .7); for (const k of [-1, 0, 1]) { g.beginPath(); g.arc(x - r * .55, y + k * r * .45, r * .3, 0, 7); g.fill(); } }
+function bootAt(g, x, y, w, col) { g.fillStyle = shade(col, .7); g.beginPath(); g.moveTo(x + w * .5, y); g.lineTo(x - w * .8, y); g.quadraticCurveTo(x - w * .9, y - w * .5, x - w * .3, y - w * .55); g.lineTo(x + w * .5, y - w * .7); g.closePath(); g.fill(); g.fillStyle = col; g.fillRect(x - w * .3, y - w * .8, w * .8, w * .35); }
+// an orc eye: small and fierce (or sleepy), with a heavy brow over it
+function orcEye(g, x, y, r, blink, sleepy, col = '#ffcf3a') { g.fillStyle = '#1a0c06'; g.beginPath(); g.ellipse(x, y, r * 1.2, r, 0, 0, 7); g.fill(); g.fillStyle = col; g.beginPath(); g.ellipse(x - r * .1, y, r * .8, r * .7, 0, 0, 7); g.fill(); g.fillStyle = '#100604'; g.beginPath(); g.arc(x - r * .2, y, r * .32, 0, 7); g.fill();
+  const lid = Math.max(blink, sleepy); if (lid > 0) { g.fillStyle = '#4a8a2a'; g.beginPath(); g.ellipse(x, y - r * (1 - lid), r * 1.3, r * lid * 1.05, 0, 0, 7); g.fill(); } }
+const tusk = (g, x, y, L, a) => { g.fillStyle = '#f2ead4'; g.beginPath(); g.moveTo(x - 1.2, y); g.lineTo(x + 1.2, y); g.lineTo(x + Math.cos(a) * L, y + Math.sin(a) * L); g.fill(); };
+const SKIN = '#5e9a32', SKIN_D = '#3e6e20', SKIN_L = '#86c24a';
+
+// ---------- A. Brute: like the reference ----------
+function drawBrute(g, t, P) { const br = P.breathe, w = P.work, chop = w > 0 ? Math.sin(Math.PI * Math.min(1, w * 1.4)) : 0;
+  // far leg and far arm
+  seg(g, 66, 76, 70, 92, 11, 9, '#4a3020'); bootAt(g, 72, 104, 12, '#5a3a1e');
+  seg(g, 74, 50, 78, 68, 12, 10, SKIN_D); fistAt(g, 79, 74, 6, SKIN_D);
+  // near leg
+  seg(g, 56, 76, 54, 92, 12, 10, '#5a3a24', 'rgba(255,220,180,.2)'); bootAt(g, 54, 104, 13, '#6a4626');
+  // torso: barrel chest, black vest, belt
+  g.save(); g.translate(62, 80); g.scale(1, 1 + .03 * br); g.translate(-62, -80);
+  blob(g, 62, 60, 21, 22, SKIN); g.fillStyle = '#202024'; g.beginPath(); g.moveTo(44, 50); g.lineTo(54, 46); g.lineTo(60, 66); g.lineTo(66, 46); g.lineTo(80, 50); g.lineTo(80, 76); g.lineTo(44, 76); g.closePath(); g.fill();
+  g.strokeStyle = '#3a3a44'; g.lineWidth = 1; g.beginPath(); g.moveTo(60, 66); g.lineTo(60, 76); g.stroke(); g.fillStyle = '#6a4626'; g.fillRect(43, 73, 38, 5); g.fillStyle = '#c8a040'; g.fillRect(56, 73, 6, 5); g.restore();
+  // shoulder pads: rounded, red and black stripes on top
+  for (const [x, y, s] of [[76, 44, .85], [47, 46, 1]]) { blob(g, x, y, 13 * s, 9 * s, '#2a2a2e'); g.save(); g.beginPath(); g.ellipse(x, y - 1, 12 * s, 7 * s, 0, Math.PI, 0); g.clip(); for (let i = -3; i < 4; i += 2) { g.fillStyle = '#c42020'; g.fillRect(x + i * 3.4 * s, y - 10 * s, 3.4 * s, 12 * s); } g.restore(); }
+  // the head, low between the shoulders: heavy brow, small fierce eye, a big jaw with tusks, a pointed ear
+  const hx = 50 + Math.sin(t * .9) * .6, hy = 38 + br * .4; blob(g, hx, hy, 10, 11, SKIN); blob(g, hx - 2, hy + 6, 10, 6, SKIN_D);
+  g.fillStyle = SKIN; g.beginPath(); g.moveTo(hx + 6, hy - 3); g.lineTo(hx + 17, hy - 9); g.lineTo(hx + 8, hy + 3); g.fill();
+  g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(hx - 3, hy - 5, 8, 2.6, -.15, 0, 7); g.fill(); orcEye(g, hx - 4, hy - 2, 2.2, P.blink, 0);
+  g.fillStyle = '#2a1010'; g.fillRect(hx - 10, hy + 6, 9, 2); tusk(g, hx - 8, hy + 7, 5, -1.7); tusk(g, hx - 3, hy + 7, 4.5, -1.5);
+  // near arm, huge, holding an axe low (it chops on Work work!)
+  const ex = lerp(42, 40, chop), ey = lerp(66, 40, chop), hx2 = lerp(40, 30, chop), hy2 = lerp(80, 30, chop); seg(g, 46, 50, ex, ey, 14, 12, SKIN, 'rgba(220,255,170,.35)'); seg(g, ex, ey, hx2, hy2, 12, 10, SKIN, 'rgba(220,255,170,.3)');
+  const aa = lerp(1.35, -1.1, chop), L = 26; g.save(); g.translate(hx2, hy2); g.rotate(aa); g.fillStyle = '#7a5030'; g.fillRect(-1.6, -4, 3.2, L); g.fillStyle = '#b8bcc4'; g.beginPath(); g.moveTo(0, L - 6); g.lineTo(-10, L - 2); g.quadraticCurveTo(-11, L + 6, -1, L + 5); g.closePath(); g.fill(); g.restore(); fistAt(g, hx2, hy2, 6.5, SKIN); }
+
+// ---------- B. Hunched laborer: bent over under a log, long nose, big ears, an underbite, a loincloth ----------
+function drawLaborer(g, t, P) { const br = P.breathe, w = P.work, heft = w > 0 ? Math.sin(Math.PI * Math.min(1, w * 1.3)) : 0, lift = heft * 8;
+  seg(g, 74, 78, 80, 90, 7, 6, SKIN_D); seg(g, 80, 90, 76, 102, 6, 5, SKIN_D); g.fillStyle = shade(SKIN_D, .8); g.beginPath(); g.ellipse(72, 103, 6, 2.5, 0, 0, 7); g.fill();
+  // the bent back and belly
+  g.save(); g.translate(72, 84); g.scale(1, 1 + .03 * br); g.translate(-72, -84); blob(g, 66, 62, 19, 16, SKIN, -.5); blob(g, 60, 72, 11, 9, SKIN_L, -.3); g.restore();
+  // loincloth and rope belt
+  g.fillStyle = '#7a5a34'; g.beginPath(); g.moveTo(58, 76); g.lineTo(80, 74); g.lineTo(78, 90); g.lineTo(62, 92); g.closePath(); g.fill(); g.strokeStyle = '#c8b070'; g.lineWidth = 2; g.beginPath(); g.moveTo(57, 76); g.lineTo(81, 73); g.stroke();
+  seg(g, 64, 80, 58, 90, 8, 6.5, SKIN, 'rgba(220,255,170,.3)'); seg(g, 58, 90, 62, 102, 6.5, 5, SKIN); g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(58, 103, 7, 2.6, 0, 0, 7); g.fill();
+  // the log over the shoulder (bark, rings), held by the near hand above
+  const ly = 40 - lift; g.save(); g.translate(68, ly); g.rotate(-.12); const lg = g.createLinearGradient(0, -6, 0, 6); lg.addColorStop(0, '#9a6a3a'); lg.addColorStop(1, '#5a3a1e'); g.fillStyle = lg; g.fillRect(-34, -6, 62, 12); g.fillStyle = '#c8a070'; g.beginPath(); g.ellipse(-34, 0, 3, 6, 0, 0, 7); g.fill(); g.strokeStyle = '#8a5a30'; g.lineWidth = .8; g.beginPath(); g.ellipse(-34, 0, 1.6, 3.4, 0, 0, 7); g.stroke(); g.strokeStyle = '#4a2a14'; for (const x of [-20, -2, 14]) { g.beginPath(); g.moveTo(x, -6); g.lineTo(x + 3, 6); g.stroke(); } g.restore();
+  // head: low and forward, long nose, a big ear, an underbite with two tusks up
+  const hx = 42 + Math.sin(t * 1.1) * .8, hy = 54 + br * .5; blob(g, hx, hy, 9, 8, SKIN); g.fillStyle = SKIN; g.beginPath(); g.moveTo(hx - 6, hy - 2); g.quadraticCurveTo(hx - 15, hy + 1, hx - 12, hy + 4); g.lineTo(hx - 5, hy + 3); g.fill();
+  g.beginPath(); g.moveTo(hx + 5, hy - 4); g.lineTo(hx + 18, hy - 12); g.lineTo(hx + 7, hy + 1); g.fill(); g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(hx - 2, hy + 6, 7, 3.5, 0, 0, 7); g.fill(); tusk(g, hx - 6, hy + 5, 4, -1.9); tusk(g, hx - 1, hy + 5, 3.5, -1.6);
+  g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(hx - 3, hy - 4, 6, 1.8, -.2, 0, 7); g.fill(); orcEye(g, hx - 3, hy - 1.5, 1.9, P.blink, .2);
+  // arms: the near one up holding the log, the far one hanging
+  seg(g, 56, 58, 54, 48 - lift * .5, 7, 6, SKIN, 'rgba(220,255,170,.3)'); fistAt(g, 54, 44 - lift, 4.5, SKIN); seg(g, 70, 60, 74, 74, 6, 5, SKIN_D); fistAt(g, 75, 78, 4, SKIN_D); }
+
+// ---------- C. Stocky miner: short and round, a big belly, bald with a topknot, a leather apron, a pick over the shoulder ----------
+function drawMiner(g, t, P) { const br = P.breathe, w = P.work, sw = w > 0 ? Math.sin(Math.PI * Math.min(1, w * 1.4)) : 0;
+  seg(g, 68, 84, 70, 96, 10, 9, '#5a4030'); bootAt(g, 71, 104, 11, '#4a3020'); seg(g, 56, 84, 54, 96, 11, 10, '#6a4a34'); bootAt(g, 54, 104, 12, '#5a3a24');
+  g.save(); g.translate(62, 86); g.scale(1 + .02 * br, 1 + .025 * br); g.translate(-62, -86); blob(g, 62, 70, 21, 18, SKIN); blob(g, 56, 76, 14, 11, SKIN_L);
+  g.fillStyle = '#8a5a30'; g.beginPath(); g.moveTo(46, 62); g.lineTo(62, 60); g.lineTo(64, 90); g.lineTo(48, 92); g.closePath(); g.fill(); g.strokeStyle = '#5a3418'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(52, 62); g.lineTo(60, 48); g.stroke(); g.fillStyle = '#5a3418'; g.fillRect(50, 72, 8, 6); g.restore();
+  // a pouch on the hip
+  blob(g, 76, 80, 5, 6, '#7a5030');
+  // head: big and round, bald, a black topknot, a wide grin with tusks
+  const hx = 50 + Math.sin(t * 1.2) * .5, hy = 44 + br * .5; blob(g, hx, hy, 13, 12, SKIN); g.fillStyle = '#1a1a1a'; g.beginPath(); g.ellipse(hx + 6, hy - 12, 4, 5, .4, 0, 7); g.fill(); g.strokeStyle = '#c8a040'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(hx + 3, hy - 9); g.lineTo(hx + 8, hy - 8); g.stroke();
+  g.fillStyle = SKIN; g.beginPath(); g.moveTo(hx + 10, hy - 2); g.lineTo(hx + 19, hy - 6); g.lineTo(hx + 11, hy + 3); g.fill();
+  g.fillStyle = '#2a1010'; g.beginPath(); g.moveTo(hx - 12, hy + 5); g.quadraticCurveTo(hx - 4, hy + 10, hx + 2, hy + 5); g.lineTo(hx + 1, hy + 7); g.quadraticCurveTo(hx - 4, hy + 12, hx - 12, hy + 6); g.fill(); tusk(g, hx - 9, hy + 7, 4, -1.8); tusk(g, hx - 2, hy + 7, 4, -1.4);
+  g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(hx - 5, hy - 4, 7, 2.2, -.1, 0, 7); g.fill(); orcEye(g, hx - 5, hy - 1, 2.2, P.blink, 0);
+  // the pick over the shoulder (swings down on Work work!)
+  const pa = lerp(-.35, 1.4, sw); g.save(); g.translate(56, 54); g.rotate(pa); g.fillStyle = '#7a5030'; g.fillRect(-26, -1.6, 34, 3.2); g.fillStyle = '#9aa0a8'; g.beginPath(); g.moveTo(-26, 0); g.quadraticCurveTo(-30, -14, -24, -20); g.lineTo(-27, -2); g.quadraticCurveTo(-30, 12, -22, 16); g.closePath(); g.fill(); g.restore();
+  seg(g, 50, 58, 52, 62, 9, 8, SKIN, 'rgba(220,255,170,.3)'); fistAt(g, 54, 56, 6, SKIN); seg(g, 72, 60, 78, 70, 8, 7, SKIN_D); fistAt(g, 79, 74, 5, SKIN_D); }
+
+// ---------- D. Lanky slacker: tall and thin, slouched, arms to the ground, sleepy eyes, a hair tuft, a gold sack on its back ----------
+function drawSlacker(g, t, P) { const br = P.breathe, w = P.work, sh = w > 0 ? Math.sin(Math.PI * Math.min(1, w * 1.2)) : 0, sway = Math.sin(t * .8) * 1.2;
+  seg(g, 66, 70, 70, 87, 6.5, 5.5, '#4a5a34'); seg(g, 70, 87, 70, 102, 5.5, 4.5, SKIN_D); g.fillStyle = shade(SKIN_D, .8); g.beginPath(); g.ellipse(67, 103, 6, 2.4, 0, 0, 7); g.fill();
+  // the gold sack on its back, coins peeking out
+  blob(g, 80, 46 - sh * 4, 12, 14, '#a07a4a'); g.fillStyle = '#ffd36a'; for (const [x, y] of [[76, 33], [81, 32], [85, 34]]) { g.beginPath(); g.arc(x, y - sh * 4, 2.4, 0, 7); g.fill(); } g.strokeStyle = '#6a4a2a'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(72, 36); g.lineTo(62, 50); g.stroke();
+  // a thin slouched body in a ragged tunic
+  g.save(); g.translate(64, 72); g.scale(1, 1 + .03 * br); g.translate(-64, -72); blob(g, 64, 54, 12, 20, SKIN, -.35); g.fillStyle = '#8a7a5a'; g.beginPath(); g.moveTo(54, 50); g.lineTo(74, 46); g.lineTo(76, 74); g.lineTo(70, 72); g.lineTo(66, 76); g.lineTo(60, 72); g.lineTo(54, 74); g.closePath(); g.fill(); g.restore();
+  seg(g, 60, 72, 56, 88, 7, 6, '#5a6a40', 'rgba(255,255,200,.15)'); seg(g, 56, 88, 57, 102, 6, 5, SKIN); g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(54, 103, 7, 2.6, 0, 0, 7); g.fill();
+  // the head drooping forward on a long neck, a tuft of hair, droopy eyes, a slack jaw with one tusk
+  const hx = 44 + sway, hy = 34 + br * .5 + sh * -3, tilt = sh * .25; g.save(); g.translate(hx, hy); g.rotate(tilt); g.translate(-hx, -hy); seg(g, 56, 40, hx + 3, hy + 3, 6, 5, SKIN);
+  blob(g, hx, hy, 9, 10, SKIN); g.fillStyle = '#2a1a10'; g.beginPath(); g.moveTo(hx - 2, hy - 9); g.lineTo(hx + 2, hy - 15); g.lineTo(hx + 3, hy - 9); g.lineTo(hx + 7, hy - 13); g.lineTo(hx + 6, hy - 7); g.fill();
+  g.fillStyle = SKIN; g.beginPath(); g.moveTo(hx + 6, hy - 1); g.lineTo(hx + 14, hy + 6); g.lineTo(hx + 7, hy + 4); g.fill(); g.fillStyle = SKIN_D; g.beginPath(); g.ellipse(hx - 2, hy + 7, 7, 3.5, 0, 0, 7); g.fill(); g.fillStyle = '#2a1010'; g.fillRect(hx - 7, hy + 5, 6, 1.6); tusk(g, hx - 6, hy + 6, 3.5, -1.6);
+  orcEye(g, hx - 4, hy - 1, 2, P.blink, .55); g.restore();
+  // long arms hanging to the ground (they rise for the shrug)
+  seg(g, 56, 44, lerp(50, 44, sh), lerp(70, 40, sh), 5.5, 4.5, SKIN, 'rgba(220,255,170,.3)'); seg(g, lerp(50, 44, sh), lerp(70, 40, sh), lerp(48, 36, sh), lerp(96, 30, sh), 4.5, 4, SKIN); fistAt(g, lerp(48, 36, sh), lerp(98, 28, sh), 4, SKIN);
+  seg(g, 70, 46, lerp(74, 80, sh), lerp(72, 40, sh), 5, 4, SKIN_D); fistAt(g, lerp(76, 84, sh), lerp(96, 30, sh), 3.6, SKIN_D); }
+
+// ---------- rendering: model -> small canvas -> hard alpha + pixel outline -> blown up ----------
+const LO = document.createElement('canvas'), lg = LO.getContext('2d', { willReadFrequently: true });
+function renderLow(t, P, draw) { const unit = .78 * O.size / O.px, W = Math.ceil(120 * unit) + 2; LO.width = LO.height = W; lg.setTransform(unit * O.face, 0, 0, unit, O.face > 0 ? 1 : W - 1, 1); draw(lg, t, P);
+  const im = lg.getImageData(0, 0, W, W), d = im.data; for (let i = 3; i < d.length; i += 4) d[i] = d[i] > 100 ? 255 : 0;
+  if (O.outline) { const solid = i => d[i * 4 + 3] === 255, out = []; for (let y = 0; y < W; y++) for (let x = 0; x < W; x++) { const i = y * W + x; if (solid(i)) continue; if ((x > 0 ? solid(i - 1) : false) || (x < W - 1 ? solid(i + 1) : false) || (y > 0 ? solid(i - W) : false) || (y < W - 1 ? solid(i + W) : false)) out.push(i); } for (const i of out) { d[i * 4] = 16; d[i * 4 + 1] = 22; d[i * 4 + 2] = 10; d[i * 4 + 3] = 255; } }
+  lg.putImageData(im, 0, 0); return W; }
+const VAR = [
+  { k: 'A', name: 'Brute', desc: 'Like the reference: huge shoulders and arms, a small head sunk low between them with a heavy brow and tusks, a black vest and belt, red-and-black striped shoulder pads, brown trousers and boots, an axe held low (it chops).', draw: drawBrute },
+  { k: 'B', name: 'Hunched laborer', desc: 'Bent over under a log on its shoulder: a long nose, a big pointed ear, an underbite with two tusks up, a loincloth with a rope belt, bare green skin (it hefts the log).', draw: drawLaborer },
+  { k: 'C', name: 'Stocky miner', desc: 'Short and round with a big belly, a big bald head with a black topknot, a wide toothy grin, a leather apron, a pouch, a pickaxe over the shoulder (it swings it).', draw: drawMiner },
+  { k: 'D', name: 'Lanky slacker', desc: 'Tall, thin and slouched, long arms hanging to the ground, a tuft of hair, droopy sleepy eyes, one tusk, a ragged tunic, a gold sack on its back (it shrugs).', draw: drawSlacker }];
+const grid = document.getElementById('grid'), cvs = VAR.map(o => { const p = document.createElement('div'); p.className = 'panel cell'; p.innerHTML = '<b>' + o.k + '. ' + o.name + '</b><small>' + o.desc + '</small>'; const c = document.createElement('canvas'); c.width = c.height = 300; p.prepend(c); grid.appendChild(p); return c; });
+const game = document.getElementById('game'), gg = game.getContext('2d');
+let last = performance.now();
+function frame(ts) { const dt = Math.min(.05, (ts - last) / 1000); last = ts; now += dt; const t = now, bp = (t % 4.1) / 4.1;
+  const P = { breathe: Math.sin(t * 2), blink: bp > .965 ? Math.sin((bp - .965) / .035 * Math.PI) : 0, work: clamp((t - workAt) / 1.1, 0, 1) < 1 ? clamp((t - workAt) / 1.1, 0, 1) : 0 };
+  gg.imageSmoothingEnabled = false; gg.clearRect(0, 0, game.width, game.height); const bw = game.width - 40, bx = 20, by = game.height - 26;
+  gg.fillStyle = '#0a0910'; gg.fillRect(bx - 2, by - 2, bw + 4, 15); gg.fillStyle = '#7a3fcf'; gg.fillRect(bx, by, bw * .55, 11); gg.fillStyle = '#2a2236'; gg.fillRect(bx + bw * .55, by, bw * .45, 11);
+  VAR.forEach((o, i) => { const W = renderLow(t, P, o.draw), c = cvs[i], cg = c.getContext('2d'); cg.imageSmoothingEnabled = false; cg.clearRect(0, 0, c.width, c.height); const z = Math.max(1, Math.floor(290 / W)); cg.drawImage(LO, Math.round((c.width - W * z) / 2), Math.round((c.height - W * z) / 2 + 6), W * z, W * z);
+    const cx = bx + bw * (.14 + .24 * i); gg.drawImage(LO, Math.round(cx - W * O.px / 2), Math.round(by - 2 - W * O.px * .87), W * O.px, W * O.px); gg.fillStyle = '#a59f92'; gg.font = '12px system-ui'; gg.fillText(o.k, cx - 3, by - 4 - W * O.px * .87 - 4); });
+  requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+</script>
+</body></html>

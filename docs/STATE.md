@@ -1,146 +1,48 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-16 (stop point), skill-up gains: **all four gatherers DONE**; **Blacksmithing DONE**
-(rounds 53-82). Next: the user starts a **new session for the other crafters**, one at
-a time. Read this first (the `session-resume` skill does), then CLAUDE.md and `docs/plan.md` ("1.4.0 scope, revised
-2026-11-12": every round and pick, newest at the end of "2. Skill-up gains"). Older detail: git log._
+_Last checkpoint: 2026-11-16. Kept short on purpose (the start-up hook loads it into every session): status, the current
+focus and pointers. Detail lives in the workstream file named below; history in git log._
 
 ## Where things stand
-- **Murloc companion (new, 2026-11-15):** the user wants a goofy murloc "travel companion", a ragdoll beat-em-up buddy that things happen to (XP and more). Design page `docs/mockups/murloc.html`: round 3 picked **C. Knuckle-walker** (side-on, arched back, ragged spike crest, long low head, leans on its knuckles), pixels locked at **Medium** (2 px, pixel outline). Earlier tries (wrung-out murloc options 9-13 in leveling-all.html: hands, wringer, clothesline, toothpaste; face realistic/sad, body switch) were all rejected as looks; the wring-out mechanics may come back with the new murloc. Companion round 1 on `docs/mockups/murloc-companion.html` (verlet ragdoll of C, lives on the XP bar at the fill end; scenes: kill punt, elite punt, level-up cannon with ceiling splat, mounted drag (pinned hand, wind), grab and fling (drag anytime), XP punch (kill) and jab-jab-uppercut combo (quest)). Ragdoll feel round (user: "too floaty, no impact"): a Feel switch A round 1 / B heavy (2x gravity, dead landings, heavy core + light limbs) / C heavy + impact (hit-stop, shake, squash, dust, thud by force; default) / D C + KO slow-mo. Then (user: "still off", ceiling stuck, wants better effects, sounds and spinning): extra contact points (snout, belly, back end), joint limits, the ceiling moved into view (CEIL) with a glass splat (cracks, slide, push off after .4 s), get-up that rolls along the floor and pops, hit flash, impact lines, comic words (BONK, BOOM, SPLAT, POW), sideways dust, skid dust, shock rings, a noise-based sound kit (thud, slap, clatter, yelp, boom, whoosh, splat, wind loop), and yaw spin. Then (user: spin must be a real animation, generalized for new designs; plus a ragdoll physics checklist): a **3D-volume rig** (`drawRig3D`, the design is data: `DESIGN_C` = torso/belly/head/jaw/mouth volumes of spheres in rest coords with depth z, spots, eyes with a facing normal, teeth rows, limbs as depth capsules; projected by yaw about the vertical axis, painted back to front; each volume shaded in 3 passes so it reads as one shape), a Rig switch (3D volumes default / 2D art), bend limits for elbows, knees, neck (`limitJoints`), restitution .22, air drag ~.985/frame on B-D, impulse inheritance (`setPose(P, true)`), pixel-snapped drawing (keyed to the hip); self-collision was never on. Then (user: sphere body lumpy, "a donut from the side"; spin should scale with hit force): the **extruded-art rig** (`drawRigX`, default; Rig switch also has Sphere volumes and Flat mirrored): the original 2D torso and head art (painted each frame to offscreen canvases, crest drawn separately) cut into 1/AS-unit vertical slices, each with a thickness from its opaque column height (PARTS[k].k) and a rounded (elliptical) cross-section drawn in 8 bands, turned about the torso's local vertical axis (CX = 66) and painted back to front; limbs and crest turned the same way (Y3). Any side-view art can be spun this way. Spin now scales with force (kill punt 3.5, elite 16, jab 1.8, uppercut 15, cannon 12, fling by release speed, hard landings add spin). About 15 ms a frame in the pane. User: "wayy better". Then Smash rules (round 2 of the page): damage % (DMG, HUD top right, white to dark red, pops), knockback x (1 + DMG/140), hitlag (add/3 + 3) frames x1.6 at 100%+ and x3 at 200%+, vibration through the freeze, smoke trail at 100%+, 200%+ = zoom 1.4 + blue tint + speed lines + red sparks + CRUNCH + slow-mo; the ceiling is gone: off the top = KO (a colour blast from the top edge), then respawn on a glowing platform (1.9 s, flicker), damage back to 0%. Level-up is now the cannon KO + respawn with LEVEL 24, then the victory pose. Then (user: no damage % meter, Smash was only the example for how hard hits land; never fly off screen, always settle): round 3 of the page: fixed hit strength per event via smash(tier): light (kill, jab: 80 ms freeze, small vibration), heavy (elite, quest uppercut: 170 ms, bigger vibration, smoke trail), mega (level-up: 380 ms freeze, zoom, blue tint, speed lines, CRUNCH, slow-mo, long trail); no meter, no KO or respawn (functions left unused); the top of the screen is a soft bounce (CEIL); level-up = cannon mega hit, flies to near the top, lands, settles, then LEVEL 24 + victory pose. Waiting on feedback. Impulses are per 1/120 s substep. Checking tip: the pane throttles rAF when hidden, so step it by hand: `requestAnimationFrame = () => 0` then call `frame(last + 16.67)` in a loop.
 - **1.3.1 is the latest release** (2026-11-10). **The game is on the RELEASED copy**: switch to dev before testing new
-  work (`tools/addon-mode.ps1`, command in CLAUDE.local.md; then `/reload`). Everything is committed and pushed.
-- **1.4.0 = Leveling + the dungeon recap + the crafting redesign + a cohesion pass.** Design only so far. Order (plan.md
-  "1.4.0 order"): professions first (crafting DONE in design; skill-up gains now; then the Create All pile, gathering,
-  the loot window), build them; then XP, rep, level-up; the dungeon recap last (may slip to 1.5.0).
-- **Crafting redesign: design DONE** (`docs/mockups/craft-compare.html`; Phase 2 + Phase 3 Polish for all ten; picks in
-  plan.md "Phase 2 done for all 10" and "Crafting Phase 3 Polish"; loudness Even, `LOUD_GAIN.even`).
-- **Skill-up gains** (`docs/mockups/skillup-p2.html`, the only page; the `<h1>` says the round):
-  - SET: the 1.3-style header (no backing, the game's text shadow) and bar (dark track, thin gold border, notches,
-    the next unlock's icon at the end, "N to X" under it). Each profession uses the bar as a frame: parts may
-    reach outside it, like the craft rings' tools. Finales are per profession. The page's option buttons show
-    letters only.
-  - **Herbalism DONE:** the Vine breaking out of a slim 6 px bar (no add-on). Finale: Sickle sweep (a gold slash
-    runs the bar, leaves shear off). Sound: Thumb piano (a note + a soft fifth, varied).
-  - **Fishing DONE:** a water bar (bright surface over the fill, Depth bands texture), the reel at the start
-    paying out line, the bobber at the front. Add-on: the swell. Sound: Water drops (two plinks, varied; the
-    swell a shower; no reel sound; Fishing's built-in strike muted). Finale: a big fish surfs a big swell and is
-    flung into the icon.
-  - **Skinning DONE:** the cut + a stroke, + Fur flies. Finale: the reticle locks on the icon; fast chops drop
-    the hide away notch by notch; the reticle tightens and turns 90° in steps. Sound: its **original** sounds
-    (the user preferred them), with only the step-down and a slight pitch variation.
-  - **Mining DONE:** the Blast. The mined part is a dug channel and the rock ahead stays solid; each skill-up a
-    charge at the front (flash, muffled thump, chunks and dust, the bar kicks, a hot glow). No add-on. Finale:
-    every blast throws ore (the chain runs; nuggets land, bounce, roll into the icon). Sound: as now (thump +
-    pebbles, clinks).
-  - **Blacksmithing DONE (2026-11-16):**
-    - The bar: open at the top like Fishing's (mode `M`): the magma's wavy glowing surface is the top edge, dark
-      cooled lava ahead of the fill. Magma = **depth bands blended as a gradient** (`bandsGrad66`).
-    - A small black **anvil** just left of the bar (rim light, warm glow behind).
-    - Idle: slow **swamp bubbles at the head** only: a glossy film dome swells (~1.5 s) and pops as a **Film
-      burst** (a flat bright ring) + a **thick splat** + a dimple and ripples. Silent.
-    - Skill-up: **Sparks into the magma**: the anvil flings its Lingering-sparks shower along the bar; each spark
-      lands with a tiny ring of ripples; the head moves on. Sound: the anvil **clank** (`anvClank60`).
-    - Finale (reaching the next unlock): **molten beads rise** out of the sinking magma in no set order, then
-      left to right each is **struck to iron** in one flash (squash, the bar jolts) with **crunch + scale**
-      (gritty crunch + low knock; sparks and dark scale flakes); a **crate** drops in, the ingots fly in and
-      stack 4 + 3, a lid thunks on; then **a peon runs in, hoists the crate and runs off with it**; the icon
-      lights. The ding is gone (banner chime + old dress bell muted for Blacksmithing).
-    - Finale sound: **Scurry** (round 82 A, no whoosh): quick light footsteps, the ingots jingling in the crate,
-      a grunt on the lift, a soft airy puff when the icon lights. The user disliked every boom here (it drowned the
-      peon) and every chime/ding.
-  - **Next: the other crafters** in a new session, one at a time: Leatherworking, Alchemy, Tailoring,
-    Engineering, Enchanting; then Cooking, First Aid. Same steps per profession: base design (pitch first) →
-    add-ons → finale → sound. Rules: **no echo** with the craft ring = mainly don't copy its **tool**
-    (materials, heat, sparks are fine); a crafting batch can be 100 casts. Lessons from Blacksmithing: options
-    must be **clearly different designs, not variations** of one; when the user names what they like it's a
-    hint for new directions; keep the profession's identity (avoiding everything the ring uses made "a gray
-    bar, nothing blacksmithy"); show **8 options** (keys 1-8) when iterating two things at once.
-  - Unlocks per profession and the bar code are on the page. The full record is in plan.md.
+  work (`tools/addon-mode.ps1`, command in CLAUDE.local.md; then `/reload`).
+- **1.4.0 = the professions redesign + leveling (+ the dungeon recap if the budget allows).** Design only so far. The
+  to-do order is plan.md "1.4.0 order" (unchanged): 1 crafting API checks (done), **2 skill-up gains (now)**, 3 the
+  Create All pile, 4 gathering, 5 the loot window, 6 build the professions; 7-10 XP, rep, level-up, build; 11 dungeon
+  recap; 12 release. Crafting redesign: design DONE (`docs/mockups/craft-compare.html`).
+- **Current focus: skill-up gains. Read `docs/skillup.md`** (status per profession, the locked craft rings to avoid
+  echoing, the page's workings). Don't read plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed.
+  Right now: **Leatherworking base, round 85 waiting on the pick** (A Grip wrap kept, B Sling, C Fringe, D Belt and
+  buckle). Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing.
+- Side projects (not 1.4.0, don't read unless asked): `docs/side-projects/` (murloc/: the murloc + peon companion).
 
-## How the skill-up page works (for the next session)
-- Options are the `FAM` slots `PA`-`PH` (keys 1-8; slots left unset hide), set by `Object.assign(FAM, {PA:
-  rNN('A'), ...})`; the last assignment wins. Each `rNN(K)` returns `{name, desc, note, draw(top)}`, and draw
-  routes the other professions to their done looks. The latest is `r82`.
-- **Size limit:** the pane loads the page as one `data:` snapshot (a separate .js beside it does NOT load) and
-  refuses pages over **512 KiB** (524,288 bytes). Check `wc -c`; move rejected rounds and dead helpers to
-  `docs/mockups/skillup-p2-old-rounds.js` (not loaded) as you go. Watch for a stray `};` when cutting objects.
-- Blacksmithing plumbing: `V69(F)` builds a finale V from `{finAt, lift, tip, fin, after}`; `mag62` draws the
-  magma (`TEX62.G66` = gradient bands), `MAGLIFT(x)` lifts its surface, `FILL70` overrides where the fill ends;
-  `INGOTS72` is the crate ending, `r77('C')` the locked formation (shifted by `SH76`), `r80('D')` the peon;
-  sound hooks: `window.FINSND78` (the payoff sound), `PS81` (peon step/grab/dash), `LDSND72` (crate landings),
-  `NOSWARM72` (no ember swarm).
-- `barModule(top, mode, V)`: modes `A` inside the bar, `B` breaks out (6 px), `F` the Fishing water, `M` open-top (sides + bottom border; the growth draws the whole bar). Slots `PA`-`PH` (keys 1-8); unassigned slots hide.
-- Hooks on V:
-  - `grow`, `over`, `after` (drawn over the icon)
-  - `tip`, `unlockX`, `unlockY`, `iconPulse`, `shake(info) -> [dx, dy]`
-  - `finAt`: seconds from the fill to the payoff (chime, lit icon, flash), so the finale plays first
-- Globals that override Fishing:
-  - `window.FSW(x)`: the surface lift
-  - `window.FTEX`: the texture
-  - `window.FSND(i)`: the skill-up sound
-  - `window.FREEL`: the reel clicks (`false` = silent)
-- Muting a profession's built-in strike: swap `S.p.snd` during the draw.
-- Muting a base's sounds: swap `window.tone`/`window.noise` with no-ops around the base `over`.
-- Sound helpers:
-  - `fat45(i)`: the step-down
-  - `pick45(i, span)`: varied scale notes
-  - instruments: `kal`, `mallet`, `drop`, `bell45`, `pluck`, `drum46`
-- Checking: `requestAnimationFrame = () => 0`, then step `S.age` by hand (a `stepTo(K, moment, T)` helper)
-  and zoom on [380, 50, 740, 200]. This freezes the tab and the user may be watching. Afterwards, close it
-  and reopen the page fresh (`preview_start` with the file URL). A new tab from `tabs_create` + `navigate`
-  still comes to the front.
-- No node or python on this machine: insert code with `sed "<line>r file"` from the scratchpad.
-
-## The compare page (crafting)
-- Profession buttons 1-10; Final round / Exploration. Mute only the run (`play(); S.mute = true`). Loudness check
-  offline via an OfflineAudioContext replay. No `shadowBlur` inside rotated transforms (perf).
-
-## Verified in game (by the user)
-- Everything shipped in 1.0-1.3.1.
-## Not yet verified
+## Not yet verified in game
 - The recipe-color line after a real crafting skill-up; big batches (100+) sinking the pile; `/dl` in combat; a
   dungeon (secret loot text?); vendor buys must not pop; gathering with Baganator's bags.
 
-## User preferences (stated in chat; follow them)
-- **Privacy first**: the only public identity is **Bempis**. Never `--no-verify` unless the user says so. Tag or
-  publish only with the user's OK in chat.
-- **Only `/dl`**; everything is a control on a settings page.
-- **Mockups first, the user picks.** Four options per round, each a **clearly different mechanism**. Keep the
-  current pick as A when comparing; mixes on request. **Pitch one-liners before building** a new direction.
-  **One profession at a time.** **Bold add-ons**; destructive for Mining; picking, not cultivating, for Herbalism.
-- **Sound fatigue, always** (addon rule; CLAUDE.md; style guide "Sound"):
-  - gentle, but not monotone or boring
-  - no hiss, sharp clicks or cartoon pitch drops
-  - notes varied from a scale
-  - repeats step down across systems
-  - a skill-up folds under the craft sound in a batch
-  - rare milestones in full
-- **Simple shapes** over drawn objects; **no zig-zag**; no outlines; **polish only what's named**; **no
-  lottery**; **info in one place**; **no echo between systems**.
-- Show pages with the **`/view`** skill (`/view pc` = browser pane, `/view phone` = SendUserFile; the mode is in
-  memory). On Remote Control, send pages with SendUserFile.
-- No bulk scripted runs in the browser pane; one scene, sound off for checks. Answers concise.
+## User preferences (beyond CLAUDE.md and memory, which hold the design rules)
+- Privacy first: the only public identity is **Bempis**. Never `--no-verify` unless the user says so. Tag or publish
+  only with the user's OK in chat. Only `/dl`; everything is a control on a settings page.
+- Mockups first, the user picks. **Pitch one-liners before building** a new direction; keep the current pick as A.
+  **One profession at a time.** Show pages with the `/view` skill. Answers concise.
 
-## Gotchas and environment notes
+## Gotchas
 - Media pipeline: `tools/render-media.ps1` (serves `tools/render-media.html` on :8765), `await renderAll()` in the
   pane, then `bash tools/convert-media.sh`.
-- Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep:
-  check patterns one at a time. sed: an unescaped apostrophe in a JS string breaks the page (use ’).
+- Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep: check
+  patterns one at a time. sed: an unescaped apostrophe in a JS string breaks a page (use ’). No node or python here.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
 - Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.8.1.
 - Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
+- Crafting compare page: profession buttons 1-10; mute only the run (`play(); S.mute = true`); no `shadowBlur` inside
+  rotated transforms (perf).
 
 ## Open questions / waiting on the user
 - XP: with-loot handling; Calm-when-busy (maybe one addon-wide sound budget).
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
-- 2026-11-15 (later): skill-up Blacksmithing rounds 53-82: base (anvil + gradient-band magma in an open-top bar, swamp
-  bubbles at the head, skill-up Sparks into the magma), finale (rising beads struck to iron, crate, the peon runs off
-  with it); its sound open. The page outgrew the pane's 512 KiB: old rounds to skillup-p2-old-rounds.js; leveling-all.html.
-- 2026-11-15: skill-up gatherers DONE (rounds 15-52: header + bar set, Herbalism, Fishing, Skinning, Mining: look,
-  finale, sound); the sound-fatigue rule; the `/view` skill.
-- 2026-11-14: skill-up Phase 2 rounds 1-14 (own module, grows along the line); 1.4.0 order revised; crafting Phase 3
-  Polish done (3 beats, loudness Even).
-- 2026-11-13: crafting Phase 2 second pass, Smelting + Disenchanting. 2026-11-12: 1.4.0 design scope, style guide.
+- 2026-11-16: skill-ups split out (`docs/skillup.md`, `docs/skillup-rounds.md`; plan.md no longer holds the rounds);
+  STATE.md cut to this; the murloc moved to `docs/side-projects/`. Leatherworking rounds 83-85.
+- 2026-11-15: skill-up gatherers and Blacksmithing DONE (rounds 15-82). 2026-11-14: crafting Phase 3 Polish done.
 - 2026-11-10 1.3.1. 2026-11-04 1.0.0 on WoW Forever.

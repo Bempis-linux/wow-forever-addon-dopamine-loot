@@ -1200,3 +1200,324 @@ Object.assign(FAM, { PA: r81('A'), PB: r81('B'), PC: r81('C'), PD: r81('D') });
   B: { name: 'Pin ting + boom', desc: 'A tiny, bright, dry “ting”, like a firing pin being struck, and a beat later the punchy boom goes off.', play: () => { ting80(); boom80(.13); } },
   C: { name: 'Last strike + boom', desc: 'The last metal being forged: one short, damped anvil clang with a bit of grit (not a bell), and right behind it the punchy boom.', play: () => { clang80(); boom80(.16); } },
 Object.assign(FAM, { PA: r80('A'), PB: r80('B'), PC: r80('C'), PD: r80('D') });
+
+// ===== comment lines moved out of skillup-p2.html on 2026-11-16 (page size); NNNN: = their old line numbers =====
+// 70: // ---------- helpers ----------
+// 86: // an item icon stand-in: an emoji in a white (item quality) border; lit 0..1 (dark until reached)
+// 95: // ---------- sound: the mockups' helpers (tools/render-media.html), live ----------
+// 99: // (the scene autoplays on load, before any click, so the browser starts the audio paused: resume it on the first click or key)
+// 107: // ---------- the tools: the same drawings as in game (tools/render-media.html) ----------
+// 119: // ---------- particles ----------
+// 131: // ---------- professions: material, tool and its motion, what's next ----------
+// 132: // span: what Ring and Segments fill (gatherers: last unlock -> next; crafters: the rank); cspan: Constellation's (the whole rank)
+// 151:   // round 12: the other two gatherers (sample unlocks: beast levels you can skin, waters you can fish)
+// 167: // the tool's motion: t seconds since the strike began (it lands at HIT); returns dx, dy, rot, sx, sy
+// 180: // ---------- materials along a path (Ring's arc, Constellation's line) ----------
+// 181: // path: s (0..1) -> { x, y, a (tangent) }; L: its length in px
+// 215: // a Segments cell drawn in the material: lit 0..1 (left to right), age since it was lit
+// 224:   // empty
+// 238: // ---------- scene ----------
+// 248: // the skill value now (float while filling) and the time since the last strike began
+// 252: // strikes: the tool's sound (a step higher each in a row) and its particles, once per hit
+// 266: // the reveal under the banner (shared): the new herb or ore drops in dark, lights with rings and glints
+// 276: // ---------- the families ----------
+// 295:       // closing: flash + shockwave
+// 302:       // the tool at the head, outside the ring (under the seam's icon)
+// 305:       // the seam: the next unlock waits where the ring closes
+// 339:       // the milestones on the ring
+// 365:       // the stars: every unlock in the rank (crafters: milestones and the rank cap)
+// 405:   // ---------- Phase 2 (2026-11-14): new designs from what the crafting picks taught (tools act on the ring, punchy beats,
+// 406:   // the ring as the material, the item in the middle); A is the Phase 1 lock (Ring + road)
+// 431:         // beside it: the name, the number and the road (gatherers) or the rank cap (crafters)
+// 471:       // the tool: on its stone, hopping to the next one on each skill-up (lands at the strike)
+// 479:   // ---------- Phase 2 round 2 (2026-11-14): skill-ups as their own draggable module (shown at its default place), each
+// 480:   // option a different mechanism: the number (B), distance (C), the tool as the gauge (D)
+// 490:       // the counter: each digit on its own drum
+// 496:       // the line to the next unlock, in the material
+// 515:       // the dotted way still to go
+// 517:       // your ring: the skill number in the profession's color
+// 537:       // the swing at the unlock: lifts, then strikes the icon to its right
+// 554:   // ---------- Phase 2 round 3 (2026-11-14, after the budget rule): each carried by something no other option uses:
+// 555:   // the reward's picture completing (B), the impact itself (C), pitch and light (D)
+// 626:       // the scale under the bell: eight dots, the struck note lit
+// 642:   // ---------- Phase 2 round 4 (2026-11-14): the A + D direction (resonance: sound and light), each carried differently:
+// 643:   // the arc filling and ringing (B), how far the light reaches (C), a string going from slack to taut (D)
+// 657:       // the light pool: everything the ripples have reached so far
+// 661:       // the road as circles: the next unlock nearest, the ones after further out; icons sit on them to the upper right
+// 666:       // this strike's ripple travelling out to the new reach
+// 668:       // the bell
+// 692:       // the string: a quadratic from your ring to the unlock, the vibration on its middle
+// 696:       // knobs at both ends
+// 698:       // your skill: a small ring with the number
+// 708:   // ---------- Phase 2 round 5 (2026-11-14): progression first, each carried differently: where you stand on the whole
+// 709:   // career (B), height you build (C), a goal you travel toward (D)
+// 724:       // the ranks: tinted bands with their names
+// 728:       // ticks: every 5 levels, numbers every 25 (zoomed in)
+// 731:       // the line: the whole career dim, your trail lit in the material, the tool at the head
+// 733:       // the unlocks on the line
+// 757:       // rails
+// 759:       // the ledges: the next unlocks at their levels (crafters: the rank cap)
+// 766:       // the blocks (settled), then the falling one
+// 789:       // the horizon glow and the road
+// 794:       // the marks: one per skill point, flowing toward you; lit in the material color once passed
+// 798:       // the unlocks standing on the road (the next one, then the ones after)
+// 808:   // ---------- round 6 (2026-11-14): A vs B, each dressed per profession, to judge which frame customizes best
+// 814:   // ---------- round 7 (2026-11-14): compact, no ring and no tool (no echo of the craft ring); each with an obvious
+// 815:   // per-profession slot: the pip (B), what fills the icon (C), how the digit changes (D)
+// 875:   // ---------- round 8 (2026-11-14): B and C of round 7 again; B without the repeated icons, C cleaner (nothing covers the icon)
+// 921:   // ---------- round 9 (2026-11-14): the container idea, three different ways (no blocky frame); A = One notched line
+// 930:       // inside the vessel
+// 934:       // the delivery from above, per profession
+// 957:       // the goal line and the ground
+// 985:   // ---------- round 10 (2026-11-15): the tighter layout (rank, points to go, what comes after) and two bold ways
+// 996:       // the notches up the side; the top one (the brim) is gold
+// 1022:       // line 1: name, skill / cap, rank
+// 1028:       // line 3: the unlock by name, points to go, what comes after
+// 1071:   // ---------- round 11 (2026-11-15): add-ons to round 10 B (it grows along the line); A = B as it is
+// 1081: // round 11: the grows-along-the-line module with its add-on (mode: plain, tip, road, unlock)
+// 1101:   // the growth (road: from where the stretch began, so it slides off on the way to the next; finale: eaten from the left into the icon)
+// 1120: // ---------- round 12 (2026-11-15): per profession, gatherers: four ways the line grows for each ----------
+// 1202: // ---------- round 13 (2026-11-15): the gatherers again, from the round 12 feedback (Fishing: the cast + the reel, then add-ons;
+// 1203: // Skinning: add-ons to the cut; Herbalism: the vine + three different mechanisms; Mining: four new ones) ----------
+// 1206: // Fishing: the reel at the start of the line (the spool empties as line goes out), the line, the bobber
+// 1221: // Skinning: the cut as round 12 drew it
+// 1223: // Herbalism B: the plant at the tip, stage by how near the unlock is (f), bl = bloom 0..1
+// 1232: // Mining B: the color of the vein by heat (1 = white-hot at the tip)
+// 1328: // ---------- round 14 (2026-11-15): bolder add-ons (Fishing on rod and reel + taut line + a bite, Skinning on the cut + a stroke
+// 1329: // per skill-up, Herbalism on the vine) and four Mining bases to compare ----------
+// 1452: // ---------- round 15 (2026-11-15): a cleaner base. Four frames for the same growth (each profession's current base) ----------
+// 1453: // The 1.3 banner was liked for being clean and quick: these strip the frame back; the growth and unlocks stay.
+// 1501: // ---------- round 16 (2026-11-15): B "Just a line" picked; four ways to keep it readable on any ground ----------
+// 1515: // ---------- round 17 (2026-11-15): Just a line on a fading strip (no outlines; the shade looked too big); Fishing redrawn to read ----------
+// 1532: // ---------- round 18 (2026-11-15): back to a skill bar, like 1.3 ("the clear show that a skill bar was increasing") ----------
+// 1533: // The header has no backing (the game's text shadow); the bar is its own backing. Like the craft rings' tools, parts may
+// 1534: // reach outside the bar. Four ways each profession's current base sits in the bar.
+// 1550:   // header: no backing, the game's text shadow
+// 1553:   // the bar: dark track, thin border
+// 1577: // ---------- round 19 (2026-11-15): the header and the bar are set (round 18); how the growth sits in it is per profession ----------
+// 1578: // Herbalism breaks out (round 18 B), Mining and Skinning stay inside (A), Fishing: the whole bar is water, its top is the
+// 1579: // water's surface (no border there) and the bobber floats on it at the fill's front. A-D: four ways to draw that surface.
+// 1600:   // the bobber floats on the surface at the fill's front; each skill-up it dips under with a splash
+// 1602:   // round 20: the reel and line from round 14 A, attached at the bar's start (like the tools on the craft rings): the reel
+// 1603:   // pays out line with clicks; each skill-up the line snaps taut with a twang and shivers, then slowly sags to the water
+// 1618: // ---------- round 21 (2026-11-15): Fishing locked; new Mining options and one more pass for Herbalism and Skinning, in the set bar ----------
+// 1619: // Herbalism breaks out (the 6 px bar), Mining and Skinning stay inside; parts may attach outside like Fishing's reel; no tool riding.
+// 1696: // ---------- round 22 (2026-11-15): Mining = the tunnel + the mine cart (four ways); Herbalism grass, roots and a mix; Skinning add-ons to the cut ----------
+// 1701: // a mine cart standing on the rail at (x, ry): load 0..1 heaps ore over its rim; tilt (radians, forward); ang turns the wheels
+// 1766: // ---------- round 23 (2026-11-15): one profession at a time. Herbalism: Vine or Tall grass? Two more to help decide ----------
+// 1786: // ---------- round 24 (2026-11-15): Herbalism, new C and D (the mix and Picked herbs out) ----------
+// 1787: // a fern frond rising from (x, y): h tall, u 0 (a tight fiddlehead coil) .. 1 (unrolled, leaflets out), sw sway
+// 1791: // a broad leaf from (x, y): open 0 (folded spike) .. 1 (wide open), tilt, size
+// 1805: // ---------- round 25 (2026-11-15): Herbalism C and D that are NOT something sprouting at each tick ----------
+// 1827: // ---------- round 26 (2026-11-15): Herbalism base = Vine (round 25 A); bold add-ons ----------
+// 1854: // ---------- round 27 (2026-11-15): Herbalism vine add-ons about picking herbs, not cultivating (sunbeam, butterfly out) ----------
+// 1871: // (the user, mid-round: picking may be a new design rather than an add-on. B and C are new picking designs; D keeps the vine, plucked)
+// 1886: // ---------- round 29 (2026-11-15): Herbalism LOCKED as the Vine (round 28 A); four finales for when the bar fills ----------
+// 1887: // V.finAt: seconds from the bar filling to the payoff (chime, icon lit, bar flash, "Unlocked!"), so the finale plays first.
+// 1930: // ---------- round 30 (2026-11-15): Herbalism DONE (Vine + Sickle sweep); Skinning: the cut + a stroke + Fur flies, add-ons on top ----------
+// 1968: // ---------- round 31 (2026-11-15): Skinning keeps A Fur flies; three new add-ons on top (round 30 B-D not liked) ----------
+// 1969: // V.shake(info) -> [dx, dy]: moves the whole bar module (header, bar, icon) for a jolt.
+// 2001: // ---------- round 32 (2026-11-15): Skinning LOCKED as A, the cut + a stroke + Fur flies; four finales for when the bar fills ----------
+// 2036: // ---------- round 34 (2026-11-15): Skinning finale = round 33 C Target lock mixed with D, but the hide gets chopped up instead of the refill ----------
+// 2039: // the reticle sliding from x0 to x1 over [t0, t0 + d], locking there (eased), then held gold till it fades
+// 2043: // the hide chopped at the notches, left to right: chop k (1..n) at t0 + (k - 1) * dt cuts piece k - 1 loose
+// 2077: // C's payoff waits for the reticle: finAt depends on the notch count, so set it per draw
+// 2086: // ---------- round 35 (2026-11-15): Skinning finale = lock first (round 34 A's order), then fast chops whose pieces fly into the locked icon (34 B) ----------
+// 2087: // cfg: dt (between chops), fly (piece flight time), rtl (chop from the icon end back), react ('pulse' | 'tighten')
+// 2124: // ---------- round 36 (2026-11-15): Skinning finale = round 35 D (the reticle tightens), turning 90 degrees, the pieces falling away (round 34) ----------
+// 2125: // turn: 'steps' (a step per chop), 'smooth' (turns evenly as the chops run), 'snap' (all 90 on the last chop), 'kick' (steps with an overshoot)
+// 2163: // ---------- round 37 (2026-11-15): Skinning DONE; Fishing (locked bar) add-ons, bold ones; the finale comes after ----------
+// 2164: // window.FSW(x): extra height added to the water surface (negative = up), set per draw by an add-on and cleared after.
+// 2198: // ---------- round 38 (2026-11-15): Fishing picks D The swell (round 37); new water textures inside the filled water + new swell sounds ----------
+// 2199: // window.FTEX(x0, tipX, top, bot, ly, t, body): draws the texture inside the filled water (body() traces its shape).
+// 2235: // ---------- round 39 (2026-11-15): Fishing = the swell + Depth bands texture (38 B) + the soft low rush (38 A sound); the skill-up sound itself (the bobber dip) ----------
+// 2236: // window.FSND(i): replaces the locked bar's skill-up sound (i = which skill-up in the popup); the splash drops stay.
+// 2256: // ---------- round 41 (2026-11-15): Fishing's whole sound reworked, four gentle sets (no hiss, no sharp clicks, nothing high or buzzy) ----------
+// 2257: // Each set: up(i) = the skill-up (the bobber dipping), swell() = the swell rolling, reel = the reel's clicks per skill-up (false = silent).
+// 2280: // ---------- round 42 (2026-11-15): Fishing sound sets, livelier but still gentle (round 41 A-C too monotone/boring) ----------
+// 2305: // round 42 D replaced (the user): the hybrid, B's water drops for the skill-ups + C's swell (a low pluck + two high notes), no reel
+// 2309: // ---------- round 43 (2026-11-15): Fishing set (the swell, Depth bands, the Water drops sounds: round 42 B); four finales ----------
+// 2341: // ---------- round 44 (2026-11-15): Fishing finale = round 43 B Tidal wave mixed with D Leaping school, four ways ----------
+// 2347: // one leap: from xa to xb starting at t0 for d seconds, h high; toIcon lands at the icon's height; s scale; k its note
+// 2374: // ---------- round 45 (2026-11-15): Fishing DONE (big fish surfs the swell); Herbalism's sound revisited: four gentle sets ----------
+// 2375: // Each set: up(i, v) = the skill-up (v = volume after the long-session step-down), fin() = the Sickle sweep finale.
+// 2376: // Long sessions (style guide): notes vary from a scale; the first two skill-ups full, then each a step quieter (floor .5).
+// 2398: // ---------- round 46 (2026-11-15): Herbalism DONE (thumb piano); Skinning's sound revisited (it was all hiss: the strike 2.6/5.2 kHz noise, the stroke 2.2 kHz, the finale clicks) ----------
+// 2399: // Each set: up(i, v) = the skill-up (the cut), lock() = the reticle locking, chop(j, n) = each chop, last() = after the last chop.
+// 2428: // ---------- round 47 (2026-11-15): Skinning DONE (original sounds); Mining, four new designs that use the bar as a frame (parts outside it, like the reel/bobber/vine) ----------
+// 2494: // ---------- round 48 (2026-11-15): Mining, destructive designs (round 47 A/C/D too alike): blast, collapse, shatter, crushed to gravel ----------
+// 2495: // The mined part is a dug-out channel; the rock still ahead stays solid, so it still reads as a bar filling.
+// 2544: // ---------- round 49 (2026-11-15): Mining base LOCKED as Blast (round 48 A); add-ons on top ----------
+// 2576: // ---------- round 50 (2026-11-15): Mining = the Blast, no add-on (round 49 A); four finales ----------
+// 2609: // ---------- round 51 (2026-11-15): Mining finale = round 50 A Chain reaction mixed with D Ore shower, four ways ----------
+// 2614: // a nugget thrown from xa at t0 landing on the bar top at xb after d, a little bounce, then rolling to the icon; returns false when done
+// 2641: // ---------- round 52 (2026-11-15): Mining = the Blast + finale "every blast throws ore" (round 51 A); its sound, four sets ----------
+// 2642: // Each set: up(i, v) = the skill-up blast, blast(k) = each blast of the finale chain (k 0..4, 4 = the icon), clink(j) = a nugget landing.
+// 2666: // ---------- round 53 (2026-11-15): Blacksmithing, the base (first crafter). No ring, no hammer, no tool at the tip, no white-hot cooling (the craft ring has those) ----------
+// 2672: // ---------- round 58 (2026-11-15): Blacksmithing base: an anvil at the start throwing sparks, a magma channel, Ironforge's magma falls ----------
+// 2673: // Echo, clarified by the user: don't copy the hammer; heat, sparks, an anvil and magma (not white-hot metal) are fine.
+// 2675: // B: a small black anvil (face, waist, base, horn to the left), a cool rim light so it reads on dark ground
+// 2679: // ---------- round 59 (2026-11-15): Blacksmithing, where round 58 B (anvil at the start) and D (Ironforge falls) can go ----------
+// 2682: // ---------- round 60 (2026-11-15): Blacksmithing, round 59 B (Spark shower) and C (Falls and mound) improved ----------
+// 2683: // The anvil's sound: struck metal, short and damped (round 59's bell tones were "too chimey for an anvil getting hit").
+// 2686: // a warm glow behind the anvil so the black anvil reads on dark ground
+// 2688: // ---------- round 61 (2026-11-15): eight options. 1-4: add-ons on round 60 B (Lingering sparks, clank). 5-8: the magma reworked ----------
+// 2689: // The sparks: n sparks flung from the anvil; each lands on the bar (or past the front, the last three) and lingers as a hot speck.
+// 2700: // ---- magma, reworked: no bubbles; three textures (crust plates over glowing cracks, flow streaks, veined rock) ----
+// 2703: // ---------- round 62 (2026-11-15): Blacksmithing magma, the LOOK only (animations later). The bar is open at the top like Fishing's:
+// 2704: // the magma's wavy surface is the bar's top edge (no track or border showing behind it); ahead of the fill, dark cooled lava at the same level.
+// 2705: // A = round 61's flow texture; B-D three different looks. Mode 'M' in barModule: border on the sides and bottom only, the growth draws the whole bar.
+// 2710:   // ahead: dark cooled lava, a faint ember glow deep down
+// 2715:   // the surface: bright crest over the magma, a dim one over the cooled part
+// 2720:   // B: depth bands: the heat in soft layers, bright under the surface, deep red at the bottom; the band edges sway slowly
+// 2724: // ---------- round 65 (2026-11-15): Bubbling (round 64 B) kept as A; three bubbling designs that differ in both the magma and the bubbles ----------
+// 2726: // a bubble slot: k's current cycle c and phase ph (0..1); its spot along the fill changes every cycle
+// 2728: // ---------- round 66 (2026-11-15): the mix: round 65 C's Boiling patch bubbles + D's pops (thick splat, ripples), in Depth bands with soft gradient edges ----------
+// 2729: // Depth bands as a gradient: per 2 px column, the colors follow the surface down and blend into each other; plume(x) pushes the bands up (heat rising)
+// 2737: // ---------- round 67 (2026-11-15): the anvil + the magma. Gradient depth bands; slow bubbles only at the head (the fill's front), each popping with a splat + ripples.
+// 2738: // Each skill-up the anvil (at the bar's start) acts, four ways.
+// 2741: // the anvil throws a glob of magma along the bar onto the head: t 0..SHOT
+// 2742: // a big wave rolling left from the head to the anvil, between ta and tb; returns the lift
+// 2747: // ---------- round 68 (2026-11-15): round 67 D (Sparks into the magma) LOCKED as the skill-up; the head's bubbles reworked to feel like swamp bubbles popping, four ways ----------
+// 2748: // A bubble at the head: a glossy film dome swells slowly, then pops; the surface dimples where it was and rings of ripples run out.
+// 2751: // pops of the last 1.4 s: { x, age, k, c, s (size 0.7..1.2) }
+// 2754: // the surface's response: a dimple where the film was, a soft ring of ripples; D also bounces back up
+// 2759: // the dome: a thin glossy film, see-through at the middle, a bright rim and a highlight
+// 2772: // ---------- round 69 (2026-11-15): Blacksmithing FINALES (reaching the next unlock). The base as picked: the anvil, gradient depth-band magma
+// 2773: // (open-top bar), Film burst bubbles + thick splat at the head, skill-up = Sparks into the magma. ts = seconds since the bar closed.
+// 2775: // the icon filling with glowing magma from the bottom (k 0..1), drawn over the icon
+// 2786: // ---------- round 70 (2026-11-15): Blacksmithing finales, four new (round 69's set aside); A drains ----------
+// 2788: // ---------- round 71 (2026-11-15): finales: Fire across the surface (round 70 C) kept as A; B the magma hardens into ingots that go into a crate,
+// 2789: // shipped off; C an ember swarm; D a blade rising out of the magma ----------
+// 2792: // an ingot: a trapezoid (narrower on top), hot -> iron with a warm edge as cool goes 0..1
+// 2796: // the crate: a wooden box, planks and two dark bands
+// 2798: // ingot k leaves the bar (rightmost first) at the time below and hops into the crate
+// 2800: // ---------- round 72 (2026-11-15): finale = the Ember swarm (round 71 C) as A; three add-ons on it (B-D); E the ingots and F the blade,
+// 2801: // cleaned up and each with the ember swarm. Six options (keys 1-6). ----------
+// 2802: // the swarm: n embers from src(q) -> [x, y], starting at t0 + spread, lifting, then streaming into the icon; spin = orbit the icon before diving in
+// 2810: // ---- E: the ingots, clean: a bright cut sweeps the bar into seven moulds; a cooling wave runs along them, each ingot giving its heat off as embers that
+// 2811: // stream into the icon; a crate drops in; the ingots fly in one by one and stack neatly, the crate dipping with each; a lid drops; the crate glides off.
+// 2837: // ---------- round 75 (2026-11-15): four ways the INGOTS ARE CREATED (the rest as round 72 E: crate, fly in, lid, glide off). A = the cut + cooling wave ----------
+// 2838: // each formation runs 0..1.15 s; from 1.15 the shared exit (INGOTS72.fin) takes over with the seven cooled ingots in their places
+// 2841: // ---------- round 76 (2026-11-15): the ingots form as molten BEADS (round 75 B) rising from the depths (75 D), and the BLINK: left to right, each bead is
+// 2842: // struck in a quick flash and snaps into an ingot. Formation window 0..1.65 s, then round 72 E's crate ending (shifted by SH76). ----------
+// 2844: // a molten bead: a rounded glowing blob, wobbling
+// 2848: // the blink at tb: a white flash over the piece, a squash that springs back, three sparks, a soft tap a step higher each time
+// 2851: // rising beads: in no set order, beads rise out of the magma (clipped at its sinking surface), dripping
+// 2855: // the beading-up from the whole bar (round 75 B): necks thin and snap
+// 2856: // ---------- round 77 (2026-11-15): Rising beads (76 A) + Blink to iron (76 D), made SPARKY and CHUNKY, no chimes. Four strike sets (spark style + sound) ----------
+// 2857: // the strike: a hard squash that springs back, the bar jolts, sparks burst, and the bead is iron in the same flash
+// 2883: // ---------- round 78 (2026-11-15): the finale animation LOCKED (round 77 C: rising beads, struck to iron, crunch + scale, the crate). Its closing sound:
+// 2884: // a low pound with reverb, four ways (the ding gone: the payoff calls FINSND78; the crate lid is a low thud now) ----------
+// 2889: // ---------- round 79 (2026-11-15): the finale sound: CHUNKY booms (round 78's pounds were too low and too alike), four clearly different; D in the style of a
+// 2890: // JRPG boss dying (a flickering, crumbling rumble that dissolves, then the final boom) ----------
+// 2891: // a bus: dry + reverb send, through a soft saturator (the chunk)
+// 2894: // a voice: osc f0 -> f1 over dur, attack att, into dest
+// 2896: // a noise layer: filtered (type, f0 -> f1), env shape: 'hit' (fast decay), 'swell' (rises to the end), 'flat'
+// 2900: // ---------- round 80 (2026-11-15): the Punchy boom (79 A) made more blacksmithy; and, for fun, a peon who runs off with the crate ----------
+// 2902: // a firing-pin ting: tiny, bright, very short and dry, then the boom
+// 2904: // the last strike of the forge: a short anvil clang (inharmonic, damped, not a bell) with a hit of grit, then the boom
+// 2906: // the peon: a small orc worker (green, brown tunic, little tusks), simple shapes; legs swing while running
+// 2912: // D: the peon runs in from the right as the lid drops, hoists the crate over its head and runs off with it, little puffs of dust behind; then the icon lights
+// 2931: // ---------- round 81 (2026-11-15): the peon ending LOCKED (round 80 D). Sounds that match it, four sets: footsteps, the grab, the dash, and the closing hit ----------
+// 2933: // ---------- round 82 (2026-11-15): the peon’s sounds without any boom (round 81: “all sound the same, a boom as he runs away”): the running is the sound now,
+// 2934: // louder and characterful, and the icon lighting is small. Four clearly different sets. ----------
+// 2935: // a little grunt: a buzzy low voice through two vowel-ish band filters, short
+// 2959: // round 11 B: the flourish at the tip, t seconds after the strike lands
+// 2967: // round 11 D: the unlock's icon dressed by what grew; k 0..1 progress, t seconds since the payoff
+// 2979: // round 10 C: the material behind the text, from surf down to bot, across the module
+// 2990:   // the surface line, bright, the profession's color
+// 2993: // round 10 D: the material in a bulb, filling the rect (x, y, w, h); top = the bulb of points still to go
+// 3001: // round 10: the tighter layout's text. head: name, skill / rank cap, rank; tail: next unlock, points to go, the two after it
+// 3013: // round 10 B: the line grows toward the unlock, the profession's way; f 0..1 of L
+// 3034: // round 9 B: the vessel per profession (simple outlines); returns its path, inner top/bottom, sides, rim color
+// 3051: // round 9 C: the free-standing column under the icon, h px tall from base
+// 3062: // round 9 D: the long low container per profession, filled to f, N notches on the rim
+// 3078: // round 8 B: what a notch does when the material reaches it, per profession
+// 3086: // round 8 C: the edge that marks the level, in the profession's style
+// 3096: // a pip in the profession's shape; fill 0..1 (partial pips fill from the bottom), sweep: the unlock's light run
+// 3111: // what fills the unlock's frame, per profession (round 7 C): from the bottom up to y = surf
+// 3130: // one countdown digit in the profession's look; since = time since it arrived
+// 3137: // ---------- per-profession dressing (round 6): hooks the frames call at the head, on each unlock icon, and at the unlock
+// 3167: // a stamped seal: number (or the unlock's icon) in a rimmed disc; dark 0..1 darkens older ones
+// 3175: // the bell's scale: eight notes; the closer to the next unlock the higher, a run a step each; the unlock is the top
+// 3181: // ---------- loop ----------
+// 3187: // ---------- panel ----------
+
+// ===== round 83 B-D (Dye soaks in, Tooled pattern, Stretched and tacked; LW83 entries), r83, and round 84 B-C (Boot stomp, Hide throw; LW84 entries), moved out 2026-11-16 =====
+  B: { name: 'Dye soaks in', desc: 'The whole strip is pale raw leather. Each skill-up a drop of dye falls onto the front and soaks forward: a dark wet edge with ragged fingers reaching ahead, glossy while wet, then it dries to rich brown with a slow sheen running along it.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(300 * semi(n), 0, .026 * v, .16, 'sine', 360 * semi(n)); noise(.02, .12, .01 * v, 600, .7, 'lowpass'); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.x1 + 2, y - 6, y + 6, '#e6d4b6', '#c4ac8c', 2);
+        const o = last83(I), seep = o && o.t >= 0 ? clamp(o.t / .9) : 1, reach = Math.sin(Math.PI * seep) * 5, seed = o ? o.i : 0;
+        const edge = r => I.tipX + Math.sin(r * 1.7 + 1) * 1.4 + Math.sin(r * .9 + t * .6) * .8 + reach * (.3 + .7 * rnd53(r * 3.1 + seed));
+        const path = () => { ctx.beginPath(); ctx.moveTo(x0 - 2, y - 6); for (let r = 0; r <= 12; r++) ctx.lineTo(edge(r), y - 6 + r); ctx.lineTo(x0 - 2, y + 6); ctx.closePath(); };
+        if (I.tipX + reach > x0) { ctx.save(); path(); ctx.clip(); hide83(x0 - 2, I.x1 + 2, y - 6, y + 6, '#8e5628', '#4e2c12', 3);
+          const sx = x0 - 30 + ((t * 45) % (L + 60)), sg = ctx.createLinearGradient(sx - 12, 0, sx + 12, 0); sg.addColorStop(0, 'rgba(255,220,170,0)'); sg.addColorStop(.5, 'rgba(255,220,170,.14)'); sg.addColorStop(1, 'rgba(255,220,170,0)'); ctx.fillStyle = sg; ctx.fillRect(sx - 12, y - 6, 24, 12);
+          const wet = o && o.t >= 0 ? clamp(1 - (o.t - .2) / 1.4) : 0; if (wet > 0) { ctx.fillStyle = `rgba(30,12,2,${.45 * wet})`; ctx.fillRect(o.a - 6, y - 6, I.x1, 12); ctx.fillStyle = `rgba(255,230,200,${.45 * wet})`; ctx.fillRect(o.a - 6, y - 4, I.tipX + 6 - o.a + 6, 1); }
+          ctx.restore();
+          ctx.strokeStyle = 'rgba(40,18,4,.65)'; ctx.lineWidth = 1.3; ctx.beginPath(); for (let r = 0; r <= 12; r++) ctx.lineTo(edge(r), y - 6 + r); ctx.stroke(); } },
+      over(p, I) { const y = I.ly; hits83(I).forEach(o => { const x = o.a + 1;
+          if (o.t < 0 && o.t > -.18) { const u = 1 - (-o.t) / .18, dy = lerp(y - 26, y - 7, u * u); ctx.fillStyle = '#5a3214'; ctx.beginPath(); ctx.ellipse(x, dy, 1.6, 2.4, 0, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,225,190,.6)'; ctx.fillRect(x - .8, dy - 1.2, .8, .8); }
+          if (o.t >= 0 && o.t < .45) { const u = o.t / .45; ctx.strokeStyle = `rgba(70,36,12,${.7 * (1 - u)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, y - 5, 2 + 9 * eOut(u), 1 + 2.5 * eOut(u), 0, 0, 7); ctx.stroke(); } }); } } },
+  C: { name: 'Tooled pattern', desc: 'A plain leather strap. Each skill-up a tooled border pattern (two straight border lines, a row of round ring stamps between them) presses into the newest part: the strap dips, a dark pressure mark spreads and fades, the fresh impression stays darker for a moment, a soft dull thump. No tool is shown.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); drum46(100 * semi(n / 2), 0, .034 * v); noise(0, .05, .014 * v, 500, .7, 'lowpass', true); tone(200 * semi(n), 0, .008 * v, .2, 'triangle'); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.x1 + 2, y - 6, y + 6, '#d2a26e', '#9c6c3e', 4); const xe = I.tipX; if (xe <= x0) return;
+        const o = last83(I), fresh = o && o.t >= 0 ? clamp(1 - o.t / 1.2) : 0;
+        const draw = (dy, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x0, y - 4.5 + dy); ctx.lineTo(xe, y - 4.5 + dy); ctx.moveTo(x0, y + 4.5 + dy); ctx.lineTo(xe, y + 4.5 + dy); ctx.stroke();
+          ctx.fillStyle = col; for (let cx = x0 + 4; cx + 2.2 <= xe; cx += 7) { ctx.beginPath(); ctx.arc(cx, y + dy, 2.2, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, y + dy, .7, 0, 7); ctx.fill(); } };
+        draw(.7, 'rgba(255,230,190,.32)', .8); draw(0, 'rgba(60,30,10,.72)', .9);
+        if (fresh > 0) { ctx.save(); ctx.beginPath(); ctx.rect(o.a - 4, y - 6, xe - o.a + 4, 12); ctx.clip(); draw(0, `rgba(40,16,4,${.6 * fresh})`, 1.1); ctx.restore(); } },
+      shake(I) { const o = last83(I); if (!o || o.t < 0 || o.t > .25) return [0, 0]; return [0, 1.4 * (1 - o.t / .25)]; },
+      over(p, I) { const y = I.ly, o = last83(I); if (!o || o.t < 0 || o.t > .5) return; const u = o.t / .5, x = (o.a + o.b) / 2;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 9); g.addColorStop(0, `rgba(30,12,2,${.45 * (1 - u)})`); g.addColorStop(1, 'rgba(30,12,2,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, 9, 7, 0, 0, 7); ctx.fill();
+        ctx.strokeStyle = `rgba(255,230,190,${.4 * (1 - u)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, y, 3 + 9 * eOut(u), 3 + 5 * eOut(u), 0, 0, 7); ctx.stroke();
+        once('lwC' + o.i, () => { for (let k = 0; k < 4; k++) spawn({ x: x + (k - 1.5) * 3, y: y - 5, vx: (k - 1.5) * 18, vy: -20 - Math.random() * 20, g: 140, life: .45, size: .9, shape: 'sq', vr: 6, col: '#e6c494' }); }); } } },
+  D: { name: 'Stretched and tacked', desc: 'Ahead of the fill the hide hangs loose off the bar, sagging and wrinkled. Each skill-up pulls the next stretch taut with a soft creak: the loose hide lifts, the front moves on, a brass tack drops in to pin it with a glint, and the loose part shivers and sags again. Behind, the leather is smooth, held by rows of tacks.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(150 * semi(n / 3), 0, .016 * v, .32, 'triangle', 185 * semi(n / 3)); noise(0, .28, .006 * v, 420, 3, 'bandpass'); tone(660 * semi(n), LAND83, .012 * v, .14, 'triangle'); drum46(180, LAND83, .012 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 5); const o = last83(I);
+        if (o && o.t >= 0 && o.t < .8) { const a = .35 * (1 - o.t / .8); ctx.strokeStyle = `rgba(70,40,15,${a})`; ctx.lineWidth = 1; for (let k = 0; k < 3; k++) { const x = I.tipX - 3 - k * 4; ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.quadraticCurveTo(x + 1.5, y, x, y + 5); ctx.stroke(); } } },
+      over(p, I) { const y = I.ly, o = last83(I), fx = I.tipX, xe = I.x1 + 3, span = Math.max(1, xe - fx), t = S.age;
+        let shiv = 0; if (o && o.t > -.15) { if (o.t < .45) shiv = -.55 * Math.sin(Math.PI * clamp((o.t + .15) / .6)); else shiv = .3 * Math.exp(-(o.t - .45) * 6) * Math.sin((o.t - .45) * 36); }
+        const u = x => clamp((x - fx) / span), sag = x => (7 * (1 + shiv)) * Math.pow(u(x), 1.2) + Math.sin(x * .55 + 1 + t * .4) * 1.1 * u(x);
+        if (fx < xe - 1) { ctx.beginPath(); ctx.moveTo(fx, y - 6); for (let x = fx; x <= xe; x += 2) ctx.lineTo(x, y - 6 + sag(x)); for (let x = xe; x >= fx; x -= 2) ctx.lineTo(x, y + 6 + sag(x) * 1.3); ctx.closePath();
+          const g = ctx.createLinearGradient(0, y - 6, 0, y + 14); g.addColorStop(0, '#c49a6c'); g.addColorStop(1, '#7a5230'); ctx.fillStyle = g; ctx.fill();
+          for (let k = 0; fx + 8 + k * 13 < xe - 4; k++) { const x = fx + 8 + k * 13 + Math.sin(k * 2.1) * 3, b = 2 + 2 * u(x); ctx.strokeStyle = 'rgba(60,32,12,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y - 6 + sag(x) + 1); ctx.quadraticCurveTo(x + b, y + sag(x) * 1.15, x - .5, y + 6 + sag(x) * 1.3 - 1); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,228,190,.22)'; ctx.beginPath(); ctx.moveTo(x + 1.2, y - 6 + sag(x) + 1); ctx.quadraticCurveTo(x + b + 1.2, y + sag(x) * 1.15, x + .7, y + 6 + sag(x) * 1.3 - 1); ctx.stroke(); } }
+        const tack = (x, dy = 0) => [y - 3.6, y + 3.6].forEach(ty => { const g = ctx.createRadialGradient(x - .6, ty + dy - .6, .2, x, ty + dy, 1.9); g.addColorStop(0, '#fff0b8'); g.addColorStop(.5, '#d8a840'); g.addColorStop(1, '#7a5418'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, ty + dy, 1.9, 0, 7); ctx.fill(); });
+        tack(I.x0 + 1.5); for (let j = 1; j < I.N; j++) { const x = I.x0 + j / I.N * (I.x1 - I.x0) + 2.5; if (x < I.X(S.v0) - 3) tack(x); }
+        hits83(I).forEach(o => { const x = o.b - 1.5; if (o.t >= LAND83) { tack(x); once('lwD' + o.i, () => spawn({ x, y: y - 3.6, shape: 'star', size: 3.5, life: .45, col: '#fff4c0' })); } else if (o.t > LAND83 - .16) { const k = 1 - (LAND83 - o.t) / .16; ctx.save(); ctx.globalAlpha *= k; tack(x, -14 * (1 - k * k)); ctx.restore(); } }); } } },
+function r83(K) { const Z = LW83[K]; return { get name() { return K + '. ' + (profName === 'Leatherworking' ? Z.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only: the finale and the real sound come later; the sound is a gentle placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r83('A'), PB: r83('B'), PC: r83('C'), PD: r83('D') });
+  B: { name: 'Boot stomp', desc: 'A sturdy leather boot stands on the bar at the front of the fill, tapping its toe while it waits. Each skill-up it hops up, tilts back and STOMPS down: the bar dips, dust puffs out both sides, and a fresh bootprint is pressed into the leather behind it. The filled part is a trail of its prints.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); drum46(85 * semi(n / 3), 0, .04 * v); noise(0, .07, .02 * v, 450, .7, 'lowpass', true); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 6); const o = last83(I);
+        const print = (x, a) => { ctx.fillStyle = `rgba(50,24,8,${a})`; ctx.beginPath(); ctx.ellipse(x + 1.5, y + .5, 3, 2.2, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x - 3.2, y + .5, 1.6, 1.8, 0, 0, 7); ctx.fill(); };
+        for (let x = x0 + 6; x < I.X(S.v0) - 6; x += 10) print(x, .38);
+        hits83(I).forEach(q => { if (q.t >= 0) print(q.b - 7, q === o ? .38 + .4 * clamp(1 - q.t / 1) : .38); }); },
+      shake(I) { const o = last83(I); if (!o || o.t < 0 || o.t > .2) return [0, 0]; return [0, 2 * (1 - o.t / .2)]; },
+      over(p, I) { const y = I.ly, o = last83(I); let lift = 0, tilt = 0, sq = 1, bx = I.tipX - 6;
+        if (o && o.t > -.3 && o.t < 0) { const u = (o.t + .3) / .3; lift = Math.sin(Math.PI * Math.min(1, u * 1.15)) * 13 * (u < .87 ? 1 : 1 - (u - .87) / .13); tilt = -.35 * Math.sin(Math.PI * u); bx = lerp(o.a, o.b, eOut(u)) - 6; }
+        else if (o && o.t >= 0 && o.t < .3) { const u = o.t / .3; sq = 1 - .22 * Math.sin(Math.PI * u) * (1 - u); bx = o.b - 6;
+          once('lwB' + o.i, () => { for (let k = 0; k < 8; k++) { const s = k % 2 ? 1 : -1; spawn({ x: bx + s * 7, y: y - 6, vx: s * (30 + Math.random() * 40), vy: -10 - Math.random() * 25, g: 60, life: .5, size: 1.1, col: 'rgba(225,195,150,.85)' }); } }); }
+        else { const it = S.age % 1.3; if (it < .3) tilt = -.18 * Math.sin(Math.PI * it / .3); }
+        const by = y - 6 - lift; ctx.save(); ctx.translate(bx, by); ctx.rotate(tilt); ctx.scale(1 + (1 - sq) * .6, sq);
+        ctx.fillStyle = 'rgba(0,0,0,.3)'; if (lift < 1) { ctx.beginPath(); ctx.ellipse(1, .5, 7, 1.2, 0, 0, 7); ctx.fill(); }
+        const g = ctx.createLinearGradient(-5, 0, 7, 0); g.addColorStop(0, LWC.md); g.addColorStop(.5, LWC.hi); g.addColorStop(1, LWC.dk); ctx.fillStyle = g;
+        ctx.beginPath(); ctx.roundRect(-5, -13, 7, 11, [2, 2, 0, 0]); ctx.fill(); ctx.beginPath(); ctx.roundRect(-5, -4, 13, 4, [1, 3, 1, 1]); ctx.fill();
+        ctx.fillStyle = '#2e1a0a'; ctx.fillRect(-5, -1.2, 13, 1.4); ctx.fillStyle = LWC.dk; ctx.fillRect(-5.5, -14, 8, 2.4); ctx.fillStyle = 'rgba(255,236,200,.4)'; ctx.fillRect(-3.5, -11, 1, 7);
+        ctx.restore(); } } },
+  C: { name: 'Hide throw', desc: 'Each skill-up a whole hide sails in from above, turning as it flies, and lands draped over the front of the bar with a slap: its flaps hang over the top and bottom edges and bounce as it settles. The filled part is a row of overlapping hides in slightly different tans, all hanging over the bar.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(-.12, .14, .006 * v, 700, .6, 'lowpass'); drum46(110 * semi(n / 2), 0, .028 * v); noise(0, .06, .024 * v, 1000, .8, 'lowpass', true); },
+    V: { grow() {},
+      over(p, I) { const y = I.ly, cols = [['#d8a670', '#8e5c30'], ['#c8925c', '#7a4c26'], ['#e0b480', '#9a6a3a'], ['#be8a56', '#6e4422']];
+        const draped = (x, k, hang = 0) => { ctx.save(); ctx.translate(x, y); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 3; ctx.shadowOffsetX = 1.5; pelt84(20, 17 + hang * 2, ...cols[k % 4]); ctx.shadowColor = 'transparent';
+          ctx.fillStyle = 'rgba(30,14,4,.35)'; ctx.fillRect(-9, -6.5, 18, 1.2); ctx.fillRect(-9, 5.6, 18, 1.2); ctx.fillStyle = 'rgba(255,236,200,.3)'; ctx.fillRect(-8, -5.2, 16, 1); ctx.restore(); };
+        let k = 0; for (let x = I.x0 + 8; x < I.X(S.v0) - 4; x += 9, k++) draped(x, k);
+        hits83(I).forEach(q => { const xl = q.b - 8;
+          if (q.t < 0) { const u = (q.t + .3) / .3; if (u <= 0) return; const fx = lerp(xl - 60, xl, u), fy = lerp(y - 46, y, u) - Math.sin(Math.PI * u) * 10, r = (1 - u) * -2.4;
+            ctx.save(); ctx.translate(fx, fy); ctx.rotate(r); ctx.scale(1 + .25 * (1 - u), .55 + .45 * u); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 4; pelt84(22, 18, ...cols[(k + q.i) % 4]); ctx.restore(); }
+          else { const u = q.t; draped(xl, k + q.i, 1.6 * Math.exp(-u * 7) * Math.sin(u * 28));
+            once('lwC4' + q.i, () => { for (let j = 0; j < 6; j++) { const s = j % 2 ? 1 : -1; spawn({ x: xl + s * 10, y: y + (j % 3 - 1) * 5, vx: s * (25 + Math.random() * 30), vy: -10 - Math.random() * 15, g: 60, life: .45, size: 1, col: 'rgba(225,195,150,.8)' }); } }); } }); } } },

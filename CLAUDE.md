@@ -52,8 +52,10 @@ DopamineLoot/            the addon; load order in DopamineLoot.toc
   Media/*.tga, *.ogg       original art (tools/gen_textures.lua, white, tinted in game) and sounds
                            (tools/gen_sounds.sh, ffmpeg-synthesized)
 docs/plan.md             design, data model, roadmap, rain ideas
+docs/skillup.md          the skill-up workstream (current focus): status, locked craft rings, page notes; skillup-rounds.md = every round
 docs/mockups/            HTML mockups (rain.html: the rain prototype, same physics, effect toggles)
 docs/STATE.md            session handoff
+docs/side-projects/      parked side projects (murloc/: the murloc + peon companion); not part of any release, read only when asked
 tools/                   gen_textures.lua, gen_sounds.sh, test_*.lua (run by wow-preflight),
                          addon-mode.ps1 (switch the game between the dev files and a released copy)
 deprecated/chest-show/   the set-aside chest show (Rain.lua as of 0.4.5, media, README); not loaded
@@ -67,7 +69,8 @@ reports/                 daily feedback reports from the scheduled task (gitigno
 
 ## Session continuity (read first)
 
-- **Start of every session**: read `docs/STATE.md` (skill `session-resume`) and follow its preferences.
+- **Start of every session**: `docs/STATE.md` is loaded by the hook; follow it. It names the current workstream file
+  (now `docs/skillup.md`): read that, **not plan.md in full** (143 KB; open only the section you need).
 - **Keep it current** (skill `session-checkpoint`): after every pushed increment, whenever something is
   learned that isn't written down, and before the user stops or resets. Nothing important may live only
   in the chat.

@@ -106,6 +106,7 @@ const SND = { lastReward: -99, chimes: [], lastXP: -99 };
 function tap(k) { if (calm() &amp;&amp; k.taps >= 6) return; k.taps++; tone(1800 + Math.random() * 300, 0, .008 * (k.quiet ? .5 : 1), .05); }
 function xpChime(k) {
   if (k.quiet) { log('skip', 'XP chime: skipped (loot showing, XP quiet)'); return; }
+  if (k.big ? (arrival === 'cometRise' || arrival === 'cometEpic') : false) { SND.lastReward = S.age; return; }
   let vol = 1; const now = S.age;
   if (calm() &amp;&amp; !k.big) {
     if (now - SND.lastReward < 1.5) { log('skip', 'XP chime: skipped (a reward sound just played)'); return; }
@@ -370,7 +371,7 @@ const ARR = {
 // the impact: a freeze-frame, a little shake, a shockwave along the bar, a low thump, the counter slams
 function impact(x, y, big = 1) { S.hitUntil = S.age + .07 * big; S.shake = .18 * big; S.waves = S.waves || []; S.waves.push({ x, at: S.age, big });
   spawn({ x, y, size: 4, shape: 'ring', grow: 30 * big, life: .45, col: '#fff' }); for (let i = 0; i < 10 * big; i++) spawn({ x, y, vx: rnd(-160, 160), vy: rnd(-150, -30), life: .5, size: 1.6, col: i % 2 ? '#fff' : XPL });
-  tone(70, 0, .16 * big, .28); tone(140, 0, .05 * big, .12, 'triangle'); if (S.chain) { S.chain.pop = S.age; S.chain.big = true; } }
+  if (!S.silentHit) { tone(70, 0, .16 * big, .28); tone(140, 0, .05 * big, .12, 'triangle'); } if (S.chain) { S.chain.pop = S.age; S.chain.big = true; } }
 function waves() { if (!S.waves) return; const b = bars().xp; for (const w of S.waves) { const t = (S.age - w.at) / .45; if (t > 1) continue; const a = 1 - t, d = 30 + 260 * eOut(t) * w.big;
   ctx.save(); const g = ctx.createLinearGradient(w.x - d, 0, w.x + d, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5 - 10 / d, `rgba(255,255,255,${.0})`); g.addColorStop(.5, `rgba(255,255,255,${.5 * a})`); g.addColorStop(.5 + 10 / d, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = `rgba(255,255,255,${.5 * a})`; ctx.fillRect(w.x - d, b.y - 1, 3, b.h + 2); ctx.fillRect(w.x + d - 3, b.y - 1, 3, b.h + 2); ctx.fillStyle = `rgba(220,184,255,${.25 * a})`; ctx.fillRect(w.x - d, b.y, d * 2, b.h); ctx.restore(); } }
@@ -402,13 +403,300 @@ ARR.finisher = { name: 'Stream + finisher', desc: 'Both: the stream pours in mos
     for (const m of st.motes) { if (m.done) continue; m.t += dt; if (m.t < 0) continue; const u = eInOut(clamp(m.t / st.dur)), p = pathAt(st, u, m.j); ctx.fillStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, 7); ctx.fill(); ctx.shadowBlur = 0; if (u >= 1) { m.done = true; landTo(st, m.share); tap(st.k); } }
     st.o.t += dt; if (st.o.t > 0 &amp;&amp; !st.hit) { const tx = headX(b); if (cometFly(st.o, st.c.x, st.c.y, tx, ty, 6.5)) { st.hit = st.t; impact(tx, ty, 1.2); } }
     if (st.hit) landTo(st, Math.max(st.landed, .7 + .3 * eOut(clamp((st.t - st.hit) / .25)))); } };
-const QKEYS = ['stream', 'comet', 'cometImpact', 'charge', 'barrage', 'finisher'];
+// the rising turn-in sound: starts low at the impact, climbs a major arpeggio that speeds up, resolves in a chord; all through a reverb
+let REV = null;
+function rev() { const A = ac(); if (REV) return REV; const len = Math.floor(A.sampleRate * 2.4), ir = A.createBuffer(2, len, A.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+  const cv = A.createConvolver(); cv.buffer = ir; REV = A.createGain(); REV.gain.value = .55; REV.connect(cv); const lp = A.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200; cv.connect(lp).connect(OUT); return REV; }
+function rtone(f, t, vol, dec, type, f2, glide) { if (!on()) return; const A = ac(), T = A.currentTime + t, o = A.createOscillator(), g = A.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, T); if (f2) o.frequency.exponentialRampToValueAtTime(f2, T + glide);
+  g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + (RT.atk || .006)); g.gain.exponentialRampToValueAtTime(.0001, T + Math.max(dec, (RT.atk || 0) + .05)); o.connect(g); g.connect(OUT); g.connect(RT.big ? rev2() : rev()); o.start(T); o.stop(T + dec + .05); }
+const RT = { atk: 0, big: false };
+let REV2 = null;
+function rev2() { const A = ac(); if (REV2) return REV2; const len = Math.floor(A.sampleRate * 3.8), ir = A.createBuffer(2, len, A.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
+  const cv = A.createConvolver(); cv.buffer = ir; REV2 = A.createGain(); REV2.gain.value = .85; REV2.connect(cv); const lp = A.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; cv.connect(lp).connect(OUT); return REV2; }
+// the dramatic one: a low swell while the comet flies, a sub boom at the impact, a four-octave climb with harmony, a big ringing chord and a bell roll
+function questEpicFly() { const sh = semi(S.epicKey || 0), C1 = 32.7 * sh; RT.big = true; RT.atk = .38;
+  rtone(C1 * 1.5, 0, .09, .5, 'sine', C1 * 3, .42); rtone(C1 * 3, 0, .025, .5, 'triangle', C1 * 6, .42); RT.atk = 0; RT.big = false; }
+function questEpic() { const sh = semi(S.epicKey || 0), C2 = 65.41 * sh; RT.big = true;
+  rtone(C2 * .63, 0, .22, 1.2, 'sine', C2 * 1.26, .9); rtone(C2, 0, .06, .9, 'triangle'); rtone(C2 * 1.5, .01, .045, .9, 'triangle');
+  const ns = [12, 16, 19, 24, 28, 31, 36, 40, 43, 48, 52, 55], n = ns.length;
+  ns.forEach((s, i) => { const u = i / (n - 1), t = .08 + .82 * (1 - Math.pow(1 - u, 1.8)); rtone(C2 * semi(s), t, .026 + .02 * u, .4 + .35 * u, s < 30 ? 'triangle' : 'sine'); if (u > .45) rtone(C2 * semi(s + 7), t + .015, .012 + .01 * u, .4 + .3 * u); });
+  [12, 19, 24, 28, 31, 36, 40, 43, 48].forEach((s, i) => rtone(C2 * semi(s), .96 + i * .014, s < 30 ? .03 : .022, 2.8, s < 30 ? 'triangle' : 'sine'));
+  rtone(C2 * .5, .96, .12, 1.8, 'sine'); [60, 64, 67, 72].forEach((s, i) => rtone(C2 * semi(s), 1.04 + i * .07, .009, 1.6));
+  RT.big = false; log('xp', 'Quest rise, dramatic: swell, boom, four-octave climb, big chord'); }
+ARR.cometEpic = { name: 'Comet + impact, dramatic rise', desc: 'The rising sound, made bigger: a low swell builds while the comet flies, a deep boom at the impact, then a longer climb over four octaves with a harmony on top, landing on a big ringing chord with a little bell roll, in a larger hall reverb.',
+  init(st) { ARR.cometImpact.init(st); S.epicKey = [0, 2, -3][Math.floor(Math.random() * 3)]; st.flew = false; },
+  draw(st, dt) { if (!st.flew) { st.flew = true; questEpicFly(); } const was = st.hit; S.silentHit = true; ARR.cometImpact.draw(st, dt); S.silentHit = false; if (!was ? st.hit : false) questEpic(); } };
+// ---------- the wrung-out murloc: twisted like a wet towel, XP drops squeeze out and drip into the bar ----------
+// the murloc body designs (switch): each has its own outline (radius along the body, head to feet), build and skin
+const MPROF = [[0, 7], [.06, 17], [.17, 23], [.3, 21], [.4, 14], [.55, 16], [.75, 15], [.92, 10], [1, 6]];
+let MBODY = 'cur'; const MB = {
+  cur: { prof: MPROF, belly: .36, spots: 1 },
+  frog: { prof: [[0, 8], [.05, 19], [.16, 25], [.27, 24], [.36, 16], [.48, 19], [.62, 23], [.74, 21], [.86, 13], [1, 7]], hunch: 6, belly: .5, spots: 1 },
+  fish: { prof: [[0, 7], [.06, 16], [.18, 20], [.3, 19], [.45, 17], [.62, 15], [.8, 11], [.93, 7], [1, 8]], belly: .45, spots: 0, tint: [[60, 190, 150], .35], bellyCol: [205, 222, 222] },
+  lean: { prof: [[0, 7], [.06, 16], [.17, 21], [.28, 18], [.35, 10], [.43, 15], [.55, 13], [.65, 8], [.76, 10], [.9, 9], [1, 6]], hunch: 3, belly: .22, spots: .5 },
+  slimy: { prof: [[0, 8], [.06, 17], [.18, 22], [.32, 20], [.5, 19], [.7, 18], [.86, 13], [1, 7]], belly: .34, spots: 0, tint: [[30, 140, 60], .3] } };
+function mRad(v) { const P = MB[MBODY].prof; for (let i = 1; i < P.length; i++) if (v <= P[i][0]) { const [a, ra] = P[i - 1], [b, rb] = P[i]; return lerp(ra, rb, (v - a) / (b - a)); } return 6; }
+// colours from the reference: a yellow-green head into a bright green body, a pale blue throat and belly, teal spots, red spines, red-orange hands
+const MPAL = { head: [205, 236, 72], body: [80, 204, 56], belly: [158, 204, 218], spot: [22, 142, 132], fin: [206, 38, 30], tip: [255, 128, 70], hand: [228, 78, 44] };
+const mrgb = (c, k = 1, a = 1) => `rgba(${c.map(v => Math.round(clamp(v * k, 0, 255))).join(',')},${a})`;
+const mmix = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
+const mColA = v => mmix(MPAL.head, MPAL.body, clamp((v - .08) / .5));
+function mCol(v) { return mrgb(mColA(v)); }
+let MSAD = false;
+// a two-part limb, shaded (dark under, a light line along it), ending in a red-orange hand or foot
+// lo: { joint: knobby elbow/knee, web: long webbed fingers instead of claws, flap: a fin membrane along the forearm }
+function mLimb(x0, y0, a1, l1, a2, l2, w, col, lo = {}) { const x1 = x0 + Math.cos(a1) * l1, y1 = y0 + Math.sin(a1) * l1, x2 = x1 + Math.cos(a2) * l2, y2 = y1 + Math.sin(a2) * l2, c = col || MPAL.body;
+  MC.lineCap = 'round'; MC.lineJoin = 'round'; const path = () => { MC.beginPath(); MC.moveTo(x0, y0); if (lo.joint) MC.lineTo(x1, y1); else MC.quadraticCurveTo(x1, y1, x1 + (x2 - x1) * .5, y1 + (y2 - y1) * .5); MC.lineTo(x2, y2); };
+  if (lo.flap) { const nx = -Math.sin(a2), ny = Math.cos(a2), fs = lo.flap; MC.fillStyle = mrgb(MPAL.fin, .9, .8); MC.beginPath(); MC.moveTo(x1, y1); MC.lineTo(x1 + nx * fs * 1.2 + Math.cos(a2) * l2 * .3, y1 + ny * fs * 1.2 + Math.sin(a2) * l2 * .3); MC.lineTo(x2 + nx * fs * .4, y2 + ny * fs * .4); MC.lineTo(x2, y2); MC.fill();
+    MC.strokeStyle = mrgb(MPAL.fin, .55); MC.lineWidth = w * .2; for (let k = 1; k < 4; k++) { const t = k / 4, bx = lerp(x1, x2, t), by = lerp(y1, y2, t); MC.beginPath(); MC.moveTo(bx, by); MC.lineTo(bx + nx * fs * (1.2 - .8 * t), by + ny * fs * (1.2 - .8 * t)); MC.stroke(); } }
+  MC.strokeStyle = mrgb(c, .55); MC.lineWidth = w; path(); MC.stroke(); MC.strokeStyle = mrgb(c, 1); MC.lineWidth = w * .7; path(); MC.stroke(); MC.strokeStyle = mrgb(mmix(c, [255, 255, 200], .45)); MC.lineWidth = w * .25; path(); MC.stroke();
+  if (lo.joint) { MC.fillStyle = mrgb(c, .8); MC.beginPath(); MC.arc(x1, y1, w * .75, 0, 7); MC.fill(); MC.fillStyle = mrgb(mmix(c, [255, 255, 200], .4)); MC.beginPath(); MC.arc(x1 - w * .2, y1 - w * .2, w * .3, 0, 7); MC.fill(); }
+  const hg = MC.createRadialGradient(x2 - w * .2, y2 - w * .2, 0, x2, y2, w * .9); hg.addColorStop(0, mrgb(MPAL.tip)); hg.addColorStop(1, mrgb(MPAL.hand, .7)); MC.fillStyle = hg; MC.beginPath(); MC.arc(x2, y2, w * .72, 0, 7); MC.fill();
+  if (lo.web) { const tips = [-.75, -.25, .25, .75].map(k => [x2 + Math.cos(a2 + k) * w * 3, y2 + Math.sin(a2 + k) * w * 3]); MC.fillStyle = mrgb(MPAL.tip, .9, .45); MC.beginPath(); MC.moveTo(x2, y2); tips.forEach(p => MC.lineTo(...p)); MC.fill();
+    MC.strokeStyle = mrgb(MPAL.hand, .85); MC.lineWidth = w * .3; tips.forEach(p => { MC.beginPath(); MC.moveTo(x2, y2); MC.lineTo(...p); MC.stroke(); }); return; }
+  MC.strokeStyle = mrgb(MPAL.hand, .85); MC.lineWidth = w * .34; for (let k = -1; k <= 1; k++) { const ca = a2 + k * .5; MC.beginPath(); MC.moveTo(x2, y2); MC.quadraticCurveTo(x2 + Math.cos(ca) * w * 1.3, y2 + Math.sin(ca) * w * 1.3, x2 + Math.cos(ca + .35) * w * 2.1, y2 + Math.sin(ca + .35) * w * 2.1); MC.stroke(); } }
+const mNoise = (v, k) => Math.sin(v * 23 + k * 5.1) * Math.sin(v * 9.3 + k * 2.7 + 1.3);
+// x: centre, y: top of the head, s: scale, tw: twist (rad, head one way, feet the other), sq: squeeze 0..1
+// o: { up: hang upright instead of lying down, th: twist per v, rMul: width per v, faceA: face turn, extra: drawn in the body frame before the face }
+function drawMurloc(x, y, s, tw, sq, alpha, o = {}) {
+  const B = MB[MBODY], Hh = 62 * s, N = 40, th = o.th || (v => tw * (v - .5) * 2), R = v => mRad(v) * s * (1 - .42 * sq * Math.sin(Math.PI * v)) * (v < .3 ? 1 + .1 * sq : 1) * (o.rMul ? o.rMul(v) : 1);
+  const xo = v => B.hunch ? -B.hunch * s * Math.sin(Math.PI * clamp((v - .15) / .85)) : 0, colA = v => B.tint ? mmix(mColA(v), B.tint[0], B.tint[1] * clamp((v - .1) / .3)) : mColA(v);
+  MC.save(); MC.globalAlpha = alpha;
+  // lying down: drawn upright, turned so the head is on the left and the feet on the right
+  if (!o.up) { MC.translate(x, y + Hh / 2); MC.rotate(-Math.PI / 2); MC.translate(-x, -(y + Hh / 2)); }
+  const t0 = th(.05), t1 = th(1), fl = Math.sin(S.age * 24) * .5 * sq, lit = o.up ? -1 : 1;
+  // the crest: long, thin, curved red spines of mixed lengths, sweeping back from the top of the head, quivering as it is squeezed
+  const fx = x + 5 * s * Math.sin(t0 + Math.PI), fy = y + 16 * s, LS = [16, 27, 33, 25, 36, 29, 32, 22, 15];
+  for (let k = 0; k < LS.length; k++) { const a = -2.95 + k * .31 + Math.sin(S.age * 7 + k * 1.7) * .05 * (1 + 2 * sq), L = LS[k] * s, bx = fx + Math.cos(a) * 12.5 * s, by = fy + Math.sin(a) * 12.5 * s, sw = a + .35, tx = bx + Math.cos(sw) * L, ty = by + Math.sin(sw) * L, cxp = bx + Math.cos(a) * L * .55, cyp = by + Math.sin(a) * L * .55, nx = -Math.sin(a) * 1.7 * s, ny = Math.cos(a) * 1.7 * s;
+    const g = MC.createLinearGradient(bx, by, tx, ty); g.addColorStop(0, mrgb(MPAL.fin, .55)); g.addColorStop(.6, mrgb(MPAL.fin)); g.addColorStop(1, mrgb(MPAL.tip));
+    MC.fillStyle = g; MC.beginPath(); MC.moveTo(bx - nx, by - ny); MC.quadraticCurveTo(cxp - nx * .5, cyp - ny * .5, tx, ty); MC.quadraticCurveTo(cxp + nx * .5, cyp + ny * .5, bx + nx, by + ny); MC.closePath(); MC.fill(); }
+  // the fish-man's tail fin, between the legs
+  if (MBODY === 'fish') { const ty = y + Hh, tx = x + xo(1); MC.fillStyle = mrgb(MPAL.fin, .95, .85); MC.beginPath(); MC.moveTo(tx, ty - 5 * s); MC.lineTo(tx - 11 * s, ty + 13 * s); MC.quadraticCurveTo(tx, ty + 6 * s, tx + 11 * s, ty + 13 * s); MC.closePath(); MC.fill();
+    MC.strokeStyle = mrgb(MPAL.fin, .55); MC.lineWidth = .8 * s; for (const k of [-.7, -.25, .25, .7]) { MC.beginPath(); MC.moveTo(tx, ty - 3 * s); MC.lineTo(tx + k * 12 * s, ty + 11 * s); MC.stroke(); } }
+  // legs, behind the body: frog legs fold out at the knee; the lean one has knobby knees
+  const legC = mmix(colA(.9), [0, 0, 0], .15), lb = p => [x + xo(.88) + 8 * s * Math.sin(t1 + p * 1.1), y + .88 * Hh];
+  for (const p of [-1, 1]) { const [bx, by] = lb(p);
+    if (MBODY === 'frog') mLimb(bx, by, Math.PI / 2 + p * 1.3, 16 * s, Math.PI / 2 - p * .8 + fl * .4, 16 * s, 5.2 * s, legC);
+    else if (MBODY === 'lean') mLimb(bx, by, Math.PI / 2 + p * .45, 15 * s, Math.PI / 2 - p * .2 + fl * .4, 15 * s, 2.8 * s, legC, { joint: true, web: true });
+    else if (MBODY === 'fish') mLimb(bx, by, Math.PI / 2 + p * .8, 11 * s, Math.PI / 2 - p * .2 + fl * .4, 10 * s, 3.6 * s, legC, { web: true });
+    else mLimb(bx, by, Math.PI / 2 + p * .7, 13 * s, Math.PI / 2 - p * .35 + fl * .4, 13 * s, (MBODY === 'slimy' ? 4.6 : 4) * s, legC); }
+  // body by slices, lit like a round body: dark rim, a sheen, a dark underside; belly, throat and spots turn with the twist
+  for (let i = 0; i < N; i++) { const v = i / N, yy = y + v * Hh, rr = R(v), hh = Hh / N + 1, a = th(v), c = colA(v), X = x + xo(v);
+    const g = MC.createLinearGradient(X - rr * lit, 0, X + rr * lit, 0), slimy = MBODY === 'slimy'; g.addColorStop(0, mrgb(c, .42)); g.addColorStop(.18, mrgb(c, .78)); g.addColorStop(.6, mrgb(c, 1.08));
+    if (slimy) { g.addColorStop(.7, mrgb(c, 1.1)); g.addColorStop(.74, 'rgba(250,255,240,1)'); g.addColorStop(.78, mrgb(c, 1.15)); } else g.addColorStop(.74, mrgb(mmix(c, [255, 255, 215], .5)));
+    g.addColorStop(.84, mrgb(c, 1.1)); g.addColorStop(1, mrgb(c, .62)); MC.fillStyle = g; MC.fillRect(X - rr, yy, rr * 2, hh);
+    if (v > .3 ? v < .88 : false) { const cc = Math.cos(a); if (cc > 0) { const bc = B.bellyCol || MPAL.belly, bx = X + rr * .6 * Math.sin(a), bw = rr * B.belly * cc * Math.sin(Math.PI * (v - .3) / .58), bg = MC.createLinearGradient(bx - bw, 0, bx + bw, 0); bg.addColorStop(0, mrgb(bc, .75, 0)); bg.addColorStop(.3, mrgb(bc, .9, .85)); bg.addColorStop(.7, mrgb(bc, 1.05, .85)); bg.addColorStop(1, mrgb(bc, .8, 0)); MC.fillStyle = bg; MC.fillRect(bx - bw, yy, bw * 2, hh); } }
+    if (B.spots ? (v > .06 ? (v < .6 ? i % 3 !== 2 : false) : false) : false) for (const ph of [2.3, -2.3]) { const c2 = Math.cos(a + ph); if (c2 > 0) { const sx = X + rr * .78 * Math.sin(a + ph), sw = rr * (.12 + .1 * Math.abs(Math.sin(i * 1.7))) * c2; MC.fillStyle = mrgb(MPAL.spot, .9 + .2 * c2, .85 * B.spots); MC.fillRect(sx - sw, yy, sw * 2, hh); } }
+    // fish-man: rows of overlapping scales, offset every other row; gill slits behind the jaw
+    if (MBODY === 'fish' ? (v > .3 ? i % 2 === 0 : false) : false) { MC.lineWidth = .7 * s; for (let k = 0; k < 9; k++) { const ph = k * .7 + (i % 4 ? .35 : 0), c2 = Math.cos(a + ph); if (c2 < .15) continue; MC.strokeStyle = `rgba(10,60,50,${.45 * c2})`; MC.beginPath(); MC.arc(X + rr * .95 * Math.sin(a + ph), yy, 1.9 * s * c2, .1 * Math.PI, .9 * Math.PI); MC.stroke(); } }
+    if (MBODY === 'fish' ? (i === 12 || i === 13 || i === 14) : false) { const c2 = Math.cos(a - .9); if (c2 > .1) { MC.strokeStyle = 'rgba(90,20,30,.6)'; MC.lineWidth = .8 * s; MC.beginPath(); MC.moveTo(X + rr * Math.sin(a - 1.2), yy); MC.lineTo(X + rr * Math.sin(a - .6), yy + hh * .4); MC.stroke(); } }
+    // lean: ribs across the chest, a collarbone
+    if (MBODY === 'lean' ? ((v > .4 ? v < .62 : false) ? i % 2 === 0 : i === 14) : false) { const c2 = Math.cos(a); if (c2 > .1) { MC.strokeStyle = 'rgba(15,55,20,.45)'; MC.lineWidth = .9 * s; MC.beginPath(); MC.moveTo(X + rr * .9 * Math.sin(a - 1), yy); MC.quadraticCurveTo(X + rr * .9 * Math.sin(a), yy + hh * 1.2, X + rr * .9 * Math.sin(a + 1), yy); MC.stroke();
+      MC.strokeStyle = 'rgba(230,255,200,.3)'; MC.beginPath(); MC.moveTo(X + rr * .9 * Math.sin(a - 1), yy + .8 * s); MC.quadraticCurveTo(X + rr * .9 * Math.sin(a), yy + hh * 1.2 + .8 * s, X + rr * .9 * Math.sin(a + 1), yy + .8 * s); MC.stroke(); } }
+    // slimy: darker mottled patches like a salamander, and wet glints
+    if (slimy ? i % 2 === 0 : false) { for (let k = 0; k < 6; k++) { const ph = k * 1.05, c2 = Math.cos(a + ph); if (c2 < .1 ? true : mNoise(v, k) < .3) continue; MC.fillStyle = `rgba(16,70,34,${.55 * c2})`; MC.beginPath(); MC.ellipse(X + rr * .85 * Math.sin(a + ph), yy + hh * .5, 2.6 * s * c2, hh * 1.1, 0, 0, 7); MC.fill(); }
+      if (i % 6 === 2) { MC.fillStyle = 'rgba(255,255,255,.85)'; MC.fillRect(X + rr * .45 * lit, yy, 1.2 * s, 1.2 * s); } } }
+  // fish-man: the dorsal fin along the back edge, turning with the twist
+  if (MBODY === 'fish') { const pts = [], base = []; for (let i = 7; i <= 34; i++) { const v = i / N, a = th(v) + Math.PI / 2, rr = R(v), side = Math.sin(a), X = x + xo(v); base.push([X + rr * side, y + v * Hh]); pts.push([X + rr * side + Math.sign(side || 1) * (5 + 3 * Math.abs(Math.sin(i * .9))) * s * Math.abs(side), y + v * Hh + 1.5 * s]); }
+    MC.fillStyle = mrgb(MPAL.fin, .95, .82); MC.beginPath(); MC.moveTo(...base[0]); pts.forEach(p => MC.lineTo(...p)); for (let i = base.length - 1; i >= 0; i--) MC.lineTo(...base[i]); MC.fill(); MC.strokeStyle = mrgb(MPAL.fin, .5); MC.lineWidth = .8 * s; for (let i = 0; i < pts.length; i += 3) { MC.beginPath(); MC.moveTo(...base[i]); MC.lineTo(...pts[i]); MC.stroke(); } }
+  // slimy: loose skin bunching into folds when wrung, and slime drips hanging off the underside
+  if (MBODY === 'slimy') { const fa = Math.min(1, Math.abs(tw) / 1.4 + sq * .4) * .6; if (fa > .03) for (let i = 13; i <= 30; i += 2) { const v = i / N, a = th(v), rr = R(v), X = x + xo(v), yy = y + v * Hh, bend = Math.sin(i * 1.3) * 2 * s;
+      MC.strokeStyle = `rgba(12,55,25,${fa})`; MC.lineWidth = 1.1 * s; MC.beginPath(); MC.moveTo(X + rr * .9 * Math.sin(a - .8), yy); MC.quadraticCurveTo(X + rr * Math.sin(a), yy + bend, X + rr * .9 * Math.sin(a + .8), yy); MC.stroke();
+      MC.strokeStyle = `rgba(220,255,200,${fa * .5})`; MC.lineWidth = .6 * s; MC.beginPath(); MC.moveTo(X + rr * .9 * Math.sin(a - .8), yy + s); MC.quadraticCurveTo(X + rr * Math.sin(a), yy + bend + s, X + rr * .9 * Math.sin(a + .8), yy + s); MC.stroke(); }
+    for (const v of [.3, .52, .74]) { const L = (3 + 2.5 * Math.sin(S.age * 2.6 + v * 11) + 4 * sq) * s, X = x + xo(v) - R(v) * lit, yy = y + v * Hh; MC.fillStyle = 'rgba(200,250,190,.75)'; MC.beginPath(); MC.moveTo(X, yy - 1.4 * s); MC.lineTo(X - L * lit, yy); MC.lineTo(X, yy + 1.4 * s); MC.fill(); MC.beginPath(); MC.arc(X - L * lit, yy, 1.4 * s, 0, 7); MC.fill(); } }
+  // the wring creases: soft helical folds, a dark fold with a light edge
+  const cr = Math.min(1, Math.abs(tw) / 1.2) * .55; if (cr > .02) { MC.lineCap = 'round';
+    for (let k = 0; k < 5; k++) { const ph = k * Math.PI * 2 / 5; for (const [col, off, lw] of [[`rgba(10,50,20,${cr})`, 0, 1.6], [`rgba(230,255,190,${cr * .5})`, .9, .8]]) { MC.strokeStyle = col; MC.lineWidth = lw * s; let pen = false; MC.beginPath();
+      for (let i = 0; i <= N; i++) { const v = .32 + .63 * i / N, a = th(v) * 1.6 + ph, px = x + xo(v) + R(v) * Math.sin(a) + off * s, py = y + v * Hh; if (Math.cos(a) > .1) { if (pen) MC.lineTo(px, py); else MC.moveTo(px, py); pen = true; } else pen = false; } MC.stroke(); } } }
+  // arms, in front: frog arms long and dangling; lean ones thin and knobby with webbed hands; fish ones with fin flaps
+  for (const sd of [-1, 1]) { const ax = x + xo(.42) + sd * R(.42) * .85, ay = y + .42 * Hh;
+    if (MBODY === 'frog') mLimb(ax, ay, sd > 0 ? .3 + fl : Math.PI - .3 - fl, 15 * s, Math.PI / 2 - sd * .2 + fl * .3, 17 * s, 3.9 * s);
+    else if (MBODY === 'lean') mLimb(ax, ay, sd > 0 ? -.2 + fl : Math.PI + .2 - fl, 15 * s, sd > 0 ? 1 + fl : Math.PI - 1 - fl, 15 * s, 2.5 * s, null, { joint: true, web: true });
+    else if (MBODY === 'fish') mLimb(ax, ay, sd > 0 ? -.25 + fl : Math.PI + .25 - fl, 12 * s, sd > 0 ? .95 + fl : Math.PI - .95 - fl, 12 * s, 3.4 * s, null, { flap: 5 * s * sd, web: true });
+    else mLimb(ax, ay, sd > 0 ? -.25 + fl : Math.PI + .25 - fl, 13 * s, sd > 0 ? .95 + fl : Math.PI - .95 - fl, 13 * s, (MBODY === 'slimy' ? 4.2 : 3.6) * s); }
+  if (o.extra) MC.save(), o.extra(x, y, Hh, th, R, s, fl), MC.restore();
+  // the face, turned 45 degrees back toward upright on a sideways head (half way between the body and the screen)
+  const hy = y + .17 * Hh; if (!o.up) { MC.translate(x, hy); MC.rotate(Math.PI / 4); MC.translate(-x, -hy); }
+  if (MSAD) mFaceSad(x, y, Hh, R, s, sq, o.faceA !== undefined ? o.faceA : 0); else mFaceReal(x, y, Hh, R, s, sq, o.faceA !== undefined ? o.faceA : .75);
+  MC.restore(); }
+// the realistic face, three-quarter view: big glossy red eyes with a dark rim and a slit pupil, a heavy brow ridge, a wide open jaw packed with sharp teeth
+function mFaceReal(x, y, Hh, R, s, sq, tf) {
+  for (const e of [-.55, .55]) { const a = tf + e, c = Math.cos(a); if (c <= .05) continue; const ex = x + R(.14) * .82 * Math.sin(a), ey = y + .1 * Hh, er = (5 + .8 * sq) * s;
+    MC.fillStyle = 'rgba(20,50,10,.45)'; MC.beginPath(); MC.ellipse(ex, ey - er * .55, er * 1.25 * c, er * .75, 0, Math.PI, 0); MC.fill();
+    MC.fillStyle = '#2a0c08'; MC.beginPath(); MC.ellipse(ex, ey, er * 1.12 * c, er * 1.12, 0, 0, 7); MC.fill();
+    const ig = MC.createRadialGradient(ex - er * .25 * c, ey - er * .3, er * .1, ex, ey, er); ig.addColorStop(0, '#ff6a4a'); ig.addColorStop(.55, '#c8161a'); ig.addColorStop(1, '#5a0606'); MC.fillStyle = ig; MC.beginPath(); MC.ellipse(ex, ey, er * c, er, 0, 0, 7); MC.fill();
+    MC.fillStyle = '#120202'; MC.beginPath(); MC.ellipse(ex + Math.sin(S.age * 30) * sq * .5 * s, ey, er * .22 * c, er * .62, 0, 0, 7); MC.fill();
+    MC.fillStyle = 'rgba(255,255,255,.9)'; MC.beginPath(); MC.ellipse(ex - er * .38 * c, ey - er * .42, er * .2 * c, er * .14, -.5, 0, 7); MC.fill(); }
+  const a = tf, c = Math.cos(a); if (c <= .1) return; const mx = x + R(.28) * .5 * Math.sin(a), my = y + .27 * Hh, mw = R(.28) * .9 * Math.max(.55, c), op = (4 + 5 * sq) * s;
+  const A = [mx - mw * .85, my - op * .1], B = [mx + mw, my - op * .25], CU = [mx + mw * .1, my - op * .55], CL = [mx + mw * .05, my + op * 1.5];
+  const q = (C, t) => [(1 - t) * (1 - t) * A[0] + 2 * (1 - t) * t * C[0] + t * t * B[0], (1 - t) * (1 - t) * A[1] + 2 * (1 - t) * t * C[1] + t * t * B[1]];
+  const mg = MC.createLinearGradient(0, my - op, 0, my + op * 1.2); mg.addColorStop(0, '#3a0610'); mg.addColorStop(1, '#7a1624');
+  MC.fillStyle = mg; MC.beginPath(); MC.moveTo(...A); MC.quadraticCurveTo(...CU, ...B); MC.quadraticCurveTo(...CL, ...A); MC.fill();
+  MC.strokeStyle = '#d0607a'; MC.lineWidth = 1.2 * s; MC.beginPath(); MC.moveTo(...A); MC.quadraticCurveTo(...CU, ...B); MC.stroke(); MC.beginPath(); MC.moveTo(...A); MC.quadraticCurveTo(...CL, ...B); MC.stroke();
+  const tooth = (px, py, dir, L, w) => { const tg = MC.createLinearGradient(px, py, px, py + dir * L); tg.addColorStop(0, '#d8cfb4'); tg.addColorStop(1, '#fffaf0'); MC.fillStyle = tg; MC.beginPath(); MC.moveTo(px - w, py); MC.lineTo(px + w, py); MC.lineTo(px + w * .3, py + dir * L); MC.fill(); };
+  for (let k = 1; k < 11; k++) { const [px, py] = q(CU, k / 11); tooth(px, py, 1, (k % 2 ? 4 : 2.8) * s, 1.15 * s); }
+  for (let k = 1; k < 10; k++) { const [px, py] = q(CL, k / 10); tooth(px, py, -1, (k % 2 ? 3.6 : 2.6) * s, 1.1 * s); } }
+// the sad face (switch): raised brows, droopy lids, tears, a frowning jaw that becomes a wail
+function mFaceSad(x, y, Hh, R, s, sq, tf) {
+  for (const e of [-.55, .55]) { const a = tf + e, c = Math.cos(a); if (c <= 0) continue; const ex = x + R(.14) * .8 * Math.sin(a), ey = y + .1 * Hh, er = (4.8 + 1.4 * sq) * s, inn = Math.sin(a) < 0 ? 1 : -1;
+    MC.save(); MC.beginPath(); MC.ellipse(ex, ey, er * c, er, 0, 0, 7); MC.fillStyle = '#f2f0e4'; MC.fill(); MC.clip();
+    MC.fillStyle = '#b3141a'; MC.beginPath(); MC.ellipse(ex, ey + er * .2, er * .72 * c, er * .72, 0, 0, 7); MC.fill();
+    const px = ex + Math.sin(S.age * 30) * sq * .7 * s, py = ey + er * .2; MC.fillStyle = '#1a0606'; MC.beginPath(); MC.arc(px, py, er * .3, 0, 7); MC.fill(); MC.fillStyle = 'rgba(255,255,255,.85)'; MC.beginPath(); MC.arc(px - er * .2, py - er * .22, er * .12, 0, 7); MC.fill();
+    MC.fillStyle = mCol(.1); MC.beginPath(); MC.moveTo(ex - er - 1, ey - er - 1); MC.lineTo(ex + er + 1, ey - er - 1); MC.lineTo(ex + inn * er, ey - er * .5); MC.lineTo(ex - inn * er, ey + er * .05); MC.closePath(); MC.fill(); MC.restore();
+    MC.strokeStyle = '#2a5a1c'; MC.lineWidth = 1.8 * s; MC.lineCap = 'round'; MC.beginPath(); MC.moveTo(ex - inn * er * c, ey - er * 1.05); MC.lineTo(ex + inn * er * .9 * c, ey - er * 1.75); MC.stroke();
+    const tp = (S.age * 1.3 + e + .5) % 1, tx = ex - inn * er * .55 * c, ty = ey + er * .75 + tp * 12 * s; MC.fillStyle = `rgba(160,215,255,${.9 * (1 - tp)})`; MC.beginPath(); MC.moveTo(tx, ty - 3 * s); MC.quadraticCurveTo(tx + 1.8 * s, ty, tx, ty + 1.6 * s); MC.quadraticCurveTo(tx - 1.8 * s, ty, tx, ty - 3 * s); MC.fill(); }
+  { const a = tf, c = Math.cos(a); if (c > .1) { const mx = x + R(.28) * .4 * Math.sin(a), my = y + .29 * Hh, mw = R(.28) * .85 * c, mh = (3 + 4.5 * sq) * s;
+    const A = [mx - mw, my + mh * .6], B = [mx + mw, my + mh * .6], CU = [mx, my - mh * 1.7], CL = [mx, my - mh * .15], q = (C, t) => [(1 - t) * (1 - t) * A[0] + 2 * (1 - t) * t * C[0] + t * t * B[0], (1 - t) * (1 - t) * A[1] + 2 * (1 - t) * t * C[1] + t * t * B[1]];
+    MC.fillStyle = '#5c0e18'; MC.beginPath(); MC.moveTo(...A); MC.quadraticCurveTo(...CU, ...B); MC.quadraticCurveTo(...CL, ...A); MC.fill();
+    MC.strokeStyle = '#e06a7c'; MC.lineWidth = 1.1 * s; MC.beginPath(); MC.moveTo(...A); MC.quadraticCurveTo(...CU, ...B); MC.stroke();
+    MC.fillStyle = '#f6f1e0'; const tw2 = 1.5 * s;
+    for (let k = 1; k < 8; k++) { const [px, py] = q(CU, k / 8), L = (k % 2 ? 3.4 : 2.4) * s; MC.beginPath(); MC.moveTo(px - tw2, py); MC.lineTo(px + tw2, py); MC.lineTo(px, py + L); MC.fill(); }
+    for (let k = 1; k < 7; k++) { const [px, py] = q(CL, k / 7), L = (k % 2 ? 2.8 : 2) * s * (1 - .3 * sq); MC.beginPath(); MC.moveTo(px - tw2, py); MC.lineTo(px + tw2, py); MC.lineTo(px, py - L); MC.fill(); } } }
+}
+// pixel-art look: drawn small on a low-res canvas with hard alpha, then blown up with hard pixels
+let MC = null, MCV = null, MPX = 2, MW = 84;
+// o as drawMurloc (extra gets low-res units); o.colY(screenX) -> vertical squash per column (the wringer); MW grows for bigger scenes
+function drawMurlocPx(x, y, s, tw, sq, alpha, o = {}) { if (!MCV || MCV.width !== MW) { MCV = document.createElement('canvas'); MCV.width = MCV.height = MW; MC = MCV.getContext('2d'); }
+  MC.setTransform(1, 0, 0, 1, 0, 0); MC.clearRect(0, 0, MW, MW); const ss = s / MPX, Hh = 62 * ss; drawMurloc(MW / 2, MW / 2 - Hh / 2, ss, tw, sq, 1, o);
+  const im = MC.getImageData(0, 0, MW, MW), d = im.data; for (let i = 3; i < d.length; i += 4) d[i] = d[i] > 110 ? 255 : 0; MC.putImageData(im, 0, 0);
+  const cy = y + 62 * s / 2, x0 = Math.round(x - MW / 2 * MPX), y0 = Math.round(cy - MW / 2 * MPX); ctx.save(); ctx.globalAlpha *= alpha; ctx.imageSmoothingEnabled = false;
+  if (o.colY) for (let c = 0; c < MW; c++) { const f = o.colY(x0 + c * MPX), h = Math.max(1, Math.round(MW * f)); ctx.drawImage(MCV, c, 0, 1, MW, x0 + c * MPX, Math.round(cy - h * MPX / 2), MPX, h * MPX); }
+  else ctx.drawImage(MCV, x0, y0, MW * MPX, MW * MPX); ctx.restore(); }
+function mrgl(t0, base, n, vol = .02) { for (let j = 0; j < n; j++) tone(base * (j % 2 ? 1.33 : 1) * (1 + .06 * Math.random()), t0 + j * .052, vol, .08, 'triangle'); }
+ARR.murloc = { name: 'Wrung-out murloc', desc: 'A very sad murloc pops up over the end of the fill, lying sideways, and gets wrung out like a wet towel: its head twists one way and its feet the other, creases spiral round it, it frowns, then wails, with tears running, and purple XP drops squeeze out of its sides and drip into the bar. Then it untwists with a wobble and flops away. Plays on kills too (smaller and quicker).',
+  init(st) { const big = !!st.k.big; st.mu = { big, A: big ? .25 : .15, W: big ? 1.5 : .6, R: big ? .55 : .38, twMax: big ? 3.2 : 2.2, s: big ? 1 : .75, n: big ? 40 : 9, drops: [], got: 0, emitted: 0 }; },
+  draw(st, dt) { st.t += dt; const m = st.mu, b = st.b, t = st.t, by = b.y + b.h / 2, mx = clamp(b.x + b.w * st.from, b.x + 50, b.x + b.w - 50), Hh = 62 * m.s, cy = b.y - 70, top = cy - Hh / 2;
+    // sounds: a gurgle on arrival, a rising strain while wrung, a relieved gurgle on release
+    if (!m.s0) { m.s0 = true; mrgl(0, m.big ? 300 : 340, m.big ? 5 : 3); for (let j = 0; j < (m.big ? 7 : 3); j++) rtone(150 * semi(j * 2), m.A + m.W * j / (m.big ? 7 : 3), .018, .2, 'triangle'); }
+    const w = clamp((t - m.A) / m.W), tau = t - m.A - m.W; let tw, sq, alpha = 1, sc = 1, dy = 0;
+    if (t < m.A) { sc = eBk(clamp(t / m.A)); tw = 0; sq = 0; }
+    else if (tau < 0) { tw = m.twMax * eInOut(w) + Math.sin(S.age * 40) * .06 * w; sq = .95 * eOut(w); }
+    else { if (!m.s1) { m.s1 = true; mrgl(0, m.big ? 420 : 460, m.big ? 4 : 3, .016); }
+      tw = m.twMax * Math.cos(10 * tau) * Math.exp(-5 * tau); sq = .95 * Math.exp(-7 * tau); const out = clamp((tau - m.R * .45) / (m.R * .55)); alpha = 1 - out; dy = eIn(out) * 26; sc = 1 - .25 * out; }
+    // emit drops from the squeezed middle, more as it tightens
+    while (m.emitted < m.n) { const i = m.emitted, te = m.A + m.W * (.12 + .86 * Math.pow(i / m.n, .8)); if (t < te) break; m.emitted++;
+      const sd = i % 2 ? 1 : -1, v = rnd(.45, .85), rr = mRad(v) * m.s * (1 - .42 * .9 * Math.sin(Math.PI * v));
+      m.drops.push({ x: mx + (v - .5) * Hh, y: cy - sd * rr, vx: rnd(-50, 50), vy: sd > 0 ? -rnd(40, m.big ? 120 : 80) : rnd(0, 30), i }); }
+    if (alpha > 0) { ctx.save(); ctx.translate(mx, top + Hh / 2 + dy); ctx.scale(sc, sc); ctx.translate(-mx, -(top + Hh / 2)); drawMurlocPx(mx + Math.round(rnd(-1, 1) * sq * 1.4), top, m.s, tw, sq, alpha); ctx.restore(); }
+    else if (!m.poof) { m.poof = true; spawn({ x: mx, y: top + Hh * .6 + dy, size: 4, shape: 'ring', grow: 26, life: .4, col: XPL }); }
+    // drops fall into the bar
+    for (const d of m.drops) { if (d.done) continue; d.vy += 560 * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.vx *= 1 - 1.2 * dt;
+      if (d.y >= by) { d.done = true; m.got++; landTo(st, m.got / m.n); spawn({ x: d.x, y: by, size: 2, shape: 'ring', grow: 10, life: .25, col: XPL });
+        if (m.big ? d.i % 2 === 0 : true) tone(659 * semi([0, 2, 4, 7, 9, 12, 14, 16][(m.got >> (m.big ? 1 : 0)) % 8]), 0, .011, .22); continue; }
+      ctx.fillStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(d.x, d.y - 4.5); ctx.quadraticCurveTo(d.x + 2.6, d.y, d.x, d.y + 2.4); ctx.quadraticCurveTo(d.x - 2.6, d.y, d.x, d.y - 4.5); ctx.fill(); ctx.shadowBlur = 0; }
+    if (t > m.A + m.W + 1.2) landTo(st, 1); } };
+const eBk = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+// ---------- murloc iterations: hands, laundry wringer, clothesline spin, toothpaste squeeze ----------
+function mInit(st, o) { const big = !!st.k.big; st.mu = Object.assign({ big, s: big ? 1 : .75, n: big ? 40 : 9, drops: [], got: 0 }, o(big)); }
+function mEmit(m, x, y, vx, vy) { m.drops.push({ x, y, vx, vy, i: m.drops.length }); }
+// drops fall into the bar, each lands a share with a soft note (every other one on a quest)
+function mDrops(st, m, dt) { const by = st.b.y + st.b.h / 2;
+  for (const d of m.drops) { if (d.done) continue; d.vy += 560 * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.vx *= 1 - 1.2 * dt;
+    if (d.y >= by) { d.done = true; m.got++; landTo(st, Math.min(1, m.got / m.n)); spawn({ x: d.x, y: by, size: 2, shape: 'ring', grow: 10, life: .25, col: XPL });
+      if (m.big ? d.i % 2 === 0 : true) tone(659 * semi([0, 2, 4, 7, 9, 12, 14, 16][(m.got >> (m.big ? 1 : 0)) % 8]), 0, .011, .22); continue; }
+    ctx.fillStyle = XPL; ctx.shadowColor = XP; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(d.x, d.y - 4.5); ctx.quadraticCurveTo(d.x + 2.6, d.y, d.x, d.y + 2.4); ctx.quadraticCurveTo(d.x - 2.6, d.y, d.x, d.y - 4.5); ctx.fill(); ctx.shadowBlur = 0; } }
+function mDraw(x, top, s, tw, sq, alpha, sc, dy, o) { if (alpha <= 0) return; const cy = top + 31 * s; ctx.save(); ctx.translate(x, cy + dy); ctx.scale(sc, sc); ctx.translate(-x, -cy); drawMurlocPx(x, top, s, tw, sq, alpha, o); ctx.restore(); }
+// screen-space pixel shapes on the same 2 px grid
+const pg = v => Math.round(v / MPX) * MPX;
+function pxRect(x, y, w, h, col) { ctx.fillStyle = col; ctx.fillRect(pg(x), pg(y), Math.max(MPX, pg(w)), Math.max(MPX, pg(h))); }
+function pxDisc(cx, cy, r, col) { ctx.fillStyle = col; for (let yy = -r; yy <= r; yy += MPX) { const hw = Math.sqrt(Math.max(0, r * r - yy * yy)); ctx.fillRect(pg(cx - hw), pg(cy + yy), pg(hw * 2), MPX); } }
+// a fist around the body at v, in the body frame (low-res), knuckles turning with the twist, the wrist going up out of view
+function mFist(x, y, Hh, th, R, s, v, flip, big) { const yy = y + v * Hh, rr = R(v) + 2.5 * s, h = (big ? 13 : 10) * s, a = th(v);
+  MC.fillStyle = '#b9825c'; MC.fillRect(x + rr * .6, yy - h * .42, 26 * s, h * .84);
+  MC.fillStyle = '#e8b48a'; MC.beginPath(); MC.roundRect(x - rr, yy - h / 2, rr * 2, h, 3 * s); MC.fill();
+  MC.fillStyle = '#f6cfa6'; MC.fillRect(x - rr + 1, yy - h / 2 + 1, rr * .5, h - 2);
+  MC.fillStyle = '#9a6844'; for (let k = 0; k < 4; k++) { const ka = a * (flip ? -1 : 1) + k * .7 - 1, c = Math.cos(ka); if (c > .15) MC.fillRect(x + rr * .9 * Math.sin(ka) - .5, yy - h / 2 + 1, 1.1, h - 2); }
+  MC.fillStyle = '#d9a077'; MC.fillRect(x - rr * .9, yy + (flip ? -1 : 1) * h * .25 - 1.5 * s, rr * 1.2, 3 * s); }
+
+ARR.murHands = { name: 'Murloc: hands wring it', desc: 'Two chunky fists come down and grip the murloc by the neck and the ankles, then wring it in hard jerks, a quarter turn at a time. Every jerk squeezes out a burst of XP drops and a little sob. Then the fists let go and it unwinds.',
+  init(st) { mInit(st, big => ({ A: big ? .25 : .15, W: big ? 1.6 : .7, R: .55, steps: big ? 4 : 2, twMax: big ? 3.4 : 2 })); st.mu.k = -1; },
+  draw(st, dt) { st.t += dt; const m = st.mu, b = st.b, t = st.t, mx = clamp(b.x + b.w * st.from, b.x + 50, b.x + b.w - 50), Hh = 62 * m.s, cy = b.y - 70, top = cy - Hh / 2;
+    if (!m.s0) { m.s0 = true; mrgl(0, m.big ? 300 : 340, 3); }
+    let tw = 0, sq = 0, alpha = 1, sc = 1, dy = 0, hands = 1; const tau = t - m.A - m.W;
+    if (t < m.A) { sc = eBk(clamp(t / m.A)); hands = clamp(t / m.A); }
+    else if (tau < 0) { const p = (t - m.A) / m.W * m.steps, k = Math.floor(p), u = p - k; tw = m.twMax * (k + eOut(clamp(u / .3))) / m.steps; sq = .35 + .6 * (k + 1) / m.steps;
+      if (k > m.k) { m.k = k; const per = Math.round(m.n / m.steps); for (let j = 0; j < per; j++) { const sd = j % 2 ? 1 : -1, v = rnd(.55, .85); mEmit(m, mx + (v - .5) * Hh, cy - sd * 9 * m.s, rnd(-60, 60), sd > 0 ? -rnd(50, 140) : rnd(0, 40)); }
+        rtone(130 * semi([0, 3, 5, 7][k % 4]), 0, .03, .25, 'triangle'); mrgl(.04, 380 + k * 30, 2, .014); S.shake = Math.max(S.shake || 0, .04); } }
+    else { if (!m.s1) { m.s1 = true; mrgl(0, 440, 4, .016); } hands = 1 - clamp(tau / .15); tw = m.twMax * Math.cos(10 * tau) * Math.exp(-5 * tau); sq = .9 * Math.exp(-7 * tau); const out = clamp((tau - m.R * .45) / (m.R * .55)); alpha = 1 - out; dy = eIn(out) * 26; sc = 1 - .25 * out; }
+    const o = { extra: hands > .05 ? (x, y, H, th, R, s) => { MC.globalAlpha = hands; mFist(x, y, H, th, R, s, .5, false, m.big); mFist(x, y, H, th, R, s, .93, true, m.big); } : null };
+    mDraw(mx, top, m.s, tw, sq, alpha, sc, dy, o);
+    mDrops(st, m, dt); if (t > m.A + m.W + 1.2) landTo(st, 1); } };
+
+ARR.murWringer = { name: 'Murloc: laundry wringer', desc: 'An old two-roller wringer appears over the end of the fill and the murloc is fed through it headfirst. Everything that comes out the other side is flat as a pancake (face included), and the XP squirts out at the pinch, up and down, into the bar. The rollers creak in steps; the flat murloc flutters away.',
+  init(st) { mInit(st, big => ({ A: big ? .3 : .18, W: big ? 1.5 : .75, R: .5 })); st.mu.k = -1; st.mu.em = 0; },
+  draw(st, dt) { st.t += dt; const m = st.mu, b = st.b, t = st.t, rx = clamp(b.x + b.w * st.from, b.x + 60, b.x + b.w - 60), Hh = 62 * m.s, cy = b.y - 66, rr = 10 * m.s + 3, gap = 3;
+    if (!m.s0) { m.s0 = true; mrgl(m.A, 320, 3); }
+    const w = clamp((t - m.A) / m.W), tau = t - m.A - m.W, ra = clamp(t / .2) * (tau > m.R * .5 ? 1 - clamp((tau - m.R * .5) / .25) : 1);
+    // the murloc slides left through the pinch, headfirst
+    const start = rx + Hh * .5 + 16, end = rx - Hh * .62 - 10, xm = t < m.A ? start : lerp(start, end, eInOut(w)) + (tau > 0 ? -tau * 30 : 0), top = cy - Hh / 2;
+    const inPinch = (xm - Hh / 2 < rx) ? (xm + Hh / 2 > rx) : false, sq = inPinch ? .55 + .35 * Math.sin(S.age * 9) * .3 : .2;
+    let alpha = t < m.A ? clamp(t / m.A) : 1, dy = 0; if (tau > 0) { const out = clamp((tau - m.R * .3) / (m.R * .7)); alpha = 1 - out; dy = Math.sin(tau * 14) * 3 + out * 18; }
+    mDraw(xm, top, m.s, 0, sq, alpha, 1, dy, { colY: X => X < rx - 3 ? .24 : (X < rx + 3 ? .6 : 1) });
+    // drops squirt out at the pinch while the body passes
+    if (inPinch ? t >= m.A : false) { m.em += dt * m.n / (m.W * .8); while (m.em >= 1 ? m.drops.length < m.n : false) { m.em--; const up = m.drops.length % 3 !== 2; mEmit(m, rx + rnd(-2, 2), cy + (up ? -4 : 4), rnd(-90, 90), up ? -rnd(70, m.big ? 190 : 140) : rnd(0, 40)); } }
+    // the creaks: soft steps as the rollers turn
+    const k = Math.floor(w * 6); if (t >= m.A ? (k > m.k ? k < 6 : false) : false) { m.k = k; rtone(110 * semi([0, 3, 5, 7, 10, 12][k]), 0, .016, .15, 'triangle'); }
+    // the rollers (side view): two wooden discs with turning spokes, an iron frame
+    if (ra > 0) { ctx.save(); ctx.globalAlpha = ra; const turn = w * 9 + (tau > 0 ? tau * 4 : 0);
+      pxRect(rx - 2, cy - rr * 2 - gap - 8, 4, rr * 4 + gap * 2 + 14, '#4a4e57'); pxRect(rx - rr - 3, cy - rr * 2 - gap - 10, rr * 2 + 6, 4, '#5d626c');
+      for (const sgn of [-1, 1]) { const ccy = cy + sgn * (rr + gap / 2), spin = sgn * turn; pxDisc(rx, ccy, rr, '#8a6440'); pxDisc(rx, ccy, rr - 3, '#a77c52');
+        for (let q = 0; q < 3; q++) { const a = spin + q * 2.09; for (let d = 2; d < rr - 2; d += MPX) pxRect(rx + Math.cos(a) * d, ccy + Math.sin(a) * d, MPX, MPX, '#6b4a2c'); }
+        pxRect(rx - 2, ccy - 2, 4, 4, '#3a3f47'); }
+      ctx.restore(); }
+    if (m.drops.length >= m.n ? false : (tau > m.R ? true : false)) while (m.drops.length < m.n) mEmit(m, rx, cy - 4, rnd(-60, 60), -rnd(40, 90));
+    mDrops(st, m, dt); if (t > m.A + m.W + 1.3) landTo(st, 1); } };
+
+ARR.murLine = { name: 'Murloc: clothesline spin', desc: 'The murloc hangs from a clothesline above the fill, pegged by its crest. It winds itself up like a rubber band (the twist creeps down to its feet), then lets go and spins, flinging XP drops out in a spiral into the bar. The peg pops and it drops away.',
+  init(st) { mInit(st, big => ({ A: big ? .25 : .15, W1: big ? 1 : .45, W2: big ? .9 : .5, R: .4, Wmax: big ? 5 : 3.2 })); st.mu.k = -1; st.mu.em = 0; },
+  draw(st, dt) { st.t += dt; const m = st.mu, b = st.b, t = st.t, mx = clamp(b.x + b.w * st.from, b.x + 70, b.x + b.w - 70), s = m.s, Hh = 62 * s, lineY = b.y - 150 + (m.big ? 0 : 24), top = lineY + 26 * s;
+    if (!m.s0) { m.s0 = true; mrgl(0, 320, 3); }
+    const t1 = t - m.A, t2 = t1 - m.W1, t3 = t2 - m.W2; let Wc = 0, spin = 0, sq = 0, alpha = 1, dy = 0, sc = 1, la = 1;
+    if (t < m.A) { sc = eBk(clamp(t / m.A)); la = clamp(t / m.A); }
+    else if (t2 < 0) { const u = t1 / m.W1; Wc = m.Wmax * eInOut(u); sq = .25 + .55 * u; const k = Math.floor(u * 6); if (k > m.k) { m.k = k; rtone(170 * semi(k * 2), 0, .015, .14, 'triangle'); }
+      if (Math.random() < dt * 6) mEmit(m, mx + rnd(-4, 4), top + Hh + 8 * s, 0, rnd(0, 20)); }
+    else if (t3 < 0) { const u = t2 / m.W2; Wc = m.Wmax * (1 - eOut(u)); spin = m.Wmax * eOut(u) + 10 * eOut(u); sq = .8 - .3 * u;
+      if (!m.s1) { m.s1 = true; [0, 2, 4, 7, 9, 12, 14, 16, 19].forEach((n, i) => tone(392 * semi(n), i * m.W2 / 11, .012, .12)); }
+      m.em += dt * m.n / m.W2 * .95; while (m.em >= 1 ? m.drops.length < m.n : false) { m.em--; const a = spin * 1.3 + rnd(-.3, .3), sd = Math.sin(a) > 0 ? 1 : -1, v = rnd(.4, .9); mEmit(m, mx + sd * 9 * s, top + v * Hh, sd * rnd(100, m.big ? 230 : 160), -rnd(10, 90)); } }
+    else { spin = m.Wmax + 10 + t3 * 6 * Math.exp(-3 * t3); if (!m.s2) { m.s2 = true; tone(880, 0, .015, .1); mrgl(.08, 460, 3, .016); } dy = eIn(clamp(t3 / m.R)) * 40; alpha = 1 - clamp((t3 - m.R * .4) / (m.R * .6)); la = 1 - clamp(t3 / .3); }
+    // the line, sagging to the peg, and the peg
+    if (la > 0) { ctx.save(); ctx.globalAlpha = la; const sag = 5 + (t3 < 0 ? 0 : -3); for (let X = mx - 80; X <= mx + 80; X += MPX) { const f = 1 - Math.abs(X - mx) / 80; pxRect(X, lineY + sag * f, MPX, MPX, '#c9c2b4'); }
+      pxRect(mx - 3, lineY - 2 + (t3 > 0 ? -eOut(clamp(t3 / .2)) * 10 : 0), 6, 12, '#b48a5a'); pxRect(mx - 1, lineY + 2 + (t3 > 0 ? -eOut(clamp(t3 / .2)) * 10 : 0), 2, 6, '#7a5634'); ctx.restore(); }
+    const th = v => Wc * v + spin, fa = Math.max(-.45, Math.min(.45, Math.sin(th(.1)) * .45)) + (Math.cos(th(.1)) < 0 ? 2 : 0);
+    mDraw(mx, top, s, 0, sq, alpha, sc, dy, { up: true, th, faceA: fa });
+    mDrops(st, m, dt); if (t > m.A + m.W1 + m.W2 + 1.2) landTo(st, 1); } };
+
+ARR.murPaste = { name: 'Murloc: toothpaste squeeze', desc: 'A big fist grabs the murloc by the feet and squeezes up toward the head like a toothpaste tube: the squeezed part goes thin, the rest bulges ahead of the fist, and the XP gushes out of its wailing mouth in one stream, arcing down into the bar. Then the fist lets go and the flat murloc flops away.',
+  init(st) { mInit(st, big => ({ A: big ? .25 : .15, W: big ? 1.4 : .65, R: .5, n: big ? 48 : 10 })); st.mu.em = 0; },
+  draw(st, dt) { st.t += dt; const m = st.mu, b = st.b, t = st.t, s = m.s, Hh = 62 * s, fill = b.x + b.w * st.from, mx = clamp(fill + .33 * Hh + 26, b.x + 50, b.x + b.w - 50), cy = b.y - 70, top = cy - Hh / 2;
+    if (!m.s0) { m.s0 = true; mrgl(0, 320, 3); rtone(120, m.A, .02, m.W + .1, 'triangle', 240, m.W); }
+    const w = clamp((t - m.A) / m.W), tau = t - m.A - m.W; let vf = 1.08, sq = .2, alpha = 1, sc = 1, dy = 0, hand = 1;
+    if (t < m.A) { sc = eBk(clamp(t / m.A)); hand = clamp(t / m.A); }
+    else if (tau < 0) { vf = lerp(1.02, .44, eInOut(w)); sq = .6 + .35 * w;
+      m.em += dt * m.n / m.W; while (m.em >= 1 ? m.drops.length < m.n : false) { m.em--; mEmit(m, mx - .33 * Hh + rnd(-1, 1), cy + .12 * Hh, -rnd(70, m.big ? 150 : 110), rnd(-60, 0)); } }
+    else { vf = .44; if (!m.s1) { m.s1 = true; mrgl(0, 440, 4, .016); while (m.drops.length < m.n) mEmit(m, mx - .33 * Hh, cy + .12 * Hh, -rnd(60, 120), rnd(-40, 0)); }
+      hand = 1 - clamp(tau / .15); sq = .9 * Math.exp(-6 * tau); const out = clamp((tau - m.R * .45) / (m.R * .55)); alpha = 1 - out; dy = eIn(out) * 26; sc = 1 - .25 * out; }
+    const rMul = v => v > vf ? .38 : (v > vf - .14 ? 1 + .35 * (1 - (vf - v) / .14) : 1);
+    const o = { rMul, extra: hand > .05 ? (x, y, H, th, R, s2) => { MC.globalAlpha = hand; mFist(x, y, H, th, v => mRad(v) * s2 * .55, s2, Math.min(.96, vf + .02), false, true); } : null };
+    mDraw(mx, top, s, 0, sq, alpha, sc, dy, o);
+    mDrops(st, m, dt); if (t > m.A + m.W + 1.2) landTo(st, 1); } };
+function questRise() { const sh = semi([0, 2, -3][Math.floor(Math.random() * 3)]), C2 = 65.41 * sh;
+  rtone(C2 * .84, 0, .17, .7, 'sine', C2 * 2, .55); rtone(C2 * 2, 0, .04, .25, 'triangle');
+  const ns = [12, 19, 24, 28, 31, 36, 40, 43, 48], n = ns.length;
+  ns.forEach((s, i) => { const u = i / (n - 1), t = .06 + .5 * (1 - Math.pow(1 - u, 1.7)); rtone(C2 * semi(s), t, .028 + .022 * u, .35 + .3 * u, s < 30 ? 'triangle' : 'sine'); });
+  [36, 40, 43, 48].forEach((s, i) => rtone(C2 * semi(s), .64 + i * .012, .026, 1.8)); rtone(C2 * semi(60), .7, .008, 1.4);
+  log('xp', 'Quest rise: low to high, reverb'); }
+ARR.cometRise = { name: 'Comet + impact, rising sound', desc: 'The same Comet + impact, with a new sound: it starts low at the impact and climbs a major arpeggio that speeds up as the bar sweeps, resolving in a ringing chord, all with reverb. Replaces the thump and the usual quest chime.',
+  init(st) { ARR.cometImpact.init(st); },
+  draw(st, dt) { const was = st.hit; S.silentHit = true; ARR.cometImpact.draw(st, dt); S.silentHit = false; if (!was ? st.hit : false) questRise(); } };
+const QKEYS = ['stream', 'comet', 'cometImpact', 'cometRise', 'cometEpic', 'charge', 'barrage', 'finisher', 'murloc', 'murHands', 'murWringer', 'murLine', 'murPaste'];
 // TX2: the picked behaviour (Combined + chain + session glow + quiet kills), driven by the arrival: the bar swells
 // while the XP lands, segments pop as it completes them, and a spark runs to the ring when it's all in (milestones only)
 STY.TX2 = { name: 'Picked', desc: '',
   init(st) { st.t = 0; STY.T18.init(st); const xp = parseInt(st.k.text.replace(/\D/g, '')), c = S.chain;
     if (c &amp;&amp; S.age - c.last < 4) { c.amt += xp; c.kills++; c.last = S.age; c.pop = S.age; } else S.chain = { amt: xp, kills: 1, disp: 0, last: S.age, pop: S.age };
-    st.boost = (st.full ? 1 : .55) * (1 + Math.min(S.chain.kills - 1, 4) * .15); S.segs = S.segs || {}; st.t = 0; st.arr = st.k.big ? arrival : 'rain'; ARR[st.arr].init(st); },
+    st.boost = (st.full ? 1 : .55) * (1 + Math.min(S.chain.kills - 1, 4) * .15); S.segs = S.segs || {}; st.t = 0; st.arr = (st.k.big || arrival.indexOf('mur') === 0) ? arrival : 'rain'; ARR[st.arr].init(st); },
   draw(st, dt) { ctx.save(); ARR[st.arr].draw(st, dt); ctx.restore(); const b = st.b, T = THEMES.liquid;
     if (st.landed > 0 &amp;&amp; st.ls === undefined) st.ls = st.t; if (st.landed >= 1 &amp;&amp; st.le === undefined) st.le = st.t;
     const sw = st.ls === undefined ? 0 : (st.le === undefined ? Math.min(1, (st.t - st.ls) / .15) : Math.max(0, 1 - (st.t - st.le) / .35)) * clamp(.5 + st.f * 8, .5, 1) * st.boost;
@@ -500,13 +788,20 @@ function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now;
 // ---------- panel ----------
 const sEl = document.getElementById('styles');
 QKEYS.forEach((k, i) => { const b = document.createElement('button'); b.textContent = (i + 1) + '. ' + ARR[k].name; b.dataset.s = k; b.onclick = () => { arrival = k; sync(); play(); }; sEl.appendChild(b); });
+// murloc switches: pixel size (fewer, bigger pixels or more, smaller ones) and the face (realistic or sad)
+{ const row = (label, opts, get, set) => { const d = document.createElement('div'); d.style.marginTop = '6px'; d.innerHTML = '<small>' + label + '</small><br>';
+    opts.forEach(([t, v]) => { const b = document.createElement('button'); b.textContent = t; b.onclick = () => { set(v); d.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); play(); }; if (get() === v) b.classList.add('on'); d.appendChild(b); });
+    document.getElementById('sdesc').after(d); };
+  row('Murloc pixels (all murloc options)', [['Big pixels', 3], ['Medium', 2], ['Small pixels', 1]], () => MPX, v => { MPX = v; MW = Math.round(168 / v); });
+  row('Murloc face', [['Realistic', false], ['Sad', true]], () => MSAD, v => { MSAD = v; });
+  row('Murloc body (all murloc options)', [['Current', 'cur'], ['Hunched frog', 'frog'], ['Fish-man', 'fish'], ['Lean', 'lean'], ['Slimy', 'slimy']], () => MBODY, v => { MBODY = v; }); }
 function sync() { document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === arrival)); document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === moment));
   document.querySelectorAll('[data-loot]').forEach(b => b.classList.toggle('on', b.dataset.loot === lootMode)); document.getElementById('sdesc').textContent = ARR[arrival].desc; }
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { moment = b.dataset.m; sync(); play(); });
 document.querySelectorAll('[data-loot]').forEach(b => b.onclick = () => { lootMode = b.dataset.loot; if (moment !== 'loot' &amp;&amp; moment !== 'grind') moment = 'loot'; sync(); play(); });
 document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { screenEl.className = b.dataset.g; document.querySelectorAll('[data-g]').forEach(x => x.classList.toggle('on', x === b)); });
 document.getElementById('calm').onchange = () => play();
-addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '123456'.indexOf(e.key); if (i >= 0) { arrival = QKEYS[i]; sync(); play(); } });
+addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); play(); } const i = '123456789'.indexOf(e.key); if (i >= 0) { arrival = QKEYS[i]; sync(); play(); } });
 moment = 'quest'; sync(); play(); requestAnimationFrame(frame);
 </script>
 </body>

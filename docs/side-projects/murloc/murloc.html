@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Murloc design</title>
+<style>
+  :root { --bg: #0e0d12; --panel: #17151d; --line: rgba(255, 211, 106, .35); --gold: #ffd36a; --text: #e9e4d8; --dim: #a59f92; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; padding: 16px; }
+  h1 { font-size: 18px; color: var(--gold); margin: 0 0 4px; }
+  p.lead { margin: 0 0 12px; color: var(--dim); max-width: 900px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .ctrl { flex: 0 0 260px; }
+  .ctrl h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin: 10px 0 4px; }
+  .ctrl h2:first-child { margin-top: 0; }
+  button { background: #24212b; color: var(--text); border: 1px solid #3a3644; border-radius: 6px; padding: 4px 9px; margin: 0 4px 4px 0; cursor: pointer; font: inherit; font-size: 13px; }
+  button.on { border-color: var(--gold); color: var(--gold); background: #2e2918; }
+  button.act { border-color: #6fbf4a; }
+  canvas { display: block; image-rendering: pixelated; background: #1b1922; border-radius: 8px; }
+  .views { display: flex; flex-direction: column; gap: 14px; flex: 1 1 560px; min-width: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .cell canvas { width: 100%; height: auto; max-width: 300px; margin: 0 auto 6px; }
+  .cell b { display: block; color: var(--gold); }
+  .cell small { display: block; }
+  #game { max-width: 100%; }
+  small { color: var(--dim); }
+  label { display: block; margin-top: 8px; color: var(--dim); }
+</style></head><body>
+<h1>Murloc: the design, round 3</h1>
+<p class="lead">One murloc standing upright, idling: breathing, blinking, its crest swaying, its jaw working. Pixels locked at Medium. Four designs built from scratch (A-D), the round-1 murloc last for comparison; <b>Mrgl!</b> plays on all. Below: all of them at their size in game, over the XP bar.</p>
+<div class="wrap">
+  <div class="panel ctrl" id="ctrl">
+    <h2>Size in game</h2><div data-g="size"><button data-v="0.75">Small</button><button data-v="1" class="on">Medium</button><button data-v="1.35">Large</button></div>
+    <h2>Pixel outline</h2><div data-g="outline"><button data-v="1" class="on">On</button><button data-v="0">Off</button></div>
+    <h2>Facing</h2><div data-g="face"><button data-v="1" class="on">Left</button><button data-v="-1">Right</button></div>
+    <h2>Action</h2><button class="act" id="mrgl">Mrgl!</button>
+    <label><input type="checkbox" id="snd" checked> Sound (the gurgle only)</label>
+  </div>
+  <div class="views">
+    <div class="grid" id="grid"></div>
+    <div class="panel"><small>In game, over the XP bar (all four, real size)</small><canvas id="game" width="640" height="190"></canvas></div>
+  </div>
+</div>
+<script>
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const O = { px: 2, size: 1, outline: 1, face: 1 };
+document.querySelectorAll('[data-g]').forEach(grp => grp.querySelectorAll('button').forEach(b => b.onclick = () => { grp.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); O[grp.dataset.g] = parseFloat(b.dataset.v); }));
+
+// ---------- sound: the gurgle ----------
+let AC = null; function tone(f, t, vol, dec, type = 'triangle') { if (!document.getElementById('snd').checked) return; AC = AC || new AudioContext(); const T = AC.currentTime + t, o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, T); o.frequency.linearRampToValueAtTime(f * 1.12, T + dec * .5); g.gain.setValueAtTime(0, T); g.gain.linearRampToValueAtTime(vol, T + .006); g.gain.exponentialRampToValueAtTime(.0001, T + dec); o.connect(g).connect(AC.destination); o.start(T); o.stop(T + dec + .05); }
+function gurgle() { for (let j = 0; j < 9; j++) tone(260 * (j % 2 ? 1.3 : 1) * (1 + .08 * Math.sin(j * 2.1)) * (1 + j * .02), j * .055, .05, .09); }
+let mrglAt = -9; document.getElementById('mrgl').onclick = () => { mrglAt = now; gurgle(); };
+
+// ---------- drawing (model units: 120 x 120, ground at y = 104, facing left) ----------
+const C = { headTop: '#dff35a', head: '#a8e043', body: '#5cc83c', bodyDk: '#2c8228', spot: '#1e978c', belly: '#a6d2de', fin: '#c4231c', finTip: '#ff8448', hand: '#e04a2c', handTip: '#ff9a5c', mouth: '#4a0812', gum: '#d2607a', tooth: '#fbf5e4' };
+// a tapered limb segment with round ends, a light edge on top
+function seg(g, x0, y0, x1, y1, w0, w1, col, hi) { const a = Math.atan2(y1 - y0, x1 - x0), nx = -Math.sin(a), ny = Math.cos(a);
+  g.fillStyle = col; g.beginPath(); g.moveTo(x0 + nx * w0 / 2, y0 + ny * w0 / 2); g.lineTo(x1 + nx * w1 / 2, y1 + ny * w1 / 2); g.lineTo(x1 - nx * w1 / 2, y1 - ny * w1 / 2); g.lineTo(x0 - nx * w0 / 2, y0 - ny * w0 / 2); g.fill();
+  g.beginPath(); g.arc(x0, y0, w0 / 2, 0, 7); g.arc(x1, y1, w1 / 2, 0, 7); g.fill();
+  if (hi) { g.strokeStyle = hi; g.lineWidth = Math.max(.6, w1 * .25); g.beginPath(); g.moveTo(x0 - nx * w0 * .28, y0 - ny * w0 * .28); g.lineTo(x1 - nx * w1 * .28, y1 - ny * w1 * .28); g.stroke(); } }
+// a hand or foot: a red-orange palm and three tapering fingers with claws, spread around dir
+function paw(g, x, y, dir, size, dark) { const k = dark ? .75 : 1, col = shade(C.hand, k), tip = shade(C.handTip, k);
+  for (const d of [-.55, 0, .55]) { const a = dir + d, x1 = x + Math.cos(a) * size * 1.1, y1 = y + Math.sin(a) * size * 1.1, x2 = x1 + Math.cos(a + .25) * size * .9, y2 = y1 + Math.sin(a + .25) * size * .9; seg(g, x, y, x1, y1, size * .55, size * .4, col); seg(g, x1, y1, x2, y2, size * .4, size * .12, tip); }
+  g.fillStyle = col; g.beginPath(); g.arc(x, y, size * .55, 0, 7); g.fill(); }
+function shade(hex, k) { const n = parseInt(hex.slice(1), 16), r = (n >> 16) * k, gg = ((n >> 8) % 256) * k, b = (n % 256) * k; return `rgb(${Math.min(255, r) | 0},${Math.min(255, gg) | 0},${Math.min(255, b) | 0})`; }
+function qpt(p0, c, p1, t) { return [(1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * c[0] + t * t * p1[0], (1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * c[1] + t * t * p1[1]]; }
+
+// P: { breathe, bob, jaw, lift, bounce, blink, sway }; V (the design): { fin: webbed crest + jaw fins, head: head scale, jaw: extra jaw opening, dagger: holds a bone dagger }
+function drawMurloc(g, t, P, V = {}) {
+  g.save(); g.translate(0, -P.bounce);
+  const lift = P.lift, sw = P.sway;
+  // far leg and far arm (behind, darker)
+  seg(g, 73, 76, 64, 86, 7, 5, C.bodyDk); seg(g, 64, 86, 70, 98, 5, 3.4, C.bodyDk); paw(g, 69, 100, Math.PI * .92, 3.2, true);
+  { const ex = lerp(47, 42, lift), ey = lerp(72, 52, lift), wx = lerp(45 + sw * .6, 34, lift), wy = lerp(90, 36, lift); seg(g, 53, 56, ex, ey, 5.2, 4, C.bodyDk); seg(g, ex, ey, wx, wy, 4, 3, C.bodyDk); paw(g, wx, wy, lerp(Math.PI * .55, -Math.PI * .6, lift), 3, true); }
+  // torso: a hunched bean, breathing from the hips
+  g.save(); g.translate(70, 80); g.scale(1, 1 + .03 * P.breathe); g.translate(-70, -80);
+  const torso = new Path2D(); torso.moveTo(42, 50); torso.bezierCurveTo(33, 61, 37, 77, 52, 81); torso.bezierCurveTo(62, 84, 73, 81, 77, 73); torso.bezierCurveTo(89, 60, 85, 39, 70, 33); torso.bezierCurveTo(61, 30, 49, 38, 42, 50); torso.closePath();
+  let gr = g.createLinearGradient(52, 34, 68, 84); gr.addColorStop(0, '#86dc4c'); gr.addColorStop(.45, C.body); gr.addColorStop(1, '#2e8a2a'); g.fillStyle = gr; g.fill(torso);
+  g.save(); g.clip(torso);
+  gr = g.createRadialGradient(44, 70, 1, 46, 70, 14); gr.addColorStop(0, '#d2ebf2'); gr.addColorStop(.7, C.belly); gr.addColorStop(1, 'rgba(166,210,222,0)'); g.fillStyle = gr; g.beginPath(); g.ellipse(46, 70, 11, 14, -.3, 0, 7); g.fill();
+  g.fillStyle = C.spot; for (const [sx, sy, r] of [[67, 36, 2.6], [74, 40, 3], [80, 47, 2.6], [83, 55, 2.4], [81, 63, 2], [61, 35, 1.8]]) { g.beginPath(); g.ellipse(sx, sy, r * 1.2, r * .8, .6, 0, 7); g.fill(); }
+  gr = g.createRadialGradient(58, 44, 1, 58, 44, 16); gr.addColorStop(0, 'rgba(255,255,210,.45)'); gr.addColorStop(1, 'rgba(255,255,210,0)'); g.fillStyle = gr; g.fillRect(30, 28, 60, 60);
+  g.restore(); g.restore();
+  // near leg: thigh forward to the knee, shin back down, foot forward
+  seg(g, 66, 76, 54, 86, 8, 5.6, C.body, 'rgba(230,255,170,.5)'); seg(g, 54, 86, 61, 99, 5.6, 3.8, C.body, 'rgba(230,255,170,.4)'); paw(g, 59, 101, Math.PI * .95, 3.6);
+  // the head, bobbing on the neck; the lower jaw hinges open
+  const hs = V.head || 1; g.save(); g.translate(50, 48); g.rotate(P.bob); g.scale(hs, hs); g.translate(-50, -48);
+  // crest: long red spines sweeping up and back, swaying
+  const bases = [[31, 23], [35, 20.5], [40, 19], [45, 19], [50, 20.5], [54.5, 23], [58, 27], [60, 31], [61, 35]], LS = [15, 22, 28, 31, 29, 26, 22, 18, 13];
+  const sa = k => -1.75 + k * .17 + Math.sin(t * 3 + k * .9) * .05 + P.lift * .15;
+  // webbed crest: a thin red web between the spines (to 80% of their length), and fins behind the jaw
+  if (V.fin) { const tips = bases.map(([bx, by], k) => [bx + Math.cos(sa(k)) * LS[k] * .8, by + Math.sin(sa(k)) * LS[k] * .8]);
+    const wg = g.createLinearGradient(40, 20, 50, -8); wg.addColorStop(0, 'rgba(150,20,16,.95)'); wg.addColorStop(1, 'rgba(240,90,50,.8)'); g.fillStyle = wg; g.beginPath(); g.moveTo(...bases[0]); tips.forEach(p => g.lineTo(...p)); g.lineTo(...bases[bases.length - 1]); g.closePath(); g.fill();
+    for (const [fx, fy, s] of [[60, 41, 1], [57, 47, .8]]) { g.fillStyle = 'rgba(190,34,26,.95)'; g.beginPath(); g.moveTo(fx - 2, fy - 3 * s); g.lineTo(fx + 13 * s, fy - 6 * s); g.lineTo(fx + 15 * s, fy + 1); g.lineTo(fx + 9 * s, fy + 5 * s); g.lineTo(fx - 1, fy + 3 * s); g.closePath(); g.fill();
+      g.strokeStyle = '#ff8448'; g.lineWidth = .9; for (const e of [[13, -6], [15, 1], [9, 5]]) { g.beginPath(); g.moveTo(fx, fy); g.lineTo(fx + e[0] * s, fy + e[1] * s); g.stroke(); } } }
+  bases.forEach(([bx, by], k) => { const a = sa(k), L = LS[k], ex = bx + Math.cos(a) * L, ey = by + Math.sin(a) * L, cx = bx + Math.cos(a - .25) * L * .5, cy = by + Math.sin(a - .25) * L * .5, nx = -Math.sin(a) * 2.4, ny = Math.cos(a) * 2.4;
+    const fg = g.createLinearGradient(bx, by, ex, ey); fg.addColorStop(0, '#7a1210'); fg.addColorStop(.5, C.fin); fg.addColorStop(1, C.finTip); g.fillStyle = fg;
+    g.beginPath(); g.moveTo(bx - nx, by - ny); g.quadraticCurveTo(cx - nx * .5, cy - ny * .5, ex, ey); g.quadraticCurveTo(cx + nx * .5, cy + ny * .5, bx + nx, by + ny); g.fill(); });
+  // mouth inside (between the upper lip and the opened lower lip)
+  const hinge = [49, 46], ja = P.jaw + (V.jaw || 0), rot = ([x, y]) => { const dx = x - hinge[0], dy = y - hinge[1], c = Math.cos(ja), s = Math.sin(ja); return [hinge[0] + dx * c - dy * s, hinge[1] + dx * s + dy * c]; };
+  const UL = [[49, 46], [32, 46], [17, 42]], LLraw = [[49, 47], [32, 49], [19, 45]], LL = LLraw.map(rot);
+  g.fillStyle = C.mouth; g.beginPath(); g.moveTo(...UL[0]); g.quadraticCurveTo(...UL[1], ...UL[2]); g.lineTo(...LL[2]); g.quadraticCurveTo(...LL[1], ...LL[0]); g.fill();
+  // lower jaw and throat
+  { g.save(); g.translate(...hinge); g.rotate(ja); g.translate(-hinge[0], -hinge[1]);
+    const jw = new Path2D(); jw.moveTo(49, 47); jw.quadraticCurveTo(32, 49, 19, 45); jw.bezierCurveTo(21, 51, 30, 57, 42, 57); jw.bezierCurveTo(49, 56, 54, 52, 49, 47); jw.closePath();
+    gr = g.createLinearGradient(0, 45, 0, 58); gr.addColorStop(0, C.head); gr.addColorStop(.6, '#8fcf80'); gr.addColorStop(1, C.belly); g.fillStyle = gr; g.fill(jw);
+    g.fillStyle = C.tooth; for (let k = 1; k < 9; k++) { const [px, py] = qpt(...LLraw.slice(0, 1), LLraw[1], LLraw[2], k / 9); const L = k % 2 ? 3 : 2.2; g.beginPath(); g.moveTo(px - .9, py + .2); g.lineTo(px + .9, py + .2); g.lineTo(px + .2, py - L); g.fill(); }
+    g.strokeStyle = C.gum; g.lineWidth = .7; g.beginPath(); g.moveTo(49, 47.4); g.quadraticCurveTo(32, 49.4, 19, 45.4); g.stroke(); g.restore(); }
+  // upper head: cranium to a forward snout
+  const hd = new Path2D(); hd.moveTo(61, 35); hd.bezierCurveTo(59, 22, 41, 15, 30, 23); hd.bezierCurveTo(24, 27, 18, 35, 15.5, 40.5); hd.lineTo(17, 42.5); hd.quadraticCurveTo(32, 46.5, 49, 46.5); hd.bezierCurveTo(56, 46, 62, 42, 61, 35); hd.closePath();
+  gr = g.createLinearGradient(38, 17, 44, 48); gr.addColorStop(0, C.headTop); gr.addColorStop(.55, C.head); gr.addColorStop(1, '#6fbf3c'); g.fillStyle = gr; g.fill(hd);
+  g.save(); g.clip(hd); g.fillStyle = C.spot; for (const [sx, sy, r, a] of [[42, 20.5, 2.6, .1], [48, 21.5, 2.8, .3], [53.5, 25, 2.4, .6], [57, 30, 2, .9], [37, 22.5, 1.8, -.1]]) { g.beginPath(); g.ellipse(sx, sy, r * 1.3, r * .75, a, 0, 7); g.fill(); }
+  gr = g.createRadialGradient(36, 24, 1, 36, 26, 12); gr.addColorStop(0, 'rgba(255,255,220,.5)'); gr.addColorStop(1, 'rgba(255,255,220,0)'); g.fillStyle = gr; g.fillRect(15, 10, 50, 40); g.restore();
+  // upper teeth and gum line
+  g.fillStyle = C.tooth; for (let k = 1; k < 10; k++) { const [px, py] = qpt(UL[0], UL[1], UL[2], k / 10), L = k % 2 ? 3.4 : 2.4; g.beginPath(); g.moveTo(px - 1, py - .3); g.lineTo(px + 1, py - .3); g.lineTo(px - .2, py + L); g.fill(); }
+  g.strokeStyle = C.gum; g.lineWidth = .7; g.beginPath(); g.moveTo(49, 46.1); g.quadraticCurveTo(32, 46.1, 17, 42.1); g.stroke();
+  // nostril, brow ridge, eye (dark ring, glossy red iris, slit pupil, highlight), blink
+  g.fillStyle = '#2a4a10'; g.beginPath(); g.ellipse(20.5, 37.5, 1, .6, -.5, 0, 7); g.fill();
+  g.fillStyle = 'rgba(40,80,10,.55)'; g.beginPath(); g.ellipse(34, 26.5, 6.5, 3, -.15, Math.PI, 0); g.fill();
+  g.fillStyle = '#2a0a06'; g.beginPath(); g.arc(34, 31, 5.4, 0, 7); g.fill();
+  gr = g.createRadialGradient(32.5, 29.5, .5, 34, 31, 4.6); gr.addColorStop(0, '#ff7050'); gr.addColorStop(.55, '#cc1418'); gr.addColorStop(1, '#5a0606'); g.fillStyle = gr; g.beginPath(); g.arc(34, 31, 4.5, 0, 7); g.fill();
+  g.fillStyle = '#100202'; g.beginPath(); g.ellipse(33.4, 31, 1, 3, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.arc(32, 29, 1, 0, 7); g.fill();
+  if (P.blink > 0) { g.fillStyle = C.head; g.beginPath(); g.ellipse(34, 31 - 5.5 * (1 - P.blink), 5.6, 5.5 * P.blink, 0, 0, 7); g.fill(); }
+  g.restore();
+  // near arm: shoulder, elbow, a long forearm down to the ground (raised for the gurgle)
+  // armed: the forearm comes forward and the hand grips a curved bone dagger, point forward and up
+  if (V.dagger) { const ex = lerp(36, 33, lift), ey = lerp(70, 50, lift), wx = lerp(25 + sw * .5, 22, lift), wy = lerp(74, 30, lift), da = lerp(-2.6, -1.9, lift);
+    seg(g, 45, 57, ex, ey, 7.4, 5.6, C.body, 'rgba(230,255,170,.5)'); seg(g, ex, ey, wx, wy, 5.6, 4, C.body, 'rgba(230,255,170,.45)');
+    const tx = wx + Math.cos(da) * 25, ty = wy + Math.sin(da) * 25, nx = -Math.sin(da), ny = Math.cos(da), bgr = g.createLinearGradient(wx, wy, tx, ty); bgr.addColorStop(0, '#cfc6ae'); bgr.addColorStop(1, '#fbf6e8');
+    g.fillStyle = '#5a3a20'; g.beginPath(); g.moveTo(wx - Math.cos(da) * 5 + nx, wy - Math.sin(da) * 5 + ny); g.lineTo(wx + nx * 1.4, wy + ny * 1.4); g.lineTo(wx - nx * 1.4, wy - ny * 1.4); g.lineTo(wx - Math.cos(da) * 5 - nx, wy - Math.sin(da) * 5 - ny); g.fill();
+    g.fillStyle = bgr; g.beginPath(); g.moveTo(wx + nx * 3, wy + ny * 3); g.quadraticCurveTo(wx + Math.cos(da) * 14 + nx * 7, wy + Math.sin(da) * 14 + ny * 7, tx, ty); g.quadraticCurveTo(wx + Math.cos(da) * 13 - nx * 1.5, wy + Math.sin(da) * 13 - ny * 1.5, wx - nx * 2.2, wy - ny * 2.2); g.fill();
+    paw(g, wx, wy, da + 1.9, 3.4); }
+  else { const ex = lerp(38, 33, lift), ey = lerp(72, 50, lift), wx = lerp(33 + sw, 22, lift), wy = lerp(90, 33, lift);
+    seg(g, 45, 57, ex, ey, 7.4, 5.6, C.body, 'rgba(230,255,170,.5)'); seg(g, ex, ey, wx, wy, 5.6, 4, C.body, 'rgba(230,255,170,.45)'); paw(g, wx, wy, lerp(Math.PI * .58, -Math.PI * .65, lift), 3.4); }
+  g.restore(); }
+
+// ---------- round 3: four designs from scratch (model units 120 x 120, ground y = 104, facing left) ----------
+function eyeBall(g, x, y, r, iris, pw, ph, blink, lid, pupil) { g.fillStyle = '#16060a'; g.beginPath(); g.arc(x, y, r * 1.18, 0, 7); g.fill();
+  const gr = g.createRadialGradient(x - r * .3, y - r * .3, r * .1, x, y, r); gr.addColorStop(0, iris[0]); gr.addColorStop(.6, iris[1]); gr.addColorStop(1, iris[2]); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  g.fillStyle = pupil || '#0c0204'; g.beginPath(); g.ellipse(x, y, r * pw, r * ph, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(x - r * .38, y - r * .4, r * .24, 0, 7); g.fill();
+  if (blink > 0) { g.fillStyle = lid; g.beginPath(); g.ellipse(x, y - r * 1.2 * (1 - blink), r * 1.3, r * 1.25 * blink, 0, 0, 7); g.fill(); } }
+function teeth(g, p0, c, p1, n, dir, L, w, col) { g.fillStyle = col || C.tooth; for (let k = 1; k < n; k++) { const [px, py] = qpt(p0, c, p1, k / n), l = L * (k % 2 ? 1 : .7); g.beginPath(); g.moveTo(px - w, py - dir * .3); g.lineTo(px + w, py - dir * .3); g.lineTo(px + w * .2, py + dir * l); g.fill(); } }
+const rotP = (h, a) => ([x, y]) => { const dx = x - h[0], dy = y - h[1], c = Math.cos(a), s = Math.sin(a); return [h[0] + dx * c - dy * s, h[1] + dx * s + dy * c]; };
+// a jaw: the dark inside, the lower jaw hinged at h (path drawn by jawPath in the closed pose), teeth on both lips
+function mouthJaw(g, h, ja, UL, LLraw, jawPath, jawFill, inside, upT, loT) { const LL = LLraw.map(rotP(h, ja));
+  g.fillStyle = inside; g.beginPath(); g.moveTo(...UL[0]); g.quadraticCurveTo(...UL[1], ...UL[2]); g.lineTo(...LL[2]); g.quadraticCurveTo(...LL[1], ...LL[0]); g.fill();
+  g.save(); g.translate(...h); g.rotate(ja); g.translate(-h[0], -h[1]); g.fillStyle = jawFill; g.fill(jawPath); if (loT) teeth(g, LLraw[0], LLraw[1], LLraw[2], loT[0], -1, loT[1], loT[2], loT[3]); g.restore();
+  return () => { if (upT) teeth(g, UL[0], UL[1], UL[2], upT[0], 1, upT[1], upT[2], upT[3]); }; }
+// a fist resting on its knuckles
+function fist(g, x, y, r, col) { g.fillStyle = col; g.beginPath(); g.ellipse(x, y - r * .3, r * 1.1, r, 0, 0, 7); g.fill(); g.fillStyle = shade(C.handTip, .9); for (const k of [-1, 0, 1]) { g.beginPath(); g.arc(x + k * r * .7, y + r * .45, r * .42, 0, 7); g.fill(); } }
+
+// A. Tall warrior: straight and tall, broad chest, a gold plated belly, head held high, one long fin from the brow down the back, a spear held upright
+function drawWarrior(g, t, P) { const B = '#2f9a3c', BD = '#1d6427', BL = '#68cf62', GOLD = '#e8c45a', hi = 'rgba(220,255,180,.45)', lift = P.lift, sw = P.sway * .4, up = lift * 14;
+  g.save(); g.translate(0, -P.bounce);
+  // the spear, behind: a wooden shaft, a red binding, a flint leaf blade
+  const sx = 41 + sw * .3, top = 4 - up; seg(g, sx + 1, 106 - up, sx - .5, top + 14, 2.4, 2.2, '#6a4424', 'rgba(255,220,170,.35)');
+  { const tx = sx - .5, ty = top; const bg = g.createLinearGradient(tx - 3, ty, tx + 3, ty + 15); bg.addColorStop(0, '#c8ccd2'); bg.addColorStop(1, '#6a707a'); g.fillStyle = bg; g.beginPath(); g.moveTo(tx, ty - 2); g.lineTo(tx + 3.6, ty + 8); g.lineTo(tx, ty + 15); g.lineTo(tx - 3.6, ty + 8); g.fill(); g.fillStyle = '#b02a20'; g.fillRect(tx - 2, ty + 14, 4, 3); }
+  // far leg and arm
+  seg(g, 67, 72, 68, 87, 7, 5, BD); seg(g, 68, 87, 70, 100, 5, 3.6, BD); paw(g, 69, 102, Math.PI * .95, 3.2, true);
+  seg(g, 74, 48, 78, 61, 6, 4.6, BD); { const hx = lerp(78, 84, lift), hy = lerp(75, 40, lift); seg(g, 78, 61, hx, hy, 4.6, 3.4, BD); paw(g, hx, hy, lerp(Math.PI / 2, -Math.PI / 2, lift), 3, true); }
+  // the fin: one continuous red fin from the brow over the head and down the back, ribbed, swaying
+  const ridge = [[45, 17], [52, 14], [60, 15], [67, 21], [71, 30], [76, 40], [79, 50], [79, 59], [76, 67]], FL = [5, 9, 11, 11, 10, 10, 9, 7, 4];
+  const tips = ridge.map((p, i) => { const a = ridge[Math.max(0, i - 1)], b = ridge[Math.min(ridge.length - 1, i + 1)], tx = b[0] - a[0], ty = b[1] - a[1], l = Math.hypot(tx, ty), nx = ty / l, ny = -tx / l, wv = Math.sin(t * 3 + i * .8) * .8; return [p[0] + nx * FL[i] + wv, p[1] + ny * FL[i]]; });
+  { const fg = g.createLinearGradient(50, 10, 86, 50); fg.addColorStop(0, '#d8361e'); fg.addColorStop(1, '#8a1410'); g.fillStyle = fg; g.beginPath(); g.moveTo(...ridge[0]); tips.forEach(p => g.lineTo(...p)); for (let i = ridge.length - 1; i >= 0; i--) g.lineTo(...ridge[i]); g.fill();
+    g.strokeStyle = '#ff9050'; g.lineWidth = 1; ridge.forEach((p, i) => { g.beginPath(); g.moveTo(...p); g.lineTo(...tips[i]); g.stroke(); }); }
+  // torso: a broad V, breathing
+  g.save(); g.translate(62, 75); g.scale(1, 1 + .025 * P.breathe); g.translate(-62, -75);
+  const tor = new Path2D(); tor.moveTo(50, 44); tor.bezierCurveTo(45, 56, 53, 68, 57, 76); tor.lineTo(70, 76); tor.bezierCurveTo(74, 64, 81, 54, 77, 44); tor.bezierCurveTo(70, 39, 56, 39, 50, 44); tor.closePath();
+  let gr = g.createLinearGradient(52, 40, 74, 78); gr.addColorStop(0, BL); gr.addColorStop(.45, B); gr.addColorStop(1, BD); g.fillStyle = gr; g.fill(tor);
+  g.save(); g.clip(tor); gr = g.createLinearGradient(48, 46, 62, 72); gr.addColorStop(0, '#f6dc80'); gr.addColorStop(1, '#b88a2a'); g.fillStyle = gr; g.beginPath(); g.ellipse(55, 59, 7, 15, -.1, 0, 7); g.fill();
+  g.strokeStyle = 'rgba(110,70,16,.7)'; g.lineWidth = .9; for (let y = 47; y < 74; y += 4) { g.beginPath(); g.moveTo(48, y); g.quadraticCurveTo(55, y + 1.6, 62, y); g.stroke(); }
+  gr = g.createRadialGradient(70, 48, 1, 70, 48, 12); gr.addColorStop(0, 'rgba(230,255,200,.4)'); gr.addColorStop(1, 'rgba(230,255,200,0)'); g.fillStyle = gr; g.fillRect(40, 36, 50, 50); g.restore(); g.restore();
+  // near leg, straight and planted
+  seg(g, 60, 72, 57, 87, 8, 5.8, B, hi); seg(g, 57, 87, 59, 100, 5.8, 4, B, hi); paw(g, 57, 102, Math.PI * .97, 3.6);
+  // the head, held high: a short snout, a grim closed mouth with two fangs over the lip
+  g.save(); g.translate(58, 42); g.rotate(P.bob); g.translate(-58, -42);
+  const jp = new Path2D(); jp.moveTo(52, 35); jp.quadraticCurveTo(42, 36, 32, 33); jp.bezierCurveTo(34, 37.5, 42, 42, 54, 42); jp.bezierCurveTo(58, 41, 58, 37, 52, 35); jp.closePath();
+  const jf = g.createLinearGradient(0, 34, 0, 43); jf.addColorStop(0, B); jf.addColorStop(1, GOLD);
+  const up2 = mouthJaw(g, [52, 34.5], P.jaw * .5, [[52, 34.5], [42, 34.5], [31, 31]], [[52, 35], [42, 36], [32, 33]], jp, jf, '#3a0610', null, [6, 1.8, .8]);
+  const hd = new Path2D(); hd.moveTo(68, 38); hd.bezierCurveTo(72, 26, 64, 15, 53, 15); hd.bezierCurveTo(44, 15, 36, 21, 31, 29); hd.lineTo(30.5, 31); hd.quadraticCurveTo(42, 35, 52, 35); hd.bezierCurveTo(58, 35, 66, 40, 68, 38); hd.closePath();
+  gr = g.createLinearGradient(46, 15, 52, 38); gr.addColorStop(0, BL); gr.addColorStop(1, B); g.fillStyle = gr; g.fill(hd); up2();
+  g.fillStyle = '#fffaf0'; for (const fx of [37, 44]) { g.beginPath(); g.moveTo(fx - 1.2, 33); g.lineTo(fx + 1.2, 33.4); g.lineTo(fx + .2, 38.5); g.fill(); }
+  g.fillStyle = 'rgba(10,50,16,.6)'; g.beginPath(); g.ellipse(45, 21, 5, 2.4, -.2, Math.PI, 0); g.fill();
+  eyeBall(g, 45, 24, 3.6, ['#ffe680', '#e8961e', '#7a3a08'], .22, .82, P.blink, B);
+  g.fillStyle = 'rgba(20,70,28,.8)'; for (const [x, y, r] of [[56, 19, 1.5], [61, 23, 1.3], [64, 29, 1.2]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+  g.restore();
+  // near arm, gripping the spear
+  { const hx = sx, hy = 62 - up * .9, ex = lerp(47, 45, lift), ey = lerp(61, 46, lift); seg(g, 54, 48, ex, ey, 6.8, 5, B, hi); seg(g, ex, ey, hx + 1, hy, 5, 3.8, B, hi);
+    g.fillStyle = C.hand; g.beginPath(); g.ellipse(hx, hy, 3, 3.4, 0, 0, 7); g.fill(); g.fillStyle = C.handTip; for (const k of [-1.6, 0, 1.6]) { g.beginPath(); g.arc(hx - 2.2, hy + k, 1.1, 0, 7); g.fill(); } }
+  g.restore(); }
+
+// B. Squat toad: low and wide, mostly head and belly, a huge mouth across the front, eyes on top, a throat sac, warts, short bowed legs
+function drawToad(g, t, P) { const O1 = '#8c9a38', OD = '#556220', OL = '#c2cc62', MU = '#dcb84c', lift = P.lift;
+  g.save(); g.translate(0, -P.bounce);
+  seg(g, 77, 92, 87, 96, 7, 5, OD); seg(g, 87, 96, 85, 102, 5, 4, OD); paw(g, 83, 104, Math.PI * .9, 3.4, true);
+  // a stubby red crest along the back
+  [[63, 58, 5], [68, 58, 6.5], [73, 60, 7], [78, 63, 6.5], [83, 67, 5.5], [87, 72, 4.5]].forEach(([x, y, L], k) => { const a = -1.15 + k * .17 + Math.sin(t * 3 + k) * .06, ex = x + Math.cos(a) * L, ey = y + Math.sin(a) * L, nx = -Math.sin(a) * 1.8, ny = Math.cos(a) * 1.8; g.fillStyle = k % 2 ? '#c4231c' : '#e04a24'; g.beginPath(); g.moveTo(x - nx, y - ny); g.lineTo(ex, ey); g.lineTo(x + nx, y + ny); g.fill(); });
+  // the body: one round lump, breathing wide
+  g.save(); g.translate(60, 104); g.scale(1 + .02 * P.breathe, 1 - .015 * P.breathe); g.translate(-60, -104);
+  const bd = new Path2D(); bd.moveTo(32, 86); bd.bezierCurveTo(28, 66, 44, 56, 60, 56); bd.bezierCurveTo(78, 56, 91, 68, 90, 84); bd.bezierCurveTo(89, 96, 76, 101, 60, 101); bd.bezierCurveTo(44, 101, 34, 97, 32, 86); bd.closePath();
+  let gr = g.createRadialGradient(50, 64, 2, 60, 78, 32); gr.addColorStop(0, OL); gr.addColorStop(.55, O1); gr.addColorStop(1, OD); g.fillStyle = gr; g.fill(bd);
+  g.save(); g.clip(bd); gr = g.createRadialGradient(50, 96, 2, 50, 96, 18); gr.addColorStop(0, '#f2d872'); gr.addColorStop(.7, MU); gr.addColorStop(1, 'rgba(220,184,76,0)'); g.fillStyle = gr; g.beginPath(); g.ellipse(52, 96, 22, 11, 0, 0, 7); g.fill();
+  for (const [x, y, r] of [[66, 62, 1.8], [74, 66, 1.4], [81, 72, 2], [56, 61, 1.3], [85, 81, 1.5], [70, 74, 1.4], [62, 70, 1.6], [78, 88, 1.3], [86, 90, 1.2], [72, 84, 1.5]]) { g.fillStyle = '#4a5418'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = 'rgba(230,240,150,.7)'; g.beginPath(); g.arc(x - r * .35, y - r * .35, r * .4, 0, 7); g.fill(); }
+  g.restore(); g.restore();
+  // the mouth across the whole front, lower lip hinged at the corner
+  const jp = new Path2D(); jp.moveTo(58, 86.5); jp.quadraticCurveTo(45, 89.5, 31.5, 85); jp.bezierCurveTo(33, 90, 40, 93, 50, 93); jp.bezierCurveTo(56, 93, 60, 90, 58, 86.5); jp.closePath();
+  const up2 = mouthJaw(g, [58, 86], P.jaw * .7, [[58, 86], [45, 88.5], [31, 84]], [[58, 86.5], [45, 89.5], [31.5, 85]], jp, MU, '#4a0c14', [11, 1.8, .8], [10, 1.4, .7]);
+  g.strokeStyle = OD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(58, 86); g.quadraticCurveTo(45, 88.5, 31, 84); g.stroke(); up2();
+  // the throat sac, swelling (big for the gurgle)
+  { const sac = .25 + .25 * (Math.sin(t * 1.6) * .5 + .5) + lift * .9, r = 2 + 7 * sac; const sg = g.createRadialGradient(42 - r * .3, 94, 1, 42, 95 + r * .3, r); sg.addColorStop(0, '#fff2c0'); sg.addColorStop(1, '#d8a84c'); g.fillStyle = sg; g.beginPath(); g.ellipse(43, 94 + r * .5, r * 1.1, r, 0, 0, 7); g.fill(); }
+  // eyes on top: domes with a horizontal pupil
+  for (const [x, y, r, far] of [[59, 55, 3.2, 1], [46, 57, 4, 0]]) { g.fillStyle = far ? O1 : OL; g.beginPath(); g.arc(x, y + .6, r * 1.45, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(x, y + .6, r * 1.45, r * .9, 0, 0, Math.PI); g.fill();
+    eyeBall(g, x, y, r, ['#ffe070', '#e8901a', '#6a3008'], .82, .22, P.blink, OL); }
+  // near arm (short, hands planted) and the bowed near leg
+  { const hx = lerp(36, 30, lift), hy = lerp(101, 66, lift); seg(g, 42, 88, lerp(37, 33, lift), lerp(94, 76, lift), 5.6, 4.4, O1, 'rgba(240,250,160,.4)'); seg(g, lerp(37, 33, lift), lerp(94, 76, lift), hx, hy, 4.4, 3.6, O1); paw(g, hx, hy, lerp(Math.PI * .85, -Math.PI * .5, lift), 3.2); }
+  seg(g, 53, 94, 43, 97, 8.4, 6, O1, 'rgba(240,250,160,.4)'); seg(g, 43, 97, 45, 102, 6, 4.4, O1); paw(g, 41, 104, Math.PI, 3.6);
+  g.restore(); }
+
+// C. Knuckle-walker: side-on and ape-like, back arched high, a long low head with no neck, leaning on long arms with the knuckles down, a ragged crest of long spikes
+function drawKnuckle(g, t, P) { const B = C.body, BD = C.bodyDk, hi = 'rgba(230,255,170,.45)', lift = P.lift, rock = Math.sin(t * 1.4) * 1.2 + lift * -3;
+  g.save(); g.translate(0, -P.bounce);
+  seg(g, 81, 80, 73, 92, 7, 5, BD); seg(g, 73, 92, 81, 102, 5, 3.6, BD); paw(g, 80, 104, Math.PI * .9, 3.2, true);
+  { const ex = 52 + rock * .5, ey = lerp(78, 62, lift), fx = lerp(50, 44, lift), fy = lerp(101, 46, lift); seg(g, 58 + rock, 56, ex, ey, 6, 4.8, BD); seg(g, ex, ey, fx, fy, 4.8, 4, BD); if (lift > .5) paw(g, fx, fy, -Math.PI * .6, 3, true); else fist(g, fx, fy, 2.6, shade(C.hand, .75)); }
+  // the ragged crest along the whole back ridge
+  const ridge = [[34, 41], [42, 39], [51, 39], [60, 37], [68, 37], [76, 40], [82, 46], [87, 55], [89, 65]], SL = [9, 15, 19, 14, 21, 17, 15, 11, 7];
+  ridge.forEach(([x0, y0], k) => { const x = x0 + (k < 4 ? rock * .6 : 0), a = -1.9 + k * .2 + Math.sin(t * 2.6 + k * 1.3) * .06 + lift * .2, L = SL[k], ex = x + Math.cos(a) * L, ey = y0 + Math.sin(a) * L, cx = x + Math.cos(a - .3) * L * .5, cy = y0 + Math.sin(a - .3) * L * .5, w = k % 2 ? 1.5 : 2.4, nx = -Math.sin(a) * w, ny = Math.cos(a) * w;
+    const fg = g.createLinearGradient(x, y0, ex, ey); fg.addColorStop(0, '#7a1210'); fg.addColorStop(.5, C.fin); fg.addColorStop(1, C.finTip); g.fillStyle = fg; g.beginPath(); g.moveTo(x - nx, y0 - ny); g.quadraticCurveTo(cx, cy, ex, ey); g.quadraticCurveTo(cx + nx * .3, cy + ny * .3, x + nx, y0 + ny); g.fill(); });
+  // the arched body
+  g.save(); g.translate(80, 84); g.scale(1, 1 + .025 * P.breathe); g.translate(-80, -84);
+  const bd = new Path2D(); bd.moveTo(44 + rock, 54); bd.bezierCurveTo(46 + rock, 40, 62, 32, 74, 36); bd.bezierCurveTo(86, 40, 93, 58, 87, 74); bd.bezierCurveTo(85, 82, 77, 87, 68, 85); bd.bezierCurveTo(58, 82, 50, 72, 44 + rock, 63); bd.closePath();
+  let gr = g.createLinearGradient(66, 34, 70, 86); gr.addColorStop(0, '#86dc4c'); gr.addColorStop(.5, B); gr.addColorStop(1, '#2e8a2a'); g.fillStyle = gr; g.fill(bd);
+  g.save(); g.clip(bd); g.fillStyle = C.belly; g.beginPath(); g.ellipse(64, 84, 16, 7, -.2, 0, 7); g.fill(); g.fillStyle = C.spot; for (const [x, y, r] of [[62, 40, 2.4], [70, 39, 2.8], [78, 43, 2.6], [84, 51, 2.4], [87, 60, 2], [54, 45, 1.8]]) { g.beginPath(); g.ellipse(x, y, r * 1.3, r * .8, .4, 0, 7); g.fill(); }
+  gr = g.createRadialGradient(66, 42, 1, 66, 42, 16); gr.addColorStop(0, 'rgba(255,255,210,.45)'); gr.addColorStop(1, 'rgba(255,255,210,0)'); g.fillStyle = gr; g.fillRect(40, 30, 60, 50); g.restore(); g.restore();
+  seg(g, 77, 80, 67, 90, 8, 5.6, B, hi); seg(g, 67, 90, 73, 102, 5.6, 3.8, B, hi); paw(g, 72, 104, Math.PI * .95, 3.6);
+  // the long low head, jutting forward with no neck
+  g.save(); g.translate(48 + rock, 52); g.rotate(P.bob - lift * .15); g.translate(-48 - rock, -52); g.translate(rock, 0);
+  const jp = new Path2D(); jp.moveTo(46, 54.5); jp.quadraticCurveTo(28, 55.5, 15, 52); jp.bezierCurveTo(17, 57, 28, 61, 40, 61); jp.bezierCurveTo(46, 60, 50, 58, 46, 54.5); jp.closePath();
+  const jf = g.createLinearGradient(0, 53, 0, 62); jf.addColorStop(0, C.head); jf.addColorStop(1, C.belly);
+  const up2 = mouthJaw(g, [46, 54], P.jaw, [[46, 54], [28, 54], [13, 50]], [[46, 54.5], [28, 55.5], [15, 52]], jp, jf, C.mouth, [11, 3, .9], [10, 2.6, .8]);
+  const hd = new Path2D(); hd.moveTo(50, 50); hd.bezierCurveTo(46, 40, 30, 38, 18, 44); hd.lineTo(12.5, 49.5); hd.quadraticCurveTo(28, 54.5, 46, 54.5); hd.bezierCurveTo(50, 54.5, 52, 53, 50, 50); hd.closePath();
+  gr = g.createLinearGradient(30, 39, 32, 55); gr.addColorStop(0, C.headTop); gr.addColorStop(1, C.head); g.fillStyle = gr; g.fill(hd); up2();
+  g.fillStyle = C.spot; for (const [x, y] of [[40, 41.5], [45, 43.5]]) { g.beginPath(); g.ellipse(x, y, 2.4, 1.3, .3, 0, 7); g.fill(); }
+  g.fillStyle = 'rgba(40,80,10,.55)'; g.beginPath(); g.ellipse(36, 43, 5, 2.2, -.1, Math.PI, 0); g.fill();
+  eyeBall(g, 36, 46, 3.4, ['#ff7050', '#cc1418', '#5a0606'], .22, .82, P.blink, C.head); g.fillStyle = '#2a4a10'; g.beginPath(); g.arc(17, 47, .8, 0, 7); g.fill();
+  g.restore();
+  // the near arm: long, leaning on its knuckles
+  { const ex = 39 + rock * .6, ey = lerp(76, 58, lift), fx = lerp(36, 26, lift), fy = lerp(101, 40, lift); seg(g, 48 + rock, 58, ex, ey, 7.4, 5.6, B, hi); seg(g, ex, ey, fx, fy, 5.6, 4.6, B, hi); if (lift > .5) paw(g, fx, fy, -Math.PI * .6, 3.4); else fist(g, fx, fy, 3, C.hand); }
+  g.restore(); }
+
+// D. Deep-sea: gaunt, dark blue-teal with glowing spots, huge glowing eyes, ragged torn fins, thin limbs, needle teeth
+function drawDeep(g, t, P) { const D1 = '#1f5262', DD = '#0e2a34', DL = '#3e8496', GL = '#86f8ff', GL2 = '#3aa8b8', hi = 'rgba(150,230,240,.35)', lift = P.lift;
+  g.save(); g.translate(0, -P.bounce);
+  seg(g, 66, 76, 62, 89, 5, 3.6, DD); seg(g, 62, 89, 67, 101, 3.6, 2.6, DD); paw(g, 66, 103, Math.PI * .92, 3, true);
+  { const ex = lerp(50, 46, lift), ey = lerp(70, 50, lift), hx = lerp(48, 40, lift), hy = lerp(88, 34, lift); seg(g, 56, 54, ex, ey, 4.4, 3.2, DD); seg(g, ex, ey, hx, hy, 3.2, 2.4, DD); paw(g, hx, hy, lerp(Math.PI * .55, -Math.PI * .6, lift), 3.4, true); }
+  // a ragged dorsal fin down the back (torn: uneven tips, some gaps)
+  { const base = [[62, 40], [68, 42], [72, 48], [74, 55], [74, 62], [71, 69]], H = [6, 9, 3, 8, 2, 6], tips = base.map(([x, y], i) => [x + H[i] * (.8 + .1 * Math.sin(t * 3 + i)), y - H[i] * .3]);
+    g.fillStyle = '#2c6e7c'; g.beginPath(); g.moveTo(...base[0]); tips.forEach(p => g.lineTo(...p)); for (let i = base.length - 1; i >= 0; i--) g.lineTo(...base[i]); g.fill(); g.strokeStyle = '#123a44'; g.lineWidth = .9; base.forEach((b, i) => { g.beginPath(); g.moveTo(...b); g.lineTo(...tips[i]); g.stroke(); }); }
+  // the gaunt torso, ribs showing, glowing spots pulsing in a wave
+  g.save(); g.translate(60, 80); g.scale(1, 1 + .03 * P.breathe); g.translate(-60, -80);
+  const bd = new Path2D(); bd.moveTo(49, 50); bd.bezierCurveTo(45, 62, 51, 75, 56, 80); bd.lineTo(66, 80); bd.bezierCurveTo(72, 70, 75, 56, 70, 44); bd.bezierCurveTo(64, 38, 53, 40, 49, 50); bd.closePath();
+  let gr = g.createLinearGradient(52, 40, 70, 82); gr.addColorStop(0, DL); gr.addColorStop(.5, D1); gr.addColorStop(1, DD); g.fillStyle = gr; g.fill(bd);
+  g.save(); g.clip(bd); g.strokeStyle = 'rgba(150,220,235,.35)'; g.lineWidth = .9; for (let y = 55; y < 72; y += 3.4) { g.beginPath(); g.moveTo(47, y); g.quadraticCurveTo(55, y + 2, 63, y - .5); g.stroke(); } g.restore();
+  [[66, 47], [70, 54], [69.5, 62], [65, 70], [60, 75], [53, 66]].forEach(([x, y], i) => { const on = Math.sin(t * 3 - i * .9) > 0; g.fillStyle = on ? GL : GL2; g.beginPath(); g.arc(x, y, on ? 1.3 : 1, 0, 7); g.fill(); });
+  g.restore();
+  // near leg, long and thin
+  seg(g, 60, 77, 52, 89, 5.6, 4, D1, hi); seg(g, 52, 89, 58, 101, 4, 2.8, D1, hi); paw(g, 57, 103, Math.PI * .96, 3.6);
+  // the head: a big bony skull, a gaping mouth with needle teeth, a torn fin on top, huge glowing eyes
+  g.save(); g.translate(54, 46); g.rotate(P.bob); g.translate(-54, -46);
+  { const base = [[38, 18], [45, 15], [52, 15], [58, 18], [63, 24], [65, 31]], H = [6, 10, 4, 11, 7, 3], tips = base.map(([x, y], i) => { const a = -1.6 + i * .32 + Math.sin(t * 3.2 + i) * .06; return [x + Math.cos(a) * H[i], y + Math.sin(a) * H[i]]; });
+    g.fillStyle = '#2c6e7c'; g.beginPath(); g.moveTo(...base[0]); tips.forEach(p => g.lineTo(...p)); for (let i = base.length - 1; i >= 0; i--) g.lineTo(...base[i]); g.fill(); g.strokeStyle = '#123a44'; g.lineWidth = 1; base.forEach((b, i) => { g.beginPath(); g.moveTo(...b); g.lineTo(...tips[i]); g.stroke(); }); }
+  const jp = new Path2D(); jp.moveTo(52, 44.5); jp.quadraticCurveTo(36, 46, 22, 42); jp.bezierCurveTo(24, 49, 34, 54, 46, 53); jp.bezierCurveTo(52, 52, 56, 48, 52, 44.5); jp.closePath();
+  const up2 = mouthJaw(g, [52, 44], P.jaw + .12, [[52, 44], [36, 44.5], [20.5, 40]], [[52, 44.5], [36, 46], [22, 42]], jp, D1, '#07050a', [13, 4.4, .55, '#e8f4f0'], [12, 3.8, .5, '#e8f4f0']);
+  const hd = new Path2D(); hd.moveTo(64, 38); hd.bezierCurveTo(66, 24, 52, 14, 40, 18); hd.bezierCurveTo(30, 21, 23, 30, 20, 38); hd.lineTo(20.5, 40.5); hd.quadraticCurveTo(36, 44.5, 52, 44.5); hd.bezierCurveTo(58, 44.5, 64, 43, 64, 38); hd.closePath();
+  gr = g.createLinearGradient(40, 16, 44, 46); gr.addColorStop(0, DL); gr.addColorStop(1, D1); g.fillStyle = gr; g.fill(hd); up2();
+  g.fillStyle = GL; g.beginPath(); g.arc(56, 31, .9, 0, 7); g.arc(59, 36, .9, 0, 7); g.fill();
+  eyeBall(g, 48, 25, 4.4, ['#f6ffc0', '#b6e848', '#3a6a10'], .2, .2, P.blink, D1);
+  eyeBall(g, 36, 29, 6.4, ['#f6ffc0', '#b6e848', '#3a6a10'], .17, .17, P.blink, DL);
+  g.restore();
+  // near arm: thin, a torn fin at the elbow, long fingers
+  { const ex = lerp(43, 40, lift), ey = lerp(70, 48, lift), hx = lerp(38, 30, lift), hy = lerp(89, 28, lift); g.fillStyle = '#2c6e7c'; g.beginPath(); g.moveTo(ex, ey); g.lineTo(ex + 8, ey + 3); g.lineTo(ex + 5, ey + 5); g.lineTo(ex + 9, ey + 9); g.lineTo(ex + 1, ey + 6); g.fill();
+    seg(g, 51, 54, ex, ey, 5, 3.6, D1, hi); seg(g, ex, ey, hx, hy, 3.6, 2.6, D1, hi); paw(g, hx, hy, lerp(Math.PI * .58, -Math.PI * .65, lift), 4); }
+  g.restore(); }
+// ---------- render: model -> a small canvas -> hard alpha + pixel outline -> blown up ----------
+const LO = document.createElement('canvas'), lg = LO.getContext('2d', { willReadFrequently: true });
+function renderLow(t, P, V) { const unit = .78 * O.size / O.px, W = Math.ceil(120 * unit) + 2; LO.width = LO.height = W; lg.setTransform(unit * O.face, 0, 0, unit, O.face > 0 ? 1 : W - 1, 1); if (V.draw) V.draw(lg, t, P); else drawMurloc(lg, t, P, V.v || {});
+  const im = lg.getImageData(0, 0, W, W), d = im.data; for (let i = 3; i < d.length; i += 4) d[i] = d[i] > 100 ? 255 : 0;
+  if (O.outline) { const solid = i => d[i * 4 + 3] === 255, out = []; for (let y = 0; y < W; y++) for (let x = 0; x < W; x++) { const i = y * W + x; if (solid(i)) continue; if ((x > 0 ? solid(i - 1) : false) || (x < W - 1 ? solid(i + 1) : false) || (y > 0 ? solid(i - W) : false) || (y < W - 1 ? solid(i + W) : false)) out.push(i); }
+    for (const i of out) { d[i * 4] = 18; d[i * 4 + 1] = 34; d[i * 4 + 2] = 12; d[i * 4 + 3] = 255; } }
+  lg.putImageData(im, 0, 0); return W; }
+
+// round 3: four designs from scratch; the current one last, for reference
+const VAR = [
+  { k: 'A', name: 'Tall warrior', desc: 'Stands straight and tall: a broad chest with a gold plated belly, head held high with a grim mouth and two fangs, one long red fin from the brow down the back, a flint spear held upright.', draw: drawWarrior },
+  { k: 'B', name: 'Squat toad', desc: 'Low and wide, mostly head and belly: olive and mustard, warty, a huge mouth across the whole front, eyes on top with toad pupils, a throat sac that swells (and balloons on Mrgl!), short bowed legs.', draw: drawToad },
+  { k: 'C', name: 'Knuckle-walker', desc: 'Side-on and ape-like: the back arched high under a ragged crest of long spikes, a long low head jutting forward with no neck, leaning on long arms with its knuckles on the ground, rocking.', draw: drawKnuckle },
+  { k: 'D', name: 'Deep-sea', desc: 'Gaunt and eerie: dark blue-teal skin with ribs showing and glowing spots pulsing in a wave, huge glowing eyes, needle teeth in a gaping mouth, torn ragged fins on the head, back and elbow.', draw: drawDeep },
+  { k: 'Now', name: 'Current (reference)', desc: 'The design from round 1, for comparison.', v: {} }];
+const grid = document.getElementById('grid'), cvs = VAR.map(o => { const p = document.createElement('div'); p.className = 'panel cell'; p.innerHTML = '<b>' + o.k + '. ' + o.name + '</b><small>' + o.desc + '</small>'; const c = document.createElement('canvas'); c.width = c.height = 300; p.prepend(c); grid.appendChild(p); return c; });
+const game = document.getElementById('game'), gg = game.getContext('2d');
+let now = 0, last = performance.now();
+function frame(ts) { const dt = Math.min(.05, (ts - last) / 1000); last = ts; now += dt; const t = now;
+  const m = clamp((t - mrglAt) / 1.3), active = m < 1 ? Math.sin(Math.PI * m) : 0, blinkPh = (t % 3.7) / 3.7;
+  const P = { breathe: Math.sin(t * 2.2), bob: Math.sin(t * 1.1) * .03 + active * Math.sin(t * 34) * .05, jaw: .2 + .1 * (Math.sin(t * 1.3) * .5 + .5) + active * (.25 + .15 * Math.sin(t * 40)),
+    lift: active, bounce: active * Math.abs(Math.sin(t * 17)) * 3, blink: blinkPh > .965 ? Math.sin((blinkPh - .965) / .035 * Math.PI) : 0, sway: Math.sin(t * 1.7) * 1.5 };
+  // in game: all four at real size, standing over the XP bar
+  gg.imageSmoothingEnabled = false; gg.clearRect(0, 0, game.width, game.height); const bw = game.width - 40, bx = 20, by = game.height - 26;
+  gg.fillStyle = '#0a0910'; gg.fillRect(bx - 2, by - 2, bw + 4, 15); gg.fillStyle = '#7a3fcf'; gg.fillRect(bx, by, bw * .55, 11); gg.fillStyle = '#2a2236'; gg.fillRect(bx + bw * .55, by, bw * .45, 11);
+  VAR.forEach((o, i) => { const W = renderLow(t, P, o), c = cvs[i], cg = c.getContext('2d');
+    // zoomed: as many screen pixels per low-res pixel as fit
+    cg.imageSmoothingEnabled = false; cg.clearRect(0, 0, c.width, c.height); const z = Math.max(1, Math.floor(290 / W)); cg.drawImage(LO, Math.round((c.width - W * z) / 2), Math.round((c.height - W * z) / 2 + 6), W * z, W * z);
+    const cx = bx + bw * (.1 + .2 * i); gg.drawImage(LO, Math.round(cx - W * O.px / 2), Math.round(by - 50 - W * O.px * .87), W * O.px, W * O.px); gg.fillStyle = '#a59f92'; gg.font = '12px system-ui'; gg.fillText(o.k, cx - 3, by - 44); });
+  requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+</script>
+</body></html>
