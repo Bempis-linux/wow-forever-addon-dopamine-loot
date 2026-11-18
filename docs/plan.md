@@ -511,6 +511,8 @@ Professions (from 1.3.0):
    2152) = true, "Leatherworking". The burn grid works: 64 textures (8x8) of one image via SetTexCoord, every other one
    hidden, drew a clean checkerboard.
 2. Skill-up gains, Phase 2: the current focus. State, rules and the page: `docs/skillup.md`; every round: `docs/skillup-rounds.md`.
+   2b. **Rank-up celebration** (the user, 2026-11-17): after every profession's skill-up is done, consider a huge
+   animation for reaching a new rank (Journeyman, Expert, Artisan), on top of the per-recipe finale.
 3. Create All pile (CraftTray), Phase 2: its own system (the Ring is only the cast bar's new look); the one link is the
    handoff, the made item landing in the pile at the end of the cast, so it comes while crafting is fresh.
 4. Gathering animations, Phase 2 (node burst, merging +N, climbing notes, the harvest tally).

@@ -1914,3 +1914,1226 @@ Object.assign(FAM, { PA: r93('A'), PB: r93('B'), PC: r93('C'), PD: r93('D'), PE:
       xs.forEach((x, j) => { const t0 = F0_95 + j * .07; strikePeg96(x, y, (ts - t0 + .06) / .06); if (ts >= t0) once('lw96a' + j, () => { hit94(x, y - 6.5); hit94(x, y + 6.5); toks96(j); }); });
       const rx = rollAt96(I, ts, R0); if (rx === null) return; xs.forEach((x, j) => { if (rx >= x - 3) once('lw96ap' + j, () => popPeg96(x, y, j)); });
       bigStrike96(I, ts, R0 + 1.1); roll96(I, rx, clamp((ts - R0 - .75) / .4), (rx - I.x0) / 5 + clamp((ts - R0 - .75) / .4) * 8); } },
+
+// Round wrappers r12-r51 (rejected gatherer options' FAM entry points), moved out 2026-11-17 for Alchemy room. Their VAR tables stay on the page (later rounds use them).
+function r12(L) { return { get name() { const v = VAR[profName]; return L + '. ' + (v ? v[L].name : 'gatherers only this round'); }, get desc() { const v = VAR[profName]; return v ? v[L].desc : 'Round 12 covers the gatherers (Herbalism, Mining, Skinning, Fishing); crafters come next. This shows the locked look.'; },
+  get note() { const v = VAR[profName]; return v ? v[L].name.toLowerCase() + '.' : 'the locked look.'; }, draw(top) { const v = VAR[profName]; growModule(top, 'plain', v ? v[L] : null); } }; }
+Object.assign(FAM, { PA: r12('A'), PB: r12('B'), PC: r12('C'), PD: r12('D') });
+function r13(L) { return { get name() { const v = VAR13[profName]; return L + '. ' + (v ? v[L].name : 'gatherers only this round'); }, get desc() { const v = VAR13[profName]; return v ? v[L].desc : 'Round 13 covers the gatherers again (Herbalism, Mining, Skinning, Fishing); crafters come next. This shows the locked look.'; },
+  get note() { const v = VAR13[profName]; return v ? v[L].name.toLowerCase() + '.' : 'the locked look.'; }, draw(top) { const v = VAR13[profName]; growModule(top, 'plain', v ? v[L] : null); } }; }
+Object.assign(FAM, { PA: r13('A'), PB: r13('B'), PC: r13('C'), PD: r13('D') });
+function r14(L) { return { get name() { const v = VAR14[profName]; return L + '. ' + (v ? v[L].name : 'gatherers only this round'); }, get desc() { const v = VAR14[profName]; return v ? v[L].desc : 'Round 14 covers the gatherers (Herbalism, Mining, Skinning, Fishing); crafters come next. This shows the locked look.'; },
+  get note() { const v = VAR14[profName]; return v ? v[L].name.toLowerCase() + '.' : 'the locked look.'; }, draw(top) { const v = VAR14[profName]; growModule(top, 'plain', v ? v[L] : null); } }; }
+Object.assign(FAM, { PA: r14('A'), PB: r14('B'), PC: r14('C'), PD: r14('D') });
+function r15(L) { return { get name() { return L + '. ' + LAYOUT15[L].name; }, get desc() { return LAYOUT15[L].desc + ' (The growth is each profession’s current base: the vine, Breaks away, the cut + a stroke, rod and reel.)'; },
+  get note() { return LAYOUT15[L].name.toLowerCase() + '.'; }, draw(top) { cleanModule(top, L); } }; }
+Object.assign(FAM, { PA: r15('A'), PB: r15('B'), PC: r15('C'), PD: r15('D') });
+function r16(K) { return { get name() { return K + '. ' + VIS16[K].name; }, get desc() { return VIS16[K].desc + ' (B “Just a line”; the page opens on Bright ground.)'; },
+  get note() { return 'just a line, ' + VIS16[K].name.toLowerCase() + '.'; }, draw(top) { VISK = VIS16[K]; cleanModule(top, 'B'); VISK = null; OUTLINE = false; } }; }
+Object.assign(FAM, { PA: r16('A'), PB: r16('B'), PC: r16('C'), PD: r16('D') });
+function r17(K) { return { get name() { return K + '. ' + VIS17[K].name; }, get desc() { return VIS17[K].desc + ' (B “Just a line”; Fishing redrawn to read better in every option: a water band, a thicker line, a bigger bobber.)'; },
+  get note() { return 'just a line, ' + VIS17[K].name.toLowerCase() + '.'; }, draw(top) { VISK = VIS17[K]; FISHR = true; cleanModule(top, 'B'); VISK = null; FISHR = false; } }; }
+Object.assign(FAM, { PA: r17('A'), PB: r17('B'), PC: r17('C'), PD: r17('D') });
+function r18(K) { return { get name() { return K + '. ' + FIT18[K].name; }, get desc() { return FIT18[K].desc + ' (The 1.3 bar: header with no backing, a dark track with a thin gold border, the next unlock’s icon at its end, “N to X” under it. The growth is each profession’s current base.)'; },
+  get note() { return FIT18[K].name.toLowerCase() + '.'; }, draw(top) { FISHR = true; barModule(top, K); FISHR = false; } }; }
+Object.assign(FAM, { PA: r18('A'), PB: r18('B'), PC: r18('C'), PD: r18('D') });
+function r19(K) { return { get name() { return profName === 'Fishing' ? K + '. ' + SURF19[K].name : K + '. (same for A-D)'; },
+  get desc() { const fit = FIT19[profName]; return profName === 'Fishing' ? SURF19[K].desc + ' The whole bar is water, the bobber floats on it at the fill’s front and dips with a splash each skill-up.' : (fit === 'B' ? 'Herbalism breaks out: the vine full size over a slimmer bar, its leaves reaching past the edges.' : 'Inside the bar: the growth is the fill, clipped to the bar.') + ' The four options only differ for Fishing (its water surface).'; },
+  get note() { return profName === 'Fishing' ? SURF19[K].name.toLowerCase() + '.' : 'the set bar, per profession.'; }, draw(top) { FISHR = true; FISHV = K; barModule(top, FIT19[profName] || 'A'); FISHR = false; } }; }
+Object.assign(FAM, { PA: r19('A'), PB: r19('B'), PC: r19('C'), PD: r19('D') });
+function r21(K) { const v = () => VAR21[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'gatherers only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'Round 21 covers Mining, Herbalism and Skinning; crafters come next.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r21('A'), PB: r21('B'), PC: r21('C'), PD: r21('D') });
+function r22(K) { const v = () => VAR22[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'gatherers only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'Round 22 covers Mining, Herbalism and Skinning; crafters come next.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r22('A'), PB: r22('B'), PC: r22('C'), PD: r22('D') });
+function r23(K) { const v = () => VAR23[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+
+Object.assign(FAM, { PA: r23('A'), PB: r23('B'), PC: r23('C'), PD: r23('D') });
+function r26(K) { const v = () => VAR26[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+
+Object.assign(FAM, { PA: r26('A'), PB: r26('B'), PC: r26('C'), PD: r26('D') });
+function r29(K) { const v = () => VAR29[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : 'Herbalism only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : 'One profession at a time: this round is Herbalism’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = v(); barModule(top, FIT19[profName] || 'A', o ? o[K] : null); FISHR = false; } }; }
+Object.assign(FAM, { PA: r29('A'), PB: r29('B'), PC: r29('C'), PD: r29('D') });
+function r30(K) { const v = () => VAR30[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Reaching the next unlock” for the finale.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r30('A'), PB: r30('B'), PC: r30('C'), PD: r30('D') });
+function r31(K) { const v = () => VAR31[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Reaching the next unlock” for the finale.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r31('A'), PB: r31('B'), PC: r31('C'), PD: r31('D') });
+function r32(K) { const v = () => VAR32[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; const o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null; barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r32('A'), PB: r32('B'), PC: r32('C'), PD: r32('D') });
+function r34(K) { const v = () => VAR34[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null;
+    if (o && v() && K !== 'C') { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6; if (K === 'B') o = Object.assign({}, o, { finAt: (N - 1) * .07 + .38 + .05 }); if (K === 'D') o = Object.assign({}, o, { finAt: (N - 1) * .06 + .25 + .45 }); if (K === 'A') o = Object.assign({}, o, { finAt: .55 + (N - 1) * .07 + .35 }); }
+    if (o && v() && K === 'C') { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: (N + 1) * .12 + .05 }); }
+    barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r34('A'), PB: r34('B'), PC: r34('C'), PD: r34('D') });
+function r35(K) { const v = () => VAR35[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null;
+    if (o && v()) { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6, c = CFG35[K]; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * c.dt + c.fly + .02 }); }
+    barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r35('A'), PB: r35('B'), PC: r35('C'), PD: r35('D') });
+function r36(K) { const v = () => VAR36[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Fishing' ? 'Fishing (locked)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : profName === 'Fishing' ? 'Locked in round 20: the water bar, the bright surface over the filled water, the reel and line.' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : 'One profession at a time: this round is Skinning’s finale. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : v() ? v()[K] : null;
+    if (o && v()) { const n = S.p && S.nx ? Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15) : 6, N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * DT36 + .2 }); }
+    barModule(top, FIT19[profName] || 'A', o); FISHR = false; } }; }
+Object.assign(FAM, { PA: r36('A'), PB: r36('B'), PC: r36('C'), PD: r36('D') });
+function r37(K) { const v = () => VAR37[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Five in a row”.)' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : profName === 'Skinning' ? 'Done: the cut + Fur flies, and the reticle chop when the bar fills.' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : profName === 'Skinning' ? VAR36.Skinning.A : v() ? v()[K] : null;
+    if (o === VAR36.Skinning.A) { const n = Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15), N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * DT36 + .2 }); }
+    window.FSW = null; if (o && o.pre) { const st = state(), lo = S.p.span[0], n = Math.max(1, S.nx.lv - lo), x0 = W / 2 - 128, L = 230; window.FSW = o.pre({ hitAge: st.hitAge, x0, x1: x0 + L, tipX: x0 + clamp((st.v - lo) / n) * L }); }
+    barModule(top, FIT19[profName] || 'A', o); window.FSW = null; FISHR = false; } }; }
+Object.assign(FAM, { PA: r37('A'), PB: r37('B'), PC: r37('C'), PD: r37('D') });
+function r38(K) { const v = () => VAR38[profName]; return { get name() { return K + '. ' + (v() ? v()[K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return v() ? v()[K].desc + ' (Try “Five in a row”.)' : profName === 'Herbalism' ? 'Done: the Vine, and the Sickle sweep when the bar fills.' : profName === 'Skinning' ? 'Done: the cut + Fur flies, and the reticle chop when the bar fills.' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return v() ? v()[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { FISHR = true; FISHV = 'D'; let o = profName === 'Herbalism' ? VAR29.Herbalism.B : profName === 'Skinning' ? VAR36.Skinning.A : v() ? v()[K] : null;
+    if (o === VAR36.Skinning.A) { const n = Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15), N = n >= 4 ? n : 6; o = Object.assign({}, o, { finAt: CHOP35 + (N - 1) * DT36 + .2 }); }
+    window.FSW = null; window.FTEX = o && o.tex ? o.tex : null; if (o && o.pre) { const st = state(), lo = S.p.span[0], n = Math.max(1, S.nx.lv - lo), x0 = W / 2 - 128, L = 230; window.FSW = o.pre({ hitAge: st.hitAge, x0, x1: x0 + L, tipX: x0 + clamp((st.v - lo) / n) * L }); }
+    barModule(top, FIT19[profName] || 'A', o); window.FSW = null; window.FTEX = null; FISHR = false; } }; }
+Object.assign(FAM, { PA: r38('A'), PB: r38('B'), PC: r38('C'), PD: r38('D') });
+function r41(K) { return { get name() { return K + '. ' + (VAR41[profName] ? VAR41[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR41[profName] ? VAR41[profName][K].desc + ' (Sound on; try “Five in a row”.)' : 'One profession at a time: this round is Fishing. Others show their current look.'; },
+  get note() { return VAR41[profName] ? VAR41[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR41.Fishing; window.FREEL = fish ? VAR41.Fishing[K].reel : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r41('A'), PB: r41('B'), PC: r41('C'), PD: r41('D') });
+function r43(K) { return { get name() { return K + '. ' + (VAR43[profName] ? VAR43[profName][K].name : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Fishing only this round'); },
+  get desc() { return VAR43[profName] ? VAR43[profName][K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Fishing’s finale. Others show their current look.'; },
+  get note() { return VAR43[profName] ? VAR43[profName][K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { const keep = VAR39.Fishing, fish = profName === 'Fishing'; VAR39.Fishing = VAR43.Fishing; window.FREEL = fish ? false : null; const snd0 = S.p.snd; if (fish) S.p.snd = () => {}; try { r39(K).draw(top); } finally { VAR39.Fishing = keep; window.FREEL = null; S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r43('A'), PB: r43('B'), PC: r43('C'), PD: r43('D') });
+function r46(K) { const c = SET46[K]; return { get name() { return K + '. ' + (profName === 'Skinning' ? c.name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : 'Skinning only this round'); },
+  get desc() { return profName === 'Skinning' ? 'Skinning as picked (the cut + Fur flies, the reticle chop finale) with a new sound set. ' + c.desc + ' Long sessions: the notes vary, and after two skill-ups in a row each is a step quieter. (Sound on; try “Five in a row” and “Reaching the next unlock”.)' : 'One profession at a time: this round is Skinning’s sound. Others show their current look.'; },
+  get note() { return profName === 'Skinning' ? c.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName === 'Fishing') return r44('D').draw(top); if (profName === 'Herbalism') return r45('D').draw(top); if (profName !== 'Skinning') return r42('B').draw(top);
+    const n = Math.min(Math.max(1, S.nx.lv - S.p.span[0]), 15), N = n >= 4 ? n : 6, base = VAR36.Skinning.A, cc = { dt: DT36, rtl: false };
+    S.hits.forEach((h, i) => { S.fired['sk' + i] = true; }); ['r36r0', 'r36r1', 'r36d'].forEach(k => S.fired[k] = true); for (let j = 0; j < 15; j++) S.fired['c36' + j] = true;
+    const o = Object.assign({}, base, { finAt: CHOP35 + (N - 1) * DT36 + .2,
+      over(p, I) { base.over(p, I); onHits('sup46', i => c.up(i, fat45(i))); if (!I.done) return; const ts = S.age - S.closeAt, { n: m, at } = ch35(I, cc);
+        if (ts >= LOCK35) once('slk46', c.lock); for (let j = 0; j < m; j++) if (ts >= at(j)) once('sch46' + j, () => c.chop(j, m)); if (ts >= at(m - 1) + .12) once('sla46', c.last); } });
+    const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, FIT19[profName] || 'A', o); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r46('A'), PB: r46('B'), PC: r46('C'), PD: r46('D') });
+function r48(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? MIN48[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? MIN48[K].desc + ' Sounds follow the fatigue rule (soft and low, varied, stepping down after two in a row). (Try “Five in a row” and “Reaching the next unlock”.)' : 'One profession at a time: this round is Mining. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? MIN48[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', MIN48[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r48('A'), PB: r48('B'), PC: r48('C'), PD: r48('D') });
+function r49(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? ADD49[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? ADD49[K].desc + ' (Try “Five in a row”.)' : 'One profession at a time: this round is Mining. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? ADD49[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR49.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r49('A'), PB: r49('B'), PC: r49('C'), PD: r49('D') });
+function r50(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? FIN50[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? 'Mining as picked (the Blast). Reaching the next ore: ' + FIN50[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Mining’s finale. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? FIN50[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR50.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r50('A'), PB: r50('B'), PC: r50('C'), PD: r50('D') });
+function r51(K) { return { get name() { return K + '. ' + (profName === 'Mining' ? MIX51[K].name : profName === 'Fishing' ? 'Fishing (done)' : profName === 'Herbalism' ? 'Herbalism (done)' : profName === 'Skinning' ? 'Skinning (done)' : 'Mining only this round'); },
+  get desc() { return profName === 'Mining' ? 'Mining as picked (the Blast). Reaching the next ore: ' + MIX51[K].desc + ' (Pick “Reaching the next unlock” to see it.)' : 'One profession at a time: this round is Mining’s finale. Others show their current look.'; },
+  get note() { return profName === 'Mining' ? MIX51[K].name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Mining') return r47(K).draw(top); const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', VAR51.Mining[K]); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r51('A'), PB: r51('B'), PC: r51('C'), PD: r51('D') });
+
+// Round 98 (Alchemy base, 5 options; the user mixed A + C + E into round 99), moved out 2026-11-17. Uses the page's ALB98, hits98, liq98, emo98, HERB98, HUE98.
+function drop98(x, y, s, col) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y - s * 1.6); ctx.quadraticCurveTo(x + s, y - s * .2, x, y + s * .9); ctx.quadraticCurveTo(x - s, y - s * .2, x, y - s * 1.6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(x - s * .35, y - s * .3, s * .3, s * .5); }
+const AL98 = {
+  A: { name: 'Herbs dissolve', desc: 'A violet potion fills the bar. Each skill-up a real herb drops in at the front, splashes, shrinks and dissolves; its color blooms through the liquid and pushes the front forward, then fades into the violet.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(520 * semi(n), 0, .016 * v, .14, 'sine', 300 * semi(n)); noise(.02, .25, .004 * v, 900, .7, 'lowpass'); },
+    V: { grow(p, x0, y, L, f, t, I) { liq98(x0 - 2, I.tipX, y, '#c08aff', '#5a2aa0');
+        hits98(I).forEach(o => { if (o.t < 0) return; const k = 1 - clamp((o.t - .15) / 1), c = HERB98[(S.v0 + o.i) % 5][1], r = 6 + 34 * eOut(clamp(o.t / .6)); if (k <= 0) return;
+          const g = ctx.createRadialGradient(o.a, y, 0, o.a, y, r); g.addColorStop(0, hexA(c, .85 * k)); g.addColorStop(1, hexA(c, 0)); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 6, I.tipX - x0 + 2, 12);
+          for (let j = 0; j < 7; j++) { const sx = o.a + (j - 3) * 3.5 + o.t * 14 * (j % 2 ? 1 : -.6), sy = y - 3 + (j * 5) % 8 + o.t * 3; ctx.fillStyle = hexA(c, .9 * k); ctx.fillRect(sx, sy, 1.4, 1.4); } }); },
+      over(p, I) { const y = I.ly; hits98(I).forEach(o => { const [e, c] = HERB98[(S.v0 + o.i) % 5];
+        if (o.t < 0) { const u = (o.t + .45) / .45; emo98(e, o.a + 2, lerp(y - 40, y - 7, u * u), 14, (1 - u) * 1.6); return; }
+        once('al98a' + o.i, () => { spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 12, life: .4, col: '#e8d8ff' }); for (let k = 0; k < 5; k++) spawn({ x: o.a, y: y - 6, vx: (Math.random() - .5) * 60, vy: -40 - Math.random() * 40, g: 280, life: .45, size: 1.3, col: k % 2 ? c : '#e8d8ff' }); });
+        if (o.t < .55) emo98(e, o.a + 2, y - 7 + o.t * 10, 14 * (1 - o.t / .55 * .8), o.t * 2, 1 - o.t / .55); }); } } },
+  B: { name: 'Lead to gold', desc: 'The whole bar is dull lead; what you have earned is gold. Each skill-up a thin transmutation circle turns over the new stretch, a white-hot front sweeps it from lead to gold, a glint lands on the new front and gold dust lifts off.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(392 * semi(n), 0, .012 * v, .5, 'triangle', null, .03); tone(784 * semi(n), .32, .009 * v, .7, 'sine'); },
+    V: { grow(p, x0, y, L, f, t, I) { liq98(x0 - 2, I.x1 + 2, y, '#8a8a94', '#3e3e46'); ctx.fillStyle = 'rgba(20,20,26,.35)'; for (let x = x0; x < I.x1; x += 3) if (rnd53(x * .7) > .6) ctx.fillRect(x, y - 4 + rnd53(x * 1.3) * 8, 1, 1);
+        liq98(x0 - 2, I.tipX, y, '#fff0b0', '#b07a1a'); const sx = x0 + ((t * 60) % (L + 60)) - 30; if (sx < I.tipX) { const g = ctx.createLinearGradient(sx - 14, 0, sx + 14, 0); g.addColorStop(0, 'rgba(255,255,240,0)'); g.addColorStop(.5, 'rgba(255,255,240,.45)'); g.addColorStop(1, 'rgba(255,255,240,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 14, y - 6, Math.min(28, I.tipX - sx + 14), 12); }
+        hits98(I).forEach(o => { if (o.t < 0 || o.t > .8) return; const k = 1 - o.t / .8; ctx.fillStyle = `rgba(255,250,220,${.5 * k})`; ctx.fillRect(o.a, y - 6, I.tipX - o.a, 12);
+          const g = ctx.createRadialGradient(I.tipX, y, 0, I.tipX, y, 10); g.addColorStop(0, `rgba(255,255,255,${k})`); g.addColorStop(1, 'rgba(255,240,180,0)'); ctx.fillStyle = g; ctx.fillRect(I.tipX - 10, y - 6, 20, 12); }); },
+      over(p, I) { const y = I.ly; hits98(I).forEach(o => { const u = (o.t + .3) / 1, al = clamp(u / .15) * clamp((.9 - u) / .25); if (al > 0) { const mx = (o.a + o.b) / 2, r = 11 + eOut(clamp(u)) * 5;
+          ctx.save(); ctx.strokeStyle = `rgba(255,211,106,${.8 * al})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(mx, y, r, 0, 7); ctx.stroke(); ctx.strokeStyle = `rgba(255,240,200,${.5 * al})`; ctx.beginPath(); ctx.arc(mx, y, r - 3, 0, 7); ctx.stroke();
+          for (let q = 0; q < 4; q++) { const an = q * Math.PI / 2 + u * 2.4; ctx.beginPath(); ctx.moveTo(mx + Math.cos(an) * (r - 3), y + Math.sin(an) * (r - 3)); ctx.lineTo(mx + Math.cos(an) * (r + 3), y + Math.sin(an) * (r + 3)); ctx.stroke(); } ctx.restore(); }
+        if (o.t >= .42) once('al98b' + o.i, () => { spawn({ x: o.b, y: y - 5, size: 6, shape: 'star', life: .5, col: '#fff8d0' }); for (let k = 0; k < 6; k++) spawn({ x: lerp(o.a, o.b, Math.random()), y: y - 6, vx: (Math.random() - .5) * 16, vy: -14 - Math.random() * 18, g: -8, life: .9, size: 1, col: k % 2 ? '#ffd36a' : '#fff4c0' }); }); }); } } },
+  C: { name: 'Titration flash', desc: 'One drop falls into the front; the whole potion flashes white and turns to its next color from where the drop landed outward, then the front steps on. The colors run violet, blue, teal, green, lime to gold at the recipe, and a soft glow of the new color spills past the bar.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(660 * semi(n), 0, .014 * v, .1, 'sine', 420 * semi(n)); tone(262 * semi(n), .03, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), .03, .007 * v, .8, 'sine', null, .08); },
+    V: { grow(p, x0, y, L, f, t, I) { const H = j => HUE98[clamp(j, 0, 5)], A = hits98(I).filter(o => o.t >= 0 && o.t < 1).pop();
+        if (!A) { const c = H(Math.floor(I.v + 1e-6) - I.lo); liq98(x0 - 2, I.tipX, y, mix(c, '#ffffff', .35), mix(c, '#000000', .45)); return; }
+        const c0 = H(S.v0 + A.i - I.lo), c1 = H(S.v0 + A.i + 1 - I.lo), d = 420 * A.t; liq98(x0 - 2, I.tipX, y, mix(c0, '#ffffff', .35), mix(c0, '#000000', .45));
+        ctx.save(); ctx.beginPath(); ctx.rect(A.a - d, y - 6, 2 * d, 12); ctx.clip(); liq98(x0 - 2, I.tipX, y, mix(c1, '#ffffff', .35), mix(c1, '#000000', .45)); const w = 1 - clamp(A.t / .35); ctx.fillStyle = `rgba(255,255,255,${.75 * w})`; ctx.fillRect(x0 - 2, y - 6, I.tipX - x0 + 2, 12); ctx.restore(); },
+      over(p, I) { const y = I.ly; hits98(I).forEach(o => { const c1 = HUE98[clamp(S.v0 + o.i + 1 - I.lo, 0, 5)];
+        if (o.t < 0) { const u = (o.t + .45) / .45; drop98(o.a, lerp(y - 42, y - 7, u * u), 3, mix(c1, '#ffffff', .4)); return; }
+        once('al98c' + o.i, () => { spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 10, life: .35, col: '#ffffff' }); for (let k = 0; k < 3; k++) spawn({ x: o.a, y: y - 6, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 30, g: 300, life: .4, size: 1.2, col: '#ffffff' }); });
+        const gl = 1 - clamp(o.t / .9); if (gl > 0) { ctx.save(); ctx.shadowColor = c1; ctx.shadowBlur = 14; ctx.strokeStyle = hexA(c1, .7 * gl); ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(I.x0 - 3, y - 7, I.tipX - I.x0 + 4, 14, 4); ctx.stroke(); ctx.restore(); } }); } } },
+  D: { name: 'Layers settle', desc: 'Inside, the potion stands in three layers: dark below, violet, a glowing pale top. Each skill-up the bar sloshes, the liquid clouds over and a few drops jump the rim; then it settles back into layers (the tilt easing out, straight lines) one stretch longer.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(0, .35, .008 * v, 500, .7, 'lowpass'); tone(196 * semi(n), .5, .01 * v, .6, 'sine', null, .1); },
+    V: { shake(I) { const o = hits98(I).filter(o => o.t > -.1 && o.t < .55).pop(); return o ? [Math.sin((o.t + .1) * 28) * 2.4 * (1 - (o.t + .1) / .65), 0] : [0, 0]; },
+      grow(p, x0, y, L, f, t, I) { const xb = I.tipX; if (xb <= x0) return; const o = hits98(I).filter(o => o.t > -.1 && o.t < 1.3).pop(), s = o ? eOut(clamp((o.t - .15) / .9)) : 1, cloud = o ? clamp((o.t + .1) / .15) * (1 - s) : 0;
+        const tilt = o ? Math.sin((o.t + .1) * 14) * .09 * (1 - s) : 0, cx = (x0 + xb) / 2, yy = (b, x) => b + (x - cx) * tilt;
+        ctx.fillStyle = '#f0dcff'; ctx.fillRect(x0 - 2, y - 6, xb - x0 + 2, 12);
+        const band = (b, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0 - 2, yy(b, x0 - 2)); ctx.lineTo(xb, yy(b, xb)); ctx.lineTo(xb, y + 7); ctx.lineTo(x0 - 2, y + 7); ctx.closePath(); ctx.fill(); };
+        band(y - 2, '#9a5ae0'); band(y + 2, '#3a1a6a');
+        ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 2, yy(y - 2, x0 - 2)); ctx.lineTo(xb, yy(y - 2, xb)); ctx.stroke();
+        if (cloud > 0) { ctx.fillStyle = `rgba(150,110,190,${.9 * cloud})`; ctx.fillRect(x0 - 2, y - 6, xb - x0 + 2, 12); } },
+      over(p, I) { const y = I.ly; hits98(I).forEach(o => { if (o.t >= -.05) once('al98d' + o.i, () => { for (let k = 0; k < 4; k++) spawn({ x: I.tipX - 4 - k * 5, y: y - 6, vx: (Math.random() - .3) * 40, vy: -45 - Math.random() * 35, g: 300, life: .55, size: 1.4, col: k % 2 ? '#d0a8ff' : '#f0dcff' }); });
+        const u = clamp((o.t - .9) / .4); if (u > 0 && u < 1) { const x = lerp(I.x0, I.tipX, u); ctx.fillStyle = `rgba(255,255,255,${.8 * Math.sin(Math.PI * u)})`; ctx.fillRect(x - 6, y - 6, 12, 1.5); } }); } } },
+  E: { name: 'Grind powder', desc: 'The bar fills with ground powder, not liquid. Each skill-up a grinding ring turns above the front (the pestle shown only by its circling streak), fine powder pours from under it into the bar, the front heaps forward and a little dust puffs off.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(0, .14, .007 * v, 1400, 1.5, 'bandpass'); noise(.17, .14, .006 * v, 1250, 1.5, 'bandpass'); tone(330 * semi(n), .38, .009 * v, .25, 'triangle'); },
+    V: { grow(p, x0, y, L, f, t, I) { liq98(x0 - 2, I.tipX, y, '#e8dcf8', '#8a6ab8'); for (let x = x0; x < I.tipX; x += 2) { const r = rnd53(x * .9); ctx.fillStyle = r > .7 ? 'rgba(255,255,255,.6)' : r < .25 ? 'rgba(60,30,100,.35)' : 'rgba(180,150,220,.5)'; ctx.fillRect(x, y - 5 + rnd53(x * 2.1) * 10, 1, 1); }
+        hits98(I).forEach(o => { if (o.t < 0 || o.t > .7) return; ctx.fillStyle = `rgba(255,255,255,${.35 * (1 - o.t / .7)})`; ctx.fillRect(o.a, y - 6, I.tipX - o.a, 12); }); },
+      over(p, I) { const y = I.ly; hits98(I).forEach(o => { const gx = lerp(o.a, o.b, .5), gy = y - 13, al = clamp((o.t + .45) / .1) * clamp((.45 - o.t) / .15);
+        if (al > 0) { ctx.save(); ctx.strokeStyle = `rgba(232,216,255,${.35 * al})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(gx, gy, 5, 0, 7); ctx.stroke(); const an = (o.t + .45) * 20;
+          ctx.strokeStyle = `rgba(255,255,255,${.9 * al})`; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(gx, gy, 5, an, an + 1.8); ctx.stroke(); ctx.restore(); }
+        for (let q = 0; q < 16; q++) { const age = o.t - (-.3 + q * .04); if (age <= 0 || age > .3) continue; const gyy = gy + 4 + age * age * 200; if (gyy > y - 5) continue; ctx.fillStyle = q % 3 ? '#e8dcf8' : '#ffffff'; ctx.fillRect(gx + (skHash(q + o.i * 17) - .5) * 9, gyy, 1.3, 1.3); }
+        if (o.t >= .35) once('al98e' + o.i, () => { for (let k = 0; k < 6; k++) spawn({ x: o.b - 2, y: y - 6, vx: (k - 2.5) * 12, vy: -8 - Math.random() * 10, g: -4, life: .7, size: 1.6, col: 'rgba(232,220,248,.7)' }); }); }); } } },
+};
+function r98(K) { const Z = AL98[K];
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Alchemy’s bar counts to the next recipe. Try all three moments; the sound is a gentle placeholder.)'; }, get note() { return Z.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Alchemy' || S.p !== ALB98) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = ALB98; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Alchemy = keep; } }
+      S.hits.forEach((h, i) => { if (S.age >= h + HIT) once('al98s' + i, () => Z.snd(i)); }); barModule(top, 'A', Z.V); } }; }
+Object.assign(FAM, { PA: r98('A'), PB: r98('B'), PC: r98('C'), PD: r98('D'), PE: r98('E') }); delete FAM.PF; delete FAM.PG; delete FAM.PH;
+
+// Round 100 (Alchemy: ways to grind the herb; the user took B Wheel grinder into round 101), moved out 2026-11-17. Uses the page's r99 (cfg.grind hook), fall100, crumb100, emo98.
+const GR100 = {
+  B: { name: 'Wheel grinder', desc: 'A small stone wheel on a wooden axle rolls back and forth along the bar’s top edge (the bar is its trough) over the herb: three passes, the herb flattening on each, green crumbs dropping into the potion; then the flash.',
+    grind(o, I, e, hc, y) { const top = y - 6; if (fall100(o, e, o.a, top - 3, y)) return;
+      const k = clamp((o.t + .38) / .38), al = clamp((o.t + .45) / .08) * clamp((.1 - o.t) / .12);
+      if (k < 1) { ctx.save(); ctx.translate(o.a, top - 3 + k * 2); ctx.scale(1 + k * .3, 1 - k * .75); emo98(e, 0, 0, 13, 0, 1 - k * .5); ctx.restore(); }
+      if (al <= 0) return; const ph = clamp((o.t + .38) / .38) * 3 * Math.PI, wx = o.a + 12 * Math.cos(ph), r = 7, wy = top - r;
+      ctx.save(); ctx.globalAlpha *= al; ctx.strokeStyle = '#7a5230'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(wx - 13, wy); ctx.lineTo(wx + 13, wy); ctx.stroke();
+      const g = ctx.createRadialGradient(wx - 2, wy - 2, 1, wx, wy, r); g.addColorStop(0, '#d8d0c8'); g.addColorStop(1, '#6e6660'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(wx, wy, r, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(40,34,30,.8)'; ctx.lineWidth = 1; const an = (wx - o.a) / r; for (let q = 0; q < 2; q++) { const a = an + q * Math.PI / 2; ctx.beginPath(); ctx.moveTo(wx - Math.cos(a) * r * .8, wy - Math.sin(a) * r * .8); ctx.lineTo(wx + Math.cos(a) * r * .8, wy + Math.sin(a) * r * .8); ctx.stroke(); }
+      ctx.fillStyle = '#c8955a'; ctx.beginPath(); ctx.arc(wx, wy, 1.6, 0, 7); ctx.fill(); ctx.restore();
+      for (let q = 0; q < 3; q++) if (o.t >= -.38 + (q * 2 + 1) / 6 * .38) once('al100b' + o.i + q, () => { crumb100(o.a, top + 1, hc, 4); const v = fat45(o.i); noise(0, .1, .006 * v, 500, .8, 'lowpass'); noise(.02, .03, .004 * v, 1600, 2, 'bandpass', true); }); } },
+  C: { name: 'Millstones', desc: 'Two flat millstones sit above the front. The herb drops into the hole in the top stone; the top stone turns (its handle peg sweeps across, the grooves on its edge slide) and fine powder spills from the gap between the stones on both sides into the potion; then the flash.',
+    grind(o, I, e, hc, y) { const cx = o.a, sy = y - 13; if (fall100(o, e, cx, sy - 6, y)) { } const al = clamp((o.t + .55) / .08) * clamp((.1 - o.t) / .12); if (al <= 0) return;
+      const turn = clamp((o.t + .38) / .38), ang = turn * 2.5 * Math.PI; ctx.save(); ctx.globalAlpha *= al;
+      const stone = (y0, h, c0, c1) => { const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, c0); g.addColorStop(1, c1); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(cx - 12, y0, 24, h, 2); ctx.fill(); };
+      stone(sy, 4, '#a49a90', '#6a625a'); stone(sy - 5, 4.5, '#cec4ba', '#8a8078');
+      ctx.fillStyle = 'rgba(40,34,30,.7)'; for (let q = 0; q < 6; q++) { const a = ang + q * Math.PI / 3, c = Math.cos(a); if (Math.sin(a) < 0) continue; ctx.fillRect(cx + c * 11 - .5, sy - 4.5, 1, 3.5); }
+      const px = cx + Math.cos(ang) * 8, front = Math.sin(ang) > 0; ctx.strokeStyle = front ? '#8a5a30' : 'rgba(138,90,48,.6)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px, sy - 5); ctx.lineTo(px, sy - 10); ctx.stroke();
+      ctx.fillStyle = '#3a302a'; ctx.fillRect(cx - 2, sy - 5, 4, 1.5); ctx.restore();
+      if (o.t > -.38 && o.t < -.3) emo98(e, cx, sy - 6, 13 * (1 - (o.t + .38) / .08 * .7), 0, 1 - (o.t + .38) / .08);
+      for (let q = 0; q < 16; q++) { const age = o.t - (-.32 + q * .02); if (age <= 0 || age > .3) continue; const sd = q % 2 ? 1 : -1, xx = cx + sd * (12 + age * 14), yy = sy + 1 + age * age * 120; if (yy > y - 5) continue; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(xx, yy, 1.2, 1.2); }
+      if (o.t >= -.38) once('al100c' + o.i, () => { const v = fat45(o.i); noise(0, .38, .007 * v, 260, .9, 'lowpass'); noise(.05, .3, .003 * v, 1800, 1.5, 'bandpass'); }); } },
+  D: { name: 'Sieve', desc: 'A shallow sieve tray (a straight mesh with low sides) hangs above the front. The herb lands in it, the tray shakes side to side and the ground herb sifts through as an even fine rain into the potion, the herb shrinking away; then the flash.',
+    grind(o, I, e, hc, y) { const sy = y - 15; if (fall100(o, e, o.a, sy - 4, y)) { } const al = clamp((o.t + .55) / .08) * clamp((.1 - o.t) / .12); if (al <= 0) return;
+      const sh = o.t > -.38 && o.t < 0 ? Math.sin((o.t + .38) * 50) * 3 : 0, cx = o.a + sh, k = clamp((o.t + .38) / .38);
+      if (o.t >= -.38 && k < 1) emo98(e, cx, sy - 4, 13 * (1 - k * .85), sh * .1, 1 - k * .6);
+      ctx.save(); ctx.globalAlpha *= al; ctx.strokeStyle = '#a07a50'; ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx - 13, sy - 5); ctx.lineTo(cx - 12, sy); ctx.lineTo(cx + 12, sy); ctx.lineTo(cx + 13, sy - 5); ctx.stroke();
+      ctx.strokeStyle = 'rgba(232,220,200,.75)'; ctx.lineWidth = .8; for (let x = -10; x <= 10; x += 2.5) { ctx.beginPath(); ctx.moveTo(cx + x, sy - .5); ctx.lineTo(cx + x, sy + 1.5); ctx.stroke(); } ctx.restore();
+      if (o.t > -.36 && o.t < .02) for (let q = 0; q < 22; q++) { const age = ((o.t + .36 + q * .037) % .16); const xx = cx + (skHash(q + o.i * 31) - .5) * 22, yy = sy + 2 + age * 50 + age * age * 300; if (yy > y - 5) continue; ctx.fillStyle = q % 3 ? hexA(hc, .9) : 'rgba(255,255,255,.8)'; ctx.fillRect(xx, yy, 1, 1); }
+      if (o.t >= -.38) once('al100d' + o.i, () => { const v = fat45(o.i); for (let q = 0; q < 4; q++) noise(q * .09, .07, .004 * v, 2400, 1.2, 'bandpass'); }); } },
+};
+function r100(K) { if (K === 'A') { const A = r99('A'); return { get name() { return 'A. Grinding ring (round 99 A)'; }, get desc() { return 'The current pick: ' + A.desc; }, get note() { return A.note; }, draw: top => A.draw(top) }; }
+  const G = GR100[K]; CFG99['G' + K] = Object.assign({}, CFG99.A, { name: G.name, desc: G.desc, grind: G.grind }); const R = r99('G' + K); return { get name() { return K + '. ' + G.name; }, get desc() { return R.desc; }, get note() { return R.note; }, draw: top => R.draw(top) }; }
+Object.assign(FAM, { PA: r100('A'), PB: r100('B'), PC: r100('C'), PD: r100('D') });
+
+// Round 101 W101 entries B-D (Own trough, One rolling pass, Edge-runner; the user kept A Edge roll), moved out 2026-11-17. They go inside the page's W101 object.
+  B: { name: 'Own trough', desc: 'A shallow wooden trough settles above the front; the herb lands in its dip with a squash and the wheel rolls back and forth along the trough’s curve over it (three passes, the herb flattening each time); powder slides off the trough’s ends into the potion; the trough lifts away, then the flash.',
+    run(o, I, e, hc, y) { const cx = o.a, by = y - 12, al = clamp((o.t + 1.05) / .12) * clamp((.02 - o.t) / .12), T = [0, 1, 2].map(k => -.62 + (k * 2 + 1) / 6 * .5), crush = steps101(o.t, T);
+      if (al > 0) { ctx.save(); ctx.globalAlpha *= al; ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx - 22, by - 7); ctx.quadraticCurveTo(cx, by + 7, cx + 22, by - 7); ctx.stroke(); ctx.restore(); }
+      herb101(o, e, hc, cx, by - 1, crush, y);
+      const ph = clamp((o.t + .62) / .5) * 3 * Math.PI, wx = cx + 15 * Math.cos(ph), r = 7, wy = by - 1.5 - 7 * Math.pow((wx - cx) / 22, 2) - r;
+      wheel101(wx, wy, r, (wx - cx) / r, clamp((o.t + .78) / .1) * clamp((-.06 - o.t) / .1));
+      [-1, 1].forEach(sd => { for (let q = 0; q < 8; q++) { const age = o.t - (-.5 + q * .05); if (age <= 0 || age > .28) continue; const xx = cx + sd * (22 + age * 10), yy = by - 7 + age * age * 220; if (yy > y - 5) continue; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(xx, yy, 1.4, 1.4); } });
+      return T; } },
+  C: { name: 'One rolling pass', desc: 'The herb lands at the old front; the wheel rolls in from behind, crushes it flat in one heavy pass and keeps rolling to the new front, smearing a green line of herb along the top of the new stretch that sinks in; then the flash runs from where the herb was.',
+    run(o, I, e, hc, y) { const top = y - 6, r = 9, wy = top - r, T = [-.5], crush = steps101(o.t, T) ;
+      const wx = o.t < -.5 ? lerp(o.a - 34, o.a, eOut(clamp((o.t + .75) / .25))) : lerp(o.a, o.b, eOut(clamp((o.t + .5) / .38)));
+      herb101(o, e, hc, o.a, top, crush, y);
+      if (o.t > -.5 && o.t < .05) { const tr = Math.max(o.a, wx - 4), al = clamp((.05 - o.t) / .15); ctx.fillStyle = hexA(hc, .8 * al); ctx.fillRect(o.a, top - 1.5, tr - o.a, 2.5); }
+      wheel101(wx, wy, r, (wx - o.a) / r, clamp((o.t + .8) / .1) * clamp((.04 - o.t) / .1)); return T; } },
+  D: { name: 'Edge-runner', desc: 'A stone wheel on an arm circles a short post standing on the front (seen from the side it swings left and right, bigger as it comes toward you); the herb lies in a flat basin on the bar and is crushed each time the wheel passes in front (twice); then the flash.',
+    run(o, I, e, hc, y) { const top = y - 6, al = clamp((o.t + .95) / .12) * clamp((.02 - o.t) / .12), ph = clamp((o.t + .7) / .6) * 4 * Math.PI - Math.PI / 2, dep = Math.sin(ph), wx = o.a + 15 * Math.cos(ph), sc = 1 + dep * .22, r = 7 * sc;
+      const T = [0, 1].map(k => -.7 + (k + .5) / 2 * .6), crush = steps101(o.t, T);
+      const post = () => { ctx.save(); ctx.globalAlpha *= al; ctx.strokeStyle = '#7a5230'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(o.a, top - 1); ctx.lineTo(o.a, top - 24); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(o.a, top - 12); ctx.lineTo(wx, top - r); ctx.stroke(); ctx.restore(); };
+      if (al > 0) { ctx.save(); ctx.globalAlpha *= al; ctx.fillStyle = 'rgba(160,140,120,.8)'; ctx.fillRect(o.a - 20, top - 1.5, 40, 1.5); ctx.restore(); }
+      herb101(o, e, hc, o.a, top - 1, crush, y);
+      if (dep < 0) { wheel101(wx, top - r, r, ph * 2, al, 0); post(); } else { post(); wheel101(wx, top - r, r, ph * 2, al, 0); } return T; } },
+
+// Moved out 2026-11-17 (round 103 prep): round 99 (r99, CFG99, hits99; the herb-grind-flash mix), round 100's fall100, round 102's ring102 + W102 + r102 (Edge roll looks), round 83's LW83 (Unrolling hide).
+const LW83 = {
+  A: { name: 'Unrolling hide', desc: 'A rolled-up hide sits at the front of the fill, poking out over the bar. Each skill-up it rolls forward (the rolled layers turn), lays the hide down behind it, and the new piece flops flat with a soft leather slap: a light flash, a small hop of the roll, a puff of dust. The roll gets thinner as you near the next rank.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(0, .3, .01 * v, 260, .7, 'lowpass'); drum46(120 * semi(n / 2), LAND83, .03 * v); noise(LAND83, .06, .022 * v, 900, .8, 'lowpass', true); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 1); const o = last83(I);
+        if (o && o.t > LAND83 && o.t < LAND83 + .4) { const k = 1 - (o.t - LAND83) / .4; ctx.fillStyle = `rgba(255,235,200,${.35 * k})`; ctx.fillRect(o.a - 3, y - 6, I.tipX - o.a + 3, 12); } },
+      shake(I) { const o = last83(I); if (!o || o.t < LAND83 || o.t > LAND83 + .15) return [0, 0]; return [0, 1.2 * (1 - (o.t - LAND83) / .15)]; },
+      over(p, I) { const y = I.ly, r = lerp(8.5, 5.5, I.f), o = last83(I); let hop = 0;
+        if (o && o.t >= LAND83) { const u = o.t - LAND83; hop = Math.max(0, Math.sin(u * 14)) * 2.5 * Math.exp(-u * 7);
+          once('lwA' + o.i, () => { for (let k = 0; k < 7; k++) spawn({ x: lerp(o.a - 6, I.tipX - r, k / 6), y: y + 5, vx: (Math.random() - .5) * 40, vy: -15 - Math.random() * 25, g: 50, life: .55, size: 1, col: 'rgba(225,195,150,.8)' }); }); }
+        const cx = I.tipX, cy = y + 6 - r - hop, ang = (I.tipX - I.x0) / r;
+        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(cx + 1, y + 6.5, r * .9, 1.6, 0, 0, 7); ctx.fill();
+        const g = ctx.createRadialGradient(cx - r * .35, cy - r * .4, 1, cx, cy, r); g.addColorStop(0, LWC.hi); g.addColorStop(.55, LWC.lt); g.addColorStop(1, LWC.dk);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(70,40,15,.75)'; ctx.lineWidth = .9; ctx.beginPath(); for (let a = 0; a < 5 * Math.PI; a += .2) { const rr = r * (.15 + .8 * a / (5 * Math.PI)); ctx.lineTo(cx + Math.cos(a + ang) * rr, cy + Math.sin(a + ang) * rr); } ctx.stroke(); } } },
+};
+// ---------- round 99 (2026-11-17): Alchemy base, "I like C's animation; mix A and C, and mix E in: grinding the herbs into the mixture". Each skill-up: a herb drops into a grinding ring
+// above the front, is ground to powder that pours in, and the potion flashes to its next color (98 C). Four ways to join them: A In order (the hue ladder), B The herb's own color,
+// C Ground on the surface (the ring sits on the potion), D Ground along the new stretch (the ring travels, the flash follows the powder) ----------
+const hits99 = I => S.hits.map((h, i) => ({ i, t: S.age - h - HIT, a: I.X(S.v0 + i), b: I.X(S.v0 + i + 1) })).filter(o => o.t > -.55 && o.t < 1.4);
+const CFG99 = {
+  A: { name: 'Herb, ground, flash', hue: 'ladder', gy: -13, flash: 'out', desc: 'In order: a herb drops into a grinding ring just above the front, the ring’s streak circles and the herb shrinks to powder that pours into the potion; where it lands the potion flashes white and turns its next color outward (violet, blue, teal, green, lime, gold at the recipe), the front steps on and a glow spills past the bar.' },
+  B: { name: 'The herb’s own color', hue: 'herb', gy: -13, flash: 'out', desc: 'As A, but the potion turns the color of the herb that was ground (green, pink, gold...), so each skill-up you see which herb went in; the flash and glow are that herb’s color.' },
+  C: { name: 'Ground on the surface', hue: 'ladder', gy: -3, flash: 'out', desc: 'As A, but the grinding happens on the potion itself: the herb lands on the surface at the front, the ring grinds it in place half sunk in the liquid, and the flash spreads from under it.' },
+  D: { name: 'Ground along the new stretch', hue: 'ladder', gy: -13, flash: 'trail', desc: 'As A, but the grinding ring travels from the old front to the new one while it grinds, laying a line of powder along the new stretch; the new color follows the powder instead of spreading from one point.' },
+};
+function r99(K) { const cfg = CFG99[K];
+  // the potion's color after hit index i (j = i + 1); before any hit: the color for the current level
+  const hueAt = (I, n) => cfg.hue === 'herb' ? (n <= 0 ? HUE98[0] : HERB98[(I.lo + n - 1) % 5][1]) : HUE98[clamp(n, 0, 5)];
+  const ringX = (o) => cfg.flash === 'trail' ? lerp(o.a, o.b, clamp((o.t + .3) / .3)) : o.a;
+  const V = {
+    grow(p, x0, y, L, f, t, I) { const A = hits99(I).filter(o => o.t >= 0 && o.t < 1).pop(), lv = n => mix(n, '#ffffff', .35), dk = n => mix(n, '#000000', .45);
+      if (!A) { const c = hueAt(I, Math.floor(I.v + 1e-6) - I.lo); liq98(x0 - 2, I.tipX, y, lv(c), dk(c)); return; }
+      const n0 = S.v0 + A.i - I.lo, c0 = hueAt(I, n0), c1 = hueAt(I, n0 + 1); liq98(x0 - 2, I.tipX, y, lv(c0), dk(c0));
+      ctx.save(); ctx.beginPath(); if (cfg.flash === 'trail') { const xs = lerp(A.a, x0 - 2, eOut(clamp(A.t / .4))); ctx.rect(xs, y - 6, I.tipX + 2 - xs, 12); } else { const d = 420 * A.t; ctx.rect(A.a - d, y - 6, 2 * d, 12); } ctx.clip();
+      liq98(x0 - 2, I.tipX, y, lv(c1), dk(c1)); const w = 1 - clamp(A.t / .35); ctx.fillStyle = `rgba(255,255,255,${.75 * w})`; ctx.fillRect(x0 - 2, y - 6, I.tipX - x0 + 2, 12); ctx.restore();
+      if (cfg.flash === 'trail') hits99(I).forEach(o => { if (o.t < -.3 || o.t > .6) return; const xe = ringX(o), al = 1 - clamp(o.t / .6); ctx.fillStyle = hexA(HERB98[(S.v0 + o.i) % 5][1], .8 * al); for (let x = o.a; x < xe; x += 2) ctx.fillRect(x, y - 5 + rnd53(x * 1.7) * 3, 1.3, 1.3); }); },
+    over(p, I) { const y = I.ly; hits99(I).forEach(o => { const [e, hc] = HERB98[(S.v0 + o.i) % 5], c1 = hueAt(I, S.v0 + o.i + 1 - I.lo), gx = ringX(o), gy = y + cfg.gy, onS = cfg.gy > -6;
+      if (cfg.grind) cfg.grind(o, I, e, hc, y); else {
+      // 1. the herb falls into the ring (-.55..-.3)
+      if (o.t < -.3) { const u = (o.t + .55) / .25; emo98(e, o.a + 1, lerp(y - 32, gy, u * u), 13, (1 - u) * 1.6); }
+      // 2. the ring grinds it (-.32..0): its streak circles, the herb shrinks, powder pours
+      const al = clamp((o.t + .36) / .06) * clamp((.08 - o.t) / .1);
+      if (al > 0) { const k = clamp((o.t + .3) / .3); if (k < 1) emo98(e, gx, gy, 13 * (1 - k * .85), k * 6, 1 - k * .6);
+        ctx.save(); ctx.strokeStyle = `rgba(232,216,255,${.35 * al})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(gx, gy, 6, 0, 7); ctx.stroke(); const an = (o.t + .36) * 22;
+        ctx.strokeStyle = `rgba(255,255,255,${.9 * al})`; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(gx, gy, 6, an, an + 1.8); ctx.stroke(); ctx.restore(); }
+      if (!onS) for (let q = 0; q < 14; q++) { const age = o.t - (-.28 + q * .02); if (age <= 0 || age > .3) continue; const yy = gy + 5 + age * age * 200; if (yy > y - 5) continue; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(gx + (skHash(q + o.i * 17) - .5) * 8, yy, 1.3, 1.3); }
+      else if (o.t > -.3 && o.t < .1) for (let q = 0; q < 6; q++) { const an = q + (o.t + .3) * 12; ctx.fillStyle = hexA(hc, .9); ctx.fillRect(gx + Math.cos(an) * 8, gy + Math.sin(an) * 3, 1.3, 1.3); }
+      if (o.t >= -.3) once('al99g' + o.i, () => { const v = fat45(o.i), n = pick45(o.i, 4); tone(520 * semi(n), 0, .012 * v, .12, 'sine', 320 * semi(n)); noise(.02, .28, .006 * v, 1300, 1.4, 'bandpass'); });
+      }
+      // 3. the flash (t >= 0): ring, droplets, glow past the bar
+      if (o.t >= 0) once('al99f' + o.i, () => { const v = fat45(o.i), n = pick45(o.i, 4); tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08);
+        spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 10, life: .35, col: '#ffffff' }); for (let k = 0; k < 3; k++) spawn({ x: o.a, y: y - 6, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 30, g: 300, life: .4, size: 1.2, col: '#ffffff' }); });
+      const gl = o.t >= 0 ? 1 - clamp(o.t / .9) : 0; if (gl > 0) { ctx.save(); ctx.shadowColor = c1; ctx.shadowBlur = 14; ctx.strokeStyle = hexA(c1, .7 * gl); ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(I.x0 - 3, y - 7, I.tipX - I.x0 + 4, 14, 4); ctx.stroke(); ctx.restore(); } }); } };
+  return { get name() { return K + '. ' + cfg.name; }, get desc() { return cfg.desc + ' (Try all three moments; the sound is a gentle placeholder.)'; }, get note() { return cfg.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Alchemy' || S.p !== ALB98) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = ALB98; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r99('A'), PB: r99('B'), PC: r99('C'), PD: r99('D') }); delete FAM.PE; delete FAM.PF; delete FAM.PG; delete FAM.PH;
+const fall100 = (o, e, x, y1, y) => { if (o.t < -.38) { const u = (o.t + .55) / .17; emo98(e, x, lerp(y - 32, y1, clamp(u) * clamp(u)), 13, (1 - u) * 1.6); return true; } return false; };
+function ring102(x, y, r, ang, al) { if (al <= 0) return; ctx.save(); ctx.globalAlpha *= al;
+  ctx.strokeStyle = 'rgba(255,211,106,.85)'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - r - 7, y); ctx.lineTo(x + r + 7, y); ctx.stroke();
+  ctx.shadowColor = '#d0a8ff'; ctx.shadowBlur = 8; ctx.strokeStyle = '#f4ecff'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(208,168,255,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .45, 0, 7); ctx.stroke();
+  ctx.fillStyle = '#ffffff'; star4(x + Math.cos(ang) * r, y + Math.sin(ang) * r, 3.2, ang); ctx.restore(); }
+const W102 = {
+  B: { name: 'Carved stone', desc: 'The same roll, drawn properly: a lit stone wheel (light from the top left, a dark rim, chiselled notches turning with it, a wooden hub) on a turned wooden axle with knobbed ends, a soft shadow under it and faint motion ghosts; each pass squeezes green juice flecks and a few glints out of the herb.',
+    run(o, I, e, hc, y) { const top = y - 6, r = 8.5, crush = steps101(o.t, T102); herb101(o, e, hc, o.a, top, crush, y); const wx = wx102(o), al = al102(o);
+      [.05, .025].forEach((d, k) => { const w0 = wx102(Object.assign({}, o, { t: o.t - d })); if (Math.abs(w0 - wx) > 1.5) { ctx.save(); ctx.globalAlpha *= .12 * (k + 1) * al; ctx.fillStyle = '#c8beb4'; ctx.beginPath(); ctx.arc(w0, top - r, r, 0, 7); ctx.fill(); ctx.restore(); } });
+      carved102(wx, top - r, r, (wx - o.a) / r, al); return T102; },
+    fx(o, y, hc) { for (let k = 0; k < 6; k++) spawn({ x: o.a + (Math.random() - .5) * 8, y: y - 7, vx: (Math.random() - .5) * 50, vy: -30 - Math.random() * 40, g: 320, life: .45, size: 1.1, col: k % 3 ? hc : '#e8ffe0' }); spawn({ x: o.a, y: y - 9, size: 3, shape: 'star', life: .3, col: '#ffffff' }); crumb100(o.a, y - 5, hc, 3, 16); } },
+  C: { name: 'Ring and glint', desc: 'No drawn wheel at all: a bright violet-white rim ring rolls on the edge with a glint riding its rim (so you see it turn), a thin gold axle line through it; each pass a white impact ring pops under it, leaf bits of the herb flip up and out and a couple of glints sparkle.',
+    run(o, I, e, hc, y) { const top = y - 6, r = 8, crush = steps101(o.t, T102); herb101(o, e, hc, o.a, top, crush, y); const wx = wx102(o); ring102(wx, top - r, r, (wx - o.a) / r, al102(o)); return T102; },
+    fx(o, y, hc) { spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 12, life: .3, col: '#ffffff' }); for (let k = 0; k < 4; k++) spawn({ x: o.a + (k - 1.5) * 3, y: y - 8, vx: (k - 1.5) * 26, vy: -40 - Math.random() * 25, g: 220, life: .55, size: 2, shape: 'leaf', vr: 9, rot: k, col: hc });
+      for (let k = 0; k < 2; k++) spawn({ x: o.a + (Math.random() - .5) * 14, y: y - 12 - Math.random() * 6, size: 3.5, shape: 'star', life: .35, col: '#fff8e0' }); } },
+  D: { name: 'Heavy wheel', desc: 'A bigger, heavier stone wheel: it rolls slower at the turns, the whole bar jolts down under it on each pass over the herb, dust puffs from the edge where it turns back, and the herb splats a little wider each pass.',
+    run(o, I, e, hc, y) { const top = y - 6, r = 11.5, crush = steps101(o.t, T102); herb101(o, e, hc, o.a, top, crush, y); const wx = wx102(o, 16);
+      [1, 2].forEach(k => { const at = -.62 + k / 3 * .5; if (o.t >= at) once('al102d' + o.i + k, () => { const x = o.a + (k === 1 ? -16 : 16); for (let q = 0; q < 5; q++) spawn({ x, y: top - 1, vx: (q - 2) * 14 + (Math.random() - .5) * 8, vy: -8 - Math.random() * 10, g: -6, life: .6, size: 1.8, col: 'rgba(200,190,180,.55)' }); }); });
+      carved102(wx, top - r, r, (wx - o.a) / r, al102(o), 19); return T102; },
+    shake(I) { let k = 0; hits101(I).forEach(o => T102.forEach(a => { const d = o.t - a; if (d >= 0 && d < .14) k = Math.max(k, 1 - d / .14); })); return [0, 1.8 * k]; },
+    fx(o, y, hc) { crumb100(o.a, y - 5, hc, 6, 34); const v = fat45(o.i); drum46(70, 0, .012 * v); } },
+};
+function r102(K) { if (K === 'A') { const A = r101('A'); return { get name() { return 'A. Edge roll (round 101 A)'; }, get desc() { return 'The current pick: ' + A.desc; }, get note() { return A.note; }, draw: top => A.draw(top) }; }
+  W101['V' + K] = W102[K]; const R = r101('V' + K); return { get name() { return K + '. ' + W102[K].name; }, get desc() { return R.desc; }, get note() { return 'edge roll: ' + W102[K].name.toLowerCase() + '.'; }, draw: top => R.draw(top) }; }
+Object.assign(FAM, { PA: r102('A'), PB: r102('B'), PC: r102('C'), PD: r102('D') });
+
+// Moved out 2026-11-17 (round 104 prep): round 101's wheel101, W101 (Edge roll) and r101; round 103's SC103 A-D (Apothecary trough, Glass and juice, Herbs in a row, Juice press stream) and r103 (E Big herb on stage stays on the page as SC103.E, the base).
+function wheel101(x, y, r, ang, al, axle = 1) { if (al <= 0) return; ctx.save(); ctx.globalAlpha *= al;
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x + 1, y + r + .5, r * .8, 1.5, 0, 0, 7); ctx.fill();
+  if (axle) { ctx.strokeStyle = '#7a5230'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - r - 7, y); ctx.lineTo(x + r + 7, y); ctx.stroke(); }
+  const g = ctx.createRadialGradient(x - r * .3, y - r * .3, 1, x, y, r); g.addColorStop(0, '#e0d8d0'); g.addColorStop(1, '#6a625c'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r - 1, 0, 7); ctx.stroke();
+  ctx.strokeStyle = 'rgba(40,34,30,.8)'; for (let q = 0; q < 2; q++) { const a = ang + q * Math.PI / 2; ctx.beginPath(); ctx.moveTo(x - Math.cos(a) * r * .8, y - Math.sin(a) * r * .8); ctx.lineTo(x + Math.cos(a) * r * .8, y + Math.sin(a) * r * .8); ctx.stroke(); }
+  ctx.fillStyle = '#c8955a'; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 7); ctx.fill(); ctx.restore(); }
+// the herb at (x, yb = its base): falls -1.05..-.85, squashes on landing, then flattens by crush (0..1) into a smear; sinks -.1..0
+const W101 = {
+  A: { name: 'Edge roll', desc: '100 B made readable: the herb lands on the bar’s top edge with a squash, the wheel rolls in, makes three slow passes over it (the herb flattening a step each pass into a green smear, crumbs dropping in), rolls off, the smear sinks in, then the flash.',
+    run(o, I, e, hc, y) { const top = y - 6, r = 8, wy = top - r, T = [0, 1, 2].map(k => -.62 + (k * 2 + 1) / 6 * .5), crush = steps101(o.t, T);
+      herb101(o, e, hc, o.a, top, crush, y); const ph = clamp((o.t + .62) / .5) * 3 * Math.PI;
+      let wx = o.a + 14 * Math.cos(ph); if (o.t < -.62) wx = o.a + 14 + 20 * clamp((-.62 - o.t) / .14); if (o.t > -.12) wx = o.a - 14 - 24 * clamp((o.t + .12) / .14);
+      wheel101(wx, wy, r, (wx - o.a) / r, clamp((o.t + .78) / .1) * clamp((.04 - o.t) / .1)); return T; } },
+};
+function r101(K) { const W = W101[K], lv = n => mix(n, '#ffffff', .35), dk = n => mix(n, '#000000', .45), hueAt = n => HUE98[clamp(n, 0, 5)];
+  const V = { shake(I) { return W.shake ? W.shake(I) : [0, 0]; },
+    grow(p, x0, y, L, f, t, I) { const A = hits101(I).filter(o => o.t >= 0 && o.t < 1).pop();
+      if (!A) { const c = hueAt(Math.floor(I.v + 1e-6) - I.lo); liq98(x0 - 2, I.tipX, y, lv(c), dk(c)); return; }
+      const n0 = S.v0 + A.i - I.lo, c0 = hueAt(n0), c1 = hueAt(n0 + 1), d = 420 * A.t; liq98(x0 - 2, I.tipX, y, lv(c0), dk(c0));
+      ctx.save(); ctx.beginPath(); ctx.rect(A.a - d, y - 6, 2 * d, 12); ctx.clip(); liq98(x0 - 2, I.tipX, y, lv(c1), dk(c1)); ctx.fillStyle = `rgba(255,255,255,${.75 * (1 - clamp(A.t / .35))})`; ctx.fillRect(x0 - 2, y - 6, I.tipX - x0 + 2, 12); ctx.restore(); },
+    over(p, I) { const y = I.ly; hits101(I).forEach(o => { const [e, hc] = HERB98[(S.v0 + o.i) % 5], c1 = hueAt(S.v0 + o.i + 1 - I.lo);
+      if (o.t < 0) { const T = W.run(o, I, e, hc, y); const v = fat45(o.i), n = pick45(o.i, 4);
+        if (o.t >= -.85) once('al101l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+        T.forEach((a, k) => { if (o.t >= a) once('al101c' + o.i + k, () => { if (W.fx) W.fx(o, y, hc, k); else crumb100(o.a, y - 6, hc, 5, 26); noise(0, .16, .006 * v, 420, .8, 'lowpass'); noise(.01, .03, .004 * v, 1500, 2, 'bandpass', true); }); }); }
+      if (o.t >= 0) once('al101f' + o.i, () => { const v = fat45(o.i), n = pick45(o.i, 4); tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08);
+        spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 10, life: .35, col: '#ffffff' }); for (let k = 0; k < 3; k++) spawn({ x: o.a, y: y - 6, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 30, g: 300, life: .4, size: 1.2, col: '#ffffff' }); });
+      const gl = o.t >= 0 ? 1 - clamp(o.t / .9) : 0; if (gl > 0) { ctx.save(); ctx.shadowColor = c1; ctx.shadowBlur = 14; ctx.strokeStyle = hexA(c1, .7 * gl); ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(I.x0 - 3, y - 7, I.tipX - I.x0 + 4, 14, 4); ctx.stroke(); ctx.restore(); } }); } };
+  return { get name() { return K + '. ' + W.name; }, get desc() { return W.desc + ' (Skill-ups are 1.5 s apart on this round so each one reads; the sound is a gentle placeholder.)'; }, get note() { return 'wheel grinder: ' + W.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Alchemy' || S.p !== ALB98 || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = ALB98; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r101('A') });
+  A: { name: 'Apothecary trough', desc: 'The bar is a carved wooden trough. The herb lands on its rim and the stone wheel rolls three passes over it; a lump of green paste plops into the trough at the front, and the older paste behind it glows into finished violet potion, the glow line following the front.',
+    grow(p, x0, y, L, f, t, I) { const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, '#5a361a'); g.addColorStop(.5, '#7a4e2a'); g.addColorStop(1, '#3a2210'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 6, I.x1 - x0 + 4, 12);
+      ctx.fillStyle = 'rgba(30,16,6,.45)'; [-3, 0, 3.5].forEach((d, k) => { for (let x = x0; x < I.x1; x += 9) if (rnd53(x * .3 + k) > .35) ctx.fillRect(x, y + d, 5 + rnd53(x + k) * 4, .8); });
+      const tip = I.tipX; if (tip <= x0) return; const pg = ctx.createLinearGradient(0, y - 5, 0, y + 6); pg.addColorStop(0, '#a8e070'); pg.addColorStop(1, '#3a6a20'); ctx.fillStyle = pg; ctx.fillRect(x0 - 2, y - 4.5, tip - x0 + 2, 10.5);
+      ctx.fillStyle = 'rgba(30,60,10,.5)'; for (let x = x0; x < tip; x += 2) if (rnd53(x * 1.7) > .55) ctx.fillRect(x, y - 3 + rnd53(x * 2.3) * 7, 1, 1);
+      const px = tip - 26; if (px > x0) { ctx.save(); ctx.beginPath(); ctx.rect(x0 - 2, y - 6, px - x0 + 2, 12); ctx.clip(); liq98(x0 - 2, px + 2, y, '#d0a0ff', '#5a2aa0'); ctx.restore();
+        const gg = ctx.createLinearGradient(px - 2, 0, px + 10, 0); gg.addColorStop(0, 'rgba(208,160,255,.9)'); gg.addColorStop(1, 'rgba(208,160,255,0)'); ctx.fillStyle = gg; ctx.fillRect(px - 2, y - 4.5, 12, 10.5);
+        ctx.fillStyle = `rgba(255,255,255,${.6 + .3 * Math.sin(t * 6)})`; for (let k = 0; k < 3; k++) ctx.fillRect(px - 1, y - 3 + k * 3, 1.2, 1.2); } },
+    over(p, I, o, e, hc) { const y = I.ly; if (o.t < 0) { herb101(o, e, hc, o.a, y - 6, steps101(o.t, T102), y); wheel103(o, o.a, y - 6); }
+      else if (o.t < .4) { const k = o.t / .4, h = 4 * (1 - eOut(k)); ctx.fillStyle = '#8ac850'; ctx.beginPath(); ctx.ellipse(I.tipX - 5, y - 5, 6, h + .5, 0, Math.PI, 0); ctx.fill(); } } },
+  B: { name: 'Glass and juice', desc: 'The bar is a glass vessel: dark glass with bright edges and a glint, the potion inside. The herb lands on the glass lid and a clear crystal wheel (a ring of light with turning facets) presses it; each pass a drop of herb juice drips through into the potion and swirls; then the potion turns its next color.',
+    grow(p, x0, y, L, f, t, I) { ctx.fillStyle = 'rgba(190,210,255,.10)'; ctx.fillRect(x0 - 2, y - 6, I.x1 - x0 + 4, 12); pot103(x0, y, I, .9);
+      hits101(I).forEach(o => T102.forEach((a, k) => { const u = (o.t - a) / .7; if (u <= 0 || u >= 1) return; const [, hc] = HERB98[(S.v0 + o.i) % 5]; for (let q = 0; q < 5; q++) { const an = q * 1.26 + u * 5 + k, rr = 2 + u * 9; ctx.fillStyle = hexA(hc, .8 * (1 - u)); ctx.fillRect(o.a + Math.cos(an) * rr, y + Math.sin(an) * Math.min(4, rr * .4), 1.5, 1.5); } }));
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(x0 - 1, y - 5.5, I.x1 - x0 + 2, 1); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x0 - 1, y + 4, I.x1 - x0 + 2, 1);
+      const gx = x0 + ((t * 40) % (L + 80)) - 40; ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(gx, y - 4, 10, 1.5); ctx.fillRect(gx + 4, y - 2, 5, 1); },
+    over(p, I, o, e, hc) { const y = I.ly; if (o.t >= 0) return; herb101(o, e, hc, o.a, y - 6, steps101(o.t, T102), y); const wx = wx102(o), r = 8.5, wy = y - 6 - r, al = al102(o); if (al <= 0) return;
+      ctx.save(); ctx.globalAlpha *= al; ctx.fillStyle = 'rgba(220,240,255,.22)'; ctx.beginPath(); ctx.arc(wx, wy, r, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = 'rgba(200,230,255,.6)'; ctx.lineWidth = 1; const an = (wx - o.a) / r; for (let q = 0; q < 3; q++) { const a = an + q * Math.PI / 3; ctx.beginPath(); ctx.moveTo(wx + Math.cos(a) * r * .9, wy + Math.sin(a) * r * .9); ctx.lineTo(wx - Math.cos(a) * r * .9, wy - Math.sin(a) * r * .9); ctx.stroke(); }
+      ctx.fillStyle = '#ffffff'; star4(wx - r * .45, wy - r * .45, 2.5, 0); ctx.restore();
+      T102.forEach((a, k) => { const u = (o.t - a) / .15; if (u > 0 && u < 1) { ctx.fillStyle = hc; ctx.beginPath(); ctx.arc(o.a, y - 6 + u * 5, 1.8, 0, 7); ctx.fill(); } }); } },
+  C: { name: 'Herbs in a row', desc: 'The rest of the bar shows what is left to the next recipe: one herb sitting on the bar for every point still to go. Each skill-up the wheel rolls in over the next herb in the row, crushes it in three passes, and that slot fills with potion (the color flash), so you watch the row of herbs being used up.',
+    grow(p, x0, y, L, f, t, I) { pot103(x0, y, I); },
+    pre(p, I) { const y = I.ly, busy = new Set(hits101(I).filter(o => o.t > -.8).map(o => S.v0 + o.i)); for (let j = Math.floor(I.v + 1e-6); j < S.nx.lv; j++) { if (busy.has(j)) continue; emo98(HERB98[j % 5][0], I.X(j + .5), y - 12, 12, 0, .9); } },
+    over(p, I, o, e, hc) { const y = I.ly, hx = I.X(S.v0 + o.i + .5); if (o.t <= -.8 || o.t >= 0) return; herb101(Object.assign({}, o, { t: Math.max(o.t, -.74) }), e, hc, hx, y - 6, steps101(o.t, T102), y, 12 + 4 * clamp((o.t + .8) / .1)); wheel103(o, hx, y - 6, 8, 11); } },
+  D: { name: 'Juice press stream', desc: 'The wheel squeezes the herb and its juice runs along the top of the bar as a bright stream in the herb’s color, a little farther each pass; then it pours in and the fill catches up to it. The fill keeps each herb’s color, so the bar shows a stripe for every herb you pressed.',
+    grow(p, x0, y, L, f, t, I) { const tip = I.tipX; for (let j = I.lo; j < S.nx.lv; j++) { const a = I.X(j), b = Math.min(I.X(j + 1), tip); if (b <= a) break; const c = HERB98[j % 5][1]; liq98(a - (j === I.lo ? 2 : 0), b, y, lv103(c), dk103(c)); }
+      const pl = hits101(I).filter(o => o.t >= 0 && o.t < .5).pop(); if (pl) { const k = 1 - pl.t / .5; ctx.fillStyle = `rgba(255,255,255,${.45 * k})`; ctx.fillRect(pl.a, y - 6, tip - pl.a, 12); } },
+    over(p, I, o, e, hc) { const y = I.ly; if (o.t < 0) { herb101(o, e, hc, o.a, y - 6, steps101(o.t, T102), y); wheel103(o, o.a, y - 6); }
+      const fr = steps101(o.t, T102), fade = o.t >= 0 ? 1 - clamp(o.t / .45) : 1; if (fr > 0 && fade > 0) { const xe = lerp(o.a + 5, o.b, fr); ctx.save(); ctx.globalAlpha *= fade; ctx.strokeStyle = hc; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(o.a + 5, y - 6.5); ctx.lineTo(xe, y - 6.5); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.shadowColor = hc; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(xe, y - 6.5, 1.8, 0, 7); ctx.fill(); ctx.restore(); }
+      if (o.t >= .3) once('al103d' + o.i, () => spawn({ x: o.b, y: y - 4, size: 2, shape: 'ring', grow: 9, life: .35, col: hc })); } },
+function r103(K) { const Z = SC103[K];
+  const V = { grow: Z.grow,
+    over(p, I) { const y = I.ly; if (Z.pre) Z.pre(p, I); hits101(I).forEach(o => { const [e, hc] = HERB98[(S.v0 + o.i) % 5]; Z.over(p, I, o, e, hc); const v = fat45(o.i), n = pick45(o.i, 4);
+      if (o.t >= -.85 && o.t < 0) once('al103l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+      T102.forEach((a, k) => { if (o.t >= a && o.t < 0) once('al103c' + o.i + k, () => { if (K !== 'E') crumb100(K === 'C' ? I.X(S.v0 + o.i + .5) : o.a, y - 6, hc, 3, 18); noise(0, .16, .006 * v, 420, .8, 'lowpass'); noise(.01, .03, .004 * v, 1500, 2, 'bandpass', true); }); });
+      if (o.t >= 0) once('al103f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); }); }); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Skill-ups 1.5 s apart; the sound is a gentle placeholder.)'; }, get note() { return Z.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Alchemy' || S.p !== ALB98 || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = ALB98; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r103('A'), PB: r103('B'), PC: r103('C'), PD: r103('D'), PE: r103('E') });
+
+// Moved out 2026-11-17 (round 105 prep): round 103's SC103.E (Big herb on stage) and round 104's SC104 (A-G scenes incl. C Mortar pour, the base of round 105), ladle104, r104. The page keeps alb104/pot104/act104/fall104/bead104 and the gap switch.
+const SC103 = {
+  E: { name: 'Big herb on stage', desc: 'A small wooden stand sits on the start of the bar. A big herb lands on it and a big stone wheel rolls over it; each pass squeezes a glowing drop of essence that arcs over into the front of the potion with a splash; then the color flash.',
+    grow(p, x0, y, L, f, t, I) { pot103(x0, y, I); },
+    pre(p, I) { const y = I.ly, sx = I.x0 + 14, yS = y - 15; ctx.fillStyle = '#5a3a1e'; ctx.fillRect(sx - 2, yS + 4, 4, 5); const g = ctx.createLinearGradient(0, yS, 0, yS + 4); g.addColorStop(0, '#b8865a'); g.addColorStop(1, '#6a4424'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(sx - 17, yS, 34, 4, 1.5); ctx.fill(); },
+    over(p, I, o, e, hc) { const y = I.ly, sx = I.x0 + 14, yS = y - 15; if (o.t < 0) { herb101(o, e, hc, sx, yS, steps101(o.t, T102), y, 24); wheel103(o, sx, yS, 11, 10); }
+      T102.forEach((a, k) => { const u = (o.t - a) / .3; if (u > 0 && u < 1) { const x = lerp(sx + 4, o.a, u), yy = lerp(yS - 3, y - 5, u) - Math.sin(Math.PI * u) * 16; ctx.save(); ctx.shadowColor = hc; ctx.shadowBlur = 8; ctx.fillStyle = mix(hc, '#ffffff', .3); ctx.beginPath(); ctx.arc(x, yy, 2.6, 0, 7); ctx.fill(); ctx.restore(); }
+        if (u >= 1) once('al103e' + o.i + k, () => { spawn({ x: o.a, y: y - 5, size: 2, shape: 'ring', grow: 8, life: .3, col: hc }); for (let q = 0; q < 3; q++) spawn({ x: o.a, y: y - 6, vx: (Math.random() - .5) * 40, vy: -30 - Math.random() * 25, g: 300, life: .35, size: 1.1, col: hc }); }); }); } },
+};
+const SC104 = {
+  A: Object.assign({}, SC103.E, { name: 'Big herb on stage (round 103 E)' }),
+  B: { name: 'Alembic drip', desc: 'A glass flask sits at the start of the bar with a straight glass pipe sloping down to the front. The herb drops into the flask, which glows its color; one bright bead of essence slides down the pipe and drips into the potion.',
+    pre(p, I) { const y = I.ly, fx = I.x0 + 8, fy = y - 21, pe = Math.max(I.tipX, fx + 30), A = act104(I), g = A && A.t > -.85 && A.t < -.2 ? Math.sin(Math.PI * (A.t + .85) / .65) : 0;
+      ctx.strokeStyle = 'rgba(220,235,255,.55)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(fx + 5, fy - 4); ctx.lineTo(pe, y - 9); ctx.stroke(); ctx.strokeStyle = 'rgba(40,50,70,.8)'; ctx.lineWidth = 1; ctx.stroke(); ctx.lineCap = 'butt';
+      if (g > 0) { const c = HERB98[(S.v0 + A.i) % 5][1], rg = ctx.createRadialGradient(fx, fy, 1, fx, fy, 16); rg.addColorStop(0, hexA(c, .6 * g)); rg.addColorStop(1, hexA(c, 0)); ctx.fillStyle = rg; ctx.fillRect(fx - 16, fy - 16, 32, 32); }
+      ctx.fillStyle = 'rgba(200,220,255,.14)'; ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill(); ctx.save(); ctx.beginPath(); ctx.arc(fx, fy, 6, 0, 7); ctx.clip(); const c = hue104(I, Math.floor(I.v + 1e-6)); ctx.fillStyle = hexA(c, .8); ctx.fillRect(fx - 7, fy, 14, 7); ctx.restore();
+      ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.stroke(); ctx.strokeRect(fx - 1.8, fy - 13, 3.6, 6); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(fx - 4, fy - 4, 1.5, 3); },
+    over(p, I, o, e, hc) { const y = I.ly, fx = I.x0 + 8, fy = y - 21; if (o.t < -.85) { fall104(o, e, fx, y - 46, fy - 12, 13); return; } if (o.t < -.75) emo98(e, fx, fy - 10 + (o.t + .85) * 60, 13 * (1 - (o.t + .85) / .1 * .7), 0, 1 - (o.t + .85) / .1);
+      if (o.t > -.45 && o.t < -.05) { const u = (o.t + .45) / .4; bead104(lerp(fx + 5, o.a, u * u), lerp(fy - 4, y - 9, u * u), hc); }
+      if (o.t >= -.05 && o.t < 0) bead104(o.a, lerp(y - 9, y - 6, (o.t + .05) / .05), hc, 2);
+      if (o.t >= 0) once('al104b' + o.i, () => spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 9, life: .35, col: hc })); } },
+  C: { name: 'Mortar pour', desc: 'A stone mortar sits at the start of the bar. The herb drops in, a pestle streak circles inside the bowl as the herb is ground down, then the powder pours from the bowl’s lip as a thin stream that runs along the top of the bar and settles in at the front.',
+    pre(p, I) { const y = I.ly, mx = I.x0 + 12, my = y - 13, g = ctx.createLinearGradient(0, my, 0, my + 8); g.addColorStop(0, '#b8b0a6'); g.addColorStop(1, '#5e5852'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(mx, my, 11, 7, 0, 0, Math.PI); ctx.fill();
+      ctx.fillStyle = '#3a3430'; ctx.beginPath(); ctx.ellipse(mx, my, 11, 2.2, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#d8d0c6'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = '#d8d0c6'; ctx.beginPath(); ctx.moveTo(mx + 10, my - 1); ctx.lineTo(mx + 15, my - .5); ctx.lineTo(mx + 10, my + 1.5); ctx.fill(); },
+    over(p, I, o, e, hc) { const y = I.ly, mx = I.x0 + 12, my = y - 13; if (o.t < -.85) { fall104(o, e, mx, y - 46, my - 6, 13); return; }
+      if (o.t < -.4) { const k = clamp((o.t + .85) / .45); emo98(e, mx, my - 3, 13 * (1 - k * .8), k * 5, 1 - k * .5); const ph = (o.t + .85) * 24; ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(mx, my - 1, 8, 3, 0, ph, ph + 1.6); ctx.stroke(); ctx.restore(); }
+      if (o.t > -.42 && o.t < .05) { const px = mx + 15, L1 = y - 6.5 - my, L2 = Math.max(1, o.a - px - 4); for (let q = 0; q < 16; q++) { const s = (o.t + .42) / .42 * 1.5 - q * .06; if (s < 0 || s > 1) continue; const d = s * (L1 + L2), x = d < L1 ? px + d * .3 : px + L1 * .3 + (d - L1), yy = d < L1 ? my + d : y - 6.5;
+        ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(Math.min(x, o.a), yy - .6, 1.3, 1.3); } } } },
+  D: { name: 'Balance pan', desc: 'A small balance stands over the front. The herb drops onto the right pan, the beam dips under its weight, the herb crumbles to powder on the pan, then the pan tips and spills the powder into the potion right at the front; the beam settles level again.',
+    pre(p, I) { const y = I.ly, A = act104(I), px = I.tipX - 13, py = y - 20; let th = 0, tip = 0;
+      if (A) { const t = A.t; th = t < -.85 ? 0 : t < -.6 ? .22 * eBack(clamp((t + .85) / .25)) : t < 0 ? .22 : .22 * (1 - eOut(clamp(t / .4))); tip = t < -.3 ? 0 : t < 0 ? eOut(clamp((t + .3) / .15)) : 1 - clamp(t / .3); }
+      ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(px, y - 6); ctx.lineTo(px, py); ctx.stroke(); ctx.fillStyle = '#c8955a'; ctx.beginPath(); ctx.arc(px, py, 1.6, 0, 7); ctx.fill();
+      const ex = s => px + s * 13 * Math.cos(th), ey = s => py + s * 13 * Math.sin(th); ctx.strokeStyle = '#d8b070'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(ex(-1), ey(-1)); ctx.lineTo(ex(1), ey(1)); ctx.stroke();
+      [-1, 1].forEach(s => { const hx = ex(s), hy = ey(s), r = s > 0 ? tip * .9 : 0; ctx.strokeStyle = 'rgba(230,210,170,.6)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx, hy + 5); ctx.stroke();
+        ctx.save(); ctx.translate(hx, hy + 6); ctx.rotate(r); ctx.fillStyle = '#c8a060'; ctx.beginPath(); ctx.ellipse(0, 0, 5.5, 2, 0, 0, Math.PI); ctx.fill(); ctx.restore(); });
+      this.pan = { x: ex(1), y: ey(1) + 6, tip }; },
+    over(p, I, o, e, hc) { const y = I.ly, P = SC104.D.pan || { x: I.tipX, y: y - 14, tip: 0 }; if (o.t < -.85) { fall104(o, e, P.x, y - 46, P.y - 7, 12); return; }
+      if (o.t < -.25) { const k = clamp((o.t + .65) / .35); emo98(e, P.x, P.y - 6, 12 * (1 - k * .75), 0, 1 - k * .4); if (o.t > -.65) once('al104d' + o.i, () => crumb100(P.x, P.y - 3, hc, 4, 14)); }
+      if (o.t > -.3 && o.t < .05) for (let q = 0; q < 12; q++) { const s = (o.t + .3) / .3 * 1.4 - q * .05; if (s < 0 || s > 1) continue; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(P.x + 4 + q % 3, P.y + s * (y - 6 - P.y), 1.2, 1.2); } } },
+  E: { name: 'Herb press', desc: 'A small wooden press stands at the start of the bar: two plates between two posts. The herb drops between the plates; the top plate squeezes down three times, the herb flattening a step each time, and each squeeze squirts an arc of juice farther along the bar, the last one landing at the front.',
+    pre(p, I) { const y = I.ly, sx = I.x0 + 12, A = act104(I, -1.1, .1); let pr = 0; if (A) T102.forEach(a => { const d = A.t - a; if (d > -.06 && d < .12) pr = Math.max(pr, d < 0 ? 1 + d / .06 : 1 - d / .12); }); const gap = 9 - 6 * pr, b = y - 13;
+      ctx.strokeStyle = '#6a4424'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx - 12, y - 6); ctx.lineTo(sx - 12, y - 32); ctx.moveTo(sx + 12, y - 6); ctx.lineTo(sx + 12, y - 32); ctx.stroke();
+      const plate = yy => { const g = ctx.createLinearGradient(0, yy, 0, yy + 3); g.addColorStop(0, '#c8955a'); g.addColorStop(1, '#7a4e2a'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(sx - 11, yy, 22, 3, 1); ctx.fill(); }; plate(b); plate(b - 3 - gap); ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(sx, b - 3 - gap); ctx.lineTo(sx, y - 34); ctx.stroke(); },
+    over(p, I, o, e, hc) { const y = I.ly, sx = I.x0 + 12, b = y - 13; if (o.t < -.85) { fall104(o, e, sx, y - 46, b - 5, 12); return; } const cr = steps101(o.t, T102); if (o.t < 0) { ctx.save(); ctx.translate(sx, b); ctx.scale(1 + cr * .5, Math.max(.2, 1 - cr * .8)); emo98(e, 0, -5, 12, 0, 1 - cr * .5); ctx.restore(); }
+      T102.forEach((a, k) => { const u = (o.t - a) / .28, lx = lerp(sx + 16, o.a, (k + 1) / 3); for (let q = 0; q < 5; q++) { const s = u - q * .06; if (s <= 0 || s >= 1) continue; ctx.fillStyle = q ? hexA(hc, .85) : mix(hc, '#ffffff', .4); ctx.beginPath(); ctx.arc(lerp(sx + 11, lx, s), lerp(b - 1, y - 6, s) - Math.sin(Math.PI * s) * (8 + k * 4), q ? 1.1 : 1.6, 0, 7); ctx.fill(); }
+        if (u >= 1) once('al104e' + o.i + k, () => spawn({ x: lx, y: y - 6, size: 1.5, shape: 'ring', grow: 6, life: .25, col: hc })); }); } },
+  F: { name: 'Stirred in', desc: 'The herb drops straight into the potion at the front with a splash and sinks; a stirring streak circles there and ribbons of the herb’s color twist into the liquid, which glows brighter at the front before the color flash.',
+    over(p, I, o, e, hc) { const y = I.ly, cx = o.a - 5; if (o.t < -.85) { fall104(o, e, o.a, y - 46, y - 10, 13); return; } if (o.t < -.6) { const k = (o.t + .85) / .25; emo98(e, o.a, y - 9 + k * 6, 13 * (1 - k * .7), k * 2, 1 - k); }
+      once('al104f' + o.i, () => { spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 10, life: .35, col: '#ffffff' }); for (let q = 0; q < 4; q++) spawn({ x: o.a, y: y - 6, vx: (Math.random() - .5) * 40, vy: -35 - Math.random() * 25, g: 300, life: .4, size: 1.2, col: hc }); });
+      if (o.t > -.75 && o.t < .1) { const al = clamp((o.t + .75) / .1) * clamp((.1 - o.t) / .15), ph = (o.t + .75) * 14; ctx.save(); ctx.globalAlpha *= al;
+        const rg = ctx.createRadialGradient(cx, y, 1, cx, y, 12); rg.addColorStop(0, hexA(hc, .55)); rg.addColorStop(1, hexA(hc, 0)); ctx.fillStyle = rg; ctx.fillRect(cx - 12, y - 6, 24, 12);
+        for (let q = 0; q < 12; q++) { const a = ph - q * .32, rr = 9 - q * .55; ctx.fillStyle = q % 4 ? hexA(hc, .9 - q * .06) : 'rgba(255,255,255,.8)'; ctx.fillRect(cx + Math.cos(a) * rr, y + Math.sin(a) * rr * .42, 1.4, 1.4); }
+        ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(cx, y - 1, 10, 4.2, 0, ph, ph + 1.4); ctx.stroke(); ctx.restore(); } } },
+  G: { name: 'Ladle pour', desc: 'A small ladle rests over the start of the bar. The herb drops into it; it dips into the potion to scoop, lifts and swings along an arc to the front, tips and pours a thin stream of herb-colored potion into the front, then swings back before the next herb.',
+    pre(p, I) { if (!act104(I, -1.1, 1.4)) ladle104(I.x0 + 10, I.ly - 20, 0, null); },
+    over(p, I, o, e, hc) { const Lh = act104(I, -1.1, 1.4); if (!Lh || Lh.i !== o.i) return; const y = I.ly, rx = I.x0 + 10, ry = y - 20, t = o.t; let x = rx, yy = ry, rot = 0, pour = 0;
+      if (t >= -.85 && t < -.65) yy = ry + Math.sin(Math.PI * (t + .85) / .2) * 17; else if (t >= -.65 && t < -.35) { const u = eOut(clamp((t + .65) / .3)); x = lerp(rx, o.a - 6, u); yy = ry - Math.sin(Math.PI * u) * 8; }
+      else if (t >= -.35 && t < .15) { x = o.a - 6; rot = .95 * eOut(clamp((t + .35) / .1)) * (t > .08 ? 1 - clamp((t - .08) / .07) : 1); pour = t > -.27 && t < .08 ? 1 : 0; } else if (t >= .15) { const u = eOut(clamp((t - .15) / .25)); x = lerp(o.a - 6, rx, u); yy = ry - Math.sin(Math.PI * u) * 8; }
+      if (t < -.85) fall104(o, e, rx, y - 46, ry - 5, 11); else if (t < -.65) emo98(e, x, yy - 4, 11 * (1 - (t + .85) / .2 * .7), 0, 1 - (t + .85) / .2);
+      if (pour) { ctx.strokeStyle = hc; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 4.5, yy + 1); ctx.lineTo(x + 5, y - 6); ctx.stroke(); }
+      ladle104(x, yy, rot, t > -.75 && t < -.1 ? hc : null); } },
+};
+function ladle104(x, yy, rot, fill) { ctx.save(); ctx.translate(x, yy); ctx.rotate(rot); ctx.strokeStyle = '#b8b0a6'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-4, -1); ctx.lineTo(-14, -9); ctx.stroke();
+      ctx.fillStyle = '#9a928a'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI); ctx.fill(); ctx.strokeStyle = '#e0d8ce'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(5, 0); ctx.stroke();
+  if (fill) { ctx.fillStyle = hexA(fill, .9); ctx.beginPath(); ctx.ellipse(0, .5, 4, 1.4, 0, 0, 7); ctx.fill(); } ctx.restore(); }
+function r104(K) { const Z = SC104[K];
+  const V = { grow(p, x0, y, L, f, t, I) { pot104(x0, y, I); },
+    over(p, I) { const y = I.ly; if (Z.pre) Z.pre.call(Z, p, I); hits101(I).forEach(o => { const [e, hc] = HERB98[(S.v0 + o.i) % 5]; Z.over(p, I, o, e, hc); const v = fat45(o.i), n = pick45(o.i, 4);
+      if (o.t >= -.85 && o.t < 0) once('al104l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+      T102.forEach((a, k) => { if (o.t >= a && o.t < 0) once('al104c' + o.i + k, () => { noise(0, .14, .005 * v, 420, .8, 'lowpass'); noise(.01, .03, .003 * v, 1500, 2, 'bandpass', true); }); });
+      if (o.t >= 0) once('al104f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); }); }); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Use the gap buttons to see 5-, 15- and 50-point gaps to the next recipe. Skill-ups 1.5 s apart; placeholder sound.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r104('A'), PB: r104('B'), PC: r104('C'), PD: r104('D'), PE: r104('E'), PF: r104('F'), PG: r104('G') });
+
+// Round 105 options (MO105 A-E, r105), moved out 2026-11-17; the page keeps the mortar helpers (pestle105, bowlBack105, bowlFront105, pour105, bowlHerb105, grind105, MX105) that round 106 builds on.
+const MO105 = {
+  A: { name: 'Mortar pour + pestle', desc: 'Mortar pour as you liked it, now with a real pestle: it leans in the bowl, the herb drops in, the pestle grinds round inside the bowl while the herb shrinks, then leans back as the powder pours from the lip along the bar into the front.',
+    grow(p, x0, y, L, f, t, I) { pot104(x0, y, I); },
+    scene(I, o, e, hc) { const [mx, my] = MX105(I), y = I.ly; bowlBack105(mx, my); if (o) bowlHerb105(o, e, mx, my); const [hx, hy, an] = grind105(o, mx, my); pestle105(hx, hy, an); bowlFront105(mx, my); if (o) pour105(o, mx, my, y, hc, o.a); } },
+  B: { name: 'Pounding pestle', desc: 'The pestle stands upright and pounds the herb three times (a soft thud and a puff of crumbs each); the bar is ground powder, grainy and pale, with a little heap at the front: the poured powder lands on the heap, it swells, then slumps forward to the new front.',
+    grow(p, x0, y, L, f, t, I) { const tip = I.tipX; if (tip <= x0) return; const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, '#e8e0b8'); g.addColorStop(1, '#8a7c48'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 6, tip - x0 + 2, 12);
+      for (let x = x0; x < tip; x += 1.6) { const r = rnd53(x * 1.3); ctx.fillStyle = r > .75 ? 'rgba(255,255,240,.7)' : r < .3 ? 'rgba(90,70,30,.45)' : 'rgba(200,190,140,.6)'; ctx.fillRect(x, y - 5 + rnd53(x * 2.7) * 10, 1, 1); } },
+    scene(I, o, e, hc) { const [mx, my] = MX105(I), y = I.ly; bowlBack105(mx, my); let hx = mx + 3, hy = my + .5, an = -1.15;
+      if (o && o.t >= -.85 && o.t < .05) { const k = Math.floor(clamp((o.t + .85) / .45) * 3), u = ((o.t + .85) / .15) % 1; hx = mx; an = -Math.PI / 2 + .12; hy = o.t < -.4 ? my - 1 - 9 * (u < .65 ? eOut(u / .65) : 1 - Math.pow((u - .65) / .35, 2)) : my - 1;
+        if (o.t < -.4) { const sq = 1 - clamp(k / 3) * .8; emo98(e, mx, my - 3, 13 * sq, 0, .6 + .4 * sq); [0, 1, 2].forEach(n => { if (o.t >= -.85 + (n + 1) * .15 - .01) once('al105b' + o.i + n, () => { crumb100(mx, my - 2, hc, 4, 22); spawn({ x: mx, y: my - 1, size: 2, shape: 'ring', grow: 7, life: .25, col: 'rgba(255,255,255,.8)' }); drum46(85, 0, .012 * fat45(o.i)); }); }); } }
+      if (o && o.t < -.85) bowlHerb105(o, e, mx, my); pestle105(hx, hy, an); bowlFront105(mx, my); if (o) pour105(o, mx, my, y, '#e8e0b8', o.a);
+      const hp = o ? (o.t < -.2 ? 0 : o.t < 0 ? (o.t + .2) / .2 : 1 - eOut(clamp(o.t / .5))) : 0, hh = 2 + 3.5 * hp, hxp = I.tipX; ctx.fillStyle = '#d8cf9c'; ctx.beginPath(); ctx.ellipse(hxp - 2, y - 6, 5 + hp * 2, hh, 0, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(255,255,240,.6)'; ctx.fillRect(hxp - 4, y - 6 - hh + 1, 2, 1); } },
+  C: { name: 'Bar is the mortar', desc: 'No bowl: the bar itself is a long stone trough. The herb drops straight into the trough at the front, and the pestle grinds it back and forth right there inside the bar, three strokes, the herb crumbling; the ground herb is the fill, green-gold and grainy, left exactly where it was ground. The pestle rests at the front between skill-ups.',
+    grow(p, x0, y, L, f, t, I) { const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, '#8a827a'); g.addColorStop(.3, '#4e4842'); g.addColorStop(1, '#6e665e'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 6, I.x1 - x0 + 4, 12);
+      ctx.fillStyle = 'rgba(20,18,16,.5)'; ctx.fillRect(x0 - 2, y - 3, I.x1 - x0 + 4, 7); ctx.fillStyle = 'rgba(220,210,200,.25)'; for (let x = x0; x < I.x1; x += 5) if (rnd53(x * .9) > .6) ctx.fillRect(x, y - 5 + rnd53(x * 1.9) * 2, 1, 1);
+      const tip = I.tipX; if (tip > x0) { const pg = ctx.createLinearGradient(0, y - 3, 0, y + 4); pg.addColorStop(0, '#c8d070'); pg.addColorStop(1, '#5a6a20'); ctx.fillStyle = pg; ctx.fillRect(x0 - 2, y - 3, tip - x0 + 2, 7);
+        for (let x = x0; x < tip; x += 1.6) { const r = rnd53(x * 2.1); ctx.fillStyle = r > .7 ? 'rgba(240,250,190,.7)' : 'rgba(40,60,10,.45)'; ctx.fillRect(x, y - 2.5 + rnd53(x * 3.1) * 6, 1, 1); } } },
+    scene(I, o, e, hc) { const y = I.ly, x = o ? o.a : I.tipX; let hx = I.tipX + 1, hy = y - 1, an = -1.0;
+      if (o && o.t < -.85) fall104(o, e, x + 3, y - 40, y - 4, 12); else if (o && o.t < -.05) { const cr = steps101(o.t, T102); emo98(e, x + 3, y - 4 + cr * 2, 12 * (1 - cr * .75), 0, 1 - cr * .5); }
+      if (o && o.t >= -.8 && o.t < -.1) { const ph = clamp((o.t + .8) / .7) * 3 * Math.PI; hx = x + 3 + Math.sin(ph) * 7; hy = y - 1; an = -1.0 - Math.cos(ph) * .18; }
+      pestle105(hx, hy, an); } },
+  D: { name: 'Powder dissolves', desc: 'As A, but you see the powder go into the potion: it lands as a pale floating film on top of the liquid at the front, spreads a little, then sinks and blooms into the potion as a soft cloud of the herb’s color while the potion takes its next color.',
+    grow(p, x0, y, L, f, t, I) { pot104(x0, y, I); hits101(I).forEach(o => { const [, hc] = HERB98[(S.v0 + o.i) % 5];
+      if (o.t > -.2 && o.t < .7) { const k = clamp(o.t / .6), w = 6 + 10 * clamp((o.t + .2) / .3); ctx.fillStyle = `rgba(246,240,220,${.9 * (1 - k)})`; ctx.fillRect(o.a - w, y - 6 + k * 6, w + 2, 2.5);
+        if (o.t > 0) { const r = 4 + 16 * eOut(k), rg = ctx.createRadialGradient(o.a - 4, y + 1, 0, o.a - 4, y + 1, r); rg.addColorStop(0, hexA(hc, .7 * (1 - k))); rg.addColorStop(1, hexA(hc, 0)); ctx.fillStyle = rg; ctx.fillRect(o.a - 4 - r, y - 6, 2 * r, 12); } } }); },
+    scene(I, o, e, hc) { MO105.A.scene(I, o, e, hc); } },
+  E: { name: 'Puff of powder', desc: 'After the grind, the pestle taps the rim twice and a soft cloud of fine powder puffs out of the bowl, drifts over the bar and settles down onto the front, glittering; the bar is a glittering powder (fine sparkles that twinkle), not a liquid.',
+    grow(p, x0, y, L, f, t, I) { const tip = I.tipX; if (tip <= x0) return; const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, '#e0d0ff'); g.addColorStop(1, '#6a4aa8'); ctx.fillStyle = g; ctx.fillRect(x0 - 2, y - 6, tip - x0 + 2, 12);
+      for (let x = x0 + 1; x < tip; x += 3) { const tw = .5 + .5 * Math.sin(t * 3 + x * 1.7); ctx.fillStyle = `rgba(255,255,255,${.25 + .6 * tw * (rnd53(x) > .5 ? 1 : .3)})`; ctx.fillRect(x, y - 5 + rnd53(x * 1.4) * 10, 1, 1); } },
+    scene(I, o, e, hc) { const [mx, my] = MX105(I), y = I.ly; bowlBack105(mx, my); if (o) bowlHerb105(o, e, mx, my); let [hx, hy, an] = grind105(o, mx, my);
+      if (o && o.t >= -.4 && o.t < -.2) { const u = ((o.t + .4) / .1) % 1; hx = mx + 9; hy = my - 1 - Math.sin(Math.PI * u) * 4; an = -1.5; [0, 1].forEach(n => { if (o.t >= -.4 + n * .1 + .05) once('al105e' + o.i + n, () => spawn({ x: mx + 9, y: my - 1, size: 1.5, shape: 'ring', grow: 6, life: .2, col: 'rgba(255,255,255,.8)' })); }); }
+      pestle105(hx, hy, an); bowlFront105(mx, my);
+      if (o && o.t > -.32 && o.t < .45) for (let q = 0; q < 9; q++) { const s = clamp((o.t + .32) / .34 - q * .04); if (s <= 0) continue; const set = clamp(o.t / .45), x = lerp(mx + 6, o.a - 2, eOut(s)) + Math.sin(q * 2.1) * 4, yy = lerp(my - 6, y - 9, s) - Math.sin(Math.PI * s) * 7 + set * 5 + Math.cos(q * 1.3) * 2;
+        ctx.fillStyle = `rgba(240,232,255,${.32 * (1 - set)})`; ctx.beginPath(); ctx.arc(x, yy, 3 + q % 3 + s * 2, 0, 7); ctx.fill(); if (q % 3 === 0) { ctx.fillStyle = `rgba(255,255,255,${.8 * (1 - set)})`; ctx.fillRect(x, yy, 1, 1); } } } },
+};
+function r105(K) { const Z = MO105[K];
+  const V = { grow: Z.grow,
+    over(p, I) { const y = I.ly, L = act104(I, -1.1, 1.4), o = L && L.t < .6 ? L : null, [e, hc] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0]; Z.scene(I, o, e, hc);
+      hits101(I).forEach(o => { const v = fat45(o.i), n = pick45(o.i, 4);
+        if (o.t >= -.85 && o.t < 0) once('al105l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+        if (K !== 'B' && o.t >= -.85 && o.t < -.4) once('al105g' + o.i, () => noise(0, .45, .005 * v, 700, .9, 'bandpass'));
+        if (o.t >= -.42 && o.t < 0) once('al105p' + o.i, () => noise(0, .4, .004 * v, 2400, .7, 'lowpass'));
+        if (o.t >= 0) once('al105f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); }); }); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Gap switch under the moments; skill-ups 1.5 s apart; placeholder sound.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r105('A'), PB: r105('B'), PC: r105('C'), PD: r105('D'), PE: r105('E') }); delete FAM.PF; delete FAM.PG; delete FAM.PH;
+
+// Round 106 AD106 A-D (base + puff, drop + bubbles, mix sweeps right, fizz + color ring) and r106, moved out 2026-11-17; AD106.E (sinks and fans out), puff106 and scene106 stay (round 107 uses them).
+  A: { name: 'Base + puff when done', desc: 'The locked base (Mortar pour + pestle) with the puff add-on: the moment the pestle stops, a soft puff of powder rises up out of the bowl (not toward the bar) with a few sparkles, then the powder pours along the bar into the front.' },
+  B: { name: '+ Drop + bubbles', pour: false, desc: 'With the puff. No stream along the top: the ground powder lifts out of the bowl as a small clump, arcs over to just above the front and drops straight down into the potion; there the potion bubbles up, a few bubbles rising and popping at the surface.',
+    over(o, I, mx, my, y, hc) { if (o.t > -.42 && o.t < -.18) { const u = (o.t + .42) / .24; ctx.fillStyle = hc; ctx.beginPath(); ctx.arc(lerp(mx + 6, o.a, eOut(u)), lerp(my - 4, y - 18, u) - Math.sin(Math.PI * u) * 8, 2.6, 0, 7); ctx.fill(); }
+      if (o.t >= -.18 && o.t < .02) for (let q = 0; q < 8; q++) { const s = (o.t + .18) / .2 * 1.4 - q * .05; if (s < 0 || s > 1) continue; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(o.a - 1 + (q % 3 - 1), lerp(y - 18, y - 6, s), 1.3, 1.3); }
+      for (let q = 0; q < 5; q++) { const u = (o.t - .05 - q * .1) / .45; if (u >= 1 && u < 1.25) { const k = (u - 1) / .25; ctx.strokeStyle = `rgba(255,255,255,${.8 * (1 - k)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(o.a - 4 + q * 2.5, y - 6.5, 1.5 + k * 3, Math.PI, 0); ctx.stroke(); } } },
+    grow(o, I, y, hc) { for (let q = 0; q < 5; q++) { const u = (o.t - .05 - q * .1) / .45; if (u <= 0 || u >= 1) continue; const r = 1.2 + u * 1.3 + q % 2 * .5; ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.arc(o.a - 4 + q * 2.5, lerp(y + 4, y - 5, u), r, 0, 7); ctx.stroke(); ctx.fillStyle = hexA(hc, .45); ctx.fill(); } } },
+  C: { name: '+ Mix sweeps right', desc: 'With the puff. The powder pours in as before, then streaks of its color sweep rightward through the potion like a current, carrying it to the new front where they fade in; the potion takes its next color behind them.',
+    grow(o, I, y, hc) { if (o.t < 0 || o.t > .9) return; for (let q = 0; q < 7; q++) { const s = clamp((o.t - q * .05) / .6); if (s <= 0 || s >= 1) continue; const yy = y - 4 + (q * 5) % 9, xh = lerp(o.a - 18, o.b + 2, eOut(s)), len = 6 + q % 3 * 3;
+      const g = ctx.createLinearGradient(xh - len, 0, xh, 0); g.addColorStop(0, hexA(hc, 0)); g.addColorStop(1, hexA(hc, .95 * (1 - s * .6))); ctx.fillStyle = g; ctx.fillRect(xh - len, yy, len, 1.4); } } },
+  D: { name: '+ Fizz + color ring', desc: 'With the puff. Where the powder lands, a quick fizz of tiny sparks jumps up out of the potion, and a ring of the herb’s color spreads out through the liquid from the spot and fades.',
+    over(o, I, mx, my, y, hc) { if (o.t >= 0) once('al106d' + o.i, () => { for (let q = 0; q < 9; q++) spawn({ x: o.a + (Math.random() - .5) * 6, y: y - 6, vx: (Math.random() - .5) * 50, vy: -40 - Math.random() * 50, g: 260, life: .4, size: 1, col: q % 3 ? mix(hc, '#ffffff', .5) : '#ffffff' }); noise(0, .2, .003 * fat45(o.i), 5000, 1, 'highpass'); }); },
+    grow(o, I, y, hc) { if (o.t < 0 || o.t > .7) return; const k = o.t / .7, rx = 4 + 34 * eOut(k); ctx.strokeStyle = hexA(hc, .9 * (1 - k)); ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(o.a, y, rx, Math.min(5, 2 + rx * .2), 0, 0, 7); ctx.stroke(); } },
+function r106(K) { const Z = AD106[K];
+  const V = { grow(p, x0, y, L, f, t, I) { pot104(x0, y, I); if (Z.grow) hits101(I).forEach(o => Z.grow(o, I, y, HERB98[(S.v0 + o.i) % 5][1])); },
+    over(p, I) { const y = I.ly, Lh = act104(I, -1.1, 1.4), o = Lh && Lh.t < .6 ? Lh : null, [e, hc] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0], [mx, my] = MX105(I); scene106(I, o, e, hc, Z.pour !== false);
+      hits101(I).forEach(o => { const hc = HERB98[(S.v0 + o.i) % 5][1], v = fat45(o.i), n = pick45(o.i, 4); if (Z.over) Z.over(o, I, mx, my, y, hc);
+        if (o.t >= -.85 && o.t < 0) once('al106l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+        if (o.t >= -.85 && o.t < -.4) once('al106g' + o.i, () => noise(0, .45, .005 * v, 700, .9, 'bandpass'));
+        if (o.t >= -.42 && o.t < 0 && Z.pour !== false) once('al106s' + o.i, () => noise(0, .4, .004 * v, 2400, .7, 'lowpass'));
+        if (o.t >= 0) once('al106f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); if (K === 'B') for (let q = 0; q < 3; q++) tone(600 * semi(pick45(o.i + q, 4)), .5 + q * .1, .004 * v, .08, 'sine', 900); }); }); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Base locked: Mortar pour + pestle. Gap switch under the moments; placeholder sound.)'; }, get note() { return 'add-on: ' + Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r106('A'), PB: r106('B'), PC: r106('C'), PD: r106('D'), PE: r106('E') });
+
+// Round 107 (bar looks x motions: CF107, DESC107, topBubbles107, r107) and round 106 AD106.E (sinks and fans out), moved out 2026-11-17. fill107/tip107/col107 stay (round 108's bar).
+const AD106 = {
+  E: { name: '+ Sinks and fans out', desc: 'With the puff. The powder enters at the front and sinks as a falling column of grains down through the potion, then fans out both ways along the bottom and dissolves.',
+    grow(o, I, y, hc) { if (o.t < -.05 || o.t > .9) return; for (let q = 0; q < 14; q++) { const s = (o.t + .05 - q * .015) / .3; if (s <= 0) continue; let x = o.a - 2 + (q % 3 - 1) * 1.2, yy = lerp(y - 6, y + 4.5, clamp(s)), al = 1;
+      if (s > 1) { const f = clamp((s - 1) / 1.6); x += (q % 2 ? 1 : -1) * (4 + q) * eOut(f); al = 1 - f; } ctx.fillStyle = q % 3 ? hexA(hc, .95 * al) : `rgba(255,255,255,${.9 * al})`; ctx.fillRect(x, yy, 1.3, 1.3); } } },
+};
+// ---------- round 107 (2026-11-17): "you've barely touched the bar and how it moves". Kept on all: the mortar + pestle, the puff when done, bubbles on the potion's surface where the powder
+// enters, and 106 E sinks/fans out. Bar looks (picked): Glass vial, Clears as it nears, Living potion; bar motions (picked, all four): Slosh and settle, Surge past + ease back,
+// Swell and glow, Fizzing front. Four pairings: A Vial + slosh, B Clears + surge, C Living + swell, D Clears + fizzing front ----------
+const CF107 = { A: { look: 'vial', mo: 'slosh', name: 'Glass vial + slosh' }, B: { look: 'clear', mo: 'surge', name: 'Clears as it nears + surge' }, C: { look: 'living', mo: 'swell', name: 'Living potion + swell and glow' }, D: { look: 'clear', mo: 'fizz', name: 'Clears as it nears + fizzing front' } };
+const DESC107 = { vial: 'The bar is a long glass vial (glass across the whole bar, a bright highlight along the top, rounded glass ends) with the potion inside, a thin gap of air above it.', clear: 'The potion starts the gap dark and murky with specks in it and clears as it nears the recipe, brighter and glowing as it gets close.', living: 'Slow motes of light drift through the potion all the time, so it looks alive; each skill-up they rush for a moment.',
+  slosh: 'When the powder lands the surface tilts (a straight tilted line), rocks back and forth a couple of times and settles level.', surge: 'The front surges a little past the new point and eases back to it, like liquid poured in fast.', swell: 'The filled part swells taller than the bar and glows for a moment, then shrinks back.', fizz: 'The front is a bright edge that fizzes all the time (tiny dots rising along it); on a skill-up it bursts with sparks and pushes forward.' };
+function topBubbles107(o, y) { for (let q = 0; q < 6; q++) { const t0 = -.08 + q * .1, u = (o.t - t0) / .32; if (u <= 0 || u > 1.3) continue; const x = o.a - 5 + (q * 7) % 11, r = 1 + Math.min(1, u) * 1.8 + q % 2 * .4;
+  if (u <= 1) { ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.arc(x, y - 6 - r * .6, r, Math.PI, 0); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill(); }
+  else { const k = (u - 1) / .3; ctx.strokeStyle = `rgba(255,255,255,${.7 * (1 - k)})`; ctx.lineWidth = .8; ctx.beginPath(); ctx.arc(x, y - 6, 2 + k * 3, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke(); } } }
+function r107(K) { const cfg = CF107[K];
+  const V = { grow(p, x0, y, L, f, t, I) { fill107(cfg, x0, y, I, t); hits101(I).forEach(o => AD106.E.grow(o, I, y, HERB98[(S.v0 + o.i) % 5][1])); },
+    over(p, I) { const y = I.ly, Lh = act104(I, -1.1, 1.4), o = Lh && Lh.t < .6 ? Lh : null, [e, hc] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0]; scene106(I, o, e, hc, true);
+      if (cfg.look === 'vial') { ctx.strokeStyle = 'rgba(220,235,255,.55)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(I.x0 - 2, y, 6, Math.PI * .5, Math.PI * 1.5); ctx.stroke(); ctx.beginPath(); ctx.arc(I.x1 + 2, y, 6, -Math.PI * .5, Math.PI * .5); ctx.stroke(); }
+      if (cfg.look === 'clear') { const f = clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo)); if (f > .5) { ctx.save(); ctx.shadowColor = col107(cfg, I); ctx.shadowBlur = 12 * (f - .5) * 2; ctx.strokeStyle = hexA('#ffd36a', .35 * (f - .5) * 2); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(I.x0 - 3, y - 7, tip107(cfg, I) - I.x0 + 4, 14, 4); ctx.stroke(); ctx.restore(); } }
+      hits101(I).forEach(o => { const hc = HERB98[(S.v0 + o.i) % 5][1], v = fat45(o.i), n = pick45(o.i, 4); topBubbles107(o, y);
+        if (cfg.mo === 'swell' && o.t >= 0 && o.t < .55) { const k = Math.sin(Math.PI * o.t / .55), c = col107(cfg, I), tip = I.tipX; ctx.save(); ctx.globalAlpha *= .85 * k; ctx.shadowColor = c; ctx.shadowBlur = 14; const g = ctx.createLinearGradient(0, y - 6 - 3 * k, 0, y + 6 + 3 * k); g.addColorStop(0, lv103(c)); g.addColorStop(1, dk103(c)); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(I.x0 - 2, y - 6 - 3 * k, tip - I.x0 + 2, 12 + 6 * k, 4); ctx.fill(); ctx.restore(); }
+        if (cfg.mo === 'fizz' && o.t >= 0) once('al107z' + o.i, () => { for (let q = 0; q < 8; q++) spawn({ x: o.b, y: y - 4 + Math.random() * 8, vx: 20 + Math.random() * 40, vy: (Math.random() - .5) * 40 - 20, g: 120, life: .4, size: 1, col: q % 2 ? '#ffffff' : '#ffe8a0' }); });
+        if (o.t >= -.85 && o.t < 0) once('al107l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+        if (o.t >= -.85 && o.t < -.4) once('al107g' + o.i, () => noise(0, .45, .005 * v, 700, .9, 'bandpass'));
+        if (o.t >= -.42 && o.t < 0) once('al107s' + o.i, () => noise(0, .4, .004 * v, 2400, .7, 'lowpass'));
+        if (o.t >= 0) once('al107f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); for (let q = 0; q < 3; q++) tone(640 * semi(pick45(o.i + q, 4)), .15 + q * .1, .003 * v, .07, 'sine', 900); }); }); } };
+  return { get name() { return K + '. ' + cfg.name; }, get desc() { return DESC107[cfg.look] + ' ' + DESC107[cfg.mo] + ' (On all: mortar + pestle, the puff when done, bubbles on the surface where the powder enters, then it sinks and fans out. Looks and motions can be swapped between options. Gap switch under the moments.)'; }, get note() { return cfg.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r107('A'), PB: r107('B'), PC: r107('C'), PD: r107('D') }); delete FAM.PE;
+
+// Round 108 (EN108, mortar108, mote108, r108: six ways the herb goes in; the user: 'not liking how it's all put together, start clean'), moved out 2026-11-17.
+// ---------- round 108 (2026-11-17): the bar LOCKED as a mix: 107 C Living potion + swell and glow, D's fizzing front, A's slosh. "Not liking the herb drop (the bubbles, the spread)": six ways
+// the herb goes into the mix, picked from a brainstorm. With the mortar (+ the puff): A Powder becomes motes, B Front flares, C Glow drawn down, D Bowl tips, current carries.
+// No mortar: E Herb dissolves to motes, F Herb rides the current ----------
+const BAR108 = { look: 'living', mo: 'swell', slosh: true, fizz: true };
+// the mortar, optionally tipped by ang around its spout
+function mortar108(I, o, e, hc, ang = 0) { const [mx, my] = MX105(I), sx = mx + 15, sy = my; ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang); ctx.translate(-sx, -sy); bowlBack105(mx, my); if (o) bowlHerb105(o, e, mx, my); const [hx, hy, an] = grind105(o, mx, my); pestle105(hx, hy, an); bowlFront105(mx, my); ctx.restore(); puff106(o, mx, my); }
+const mote108 = (x, y, c, a = 1, r = 1.4) => { ctx.save(); ctx.globalAlpha *= a; ctx.shadowColor = c; ctx.shadowBlur = 5; ctx.fillStyle = mix(c, '#ffffff', .45); ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); };
+const EN108 = {
+  A: { name: 'Powder becomes motes', mortar: true, desc: 'After the puff, the ground herb leaves the bowl as a stream of glowing motes in its color that fly in a curve into the front of the potion, then keep drifting inside it and join the motes already there.',
+    over(o, I, y, hc) { const [mx, my] = MX105(I); for (let q = 0; q < 12; q++) { const s = (o.t + .4) / .4 - q * .045; if (s > 0 && s < 1) { const u = eOut(s), x = lerp(mx + 6, o.a - 2, u), yy = lerp(my - 3, y - 2, u) - Math.sin(Math.PI * u) * 14 + Math.sin(q * 2.3) * 2; mote108(x, yy, hc); }
+      else if (s >= 1 && o.t < .9) { const k = clamp(o.t / .9), x = o.a - 2 + (q % 4) * 3 + k * (10 + q % 3 * 6), yy = y - 3 + (q * 5) % 7 + Math.sin(q + o.t * 4) * 1.5; mote108(x, yy, hc, 1 - k, 1.1); } } } },
+  B: { name: 'Front flares', mortar: true, pour: true, desc: 'The powder pours along the bar onto the fizzing front; the front flares in the herb’s color (a bright edge and a glow around it) and bursts forward with sparks of that color.',
+    over(o, I, y, hc) { if (o.t >= 0) once('al108b' + o.i, () => { for (let q = 0; q < 10; q++) spawn({ x: o.a, y: y - 4 + Math.random() * 8, vx: 25 + Math.random() * 50, vy: (Math.random() - .5) * 50 - 15, g: 140, life: .45, size: 1.2, col: q % 3 ? hc : '#ffffff' }); });
+      if (o.t > -.05 && o.t < .6) { const k = o.t < 0 ? 1 : 1 - o.t / .6, x = I.tipX; ctx.save(); const rg = ctx.createRadialGradient(x, y, 0, x, y, 14); rg.addColorStop(0, hexA(hc, .7 * k)); rg.addColorStop(1, hexA(hc, 0)); ctx.fillStyle = rg; ctx.fillRect(x - 14, y - 14, 28, 28);
+        ctx.fillStyle = hexA(hc, k); ctx.fillRect(x - 2, y - 7, 2.5, 14); ctx.restore(); } } },
+  C: { name: 'Glow drawn down', mortar: true, pour: true, desc: 'The powder pours along the bar and settles on the potion’s surface at the front as a glowing patch of the herb’s color; then the patch narrows and is drawn down into the potion as it swells, leaving a soft glow that fades.',
+    over(o, I, y, hc) { if (o.t > -.15 && o.t < .7) { const grow = clamp((o.t + .15) / .2), down = clamp((o.t - .1) / .45), w = (4 + 8 * grow) * (1 - down * .7), yy = y - 6 + down * 7; ctx.save(); ctx.shadowColor = hc; ctx.shadowBlur = 10; ctx.fillStyle = hexA(hc, .85 * (1 - down * .8)); ctx.beginPath(); ctx.ellipse(o.a - 3, yy, w, 1.6 + down, 0, 0, 7); ctx.fill(); ctx.restore(); } } },
+  D: { name: 'Bowl tips, current carries', mortar: true, tip: true, desc: 'After the puff the whole mortar tips forward and pours its powder into the start of the bar; the potion sloshes and a current of the herb’s color carries it along the bar to the front, where it joins in.',
+    over(o, I, y, hc) { const [mx, my] = MX105(I), px = mx + 15; if (o.t > -.36 && o.t < -.08) for (let q = 0; q < 10; q++) { const s = (o.t + .36) / .2 - q * .06; if (s < 0 || s > 1) continue; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(px + 2 + s * 4, lerp(my + 1, y - 6, s), 1.3, 1.3); }
+      if (o.t > -.15 && o.t < .45) { const s = clamp((o.t + .15) / .45); for (let q = 0; q < 6; q++) { const xh = lerp(px + 4, o.a, eOut(clamp(s * 1.2 - q * .04))), len = 8 + q % 3 * 4, yy = y - 4 + (q * 3) % 8, g = ctx.createLinearGradient(xh - len, 0, xh, 0); g.addColorStop(0, hexA(hc, 0)); g.addColorStop(1, hexA(hc, .9 * (1 - s * .5))); ctx.fillStyle = g; ctx.fillRect(xh - len, yy, len, 1.5); } } } },
+  E: { name: 'Herb dissolves to motes', desc: 'No mortar: the herb itself drops onto the potion at the front and floats there, bobbing; then it breaks up into motes of its color that spread out through the living potion as the front moves on.',
+    over(o, I, y, hc, e) { if (o.t < -.85) { fall104(o, e, o.a, y - 44, y - 10, 15); return; } if (o.t < -.25) { const b = Math.sin((o.t + .85) * 9) * 1.2; emo98(e, o.a, y - 10 + b, 15, Math.sin((o.t + .85) * 5) * .15); }
+      else if (o.t < .05) { const k = (o.t + .25) / .3; emo98(e, o.a, y - 9 + k * 3, 15 * (1 - k * .9), 0, 1 - k); }
+      if (o.t > -.25 && o.t < .8) for (let q = 0; q < 14; q++) { const k = clamp((o.t + .25) / 1.05), an = q * .9, r = eOut(k) * (8 + q % 4 * 5), x = o.a + Math.cos(an) * r * 1.4 + k * 6, yy = y - 4 + Math.sin(an) * Math.min(5, r * .4) + k * 3; mote108(x, yy, hc, 1 - k * k); } } },
+  F: { name: 'Herb rides the current', desc: 'No mortar: the herb drops in at the start of the bar and the potion carries it along the surface to the front, the herb shrinking and leaving a fading trail of its color as it dissolves; it vanishes just as it reaches the front.',
+    over(o, I, y, hc, e) { const sx = I.x0 + 6; if (o.t < -.85) { fall104(o, e, sx, y - 40, y - 10, 15); return; } if (o.t < 0) { const k = clamp((o.t + .85) / .85), x = lerp(sx, o.a, k * k * (3 - 2 * k)), b = Math.sin((o.t + .85) * 10) * 1;
+        const g = ctx.createLinearGradient(sx, 0, x, 0); g.addColorStop(0, hexA(hc, 0)); g.addColorStop(1, hexA(hc, .7)); ctx.fillStyle = g; ctx.fillRect(sx, y - 6, Math.max(0, x - sx), 2); emo98(e, x, y - 10 + b + k * 2, 15 * (1 - k * .65), Math.sin((o.t + .85) * 6) * .25, 1 - k * .4); }
+      if (o.t >= 0) once('al108f' + o.i, () => { for (let q = 0; q < 6; q++) spawn({ x: o.a, y: y - 5, vx: (Math.random() - .3) * 40, vy: -20 - Math.random() * 20, g: 100, life: .4, size: 1.2, col: hc }); }); } },
+};
+function r108(K) { const Z = EN108[K];
+  const V = { grow(p, x0, y, L, f, t, I) { fill107(BAR108, x0, y, I, t); },
+    over(p, I) { const y = I.ly, Lh = act104(I, -1.1, 1.4), o = Lh && Lh.t < .6 ? Lh : null, [e, hc] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0];
+      if (Z.mortar) { mortar108(I, o, e, hc, Z.tip && o ? .9 * (o.t < -.42 ? 0 : o.t < -.32 ? eOut((o.t + .42) / .1) : o.t < -.05 ? 1 : 1 - eOut(clamp((o.t + .05) / .25))) : 0); if (o && Z.pour) { const [mx, my] = MX105(I); pour105(o, mx, my, y, hc, o.a); } }
+      hits101(I).forEach(o => { const [e, hc] = HERB98[(S.v0 + o.i) % 5], v = fat45(o.i), n = pick45(o.i, 4); Z.over(o, I, y, hc, e);
+        if (o.t >= 0 && o.t < .55) { const k = Math.sin(Math.PI * o.t / .55), c = col107(BAR108, I); ctx.save(); ctx.globalAlpha *= .85 * k; ctx.shadowColor = c; ctx.shadowBlur = 14; const g = ctx.createLinearGradient(0, y - 6 - 3 * k, 0, y + 6 + 3 * k); g.addColorStop(0, lv103(c)); g.addColorStop(1, dk103(c)); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(I.x0 - 2, y - 6 - 3 * k, I.tipX - I.x0 + 2, 12 + 6 * k, 4); ctx.fill(); ctx.restore(); }
+        if (o.t >= 0) once('al108z' + o.i, () => { for (let q = 0; q < 8; q++) spawn({ x: o.b, y: y - 4 + Math.random() * 8, vx: 20 + Math.random() * 40, vy: (Math.random() - .5) * 40 - 20, g: 120, life: .4, size: 1, col: q % 2 ? '#ffffff' : '#ffe8a0' }); });
+        if (o.t >= -.85 && o.t < 0) once('al108l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n)));
+        if (Z.mortar && o.t >= -.85 && o.t < -.4) once('al108g' + o.i, () => noise(0, .45, .005 * v, 700, .9, 'bandpass'));
+        if (o.t >= -.42 && o.t < 0) once('al108s' + o.i, () => noise(0, .4, .004 * v, Z.mortar ? 2400 : 1200, .7, 'lowpass'));
+        if (o.t >= 0) once('al108f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); }); }); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (The bar, locked: living potion, swell and glow, fizzing front, slosh. Gap switch under the moments; placeholder sound.)'; }, get note() { return 'herb goes in: ' + Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r108('A'), PB: r108('B'), PC: r108('C'), PD: r108('D'), PE: r108('E'), PF: r108('F') });
+
+// Moved out 2026-11-17 (round 110 prep, a fresh brainstorm): helpers and options of rounds 100-109 (crumb100, herb101, steps101, pot103, wheel103, the mortar helpers 105, puff106/scene106, fill107 family, round 109 CL109/r109, round 102 T102/wx102/al102/carved102).
+// ---------- round 100 (2026-11-17): Alchemy base = 99 A (herb, ground, flash; the hue ladder). "Differing variations of grinding the herbs, like a wheeled herb grinder for one".
+// The herb and the flash stay; only the grinding changes (t -.55..0, the flash at 0): A the ring (99 A), B Wheel grinder (a stone wheel on an axle rolls back and forth over the herb
+// on the bar's top edge, the bar is its trough), C Millstones (two flat stones above the front; the herb drops in the top, the top stone turns, powder spills from the gap),
+// D Sieve (a shallow mesh tray; the herb is shaken on it and sifts through as a fine rain) ----------
+const crumb100 = (x, y, hc, n = 3, sp = 20) => { for (let k = 0; k < n; k++) spawn({ x: x + (Math.random() - .5) * 6, y, vx: (Math.random() - .5) * sp, vy: 10 + Math.random() * 15, g: 260, life: .22, size: .9, shape: 'sq', vr: 8, col: k % 2 ? hc : '#ffffff' }); };
+// ---------- round 101 (2026-11-17): Alchemy base = 99 A with 100 B's wheel grinder; "differing variations of wheel grinder", and "it's abrupt and hard to tell what's going on, especially
+// with the herb". Readability for all four: skill-ups spaced 1.5 s here (a craft cast is longer than that in game), a bigger herb (18 px) that lands with a squash, flattens a step per pass into a
+// green smear that sinks in, and only then the flash (98 C). A Edge roll (100 B, slower), B Own trough, C One rolling pass along the new stretch, D Edge-runner (circles a post) ----------
+function herb101(o, e, hc, x, yb, crush, y, s = 18) { const t = o.t; if (t < -.85) { const u = (t + 1.05) / .2; emo98(e, x, lerp(y - 40, yb - 9, u * u), s, (1 - u) * 1.2); return; }
+  const sq = t < -.75 ? Math.sin((t + .85) / .1 * Math.PI) * .25 : 0, sink = clamp((t + .1) / .1), al = 1 - sink;
+  if (al <= 0) return; const sy = Math.max(.15, 1 - crush * .85) - sq, sx = 1 + crush * .6 + sq;
+  ctx.save(); ctx.globalAlpha *= al; if (crush > .05) { ctx.fillStyle = hexA(hc, .85 * crush); ctx.beginPath(); ctx.ellipse(x, yb - 1, 6 + crush * 7, 1.6, 0, 0, 7); ctx.fill(); }
+  ctx.translate(x, yb + sink * 3); ctx.scale(sx, sy); emo98(e, 0, -s / 2, s, 0, 1 - crush * .7); ctx.restore(); }
+// crush steps: each time the wheel passes over (times in t), eased
+const steps101 = (t, at) => at.reduce((s, a) => s + eOut(clamp((t - a) / .08)) / at.length, 0);
+// ---------- round 103 (2026-11-17): Alchemy, the herb + wheel grinder direction as five whole scenes (bar, herb, wheel, payoff all different), picked from a brainstorm first:
+// A Apothecary trough, B Glass and juice, C Herbs in a row, D Juice press stream, E Big herb on stage. Same unhurried timing as 101 (skill-ups 1.5 s apart, three passes at T102) ----------
+// the potion in the ladder colors, flashing to the next color outward from the front (98 C)
+function pot103(x0, y, I, al = 1) { const A = hits101(I).filter(o => o.t >= 0 && o.t < 1).pop();
+  if (!A) { const c = hue103(Math.floor(I.v + 1e-6) - I.lo); liq98(x0 - 2, I.tipX, y, lv103(c), dk103(c), al); return; }
+  const n0 = S.v0 + A.i - I.lo, c0 = hue103(n0), c1 = hue103(n0 + 1), d = 420 * A.t; liq98(x0 - 2, I.tipX, y, lv103(c0), dk103(c0), al);
+  ctx.save(); ctx.beginPath(); ctx.rect(A.a - d, y - 6, 2 * d, 12); ctx.clip(); liq98(x0 - 2, I.tipX, y, lv103(c1), dk103(c1), al); ctx.fillStyle = `rgba(255,255,255,${.75 * (1 - clamp(A.t / .35))})`; ctx.fillRect(x0 - 2, y - 6, I.tipX - x0 + 2, 12); ctx.restore(); }
+const wheel103 = (o, x, yb, r = 8.5, amp = 14) => { const wx = wx102(Object.assign({}, o, { a: x }), amp); carved102(wx, yb - r, r, (wx - x) / r, al102(o)); return wx; };
+// ---------- round 105 (2026-11-17): Alchemy base = 104 C Mortar pour ("pretty good, just needs the little grinder handle thing"): A = it with a real pestle in the bowl. Variations the user
+// picked from a brainstorm, each changing the bar, the grinding and how it goes in: B Pounding pestle (powder bar with a heap at the front), C Bar is the mortar (a stone trough bar, the
+// pestle grinds inside it), D Powder dissolves (floats, sinks, blooms in the potion), E Puff of powder (the pestle taps the rim; a cloud drifts over and settles; a glittering powder bar).
+// The user expects to keep A and add on to it next. Gap switch moved inside the panel ----------
+const MX105 = I => [I.x0 + 12, I.ly - 13];
+function pestle105(hx, hy, ang, al = 1) { const L = 17, tx = hx + Math.cos(ang) * L, ty = hy + Math.sin(ang) * L; ctx.save(); ctx.globalAlpha *= al; ctx.lineCap = 'round';
+  ctx.strokeStyle = '#6e665e'; ctx.lineWidth = 4.2; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke(); ctx.strokeStyle = '#d4ccc2'; ctx.lineWidth = 2.6; ctx.stroke();
+  const g = ctx.createRadialGradient(hx - 1, hy - 1, .5, hx, hy, 3.6); g.addColorStop(0, '#f0e8de'); g.addColorStop(1, '#8a827a'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(hx, hy, 3.6, 0, 7); ctx.fill();
+  ctx.fillStyle = '#b8b0a6'; ctx.beginPath(); ctx.arc(tx, ty, 2, 0, 7); ctx.fill(); ctx.restore(); }
+const bowlBack105 = (mx, my) => { ctx.fillStyle = '#2e2824'; ctx.beginPath(); ctx.ellipse(mx, my, 11, 2.4, 0, 0, 7); ctx.fill(); };
+const bowlFront105 = (mx, my) => { const g = ctx.createLinearGradient(0, my, 0, my + 8); g.addColorStop(0, '#c4bcb2'); g.addColorStop(1, '#5e5852'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(mx, my, 11, 7, 0, 0, Math.PI); ctx.fill();
+  ctx.strokeStyle = '#e4dcd2'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(mx, my, 11, 2.4, 0, 0, Math.PI); ctx.stroke(); ctx.fillStyle = '#d8d0c6'; ctx.beginPath(); ctx.moveTo(mx + 10, my - 1); ctx.lineTo(mx + 15, my - .5); ctx.lineTo(mx + 10, my + 1.5); ctx.fill(); };
+// the stream of powder from the spout, down to the bar top, along it to the front (t -.42..0)
+function pour105(o, mx, my, y, hc, xEnd) { if (o.t <= -.42 || o.t >= .05) return; const px = mx + 15, L1 = y - 6.5 - my, L2 = Math.max(1, xEnd - px - 4);
+  for (let q = 0; q < 16; q++) { const s = (o.t + .42) / .42 * 1.5 - q * .06; if (s < 0 || s > 1) continue; const d = s * (L1 + L2), x = d < L1 ? px + d * .3 : px + L1 * .3 + (d - L1), yy = d < L1 ? my + d : y - 6.5; ctx.fillStyle = q % 3 ? hc : '#ffffff'; ctx.fillRect(Math.min(x, xEnd), yy - .6, 1.3, 1.3); } }
+// the herb in the bowl: falls in, shrinks while ground (-.85..-.4)
+function bowlHerb105(o, e, mx, my) { if (o.t < -.85) { fall104(o, e, mx, my - 33, my - 6, 13); return; } if (o.t < -.4) { const k = clamp((o.t + .85) / .45); emo98(e, mx, my - 3, 13 * (1 - k * .8), k * 5, 1 - k * .5); } }
+// the pestle's grinding circle (-.85..-.4); resting, leaning on the rim, otherwise
+const grind105 = (o, mx, my) => { if (o && o.t > -.85 && o.t < -.4) { const ph = (o.t + .85) * 24; return [mx + Math.cos(ph) * 6, my + 1 + Math.sin(ph) * 1.4, -1.1 + Math.sin(ph) * .22]; } return [mx + 3, my + .5, -1.15]; };
+// ---------- round 106 (2026-11-17): Alchemy base LOCKED as 105 A (Mortar pour + pestle). Add-ons the user picked: a puff with sparkles rising from the bowl when the grinding is done
+// (on all), and how the powder goes in: B Drop + bubbles (flies over, drops straight down, the potion bubbles), C Mix sweeps right (streaks carry it to the new front),
+// D Fizz + color ring (sparks jump, a ring of the herb's color spreads), E Sinks and fans out (a falling column inside the potion fans out along the bottom) ----------
+function puff106(o, mx, my) { if (!o || o.t < -.42 || o.t > .25) return; const u = (o.t + .42) / .67;
+  for (let q = 0; q < 6; q++) { const a = (q - 2.5) * .45, r = 2.5 + u * 5 + q % 2, x = mx + Math.sin(a) * (3 + u * 9), yy = my - 3 - u * (14 + q % 3 * 4); ctx.fillStyle = `rgba(236,228,214,${.4 * (1 - u)})`; ctx.beginPath(); ctx.arc(x, yy, r, 0, 7); ctx.fill(); }
+  once('al106p' + o.i, () => { for (let q = 0; q < 6; q++) spawn({ x: mx + (Math.random() - .5) * 12, y: my - 4, vx: (Math.random() - .5) * 24, vy: -30 - Math.random() * 30, g: 15, life: .75, size: 2 + Math.random() * 1.5, shape: 'star', col: q % 2 ? '#fff4c0' : '#ffffff' }); tone(1046 * semi(pick45(o.i, 3)), .02, .004 * fat45(o.i), .3, 'sine'); }); }
+// the base scene; pour = false leaves the powder in the bowl for an add-on to move
+function scene106(I, o, e, hc, pour = true) { const [mx, my] = MX105(I), y = I.ly; bowlBack105(mx, my); if (o) bowlHerb105(o, e, mx, my); const [hx, hy, an] = grind105(o, mx, my); pestle105(hx, hy, an); bowlFront105(mx, my); puff106(o, mx, my); if (o && pour) pour105(o, mx, my, y, hc, o.a); }
+const lastHit107 = I => act104(I, -.1, 1.4);
+function tip107(cfg, I) { if (cfg.mo !== 'surge') return I.tipX; const o = lastHit107(I); if (!o || o.t < 0) return I.tipX; const u = clamp(o.t / .7), base = S.v0 + o.i; return I.X(base + Math.min(1, eOut(u * 1.6)) + .45 * Math.sin(Math.PI * u) * (1 - u)); }
+const mixHex107 = (a, b, k) => '#' + hex(a).map((v, i) => Math.round(lerp(v, hex(b)[i], k)).toString(16).padStart(2, '0')).join('');
+function col107(cfg, I) { const f = clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo)), c = hue104(I, Math.floor(I.v + 1e-6)); return cfg.look === 'clear' ? mixHex107(c, '#241e2c', (1 - f) * .78) : c; }
+function fill107(cfg, x0, y, I, t) { const tip = tip107(cfg, I); if (tip <= x0) return; const c = col107(cfg, I), f = clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo)), top = cfg.look === 'vial' ? y - 3.5 : y - 6;
+  if (cfg.look === 'vial') { ctx.fillStyle = 'rgba(200,220,255,.10)'; ctx.fillRect(x0 - 2, y - 6, I.x1 - x0 + 4, 12); }
+  const o = lastHit107(I), sl = (cfg.mo === 'slosh' || cfg.slosh) && o && o.t < 1.2 ? .14 * Math.sin(o.t * 13) * Math.exp(-o.t * 3.5) : 0, cx = (x0 + tip) / 2, sy = x => top + (x - cx) * sl;
+  const g = ctx.createLinearGradient(0, top, 0, y + 6); g.addColorStop(0, lv103(c)); g.addColorStop(1, dk103(c)); ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(x0 - 2, sy(x0 - 2)); ctx.lineTo(tip, sy(tip)); ctx.lineTo(tip, y + 7); ctx.lineTo(x0 - 2, y + 7); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 2, sy(x0 - 2) + .5); ctx.lineTo(tip, sy(tip) + .5); ctx.stroke();
+  if (o && o.t >= 0 && o.t < .35) { ctx.fillStyle = `rgba(255,255,255,${.45 * (1 - o.t / .35)})`; ctx.fillRect(x0 - 2, y - 6, tip - x0 + 2, 12); }
+  if (cfg.look === 'clear') { ctx.fillStyle = `rgba(20,16,12,${.55 * (1 - f)})`; for (let x = x0; x < tip; x += 3) if (rnd53(x * 1.1) > .55) ctx.fillRect(x, y - 4 + rnd53(x * 2.2) * 8, 1.2, 1.2); }
+  if (cfg.look === 'living') { let off = t * 10; S.hits.forEach(h => { off += 30 * eOut(clamp((S.age - h - HIT) / .8)); }); for (let k = 0; k < 18; k++) { const w = Math.max(1, tip - x0), x = x0 + ((k * 37.3 + off * (.6 + (k % 3) * .25)) % w), yy = y + Math.sin(k * 1.7 + t * (1 + k % 2)) * 3.5;
+      ctx.fillStyle = `rgba(255,255,255,${.35 + .4 * (k % 2)})`; ctx.fillRect(x, yy, 1.2, 1.2); } }
+  if (cfg.look === 'vial') { ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(x0, y - 5.5, I.x1 - x0, 1); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x0, y + 4, I.x1 - x0, 1); const gx = x0 + ((t * 35) % (I.x1 - x0 + 60)) - 30; ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(gx, y - 3, 9, 1.4); }
+  if (cfg.mo === 'fizz' || cfg.fizz) { ctx.fillStyle = mix(c, '#ffffff', .6); ctx.fillRect(tip - 1.5, y - 6, 1.5, 12); for (let q = 0; q < 6; q++) { const u = ((t * 1.6 + q / 6) % 1); ctx.fillStyle = `rgba(255,255,255,${.8 * (1 - u)})`; ctx.fillRect(tip - 3 - (q % 2) * 2, y + 5 - u * 11, 1, 1); } }
+  return tip; }
+// ---------- round 109 (2026-11-17): clean restart ("over-zealous with the additions; start clean, a few options that read clean, satisfying, room to improve"; and not old ideas trimmed).
+// One bar, one action, one payoff each: A Grind and pour (the one kept: mortar + pestle, one pour, the living potion swells), and three new: B Toward the recipe's color,
+// C Pulse charge, D Essence drawn from the herb ----------
+const LIV109 = { look: 'living' };
+const one109 = (I, a = -1.1, b = .6) => { const L = act104(I, -1.1, 1.4); return L && L.t > a && L.t < b ? L : null; };
+function swell109(I, y, c, o) { if (!o || o.t < 0 || o.t > .55) return; const k = Math.sin(Math.PI * o.t / .55); ctx.save(); ctx.globalAlpha *= .8 * k; ctx.shadowColor = c; ctx.shadowBlur = 12; const g = ctx.createLinearGradient(0, y - 8, 0, y + 8); g.addColorStop(0, lv103(c)); g.addColorStop(1, dk103(c)); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(I.x0 - 2, y - 6 - 2.5 * k, I.tipX - I.x0 + 2, 12 + 5 * k, 4); ctx.fill(); ctx.restore(); }
+const TGT109 = '#e8504a', BASE109 = '#5a5870';
+const CL109 = {
+  A: { name: 'Grind and pour', desc: 'The living potion bar (slow motes drifting in it). The herb drops into a mortar at the start of the bar, the pestle grinds it, and one clean stream of powder pours along the bar into the front; the potion swells and glows one step forward. Nothing else.',
+    grow(x0, y, I, t) { fill107(LIV109, x0, y, I, t); },
+    over(I, y, o, e, hc) { const [mx, my] = MX105(I); bowlBack105(mx, my); if (o) bowlHerb105(o, e, mx, my); const [hx, hy, an] = grind105(o, mx, my); pestle105(hx, hy, an); bowlFront105(mx, my); if (o) pour105(o, mx, my, y, hc, o.a); swell109(I, y, col107(LIV109, I), o); },
+    snd(o, v, n) { if (o.t >= -.85 && o.t < -.4) once('c9g' + o.i, () => noise(0, .45, .005 * v, 700, .9, 'bandpass')); if (o.t >= -.42 && o.t < 0) once('c9p' + o.i, () => noise(0, .4, .004 * v, 2400, .7, 'lowpass')); } },
+  B: { name: 'Toward the recipe’s color', desc: 'New: the recipe has a color (a ring of it around the recipe icon: Strong Troll’s Blood is red). The potion starts dull grey-violet; each skill-up one drop of the herb lands at the front with a small ring, and the potion shifts one step closer to the recipe’s color, the new color washing back from the front. When the bar fills, the color matches and the icon lights.',
+    col(I, j) { return mixHex107(BASE109, TGT109, clamp((j - I.lo) / Math.max(1, S.nx.lv - I.lo))); },
+    grow(x0, y, I, t) { const o = one109(I, -.05, .7), j = Math.floor(I.v + 1e-6); if (!o) { const c = this.col(I, j); liq98(x0 - 2, I.tipX, y, lv103(c), dk103(c)); return; }
+      const c0 = this.col(I, S.v0 + o.i), c1 = this.col(I, S.v0 + o.i + 1), xs = lerp(I.tipX, x0 - 2, eOut(clamp(o.t / .6))); liq98(x0 - 2, I.tipX, y, lv103(c0), dk103(c0)); ctx.save(); ctx.beginPath(); ctx.rect(xs, y - 6, I.tipX - xs + 1, 12); ctx.clip(); liq98(x0 - 2, I.tipX, y, lv103(c1), dk103(c1)); ctx.restore(); },
+    over(I, y, o, e, hc) { const ux = I.x1 + 18; ctx.strokeStyle = hexA(TGT109, .9); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ux, y, 13, 0, 7); ctx.stroke();
+      if (!o) return; if (o.t < 0 && o.t > -.4) { const u = (o.t + .4) / .4; ctx.fillStyle = hc; ctx.beginPath(); const yy = lerp(y - 30, y - 7, u * u); ctx.moveTo(o.a, yy - 4); ctx.quadraticCurveTo(o.a + 3, yy, o.a, yy + 2.5); ctx.quadraticCurveTo(o.a - 3, yy, o.a, yy - 4); ctx.fill(); }
+      if (o.t >= 0) once('c9b' + o.i, () => spawn({ x: o.a, y: y - 6, size: 2, shape: 'ring', grow: 10, life: .4, col: '#ffffff' })); },
+    snd(o, v, n) { if (o.t >= -.05) once('c9d' + o.i, () => tone(700 * semi(n), 0, .012 * v, .1, 'sine', 420 * semi(n))); } },
+  C: { name: 'Pulse charge', desc: 'New, no tools: the potion’s front breathes with a soft glow. Each skill-up a bright pulse of light runs from the start of the bar to the front in a blink, and where it arrives the front steps forward with a flash and a soft ring; the pulse leaves the potion a touch brighter.',
+    grow(x0, y, I, t) { const c = hue104(I, Math.floor(I.v + 1e-6)); liq98(x0 - 2, I.tipX, y, lv103(c), dk103(c)); const br = .25 + .15 * Math.sin(t * 3), g = ctx.createLinearGradient(I.tipX - 16, 0, I.tipX, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, `rgba(255,255,255,${br})`); ctx.fillStyle = g; ctx.fillRect(I.tipX - 16, y - 6, 16, 12);
+      const o = one109(I, -.4, .2); if (o && o.t < 0) { const x = lerp(x0, o.a, eOut(clamp((o.t + .35) / .35))), pg = ctx.createLinearGradient(x - 26, 0, x + 4, 0); pg.addColorStop(0, 'rgba(255,255,255,0)'); pg.addColorStop(.85, 'rgba(255,255,255,.9)'); pg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = pg; ctx.fillRect(x - 26, y - 6, 30, 12); } },
+    over(I, y, o) { if (o && o.t >= 0) once('c9c' + o.i, () => { spawn({ x: o.a, y, size: 3, shape: 'ring', grow: 12, life: .4, col: '#ffffff' }); spawn({ x: o.a, y, size: 4, shape: 'star', life: .3, col: '#ffffff' }); }); swell109(I, y, hue104(I, Math.floor(I.v + 1e-6)), o); },
+    snd(o, v, n) { if (o.t >= -.35) once('c9u' + o.i, () => tone(330 * semi(n), 0, .008 * v, .4, 'sine', 660 * semi(n), .2)); } },
+  D: { name: 'Essence drawn from the herb', desc: 'New: a herb sits above the start of the bar, glowing gently. Each skill-up a straight thread of light is drawn from the herb down to the front of the potion and a bead of its essence slides along it into the potion; the front steps forward and the herb grows a little paler, spent as the bar fills toward the recipe.',
+    grow(x0, y, I, t) { fill107(LIV109, x0, y, I, t); },
+    over(I, y, o, e, hc) { const hx = I.x0 + 8, hy = y - 22, used = clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo)), [he, hcol] = HERB98[S.v0 % 5];
+      const rg = ctx.createRadialGradient(hx, hy, 1, hx, hy, 14); rg.addColorStop(0, hexA(hcol, .45 * (1 - used * .7))); rg.addColorStop(1, hexA(hcol, 0)); ctx.fillStyle = rg; ctx.fillRect(hx - 14, hy - 14, 28, 28);
+      const pul = o && o.t > -.5 && o.t < 0 ? Math.sin(Math.PI * (o.t + .5) / .5) * .12 : 0; emo98(he, hx, hy, 18 * (1 + pul), 0, 1 - used * .55);
+      if (o && o.t > -.5 && o.t < .2) { const ext = clamp((o.t + .5) / .2), fade = o.t > 0 ? 1 - o.t / .2 : 1, ex = lerp(hx + 6, o.a, ext), ey = lerp(hy + 6, y - 6, ext); ctx.strokeStyle = hexA(hcol, .8 * fade); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(hx + 6, hy + 6); ctx.lineTo(ex, ey); ctx.stroke();
+        if (o.t > -.3 && o.t < 0) { const u = (o.t + .3) / .3; bead104(lerp(hx + 6, o.a, u * u), lerp(hy + 6, y - 6, u * u), hcol); } }
+      if (o && o.t >= 0) once('c9e' + o.i, () => spawn({ x: o.a, y: y - 5, size: 2, shape: 'ring', grow: 8, life: .35, col: hcol })); swell109(I, y, col107(LIV109, I), o); },
+    snd(o, v, n) { if (o.t >= -.5) once('c9h' + o.i, () => tone(523 * semi(n), 0, .007 * v, .5, 'sine', null, .15)); } },
+};
+function r109(K) { const Z = CL109[K];
+  const V = { grow(p, x0, y, L, f, t, I) { Z.grow(x0, y, I, t); },
+    over(p, I) { const y = I.ly, o = one109(I), [e, hc] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0]; Z.over(I, y, o, e, hc);
+      hits101(I).forEach(o => { const v = fat45(o.i), n = pick45(o.i, 4); if (K === 'A' && o.t >= -.85 && o.t < 0) once('c9l' + o.i, () => tone(330 * semi(n), 0, .01 * v, .12, 'sine', 220 * semi(n))); Z.snd(o, v, n);
+        if (o.t >= 0) once('c9f' + o.i, () => { tone(262 * semi(n), 0, .01 * v, .8, 'sine', null, .08); tone(392 * semi(n), 0, .007 * v, .8, 'sine', null, .08); }); }); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Gap switch under the moments; placeholder sound.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r109('A'), PB: r109('B'), PC: r109('C'), PD: r109('D') }); delete FAM.PE; delete FAM.PF;
+// bubbles sitting on the surface where the powder enters (t -.1..0.7): they swell, then pop
+// ---------- round 102 (2026-11-17): Alchemy base LOCKED as 101 A Edge roll (herb lands, a wheel rolls three passes over it on the bar's top edge, smear sinks in, flash). "Work on the
+// animations/visuals, I'd like to see it look better". Same timing, three looks: B Carved stone (a lit, chiselled wheel on a turned axle, motion ghosts, juice flecks), C Ring and glint
+// (no drawn object: a bright rim ring with a rolling glint, leaf bits and an impact ring per pass), D Heavy wheel (bigger and weighty: the bar jolts on each pass, dust at each turn) ----------
+const T102 = [0, 1, 2].map(k => -.62 + (k * 2 + 1) / 6 * .5);
+const wx102 = (o, amp = 14) => { if (o.t < -.62) return o.a + amp + 20 * clamp((-.62 - o.t) / .14); if (o.t > -.12) return o.a - amp - 24 * clamp((o.t + .12) / .14); return o.a + amp * Math.cos(clamp((o.t + .62) / .5) * 3 * Math.PI); };
+const al102 = o => clamp((o.t + .78) / .1) * clamp((.04 - o.t) / .1);
+function carved102(x, y, r, ang, al, ax = 15) { if (al <= 0) return; ctx.save(); ctx.globalAlpha *= al;
+  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x + 1.5, y + r + .8, r * .95, 1.8, 0, 0, 7); ctx.fill();
+  const wg = ctx.createLinearGradient(0, y - 2, 0, y + 2); wg.addColorStop(0, '#c8955a'); wg.addColorStop(1, '#6a4020'); ctx.strokeStyle = wg; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - ax, y); ctx.lineTo(x + ax, y); ctx.stroke();
+  [-1, 1].forEach(s => { ctx.fillStyle = '#8a5a30'; ctx.beginPath(); ctx.arc(x + s * ax, y, 2.4, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,220,170,.5)'; ctx.beginPath(); ctx.arc(x + s * ax - .6, y - .7, .9, 0, 7); ctx.fill(); });
+  ctx.fillStyle = '#4e4842'; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  const g = ctx.createRadialGradient(x - r * .35, y - r * .4, 1, x, y, r - 1.5); g.addColorStop(0, '#f0e8de'); g.addColorStop(.6, '#a89e94'); g.addColorStop(1, '#7a7068'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r - 1.5, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r - .5, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
+  ctx.strokeStyle = 'rgba(50,42,36,.55)'; for (let q = 0; q < 8; q++) { const a = ang + q * Math.PI / 4; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * (r - 4.5), y + Math.sin(a) * (r - 4.5)); ctx.lineTo(x + Math.cos(a) * (r - 2), y + Math.sin(a) * (r - 2)); ctx.stroke(); }
+  ctx.fillStyle = '#9a6a3a'; ctx.beginPath(); ctx.arc(x, y, 2.6, 0, 7); ctx.fill(); ctx.fillStyle = '#3a2410'; ctx.beginPath(); ctx.arc(x, y, 1, 0, 7); ctx.fill(); ctx.restore(); }
+
+// Round 110 (eight story bars: ST110, blob110, r110; the user: only the Bottle shelf was unique, the bar itself never changed), moved out 2026-11-17.
+// ---------- round 110 (2026-11-17): a fresh brainstorm ("branch out like Mining's blasts + peon, Leatherworking's pulled tarp, Fishing's reel + big fish, the cooking pan flip;
+// unique, fun, clean, super satisfying, no echo of the craft ring, calm for 100+ crafts"). The eight picked, each its own little story on the bar, one calm beat per point
+// (finales come later): A Bottle shelf, B Slime pet, C Stretching ooze, D Bouncing droplet, E Red goo stone (the philosopher's stone take), F Homunculus, G Happy accident,
+// H Balance scale ----------
+const mixHex110 = (a, b, k) => '#' + hex(a).map((v, i) => Math.round(lerp(v, hex(b)[i], k)).toString(16).padStart(2, '0')).join('');
+const cur110 = I => hits101(I).filter(o => o.t > -.7 && o.t < 1.2).pop();
+const fr110 = I => clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo));
+const blob110 = (x, y, rx, ry, c, eyes = 0, look = 0) => { const g = ctx.createRadialGradient(x - rx * .3, y - ry * .4, .5, x, y, Math.max(rx, ry)); g.addColorStop(0, mix(c, '#ffffff', .55)); g.addColorStop(.6, c); g.addColorStop(1, mix(c, '#000000', .35)); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(x - rx * .35, y - ry * .45, rx * .22, ry * .15, -.4, 0, 7); ctx.fill();
+  if (eyes) { [-1, 1].forEach(s => { ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x + s * rx * .32 + look, y - ry * .1, eyes, 0, 7); ctx.fill(); ctx.fillStyle = '#1a1020'; ctx.beginPath(); ctx.arc(x + s * rx * .32 + look * 1.3, y - ry * .1, eyes * .5, 0, 7); ctx.fill(); }); } };
+const GO110 = '#d8344a';
+const ST110 = {
+  A: { name: 'Bottle shelf', desc: 'The bar is a wooden shelf. Each skill-up a small potion bottle in its own color drops onto the shelf at the front, squashes on landing and clinks against its neighbor; the row of bottles is your progress toward the recipe (thin vials when the gap is long).',
+    grow(x0, y, I, t) { ctx.fillStyle = 'rgba(70,44,22,.55)'; ctx.fillRect(x0 - 2, y + 2, I.x1 - x0 + 4, 4); },
+    over(I, y, t) { const g = ctx.createLinearGradient(0, y + 3, 0, y + 7); g.addColorStop(0, '#b8865a'); g.addColorStop(1, '#5a3a1e'); ctx.fillStyle = g; ctx.fillRect(I.x0 - 4, y + 3, I.x1 - I.x0 + 8, 3.5);
+      const n = S.nx.lv - I.lo, slot = (I.x1 - I.x0) / n, w = Math.min(9, slot * .78), o = cur110(I), lvl = Math.floor(I.v + 1e-6);
+      const topJ = S.v0 + S.hits.filter(h => S.age - h - HIT >= -.45).length; for (let j = I.lo; j < topJ && j < S.nx.lv; j++) { const cx = I.X(j + .5), last = o && j === S.v0 + o.i; let dy = 0, sq = 0; if (last && o.t < 0) dy = -26 * (1 - Math.pow(clamp((o.t + .45) / .45), 2)); if (last && o.t >= 0 && o.t < .25) sq = Math.sin(Math.PI * o.t / .25) * .25;
+        const h = 13, c = HUE98[(j * 2 + 1) % 6], bx = cx - w / 2, by = y + 3 - h + dy; ctx.save(); ctx.translate(cx, y + 3 + dy); ctx.scale(1 + sq, 1 - sq); ctx.translate(-cx, -(y + 3 + dy));
+        ctx.fillStyle = 'rgba(210,225,255,.25)'; ctx.beginPath(); ctx.roundRect(bx, by + 4, w, h - 4, Math.min(3, w / 2)); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(bx + .5, by + 6, w - 1, h - 6.5, Math.min(2.5, w / 2)); ctx.fill();
+        ctx.fillStyle = 'rgba(210,225,255,.45)'; ctx.fillRect(cx - w * .18, by + 1, w * .36, 3.5); ctx.fillStyle = '#8a5a30'; ctx.fillRect(cx - w * .22, by, w * .44, 1.5); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(bx + 1, by + 6, 1, h - 8); ctx.restore(); }
+      if (o && o.t >= 0) once('s0a' + o.i, () => spawn({ x: I.X(S.v0 + o.i + .5) - w / 2, y: y - 4, size: 2.5, shape: 'star', life: .25, col: '#ffffff' })); },
+    snd(o, v, n) { if (o.t >= 0) once('s0as' + o.i, () => { tone(1568 * semi(n), 0, .006 * v, .25, 'sine'); tone(2349 * semi(n), .01, .003 * v, .18, 'sine'); }); } },
+  B: { name: 'Slime pet', desc: 'A little green slime with two dot eyes lives at the front of the bar. Each skill-up a herb drops in front of it; it leans in, gulps the herb, wobbles, and scoots forward to the new front leaving a glossy slime trail (the fill). It grows a little as the bar fills.',
+    grow(x0, y, I, t) { liq98(x0 - 2, I.tipX - 4, y, '#a8f070', '#3a8a2a'); },
+    over(I, y, t) { const o = cur110(I), f = fr110(I), s = 1 + f * .4, [e] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0]; let x = I.tipX, lean = 0, wob = Math.sin(t * 2) * .04;
+      if (o && o.t < -.3) { const u = clamp((o.t + .7) / .3); emo98(e, o.a + 14, lerp(y - 34, y - 12, u * u), 11); }
+      if (o && o.t >= -.3 && o.t < 0) { const u = (o.t + .3) / .3; lean = Math.sin(Math.PI * u) * 4; emo98(e, o.a + 14 - u * 8, y - 12 + u * 2, 11 * (1 - u), 0, 1 - u); if (u > .6) wob = .15 * Math.sin(u * 30); }
+      if (o && o.t >= 0 && o.t < .6) wob = .12 * Math.sin(o.t * 25) * (1 - o.t / .6);
+      blob110(x + lean, y - 8 * s, 8 * s * (1 + wob), 6.5 * s * (1 - wob), '#6ad84a', 1.6 * s, lean > 1 ? 1 : 0); },
+    snd(o, v, n) { if (o.t >= -.12) once('s0bs' + o.i, () => { tone(180 * semi(n), 0, .012 * v, .12, 'sine', 120 * semi(n)); tone(520 * semi(n), .05, .005 * v, .1, 'sine', 900 * semi(n)); }); } },
+  C: { name: 'Stretching ooze', desc: 'The potion is a living violet goo with a rounded front. Each skill-up the front stretches out a thin reaching arm to the new point, its tip sticks there with a little splat, then the whole body slides up to it and jiggles as it settles.',
+    grow(x0, y, I, t) { const o = cur110(I); let tip = I.tipX, jig = o && o.t > 0 && o.t < .8 ? Math.sin(o.t * 22) * 1.6 * (1 - o.t / .8) : 0; liq98(x0 - 2, tip - 5, y, '#c890ff', '#5a2aa0'); },
+    over(I, y, t) { const o = cur110(I); const tip = I.tipX, jig = o && o.t > 0 && o.t < .8 ? Math.sin(o.t * 22) * (1 - o.t / .8) : 0, g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, '#c890ff'); g.addColorStop(1, '#5a2aa0');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(tip - 5, y, 6 + jig * 1.5, 6 - jig * .8, 0, -Math.PI / 2, Math.PI / 2); ctx.fill();
+      if (o && o.t > -.4 && o.t < .45) { const ext = o.t < -.1 ? eOut((o.t + .4) / .3) : 1, ret = o.t > 0 ? clamp(o.t / .45) : 0, x1 = lerp(o.a, o.b, ext), x0a = lerp(o.a, o.b, eOut(ret)); if (x1 > x0a + 1) { ctx.fillStyle = '#a870f0'; ctx.beginPath(); ctx.roundRect(x0a, y - 1.6, x1 - x0a, 3.2, 1.6); ctx.fill(); ctx.beginPath(); ctx.arc(x1, y, 2.6, 0, 7); ctx.fill(); } }
+      if (o && o.t >= -.1) once('s0c' + o.i, () => spawn({ x: o.b, y, size: 1.5, shape: 'ring', grow: 6, life: .25, col: '#e8d0ff' })); },
+    snd(o, v, n) { if (o.t >= -.1) once('s0cs' + o.i, () => tone(392 * semi(n), 0, .008 * v, .15, 'sine', 600 * semi(n))); if (o.t >= .1) once('s0ct' + o.i, () => tone(196 * semi(n), 0, .008 * v, .25, 'sine')); } },
+  D: { name: 'Bouncing droplet', desc: 'One glossy drop of potion sits on top of the bar at the front. Each skill-up it squats, then hops in a little arc to the new front, squashes as it lands with a tiny splash, and its color fills the stretch it jumped over.',
+    grow(x0, y, I, t) { liq98(x0 - 2, I.tipX, y, '#a0c8ff', '#2a5ab0'); },
+    over(I, y, t) { const o = cur110(I); let x = I.tipX, yy = y - 10, sx = 1, sy = 1;
+      if (o && o.t > -.15 && o.t < 0) { const k = Math.sin(Math.PI * (o.t + .15) / .15); sx = 1 + .25 * k; sy = 1 - .25 * k; }
+      if (o && o.t >= 0 && o.t < .45) { const u = o.t / .45; x = lerp(o.a, o.b, u); yy = y - 10 - Math.sin(Math.PI * u) * 14; sx = .9; sy = 1.12; }
+      if (o && o.t >= .45 && o.t < .65) { const k = Math.sin(Math.PI * (o.t - .45) / .2); sx = 1 + .35 * k; sy = 1 - .3 * k; }
+      if (o && o.t >= .45) once('s0d' + o.i, () => { spawn({ x: o.b, y: y - 6, size: 2, shape: 'ring', grow: 7, life: .3, col: '#d0e8ff' }); for (let q = 0; q < 3; q++) spawn({ x: o.b, y: y - 6, vx: (q - 1) * 25, vy: -25, g: 300, life: .3, size: 1, col: '#d0e8ff' }); });
+      ctx.save(); ctx.translate(x, yy + 4); ctx.scale(sx, sy); ctx.translate(-x, -(yy + 4)); blob110(x, yy, 4.2, 4.2, '#5a9aff'); ctx.restore(); },
+    snd(o, v, n) { if (o.t >= 0) once('s0ds' + o.i, () => tone(520 * semi(n), 0, .006 * v, .1, 'sine', 780 * semi(n))); if (o.t >= .45) once('s0dt' + o.i, () => tone(440 * semi(n), 0, .009 * v, .14, 'sine', 300 * semi(n))); } },
+  E: { name: 'Red goo stone', desc: 'The philosopher’s-stone take: the bar ahead is dull lead grey; behind the front it is glowing red goo. A small red stone sits at the front. Each skill-up the stone melts down into the bar, its goo flows forward to the new front, then pulls itself back up into a stone with a glint.',
+    grow(x0, y, I, t) { liq98(x0 - 2, I.x1 + 2, y, '#7a7a84', '#3a3a42'); liq98(x0 - 2, I.tipX, y, '#ff5a6a', '#7a0a1a'); for (let k = 0; k < 8; k++) { const x = x0 + ((k * 41 + t * 7) % Math.max(1, I.tipX - x0)); ctx.fillStyle = `rgba(255,200,200,${.25 + .25 * Math.sin(t * 2 + k)})`; ctx.fillRect(x, y - 3 + (k * 3) % 6, 3, 1); } },
+    over(I, y, t) { const o = cur110(I); let x = I.tipX, h = 1, w = 1;
+      if (o && o.t > -.35 && o.t < 0) { const u = (o.t + .35) / .35; h = 1 - u * .8; w = 1 + u * .8; x = o.a; }
+      else if (o && o.t >= 0 && o.t < .35) { h = .2; w = 1.8; } else if (o && o.t >= .35 && o.t < .65) { const u = (o.t - .35) / .3; h = .2 + .8 * eBack(u); w = 1.8 - .8 * eOut(u); }
+      if (o && o.t >= .6) once('s0e' + o.i, () => spawn({ x: x - 2, y: y - 13, size: 3, shape: 'star', life: .35, col: '#ffe0e0' }));
+      ctx.save(); ctx.shadowColor = '#ff3040'; ctx.shadowBlur = 8; ctx.fillStyle = GO110; ctx.beginPath(); ctx.ellipse(x - 1, y - 6 - 5 * h, 5 * w, 5 * h + .5, 0, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,220,220,.75)'; ctx.beginPath(); ctx.ellipse(x - 2.5, y - 6 - 7 * h, 1.6 * w, 1.1 * h + .2, -.4, 0, 7); ctx.fill(); ctx.restore(); },
+    snd(o, v, n) { if (o.t >= -.35) once('s0es' + o.i, () => tone(147 * semi(n), 0, .01 * v, .5, 'sine', 110 * semi(n), .1)); if (o.t >= .6) once('s0et' + o.i, () => tone(1175 * semi(n), 0, .004 * v, .3, 'sine')); } },
+  F: { name: 'Homunculus', desc: 'A tiny red goo creature made from the stone walks along the bar. Each skill-up it hops forward to the new front, and as the bar fills it grows: a blob, then a head, then little arms, then legs; a sparkle each time it grows a part. The red goo it walks on is the fill.',
+    grow(x0, y, I, t) { liq98(x0 - 2, I.tipX, y, '#ff6a7a', '#6a0a1a'); },
+    over(I, y, t) { const o = cur110(I), f = fr110(I), st = Math.min(3, Math.floor(f * 4 + 1e-6)); let x = I.tipX - 3, hop = 0; if (o && o.t >= 0 && o.t < .45) hop = Math.sin(Math.PI * o.t / .45) * 7;
+      const by = y - 13 - hop, bob = Math.sin(t * 4) * .5; ctx.save(); ctx.strokeStyle = GO110; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+      if (st >= 3) { ctx.beginPath(); ctx.moveTo(x - 2, by + 4); ctx.lineTo(x - 3, by + 7 + (hop ? -1 : 0)); ctx.moveTo(x + 2, by + 4); ctx.lineTo(x + 3, by + 7); ctx.stroke(); }
+      if (st >= 2) { const a = hop ? -1.5 : Math.sin(t * 3) * .4; ctx.beginPath(); ctx.moveTo(x - 4, by); ctx.lineTo(x - 7, by - 2 + a * 2); ctx.moveTo(x + 4, by); ctx.lineTo(x + 7, by - 2 + a * 2); ctx.stroke(); }
+      ctx.restore(); blob110(x, by + bob, 5, 5, GO110, st >= 1 ? 0 : 1, 1); if (st >= 1) blob110(x + .5, by - 6 + bob, 3.6, 3.4, '#e8445a', 1, 1);
+      hits101(I).forEach(o => { const s0 = Math.min(3, Math.floor(clamp((S.v0 + o.i - I.lo) / Math.max(1, S.nx.lv - I.lo)) * 4 + 1e-6)), s1 = Math.min(3, Math.floor(clamp((S.v0 + o.i + 1 - I.lo) / Math.max(1, S.nx.lv - I.lo)) * 4 + 1e-6)); if (s1 > s0 && o.t >= .45) once('s0f' + o.i, () => { for (let q = 0; q < 5; q++) spawn({ x: o.b - 3, y: y - 16, vx: (Math.random() - .5) * 40, vy: -30 - Math.random() * 20, g: 60, life: .5, size: 2, shape: 'star', col: q % 2 ? '#ffd0d8' : '#ffffff' }); tone(1047, 0, .006, .3, 'sine'); }); }); },
+    snd(o, v, n) { if (o.t >= 0) once('s0fs' + o.i, () => tone(600 * semi(n), 0, .006 * v, .08, 'sine', 900 * semi(n))); if (o.t >= .45) once('s0ft' + o.i, () => tone(300 * semi(n), 0, .007 * v, .1, 'sine')); } },
+  G: { name: 'Happy accident', desc: 'A little alchemist humor: each skill-up a small harmless poof of colored smoke pops up from the front of the potion (a different soft color each time) and drifts away as the front steps forward. Gentle: one puff, no bang.',
+    grow(x0, y, I, t) { const c = hue104(I, Math.floor(I.v + 1e-6)); liq98(x0 - 2, I.tipX, y, lv103(c), dk103(c)); },
+    over(I, y, t) { hits101(I).forEach(o => { if (o.t < 0 || o.t > 1) return; const c = HUE98[(S.v0 + o.i * 2) % 6], u = o.t; for (let q = 0; q < 7; q++) { const a = q * .9, r = (3 + q % 3) * (.6 + u * 1.4), x = o.a + Math.cos(a) * (2 + u * 9) + u * 4, yy = y - 8 - u * 16 + Math.sin(a) * (2 + u * 4);
+      ctx.fillStyle = hexA(c, .55 * (1 - u)); ctx.beginPath(); ctx.arc(x, yy, r, 0, 7); ctx.fill(); } if (o.t < .1) { ctx.fillStyle = `rgba(255,255,255,${1 - o.t / .1})`; ctx.beginPath(); ctx.arc(o.a, y - 7, 4, 0, 7); ctx.fill(); } }); },
+    snd(o, v, n) { if (o.t >= 0) once('s0gs' + o.i, () => { noise(0, .25, .006 * v, 900, .6, 'lowpass'); tone(660 * semi(n), 0, .005 * v, .15, 'sine', 990 * semi(n)); }); } },
+  H: { name: 'Balance scale', desc: 'The whole bar hangs like a balance beam on a little post: heavy on the left at the start of the gap, it tips toward level as you skill up. Each skill-up a small gold weight drops onto the right end with a clink and the beam rocks and settles a little closer to level; level means the recipe.',
+    tilt: I => { const o = cur110(I), base = -.11 * (1 - fr110(I)); return base + (o && o.t >= 0 && o.t < .9 ? Math.sin(o.t * 14) * .025 * (1 - o.t / .9) : 0); },
+    grow(x0, y, I, t) { liq98(x0 - 2, I.tipX, y, '#ffe08a', '#a8761a'); },
+    over(I, y, t) { const o = cur110(I), n = Math.min(5, S.v0 - I.lo + S.hits.filter(h => S.age - h - HIT >= -.35).length); for (let k = 0; k < n; k++) { const last = o && k === n - 1 && o.t < 0, dy = last ? -24 * (1 - Math.pow(clamp((o.t + .35) / .35), 2)) : 0; ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.roundRect(I.x1 + 3 - 4, y - 10 - k * 3.4 + dy, 8, 3, 1); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(I.x1, y - 10 - k * 3.4 + dy, 3, .8); } },
+    snd(o, v, n) { if (o.t >= 0) once('s0hs' + o.i, () => { tone(1319 * semi(n), 0, .005 * v, .3, 'sine'); tone(988 * semi(n), .03, .003 * v, .3, 'sine'); }); } },
+};
+function r110(K) { const Z = ST110[K];
+  const V = { grow(p, x0, y, L, f, t, I) { Z.grow(x0, y, I, t); }, over(p, I) { Z.over(I, I.ly, S.age); hits101(I).forEach(o => Z.snd(o, fat45(o.i), pick45(o.i, 4))); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Fresh brainstorm; skill-ups 1.5 s apart; finales and sounds come later. Gap switch under the moments.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      if (Z.tilt) { const px = W / 2 - 13, py = top + 34; ctx.save(); ctx.fillStyle = '#6a4424'; ctx.beginPath(); ctx.moveTo(px, py + 6); ctx.lineTo(px - 6, py + 18); ctx.lineTo(px + 6, py + 18); ctx.fill(); ctx.restore(); let a = 0; const I0 = { lo: S.p.span[0], v: state().v }; a = -.11 * (1 - clamp((I0.v - I0.lo) / Math.max(1, S.nx.lv - I0.lo)));
+        const o = S.hits.map((h, i) => ({ i, t: S.age - h - HIT })).filter(o => o.t >= 0 && o.t < .9).pop(); if (o) a += Math.sin(o.t * 14) * .025 * (1 - o.t / .9); ctx.save(); ctx.translate(px, py); ctx.rotate(a); ctx.translate(-px, -py); try { barModule(top, 'A', V); } finally { ctx.restore(); } return; }
+      barModule(top, 'A', V); } }; }
+Object.assign(FAM, { PA: r110('A'), PB: r110('B'), PC: r110('C'), PD: r110('D'), PE: r110('E'), PF: r110('F'), PG: r110('G'), PH: r110('H') });
+
+// Round 111 OB111 entries B (Vial rack), D (Recipe scroll), E (Setting up the lab), F (Cascade of bulbs) and LAB111, moved out 2026-11-17 (the user kept A Shelf to cabinet and C Ingredient jars). They go inside OB111.
+  B: { name: 'Vial rack', desc: 'The bar is a wooden rack of empty glass vials. Each point a thin stream pours into the next vial and its potion rises; a full vial glows softly. No boiling, nothing on top: calm vials filling one by one (a long gap fills each vial over a few points).',
+    draw(I, y, t, G, o) { wood111(I.x0 - 6, y - 9, I.x1 - I.x0 + 12, 2.5); wood111(I.x0 - 6, y + 5, I.x1 - I.x0 + 12, 4); const vw = Math.min(7, G.sw * .58), kc = o ? G.kOf(S.v0 + o.i) : -1;
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k), c = HUE98[Math.min(5, Math.floor(k * 6 / G.N))], top = y - 17, bot = y + 5;
+        if (fr >= 1) { ctx.save(); ctx.shadowColor = c; ctx.shadowBlur = 6; ctx.fillStyle = hexA(c, .25); ctx.fillRect(cx - vw / 2, top, vw, bot - top); ctx.restore(); }
+        ctx.fillStyle = 'rgba(210,225,255,.12)'; ctx.beginPath(); ctx.roundRect(cx - vw / 2, top, vw, bot - top, [1, 1, vw / 2, vw / 2]); ctx.fill(); if (fr > 0) { const lh = (bot - top - 2) * fr; ctx.save(); ctx.beginPath(); ctx.roundRect(cx - vw / 2, top, vw, bot - top, [1, 1, vw / 2, vw / 2]); ctx.clip(); ctx.fillStyle = c; ctx.fillRect(cx - vw / 2, bot - lh, vw, lh); ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillRect(cx - vw / 2, bot - lh, vw, 1); ctx.restore(); }
+        ctx.strokeStyle = 'rgba(230,240,255,.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(cx - vw / 2, top, vw, bot - top, [1, 1, vw / 2, vw / 2]); ctx.stroke(); }
+      if (o && o.t > -.4 && o.t < .15) { const cx = G.sx(kc), al = o.t > 0 ? 1 - o.t / .15 : 1, y0 = y - 36 + 0, y1 = y + 4 - (y + 4 - (y - 15)) * G.fr(kc); ctx.strokeStyle = hexA(HUE98[Math.min(5, Math.floor(kc * 6 / G.N))], .9 * al); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(cx, y0 + 10 * clamp((o.t + .4) / .1) * 0); ctx.lineTo(cx, lerp(y0, y1, clamp((o.t + .4) / .12))); ctx.stroke(); } },
+    snd(o, v, n) { if (o.t >= -.4) once('o1bs' + o.i, () => noise(0, .35, .004 * v, 1600, .8, 'lowpass')); if (o.t >= 0) once('o1bt' + o.i, () => tone(880 * semi(n), 0, .005 * v, .3, 'sine')); } },
+  D: { name: 'Recipe scroll', desc: 'The bar is a parchment scroll with rolled ends. Each point a quill sweeps across the next entry: the herb is stamped in and a straight ink line is written under it; the inked entries are your progress (a long gap writes each line over a few points).',
+    draw(I, y, t, G, o) { const g = ctx.createLinearGradient(0, y - 14, 0, y + 10); g.addColorStop(0, '#f0e2bc'); g.addColorStop(1, '#c8b080'); ctx.fillStyle = g; ctx.fillRect(I.x0 - 2, y - 14, I.x1 - I.x0 + 4, 24);
+      [I.x0 - 8, I.x1 + 2].forEach(x => { const rg = ctx.createLinearGradient(x, 0, x + 6, 0); rg.addColorStop(0, '#9a7a4a'); rg.addColorStop(.5, '#e8d4a4'); rg.addColorStop(1, '#8a6a3a'); ctx.fillStyle = rg; ctx.beginPath(); ctx.roundRect(x, y - 16, 6, 28, 3); ctx.fill(); });
+      const kc = o ? G.kOf(S.v0 + o.i) : -1, sz = Math.min(11, G.sw * .8);
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k); if (fr <= 0) { ctx.fillStyle = 'rgba(90,70,40,.18)'; ctx.fillRect(cx - G.sw * .32, y + 4, G.sw * .64, 1); continue; } const [e] = HERB98[k % 5];
+        let s = 1; if (k === kc && o && o.t >= 0 && o.t < .2 && G.first(S.v0 + o.i)) s = 1.5 - .5 * (o.t / .2); emo98(e, cx, y - 5, sz * s, 0, .9); ctx.fillStyle = '#3a2a16'; ctx.fillRect(cx - G.sw * .32, y + 4, G.sw * .64 * fr, 1.3); }
+      if (o && o.t > -.3 && o.t < .15) { const u = clamp((o.t + .3) / .45), cx = G.sx(kc), qx = cx - G.sw * .32 + G.sw * .64 * u, qy = y + 4; ctx.save(); ctx.translate(qx, qy); ctx.rotate(-.9); ctx.fillStyle = '#f4f0ea'; ctx.beginPath(); ctx.ellipse(10, 0, 9, 2.6, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#5a4a3a'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(18, 0); ctx.stroke(); ctx.restore(); } },
+    snd(o, v, n) { if (o.t >= -.3) once('o1ds' + o.i, () => { noise(0, .18, .004 * v, 3000, 2, 'bandpass'); noise(.2, .12, .003 * v, 2600, 2, 'bandpass'); }); if (o.t >= 0) once('o1dt' + o.i, () => tone(392 * semi(n), 0, .006 * v, .2, 'triangle')); } },
+  E: { name: 'Setting up the lab', desc: 'The bar is a workbench with faint outlines of a lab to come. Each point the next piece (an alembic, a candle, scales, herbs, a scroll, a gem…) drops onto the bench with a little bounce and a puff of dust, building the scene until the lab is ready (a long gap brings each piece in over a few points).',
+    draw(I, y, t, G, o) { wood111(I.x0 - 6, y + 4, I.x1 - I.x0 + 12, 5); ctx.fillStyle = '#4a2c14'; ctx.fillRect(I.x0 - 2, y + 9, 4, 5); ctx.fillRect(I.x1 - 2, y + 9, 4, 5); const sz = Math.min(15, G.sw * .9), kc = o ? G.kOf(S.v0 + o.i) : -1, drop = o && G.first(S.v0 + o.i);
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k), e = LAB111[k % LAB111.length], falling = drop && k === kc && o.t < 0 && o.t > -.4; let dy = 0;
+        if (falling) dy = -28 * (1 - Math.pow((o.t + .4) / .4, 2)); else if (drop && k === kc && o.t >= 0 && o.t < .3) dy = -Math.abs(Math.sin(Math.PI * o.t / .3)) * 3;
+        emo98(e, cx, y - sz / 2 + 3 + dy, sz, 0, fr > 0 || falling ? .45 + .55 * Math.max(fr, falling ? 1 : 0) : .12); }
+      if (o && o.t >= 0 && drop) once('o1e' + o.i, () => { for (let q = 0; q < 5; q++) spawn({ x: G.sx(kc) + (q - 2) * 3, y: y + 3, vx: (q - 2) * 14, vy: -6 - Math.random() * 8, g: 10, life: .5, size: 1.5, col: 'rgba(220,200,170,.6)' }); }); },
+    snd(o, v, n) { if (o.t >= 0) once('o1es' + o.i, () => { drum46(140 * semi(n / 2), 0, .012 * v); tone(330 * semi(n), .02, .004 * v, .12, 'triangle'); }); } },
+  F: { name: 'Cascade of bulbs', desc: 'The bar is a little fountain of glass bulbs stepping down from left to right, joined by short spouts. Each point potion spills from one bulb into the next lower one and it fills; the filled bulbs are your progress (a long gap fills each bulb over a few points).',
+    draw(I, y, t, G, o) { const r = Math.min(6.5, G.sw * .42), by = k => y - 11 + (G.N > 1 ? k / (G.N - 1) : 0) * 16, kc = o ? G.kOf(S.v0 + o.i) : -1;
+      for (let k = 0; k < G.N - 1; k++) { ctx.strokeStyle = 'rgba(230,240,255,.4)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(G.sx(k) + r * .8, by(k) + r * .2); ctx.lineTo(G.sx(k + 1) - r * .6, by(k + 1) - r * .8); ctx.stroke(); }
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), cy = by(k), fr = G.fr(k), c = HUE98[Math.min(5, Math.floor(k * 6 / G.N))];
+        ctx.fillStyle = 'rgba(210,225,255,.12)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill(); if (fr > 0) { ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r - .5, 0, 7); ctx.clip(); ctx.fillStyle = c; ctx.fillRect(cx - r, cy + r - 2 * r * fr, 2 * r, 2 * r * fr); ctx.restore(); if (fr >= 1) { ctx.save(); ctx.shadowColor = c; ctx.shadowBlur = 6; ctx.strokeStyle = hexA(c, .6); ctx.beginPath(); ctx.arc(cx, cy, r + .5, 0, 7); ctx.stroke(); ctx.restore(); } }
+        ctx.strokeStyle = 'rgba(230,240,255,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(cx - r * .5, cy - r * .55, 1.5, 1.5); }
+      if (o && o.t > -.35 && o.t < .15) { const al = o.t > 0 ? 1 - o.t / .15 : 1, c = HUE98[Math.min(5, Math.floor(kc * 6 / G.N))], x0 = kc > 0 ? G.sx(kc - 1) + r * .8 : G.sx(0) - 2, y0 = kc > 0 ? by(kc - 1) + r * .2 : y - 34, x1 = G.sx(kc) - (kc > 0 ? r * .6 : 0), y1 = by(kc) - r * .8, u = clamp((o.t + .35) / .15);
+        ctx.strokeStyle = hexA(c, .9 * al); ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(lerp(x0, x1, u), lerp(y0, y1, u)); ctx.stroke(); } },
+    snd(o, v, n) { if (o.t >= -.35) once('o1fs' + o.i, () => noise(0, .3, .004 * v, 1400, .8, 'lowpass')); if (o.t >= 0) once('o1ft' + o.i, () => tone(1046 * semi(n), 0, .004 * v, .35, 'sine')); } },
+
+// Round 112 prep: OB111.C Ingredient jars moved out 2026-11-17 (misread pick: the user meant E Setting up the lab).
+  C: { name: 'Ingredient jars', desc: 'The bar is a row of lidded ingredient jars, each full of a different colored ingredient. Each point the next jar’s lid pops off with a hop, a pinch of its ingredient puffs out, and the jar empties a step; open, empty jars are your progress (a long gap empties each jar over a few points).',
+    draw(I, y, t, G, o) { wood111(I.x0 - 6, y + 4, I.x1 - I.x0 + 12, 4); const jw = Math.min(13, G.sw * .8), kc = o ? G.kOf(S.v0 + o.i) : -1, pop = o && G.first(S.v0 + o.i);
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k), c = HERB98[(k * 3) % 5][1], top = y - 9, bot = y + 4;
+        ctx.fillStyle = 'rgba(210,225,255,.16)'; ctx.beginPath(); ctx.roundRect(cx - jw / 2, top, jw, bot - top, 3); ctx.fill(); const lh = (bot - top - 2) * (1 - fr); if (lh > 0) { ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(cx - jw / 2 + 1, bot - 1 - lh, jw - 2, lh, 2); ctx.fill(); }
+        ctx.strokeStyle = 'rgba(230,240,255,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(cx - jw / 2, top, jw, bot - top, 3); ctx.stroke();
+        let lx = cx, ly = top - 2, la = 0; const popping = pop && k === kc && o.t > -.3 && o.t < .2; if (popping) { const u = (o.t + .3) / .5; ly = top - 2 - Math.sin(Math.PI * Math.min(1, u * 1.2)) * 11; lx = cx + u * jw * .7; la = u * 1.3; } else if (fr > 0) { lx = cx + jw * .7; ly = top + 1; la = 1.3; }
+        ctx.save(); ctx.translate(lx, ly); ctx.rotate(la); wood111(-jw / 2 - 1, -1.5, jw + 2, 3, '#b8865a', '#6a4424'); ctx.restore(); }
+      if (o && o.t >= -.15) once('o1c' + o.i, () => { const c = HERB98[(kc * 3) % 5][1]; for (let q = 0; q < 6; q++) spawn({ x: G.sx(kc) + (Math.random() - .5) * 6, y: y - 11, vx: (Math.random() - .5) * 30, vy: -25 - Math.random() * 25, g: 30, life: .6, size: 1.6, col: q % 2 ? c : '#ffffff' }); }); },
+    snd(o, v, n) { if (o.t >= -.3) once('o1cs' + o.i, () => { tone(700 * semi(n), 0, .007 * v, .06, 'sine', 1100 * semi(n)); noise(.04, .2, .004 * v, 1200, .8, 'lowpass'); }); } },
+
+// Round 112 OB111 X (Bottle xylophone), N (Homunculus nursery), O (Ooze leaves its flask) and its option list, moved out 2026-11-17 (the user: Slime came out pretty good, A the best).
+  X: { name: 'Bottle xylophone', desc: 'The bar is a row of glass bottles rising in height, unlit. A glossy droplet sits on the last lit bottle. Each point it squats and hops onto the next bottle, which lights up in its color with a chime; the chimes climb up the row like a scale (a long gap lights each bottle over a few hops, a softer tap in between).',
+    draw(I, y, t, G, o) { wood111(I.x0 - 5, y + 5, I.x1 - I.x0 + 10, 3.5); const bw = Math.min(10, G.sw * .7), hk = k => 7 + 10 * (G.N > 1 ? k / (G.N - 1) : 1), kc = o ? G.kOf(S.v0 + o.i) : G.kOf(Math.floor(I.v + 1e-6));
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), h = hk(k), fr = G.fr(k), c = HUE98[Math.min(5, Math.floor(k * 6 / G.N))], bx = cx - bw / 2, by = y + 5 - h;
+        if (fr > 0) { ctx.save(); ctx.shadowColor = c; ctx.shadowBlur = fr >= 1 ? 6 : 0; ctx.fillStyle = hexA(c, .35 + .55 * fr); ctx.beginPath(); ctx.roundRect(bx, by + 3, bw, h - 3, 2); ctx.fill(); ctx.restore(); }
+        ctx.strokeStyle = fr > 0 ? 'rgba(240,245,255,.7)' : 'rgba(200,210,230,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(bx, by + 3, bw, h - 3, 2); ctx.stroke(); ctx.strokeRect(cx - bw * .18, by, bw * .36, 3); }
+      let dx, dy, sx = 1, sy = 1; const top = k => y + 5 - hk(k) - 4.5; if (!o || o.t < -.15 || o.t > .55) { const kk = G.kOf(Math.max(I.lo, Math.ceil(I.v - 1e-6) - 1)); dx = G.sx(kk); dy = top(kk); }
+      else { const a = G.kOf(S.v0 + o.i - (S.v0 + o.i > I.lo ? 1 : 0)), b = G.kOf(S.v0 + o.i); if (o.t < 0) { const k = Math.sin(Math.PI * (o.t + .15) / .15); dx = G.sx(a); dy = top(a); sx = 1 + .25 * k; sy = 1 - .25 * k; } else if (o.t < .4) { const u = o.t / .4; dx = lerp(G.sx(a), G.sx(b), u); dy = lerp(top(a), top(b), u) - Math.sin(Math.PI * u) * 12; } else { const k = Math.sin(Math.PI * (o.t - .4) / .15); dx = G.sx(b); dy = top(b); sx = 1 + .3 * k; sy = 1 - .3 * k; } }
+      ctx.save(); ctx.translate(dx, dy + 3); ctx.scale(sx, sy); ctx.translate(-dx, -(dy + 3)); const gg = ctx.createRadialGradient(dx - 1, dy - 1.5, .5, dx, dy, 3.6); gg.addColorStop(0, '#ffffff'); gg.addColorStop(1, '#6aa8ff'); ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(dx, dy, 3.4, 0, 7); ctx.fill(); ctx.restore();
+      if (o && o.t >= .4) once('o2x' + o.i, () => spawn({ x: dx, y: dy + 3, size: 1.5, shape: 'ring', grow: 6, life: .25, col: '#ffffff' })); },
+    snd(o, v, n) { if (o.t >= .4) once('o2xs' + o.i, () => { const G = g111({ lo: S.p.span[0], v: S.v0, x0: 0, x1: 1 }), k = G.kOf(S.v0 + o.i), fst = G.first(S.v0 + o.i), f = 523 * semi(PENT42[k % 10]); tone(f, 0, (fst ? .012 : .006) * v, .6, 'sine'); tone(f * 2.01, 0, (fst ? .004 : .002) * v, .35, 'sine'); }); } },
+  N: { name: 'Homunculus nursery', desc: 'The bar is a row of little glass domes on a stand. Each point a drop of red goo falls into the next dome and swells into a blob that wobbles, then blinks its eyes open; awake blobs sway gently. A long gap grows each blob over a few points (it wakes when full).',
+    draw(I, y, t, G, o) { wood111(I.x0 - 5, y + 5, I.x1 - I.x0 + 10, 3.5); const dw = Math.min(14, G.sw * .86), kc = o ? G.kOf(S.v0 + o.i) : -1;
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k), dh = 14; if (fr > 0) { let jig = 0; if (k === kc && o && o.t >= 0 && o.t < .5) jig = Math.sin(o.t * 25) * .15 * (1 - o.t / .5); const s = .35 + .65 * fr, rx = dw * .36 * s * (1 + jig), ry = dw * .3 * s * (1 - jig), by = y + 5 - ry, sw = fr >= 1 ? Math.sin(t * 2 + k) * .6 : 0;
+          const g = ctx.createRadialGradient(cx - rx * .3 + sw, by - ry * .4, .5, cx + sw, by, Math.max(rx, ry)); g.addColorStop(0, '#ff9aa6'); g.addColorStop(.6, '#d8344a'); g.addColorStop(1, '#7a0a1a'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx + sw, by, rx, ry, 0, 0, 7); ctx.fill();
+          if (fr >= 1) { const wake = k === kc && o ? clamp((o.t - .5) / .15) : 1, bl = (t * .7 + k * .37) % 3 < .08 ? .1 : 1; eyes112(cx + sw, by - ry * .1, Math.max(.8, rx * .2), Math.min(wake, bl)); } }
+        ctx.fillStyle = 'rgba(210,225,255,.1)'; ctx.beginPath(); ctx.ellipse(cx, y + 5, dw / 2, dh, 0, Math.PI, 0); ctx.fill(); ctx.strokeStyle = 'rgba(230,240,255,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(cx - dw * .28, y - 6, 1.2, 4); }
+      if (o && o.t > -.35 && o.t < 0) { const u = (o.t + .35) / .35, cx = G.sx(kc); ctx.fillStyle = '#d8344a'; ctx.beginPath(); ctx.arc(cx, lerp(y - 30, y + 2, u * u), 2, 0, 7); ctx.fill(); } },
+    snd(o, v, n) { if (o.t >= 0) once('o2ns' + o.i, () => tone(220 * semi(n), 0, .01 * v, .2, 'sine', 160 * semi(n))); if (o.t >= .5) once('o2nt' + o.i, () => tone(1175 * semi(n), 0, .004 * v, .15, 'sine')); } },
+  O: { name: 'Ooze leaves its flask', desc: 'A round flask lies on its side at the start of a wooden rail, full of violet ooze. The ooze creeps out along the rail: each point its front reaches out to the new point, grips with a little splat, and the body pulls after it with a jiggle, while the flask behind it empties.',
+    draw(I, y, t, G, o) { wood111(I.x0 - 6, y + 5, I.x1 - I.x0 + 12, 3.5); const fx = I.x0 - 4, f = clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo)), mouth = I.x0 + 9;
+      ctx.save(); ctx.beginPath(); ctx.arc(fx, y - 3, 8, 0, 7); ctx.clip(); ctx.fillStyle = '#9a5ae0'; ctx.fillRect(fx - 8, y - 3 + 16 * (f * .85) - 8, 16, 16); ctx.restore();
+      ctx.strokeStyle = 'rgba(230,240,255,.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(fx, y - 3, 8, .5, Math.PI * 2 - .5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(fx + 7, y - 7); ctx.lineTo(mouth, y - 6); ctx.moveTo(fx + 7, y + 1); ctx.lineTo(mouth, y); ctx.stroke();
+      const tip = Math.max(mouth + 2, I.tipX), jig = o && o.t > 0 && o.t < .8 ? Math.sin(o.t * 22) * (1 - o.t / .8) : 0, g = ctx.createLinearGradient(0, y - 4, 0, y + 5); g.addColorStop(0, '#c890ff'); g.addColorStop(1, '#5a2aa0');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(mouth - 3, y - 3 - jig * .6, tip - mouth + 3, 8 + jig * .6, [2, 4 + jig, 2, 2]); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(mouth, y - 2, Math.max(0, tip - mouth - 4), 1);
+      if (o && o.t > -.4 && o.t < .45) { const ext = o.t < -.1 ? eOut((o.t + .4) / .3) : 1, ret = o.t > 0 ? clamp(o.t / .45) : 0, xe = lerp(o.a, o.b, ext), xs = lerp(o.a, o.b, eOut(ret)); if (xe > xs + 1) { ctx.fillStyle = '#a870f0'; ctx.beginPath(); ctx.roundRect(xs, y + 1, xe - xs, 3, 1.5); ctx.fill(); ctx.beginPath(); ctx.arc(xe, y + 2.5, 2.4, 0, 7); ctx.fill(); } }
+      if (o && o.t >= -.1) once('o2o' + o.i, () => spawn({ x: o.b, y: y + 3, size: 1.5, shape: 'ring', grow: 6, life: .25, col: '#e8d0ff' })); },
+    snd(o, v, n) { if (o.t >= -.1) once('o2os' + o.i, () => tone(392 * semi(n), 0, .007 * v, .15, 'sine', 600 * semi(n))); if (o.t >= .1) once('o2ot' + o.i, () => tone(196 * semi(n), 0, .007 * v, .25, 'sine')); } },
+Object.assign(FAM, { PA: r112('A', 'A'), PB: r112('B', 'E'), PC: r112('C', 'S'), PD: r112('D', 'X'), PE: r112('E', 'N'), PF: r112('F', 'O') }); delete FAM.PG; delete FAM.PH;
+
+// Moved out 2026-11-17 (round 114 prep): round 111 LAB111/OB111 (A cabinet, E lab, + 112's S slime tank)/r111, round 112 eyes112/r112, round 113 BT113 B (crate), C (test subject), D (chain pop). Round 113 A (clean shelf) stays.
+const LAB111 = ['⚗️', '\u{1F56F}️', '⚖️', '\u{1F33F}', '\u{1F4DC}', '\u{1F344}', '\u{1F48E}', '\u{1F52E}', '\u{1F9C2}', '\u{1F330}', '\u{1F338}', '\u{1F36F}', '\u{1F944}', '\u{1F525}', '\u{1F9B4}'];
+const OB111 = {
+  A: { name: 'Shelf to cabinet', desc: 'The bar is a small wooden cabinet, its left door swung open. Each point a bottle (a herb’s color, a gold wax seal on top) drops onto the shelf, squashes, clinks, and fills; with a long gap a bottle takes a few points to fill. The row of bottles is your progress.',
+    draw(I, y, t, G, o) { ctx.fillStyle = '#1e140c'; ctx.fillRect(I.x0 - 6, y - 17, I.x1 - I.x0 + 12, 25); ctx.strokeStyle = '#7a5230'; ctx.lineWidth = 3; ctx.strokeRect(I.x0 - 6, y - 17, I.x1 - I.x0 + 12, 25);
+      ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.moveTo(I.x0 - 8, y - 18); ctx.lineTo(I.x0 - 20, y - 22); ctx.lineTo(I.x0 - 20, y + 13); ctx.lineTo(I.x0 - 8, y + 9); ctx.fill(); ctx.fillStyle = '#d8a84a'; ctx.beginPath(); ctx.arc(I.x0 - 17, y - 7, 1.4, 0, 7); ctx.fill();
+      wood111(I.x0 - 5, y + 3, I.x1 - I.x0 + 10, 4); const bw = Math.min(10, G.sw * .72), kc = o ? G.kOf(S.v0 + o.i) : -1, drop = o && G.first(S.v0 + o.i);
+      for (let k = 0; k < G.N; k++) { const fr = G.fr(k), falling = drop && k === kc && o.t < 0 && o.t > -.4; if (fr <= 0 && !falling) continue; const cx = G.sx(k), c = HERB98[k % 5][1]; let dy = 0, sq = 0;
+        if (falling) dy = -28 * (1 - Math.pow((o.t + .4) / .4, 2)); if (drop && k === kc && o.t >= 0 && o.t < .25) sq = Math.sin(Math.PI * o.t / .25) * .22;
+        const h = 16, bx = cx - bw / 2, by = y + 3 - h + dy; ctx.save(); ctx.translate(cx, y + 3 + dy); ctx.scale(1 + sq, 1 - sq); ctx.translate(-cx, -(y + 3 + dy));
+        ctx.fillStyle = 'rgba(210,225,255,.2)'; ctx.beginPath(); ctx.roundRect(bx, by + 5, bw, h - 5, Math.min(3, bw / 2)); ctx.fill(); ctx.fillRect(cx - bw * .2, by + 1.5, bw * .4, 4);
+        const lh = (h - 6) * Math.max(fr, falling ? .15 : 0); ctx.fillStyle = c; ctx.fillRect(bx + 1, y + 2 + dy - lh, bw - 2, lh); ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.roundRect(cx - bw * .26, by, bw * .52, 2.2, 1); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(bx + 1, by + 6, 1, h - 8); ctx.restore(); }
+      if (o && o.t >= 0) once('o1a' + o.i, () => spawn({ x: G.sx(kc) - bw / 2, y: y - 9, size: 2.5, shape: 'star', life: .25, col: '#ffffff' })); },
+    snd(o, v, n) { if (o.t >= 0) once('o1as' + o.i, () => { tone(1568 * semi(n), 0, .006 * v, .25, 'sine'); tone(2349 * semi(n), .01, .003 * v, .18, 'sine'); }); } },
+  E: { name: 'Setting up the lab', desc: 'The bar is a workbench with faint outlines of a lab to come. Each point the next piece (an alembic, a candle, scales, herbs, a scroll, a gem…) drops onto the bench with a little bounce and a puff of dust, building the scene until the lab is ready (a long gap brings each piece in over a few points).',
+    draw(I, y, t, G, o) { wood111(I.x0 - 6, y + 4, I.x1 - I.x0 + 12, 5); ctx.fillStyle = '#4a2c14'; ctx.fillRect(I.x0 - 2, y + 9, 4, 5); ctx.fillRect(I.x1 - 2, y + 9, 4, 5); const sz = Math.min(15, G.sw * .9), kc = o ? G.kOf(S.v0 + o.i) : -1, drop = o && G.first(S.v0 + o.i);
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k), e = LAB111[k % LAB111.length], falling = drop && k === kc && o.t < 0 && o.t > -.4; let dy = 0;
+        if (falling) dy = -28 * (1 - Math.pow((o.t + .4) / .4, 2)); else if (drop && k === kc && o.t >= 0 && o.t < .3) dy = -Math.abs(Math.sin(Math.PI * o.t / .3)) * 3;
+        emo98(e, cx, y - sz / 2 + 3 + dy, sz, 0, fr > 0 || falling ? .45 + .55 * Math.max(fr, falling ? 1 : 0) : .12); }
+      if (o && o.t >= 0 && drop) once('o1e' + o.i, () => { for (let q = 0; q < 5; q++) spawn({ x: G.sx(kc) + (q - 2) * 3, y: y + 3, vx: (q - 2) * 14, vy: -6 - Math.random() * 8, g: 10, life: .5, size: 1.5, col: 'rgba(220,200,170,.6)' }); }); },
+    snd(o, v, n) { if (o.t >= 0) once('o1es' + o.i, () => { drum46(140 * semi(n / 2), 0, .012 * v); tone(330 * semi(n), .02, .004 * v, .12, 'triangle'); }); } },
+};
+function r111(K) { const Z = OB111[K];
+  const V = { grow(p, x0, y, L, f, t, I) { Z.draw(I, y, t, g111(I), cur111(I)); }, over(p, I) { hits101(I).forEach(o => Z.snd(o, fat45(o.i), pick45(o.i, 4))); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (The bar is drawn from scratch: no track. Try the gap switch: 5, 15, 50 points. Finales and sounds come later.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'X', V); } }; }
+// ---------- round 112 (2026-11-17): bar-as-object kept ("much happier with this direction"): A Shelf to cabinet and B Ingredient jars ("very cute") as they were; round 110's stories
+// reworked so the bar is the object (picked from a brainstorm): C Slime tank, D Bottle xylophone, E Homunculus nursery, F Ooze leaves its flask ----------
+const eyes112 = (x, y, s, open = 1) => [-1, 1].forEach(d => { ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(x + d * s * 1.3, y, s, s * open + .2, 0, 0, 7); ctx.fill(); if (open > .3) { ctx.fillStyle = '#1a1020'; ctx.beginPath(); ctx.arc(x + d * s * 1.3 + s * .3, y, s * .5 * open, 0, 7); ctx.fill(); } });
+Object.assign(OB111, {
+  S: { name: 'Slime tank', desc: 'The bar is a glass tank with a wooden lid, and a green slime lives inside. Each point a herb drops in through the lid just ahead of it; the slime lunges, gulps it and grows longer, so the slime filling the tank is your progress. Its eyes ride at its front.',
+    draw(I, y, t, G, o) { const x0 = I.x0 - 3, x1 = I.x1 + 3, top = y - 13, bot = y + 7; ctx.fillStyle = 'rgba(160,200,180,.08)'; ctx.beginPath(); ctx.roundRect(x0, top, x1 - x0, bot - top, 4); ctx.fill();
+      let tip = Math.max(I.x0 + 10, I.tipX), lunge = 0; const [e] = o ? HERB98[(S.v0 + o.i) % 5] : HERB98[0];
+      if (o && o.t > -.55 && o.t < 0) { const hx = o.b - 3; if (o.t < -.2) { const u = (o.t + .55) / .35; emo98(e, hx, lerp(y - 30, y - 1, u * u), 10, (1 - u)); } else { const u = (o.t + .2) / .2; lunge = Math.sin(Math.PI * u) * Math.max(0, hx - tip) * .8; emo98(e, hx - u * 4, y - 1, 10 * (1 - u), 0, 1 - u); } }
+      const br = Math.sin(t * 2.2) * .6, g = ctx.createLinearGradient(0, y - 6, 0, bot); g.addColorStop(0, '#9af07a'); g.addColorStop(1, '#2e8a2a'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x0 + 1, y - 5 - br, tip + lunge - x0 - 1, bot - y + 4 + br, [3, 7, 2, 2]); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x0 + 3, y - 4 - br, Math.max(0, tip + lunge - x0 - 10), 1.2); eyes112(tip + lunge - 6, y - 1 - br, 1.7);
+      ctx.strokeStyle = 'rgba(220,240,230,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(x0, top, x1 - x0, bot - top, 4); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fillRect(x0 + 4, top + 2, x1 - x0 - 8, 1);
+      wood111(x0 - 2, top - 3, x1 - x0 + 4, 3); },
+    snd(o, v, n) { if (o.t >= -.12) once('o2s' + o.i, () => { tone(160 * semi(n), 0, .012 * v, .14, 'sine', 110 * semi(n)); tone(500 * semi(n), .06, .004 * v, .1, 'sine', 820 * semi(n)); }); } },
+});
+function r112(L, K) { const R = r111(K); return { get name() { return L + '. ' + OB111[K].name; }, get desc() { return R.desc; }, get note() { return R.note; }, draw: top => R.draw(top) }; }
+  B: { name: 'Bench + packed in a crate', finAt: 1.75, desc: 'The bottles on a workbench, set up like the lab: each point the next bottle drops onto the bench with a little bounce and a puff of dust; faint outlines show the rest. Finale: a wooden crate drops over the row with a thump, twine ties round it (two straight cords), and the crate hops into the recipe icon.',
+    draw(I, y, t, G, o) { const ts = ts95(); bench113(I, y, t, G, o); if (ts <= 0) return; const x0 = I.x0 - 4, x1 = I.x1 + 4, drop = ts < .4 ? -40 * (1 - Math.pow(ts / .4, 2)) : 0, hop = clamp((ts - 1.2) / .45), ux = I.x1 + 18;
+      if (hop >= 1) return; const sc = 1 - hop * .85, cx = lerp((x0 + x1) / 2, ux, eOut(hop)), cy = lerp(y - 4, y, hop) - Math.sin(Math.PI * hop) * 16 + drop, w = (x1 - x0) * sc, h = 20 * sc;
+      ctx.save(); ctx.translate(cx, cy); const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2); g.addColorStop(0, '#b8865a'); g.addColorStop(1, '#6a4424'); ctx.fillStyle = g; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeStyle = 'rgba(40,24,10,.7)'; ctx.lineWidth = 1;
+      for (let q = 1; q < 3; q++) { ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2 + q * h / 3); ctx.lineTo(w / 2, -h / 2 + q * h / 3); ctx.stroke(); } ctx.strokeRect(-w / 2, -h / 2, w, h);
+      const tie = clamp((ts - .6) / .4); if (tie > 0) { ctx.strokeStyle = '#e8d8a8'; ctx.lineWidth = 1.6 * sc; ctx.beginPath(); ctx.moveTo(-w / 2, 0); ctx.lineTo(-w / 2 + w * tie, 0); ctx.moveTo(0, -h / 2); ctx.lineTo(0, -h / 2 + h * clamp(tie * 1.5)); ctx.stroke(); } ctx.restore(); },
+    fsnd(ts) { if (ts >= .4) once('b3fb0', () => { drum46(90, 0, .02); noise(0, .1, .006, 600, .8, 'lowpass', true); }); if (ts >= .6) once('b3fb1', () => noise(0, .35, .004, 2200, 1.5, 'bandpass')); if (ts >= 1.2) once('b3fb2', () => tone(330, 0, .008, .2, 'sine', 520)); },
+    snd(o, v, n) { if (o.t >= 0) once('b3bs' + o.i, () => { drum46(140 * semi(n / 2), 0, .01 * v); tone(1568 * semi(n), .02, .004 * v, .2, 'sine'); }); } },
+  C: { name: 'Bench + test subject', finAt: 2.2, desc: 'The bench of bottles. Finale: the slime from the tank slides in from the right onto the bench, gulps the last bottle, flashes through the potion colors, swells and sparkles, then happily hops into the recipe icon.',
+    draw(I, y, t, G, o) { const ts = ts95(), last = G.N - 1; bench113(I, y, t, G, o, k => ts > .95 && k === last); if (ts <= 0) return; const lx = G.sx(last), ux = I.x1 + 18, hop = clamp((ts - 1.75) / .45);
+      if (ts > .7 && ts < .95) { const u = (ts - .7) / .25; bottle113(lerp(lx, lx + 8, u), y + 4 - u * 4, Math.min(9, G.sw * .7), 15, col113(last), 1, 1 - u, 1); }
+      if (hop >= 1) return; const sx = ts < .55 ? lerp(I.x1 + 40, lx + 13, eOut(ts / .55)) : lerp(lx + 13, ux, eOut(hop)), sy = y - 3 - Math.sin(Math.PI * hop) * 18, cyc = ts > 1 && ts < 1.6 ? HUE98[Math.floor((ts - 1) * 12) % 6] : '#6ad84a', sw = ts > 1 && ts < 1.6 ? 1 + .25 * Math.sin((ts - 1) * 20) : 1, gulp = ts > .7 && ts < .95 ? Math.sin(Math.PI * (ts - .7) / .25) * .2 : 0, s = (1 - hop * .5) * sw;
+      const g = ctx.createRadialGradient(sx - 2, sy - 3, .5, sx, sy, 8 * s); g.addColorStop(0, '#ffffff'); g.addColorStop(.35, cyc); g.addColorStop(1, mix(cyc, '#000000', .35)); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(sx, sy, 8 * s * (1 + gulp), 6.5 * s * (1 - gulp), 0, 0, 7); ctx.fill(); eyes112(sx - 1, sy - 2, 1.6 * s * (ts > 1 && ts < 1.6 ? 1.3 : 1));
+      if (ts > 1) once('b3c0', () => { for (let q = 0; q < 8; q++) spawn({ x: sx + (Math.random() - .5) * 16, y: sy - 4, vx: (Math.random() - .5) * 40, vy: -30 - Math.random() * 30, g: 40, life: .7, size: 2.2, shape: 'star', col: q % 2 ? '#fff4c0' : '#ffffff' }); }); },
+    fsnd(ts) { if (ts >= 0) once('b3fc0', () => noise(0, .5, .004, 700, .8, 'lowpass')); if (ts >= .75) once('b3fc1', () => { tone(170, 0, .012, .14, 'sine', 110); tone(200, .12, .01, .14, 'sine', 130); }); if (ts >= 1) once('b3fc2', () => [0, 4, 7, 12].forEach((s, i) => tone(523 * semi(s), i * .1, .006, .3, 'sine'))); if (ts >= 1.75) once('b3fc3', () => tone(440, 0, .008, .15, 'sine', 700)); },
+    snd(o, v, n) { if (o.t >= 0) once('b3cs' + o.i, () => { drum46(140 * semi(n / 2), 0, .01 * v); tone(1568 * semi(n), .02, .004 * v, .2, 'sine'); }); } },
+  D: { name: 'Bench + chain pop', desc: 'The bench of bottles. Finale: the bottles pop one after another down the bench, left to right, each a soft puff of its own color with a little pop that climbs the scale, and the last pop lands as the recipe lights.',
+    get finAt() { return .25 + Math.min(15, Math.max(1, S.nx.lv - S.p.span[0])) * .08 + .2; },
+    draw(I, y, t, G, o) { const ts = ts95(), at = k => .25 + k * .08; bench113(I, y, t, G, o, k => ts > 0 && ts >= at(k)); if (ts <= 0) return;
+      for (let k = 0; k < G.N; k++) { const u = (ts - at(k)) / .6; if (u > 0 && u < 1) { puff113(G.sx(k), y - 4, col113(k), u, 6, 2.5); if (u < .12) { ctx.fillStyle = `rgba(255,255,255,${1 - u / .12})`; ctx.beginPath(); ctx.arc(G.sx(k), y - 4, 4, 0, 7); ctx.fill(); } } } },
+    fsnd(ts) { const N = Math.min(15, Math.max(1, S.nx.lv - S.p.span[0])); for (let k = 0; k < N; k++) if (ts >= .25 + k * .08) once('b3fd' + k, () => { tone(392 * semi(PENT42[k % 10]), 0, .006, .12, 'sine', 600 * semi(PENT42[k % 10])); noise(0, .06, .003, 1200, .8, 'lowpass', true); }); },
+    snd(o, v, n) { if (o.t >= 0) once('b3ds' + o.i, () => { drum46(140 * semi(n / 2), 0, .01 * v); tone(1568 * semi(n), .02, .004 * v, .2, 'sine'); }); } },
+
+// Moved out 2026-11-17 (round 116 prep): round 113 BT113 (A clean shelf + doors close) and r113; round 114's option list; round 115 AO115 C (seal + confetti), D (label + into the icon) and its option list.
+const BT113 = {
+  A: { name: 'Clean shelf + doors close', finAt: 2.1, desc: 'The shelf tidied so it reads like a skill-up bar: a dark recessed niche the size of the bar, a wooden lip under it, faint outlines of the bottles still to come. Each point the next bottle pops into its spot (a quick overshoot and a glint), a soft clink. Finale: two cabinet doors swing shut over the shelf, it rattles, three muffled pops behind the doors puff colored smoke out of the cracks, and the doors creak back open on an empty, scorched shelf as the recipe lights.',
+    draw(I, y, t, G, o) { const ts = ts95(); ctx.fillStyle = '#140e0a'; ctx.beginPath(); ctx.roundRect(I.x0 - 3, y - 9, I.x1 - I.x0 + 6, 16, 3); ctx.fill(); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(I.x0 - 3, y - 9, I.x1 - I.x0 + 6, 2);
+      const bw = Math.min(8, G.sw * .62), h = 12, kc = o ? G.kOf(S.v0 + o.i) : -1, pop = o && G.first(S.v0 + o.i), gone = ts > 1.45;
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), fr = G.fr(k); if (gone) { ctx.fillStyle = 'rgba(40,30,24,.6)'; ctx.beginPath(); ctx.ellipse(cx, y + 5, bw * .6, 1.2, 0, 0, 7); ctx.fill(); continue; } if (fr <= 0) { ghost113(cx, y + 5, bw, h); continue; }
+        let sc = 1; if (pop && k === kc && o.t >= 0 && o.t < .3) sc = eBack(clamp(o.t / .25)); bottle113(cx, y + 5, bw, h, col113(k), fr, 1, Math.max(.01, sc)); }
+      wood111(I.x0 - 5, y + 5, I.x1 - I.x0 + 10, 3.5); ctx.fillStyle = '#6a4424'; ctx.fillRect(I.x0 - 5, y - 10, I.x1 - I.x0 + 10, 1.5);
+      if (pop && o.t >= 0) once('b3a' + o.i, () => spawn({ x: G.sx(kc) - bw / 2, y: y - 4, size: 2.5, shape: 'star', life: .25, col: '#ffffff' }));
+      if (ts > 0) { const cl = ts < .4 ? eOut(ts / .4) : ts < 1.5 ? 1 : 1 - eOut(clamp((ts - 1.5) / .4)) * .85, half = (I.x1 - I.x0 + 10) / 2, bulge = [.75, 1, 1.25].reduce((s, a) => s + (ts > a && ts < a + .15 ? Math.sin(Math.PI * (ts - a) / .15) : 0), 0);
+        [-1, 1].forEach(s => { const w = half * cl, x = s < 0 ? I.x0 - 5 : I.x1 + 5 - w; if (w < .5) return; const g = ctx.createLinearGradient(0, y - 11, 0, y + 9); g.addColorStop(0, '#8a5a30'); g.addColorStop(1, '#4a2c14'); ctx.fillStyle = g; ctx.fillRect(x, y - 11 - bulge, w, 20 + bulge * 2);
+          ctx.strokeStyle = 'rgba(30,18,8,.6)'; ctx.lineWidth = 1; ctx.strokeRect(x + 2, y - 8 - bulge, w - 4, 14 + bulge * 2); ctx.fillStyle = '#d8a84a'; ctx.beginPath(); ctx.arc(s < 0 ? x + w - 4 : x + 4, y - 1, 1.3, 0, 7); ctx.fill(); });
+        [.75, 1, 1.25].forEach((a, n) => { const k = (ts - a) / .7; if (k > 0 && k < 1) { const sx = (I.x0 + I.x1) / 2 + (n - 1) * 30; puff113(sx, y - 11, HUE98[(n * 2 + 1) % 6], k, 5, 2.5); puff113((I.x0 + I.x1) / 2, y + 9 - k * 2, HUE98[(n * 2) % 6], k * .7, 3, 2); } }); } },
+    shake(I) { const ts = ts95(); if (ts < .55 || ts > 1.45) return [0, 0]; const k = [.75, 1, 1.25].reduce((s, a) => s + (ts > a && ts < a + .12 ? 1 - (ts - a) / .12 : 0), 0); return [Math.sin(ts * 70) * .8 * (ts < .7 ? 1 : 0), 1.6 * k]; },
+    fsnd(ts) { if (ts >= 0) once('b3fa0', () => tone(180, 0, .01, .3, 'triangle', 120)); if (ts >= .4) once('b3fa1', () => { drum46(110, 0, .016); noise(0, .05, .006, 800, .8, 'lowpass', true); });
+      [.75, 1, 1.25].forEach((a, n) => { if (ts >= a) once('b3fp' + n, () => { drum46(70 + n * 12, 0, .02); noise(0, .3, .008, 500, .7, 'lowpass'); }); }); if (ts >= 1.5) once('b3fc', () => tone(150, 0, .008, .5, 'triangle', 190)); },
+    snd(o, v, n) { if (o.t >= 0) once('b3as' + o.i, () => { tone(1568 * semi(n), 0, .005 * v, .22, 'sine'); tone(2349 * semi(n), .01, .0025 * v, .16, 'sine'); }); } },
+};
+function r113(K) { const Z = BT113[K];
+  const V = { get finAt() { return Z.finAt; }, shake: I => Z.shake ? Z.shake(I) : [0, 0], grow(p, x0, y, L, f, t, I) { Z.draw(I, y, t, g111(I), cur111(I)); },
+    over(p, I) { hits101(I).forEach(o => Z.snd(o, fat45(o.i), pick45(o.i, 4))); const ts = ts95(); if (ts >= 0) Z.fsnd(ts); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Pick “Reaching the next unlock” to see the finale. Placeholder sounds, kept soft: no big booms.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 4.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'X', V); } }; }
+Object.assign(FAM, { PA: r114('A'), PB: r114('B'), PC: r114('C'), PD: r114('D') });
+  C: { name: 'Seal stamped on + gold confetti', fx: .6, desc: 'Each point: after the bottle lands, its gold seal hovers, then stamps down onto the neck with a little press and a glint. Finale add-on: as the seals pop, each bursts into a few flakes of gold confetti that twinkle as they drift down.',
+    hide: (k, G, o) => o && G.first(S.v0 + o.i) && k === kc115(G, o) && o.t >= 0 && o.t < .4,
+    over(I, y, G, o) { const kc = kc115(G, o); if (o && G.first(S.v0 + o.i) && o.t >= 0 && o.t < .4) { const bw = Math.min(9, G.sw * .7), sd = o.t < .12 ? -7 : o.t < .2 ? lerp(-7, 0, (o.t - .12) / .08) : 0, sq = o.t >= .2 && o.t < .3 ? Math.sin(Math.PI * (o.t - .2) / .1) * .06 : 0; bottle113(G.sx(kc), y + 4, bw, 15, col113(kc), G.fr(kc), 1, 1 - sq, sd);
+      if (o.t >= .2) once('a5c' + o.i, () => { spawn({ x: G.sx(kc) + 2, y: y - 11, size: 2.5, shape: 'star', life: .3, col: '#fff4c0' }); tone(1319 * semi(pick45(o.i, 3)), 0, .004 * fat45(o.i), .15, 'triangle'); }); } },
+    fin(I, y, G, ts, C) { for (let k = 0; k < G.N; k++) if (ts >= C.pop(k)) once('a5g' + k, () => { for (let q = 0; q < 3; q++) spawn({ x: G.sx(k), y: y - 11, vx: (Math.random() - .5) * 50, vy: -90 - Math.random() * 40, g: 70, life: 1.6, size: 1.3, shape: 'sq', vr: 10, col: q % 2 ? '#ffd36a' : '#fff0b0' }); spawn({ x: G.sx(k) + (Math.random() - .5) * 10, y: y - 30 - Math.random() * 10, size: 2, shape: 'star', life: .5, col: '#ffffff' }); }); } },
+  D: { name: 'Label slapped on + into the icon', fx: .55, desc: 'Each point: after the bottle lands, a little paper label with the herb’s color slaps onto its front. Finale add-on: the labels blow off as the seals pop, and every bottle’s spray arcs over into the recipe icon, which glows brighter as it fills.',
+    deco(k, cx, base, w, h, falling, G, o, ts, popped, since) { if (falling) return; const kc = kc115(G, o), slap = !ts && o && G.first(S.v0 + o.i) && k === kc ? clamp((o.t - .05) / .15) : 1; if (popped) return; label115(cx, base, w, h, k, 1 + .8 * (1 - slap), slap > 0 ? 1 : 0); if (!ts && o && k === kc && o.t >= .2) once('a5d' + o.i, () => noise(0, .04, .004 * fat45(o.i), 900, .8, 'lowpass', true)); },
+    fin(I, y, G, ts, C) { const ux = I.x1 + 18; let got = 0; for (let k = 0; k < G.N; k++) { const p = C.pop(k); if (ts >= p) once('a5l' + k, () => spawn({ x: G.sx(k), y: y - 3, vx: (Math.random() - .3) * 40, vy: -60 - Math.random() * 30, g: 60, life: 1.4, size: 2.2, shape: 'sq', vr: 7, col: '#efe2c0' }));
+      for (let q = 0; q < 3; q++) { const u = (ts - p - .1 - q * .05) / .45; if (u >= 1) got++; if (u > 0 && u < 1) { ctx.fillStyle = col113(k); ctx.beginPath(); ctx.arc(lerp(G.sx(k), ux, u), lerp(y - 11, y, u) - Math.sin(Math.PI * u) * 26, 1.5, 0, 7); ctx.fill(); } } }
+      const gl = got / (G.N * 3); if (gl > 0) { ctx.save(); ctx.shadowColor = '#d0a8ff'; ctx.shadowBlur = 14 * gl; ctx.strokeStyle = `rgba(255,240,200,${.8 * gl})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ux, y, 13, 0, 7); ctx.stroke(); ctx.restore(); } } },
+Object.assign(FAM, { PA: r115('A'), PB: r115('B'), PC: r115('C'), PD: r115('D') });
+
+// Moved out 2026-11-17 (Tailoring prep): unused Alchemy helpers and wrappers (hits98, emo98, pot104, act104, fall104, bead104, puff113, r114, label115, r115). Alchemy's done look r117('C') stays.
+const hits98 = I => S.hits.map((h, i) => ({ i, t: S.age - h - HIT, a: I.X(S.v0 + i), b: I.X(S.v0 + i + 1) })).filter(o => o.t > -.45 && o.t < 1.4);
+function emo98(e, x, y, s, rot = 0, al = 1) { ctx.save(); ctx.globalAlpha *= al; ctx.translate(x, y); ctx.rotate(rot); ctx.font = `${s}px "Segoe UI Emoji", serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e, 0, 0); ctx.restore(); }
+function pot104(x0, y, I) { const A = hits101(I).filter(o => o.t >= 0 && o.t < 1).pop();
+  if (!A) { const c = hue104(I, Math.floor(I.v + 1e-6)); liq98(x0 - 2, I.tipX, y, lv103(c), dk103(c)); return; }
+  const c0 = hue104(I, S.v0 + A.i), c1 = hue104(I, S.v0 + A.i + 1), d = 420 * A.t; liq98(x0 - 2, I.tipX, y, lv103(c0), dk103(c0));
+  ctx.save(); ctx.beginPath(); ctx.rect(A.a - d, y - 6, 2 * d, 12); ctx.clip(); liq98(x0 - 2, I.tipX, y, lv103(c1), dk103(c1)); ctx.fillStyle = `rgba(255,255,255,${.6 * (1 - clamp(A.t / .3))})`; ctx.fillRect(x0 - 2, y - 6, I.tipX - x0 + 2, 12); ctx.restore(); }
+const act104 = (I, a = -1.1, b = .6) => hits101(I).filter(o => o.t > a && o.t < b).pop();
+const fall104 = (o, e, x, y0, y1, s = 13) => { const u = clamp((o.t + 1.05) / .2); if (o.t < -.85) emo98(e, x, lerp(y0, y1, u * u), s, (1 - u) * 1.2); return o.t >= -.85; };
+const bead104 = (x, y, c, r = 2.2) => { ctx.save(); ctx.shadowColor = c; ctx.shadowBlur = 7; ctx.fillStyle = mix(c, '#ffffff', .35); ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); };
+const puff113 = (x, y, c, k, n = 6, r0 = 3) => { for (let q = 0; q < n; q++) { const a = q * 1.1, r = r0 * (.6 + k * 1.2) + q % 2, px = x + Math.cos(a) * k * 7, py = y - k * 10 + Math.sin(a) * k * 4; ctx.fillStyle = hexA(c, .55 * (1 - k)); ctx.beginPath(); ctx.arc(px, py, r, 0, 7); ctx.fill(); } };
+function r114(K) { const Z = BT114[K];
+  const V = { get finAt() { return Z.finAt; }, shake: I => Z.shake ? Z.shake(I) : [0, 0], grow(p, x0, y, L, f, t, I) { Z.draw(I, y, t, g111(I), cur111(I)); },
+    over(p, I) { hits101(I).forEach(o => Z.snd(o, fat45(o.i), pick45(o.i, 4))); const ts = ts95(); if (ts >= 0) Z.fsnd(ts); } };
+  return { get name() { return K + '. ' + (K === 'A' ? 'Clean shelf + doors close (113 A)' : 'Bench + ' + Z.name); }, get desc() { return Z.desc + ' (Pick “Reaching the next unlock” to see the finale; try the 5-point gap too. Placeholder sounds, kept soft.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 5 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'X', V); } }; }
+const label115 = (cx, base, w, h, k, sc = 1, al = 1) => { if (al <= 0) return; ctx.save(); ctx.globalAlpha *= al; ctx.translate(cx, base - h * .42); ctx.scale(sc, sc); ctx.fillStyle = '#efe2c0'; ctx.fillRect(-w * .42, -2.6, w * .84, 5.2); ctx.fillStyle = col113(k); ctx.beginPath(); ctx.arc(0, 0, 1.4, 0, 7); ctx.fill(); ctx.restore(); };
+function r115(K) { const Z = AO115[K], base = BT114.B;
+  const V = { get finAt() { return base.finAt + (Z ? Z.fx : 0); }, shake: I => base.shake(I),
+    grow(p, x0, y, L, f, t, I) { const G = g111(I), o = cur111(I), ts = ts95();
+      if (ts <= 0) return bench113(I, y, t, G, o, Z && Z.hide ? k => Z.hide(k, G, o) : null, Z && Z.deco ? (k, cx, b, w, h, fl) => Z.deco(k, cx, b, w, h, fl, G, o, 0, false) : null);
+      chain114('B', I, y, G, ts, Z && Z.deco ? (k, cx, by, w, h, popped, since) => Z.deco(k, cx, by + h, w, h, false, G, o, ts, popped, since) : null); },
+    over(p, I) { const G = g111(I), o = cur111(I), ts = ts95(); if (Z && Z.over && ts <= 0) Z.over(I, I.ly, G, o); if (Z && Z.fin && ts > 0) Z.fin(I, I.ly, G, ts, ch114(I, G).B);
+      hits101(I).forEach(o => base.snd(o, fat45(o.i), pick45(o.i, 4))); if (ts >= 0) base.fsnd(ts); } };
+  return { get name() { return K + '. ' + (Z ? Z.name : 'As locked (114 B)'); }, get desc() { return (Z ? Z.desc : 'The locked look: the bench of bottles, the fizz, pop, spray finale.') + ' (Try one skill-up for the per-point add-on and “Reaching the next unlock” for the finale.)'; }, get note() { return (Z ? Z.name : 'as locked').toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = alb104(GAP104); if (profName !== 'Alchemy' || S.p !== P || !S.slow101) { profName = 'Alchemy'; const keep = PROF.Alchemy; PROF.Alchemy = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 5.5 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Alchemy = keep; } }
+      barModule(top, 'X', V); } }; }
+
+// Round 118 TL118 C (Clothes rack: 'just the same as the clothesline') and D (Measuring tape), moved out 2026-11-17. They go inside TL118.
+  C: { name: 'Clothes rack', desc: 'A shop rail on two little wheeled legs, with empty hangers waiting. Each point the next garment comes sliding along the rail from the left on its hanger, stops at its spot with a clack and swings to rest; the filled hangers are your progress.',
+    draw(I, y, t, G, o) { const rail = y - 12; ctx.strokeStyle = '#b8b8c0'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(I.x0 - 8, rail); ctx.lineTo(I.x1 + 8, rail); ctx.stroke(); [I.x0 - 7, I.x1 + 7].forEach(x => { ctx.beginPath(); ctx.moveTo(x, rail); ctx.lineTo(x, y + 11); ctx.stroke(); ctx.fillStyle = '#4a4a52'; ctx.beginPath(); ctx.arc(x, y + 12.5, 1.8, 0, 7); ctx.fill(); });
+      const kn = new118(G, o), sz = Math.min(15, G.sw * .95), hanger = (x, al) => { ctx.strokeStyle = `rgba(200,170,120,${al})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, rail + 1.5, 1.5, Math.PI, 0); ctx.moveTo(x, rail + 3); ctx.lineTo(x - sz * .4, rail + 6); ctx.lineTo(x + sz * .4, rail + 6); ctx.closePath(); ctx.stroke(); };
+      for (let k = 0; k < G.N; k++) { const fr = G.fr(k), sliding = k === kn && o.t < 0 && o.t > -.45; let x = G.sx(k), a = 0; if (fr <= 0 && !sliding) { hanger(x, .2); continue; }
+        if (sliding) { const u = eOut((o.t + .45) / .45); x = lerp(I.x0 - 10, G.sx(k), u); a = -.25 * (1 - u); } else if (k === kn && o.t >= 0 && o.t < .7) a = Math.sin(o.t * 16) * .3 * (1 - o.t / .7);
+        ctx.save(); ctx.translate(x, rail + 1.5); ctx.rotate(a); ctx.translate(-x, -(rail + 1.5)); hanger(x, .9); emo98(WEAR118[(k + 3) % 8], x, rail + 6 + sz * .48, sz, 0, .45 + .55 * Math.max(fr, sliding ? 1 : 0)); ctx.restore(); } },
+    snd(o, v, n) { if (o.t >= -.4) once('t8cs' + o.i, () => noise(0, .3, .0015 * v, 2000, 1, 'bandpass')); if (o.t >= 0) once('t8ct' + o.i, () => { tone(1320 * semi(n), 0, .004 * v, .08, 'triangle'); drum46(200, 0, .004 * v); }); } },
+  D: { name: 'Measuring tape', desc: 'The bar is a tailor’s measuring tape pulled out of a little brass case at the start: yellow, with tick marks and a number at each mark. Each point the tape pulls out to the new length with a quick tug that overshoots a hair and snaps back, its metal end tab catching the light.',
+    draw(I, y, t, G, o) { const cx = I.x0 - 9, g = ctx.createLinearGradient(0, y - 8, 0, y + 8); g.addColorStop(0, '#f0d080'); g.addColorStop(1, '#8a6a20'); ctx.strokeStyle = 'rgba(200,190,160,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(I.x0, y + 2); ctx.lineTo(I.x1, y + 2); ctx.stroke();
+      let tip = I.tipX; if (o && o.t >= 0 && o.t < .5) tip = I.X(S.v0 + o.i + eBack(clamp(o.t / .35))); tip = Math.max(cx + 6, tip);
+      const tg = ctx.createLinearGradient(0, y - 2, 0, y + 6); tg.addColorStop(0, '#ffe680'); tg.addColorStop(1, '#d8b030'); ctx.fillStyle = tg; ctx.fillRect(cx + 4, y - 2, tip - cx - 4, 7);
+      ctx.fillStyle = '#5a4410'; for (let x = I.x0, q = 0; x < tip - 1; x += 3, q++) ctx.fillRect(x, y - 2, .8, q % 5 ? 2 : 4);
+      for (let k = 1; k <= G.N; k++) { const x = I.X(I.lo + k * G.per); if (x < tip - 4) { ctx.font = '6px system-ui'; ctx.fillStyle = '#5a4410'; ctx.textAlign = 'center'; ctx.fillText(String(Math.round(I.lo + k * G.per) % 100), x - 3, y + 4.5); } }
+      ctx.fillStyle = '#c8c8d0'; ctx.fillRect(tip - 1, y - 3, 2, 9); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(tip - .5, y - 2, .8, 3);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(cx - 8, y - 8, 14, 16, 4); ctx.fill(); ctx.strokeStyle = '#6a5010'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx - 1, y, 3.5, 0, 7); ctx.stroke(); ctx.fillStyle = '#6a5010'; ctx.beginPath(); ctx.arc(cx - 1, y, 1, 0, 7); ctx.fill();
+      if (o && o.t >= .3) once('t8d' + o.i, () => spawn({ x: o.b, y: y - 2, size: 2.5, shape: 'star', life: .25, col: '#ffffff' })); },
+    snd(o, v, n) { if (o.t >= 0) once('t8ds' + o.i, () => { noise(0, .12, .002 * v, 1500, 1, 'bandpass'); tone(990 * semi(n), .12, .004 * v, .07, 'triangle'); }); } },
+
+// Comment lines moved off the page 2026-11-18 (room for Tailoring; the rounds log keeps every round):
+// ---------- round 83 (2026-11-16): Leatherworking, the base (pitched first; no punch, no knife cut: the ring and Skinning own those). A Unrolling hide, B Dye soaks in, C Tooled pattern, D Stretched and tacked ----------
+// a strip of leather: a soft vertical gradient, sparse grain, a faint light lip on top
+// this run's skill-ups: t = seconds since it landed (negative while the strike comes in), a/b = the front before/after
+// ---------- round 84 (2026-11-16): Leatherworking base, A (Unrolling hide) kept; the user: "don't play it safe inside the bar". Three bold ones that use the bar as a frame: B Boot stomp, C Hide throw, D Grip wrap ----------
+// a pelt: a soft blob with four leg flaps (simple shapes), centred at 0,0, w x h
+// ---------- round 85 (2026-11-16): Leatherworking base, A = Grip wrap (round 84 D, "not a bad idea"); three more, each a different mechanism outside the bar: B Sling, C Fringe, D Belt and buckle ----------
+// ---------- round 90 (2026-11-16): the user's remembered Skinning option, "a tarp thinly stretched and pulled to the next point". Best match: Pegged out (round 21 B) at Skinning's scale
+// (each skill-up ~1/5 of the bar). A = it as it was, on Skinning's bar; B, C = Leatherworking versions at a scale that reads (the pull is per notch section, not per 3 px point) ----------
+// the thin stretched sheet from xa to xb: k 0..1 how thick (0 = tissue-thin, 1 = full leather), shiv = its vibration
+// ---------- round 91 (2026-11-16): Leatherworking base LOCKED as Pegged out, a peg pair per notch (round 90 B: the hide pulled thin like a tarp to the next pegs). Add-ons the user picked, one each:
+// B Mallet taps the pegs, C Tension shiver, D Scraps trimmed off, E Stretched hide sheen. The single skill-up starts at 124 so every moment reaches a notch ----------
+// the latest skill-up that reached a notch: nx = that notch, xa = the notch before
+// ---------- round 92 (2026-11-16): "I liked Pegged out when it stretched further; lock that in first". How far each skill-up pulls on Leatherworking:
+// A the Skinning original (reference), B Bigger steps (the bar runs to the next recipe unlock, 5 points, so each skill-up is ~1/5 of the bar, pegs per point as on Skinning),
+// C Pulled far, springs back (the rank-long bar with pegs per notch; each skill-up yanks the thin hide far ahead, then it springs back) ----------
+// ---------- round 93 (2026-11-16): LOCKED base: Pegged out as on Skinning ("definitely A"), on Leatherworking's bar counted to the next recipe (round 92 B, `LWB92`: ~1/5 of the bar per skill-up).
+// The add-ons the user picked (round 91), now on every skill-up (each one pegs a big step): B Mallet taps, C Tension shiver, D Scraps trimmed off, E Stretched hide sheen ----------
+// this run's skill-ups on the recipe bar: t since it landed, a = the last pegs, b = the new pegs
+// ---------- round 94 (2026-11-16): the user likes 93 B (mallet) and D (scraps trimmed); the mallet "doesn't look too good". Four mallet treatments, each with the scraps:
+// A Rawhide mallet (drawn properly, swings from the wrist, motion trail), B Silhouette mallet, C Strike only (no mallet), D One big blow (both pegs at once) ----------
+// the mallet in pivot coords: handle along -x, the head's axis vertical, its face at +y; style 'raw' | 'sil'; k = size
+// ---------- round 95 (2026-11-16): Leatherworking LOCKED skill-up (94 C: Pegged out on the recipe bar, strike streaks set the pegs, scraps trimmed). The finale (reaching the next recipe),
+// the two the user picked from the pitch: A Strike cascade, B Pegs pop, hide rolls up. Both start after the last skill-up's strikes and scraps (F0 = .8 s after the bar fills) ----------
+// a strike streak arcing down (sy -1) or up (sy 1) onto (x, y); u 0..1.6 its life; k size
+// ---------- round 96 (2026-11-16): the finale, "mix A and B" (Strike cascade + Pegs pop, hide rolls up): A Cascade, then roll; B One sweep (the strikes knock the pegs out just ahead of the roll) ----------
+// one shared shape: roll from R0 for D seconds, hop at R0+D+.05 for .4 s
+// ---------- round 97 (2026-11-16): Leatherworking's look is LOCKED (Pegged out on the recipe bar, strike streaks set the pegs, scraps trimmed; finale One sweep). Its sound, four sets.
+// Each set: taut (the hide pulls to the new front), strike (each peg; n 0 top, 1 bottom), scraps, ftok (each peg knocked out in the finale), big (the last streak on the icon), pay (the icon lights).
+// Sound fatigue: gentle, low, notes varied from a scale, repeats step down (fat45 by skill-up index); the finale plays in full ----------
+// ---------- round 98 (2026-11-17): Alchemy, the base (pitched first; no tube boiling over, no cork: the craft ring owns those). The bar counts to the next recipe (each skill-up 1/5),
+// the finale plays when it fills (a rank-up celebration is a later item). The five the user picked: A Herbs dissolve, B Lead to gold, C Titration flash, D Layers settle, E Grind powder ----------
+// this run's skill-ups: t = seconds since it landed (negative while it comes in), a = the front before, b = after
+// ---------- round 104 (2026-11-17): Alchemy, base = 103 E Big herb on stage (A); six new whole scenes from the brainstorm: B Alembic drip, C Mortar pour, D Balance pan, E Herb press,
+// F Stirred in, G Ladle pour. The user's scale worry ("incremental like Fishing/Mining, what about 50+ points to the next unlock?"): the bar always counts the points to the next unlock,
+// so a gap switch (5 / 15 / 50 points) shows each scene with big and small steps; the potion's color steps every fifth of the gap (white flash every point) ----------
+// ---------- round 111 (2026-11-17): the bar IS the object ("you keep not doing anything with the bar"; only the Bottle shelf was unique). A new barModule mode 'X' (no track, no
+// notches, no border: the scene draws the whole bar). Picked from a brainstorm: A Shelf to cabinet, B Vial rack, C Ingredient jars, D Recipe scroll, E Setting up the lab,
+// F Cascade of bulbs. The bar is N objects (N = the gap, max 15; with a long gap each object holds a few points and fills part by part). Finales later ----------
+// ---------- round 113 (2026-11-17): the bottles win ("A is the best"; "slime came out pretty good"). A Clean shelf: the shelf tidied to read like a skill-up bar, finale the doors close
+// and the bottles blow up behind them (the user's idea). B-D: bottles on a workbench like 111 E's lab, each with its own funny finale: B Packed in a crate, C Test subject (the slime
+// drinks one), D Chain pop. Finales play when the bar fills (pick "Reaching the next unlock", or Five in a row with the 5-point gap) ----------
+// the bottles on the workbench (B-D): drop in with a bounce and dust, ghosts for the rest
+// ---------- round 114 (2026-11-17): "A is nice; explore D more: a dramatic chain reaction with fizzles, pops and spraying liquid, like Mining's chain of blasts". The user's idea is B:
+// all bottles fizzle and shake, the tops pop left to right in a "trrrink", the liquid sprays up like a shaken soda can. C Knock-on chain (each spray sets off the next, faster and faster),
+// D Pressure burst (pressure builds, a hush, then they all burst from the middle outward). The tops are the bottles' gold seals (the craft ring owns the cork pop). A = 113 A as it was ----------
+// ---------- round 115 (2026-11-17): add-ons on the locked look (bench of bottles + fizz, pop, spray). Picked per skill-up: Neighbor clink, Seal stamped on, Label slapped on; and "add-ons to
+// the finale too". One of each per option: A as locked; B Neighbor clink + the spray rains back down; C Seal stamped on + seals fly off as gold confetti; D Label slapped on + labels blow
+// off and the spray arcs into the recipe icon ----------
+// ---------- round 116 (2026-11-17): add-ons LOCKED = 115 B (neighbor clink + rain back; "the sound is a little much", later). More finale add-ons, picked: Bottles hop (during the fizz build-up),
+// Domino tip-over (after the eruption). A as is, B + hop, C + domino, D + both ----------
+// ---------- round 117 (2026-11-17): Alchemy's look LOCKED (116 A: the bench of bottles, neighbor clink, fizz/pop/spray finale, rain back). The sound, toned down ("a little much"): four sets.
+// Each: land (the bottle on the bench), clink (it bumps its neighbor), fizz (the build-up), pop (each seal, k left to right), spray, rain (a few drops), pay (the icon lights).
+// Sound fatigue: soft, lower, notes from the scale, repeats step down (fat45); the finale fuller but still gentle ----------
+
+// Moved out 2026-11-18 (Tailoring locked: clothesline + gust and fold): TL118 B-E (cloth bolt, pincushion, ironing board, loom), round 118's option list, cloth120/table120, FN120 A2/B1/B2.
+  B: { name: 'Cloth bolt unrolls', desc: 'A bolt of cloth sits on a long cutting table. Each point the bolt rolls forward, laying the cloth out behind it (the bolt gets thinner as the cloth runs out), and a quick chalk stroke marks the new length with a puff of chalk dust.',
+    draw(I, y, t, G, o) { wood111(I.x0 - 8, y + 5, I.x1 - I.x0 + 16, 5); ctx.fillStyle = '#4a2c14'; ctx.fillRect(I.x0 - 4, y + 10, 4, 5); ctx.fillRect(I.x1, y + 10, 4, 5);
+      const tip = Math.max(I.x0, I.tipX), f = clamp((I.v - I.lo) / Math.max(1, S.nx.lv - I.lo)), r = 8.5 - 3.5 * f, c = '#5a7ac8';
+      if (tip > I.x0) { const g = ctx.createLinearGradient(0, y + 1, 0, y + 5); g.addColorStop(0, '#7a9ae0'); g.addColorStop(1, '#3a5aa0'); ctx.fillStyle = g; ctx.fillRect(I.x0 - 4, y + 1, tip - I.x0 + 4, 4); ctx.fillStyle = 'rgba(255,255,255,.18)'; for (let x = I.x0; x < tip; x += 6) ctx.fillRect(x, y + 1, 1, 4); }
+      for (let k = 1; k < G.N; k++) { const x = I.X(I.lo + k * G.per); if (x <= tip - 1) { ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fillRect(x - .5, y + .5, 1, 5); } }
+      const cy = y + 5 - r, ang = (tip - I.x0) / r; ctx.save(); ctx.translate(tip, cy); const rg = ctx.createRadialGradient(-r * .3, -r * .3, .5, 0, 0, r); rg.addColorStop(0, '#9ab8f0'); rg.addColorStop(1, '#2a4a8a'); ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(20,30,60,.5)'; ctx.lineWidth = .8; for (let q = 1; q < 3; q++) { ctx.beginPath(); ctx.arc(0, 0, r * q / 3, 0, 7); ctx.stroke(); } ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.moveTo(Math.cos(ang) * r * .7, Math.sin(ang) * r * .7); ctx.lineTo(-Math.cos(ang) * r * .7, -Math.sin(ang) * r * .7); ctx.stroke();
+      ctx.fillStyle = '#c8a46a'; ctx.beginPath(); ctx.arc(0, 0, 1.6, 0, 7); ctx.fill(); ctx.restore();
+      if (o && o.t >= .4 && o.t < .7) { const u = (o.t - .4) / .3; ctx.strokeStyle = `rgba(255,255,255,${.9 * (1 - u)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(o.b - 4 + u * 4, y - 3); ctx.lineTo(o.b - 4 + u * 4 + 3, y + 6); ctx.stroke(); }
+      if (o && o.t >= .45) once('t8b' + o.i, () => { for (let q = 0; q < 4; q++) spawn({ x: o.b, y: y + 2, vx: (Math.random() - .5) * 20, vy: -10 - Math.random() * 10, g: 10, life: .5, size: 1.2, col: 'rgba(255,255,255,.6)' }); }); },
+    snd(o, v, n) { if (o.t >= 0) once('t8bs' + o.i, () => noise(0, .35, .003 * v, 700, .7, 'lowpass')); if (o.t >= .45) once('t8bt' + o.i, () => noise(0, .08, .002 * v, 2500, 1.5, 'bandpass')); } },
+C: { name: 'Pincushion', desc: 'New: the bar is a long stuffed pincushion (soft red fabric, seams). Each point a pin with a colored glass head drops in at an angle and pokes into the cushion with a little dent and a puff of fluff; with a long gap the next points push the same pin deeper. The row of pins is your progress.',
+draw(I, y, t, G, o) { const g = ctx.createLinearGradient(0, y - 7, 0, y + 7); g.addColorStop(0, '#e86a6a'); g.addColorStop(1, '#8a1e2a'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(I.x0 - 6, y - 6, I.x1 - I.x0 + 12, 13, 6.5); ctx.fill();
+ctx.strokeStyle = 'rgba(60,10,16,.45)'; ctx.lineWidth = 1; for (let k = 1; k < 6; k++) { const x = lerp(I.x0 - 6, I.x1 + 6, k / 6); ctx.beginPath(); ctx.moveTo(x, y - 5.5); ctx.lineTo(x, y + 6); ctx.stroke(); } ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(I.x0, y - 4.5, I.x1 - I.x0, 1.5);
+const kc = o ? G.kOf(S.v0 + o.i) : -1, first = o && G.first(S.v0 + o.i);
+for (let k = 0; k < G.N; k++) { const fr = G.fr(k), falling = first && k === kc && o.t < 0 && o.t > -.4; if (fr <= 0 && !falling) continue; const cx = G.sx(k), ang = (k % 3 - 1) * .22, depth = 6 + 4 * Math.min(1, fr); let dy = 0, sq = 0;
+if (falling) dy = -26 * (1 - Math.pow((o.t + .4) / .4, 2)); if (first && k === kc && o.t >= 0 && o.t < .2) sq = Math.sin(Math.PI * o.t / .2) * 1.5;
+if (!falling) { ctx.fillStyle = 'rgba(60,10,16,.35)'; ctx.beginPath(); ctx.ellipse(cx, y - 5 + sq * .5, 2.2 + sq, 1, 0, 0, 7); ctx.fill(); }
+ctx.save(); ctx.translate(cx, y - 5 + dy); ctx.rotate(ang); ctx.strokeStyle = '#d8d8e0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -(16 - depth)); ctx.stroke();
+const hg = ctx.createRadialGradient(-.8, -(16 - depth) - .8, .3, 0, -(16 - depth), 2.6); hg.addColorStop(0, '#ffffff'); hg.addColorStop(1, CLR118[k % 8]); ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(0, -(16 - depth), 2.6, 0, 7); ctx.fill(); ctx.restore(); }
+if (first && o.t >= 0) once('t9c' + o.i, () => { for (let q = 0; q < 4; q++) spawn({ x: G.sx(kc), y: y - 5, vx: (Math.random() - .5) * 24, vy: -12 - Math.random() * 10, g: 20, life: .5, size: 1.2, col: 'rgba(255,230,230,.7)' }); }); },
+snd(o, v, n) { if (o.t >= 0) once('t9cs' + o.i, () => { tone(1568 * semi(n), 0, .003 * v, .05, 'triangle'); noise(.01, .08, .002 * v, 600, .8, 'lowpass', true); }); } },
+D: { name: 'Ironing board', desc: 'New: the bar is an ironing board with a crumpled cloth on it: creased and dull ahead, pressed smooth and bright behind. Each point the iron glides forward to the new length with a soft puff of steam from its nose, a light sheen sliding along the freshly pressed cloth behind it.',
+draw(I, y, t, G, o) { ctx.fillStyle = '#3a3a44'; ctx.beginPath(); ctx.moveTo(I.x0 - 8, y - 5); ctx.lineTo(I.x1 + 2, y - 5); ctx.quadraticCurveTo(I.x1 + 12, y, I.x1 + 2, y + 6); ctx.lineTo(I.x0 - 8, y + 6); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#5a5a66'; ctx.fillRect(I.x0 + 10, y + 6, 3, 8); ctx.fillRect(I.x1 - 14, y + 6, 3, 8);
+const tip = Math.max(I.x0, I.tipX); ctx.fillStyle = '#7a6aa8'; ctx.fillRect(tip, y - 4, I.x1 - tip, 9); ctx.strokeStyle = 'rgba(30,20,60,.55)'; ctx.lineWidth = 1; for (let x = tip + 2; x < I.x1 - 2; x += 7) { const s = rnd53(x) > .5 ? 1 : -1; ctx.beginPath(); ctx.moveTo(x, y - 3); ctx.lineTo(x + 4 * s, y + 4); ctx.stroke(); }
+if (tip > I.x0) { const g = ctx.createLinearGradient(0, y - 4, 0, y + 5); g.addColorStop(0, '#c8b8f8'); g.addColorStop(1, '#8a7ac8'); ctx.fillStyle = g; ctx.fillRect(I.x0 - 4, y - 4, tip - I.x0 + 4, 9); const sx = I.x0 + ((t * 40) % (I.x1 - I.x0 + 40)) - 20; if (sx < tip) { const sg = ctx.createLinearGradient(sx - 10, 0, sx + 10, 0); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,255,255,.4)'); sg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = sg; ctx.fillRect(sx - 10, y - 4, Math.min(20, tip - sx + 10), 9); } }
+const ix = tip; ctx.fillStyle = '#c8ccd8'; ctx.beginPath(); ctx.moveTo(ix - 14, y - 4); ctx.lineTo(ix + 4, y - 4); ctx.quadraticCurveTo(ix + 9, y - 4.5, ix + 6, y - 9); ctx.lineTo(ix - 12, y - 9); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#8a8ea0'; ctx.fillRect(ix - 14, y - 5, 18, 1.5);
+ctx.strokeStyle = '#5a3a2a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(ix - 9, y - 9); ctx.quadraticCurveTo(ix - 4, y - 15, ix + 2, y - 9); ctx.stroke(); ctx.lineCap = 'butt';
+if (o && o.t > -.05 && o.t < .7) { const u = (o.t + .05) / .75; for (let q = 0; q < 3; q++) { const k = clamp(u * 1.3 - q * .15); if (k <= 0 || k >= 1) continue; ctx.fillStyle = `rgba(240,240,250,${.45 * (1 - k)})`; ctx.beginPath(); ctx.arc(ix + 8 + k * 6 + q * 2, y - 8 - k * 12, 2 + k * 4, 0, 7); ctx.fill(); } } },
+snd(o, v, n) { if (o.t >= 0) once('t9ds' + o.i, () => { noise(0, .45, .002 * v, 500, .7, 'lowpass'); noise(.05, .3, .0012 * v, 1200, .8, 'lowpass'); }); } },
+  E: { name: 'Loom weaving', desc: 'The bar is a small wooden loom: threads stretched along it, the woven cloth growing from the left. Each point the shuttle shoots across the threads at the front, leaving a new band of colored weave, and the beater bar taps it tight with a soft thud.',
+    draw(I, y, t, G, o) { const top = y - 10, bot = y + 8; [I.x0 - 7, I.x1 + 7].forEach(x => wood111(x - 2, top - 3, 4, bot - top + 6, '#a8763e', '#5a3a1e')); wood111(I.x0 - 7, top - 3, I.x1 - I.x0 + 14, 2.5); wood111(I.x0 - 7, bot + .5, I.x1 - I.x0 + 14, 2.5);
+      ctx.fillStyle = 'rgba(230,220,200,.35)'; for (let yy = top + 1; yy < bot; yy += 2.6) ctx.fillRect(I.x0 - 5, yy, I.x1 - I.x0 + 10, .6);
+      const tip = I.tipX; for (let k = 0; k < G.N; k++) { const a = I.X(I.lo + k * G.per), b = Math.min(I.X(I.lo + (k + 1) * G.per), tip); if (b <= a) break; const c = CLR118[k % 8]; ctx.fillStyle = c; ctx.fillRect(a, top, b - a, bot - top);
+        ctx.fillStyle = 'rgba(0,0,0,.22)'; for (let yy = top, r = 0; yy < bot; yy += 2.6, r++) for (let x = a + (r % 2) * 1.5; x < b; x += 3) ctx.fillRect(x, yy, 1.5, 1.3); }
+      if (o && o.t > -.3 && o.t < .05) { const u = (o.t + .3) / .3, sy = lerp(top - 6, bot + 4, u), x = o.a + 3; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, sy - 10); ctx.lineTo(x, sy); ctx.stroke(); ctx.save(); ctx.translate(x, sy); ctx.fillStyle = '#c8955a'; ctx.beginPath(); ctx.ellipse(0, 0, 2, 5, 0, 0, 7); ctx.fill(); ctx.restore(); }
+      const bx = o && o.t >= 0 && o.t < .5 ? lerp(o.b + 5, I.tipX + 1, Math.sin(Math.PI * clamp(o.t / .5))) : I.tipX + 3; ctx.fillStyle = '#7a5230'; ctx.fillRect(bx, top - 2, 2, bot - top + 4); },
+    snd(o, v, n) { if (o.t >= -.3) once('t8es' + o.i, () => noise(0, .2, .002 * v, 1800, 1, 'bandpass')); if (o.t >= .2) once('t8et' + o.i, () => drum46(120 * semi(n / 2), 0, .008 * v)); } },
+Object.assign(FAM, { PA: r118('A'), PB: r118('B'), PC: r118('C'), PD: r118('D'), PE: r118('E') }); delete FAM.PF; delete FAM.PG; delete FAM.PH;
+function cloth120(I, y, x0, x1, al = 1) { if (x1 <= x0) return; ctx.save(); ctx.globalAlpha *= al; const g = ctx.createLinearGradient(0, y + 1, 0, y + 5); g.addColorStop(0, '#7a9ae0'); g.addColorStop(1, '#3a5aa0'); ctx.fillStyle = g; ctx.fillRect(x0, y + 1, x1 - x0, 4); ctx.fillStyle = 'rgba(255,255,255,.18)'; for (let x = x0; x < x1; x += 6) ctx.fillRect(x, y + 1, 1, 4); ctx.restore(); }
+function table120(I, y) { wood111(I.x0 - 8, y + 5, I.x1 - I.x0 + 16, 5); ctx.fillStyle = '#4a2c14'; ctx.fillRect(I.x0 - 4, y + 10, 4, 5); ctx.fillRect(I.x1, y + 10, 4, 5); }
+  A2: { base: 'A', name: 'Clothesline: pegs pop into a basket', finAt: 2.1, desc: 'Finale: a long wicker basket slides in under the line; the pegs pop off one after another, left to right (a quick run of wooden ticks climbing up), each garment dropping into the basket; then the full basket hops into the recipe icon.',
+    fin(I, y, G, ts) { posts120(I, y); const sz = Math.min(15, G.sw * .95), bin = eOut(clamp(ts / .35)), hop = clamp((ts - 1.65) / .45), ux = I.x1 + 18, bx0 = I.x0 - 4, bx1 = I.x1 + 4, by = y + 5;
+      for (let k = 0; k < G.N; k++) { const cx = G.sx(k), ly = line120(I, y, cx), p = .5 + k * .06, u = clamp((ts - p) / .28); if (ts < p) { const a = Math.sin(ts * 1.6 + k) * .06; ctx.save(); ctx.translate(cx, ly); ctx.rotate(a); emo98(WEAR118[k % 8], 0, sz * .52, sz, 0, 1); ctx.restore(); ctx.fillStyle = '#c89a5a'; ctx.fillRect(cx - 3.5, ly - 2.5, 1.6, 4.5); ctx.fillRect(cx + 2, ly - 2.5, 1.6, 4.5); continue; }
+        once('f0b' + k, () => [-1, 1].forEach(s => spawn({ x: cx + s * 3, y: ly, vx: s * 30, vy: -60 - Math.random() * 20, g: 300, life: .5, size: 1.2, shape: 'sq', vr: 15, col: '#c89a5a' }))); if (u < 1 && hop <= 0) emo98(WEAR118[k % 8], cx, lerp(ly + sz * .52, by - 1, u * u), sz * (1 - u * .3), u * .5, 1 - u * .6); }
+      if (hop >= 1) return; const sc = 1 - hop * .75, cx = lerp((bx0 + bx1) / 2, ux, eOut(hop)), cy = lerp(by + 3 + (1 - bin) * 20, y, hop) - Math.sin(Math.PI * hop) * 18, w = (bx1 - bx0) * sc, h = 8 * sc; ctx.save(); ctx.globalAlpha *= bin;
+      ctx.fillStyle = '#b8864a'; ctx.beginPath(); ctx.roundRect(cx - w / 2, cy - h / 2, w, h, 3 * sc); ctx.fill(); ctx.strokeStyle = 'rgba(90,56,24,.6)'; ctx.lineWidth = 1; for (let x = cx - w / 2 + 3; x < cx + w / 2; x += 4) { ctx.beginPath(); ctx.moveTo(x, cy - h / 2); ctx.lineTo(x, cy + h / 2); ctx.stroke(); } ctx.fillStyle = '#d8a86a'; ctx.fillRect(cx - w / 2, cy - h / 2, w, 1.5 * sc); ctx.restore(); },
+    fsnd(ts, N) { if (ts >= 0) once('f1a', () => noise(0, .3, .002, 800, .7, 'lowpass')); for (let k = 0; k < N; k++) if (ts >= .5 + k * .06) once('f1p' + k, () => tone(523 * semi(PENT42[k % 10]), 0, .004, .05, 'triangle')); if (ts >= 1.65) once('f1h', () => { drum46(120, 0, .008); tone(392, .05, .005, .2, 'sine', 523); }); } },
+  B1: { base: 'B', name: 'Cloth bolt: snip and fold', finAt: 2.0, desc: 'Finale: a bright scissor glint runs along the cloth from the bolt back to the start, leaving a crisp cut; the cloth folds over on itself twice (into thirds, a soft flip each time), and the folded bundle hops into the recipe icon.',
+    fin(I, y, G, ts) { table120(I, y); const L = I.x1 - I.x0, cut = clamp((ts - .1) / .55), f1 = clamp((ts - .8) / .25), f2 = clamp((ts - 1.1) / .25), hop = clamp((ts - 1.5) / .45), ux = I.x1 + 18;
+      if (hop >= 1) return; if (hop > 0) { const w = L / 3 * (1 - hop * .7), x = lerp(I.x0 + L / 6, ux, eOut(hop)), yy = lerp(y + 2, y, hop) - Math.sin(Math.PI * hop) * 16; for (let s = 0; s < 3; s++) cloth120(I, yy - 4 - s * 1.6 * (1 - hop * .5), x - w / 2, x + w / 2); return; }
+      const right = I.x0 + L * (1 - f1 / 3 - f2 / 3); cloth120(I, y, I.x0 - 4, right); if (f1 > 0 && f1 < 1) { const hx = I.x0 + L * 2 / 3, w = L / 3 * Math.cos(Math.PI * f1); cloth120(I, y - 2 - Math.sin(Math.PI * f1) * 6, hx - Math.max(0, -w), hx + Math.max(0, w), .9); }
+      if (f2 > 0 && f2 < 1) { const hx = I.x0 + L / 3, w = L / 3 * Math.cos(Math.PI * f2); cloth120(I, y - 3.5 - Math.sin(Math.PI * f2) * 6, hx - Math.max(0, -w), hx + Math.max(0, w), .9); }
+      if (f1 >= 1) cloth120(I, y - 1.6, I.x0 - 4, right); if (f2 >= 1) cloth120(I, y - 3.2, I.x0 - 4, right);
+      if (cut > 0 && cut < 1) { const x = lerp(I.x1, I.x0, cut); ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 6; star4(x, y + 1, 3, ts * 8); ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y + 1); ctx.lineTo(I.x1, y + 1); ctx.stroke(); } },
+    fsnd(ts) { if (ts >= .1) once('f2s', () => { for (let q = 0; q < 6; q++) noise(q * .09, .05, .0018, 3000, 2, 'bandpass'); }); if (ts >= .8) once('f2f1', () => noise(0, .2, .0025, 700, .7, 'lowpass')); if (ts >= 1.1) once('f2f2', () => noise(0, .2, .0025, 650, .7, 'lowpass')); if (ts >= 1.5) once('f2h', () => tone(392, 0, .006, .2, 'sine', 523)); } },
+  B2: { base: 'B', name: 'Cloth bolt: twirl into the garment', finAt: 2.0, desc: 'Finale: the laid-out cloth lifts off the table, gathers toward the middle and twirls up in a spiral, sparkling, and becomes the recipe’s garment, which flies into the recipe icon.',
+    fin(I, y, G, ts) { table120(I, y); const L = I.x1 - I.x0, lift = clamp(ts / .35), gath = clamp((ts - .35) / .7), into = clamp((ts - 1.3) / .45), cx = (I.x0 + I.x1) / 2, ux = I.x1 + 18, e = S.nx.emo;
+      if (into <= 0) { const w = L * (1 - gath * .92), yy = y - lift * 8 - gath * 10, rot = gath * gath * 9; ctx.save(); ctx.translate(cx, yy + 3); ctx.rotate(rot); ctx.translate(-cx, -(yy + 3)); cloth120(I, yy, cx - w / 2, cx + w / 2, 1); ctx.restore();
+        if (gath > .3) once('f3sp', () => { for (let q = 0; q < 8; q++) spawn({ x: cx + (Math.random() - .5) * 20, y: y - 14, vx: (Math.random() - .5) * 40, vy: -20 - Math.random() * 30, g: 20, life: .7, size: 2.2, shape: 'star', col: q % 2 ? '#c8d8ff' : '#ffffff' }); }); return; }
+      if (into >= 1) return; emo98(e, lerp(cx, ux, eOut(into)), lerp(y - 15, y, into) - Math.sin(Math.PI * into) * 10, 16 + 6 * Math.sin(Math.PI * into), 0, 1); },
+    fsnd(ts) { if (ts >= 0) once('f3a', () => noise(0, .9, .0025, 900, .7, 'lowpass')); if (ts >= .7) once('f3b', () => [0, 4, 7, 12].forEach((s, q) => tone(784 * semi(s), q * .08, .003, .3, 'sine'))); if (ts >= 1.3) once('f3c', () => tone(523, 0, .006, .25, 'sine', 784)); } },
+
+// Round 123 (Wooden pegs + music-box endings; the user: 'never mind, leave it as it was'), moved out 2026-11-18.
+// ---------- round 123 (2026-11-18): sound "A but I like the final trill of music box": A Wooden pegs + the music-box close; B Wooden pegs + the music-box fold run and close ----------
+SET122.E = Object.assign({}, SET122.A, { name: 'Wooden pegs + music-box close', pay: SET122.C.pay, desc: 'Wooden pegs throughout (soft swish, two light wooden clicks, a low hum for the dip; wind, cloth pats, wooden taps for the folds); the recipe lights with the music box’s soft three-note close.' });
+SET122.F = Object.assign({}, SET122.A, { name: 'Wooden pegs + music-box run and close', fold: SET122.C.fold, hop: SET122.C.hop, pay: SET122.C.pay, desc: 'Wooden pegs for every skill-up and the wind; the folds play as a music-box run up the scale, the stack hop a soft music-box note, then the music box’s three-note close.' });
+{ const a = r122('E'), b = r122('F'); Object.assign(FAM, { PA: { get name() { return 'A. ' + SET122.E.name; }, get desc() { return a.desc; }, get note() { return a.note; }, draw: t => a.draw(t) }, PB: { get name() { return 'B. ' + SET122.F.name; }, get desc() { return b.desc; }, get note() { return b.note; }, draw: t => b.draw(t) } }); delete FAM.PC; delete FAM.PD; }
+setTimeout(() => { const x = [...document.querySelectorAll('button')].find(z => z.textContent.includes('Reaching')); if (x) x.click(); }, 220);

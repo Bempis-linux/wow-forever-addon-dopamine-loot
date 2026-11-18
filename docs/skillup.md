@@ -4,33 +4,31 @@ The current focus. Read this file (not plan.md) when working on skill-ups. Page:
 only page; its `<h1>` says the round). Every round is in `docs/skillup-rounds.md` (read only for an old round's detail).
 Design rules that apply everywhere are in CLAUDE.md and memory.
 
-## Next: Alchemy (start here)
+## Next: Engineering (start here)
 
-1. **Pitch first** (it worked; building blind missed six rounds on Leatherworking): 6-8 one-line directions via
-   AskUserQuestion (multi-select), the user picks which to build, then build them. Four options per round, each a
-   different mechanism; keep the current pick as A when iterating.
-2. Steps, one at a time: **base → add-ons → finale → sound**, each locked before the next.
-3. **Alchemy's craft ring to avoid** (it's on screen with the skill-up): *Boil over + bubbles* (bubbles livelier each
-   beat, foam rises over the tube and spills; made = the cork pops, steam). So no tube boiling over and no cork.
-   Liquid, color, glass, bubbles as a material are fine (no-echo forbids the ring's tool/signature shape, not materials).
-4. **Bar scale, decided for Leatherworking:** a crafter's bar counts to the **next recipe unlock** (a few points), not
-   the whole 75-point rank, so each skill-up is a big visible step (~1/5 of the bar), like a gatherer's. Do the same for
-   Alchemy: make an Alchemy profile like `LWB92` (span e.g. [120,125], `unlocks` = recipe names + icons, `v`, `five`,
-   `unlockV`) and rebuild `S` with it in the draw (see `r96`). Confirm with the user in the first pitch.
-5. **Lessons from Leatherworking** (rounds 83-97):
-   - Bold: use the bar as a frame or a stage, not just a fill inside it (memory "Bold add-ons").
-   - It must *feel like the profession* (working the material), not objects colored like it.
-   - Drawn objects look crude; prefer simple shapes (streaks, rings, glints) and real icons. A tool can be implied by
-     its motion (Leatherworking's "Strike only": a swing streak + impact ring, no mallet).
-   - Order matters: the effect follows the material (the pegs are struck *after* the hide lands).
-   - No zig-zags or wavy lines, ever (memory "No zig-zag").
-   - When the user remembers an old option, search the page's option names and `skillup-rounds.md`, then show the
-     candidates **on their original bar and scale** (round 90 A found Pegged out that way).
-6. Page housekeeping before the first Alchemy round: the page is ~522 KB of a 512 KiB (524,288 byte) cap; move
-   Leatherworking's unused round code to `skillup-p2-old-rounds.js` (keep `r97('C')` and what it uses: `r96`,
-   `FIN96.B`, `LW94.C`, `ADD93.B/D`, `VAR21.Skinning.B`, `LWB92`, `SET97.C` and the helpers). Check the closing `};`.
+1. **Brainstorm first, whole stories, the bar is an object** (barModule mode `X`). Pitch 6-8 one-liners via
+   AskUserQuestion (multi-select), build only the picks. Alchemy took 20 rounds of tweaks before the bar became an
+   object; Tailoring went brainstorm → base (5) → finales for the two favorites → add-ons → sound in 6 rounds (118-123).
+   Do it that way: when the user can't decide between bases, show a finale for each.
+2. Steps, one at a time: **base → (finale) → add-ons → sound**, each locked before the next. Keep the current pick as A
+   when iterating; options must differ in the whole scene (bar, action, payoff), not one element (memory "Clearly
+   different options"). When the user says start clean, bring new ideas. Keep it simple: one bar, one action, one payoff.
+3. **Engineering's craft ring to avoid:** *Wrench, 3 turns* (the wrench's ring end round a hex bolt, the handle swings,
+   ratchet ticks; boing + puff). So no wrench, no ratchet, no boing. Gears, bolts as parts, sparks, steam are fine.
+4. **Bar scale:** the bar runs from the last unlock to the next recipe (step 1/gap; the gap switch shows 5/15/50 points:
+   `GAP104`); an object bar is N objects, N = gap capped at 15, each filling over gap/N points (`g111`). Make a profile
+   like `tlb118(g)` (span, recipe unlocks + icons) and rebuild `S` in the draw (see `r122`). The finale plays when it
+   fills (`finAt` + `ts95()`); a rank-up celebration is a later item (plan.md 1.4.0 order, 2b).
+5. **Lessons** (Leatherworking, Alchemy, Tailoring): use the bar as a frame or stage; it must feel like the profession;
+   simple shapes and real icons (emoji via `emo98`) over drawn objects; the effect follows the material; no zig-zags;
+   name options by their page letter and confirm a letter that names another option; sounds soft from the start; no
+   plucked timbre for Tailoring-like threads.
+6. **Page**: ~519 KB of the 524,288-byte cap. Before Engineering's first round move Tailoring's unused code out (keep
+   `r122('A')` and what it uses: `SET122.A`, `clothes121`, `line121`, `FN120.A1`, `posts120`, `line120`, `tlb118`,
+   `WEAR118`, `CLR118`, `emo98`) and Alchemy's done `r117('C')` with its helpers. Checking: freeze + step time
+   (`shG`), close the tab after a freeze (navigating does not reload).
 
-Then Tailoring, Engineering, Enchanting; then Cooking, First Aid (one at a time).
+Then Enchanting; then Cooking, First Aid (one at a time).
 
 ## Done
 
@@ -58,6 +56,29 @@ Then Tailoring, Engineering, Enchanting; then Cooking, First Aid (one at a time)
     (varied notes, the bottom a step lower); a faint rustle for the scraps; finale knocks climb the scale, a low knock
     on the icon, a soft two-note mallet close (replaces the default chime). Through the `window.SND97` hooks.
   - The locked whole: `r97('C')`.
+- **Alchemy (2026-11-17, rounds 98-117):**
+  - Bar: **a bench of bottles** (mode `X`, no track): a workbench with faint bottle outlines; each point the next bottle
+    (a herb's color, a gold seal) drops onto the bench with a little bounce and dust; a long gap fills each bottle over a
+    few points (`bench113`, `g111`).
+  - Each skill-up add-on: **neighbor clink**: the landing bottle bumps its neighbor, which wobbles (`AO115.B`).
+  - Finale **Fizz, pop, spray** (the user's idea): every bottle fizzes and shakes harder, the seals pop left to right in
+    one rising "trrrink", each sprays up like a shaken soda can, the levels drop; then the potion **rains back down** onto
+    the bench in splashing drops (`chain114('B')` + `AO115.B.fin`). Seals, not corks (the ring owns the cork pop).
+  - Sound **Bubbly** (`SET117.C`): a soft thunk + a rising bubble blip per bottle, a tiny plink for the clink; finale:
+    slow bubble blips (fizz), soft rising "bloop" pops up the scale, a gentle spray, a few plips of rain, a bubbly
+    three-note close (via `window.SND97.pay`).
+  - The locked whole: `r117('C')`.
+- **Tailoring (2026-11-18, rounds 118-123):**
+  - Bar: **a clothesline** (mode `X`): two wooden posts and a gently sagging line; each point the next garment (real
+    icons: shirt, socks, scarf, gloves…) flies up, two pegs clip it, it swings and settles and sways with the others;
+    empty spots show faint pegs (`clothes121`, `WEAR118`).
+  - Add-on **line dips**: the line dips under the new garment in two straight segments and springs back, the neighbors
+    bob (`line121`).
+  - Finale **gust and fold**: wind streaks, every garment flaps hard; then they fold into squares onto a stack by the
+    post, and the stack hops into the recipe icon (`FN120.A1`).
+  - Sound **Wooden pegs** (`SET122.A`): a soft air swish, two light wooden clicks, a soft low hum for the dip; finale: a
+    gentle wind, cloth pats, wooden taps climbing for the folds, a two-note wooden close (via `window.SND97.pay`).
+  - The locked whole: `r122('A')`.
 
 ## Crafting rings, as locked (don't echo them)
 
@@ -88,7 +109,7 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   pages over **524,288 bytes**. Check `wc -c`; move rejected code to `docs/mockups/skillup-p2-old-rounds.js` (not
   loaded) as you go. **A cut that drops a closing `};` stops the whole page silently** (it happened in round 95):
   after cutting, check `typeof FAM` in the pane.
-- `barModule(top, mode, V)`: modes `A` inside the bar (clipped), `B` breaks out (6 px), `F` Fishing water, `M`
+- `barModule(top, mode, V)`: modes `X` no track at all (the scene draws the whole bar; use it when the bar is an object), `A` inside the bar (clipped), `B` breaks out (6 px), `F` Fishing water, `M`
   open-top. Hooks on V: `grow` (clipped in mode A), `over` (unclipped, after the border), `after` (over the icon),
   `tip`, `unlockX`, `unlockY`, `iconPulse`, `shake(info) -> [dx, dy]`, `finAt` (seconds from the fill to the payoff,
   so the finale plays first). `info`: `x0, x1, ly, X(v), Xi(x), tipX, lo, v, N, hitAge, done, f`.

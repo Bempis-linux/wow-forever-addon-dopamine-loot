@@ -785,3 +785,240 @@ docs/skillup.md; read this file only for an old round's detail. New rounds are a
    a low pluck + fifth).
    Round 97 → **C. Wooden mallet + creak. LEATHERWORKING DONE** (2026-11-17): Pegged out on the recipe bar, strike
    streaks set the pegs, scraps trimmed; finale One sweep; sound Wooden mallet + creak (`r97('C')`). Next: Alchemy.
+
+## Alchemy
+
+- **Round 98 (2026-11-17): the base.** Pitched 7, the user picked 5. Bar scale settled first: each point plays the gain
+  animation, the bar counts to the next recipe (`ALB98`: [120,125], Strong Troll’s Blood Potion; step 1/gap), the
+  finale when it fills; a rank-up celebration is a later 1.4.0 item (plan.md 2b). Options (`r98(K)`, `AL98`): **A. Herbs
+  dissolve** (a real herb emoji drops in, splashes, shrinks; its color blooms and pushes the front), **B. Lead to gold**
+  (the whole bar lead, earned part gold; a transmutation circle with 4 ticks turns over the new stretch, white-hot
+  front, glint, gold dust), **C. Titration flash** (a drop; the potion flashes white and turns its next hue outward from
+  the drop: violet, blue, teal, green, lime, gold; a glow spills past the bar), **D. Layers settle** (three straight
+  layers; the bar sloshes, clouds, drops jump the rim, settles), **E. Grind powder** (powder fill; a grinding ring's
+  circling streak above the front, powder pours in, dust puff). Not picked: Bulb chain, Crystals grow.
+  Housekeeping: the round wrappers r12-r51 moved to `skillup-p2-old-rounds.js` (page 522 → 510 KB).
+- **Round 99 (2026-11-17):** "I like C's animation; mix A and C, and mix E in: grinding the herbs into the mixture".
+  Each skill-up: a herb drops into a grinding ring above the front (-.55..-.3 s), the ring's streak circles while it
+  shrinks to powder that pours in (-.3..0), then 98 C's flash turns the potion its next color (`r99(K)`, `CFG99`).
+  **A. Herb, ground, flash** (the hue ladder), **B. The herb's own color** (the potion takes the ground herb's color),
+  **C. Ground on the surface** (the ring sits on the potion), **D. Ground along the new stretch** (the ring travels a→b
+  laying powder; the new color spreads back from it). Page 517 KB: next round, move `AL98` B/D/E out.
+- **Round 100 (2026-11-17):** base = 99 A ("use A as a base"); "differing variations of grinding the herbs, like a
+  wheeled herb grinder". Same herb and flash, only the grinding changes (`r100(K)`, `GR100`, through the new
+  `cfg.grind` hook in `r99`): **A. Grinding ring** (99 A), **B. Wheel grinder** (a stone wheel on a wooden axle rolls
+  three passes over the herb on the bar's top edge, the bar its trough; crumbs per pass), **C. Millstones** (two flat
+  stones above the front; the herb drops in the top, the top stone turns (peg sweeps, grooves slide), powder spills
+  from the gap both sides), **D. Sieve** (a shallow mesh tray shakes side to side, a fine rain sifts through).
+  Round 98's code moved to `skillup-p2-old-rounds.js` (page 513 KB).
+- **Round 101 (2026-11-17):** 100 B (wheel grinder) taken; "differing variations of wheel grinder", and "it's abrupt
+  and hard to tell what's going on, especially with the herb". Readability for all (`r101(K)`, `W101`, `herb101`,
+  `wheel101`): skill-ups 1.5 s apart on this round (`S.slow101` re-times `S.hits`), an 18 px herb that lands with a
+  squash, flattens a step per pass into a green smear that sinks in (t -.1..0), then the flash. **A. Edge roll** (100
+  B slower: rolls in, three passes on the bar's top edge, rolls off), **B. Own trough** (a wooden trough curve above
+  the front; the wheel rolls along it, powder slides off its ends), **C. One rolling pass** (rolls in from behind,
+  crushes in one heavy pass, keeps rolling to the new front leaving a green smear line), **D. Edge-runner** (a wheel
+  on an arm circles a post on the front, bigger as it comes forward; crushes twice). Round 100's code moved out.
+- **Round 102 (2026-11-17):** base LOCKED as 101 A **Edge roll** ("use A as a base"); "work on the animations/visuals,
+  would like to see it look better". Same timing, three looks (`r102(K)`, `W102`, run through `r101` with new
+  `W.shake`/`W.fx` hooks): **A** 101 A as it was, **B. Carved stone** (a lit wheel: dark rim, chiselled notches
+  turning, wooden hub, turned axle with knobs, shadow, motion ghosts; juice flecks + a glint per pass), **C. Ring and
+  glint** (no drawn wheel: a bright rim ring with a glint riding it, a gold axle line; per pass an impact ring, leaf
+  bits flipping out, glints), **D. Heavy wheel** (bigger, the bar jolts down each pass, dust puffs at the turns, a low
+  thud). 101 B-D moved out.
+  Checking tip: the pane runs at a few fps; freeze time with `_f = frame; frame = ts => { if (FREEZE != null) S.age =
+  FREEZE; _f(ts); }`, then `fam = 'PB'; play(); FAM[fam].draw(20); FREEZE = 2.38` and zoom. **Close the tab afterwards**: navigating to the same page does not reload it, and a left-over freeze looked to the user like the animations crashing.
+- **Round 103 (2026-11-17):** 102 rejected ("not much difference; I expect the bar visuals, animations, herbs,
+  everything: 4 completely different versions of herb/grind"), and "brainstorm first before mocking up". Pitched 7
+  whole-scene concepts; picked 5, built (`r103(K)`, `SC103`; timing as 101: 1.5 s apart, passes at `T102`, the carved
+  wheel `carved102`): **A. Apothecary trough** (a wooden trough bar; green paste plops in, the older paste glows into
+  violet potion behind the front), **B. Glass and juice** (a glass bar with edges and a moving glint; a crystal wheel;
+  juice drips in and swirls; the color flash), **C. Herbs in a row** (one herb per point still to go sits on the bar;
+  the wheel crushes the next one and its slot fills), **D. Juice press stream** (juice runs along the bar's top a step
+  per pass, then the fill catches up; the fill keeps a stripe per herb color), **E. Big herb on stage** (a stand on
+  the bar's start; a 24 px herb and a big wheel; essence drops arc into the front). Not picked: Sand-art powder,
+  Rune-etched channel. Rounds 99/100/102 leftovers + LW83 moved out (page 518 KB).
+- **Round 104 (2026-11-17):** base = 103 **E Big herb on stage** ("easier to see"); "3 completely new options", and
+  the scale worry ("incremental like Fishing/Mining? what about 50+ points to the next unlock?"). Answer: the bar
+  always spans the gap to the next unlock (1/gap per point); the page now has a **gap switch** (5/15/50 points,
+  `GAP104`, `alb104(g)`; default 15) and the potion's color steps every fifth of the gap (`pot104`). Brainstormed 6,
+  the user picked all 6 (`r104(K)`, `SC104`): **A** Big herb on stage, **B. Alembic drip** (flask at the start, a
+  straight glass pipe to the front, a bead slides down and drips), **C. Mortar pour** (stone bowl, a pestle streak,
+  powder streams along the bar top to the front), **D. Balance pan** (a balance over the front: the pan dips, the
+  herb crumbles, the pan tips the powder in), **E. Herb press** (two plates between posts squeeze three times, juice
+  arcs land farther each time), **F. Stirred in** (the herb splashes in at the front; a stir streak, color ribbons
+  spiral in), **G. Ladle pour** (one ladle scoops at the start, swings to the front, pours, swings back; fixed after the user saw it broken: the moving ladle was never drawn (an object-identity check), and the return now ends before the next herb).
+- **Round 105 (2026-11-17):** base = 104 **C Mortar pour** ("pretty good, just needs the little grinder handle
+  thing"); variations "with differences in the bar, the animation, how it goes in, how it grinds". The user expects
+  to keep the mortar pour and **add on to it next**. Brainstormed 6, picked 4 (`r105(K)`, `MO105`, `pestle105`,
+  `bowlBack105`/`bowlFront105`, `pour105`): **A. Mortar pour + pestle** (a drawn pestle leans in the bowl, grinds round
+  inside it, leans back while the powder pours), **B. Pounding pestle** (upright, three pounds with thuds and crumbs;
+  a grainy powder bar with a heap at the front that swells and slumps), **C. Bar is the mortar** (no bowl: a stone
+  trough bar; the herb drops in at the front, the pestle grinds back and forth inside the bar; green-gold ground fill),
+  **D. Powder dissolves** (A + a pale film floats on the potion, then sinks and blooms the herb's color), **E. Puff of
+  powder** (the pestle taps the rim twice; a cloud drifts over and settles at the front; a glittering powder bar).
+  Fixed: the gap switch was placed outside the panel (now after the moment buttons).
+- **Round 106 (2026-11-17):** base **LOCKED: 105 A Mortar pour + pestle**. Add-ons (`r106(K)`, `AD106`, `scene106`,
+  `puff106`): on all, a **puff when done** (the user: "puff when done, and it comes up with some sparkles": soft puffs
+  rise from the bowl as the pestle stops, star sparkles, a faint high note); and how it goes in: **B. Drop + bubbles**
+  (a clump arcs over and drops straight down at the front; bubbles rise and pop), **C. Mix sweeps right** (streaks of
+  the herb's color sweep right to the new front), **D. Fizz + color ring** (sparks jump; an ellipse ring of the herb's
+  color spreads), **E. Sinks and fans out** (a column of grains sinks, then fans out along the bottom). Round 105's
+  options moved out; its mortar helpers stay.
+- **Round 107 (2026-11-17):** "you've barely touched the bar and how it moves". Kept (the user): the puff when done,
+  bubbles but **on the top surface where the powder enters**, and **sinks/fans out**. Brainstormed bar looks and bar
+  motions; picked looks Glass vial, Clears as it nears, Living potion; motions all four. Four pairings (`r107(K)`,
+  `CF107`, `fill107`, `tip107`, `topBubbles107`; looks and motions can be swapped): **A. Glass vial + slosh** (glass
+  across the bar, a highlight, rounded glass ends, an air gap; the surface tilts and rocks, settles), **B. Clears as it
+  nears + surge** (murky with specks early in the gap, clearing and glowing near the recipe; the front overshoots and
+  eases back), **C. Living potion + swell and glow** (drifting motes that rush on a skill-up; the fill swells taller and
+  glows), **D. Clears as it nears + fizzing front** (a bright fizzing front edge that bursts with sparks).
+- **Round 108 (2026-11-17):** the bar **LOCKED** as a mix: 107 C **Living potion + swell and glow**, D's **fizzing
+  front**, A's **slosh** (`BAR108` through `fill107`, which now takes `slosh`/`fizz` flags). "Not liking the herb drop
+  (the bubbles, the spread)": brainstormed how the herb goes in; picked all six (`r108(K)`, `EN108`, `mortar108`):
+  with the mortar + puff: **A. Powder becomes motes** (glowing motes curve into the front and drift on), **B. Front
+  flares** (the pour lands on the fizzing front, which flares in the herb's color and sparks), **C. Glow drawn down**
+  (a glowing patch on the surface narrows and sinks as the potion swells), **D. Bowl tips, current carries** (the
+  mortar tips and pours into the bar's start; herb-colored streaks carry it to the front); no mortar: **E. Herb
+  dissolves to motes** (floats, bobs, breaks into motes), **F. Herb rides the current** (drops in at the start, is
+  carried along the surface to the front, dissolving). Page 522.5 KB of 524.3: move round 108's unpicked options out
+  before the next round.
+- **Round 109 (2026-11-17): clean restart.** The user: "not fully liking how it's all put together, I may have been
+  over-zealous with the additions; start clean, a few options that read clean, satisfying, with room to improve". A
+  pitch of trimmed old ideas was rejected ("you just re-presented them with simpler parts"); kept only **Grind and
+  pour**. One bar, one action, one payoff each (`r109(K)`, `CL109`, `swell109`): **A. Grind and pour** (living potion,
+  mortar + pestle, one pour, swell), and new: **B. Toward the recipe's color** (the recipe has a color, a ring round its
+  icon; each drop shifts the potion one step from dull grey-violet toward it, washing back from the front; matches at
+  the unlock), **C. Pulse charge** (no tools: a breathing front; a bright pulse runs from the start to the front, flash,
+  ring, swell), **D. Essence drawn from the herb** (a herb glows above the bar's start; a straight thread of light is
+  drawn to the front, a bead slides in; the herb grows paler as the bar fills).
+- **Round 110 (2026-11-17): fresh brainstorm.** Round 109 was "slight variations of the same animations"; the user
+  asked to branch out like the done ones (Mining's blasts + the peon, Leatherworking's pulled tarp, Fishing's reel + big
+  fish, the craft rings' pan flip / wrench / disintegrate): unique, fun, clean, super satisfying, no echo of the craft
+  ring, calm for 100+ crafts. Pitched 8 stories + a philosopher's stone thread (the user: the red goo stone used for
+  transmutation and homunculi, inspired by an anime; our own look, no anime circles). Built all eight picks, each one
+  calm beat per point, finales later (`r110(K)`, `ST110`, `blob110`): **A. Bottle shelf** (a shelf bar; a bottle per
+  point drops in, squashes, clinks), **B. Slime pet** (a green slime with eyes gulps a herb, wobbles, scoots; grows),
+  **C. Stretching ooze** (the goo front reaches an arm to the new point, sticks, the body follows and jiggles), **D.
+  Bouncing droplet** (a glossy drop hops point to point, squash + splash), **E. Red goo stone** (lead-grey bar, red goo
+  behind; the stone melts in, flows, reforms with a glint), **F. Homunculus** (a red goo creature hops along, growing a
+  head, arms, legs as the bar fills), **G. Happy accident** (a soft colored smoke poof per point), **H. Balance scale**
+  (the whole bar tilts like a beam on a post, heavy left; a gold weight per point rocks it toward level).
+  Rounds 100-109 helpers moved out (page 515 KB). Note: F's creature and H's post sit close to the header/label text.
+- **Round 111 (2026-11-17): the bar IS the object.** The user on 110: "you keep not doing anything with the bar; only the
+  shelf is unique; all bars are simple go-up fills". Why: every option lived inside barModule's stock track (fill,
+  front ease, border, notches) and reused one scaffolding. Fix: a new **barModule mode 'X'** (no track, notches or
+  border; the scene draws the whole bar). Brainstormed bar-as-object ideas; picked six (`r111(K)`, `OB111`, `g111`:
+  the bar is N objects, N = gap capped at 15, each holding gap/N points and filling part by part): **A. Shelf to
+  cabinet** (a cabinet, left door open; bottles drop in, squash, clink, fill), **B. Vial rack** (a rack of vials; a
+  pour fills the next, full ones glow; nothing on top, no boiling), **C. Ingredient jars** (full lidded jars; the next
+  lid pops off with a puff, the jar empties), **D. Recipe scroll** (parchment, rolled ends; a quill inks the next entry:
+  herb stamped, straight ink line), **E. Setting up the lab** (a workbench with faint outlines; the next lab piece
+  drops in with dust), **F. Cascade of bulbs** (glass bulbs stepping down with spouts; potion spills into the next).
+  Finales and sounds later. Round 110 moved out (page 514 KB).
+- **Round 112 (2026-11-17):** "much happier with this direction". Kept: 111 **A Shelf to cabinet** and 111 **E
+  Setting up the lab** (the user called it "C … the workbench setup"; I first misread it as C Ingredient jars and
+  swapped back). Round 110's stories reworked so the bar is the object (brainstorm, picked four; `OB111.S/X/N/O`,
+  `r112(L, K)`): **C. Slime tank** (a glass tank with a lid; the slime eats a herb dropped through the lid and grows
+  longer, eyes at its front), **D. Bottle xylophone** (bottles rising in height; a droplet hops to the next, which
+  lights with a chime climbing the scale), **E. Homunculus nursery** (glass domes on a stand; red goo drips in, swells,
+  wobbles, blinks awake), **F. Ooze leaves its flask** (a flask on its side at the start of a rail; the ooze reaches,
+  grips, pulls along the rail; the flask empties). 111 B/C/D/F moved out.
+- **Round 113 (2026-11-17):** "slime came out pretty good, but the best option is A" (the cabinet). Two asks: redesign
+  A like the lab bench with a funny finale (packaged up, a test subject, blowing up), and clean up the shelf so it
+  reads like a skill-up bar with the finale "the shelf closing and the bottles blowing up behind the closed doors".
+  Built (`r113(K)`, `BT113`, `bottle113`, `bench113`; finales via `finAt` + `ts95()`): **A. Clean shelf + doors close**
+  (a dark recessed niche the size of the bar, a wooden lip, ghost outlines; bottles pop in with an overshoot + glint;
+  finale: doors swing shut, rattle, three muffled pops puff colored smoke from the cracks, the doors creak open on a
+  scorched empty shelf), **B. Bench + packed in a crate** (bottles drop onto a workbench with dust; finale: a crate
+  drops over them, twine ties it, it hops into the icon), **C. Bench + test subject** (finale: the slime slides in,
+  gulps the last bottle, cycles colors, sparkles, hops into the icon), **D. Bench + chain pop** (finale: bottles pop
+  in a row left to right, soft puffs, pops climbing the scale). Sounds kept soft (no big booms). 112 X/N/O moved out.
+- **Round 114 (2026-11-17):** "A is nice; explore D (chain pop) more: a dramatic chain reaction with fizzles, pops and
+  spraying liquid/fizz, like Mining's chain of blasts". The user's idea: all bottles fizzle and shake, the corks pop
+  left to right in a satisfying "trrrink", the liquid sprays up like a shaken soda can. The tops are the gold seals
+  (the craft ring owns the cork pop; corks are a one-line swap if wanted). Built (`r114(K)`, `BT114`, `ch114`,
+  `chain114`, `fsnd114`; the page opens on "Reaching the next unlock"): **A** 113 A (clean shelf + doors close) as it
+  was; on the bench: **B. Fizz, pop, spray** (the user's idea: bubbles race inside, shaking builds, seals pop left to
+  right with rising soft pops, soda-can sprays, foam out of the necks, levels drop), **C. Knock-on chain** (the first
+  pops, its spray arcs into the next which pops, faster and faster; the last shoots straight up), **D. Pressure burst**
+  (shaking and glow build, a beat of stillness, then a burst wave from the middle outward). Fizz sound = many tiny
+  soft high sine blips (no hiss). Note: the sprays rise over the header text.
+  Round 114 → **B. Fizz, pop, spray LOCKED** (2026-11-17): the Alchemy look is the **bench of bottles** (mode `X`:
+  a bottle per point drops onto a workbench with dust, ghost outlines for the rest, N = gap capped at 15) with the
+  **fizz, pop, spray finale** (`r114('B')`). Next: sound (and per-skill-up add-ons if wanted); open: the sprays rise over
+  the header text.
+- **Round 115 (2026-11-17): add-ons** on the locked look. Picked per skill-up: Neighbor clink, Seal stamped on, Label
+  slapped on; and "add-ons to the finale too". One of each per option (`r115(K)`, `AO115`; hooks added: `bench113` and
+  `chain114` take a `deco` callback, `bottle113` a seal offset): **A** as locked; **B. Neighbor clink + rain back**
+  (the landing bottle bumps its neighbor, which wobbles and clinks; finale: the spray rains back down in drops that
+  splash on the bench), **C. Seal stamped on + gold confetti** (the seal hovers, stamps down, glint; finale: each
+  popped seal bursts into gold confetti that twinkles down), **D. Label slapped on + into the icon** (a paper label
+  with the herb's color slaps on; finale: labels blow off and every spray arcs into the recipe icon, which glows as it
+  fills). Page 522.6 KB of 524.3: trim before the next round.
+- **Round 116 (2026-11-17):** add-ons **LOCKED = 115 B** (neighbor clink + rain back); "the sound is a little much, we
+  can work on that" (sound round). More finale add-ons, picked: Bottles hop, Domino tip-over (`r116(K)`, hooks
+  `window.HOP116` / `window.TIP116` read by `chain114`): **A** as picked, **B. + Bottles hop** (the bottles hop on the
+  bench during the fizz build-up, higher until the seals blow), **C. + Domino tip-over** (after the eruption and rain
+  the empty bottles tip over one by one down the row, soft clinks stepping down), **D. + both**. Rounds 113 A, 115 C/D
+  moved out. Checking tip: jumping a frozen still into a finale fires every event at once; step time up to it instead
+  (`shG` in the console: draw + `stepP` at .033 s up to the target, then freeze).
+  Round 116 → **A LOCKED** ("stick with A and move on"): no extra finale add-ons. The Alchemy look is done: the bench of
+  bottles, neighbor clink, the fizz, pop, spray finale, the rain back down. Next: the sound (toned down).
+- **Round 117 (2026-11-17): the sound**, toned down (115-116 were "a little much"). Four sets on the locked look
+  (`r117(K)`, `SET117`; it swaps `BT114.B.snd`/`fsnd` during the draw, mutes the old clinks via `window.NOSND117` and
+  sets the payoff through `window.SND97.pay`): **A. Soft glass** (soft low thunk, a quiet clink an octave lower; faint
+  fizz blips, pops as soft glass notes up the scale, a breath of spray, three soft drops, two calm glass notes),
+  **B. Muted wood** (wooden tok, dull knock; low rumble fizz, wooden knocks up the scale, low whoosh, no rain, two-note
+  wooden close), **C. Bubbly** (thunk + a rising bubble blip, tiny plink; slow bubble fizz, rising "bloop" pops, plips,
+  a bubbly three-note close), **D. Minimal** (one soft clink per point, no thunk; only a quick soft "trrrink" of plucked
+  notes and one chime). Page 523.0 KB: trim before anything else.
+  Round 117 → **C. Bubbly. ALCHEMY DONE** (2026-11-17): the bench of bottles, neighbor clink, the fizz, pop, spray
+  finale with the rain back down, sound Bubbly (`r117('C')`). Next: Tailoring.
+
+## Tailoring
+
+- **Round 118 (2026-11-17): the base.** Brainstormed 8 whole stories (bar as object, mode `X`); picked Clothesline,
+  Cloth bolt unrolls, Clothes rack, Measuring tape, Loom weaving (and "Something else", unclear: asked). Built
+  (`r118(K)`, `TL118`, profile `tlb118(g)` with recipes Azure Silk Pants 125 etc., `WEAR118` garment icons, `CLR118`):
+  **A. Clothesline** (two posts, a gently sagging line; garments fly up, get pegged, swing, sway), **B. Cloth bolt
+  unrolls** (a bolt rolls along a cutting table laying cloth, thinner as it runs out; a chalk stroke marks each
+  length), **C. Clothes rack** (a rail on wheeled legs, empty hangers; garments slide in from the left, clack, swing),
+  **D. Measuring tape** (yellow tape pulled from a brass case, ticks + numbers, a tug that overshoots and snaps back),
+  **E. Loom weaving** (a wooden loom, threads along it; the shuttle shoots across at the front leaving a colored band,
+  the beater taps it tight). Page housekeeping: unused Alchemy helpers moved out, leading spaces stripped (page 520 KB).
+- **Round 119 (2026-11-17):** "scrap clothes rack, it's just the same as the clothesline; 2 new ideas for C and D".
+  Replaced C (rack) and D (measuring tape) with: **C. Pincushion** (a long stuffed red cushion with seams; a colored
+  glass-head pin drops in at an angle per point, dent + fluff puff; a long gap pushes the same pin deeper) and **D.
+  Ironing board** (crumpled, creased cloth ahead, pressed and bright behind; the iron glides to each new length with a
+  puff of steam, a sheen sliding along the pressed cloth). A, B, E as in 118.
+- **Round 120 (2026-11-18):** the user likes A Clothesline, B Cloth bolt, E Loom and can't decide; "let me see finales
+  for A and B" (`r120(K)`, `FN120`; the page opens on "Reaching the next unlock"): **A. Clothesline: gust and fold**
+  (wind streaks, the garments flap hard, then fold into squares onto a stack by the post; the stack hops into the
+  icon), **B. Clothesline: pegs pop into a basket** (a long wicker basket slides in; the pegs pop left to right in
+  climbing wooden ticks, garments drop in; the basket hops into the icon), **C. Cloth bolt: snip and fold** (a scissor
+  glint cuts along the cloth, it folds into thirds, the bundle hops), **D. Cloth bolt: twirl into the garment** (the
+  cloth lifts, gathers, twirls up sparkling and becomes the recipe's garment; it rises over the header). Page room:
+  the old rounds' comment lines moved to `skillup-p2-old-rounds.js` (page 523 KB).
+  Round 120 → **A. Clothesline: gust and fold LOCKED** (2026-11-18): Tailoring's look is the clothesline (each point a
+  garment flies up, is pegged, swings, sways) with the gust-and-fold finale (`r120('A1')`). Next: add-ons, then sound.
+- **Round 121 (2026-11-18): add-ons** on the locked clothesline (all four picked, one per option; `r121(K)`,
+  `clothes121`, `line121`): **A** as locked, **B. Line dips** (the line dips under the new garment in two straight
+  segments and springs back, neighbors bob, a soft low twang), **C. Shake out** (a quick snap in the air before
+  pegging, droplets flick off), **D. Drips** (the fresh garment drips three drops that fall and fade, faint plinks),
+  **E. Breeze passes** (a soft breeze streak drifts along the line; garments sway more as it passes, a soft low
+  whoosh). The finale stays the locked gust and fold.
+  Round 121 → **B. Line dips LOCKED** (2026-11-18).
+- **Round 122 (2026-11-18): the sound**, soft from the start; four sets on the locked look (`r122(K)`, `SET122`; payoff
+  via `window.SND97.pay`; no plucked timbre, the ring owns it): **A. Wooden pegs** (air swish, two light wooden clicks,
+  a low hum for the dip; gentle wind, cloth pats, wooden taps climbing for the folds, two-note wooden close), **B. Soft
+  cloth** (fabric whoosh, muffled pats, faint hum; soft wind, flutters, soft rising pats, warm pad close), **C. Music
+  box** (one soft music-box note per garment up the scale, a tiny tick, a low bell for the dip; wind + a shimmer, a
+  music-box run for the folds, three-note close), **D. Minimal** (one soft wooden click per garment; a soft wind and
+  one chime).
+- **Round 123 (2026-11-18):** "A (Wooden pegs) but I like the final trill of Music box": two versions (`SET122.E/F`):
+  **A. Wooden pegs + music-box close** (only the three-note close swapped in), **B. Wooden pegs + music-box run and
+  close** (the folds as a music-box run, the stack hop a music-box note, then the close). Opens on "Reaching the next
+  unlock".
+  Round 123 → "never mind, leave it as it was": **A. Wooden pegs. TAILORING DONE** (2026-11-18): the clothesline,
+  line dips, the gust-and-fold finale, sound Wooden pegs (`r122('A')`). Next: Engineering.
