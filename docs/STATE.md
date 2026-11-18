@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-16. Kept short on purpose (the start-up hook loads it into every session): status, the current
+_Last checkpoint: 2026-11-17 (stop point: Leatherworking skill-up DONE, next Alchemy). Kept short on purpose (the start-up hook loads it into every session): status, the current
 focus and pointers. Detail lives in the workstream file named below; history in git log._
 
 ## Where things stand
@@ -10,10 +10,11 @@ focus and pointers. Detail lives in the workstream file named below; history in 
   to-do order is plan.md "1.4.0 order" (unchanged): 1 crafting API checks (done), **2 skill-up gains (now)**, 3 the
   Create All pile, 4 gathering, 5 the loot window, 6 build the professions; 7-10 XP, rep, level-up, build; 11 dungeon
   recap; 12 release. Crafting redesign: design DONE (`docs/mockups/craft-compare.html`).
-- **Current focus: skill-up gains. Read `docs/skillup.md`** (status per profession, the locked craft rings to avoid
-  echoing, the page's workings). Don't read plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed.
-  Right now: **Leatherworking base, round 85 waiting on the pick** (A Grip wrap kept, B Sling, C Fringe, D Belt and
-  buckle). Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing.
+- **Current focus: skill-up gains. Next: Alchemy. Read `docs/skillup.md` first, its "Next: Alchemy (start here)"**
+  (the steps, Alchemy's craft ring to avoid, the recipe-bar scale, the lessons, page housekeeping), then pitch.
+  Don't read plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed.
+  Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, **Leatherworking** (2026-11-17, round 97). After Alchemy:
+  Tailoring, Engineering, Enchanting, then Cooking, First Aid. Then 1.4.0 item 3 (the Create All pile).
 - Side projects (not 1.4.0, don't read unless asked): `docs/side-projects/` (murloc/: the murloc + peon companion).
 
 ## Not yet verified in game
@@ -42,7 +43,9 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-17: Leatherworking skill-up DONE (rounds 83-97: Pegged out on a bar to the next recipe, strike streaks,
+  scraps; finale One sweep; sound Wooden mallet + creak). Crafters' bars now count to the next recipe.
 - 2026-11-16: skill-ups split out (`docs/skillup.md`, `docs/skillup-rounds.md`; plan.md no longer holds the rounds);
-  STATE.md cut to this; the murloc moved to `docs/side-projects/`. Leatherworking rounds 83-85.
+  STATE.md cut to this; the murloc moved to `docs/side-projects/`.
 - 2026-11-15: skill-up gatherers and Blacksmithing DONE (rounds 15-82). 2026-11-14: crafting Phase 3 Polish done.
 - 2026-11-10 1.3.1. 2026-11-04 1.0.0 on WoW Forever.

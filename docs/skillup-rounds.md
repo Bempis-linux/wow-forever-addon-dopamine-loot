@@ -688,3 +688,100 @@ docs/skillup.md; read this file only for an old round's detail. New rounds are a
    filled part swaying; new strands drop in at the front and a swing runs back along the whole fringe), **D. Belt and
    buckle** (the fill is a belt, a brass buckle at the front; each skill-up the belt is yanked through: the buckle jolts on,
    the strap thins for a moment, a tension streak runs back, the prong drops with a click and a glint).
+   Round 85 → "still not fully liking these; four new ones". Round 86 (built straight away; simple shapes + the item
+   icon, each beyond the bar; round 85 B-D archived; key 5 = Grip wrap kept): **A. Trampoline** (the bar is a hide
+   stretched in its frame, tanned behind the fill, raw ahead; a leather boot icon bounces at the front; each skill-up it
+   flies high and lands hard on the new front, the hide sags deep out of the frame's bottom and springs it back up),
+   **B. Lasso** (a rawhide loop circles above the front; each skill-up it's thrown ahead, drops round the bar, the rope
+   snaps taut and drags it back to the front, pulling the fill on), **C. Scraps fly in** (leather scraps in varied tans
+   fly in from all around and slap onto the front at once, the front bulges past the bar's edges, dust), **D. Sail** (a
+   small leather sail on the front flutters; each skill-up a gust streaks in from the left, the sail bellies out, the
+   mast leans, the front lurches on).
+   Round 86 → "I kind of like the scraps fly in, but none of the options give a leatherworking feel"; asked to see again
+   "one Skinning option that was like pulling leather to the next point". Round 87: **A. Scraps fly in** (86 C) and three
+   old Skinning options on the Leatherworking bar, as they were: **B. Peeled strip** (early rounds: the fur side rolls
+   away behind the front showing the pale inner side, the strip rolls up into a curl riding the front), **C. Pegged out**
+   (round 21 B: pegs at the top and bottom edges; each skill-up a new pair punches in at the front and the hide pulls taut
+   to them), **D. Laid down** (round 21 C, "reads as Leatherworking": a cut piece flips down into the bar with a slap,
+   fur and pale sides alternating); key 5 = Grip wrap.
+   Round 87 → "none of these"; the one meant was **Skinning round 30 C, Snap the pelt** (a hump runs along the whole bar
+   and cracks at the end with a thwap). Round 88 (round 86 A/B/D archived): **A. Snap the pelt** on the tanned strip
+   (the hump runs from the start and cracks at the front, flecks fly, the front jumps on), **B. Scraps fly in** (liked),
+   **C. Scraps + snap** (the scraps slap on, then the snap runs down and settles them), **D. Pull to the point** (the
+   front is drawn out past its point, thinner and paler, creak, springs back; the slack runs back down as a hump to the
+   start); key 5 = Grip wrap.
+   Round 88 → "four new ideas". Pitched eight first (rounds kept missing); the user picked **all eight**. Round 89 (keys
+   1-8; rounds 86-88 code archived, Grip wrap and Scraps fly in off the buttons): **A. Through the rollers** (a thick
+   raw hide ahead, taller than the bar; two rollers at the front draw it in, a flat strap comes out behind, flecks),
+   **B. Wet-molded bosses** (cuir bouilli: a row of raised round bosses; each skill-up steam and the next boss pushes
+   up, a finished one glints), **C. The hide spreads out** (the fill is a whole hide spreading above and below the bar
+   with leg flaps; the newest part unfolds with a flop), **D. Studded strap** (a stud drops in at the front, set with a
+   squash and a glint; bigger studs at notches), **E. Beaten hide** (a hide hangs over the front; a paddle beats it,
+   dust clouds above and below, beaten part darker), **F. Patchwork from a pile** (a scrap heap left of the bar; a
+   scrap hops off and drops into the gap at the front, straight seam glints), **G. Shaped on a form** (a limp wet end
+   droops over the front; a block rises from under the bar and presses it level, steam, creak; the block drops, it
+   holds), **H. Armor pieces** (each notch section is an armor piece with an item icon; the front section fills with
+   scraps; full, it locks on with a thump and a pop).
+   Round 89 → "none of these": the drawn shapes **look too crude**, it's the **wrong idea of leatherworking**, and **too
+   busy**. The user again pointed to a Skinning option never found yet: "like a tarp thinly stretched and pulled to the
+   next point". No round's text says that; best match: **Pegged out** (round 21 B), which at Skinning's scale (each
+   skill-up ~1/5 of the bar) pulls the loose hide taut to the next pegs; at Leatherworking's scale (75 points, ~3 px a
+   step) round 87 C couldn't read the same. Round 90 (round 89 archived): **A. Pegged out as it was, on Skinning's bar**
+   (to confirm), **B. Pulled thin to the next peg** (pegs at the notches; from the last pegs to the front the leather is
+   pulled out thin like a tarp, pale, see-through, pinched, tension lines; each skill-up pulls it further and it
+   shivers; at the next notch pegs punch in and it settles into thick leather), **C. Tarp across the gap** (the next
+   pegs already wait at the next notch; a thin tarp spans the whole gap and fills in thicker with each tug; at the notch
+   new pegs pop in further on).
+   Round 90 → **A, Pegged out: "that was the one"**; iterate and add on to it. Asked (pitched): peg scale → **a peg pair
+   per notch** (round 90 B, the hide pulled thin like a tarp to the next pegs); add-ons → all four pitched. Round 91
+   (keys 1-5; the single skill-up now starts at 124 so every moment reaches a notch): **A. Pegged out (the base)**,
+   **B. + Mallet taps the pegs** (at the notch a small mallet taps the top peg, then the bottom one, a tok each, the hide
+   jolts), **C. + Tension shiver** (when the pegs go in, the older pegs wobble one after another back to the start and a
+   ripple of light runs back over the leather), **D. + Scraps trimmed off** (the loose excess at the front drops away as
+   a few tumbling scraps), **E. + Stretched hide sheen** (a soft glint slides along only the stretch just finished).
+   Round 91 → "I liked Pegged out when it stretched further; lock that in first" (before add-ons); the single-skill-up
+   view of 91 A was "still not how I liked it". Round 92, which stretch: **A. the Skinning original** (reference),
+   **B. Bigger steps** (Leatherworking's bar runs to the next recipe unlock, 5 points, `LWB92`, so each skill-up pegs
+   ~1/5 of the bar, pegs per point exactly as on Skinning), **C. Pulled far, springs back** (rank-long bar, per-notch
+   pegs; each skill-up yanks the thin hide ~30 px ahead, it springs back), **D. Tarp across the gap** (round 90 C).
+   Round 92 → "definitely A; use B as the base and iterate on it, it's a more plain version". **LEATHERWORKING BASE
+   LOCKED: Pegged out exactly as on Skinning, on a bar counted to the next recipe** (`LWB92`, 5 points here; a crafter's
+   bar now runs to the next recipe unlock like a gatherer's to the next node/beasts). Round 93 (round 91 add-ons
+   archived and rebuilt per skill-up): **A. the locked base**, **B. + Mallet taps the pegs**, **C. + Tension shiver**
+   (each older peg pair flashes and wobbles in turn back to the start, a light ripple runs back), **D. + Scraps trimmed
+   off**, **E. + Stretched hide sheen** (a glint along the stretch just pegged).
+   Round 93 → likes **B (mallet) and D (scraps trimmed)**, but the mallet "doesn't look too good". Round 94 (rounds
+   90/92 leftovers archived): four mallet treatments, each with the scraps: **A. Rawhide mallet** (a wrapped leather
+   head on a tapered handle, swings from the wrist: wind-up, fast swing with a short motion trail, tok, a small ring,
+   a rebound; top peg then bottom), **B. Silhouette mallet** (one clean dark shape with a warm rim light), **C. Strike
+   only** (no mallet: a bright swing streak onto each peg, a white impact ring), **D. One big blow** (a bigger mallet,
+   one heavier blow drives both pegs at once, the bar dips, a deeper tok).
+   Round 94 feedback: the hammer must come **after** the hide lands ("doesn't make sense it's hammered if it's not
+   there yet"). Fixed on all four: the hide pulls taut to the new front first (~.1-.35 s after the skill-up lands), the
+   pegs appear only when the mallet hits (`window.PEGAT94` = .42 delays `VAR21.Skinning.B`'s new pegs and their tok;
+   taps at .42 top / .6 bottom), the scraps trim after the taps (.72).
+   Round 94 → **C. Strike only + scraps, LOCKED** (2026-11-16). Leatherworking skill-up = Pegged out on the recipe bar;
+   each skill-up the hide pulls taut to the new front, then a bright swing streak + white impact ring sets each peg (top,
+   then bottom, a tok each), then the loose excess drops away as scraps. Next: the finale (reaching the next recipe).
+   Finale pitches (A Strike cascade, B Pegs pop + hide rolls up, C Pulled into the icon, D Folds into the item): the
+   user chose A and B. Round 95 (keys 1-2, opens on "Reaching the next unlock"; both start .8 s after the bar fills,
+   after the last strikes and scraps): **A. Strike cascade** (strike streaks re-set every peg pair start to end, a ring
+   and a tok each climbing a soft scale, the last big streak lands on the recipe icon, which lights), **B. Pegs pop,
+   hide rolls up** (the hide rolls up from the start, the pegs popping out just ahead of the roll, which grows; at the
+   end the roll hops off into the recipe icon, which lights). Page note: archiving round 94 cut LW94's closing `};`,
+   so the page didn't run until it was restored: check the closing line when cutting objects.
+   Round 95 → "mix A and B". Round 96 (round 95 code archived): **A. Cascade, then roll** (the strike cascade re-sets every
+   peg, a breath, then the hide rolls up popping the pegs ahead of the roll; the roll hops into the recipe icon just as
+   one big streak lands on it), **B. One sweep** (the hide rolls up while a strike lands on each peg pair just ahead of
+   the roll and knocks it out, toks climbing; the roll hops in as the big streak lands on the icon).
+   Round 96 → **B. One sweep, LOCKED** (2026-11-16). Next: Leatherworking's sound.
+   Round 97 (the look locked; four sound sets through the `window.SND97` hook: taut, strike (top/bottom), scraps, ftok
+   (each finale peg), big (the streak on the icon), pay (the icon lights; replaces the default chime); notes from
+   `pick45`/PENT42, step-down `fat45`): **A. Soft leather** (soft low rub; low wooden toks, bottom a step lower; two faint
+   pats; climbing soft toks, a low thump, a warm two-note close), **B. Hide drum** (a brush on the skin; frame-drum taps
+   with a skin slap; a ghost tap; a climbing drum roll, a deep tap, two low hits), **C. Wooden mallet + creak** (a gentle
+   leather creak; soft mallet knocks; a faint rustle; climbing knocks, a low knock, a two-note mallet close), **D.
+   Plucked lace** (a soft stretching breath; low plucks, bottom a fifth below; a soft pat; climbing plucks, a deep pluck,
+   a low pluck + fifth).
+   Round 97 → **C. Wooden mallet + creak. LEATHERWORKING DONE** (2026-11-17): Pegged out on the recipe bar, strike
+   streaks set the pegs, scraps trimmed; finale One sweep; sound Wooden mallet + creak (`r97('C')`). Next: Alchemy.

@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="panel">
-  <h1>Skill-up round 85: Leatherworking, the base (keys 1-4)</h1>
+  <h1>Skill-up: Leatherworking DONE (next: Alchemy)</h1>
   <small>Skill-ups as their own draggable module (shown at its default place), apart from the craft rings. This is
   the line that grows. Round 47: Herbalism, Fishing and Skinning done; Mining is the Blast with “every blast throws ore”; four sound sets (sound on) (opens on “Reaching the next unlock”) (opens on “Reaching the next unlock”) (sound on, try “Five in a row”); its finale comes next. Herbalism and Skinning done (opens on “Reaching the next unlock”). Rounds 2-36 stay in the code.
   Try Herbalism and Mining for unlocks; crafters go to the rank cap.
@@ -1006,7 +1006,7 @@ const FAM = {
   GU: { name: 'D. The growth turns into the unlock', desc: 'Skill-ups stay quiet; the unlock gets a finale. When the line reaches the end, everything that grew is drawn into the unlock’s icon (the line runs in from the left), then the icon lights the profession’s way: the vine winds round the icon and flowers (Herbalism), the icon glows white-hot and cools to gold (Blacksmithing), crystal shards burst off it (Alchemy), a seam stitches a frame round it (Tailoring), a stone shell cracks open to show it (Mining).',
     note: 'at the unlock, the growth is drawn into the icon and dresses it.', draw(top) { growModule(top, 'unlock'); } },
 };
-function payoff(x, y) { if (profName === 'Blacksmithing') { if (window.FINSND78) window.FINSND78(); } else [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d && profName !== 'Blacksmithing') d.unlock(x, y); spawn({ x, y, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); }
+function payoff(x, y) { if (window.SND97) SND97.pay(); else if (profName === 'Blacksmithing') { if (window.FINSND78) window.FINSND78(); } else [0, 7, 12, 19].forEach((k, i) => tone(523 * semi(k), i * .05, .04, .5)); const d = DRESS[profName]; if (d && profName !== 'Blacksmithing') d.unlock(x, y); spawn({ x, y, size: 12, shape: 'ring', grow: 36, life: .7, col: '#fff' }); }
 function growModule(top, mode, V) { V = V || {};
   const p = S.p, nx = S.nx, st = state(), lo = p.span[0], n = Math.max(1, nx.lv - lo), N = Math.min(n, 15), pw = 300, ph = 66, px = W / 2 - pw / 2, py = top, a = clamp(S.age / .2) * clamp((S.dur - S.age) / .4);
   const road = mode === 'road' || !!V.road, fin = mode === 'unlock', x0 = px + 48, x1 = px + pw - (road ? 16 : 32), L = x1 - x0, ly = py + 37, done = S.closeAt !== undefined, ux = px + pw - 17, f = clamp((st.v - lo) / n);
@@ -1566,12 +1566,12 @@ const VAR21 = {
   Skinning: {
     A: { name: 'The cut + a stroke', desc: 'As it is: the knife cut along the hide; each skill-up one quick straight slash with a whoosh, the new piece of the cut flashing.', tip: glintTip, grow: skinStroke },
     B: { name: 'Pegged out', desc: 'The hide is stretched along the bar, held by wooden pegs at its top and bottom edge. Each skill-up a new pair of pegs punches in at the front with a tok, and the loose hide pulls taut to them.',
-      grow(p, x, y, L, f, t, I) { const g = L * f, k = lastHitIdx(), ha = I.hitAge, taut = clamp((ha - .1) / .25); ctx.fillStyle = '#9a6a3e'; ctx.beginPath(); ctx.moveTo(x - 2, y - 5); const pegs = []; for (let v = I.lo + 1; v <= S.v0; v++) pegs.push([I.X(v), 1]); S.hits.forEach((h, i) => { if (i <= k) pegs.push([I.X(hitTo(i)), i === k ? clamp(ha / .12) : 1]); });
+      grow(p, x, y, L, f, t, I) { const g = L * f, k = lastHitIdx(), ha = I.hitAge, taut = clamp((ha - .1) / .25); ctx.fillStyle = '#9a6a3e'; ctx.beginPath(); ctx.moveTo(x - 2, y - 5); const pegs = []; for (let v = I.lo + 1; v <= S.v0; v++) pegs.push([I.X(v), 1]); S.hits.forEach((h, i) => { if (i <= k) pegs.push([I.X(hitTo(i)), i === k ? (ha < (window.PEGAT94 || 0) ? -1 : clamp((ha - (window.PEGAT94 || 0)) / .12)) : 1]); });
         let px = x - 2; pegs.forEach(([xx]) => { if (xx > x + g + 1) return; ctx.quadraticCurveTo((px + xx) / 2, y - 3.5, xx, y - 5); px = xx; }); ctx.quadraticCurveTo((px + x + g) / 2, y - 3 + (1 - taut) * 1.5, x + g, y - 3.5 + (1 - taut) * 2); ctx.lineTo(x + g, y + 3.5 - (1 - taut) * 2);
         px = x + g; [...pegs].reverse().forEach(([xx]) => { if (xx > x + g + 1) return; ctx.quadraticCurveTo((px + xx) / 2, y + 3.5, xx, y + 5); px = xx; }); ctx.quadraticCurveTo((px + x) / 2, y + 3.5, x - 2, y + 5); ctx.closePath(); ctx.fill();
         ctx.strokeStyle = 'rgba(232,200,150,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y - 1); ctx.lineTo(x + g, y - 1); ctx.stroke();
-        pegs.forEach(([xx, o]) => { if (xx > x + g + 1) return; const s = 1 + (1 - o) * .8; for (const sy of [-5, 5]) { ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.arc(xx, y + sy, 1.9 * s, 0, 7); ctx.fill(); ctx.fillStyle = '#e8c898'; ctx.beginPath(); ctx.arc(xx - .4, y + sy - .4, .8 * s, 0, 7); ctx.fill(); } });
-        landed('skp', .1, () => { tone(520, 0, .045, .08, 'triangle', 300); click(.02, .04, 1600, 3); }); } },
+        pegs.forEach(([xx, o]) => { if (xx > x + g + 1 || o < 0) return; const s = 1 + (1 - o) * .8; for (const sy of [-5, 5]) { ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.arc(xx, y + sy, 1.9 * s, 0, 7); ctx.fill(); ctx.fillStyle = '#e8c898'; ctx.beginPath(); ctx.arc(xx - .4, y + sy - .4, .8 * s, 0, 7); ctx.fill(); } });
+        landed('skp', .1 + (window.PEGAT94 || 0), () => { if (window.SND97) return; tone(520, 0, .045, .08, 'triangle', 300); click(.02, .04, 1600, 3); }); } },
     C: { name: 'Laid down', desc: 'Each skill-up a cut piece of hide flips down into the bar from above and lands with a slap, edge to edge with the last; the bar fills with pieces, fur side and pale side alternating.',
       grow(p, x, y, L, f, t, I) { const k = lastHitIdx(), ha = I.hitAge, ends = []; for (let v = I.lo + 1; v <= S.v0; v++) ends.push(I.X(v)); S.hits.forEach((h, i) => { if (i < k || (i === k && ha >= .22)) ends.push(I.X(hitTo(i))); });
         let px = x; ends.forEach((xx, j) => { skinPiece(px, xx, y, j); px = xx; }); },
@@ -2765,77 +2765,133 @@ const LW83 = {
 };
 // ---------- round 84 (2026-11-16): Leatherworking base, A (Unrolling hide) kept; the user: "don't play it safe inside the bar". Three bold ones that use the bar as a frame: B Boot stomp, C Hide throw, D Grip wrap ----------
 // a pelt: a soft blob with four leg flaps (simple shapes), centred at 0,0, w x h
-function pelt84(w, h, c0, c1) { const g = ctx.createRadialGradient(-w * .15, -h * .2, 1, 0, 0, w * .6); g.addColorStop(0, c0); g.addColorStop(1, c1); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, 7); ctx.fill();
-  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => { ctx.beginPath(); ctx.ellipse(sx * w * .36, sy * h * .42, w * .14, h * .2, sx * sy * .5, 0, 7); ctx.fill(); }); }
-const LW84 = {
-  A: LW83.A,
-  D: { name: 'Grip wrap', desc: 'The filled part is wrapped in a leather strap like a sword grip, slanted turns all the same way. The strap’s loose tail hangs from the front and sways. Each skill-up the tail swings round the bar, behind it and back over the top, and cinches one more turn tight with a creak; the new turn catches the light.',
-    snd: i => { const v = fat45(i), n = pick45(i, 4); noise(0, .18, .005 * v, 600, .6, 'lowpass'); tone(140 * semi(n / 3), 0, .016 * v, .28, 'triangle', 175 * semi(n / 3)); noise(0, .2, .005 * v, 380, 3, 'bandpass'); drum46(150, .02, .014 * v); },
-    V: { grow(p, x0, y, L, f, t, I) { const xe = I.tipX, o = last83(I); if (xe <= x0 - 2) return; ctx.save(); ctx.beginPath(); ctx.rect(x0 - 2, y - 7, xe - x0 + 2, 14); ctx.clip();
-        for (let x = x0 - 12; x < xe + 8; x += 6) { ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x + 5, y + 6); ctx.lineTo(x + 9, y - 6); ctx.lineTo(x + 4, y - 6); ctx.closePath();
-          const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, LWC.md); g.addColorStop(.35, LWC.hi); g.addColorStop(1, LWC.dk); ctx.fillStyle = g; ctx.fill(); }
-        ctx.strokeStyle = 'rgba(30,14,4,.7)'; ctx.lineWidth = .9; for (let x = x0 - 12; x < xe + 8; x += 6) { ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x + 4, y - 6); ctx.stroke(); }
-        if (o && o.t >= 0 && o.t < .6) { ctx.fillStyle = `rgba(255,240,210,${.5 * (1 - o.t / .6)})`; ctx.fillRect(xe - 7, y - 6, 7, 12); }
-        ctx.restore(); },
-      over(p, I) { const y = I.ly, o = last83(I), fx = I.tipX; let th = 0;
-        if (o && o.t > -.3 && o.t < .05) th = clamp((o.t + .3) / .35) * Math.PI * 2;
-        const sway = Math.sin(S.age * 2.2) * .18 + (o && o.t >= .05 ? .5 * Math.exp(-(o.t - .05) * 5) * Math.sin((o.t - .05) * 14) : 0);
-        const R = 13, ang = th + sway, tx = fx + 4 + Math.sin(ang) * 3 + th * 1.2, ty = y + Math.cos(ang) * R, z = Math.sin(ang - Math.PI / 2) * -1, behind = th > Math.PI * .5 && th < Math.PI * 1.5;
-        ctx.save(); if (behind) ctx.globalAlpha *= .45; ctx.lineCap = 'round'; ctx.strokeStyle = behind ? LWC.dk : LWC.lt; ctx.lineWidth = 4.5;
-        ctx.beginPath(); ctx.moveTo(fx, y + (ty > y ? 5 : -5)); ctx.quadraticCurveTo(fx + 3, (y + ty) / 2 + (ty > y ? 3 : -3), tx, ty); ctx.stroke();
-        ctx.strokeStyle = 'rgba(255,236,200,.35)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); } } },
-};
-function r84(K) { const Z = LW84[K]; return { get name() { return K + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'A' ? ' (kept)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
-  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only: the finale and the real sound come later; the sound is a gentle placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
-  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
-  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
-Object.assign(FAM, { PA: r84('A'), PB: r84('B'), PC: r84('C'), PD: r84('D') });
 // ---------- round 85 (2026-11-16): Leatherworking base, A = Grip wrap (round 84 D, "not a bad idea"); three more, each a different mechanism outside the bar: B Sling, C Fringe, D Belt and buckle ----------
 const near85 = (I, lead) => { let best = null; S.hits.forEach((h, i) => { const t = S.age - h - HIT; if (t > -lead && t < 1.2) best = { i, t, a: I.X(S.v0 + i), b: I.X(S.v0 + i + 1) }; }); return best; };
-const LW85 = {
-  A: LW84.D,
-  B: { name: 'Sling', desc: 'Left of the bar a leather sling whirls lazily in a circle. Each skill-up it whips faster and lets go: a stone arcs along the bar, high over the filled leather, and thuds into the front with a puff of dust, pushing the fill on. The sling slows and keeps turning.',
-    snd: i => { const v = fat45(i), n = pick45(i, 3); drum46(95 * semi(n / 3), 0, .036 * v); noise(0, .06, .02 * v, 600, .7, 'lowpass', true); },
-    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 7); },
-      shake(I) { const o = near85(I, .7); if (!o || o.t < 0 || o.t > .18) return [0, 0]; return [1.2 * (1 - o.t / .18), 0]; },
-      over(p, I) { const y = I.ly, o = near85(I, .7), hx = I.x0 - 16, hy = y - 2; let spd = 2.2, rel = false;
-        if (o && o.t < -.3) spd = lerp(2.2, 9, clamp((o.t + .7) / .4)); else if (o && o.t < .6) { spd = lerp(9, 2.2, clamp((o.t + .3) / .9)); rel = true; }
-        S.sl85 = (S.sl85 || 0) + spd * (1 / 60); const a = S.sl85 * 2 * Math.PI, R = 9, px = hx + Math.cos(a) * R, py = hy + Math.sin(a) * R * .45 - 4;
-        ctx.strokeStyle = 'rgba(70,40,15,.9)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(hx, hy + 6); ctx.lineTo(px - 1.5, py); ctx.moveTo(hx, hy + 6); ctx.lineTo(px + 1.5, py); ctx.stroke();
-        ctx.fillStyle = LWC.lt; ctx.beginPath(); ctx.ellipse(px, py, 3, 2, a, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,236,200,.4)'; ctx.fillRect(px - 1, py - 1.2, 2, .8);
-        if (!rel || !o) { ctx.fillStyle = '#8a8478'; ctx.beginPath(); ctx.arc(px, py - .5, 1.6, 0, 7); ctx.fill(); }
-        if (o && o.t >= -.3 && o.t < 0) { const u = (o.t + .3) / .3, sx = lerp(hx + 8, o.b, u), sy = lerp(y - 12, y - 4, u) - Math.sin(Math.PI * u) * (14 + (o.b - hx) * .08);
-          ctx.fillStyle = '#9a9488'; ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(sx - 1, sy - 1.4, 1, 1); }
-        if (o && o.t >= 0 && o.t < .5) { const u = o.t / .5, sx = o.b + 4 + u * 8, sy = y - 4 - Math.sin(Math.PI * Math.min(1, u * 1.6)) * 5; ctx.globalAlpha *= 1 - u; ctx.fillStyle = '#9a9488'; ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, 7); ctx.fill(); ctx.globalAlpha /= Math.max(.01, 1 - u);
-          once('lw85B' + o.i, () => { for (let k = 0; k < 7; k++) spawn({ x: o.b, y: y - 2 + (k % 3 - 1) * 3, vx: -10 + Math.random() * 50, vy: -20 - Math.random() * 30, g: 90, life: .5, size: 1, col: 'rgba(225,195,150,.85)' }); }); } } } },
-  C: { name: 'Fringe', desc: 'Leather fringe hangs under the filled part, swaying in a light breeze. Each skill-up new strands drop in at the front and bounce, and a swing runs back along the whole fringe from the front to the start, every strand kicking in turn, then it settles into the breeze again.',
-    snd: i => { const v = fat45(i), n = pick45(i, 4); pluck(110 * semi(n), .018 * v); noise(.02, .35, .006 * v, 900, .6, 'lowpass'); },
-    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 8); },
-      over(p, I) { const y = I.ly, o = near85(I, .3), xe = I.tipX; ctx.lineCap = 'round';
-        for (let x = I.x0 + 1; x < xe - 1; x += 3.5) { let ang = .12 * Math.sin(S.age * 1.8 - x * .03), len = 7;
-          if (o && o.t >= 0) { const d = (o.b - x) / 260, tt = o.t - d; if (tt > 0) ang += .55 * Math.exp(-tt * 4) * Math.sin(tt * 13); if (x > o.a - 2) len = 7 * eBack(clamp(o.t / .3)); }
-          if (len <= .5) continue; const ex = x + Math.sin(ang) * len, ey = y + 6 + Math.cos(ang) * len;
-          ctx.strokeStyle = LWC.md; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(x, y + 5.5); ctx.lineTo(ex, ey); ctx.stroke();
-          ctx.strokeStyle = 'rgba(255,230,190,.3)'; ctx.lineWidth = .6; ctx.beginPath(); ctx.moveTo(x - .4, y + 6); ctx.lineTo(ex - .4, ey - .5); ctx.stroke(); }
-        ctx.lineCap = 'butt'; } } },
-  D: { name: 'Belt and buckle', desc: 'The filled part is a belt, and a brass buckle sits at the front with the belt’s tip poking through. Each skill-up the belt is yanked through: the buckle jolts forward, the strap pulls tight (it thins for a moment and a bright tension streak runs back to the start), the prong drops in with a soft click and a glint.',
-    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(0, .1, .016 * v, 700, .7, 'lowpass', true); tone(520 * semi(n), .05, .01 * v, .12, 'triangle'); drum46(140, .05, .012 * v); },
-    V: { grow(p, x0, y, L, f, t, I) { const o = near85(I, .2); let th = 0; if (o && o.t >= 0 && o.t < .35) th = Math.sin(Math.PI * o.t / .35);
-        const hh = 6 - th * 1.6; hide83(x0 - 2, I.tipX + 5, y - hh, y + hh, LWC.lt, LWC.md, 9);
-        ctx.fillStyle = 'rgba(40,18,4,.35)'; ctx.fillRect(x0 - 2, y - hh + 1.2, I.tipX + 5 - x0, .8); ctx.fillRect(x0 - 2, y + hh - 2, I.tipX + 5 - x0, .8);
-        if (o && o.t >= 0 && o.t < .5) { const sx = lerp(I.tipX, x0, o.t / .5), g = ctx.createLinearGradient(sx - 14, 0, sx + 14, 0); g.addColorStop(0, 'rgba(255,240,210,0)'); g.addColorStop(.5, `rgba(255,240,210,${.55 * (1 - o.t / .5)})`); g.addColorStop(1, 'rgba(255,240,210,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 14, y - hh, 28, hh * 2); } },
-      shake(I) { const o = near85(I, .2); if (!o || o.t < 0 || o.t > .15) return [0, 0]; return [1.5 * (1 - o.t / .15), 0]; },
-      over(p, I) { const y = I.ly, o = near85(I, .2), bx = I.tipX - 2; let pr = 1; if (o && o.t >= 0 && o.t < .25) pr = clamp((o.t - .05) / .1);
-        const g = ctx.createLinearGradient(bx - 4, y - 9, bx + 4, y + 9); g.addColorStop(0, '#fff0b0'); g.addColorStop(.45, '#d8a840'); g.addColorStop(1, '#7a5418');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(bx - 4, y - 9, 8, 18, 2.5); ctx.roundRect(bx - 2, y - 7, 4, 14, 1); ctx.fill('evenodd');
-        ctx.save(); ctx.translate(bx, y); ctx.rotate((1 - pr) * -1.1); ctx.fillStyle = '#c89a38'; ctx.fillRect(-.7, -1, 1.4, 7); ctx.restore();
-        if (o && o.t >= .05) once('lw85D' + o.i, () => spawn({ x: bx, y: y - 9, shape: 'star', size: 3.5, life: .45, col: '#fff4c0' })); } } },
+// ---------- round 90 (2026-11-16): the user's remembered Skinning option, "a tarp thinly stretched and pulled to the next point". Best match: Pegged out (round 21 B) at Skinning's scale
+// (each skill-up ~1/5 of the bar). A = it as it was, on Skinning's bar; B, C = Leatherworking versions at a scale that reads (the pull is per notch section, not per 3 px point) ----------
+const peg90 = (x, y, s = 1) => { const dy = typeof PEGDY91 === 'function' ? PEGDY91(x) : 0; for (const sy of [-5, 5]) { ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.arc(x, y + sy + dy, 1.9 * s, 0, 7); ctx.fill(); ctx.fillStyle = '#e8c898'; ctx.beginPath(); ctx.arc(x - .4, y + sy + dy - .4, .8 * s, 0, 7); ctx.fill(); } };
+const tok90 = (v = 1) => { if (window.SND97) return; drum46(150, 0, .026 * v); tone(330, 0, .008 * v, .12, 'triangle'); };
+// the thin stretched sheet from xa to xb: k 0..1 how thick (0 = tissue-thin, 1 = full leather), shiv = its vibration
+function tarp90(xa, xb, y, k, shiv) { if (xb <= xa + .5) return; const w = xb - xa, pin = x => (1 - k) * 2.6 * Math.sin(Math.PI * (x - xa) / w) + shiv * Math.sin(Math.PI * (x - xa) / w);
+  ctx.beginPath(); for (let x = xa; x <= xb; x += 1.5) ctx.lineTo(x, y - 5 + pin(x)); for (let x = xb; x >= xa; x -= 1.5) ctx.lineTo(x, y + 5 - pin(x)); ctx.closePath();
+  ctx.fillStyle = `rgba(${Math.round(lerp(236, 154, k))},${Math.round(lerp(206, 106, k))},${Math.round(lerp(160, 62, k))},${lerp(.45, 1, k)})`; ctx.fill();
+  ctx.strokeStyle = `rgba(255,240,215,${.55 * (1 - k)})`; ctx.lineWidth = .8; [-3, 0, 3].forEach(d => { ctx.beginPath(); ctx.moveTo(xa, y + d * 1.2); ctx.lineTo(xb, y + d * (1 - (1 - k) * .5)); ctx.stroke(); }); }
+const sec90 = I => { const cw = (I.x1 - I.x0) / I.N; return { cw, at: x => Math.floor((x - I.x0 + .01) / cw) }; };
+// ---------- round 91 (2026-11-16): Leatherworking base LOCKED as Pegged out, a peg pair per notch (round 90 B: the hide pulled thin like a tarp to the next pegs). Add-ons the user picked, one each:
+// B Mallet taps the pegs, C Tension shiver, D Scraps trimmed off, E Stretched hide sheen. The single skill-up starts at 124 so every moment reaches a notch ----------
+PROF.Leatherworking.v = 124;
+let PEGDY91 = null;
+// the latest skill-up that reached a notch: nx = that notch, xa = the notch before
+const cross91 = I => { const o = near85(I, .1); if (!o) return null; const { cw, at } = sec90(I); if (at(o.b) <= at(o.a)) return null; const j = at(o.b); return { o, t: o.t, nx: I.x0 + j * cw, xa: I.x0 + (j - 1) * cw, j }; };
+function mallet91(x, y, ang) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.strokeStyle = '#6a4424'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(13, -9); ctx.stroke();
+  const g = ctx.createLinearGradient(-4, -3, 4, 3); g.addColorStop(0, '#c8946a'); g.addColorStop(1, '#6e4422'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-4.5, -3, 9, 6, 2); ctx.fill(); ctx.restore(); }
+const SC91 = ['#c89a6a', '#a87444', '#e0b480'];
+// ---------- round 92 (2026-11-16): "I liked Pegged out when it stretched further; lock that in first". How far each skill-up pulls on Leatherworking:
+// A the Skinning original (reference), B Bigger steps (the bar runs to the next recipe unlock, 5 points, so each skill-up is ~1/5 of the bar, pegs per point as on Skinning),
+// C Pulled far, springs back (the rank-long bar with pegs per notch; each skill-up yanks the thin hide far ahead, then it springs back) ----------
+const LWB92 = Object.assign({}, PROF.Leatherworking, { span: [120, 125], v: 122, five: 120, unlockV: 124, caps: undefined,
+  unlocks: [[125, 'Hillman’s Leather Vest', '\u{1F9BA}'], [130, 'Fine Leather Gloves', '\u{1F9E4}'], [135, 'Guardian Pants', '\u{1F456}'], [140, 'Barbaric Shoulders', '\u{1F9E5}']] });
+// ---------- round 93 (2026-11-16): LOCKED base: Pegged out as on Skinning ("definitely A"), on Leatherworking's bar counted to the next recipe (round 92 B, `LWB92`: ~1/5 of the bar per skill-up).
+// The add-ons the user picked (round 91), now on every skill-up (each one pegs a big step): B Mallet taps, C Tension shiver, D Scraps trimmed off, E Stretched hide sheen ----------
+// this run's skill-ups on the recipe bar: t since it landed, a = the last pegs, b = the new pegs
+const pegs93 = I => S.hits.map((h, i) => ({ i, t: S.age - h - HIT, a: I.X(S.v0 + i), b: I.X(S.v0 + i + 1) })).filter(o => o.t > -.3 && o.t < 1.2);
+const ADD93 = {
+  B: { name: '+ Mallet taps the pegs', desc: 'Each skill-up a small mallet taps the new pegs in: the top one, then the bottom one, a soft tok each, the hide jolting taut with each tap.',
+    over(p, I) { const y = I.ly; pegs93(I).forEach(o => { if (o.t < -.1 || o.t > .45) return; const at = (t0, sy) => { const d = o.t < t0 ? 1 - clamp((o.t - t0 + .12) / .12) : clamp((o.t - t0) / .12); mallet91(o.b + 1, y + sy * (8 + d * 9), sy < 0 ? -.2 - d * .5 : Math.PI + .2 + d * .5); }; if (o.t < .16) at(.06, -1); else at(.24, 1); if (o.t >= .24) once('lw93b' + o.i, () => tok90(.7)); }); },
+    shake(I) { const o = pegs93(I).pop(); if (!o) return [0, 0]; const k = [.42, .6].reduce((s, t0) => s + (o.t >= t0 && o.t < t0 + .1 ? 1 - (o.t - t0) / .1 : 0), 0); return [0, 1.2 * k]; } },
+  D: { name: '+ Scraps trimmed off', desc: 'Each skill-up, as the hide pulls taut to the new pegs, the loose excess at the front is trimmed off: a few leather scraps drop away below the bar, tumbling, and fade.',
+    over(p, I) { pegs93(I).forEach(o => { if (o.t < .72) return; once('lw93d' + o.i, () => { [[-1, .9], [1, 1], [1, .7], [-1, .6], [1, .5]].forEach(([sy, s], k) => spawn({ x: o.b + 2 + k, y: I.ly + sy * 5, vx: 8 + Math.random() * 25, vy: sy < 0 ? -30 : 10 + Math.random() * 20, g: 260, life: .85, size: 1.6 * s, shape: 'sq', vr: (Math.random() - .5) * 14, col: SC91[k % 3] })); if (window.SND97) SND97.scraps(o.i); else noise(0, .05, .01, 600, .8, 'lowpass', true); }); }); } },
 };
-function r85(K) { const Z = LW85[K]; return { get name() { return K + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'A' ? ' (kept)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
-  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only: the finale and the real sound come later; the sound is a gentle placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
-  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
-  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
-Object.assign(FAM, { PA: r85('A'), PB: r85('B'), PC: r85('C'), PD: r85('D') });
+// ---------- round 94 (2026-11-16): the user likes 93 B (mallet) and D (scraps trimmed); the mallet "doesn't look too good". Four mallet treatments, each with the scraps:
+// A Rawhide mallet (drawn properly, swings from the wrist, motion trail), B Silhouette mallet, C Strike only (no mallet), D One big blow (both pegs at once) ----------
+// the mallet in pivot coords: handle along -x, the head's axis vertical, its face at +y; style 'raw' | 'sil'; k = size
+const hit94 = (x, y) => spawn({ x, y, size: 1.5, shape: 'ring', grow: 7, life: .25, col: 'rgba(255,236,200,.9)' });
+const LW94 = {
+  C: { name: 'Strike only + scraps', desc: 'No mallet at all: each peg gets a quick bright swing streak arcing down onto it and a white impact ring, a soft tok, the peg squashing in. The trimmed scraps drop away as before.',
+    over(p, I) { const y = I.ly; pegs93(I).forEach(o => [[.42, -1], [.6, 1]].forEach(([tc, sy], n) => { const u = (o.t - tc + .06) / .06; if (u > 0 && u < 1.6) { const a = clamp(1.6 - u) / 1.6, x = o.b, cx = x + 16, cy = y + sy * 12, r = 17, a0 = Math.PI + sy * .95 * (1 - clamp(u)), a1 = Math.PI + sy * .95;
+        ctx.strokeStyle = `rgba(255,240,210,${.7 * a})`; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke(); ctx.lineCap = 'butt'; }
+      if (o.t >= tc) once('lw94c' + o.i + n, () => { tok90(.7); if (window.SND97) SND97.strike(o.i, n); hit94(o.b, y + sy * 6.5); spawn({ x: o.b, y: y + sy * 6.5, size: 1, shape: 'ring', grow: 12, life: .35, col: '#ffffff' }); }); })); } },
+};
+function r94(K) { const Z = LW94[K], base = VAR21.Skinning.B, V = { grow: base.grow, shake: Z.shake || ADD93.B.shake, over(p, I) { Z.over(p, I); ADD93.D.over(p, I); } };
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (On the locked Pegged out. Try all three moments.)'; }, get note() { return Z.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Leatherworking' || S.p !== LWB92) { profName = 'Leatherworking'; const keep = PROF.Leatherworking; PROF.Leatherworking = LWB92; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Leatherworking = keep; } }
+      const snd0 = S.p.snd; S.p.snd = () => {}; window.PEGAT94 = .42; try { barModule(top, 'A', V); } finally { S.p.snd = snd0; window.PEGAT94 = 0; } } }; }
+// ---------- round 95 (2026-11-16): Leatherworking LOCKED skill-up (94 C: Pegged out on the recipe bar, strike streaks set the pegs, scraps trimmed). The finale (reaching the next recipe),
+// the two the user picked from the pitch: A Strike cascade, B Pegs pop, hide rolls up. Both start after the last skill-up's strikes and scraps (F0 = .8 s after the bar fills) ----------
+const F0_95 = .8;
+const ts95 = () => S.closeAt === undefined ? -1 : S.age - S.closeAt;
+// a strike streak arcing down (sy -1) or up (sy 1) onto (x, y); u 0..1.6 its life; k size
+function streak95(x, y, sy, u, k = 1) { if (u <= 0 || u >= 1.6) return; const a = clamp(1.6 - u) / 1.6, cx = x + 16 * k, cy = y + sy * 12 * k, a0 = Math.PI + sy * .95 * (1 - clamp(u)), a1 = Math.PI + sy * .95;
+  ctx.strokeStyle = `rgba(255,240,210,${.75 * a})`; ctx.lineWidth = 2 * k; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, cy, 17 * k, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke(); ctx.lineCap = 'butt'; }
+const pegXs95 = I => { const o = []; for (let v = I.lo + 1; v <= S.nx.lv; v++) o.push(I.X(v)); return o; };
+delete FAM.PC; delete FAM.PD;
+// ---------- round 96 (2026-11-16): the finale, "mix A and B" (Strike cascade + Pegs pop, hide rolls up): A Cascade, then roll; B One sweep (the strikes knock the pegs out just ahead of the roll) ----------
+function roll96(I, rx, hop, ang) { const y = I.ly, rolled = rx - I.x0, r = Math.min(8, 2.5 + rolled * .028), ux = I.x1 + 18, cx = lerp(rx, ux, eOut(hop)), cy = lerp(y + 5 - r, y, hop) - Math.sin(Math.PI * hop) * 14, sc = 1 - hop * .6; if (hop >= 1) return;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(1, r + .5, r * .9, 1.4, 0, 0, 7); ctx.fill();
+  const g = ctx.createRadialGradient(-r * .35, -r * .4, .5, 0, 0, r); g.addColorStop(0, '#d8a874'); g.addColorStop(.6, '#9a6a3e'); g.addColorStop(1, '#4a2c14'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(60,32,12,.75)'; ctx.lineWidth = .9; ctx.beginPath(); for (let a = 0; a < 5 * Math.PI; a += .2) { const rr = r * (.15 + .8 * a / (5 * Math.PI)); ctx.lineTo(Math.cos(a + ang) * rr, Math.sin(a + ang) * rr); } ctx.stroke(); ctx.restore(); }
+const popPeg96 = (x, y, j) => [-1, 1].forEach(sy => spawn({ x, y: y + sy * 5, vx: 10 + Math.random() * 30, vy: sy * (40 + Math.random() * 30) - 20, g: 300, life: .7, size: 1.4, shape: 'sq', vr: 10, col: '#5a3a1e' }));
+const strikePeg96 = (x, y, u) => { streak95(x, y - 6.5, -1, u); streak95(x, y + 6.5, 1, u); };
+const toks96 = j => { if (window.SND97) return SND97.ftok(j); tone(300 * semi(PENT42[j % 10]), 0, .014, .18, 'triangle'); drum46(140, 0, .012); };
+const bigStrike96 = (I, ts, tb) => { const ux = I.x1 + 18, y = I.ly; streak95(ux, y, -1, (ts - tb + .08) / .08, 1.6); if (ts >= tb) once('lw96big', () => { spawn({ x: ux, y, size: 3, shape: 'ring', grow: 18, life: .45, col: '#ffffff' }); if (window.SND97) SND97.big(); else drum46(105, 0, .028); }); };
+// one shared shape: roll from R0 for D seconds, hop at R0+D+.05 for .4 s
+const rollAt96 = (I, ts, R0, D = .7) => ts < R0 ? null : lerp(I.x0 - 3, I.x1 + 3, clamp((ts - R0) / D));
+const FIN96 = {
+  B: { name: 'One sweep', R0: F0_95, desc: 'One pass: the hide rolls up from the start while a strike streak lands on each peg pair just ahead of the roll and knocks it out (a ring, a tok climbing a soft scale, the pegs flying off); at the end the roll hops off into the recipe icon as one big streak lands on it, and the icon lights.',
+    get finAt() { return this.R0 + 1.2; },
+    over(p, I) { const ts = ts95(); if (ts < F0_95) return; const y = I.ly, xs = pegXs95(I), R0 = FIN96.B.R0, rx = rollAt96(I, ts, R0);
+      xs.forEach((x, j) => { const t0 = R0 + clamp((x - 8 - I.x0 + 3) / (I.x1 - I.x0 + 6)) * .7; strikePeg96(x, y, (ts - t0 + .06) / .06); if (ts >= t0) once('lw96b' + j, () => { hit94(x, y - 6.5); hit94(x, y + 6.5); toks96(j); popPeg96(x, y, j); }); });
+      bigStrike96(I, ts, R0 + 1.1); roll96(I, rx, clamp((ts - R0 - .75) / .4), (rx - I.x0) / 5 + clamp((ts - R0 - .75) / .4) * 8); } },
+};
+function r96(K) { const F = FIN96[K], L = LW94.C, base = VAR21.Skinning.B;
+  const V = { get finAt() { return F.finAt; }, shake: ADD93.B.shake,
+    grow(p, x0, y, Ln, f, t, I) { const ts = ts95(); let cx = rollAt96(I, ts, F.R0); if (cx !== null && K === 'B') { const xs = pegXs95(I); /* the knocked-out pegs vanish just ahead of the roll */ cx = Math.max(cx, ...xs.filter((x, j) => ts >= F.R0 + clamp((x - 8 - I.x0 + 3) / (I.x1 - I.x0 + 6)) * .7).map(x => x + 3), cx); }
+      if (cx === null) return base.grow(p, x0, y, Ln, f, t, I); ctx.save(); ctx.beginPath(); ctx.rect(Math.min(cx, I.x1 + 3), y - 12, I.x1 + 8 - Math.min(cx, I.x1 + 3), 24); ctx.clip(); base.grow(p, x0, y, Ln, f, t, I); ctx.restore();
+      if (K === 'B' && cx > rollAt96(I, ts, F.R0) + .5) { const rx = rollAt96(I, ts, F.R0); hide83(rx, Math.min(cx, I.x1 + 2), y - 4.5, y + 4.5, '#b0784a', '#7a4e2a', 40); } },
+    over(p, I) { L.over(p, I); ADD93.D.over(p, I); F.over(p, I); } };
+  return { get name() { return K + '. ' + F.name; }, get desc() { return F.desc + ' (Pick “Reaching the next unlock”; the sound is a placeholder.)'; }, get note() { return 'finale: ' + F.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Leatherworking' || S.p !== LWB92) { profName = 'Leatherworking'; const keep = PROF.Leatherworking; PROF.Leatherworking = LWB92; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Leatherworking = keep; } }
+      const snd0 = S.p.snd; S.p.snd = () => {}; window.PEGAT94 = .42; try { barModule(top, 'A', V); } finally { S.p.snd = snd0; window.PEGAT94 = 0; } } }; }
+Object.assign(FAM, { PA: r96('B') }); delete FAM.PB;
+// ---------- round 97 (2026-11-16): Leatherworking's look is LOCKED (Pegged out on the recipe bar, strike streaks set the pegs, scraps trimmed; finale One sweep). Its sound, four sets.
+// Each set: taut (the hide pulls to the new front), strike (each peg; n 0 top, 1 bottom), scraps, ftok (each peg knocked out in the finale), big (the last streak on the icon), pay (the icon lights).
+// Sound fatigue: gentle, low, notes varied from a scale, repeats step down (fat45 by skill-up index); the finale plays in full ----------
+const SET97 = {
+  A: { name: 'Soft leather', desc: 'Muted and woody: the hide pulls taut with a soft low rub; each peg a low wooden tok on a varied note (the bottom one a step lower); the scraps two faint pats; the finale’s toks climb a soft scale, a low thump on the icon and a warm two-note close.',
+    taut: i => noise(0, .18, .012 * fat45(i), 350, .7, 'lowpass'),
+    strike: (i, n) => { const v = fat45(i), d = pick45(i, 3) - n * 2; drum46(95 * semi(d / 3), 0, .022 * v); tone(196 * semi(d), 0, .008 * v, .14, 'triangle'); },
+    scraps: i => { const v = fat45(i); noise(0, .03, .006 * v, 700, .8, 'lowpass', true); noise(.05, .03, .005 * v, 650, .8, 'lowpass', true); },
+    ftok: j => { tone(220 * semi(PENT42[j % 10]), 0, .014, .2, 'triangle'); drum46(130, 0, .01); },
+    big: () => { drum46(80, 0, .03); noise(0, .2, .01, 400, .7, 'lowpass'); },
+    pay: () => { tone(196, 0, .02, .6, 'triangle'); tone(294, .08, .016, .6, 'triangle'); } },
+  B: { name: 'Hide drum', desc: 'The pegged hide is a drum skin: the pull a faint brush on the skin; each peg a soft frame-drum tap with a little skin slap, the notes varied; the scraps a ghost tap; the finale a quick climbing drum roll, a deep tap on the icon and two low hits to close.',
+    taut: i => noise(0, .15, .006 * fat45(i), 500, .8, 'bandpass'),
+    strike: (i, n) => { const v = fat45(i), d = pick45(i, 3); drum46(120 * semi(d / 2) * (n ? .85 : 1), 0, .026 * v); noise(0, .03, .009 * v, 900, .8, 'lowpass', true); },
+    scraps: i => drum46(220, .02, .005 * fat45(i)),
+    ftok: j => drum46(100 * semi(PENT42[j % 10] / 2), 0, .02),
+    big: () => { drum46(72, 0, .034); drum46(108, .06, .018); },
+    pay: () => { drum46(90, 0, .025); drum46(135, .12, .02); } },
+  C: { name: 'Wooden mallet + creak', desc: 'Workshop sounds: the hide pulls taut with a gentle leather creak; each peg a soft wooden mallet knock on a varied note; the scraps a faint rustle; the finale’s knocks climb the scale, a low knock on the icon and a soft two-note mallet close.',
+    taut: i => { const v = fat45(i), d = pick45(i, 4); tone(150 * semi(d / 3), 0, .012 * v, .3, 'triangle', 172 * semi(d / 3)); noise(0, .25, .004 * v, 420, 3, 'bandpass'); },
+    strike: (i, n) => { const v = fat45(i), d = pick45(i, 3) - n * 2; mallet(262 * semi(d), 0, .02 * v); },
+    scraps: i => noise(0, .12, .006 * fat45(i), 800, .7, 'lowpass'),
+    ftok: j => mallet(262 * semi(PENT42[j % 10]), 0, .022),
+    big: () => { mallet(131, 0, .03); drum46(90, 0, .016); },
+    pay: () => { mallet(196, 0, .024); mallet(294, .1, .02); } },
+  D: { name: 'Plucked lace', desc: 'Like a taut leather lace being plucked: the pull a soft stretching breath; each peg a low pluck on a varied note (the bottom one a fifth below); the scraps a soft pat; the finale’s plucks climb the scale, a deep pluck on the icon and a low pluck with its fifth to close.',
+    taut: i => noise(0, .25, .007 * fat45(i), 500, .6, 'lowpass'),
+    strike: (i, n) => { const v = fat45(i), d = pick45(i, 3); pluck(110 * semi(d - n * 7), .018 * v); },
+    scraps: i => noise(0, .04, .006 * fat45(i), 650, .8, 'lowpass', true),
+    ftok: j => pluck(110 * semi(PENT42[j % 10]), .018),
+    big: () => { pluck(73, .03); drum46(90, 0, .018); },
+    pay: () => { pluck(110, .025); pluck(165, .02, .1); } },
+};
+function r97(K) { const Z = SET97[K], B = r96('B');
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return 'The locked look (Pegged out, strike streaks, scraps; finale One sweep) with a sound set: ' + Z.desc + ' Long sessions: notes vary and after two in a row each is a step quieter. (Sound on; try all three moments.)'; },
+    get note() { return 'sound: ' + Z.name.toLowerCase() + '.'; },
+    draw(top) { window.SND97 = Z; try { if (S && S.p === LWB92) S.hits.forEach((h, i) => { if (S.age >= h + HIT + .1) once('lw97t' + i, () => Z.taut(i)); }); B.draw(top); } finally { window.SND97 = null; } } }; }
+{ const D97 = r97('C'); Object.assign(FAM, { PA: { get name() { return 'A. Leatherworking (done)'; }, get desc() { return 'DONE: ' + D97.desc; }, get note() { return D97.note; }, draw: top => D97.draw(top) } }); } delete FAM.PB; delete FAM.PC; delete FAM.PD;
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 60);
 setTimeout(() => { profName = 'Leatherworking'; if (typeof sync === 'function') { sync(); play(); } }, 0);
 setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
 function flourish(p, x, y, t) { if (t < 0 || t > .7) return; const u = t / .7, e = 1 - u, m = p.mat; ctx.save();

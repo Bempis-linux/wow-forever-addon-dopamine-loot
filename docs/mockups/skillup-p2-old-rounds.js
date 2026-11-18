@@ -1521,3 +1521,396 @@ Object.assign(FAM, { PA: r83('A'), PB: r83('B'), PC: r83('C'), PD: r83('D') });
             ctx.save(); ctx.translate(fx, fy); ctx.rotate(r); ctx.scale(1 + .25 * (1 - u), .55 + .45 * u); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 4; pelt84(22, 18, ...cols[(k + q.i) % 4]); ctx.restore(); }
           else { const u = q.t; draped(xl, k + q.i, 1.6 * Math.exp(-u * 7) * Math.sin(u * 28));
             once('lwC4' + q.i, () => { for (let j = 0; j < 6; j++) { const s = j % 2 ? 1 : -1; spawn({ x: xl + s * 10, y: y + (j % 3 - 1) * 5, vx: s * (25 + Math.random() * 30), vy: -10 - Math.random() * 15, g: 60, life: .45, size: 1, col: 'rgba(225,195,150,.8)' }); } }); } }); } } },
+
+// ===== round 85 B-D (Sling, Fringe, Belt and buckle; LW85 entries), moved out 2026-11-16 =====
+  B: { name: 'Sling', desc: 'Left of the bar a leather sling whirls lazily in a circle. Each skill-up it whips faster and lets go: a stone arcs along the bar, high over the filled leather, and thuds into the front with a puff of dust, pushing the fill on. The sling slows and keeps turning.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); drum46(95 * semi(n / 3), 0, .036 * v); noise(0, .06, .02 * v, 600, .7, 'lowpass', true); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 7); },
+      shake(I) { const o = near85(I, .7); if (!o || o.t < 0 || o.t > .18) return [0, 0]; return [1.2 * (1 - o.t / .18), 0]; },
+      over(p, I) { const y = I.ly, o = near85(I, .7), hx = I.x0 - 16, hy = y - 2; let spd = 2.2, rel = false;
+        if (o && o.t < -.3) spd = lerp(2.2, 9, clamp((o.t + .7) / .4)); else if (o && o.t < .6) { spd = lerp(9, 2.2, clamp((o.t + .3) / .9)); rel = true; }
+        S.sl85 = (S.sl85 || 0) + spd * (1 / 60); const a = S.sl85 * 2 * Math.PI, R = 9, px = hx + Math.cos(a) * R, py = hy + Math.sin(a) * R * .45 - 4;
+        ctx.strokeStyle = 'rgba(70,40,15,.9)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(hx, hy + 6); ctx.lineTo(px - 1.5, py); ctx.moveTo(hx, hy + 6); ctx.lineTo(px + 1.5, py); ctx.stroke();
+        ctx.fillStyle = LWC.lt; ctx.beginPath(); ctx.ellipse(px, py, 3, 2, a, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,236,200,.4)'; ctx.fillRect(px - 1, py - 1.2, 2, .8);
+        if (!rel || !o) { ctx.fillStyle = '#8a8478'; ctx.beginPath(); ctx.arc(px, py - .5, 1.6, 0, 7); ctx.fill(); }
+        if (o && o.t >= -.3 && o.t < 0) { const u = (o.t + .3) / .3, sx = lerp(hx + 8, o.b, u), sy = lerp(y - 12, y - 4, u) - Math.sin(Math.PI * u) * (14 + (o.b - hx) * .08);
+          ctx.fillStyle = '#9a9488'; ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(sx - 1, sy - 1.4, 1, 1); }
+        if (o && o.t >= 0 && o.t < .5) { const u = o.t / .5, sx = o.b + 4 + u * 8, sy = y - 4 - Math.sin(Math.PI * Math.min(1, u * 1.6)) * 5; ctx.globalAlpha *= 1 - u; ctx.fillStyle = '#9a9488'; ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, 7); ctx.fill(); ctx.globalAlpha /= Math.max(.01, 1 - u);
+          once('lw85B' + o.i, () => { for (let k = 0; k < 7; k++) spawn({ x: o.b, y: y - 2 + (k % 3 - 1) * 3, vx: -10 + Math.random() * 50, vy: -20 - Math.random() * 30, g: 90, life: .5, size: 1, col: 'rgba(225,195,150,.85)' }); }); } } } },
+  C: { name: 'Fringe', desc: 'Leather fringe hangs under the filled part, swaying in a light breeze. Each skill-up new strands drop in at the front and bounce, and a swing runs back along the whole fringe from the front to the start, every strand kicking in turn, then it settles into the breeze again.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); pluck(110 * semi(n), .018 * v); noise(.02, .35, .006 * v, 900, .6, 'lowpass'); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 8); },
+      over(p, I) { const y = I.ly, o = near85(I, .3), xe = I.tipX; ctx.lineCap = 'round';
+        for (let x = I.x0 + 1; x < xe - 1; x += 3.5) { let ang = .12 * Math.sin(S.age * 1.8 - x * .03), len = 7;
+          if (o && o.t >= 0) { const d = (o.b - x) / 260, tt = o.t - d; if (tt > 0) ang += .55 * Math.exp(-tt * 4) * Math.sin(tt * 13); if (x > o.a - 2) len = 7 * eBack(clamp(o.t / .3)); }
+          if (len <= .5) continue; const ex = x + Math.sin(ang) * len, ey = y + 6 + Math.cos(ang) * len;
+          ctx.strokeStyle = LWC.md; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(x, y + 5.5); ctx.lineTo(ex, ey); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,230,190,.3)'; ctx.lineWidth = .6; ctx.beginPath(); ctx.moveTo(x - .4, y + 6); ctx.lineTo(ex - .4, ey - .5); ctx.stroke(); }
+        ctx.lineCap = 'butt'; } } },
+  D: { name: 'Belt and buckle', desc: 'The filled part is a belt, and a brass buckle sits at the front with the belt’s tip poking through. Each skill-up the belt is yanked through: the buckle jolts forward, the strap pulls tight (it thins for a moment and a bright tension streak runs back to the start), the prong drops in with a soft click and a glint.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(0, .1, .016 * v, 700, .7, 'lowpass', true); tone(520 * semi(n), .05, .01 * v, .12, 'triangle'); drum46(140, .05, .012 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { const o = near85(I, .2); let th = 0; if (o && o.t >= 0 && o.t < .35) th = Math.sin(Math.PI * o.t / .35);
+        const hh = 6 - th * 1.6; hide83(x0 - 2, I.tipX + 5, y - hh, y + hh, LWC.lt, LWC.md, 9);
+        ctx.fillStyle = 'rgba(40,18,4,.35)'; ctx.fillRect(x0 - 2, y - hh + 1.2, I.tipX + 5 - x0, .8); ctx.fillRect(x0 - 2, y + hh - 2, I.tipX + 5 - x0, .8);
+        if (o && o.t >= 0 && o.t < .5) { const sx = lerp(I.tipX, x0, o.t / .5), g = ctx.createLinearGradient(sx - 14, 0, sx + 14, 0); g.addColorStop(0, 'rgba(255,240,210,0)'); g.addColorStop(.5, `rgba(255,240,210,${.55 * (1 - o.t / .5)})`); g.addColorStop(1, 'rgba(255,240,210,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 14, y - hh, 28, hh * 2); } },
+      shake(I) { const o = near85(I, .2); if (!o || o.t < 0 || o.t > .15) return [0, 0]; return [1.5 * (1 - o.t / .15), 0]; },
+      over(p, I) { const y = I.ly, o = near85(I, .2), bx = I.tipX - 2; let pr = 1; if (o && o.t >= 0 && o.t < .25) pr = clamp((o.t - .05) / .1);
+        const g = ctx.createLinearGradient(bx - 4, y - 9, bx + 4, y + 9); g.addColorStop(0, '#fff0b0'); g.addColorStop(.45, '#d8a840'); g.addColorStop(1, '#7a5418');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(bx - 4, y - 9, 8, 18, 2.5); ctx.roundRect(bx - 2, y - 7, 4, 14, 1); ctx.fill('evenodd');
+        ctx.save(); ctx.translate(bx, y); ctx.rotate((1 - pr) * -1.1); ctx.fillStyle = '#c89a38'; ctx.fillRect(-.7, -1, 1.4, 7); ctx.restore();
+        if (o && o.t >= .05) once('lw85D' + o.i, () => spawn({ x: bx, y: y - 9, shape: 'star', size: 3.5, life: .45, col: '#fff4c0' })); } } },
+
+// ===== round 86 A, B, D (Trampoline, Lasso, Sail; LW86 entries), moved out 2026-11-16 =====
+  A: { name: 'Trampoline', desc: 'The bar is a hide stretched in its frame like a trampoline: tanned behind the fill, raw ahead. A leather boot (the game would use a real item icon) bounces on it at the front. Each skill-up it flies up high and comes down hard on the new front: the hide sags deep out of the bottom of the frame and springs it back up, wobbling to rest.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); drum46(90 * semi(n / 3), 0, .036 * v); tone(150 * semi(n / 3), 0, .01 * v, .3, 'triangle', 175 * semi(n / 3)); noise(0, .05, .012 * v, 500, .7, 'lowpass', true); },
+    V: { grow() {},
+      over(p, I) { const y = I.ly, o = near85(I, .5), x0 = I.x0 - 2, x1 = I.x1 + 2, ft = I.tipX; let ix = ft - 5, iy = 0, D = 0, sq = 0;
+        const hop = S.age % .55, small = Math.sin(Math.PI * hop / .55);
+        if (o && o.t < 0 && o.t > -.5) { const u = (o.t + .5) / .5; ix = lerp(o.a, o.b, u) - 5; iy = -Math.sin(Math.PI * u) * 30; }
+        else if (o && o.t >= 0 && o.t < 1) { ix = o.b - 5; const w = 7 * Math.exp(-o.t * 5) * Math.cos(o.t * 16); D = Math.max(0, w); sq = clamp(w / 7); iy = w < 0 ? w * 2.2 : 0; if (o.t > .45) iy = -small * 4 * clamp((o.t - .45) / .3); }
+        else { iy = -small * 4; D = small < .15 ? 1.2 : 0; }
+        const d = x => { const u = (x - (ix + 5)) / 70; return D * Math.max(0, 1 - u * u) * Math.min(1, (x - x0) / 30, (x1 - x) / 30); };
+        const band = (xa, xb, c0, c1) => { if (xb <= xa) return; ctx.beginPath(); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, y - 5.5 + d(x)); for (let x = xb; x >= xa; x -= 2) ctx.lineTo(x, y + 5.5 + d(x)); ctx.closePath(); const g = ctx.createLinearGradient(0, y - 6, 0, y + 12); g.addColorStop(0, c0); g.addColorStop(1, c1); ctx.fillStyle = g; ctx.fill(); };
+        band(x0 + 1, ft, LWC.lt, LWC.dk); band(ft, x1 - 1, '#e2cfae', '#b49a76');
+        ctx.strokeStyle = 'rgba(255,236,200,.3)'; ctx.lineWidth = 1; ctx.beginPath(); for (let x = x0 + 1; x <= x1 - 1; x += 2) ctx.lineTo(x, y - 4.5 + d(x)); ctx.stroke();
+        if (D > 3 && o) once('lw86A' + o.i, () => { for (let k = 0; k < 6; k++) spawn({ x: ix + 5 + (k - 2.5) * 4, y: y + 6 + D, vx: (k - 2.5) * 14, vy: 10 + Math.random() * 20, g: -20, life: .45, size: 1, col: 'rgba(225,195,150,.8)' }); });
+        const by = y - 5.5 + d(ix + 5) + iy; ctx.save(); ctx.translate(ix + 5, by); ctx.scale(1 + sq * .3, 1 - sq * .3); ctx.font = '15px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(PROF.Leatherworking.made, 0, 1); ctx.restore(); } } },
+  B: { name: 'Lasso', desc: 'A rawhide lasso loop circles above the front of the fill. Each skill-up it is thrown ahead along the bar, drops round it, the rope snaps taut and drags the loop back to the front, pulling the fill on with it; then the loop rises and circles again.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); noise(0, .1, .01 * v, 600, .6, 'lowpass', true); pluck(98 * semi(n), .02 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 10); },
+      over(p, I) { const y = I.ly, o = near85(I, .45), fx = I.tipX, sp = S.age * 7; let lx = fx + 2, ly = y - 15, rx = 7, ry = 2.6, vert = 0, glow = 0;
+        if (o && o.t < 0 && o.t > -.45) { const u = (o.t + .45) / .45; lx = lerp(fx + 2, o.b + 30, eOut(u)); ly = lerp(y - 15, y, u) - Math.sin(Math.PI * u) * 8; vert = clamp((u - .6) / .4); }
+        else if (o && o.t >= 0 && o.t < .55) { const u = o.t / .55; if (u < .55) { lx = lerp(o.b + 30, o.b + 1, eOut(u / .55)); ly = y; vert = 1; glow = 1 - u; } else { const k = (u - .55) / .45; lx = o.b + 2; ly = lerp(y, y - 15, eOut(k)); vert = 1 - k; } }
+        const rX = lerp(rx, 3, vert), rY = lerp(ry, 8.5, vert);
+        ctx.strokeStyle = 'rgba(70,40,15,.9)'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(fx, y - 4); if (vert > .9) ctx.lineTo(lx - rX, ly); else ctx.quadraticCurveTo(fx + (lx - fx) * .3, Math.min(y - 4, ly) - 4, lx, ly + rY); ctx.stroke();
+        ctx.strokeStyle = '#a87444'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.ellipse(lx, ly, rX, rY, 0, 0, 7); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,236,200,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(lx, ly, rX, rY, 0, sp % 6.28, sp % 6.28 + 1.1); ctx.stroke();
+        if (glow > 0) { const g = ctx.createLinearGradient(o.b, 0, o.b + 30, 0); g.addColorStop(0, `rgba(255,236,200,${.45 * glow})`); g.addColorStop(1, 'rgba(255,236,200,0)'); ctx.fillStyle = g; ctx.fillRect(o.b, y - 6, 30, 12); } } } },
+  D: { name: 'Sail', desc: 'A small leather sail stands on the front of the fill, fluttering. Each skill-up a gust streaks in from the left over the filled bar, the sail bellies out full, the mast leans forward and the front lurches on; then it rights itself and flutters again.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); noise(0, .35, .011 * v, 500, .6, 'lowpass'); drum46(100 * semi(n / 3), .06, .02 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 12); },
+      over(p, I) { const y = I.ly, o = near85(I, .3), mx = I.tipX - 2; let belly = 2.5 + Math.sin(S.age * 9) * 1 + Math.sin(S.age * 23) * .5, lean = 0, gust = -1;
+        if (o && o.t > -.3 && o.t < .9) { const u = o.t + .3; gust = u; belly = lerp(belly, 9, clamp(u / .25) * clamp((1.2 - u) / .5)); lean = .22 * Math.sin(Math.PI * clamp(u / .7)) * (u < .7 ? 1 : 0); }
+        if (gust >= 0 && gust < .5) { const k = gust / .5; ctx.strokeStyle = `rgba(235,225,205,${.5 * (1 - k)})`; ctx.lineWidth = 1; for (let j = 0; j < 4; j++) { const sy = y - 18 + j * 5, ex = lerp(I.x0, mx, k) - j * 6; ctx.beginPath(); ctx.moveTo(ex - 30, sy); ctx.lineTo(ex, sy); ctx.stroke(); } }
+        ctx.save(); ctx.translate(mx, y - 6); ctx.rotate(lean);
+        ctx.strokeStyle = '#5e3a1c'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -17); ctx.stroke();
+        const g = ctx.createLinearGradient(0, -16, belly + 4, -4); g.addColorStop(0, LWC.hi); g.addColorStop(1, LWC.md); ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(.8, -16); ctx.quadraticCurveTo(belly + 3, -11, .8, -2.5); ctx.lineTo(.8, -16); ctx.fill(); ctx.restore(); } } },
+
+// ===== round 88 (Snap the pelt on leather, Scraps + snap, Pull to the point; hump88), moved out 2026-11-16 =====
+// ---------- round 88 (2026-11-16): Leatherworking base around the two things the user picked: Snap the pelt (Skinning round 30 C, "the one like pulling leather to the next point") and Scraps fly in (86 C):
+// A Snap the pelt (on leather), B Scraps fly in, C Scraps + snap, D Pull to the point (pulled from the front, the ripple runs back); key 5 = Grip wrap ----------
+// one hump travelling along the strip at wx (amp px tall), drawn only where the leather is (up to xmax)
+function hump88(I, wx, amp, xmax) { if (amp <= .2) return; const y = I.ly, g = x => Math.exp(-((x - wx) * (x - wx)) / 90) * amp, xa = Math.max(I.x0 - 2, wx - 30), xb = Math.min(xmax, wx + 30); if (xb <= xa) return;
+  ctx.save(); ctx.beginPath(); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, y - 6 - g(x)); for (let x = xb; x >= xa; x -= 2) ctx.lineTo(x, y + 6 + g(x)); ctx.closePath();
+  const gr = ctx.createLinearGradient(0, y - 6 - amp, 0, y + 6 + amp); gr.addColorStop(0, LWC.hi); gr.addColorStop(.45, LWC.lt); gr.addColorStop(1, LWC.dk); ctx.fillStyle = gr; ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; ctx.fill(); ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(255,240,210,.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let x = xa; x <= xb; x += 2) ctx.lineTo(x, y - 6 - g(x)); ctx.stroke(); ctx.restore(); }
+const flecks88 = (x, y, n = 8, dir = 1) => { for (let k = 0; k < n; k++) spawn({ x, y: y - 2 + (k % 3 - 1) * 3, vx: dir * (20 + Math.random() * 60), vy: -25 - Math.random() * 40, g: 120, life: .6, size: 1.1, shape: 'sq', vr: 8, col: k % 2 ? LWC.hi : LWC.md }); };
+const snap88 = (I, o, t0, dur, amp) => { if (!o) return; const u = (o.t - t0) / dur; if (u > 0 && u < 1) hump88(I, lerp(I.x0 - 20, I.tipX + 4, eOut(u) * .6 + u * .4), amp * (1 - u * .3), I.tipX + 2);
+  if (o.t >= t0 + dur) once('lw88s' + o.i, () => flecks88(I.tipX, I.ly, 8, 1)); };
+const sndSnap88 = (i, at) => { const v = fat45(i), n = pick45(i, 3); noise(Math.max(0, at - .3), .3, .006 * v, 600, .6, 'lowpass'); drum46(130 * semi(n / 2), at, .028 * v); noise(at, .07, .02 * v, 900, .8, 'lowpass', true); };
+const LW88 = {
+  A: { name: 'Snap the pelt', desc: 'Skinning round 30 C brought to Leatherworking: the tanned strip is snapped out like a pelt being shaken. Each skill-up a hump runs along the whole strip from its start and cracks at the front with a thwap, leather flecks flicking off, and the front jumps on.',
+    snd: i => sndSnap88(i, .38),
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 13); },
+      shake(I) { const o = near85(I, .1); if (!o || o.t < .38 || o.t > .5) return [0, 0]; return [1.4 * (1 - (o.t - .38) / .12), 0]; },
+      over(p, I) { snap88(I, near85(I, .1), 0, .38, 5); } } },
+  B: { name: 'Scraps fly in (liked)', snd: LW86.C.snd, desc: LW86.C.desc, V: LW86.C.V },
+  C: { name: 'Scraps + snap', desc: 'A and B together: each skill-up the scraps fly in from all around and slap onto the front, then the whole strip is snapped from its start: a hump runs down it and cracks at the front with a thwap, settling the new scraps into the leather.',
+    snd: i => { LW86.C.snd(i); sndSnap88(i, .62); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 14); },
+      shake(I) { const o = near85(I, .4); if (!o || o.t < .62 || o.t > .74) return [0, 0]; return [1.4 * (1 - (o.t - .62) / .12), 0]; },
+      over(p, I) { LW86.C.V.over(p, I); snap88(I, near85(I, .4), .24, .38, 5); } } },
+  D: { name: 'Pull to the point', desc: 'The strip is pulled from its front: each skill-up the front is drawn out past its new point, the leather stretching thinner and paler with a creak, then it springs back to the point, and the slack runs back down the strip as a hump to the start, where it bumps the bar’s end.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(140 * semi(n / 3), 0, .016 * v, .3, 'triangle', 175 * semi(n / 3)); noise(0, .25, .005 * v, 380, 3, 'bandpass'); drum46(110 * semi(n / 3), .2, .022 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 15); },
+      over(p, I) { const y = I.ly, o = near85(I, .1); if (!o || o.t < 0) return;
+        if (o.t < .3) { const s = Math.sin(Math.PI * o.t / .3), ext = 9 * s, th = 6 - 2.4 * s; const g = ctx.createLinearGradient(I.tipX, 0, I.tipX + ext, 0); g.addColorStop(0, LWC.lt); g.addColorStop(1, '#e8d0a8'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(I.tipX - 1, y - 6); ctx.quadraticCurveTo(I.tipX + ext * .5, y - th, I.tipX + ext, y - th * .8); ctx.lineTo(I.tipX + ext, y + th * .8); ctx.quadraticCurveTo(I.tipX + ext * .5, y + th, I.tipX - 1, y + 6); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = `rgba(255,240,210,${.5 * s})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(I.x0, y); ctx.lineTo(I.tipX + ext, y); ctx.stroke(); }
+        const u = (o.t - .2) / .6; if (u > 0 && u < 1) hump88(I, lerp(I.tipX - 6, I.x0 - 10, eOut(u)), 4.5 * (1 - u * .5), I.tipX + 2);
+        if (u >= 1) once('lw88d' + o.i, () => flecks88(I.x0, y, 5, -1)); } } },
+  E: LW84.D,
+};
+function r88(K) { const Z = LW88[K]; return { get name() { return (K === 'E' ? '5' : K) + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'E' ? ' (kept)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only; the sound is a placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd || null; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r88('A'), PB: r88('B'), PC: r88('C'), PD: r88('D'), PE: r88('E') });
+
+// ===== rounds 86-87 leftovers (LW86 C Scraps fly in + r86, LW87 + r87: the old Skinning options on Leatherworking), moved out 2026-11-16 =====
+// ---------- round 86 (2026-11-16): Leatherworking base, four new (round 85 "still not fully liking"), simple shapes + the icon, beyond the bar:
+// A Trampoline (impact on a stretched hide), B Lasso (catch and pull), C Scraps fly in (assembly from all around), D Sail (a gust pushes it); key 5 = Grip wrap (kept) ----------
+const LW86 = {
+  C: { name: 'Scraps fly in', desc: 'Each skill-up a burst of leather scraps in different tans comes flying in from all around the bar (above, below, behind and ahead), tumbling, and slaps onto the front all at once: the front bulges out past the bar’s edges for a moment, a puff of dust, and it settles into the strip.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); [0, .025, .045, .06].forEach((d, k) => noise(d, .04, .011 * v, 650 + k * 120, .8, 'lowpass', true)); drum46(120 * semi(n / 2), .05, .022 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { hide83(x0 - 2, I.tipX, y - 6, y + 6, LWC.lt, LWC.md, 11); },
+      over(p, I) { const y = I.ly, o = near85(I, .4), cols = ['#d8a670', '#c8925c', '#e0b480', '#9a6a3a', '#b88050'];
+        if (!o) return;
+        if (o.t < 0 && o.t > -.4) { const u = eOut((o.t + .4) / .4); for (let k = 0; k < 9; k++) { const a = rnd53(k * 3.7 + o.i) * 6.28, r = 40 + rnd53(k * 5.1 + o.i) * 35, sx = o.b + Math.cos(a) * r, sy = y + Math.sin(a) * r * .6, px = lerp(sx, o.b - 1, u), py = lerp(sy, y, u);
+            ctx.strokeStyle = 'rgba(230,200,160,.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(lerp(sx, o.b, Math.max(0, u - .25)), lerp(sy, y, Math.max(0, u - .25))); ctx.lineTo(px, py); ctx.stroke();
+            ctx.save(); ctx.translate(px, py); ctx.rotate(a + u * 9); ctx.fillStyle = cols[k % 5]; ctx.beginPath(); ctx.roundRect(-2.6, -1.8, 5.2, 3.6, 1); ctx.fill(); ctx.restore(); } }
+        else if (o.t >= 0 && o.t < .45) { const u = o.t / .45, b = Math.sin(Math.PI * Math.min(1, u * 2)) * (1 - u * .5), g = ctx.createLinearGradient(0, y - 10, 0, y + 10); g.addColorStop(0, LWC.hi); g.addColorStop(1, LWC.dk); ctx.fillStyle = g;
+          ctx.beginPath(); ctx.ellipse(o.b - 3, y, 5 + b * 3, 6 + b * 4, 0, 0, 7); ctx.fill();
+          once('lw86C' + o.i, () => { for (let k = 0; k < 7; k++) { const a = k / 7 * 6.28; spawn({ x: o.b - 3, y, vx: Math.cos(a) * 40, vy: Math.sin(a) * 30, g: 40, life: .4, size: 1, col: 'rgba(225,195,150,.8)' }); } }); } } } },
+  E: LW84.D,
+};
+function r86(K) { const Z = LW86[K]; return { get name() { return (K === 'E' ? '5' : K) + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'E' ? ' (kept)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only: the finale and the real sound come later; the sound is a gentle placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+// (round 86's FAM assignment removed: A, B, D archived)
+// ---------- round 87 (2026-11-16): Leatherworking base. A = Scraps fly in (86 C, liked, "but none feel like leatherworking"); B-D = old Skinning options brought back as the user asked
+// ("one that was like pulling leather to the next point"): B Peeled strip (VAR.Skinning.B), C Pegged out (VAR21.Skinning.B), D Laid down (VAR21.Skinning.C, "reads as Leatherworking"); key 5 = Grip wrap ----------
+const LW87 = {
+  A: LW86.C,
+  B: Object.assign({}, VAR.Skinning.B, { name: 'Peeled strip (old Skinning option)', snd: null, desc: 'Brought back from Skinning’s early rounds: the strip of hide peels back as the fill grows: behind the front the fur side is rolled away to show the pale inner side, and the peeled strip rolls up into a curl that rides the front, getting fatter as you go.' }),
+  C: Object.assign({}, VAR21.Skinning.B, { name: 'Pegged out (old Skinning option)', snd: null, desc: 'Brought back from Skinning round 21: the hide is stretched along the bar, held by wooden pegs at its top and bottom edge. Each skill-up a new pair of pegs punches in at the front with a tok, and the loose hide at the front pulls taut to them. (On a crafter’s long rank the pegs sit close together.)' }),
+  D: Object.assign({}, VAR21.Skinning.C, { name: 'Laid down (old Skinning option)', snd: null, desc: 'Brought back from Skinning round 21, where you said it reads as Leatherworking: each skill-up a cut piece of hide flips down into the bar from above and lands with a slap, edge to edge with the last; the bar fills with pieces, fur side and pale side alternating.' }),
+  E: LW84.D,
+};
+function r87(K) { const Z = LW87[K]; return { get name() { return (K === 'E' ? '5' : K) + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'E' ? ' (kept)' : K === 'A' ? ' (liked)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only; the sound is a placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd || null; try { barModule(top, 'A', Z.V || Z); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r87('A'), PB: r87('B'), PC: r87('C'), PD: r87('D'), PE: r87('E') });
+
+// ===== round 89 (eight pitched directions, all rejected: rollers, bosses, hide spreads, studs, beaten hide, patchwork, form, armor pieces), moved out 2026-11-16 =====
+// ---------- round 89 (2026-11-16): Leatherworking base, eight pitched directions the user picked (all eight), keys 1-8 ----------
+const st89 = (x, y, r) => { const g = ctx.createRadialGradient(x - r * .35, y - r * .35, .2, x, y, r); g.addColorStop(0, '#ffffff'); g.addColorStop(.5, '#b8bcc4'); g.addColorStop(1, '#4a4c54'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); };
+const puff89 = (x, y, n, col, sp = 30) => { for (let k = 0; k < n; k++) spawn({ x: x + (Math.random() - .5) * 8, y, vx: (Math.random() - .5) * sp * 2, vy: (Math.random() - .5) * sp - 12, g: -8, life: .9, size: 1.6 + Math.random() * 1.6, col }); };
+const strap89 = (I, c0 = LWC.lt, c1 = LWC.md, s = 20) => hide83(I.x0 - 2, I.tipX, I.ly - 6, I.ly + 6, c0, c1, s);
+const SC89 = ['#d8a670', '#c8925c', '#e0b480', '#a87444', '#b88050'];
+const sndPat89 = (i, at = 0, f = 120) => { const v = fat45(i), n = pick45(i, 3); drum46(f * semi(n / 3), at, .03 * v); noise(at, .06, .014 * v, 600, .7, 'lowpass', true); };
+const LW89 = {
+  A: { name: 'Through the rollers', desc: 'A thick, rough raw hide waits ahead of the fill, taller than the bar. Two rollers sit at the front, above and below; each skill-up they spin and draw the hide in, and a neat flat strap comes out behind them, flecks squeezed out above and below.',
+    snd: i => { const v = fat45(i); noise(0, .4, .012 * v, 300, .7, 'lowpass'); sndPat89(i, .3, 90); },
+    V: { grow(p, x0, y, L, f, t, I) { strap89(I); }, over(p, I) { const y = I.ly, fx = I.tipX + 3, o = near85(I, .1);
+        if (fx < I.x1 + 2) { const g = ctx.createLinearGradient(0, y - 9, 0, y + 9); g.addColorStop(0, '#dcb898'); g.addColorStop(1, '#8e664a'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(fx, y - 9, I.x1 + 2 - fx, 18, [5, 2, 2, 5]); ctx.fill();
+          ctx.fillStyle = 'rgba(60,34,18,.4)'; for (let x = Math.ceil(fx / 3) * 3; x < I.x1; x += 3) if (rnd53(x * .71) > .5) ctx.fillRect(x, y - 8 + rnd53(x * 1.3) * 15, 1, 1.4); }
+        const spin = S.age * 1.5 + (o && o.t >= 0 ? 7 * eOut(clamp(o.t / .5)) : 0);
+        [-1, 1].forEach(s => { const cy = y + s * 10.5, g = ctx.createRadialGradient(fx - 2, cy - 2, .5, fx, cy, 5.5); g.addColorStop(0, '#b07a4a'); g.addColorStop(1, '#3a2210'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(fx, cy, 5.5, 0, 7); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,230,190,.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(fx, cy); ctx.lineTo(fx + Math.cos(spin * s) * 4.5, cy + Math.sin(spin * s) * 4.5); ctx.stroke(); });
+        if (o && o.t >= .1) once('lw89a' + o.i, () => [-1, 1].forEach(s => { for (let k = 0; k < 4; k++) spawn({ x: fx - 3, y: y + s * 4, vx: -10 - Math.random() * 30, vy: s * (20 + Math.random() * 30), g: 0, life: .5, size: 1, shape: 'sq', vr: 6, col: '#c89a6a' }); })); } } },
+  B: { name: 'Wet-molded bosses', desc: 'Cuir bouilli armor: the fill is hardened leather with a row of raised round bosses. Each skill-up a puff of steam rises at the front and the soft leather there is pushed up further into the next boss; a finished boss catches the light.',
+    snd: i => { const v = fat45(i); noise(0, .45, .008 * v, 700, .5, 'lowpass'); sndPat89(i, .02, 110); },
+    V: { grow(p, x0, y, L, f, t, I) { strap89(I, '#b88050', '#6e4422', 21); for (let cx = x0 + 7; cx - 6 < I.tipX; cx += 12) { const pr = clamp((I.tipX - (cx - 6)) / 12), r = 4.2 * pr; if (r < .5) continue;
+          ctx.fillStyle = 'rgba(20,8,2,.45)'; ctx.beginPath(); ctx.arc(cx + .8, y + .8, r + .6, 0, 7); ctx.fill(); const g = ctx.createRadialGradient(cx - r * .4, y - r * .4, .3, cx, y, r); g.addColorStop(0, pr >= 1 ? '#fbe0b0' : '#e0b484'); g.addColorStop(1, '#7a4c26'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, y, r, 0, 7); ctx.fill(); } },
+      over(p, I) { const o = near85(I, .1); if (!o || o.t < 0) return; once('lw89b' + o.i, () => { puff89(o.b, I.ly - 7, 6, 'rgba(235,235,235,.45)'); const c = Math.floor((o.b - I.x0 + 6 - 7) / 12), cpr = Math.floor((o.a - I.x0 + 6 - 7) / 12); if (c > cpr) spawn({ x: I.x0 + 7 + c * 12 - 12, y: I.ly - 2, shape: 'star', size: 4, life: .5, col: '#fff4d0' }); }); } } },
+  C: { name: 'The hide spreads out', desc: 'The fill is a whole hide, not a strip: behind the front it spreads out above and below the bar, with leg flaps along it. Each skill-up the newest part unfolds from folded-over to spread flat with a soft flop.',
+    snd: i => sndPat89(i, .15, 100),
+    V: { grow(p, x0, y, L, f, t, I) { strap89(I, LWC.lt, LWC.md, 22); }, over(p, I) { const y = I.ly, fx = I.tipX, o = near85(I, .1), L = I.x1 - I.x0; if (fx <= I.x0) return;
+        const lobe = x => [.12, .34, .62, .86].reduce((s, c) => s + 5 * Math.exp(-Math.pow((x - I.x0 - c * L) / 7, 2)), 0);
+        const e = x => { let k = clamp((x - I.x0 + 2) / 8) * clamp((fx - x) / 4); if (o && o.t > -.1 && x > o.a - 12) k *= eBack(clamp(o.t / .35)); return Math.max(0, (3.5 + lobe(x)) * k); };
+        ctx.beginPath(); for (let x = I.x0 - 2; x <= fx; x += 2) ctx.lineTo(x, y - 6 - e(x)); for (let x = fx; x >= I.x0 - 2; x -= 2) ctx.lineTo(x, y + 6 + e(x)); ctx.closePath();
+        const g = ctx.createLinearGradient(0, y - 16, 0, y + 16); g.addColorStop(0, LWC.hi); g.addColorStop(.5, LWC.lt); g.addColorStop(1, LWC.dk); ctx.fillStyle = g; ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 4; ctx.fill(); ctx.shadowColor = 'transparent';
+        if (o && o.t >= .2) once('lw89c' + o.i, () => puff89(fx - 4, y + 8, 4, 'rgba(225,195,150,.7)', 20)); } } },
+  D: { name: 'Studded strap', desc: 'Studded leather: each skill-up a domed metal stud drops in from above at the front and is set with a squash, the strap flexing under it and a glint; a bigger stud at each notch. One straight row.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(520 * semi(n), 0, .012 * v, .16, 'triangle'); drum46(150, 0, .02 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { strap89(I, LWC.md, LWC.dk, 23); const N = I.N, cw = (I.x1 - x0) / N; for (let x = x0 + 4; x < I.X(S.v0) - 2; x += 6) { const j = Math.round((x - x0) / cw), nb = Math.abs(x - (x0 + j * cw)) < 3 && j > 0; st89(x, y, nb ? 2.7 : 1.7); } },
+      shake(I) { const o = near85(I, .1); if (!o || o.t < 0 || o.t > .15) return [0, 0]; return [0, 1.3 * (1 - o.t / .15)]; },
+      over(p, I) { const y = I.ly; hits83(I).forEach(o => { const x = o.b - 2; if (o.t >= 0) { const sq = o.t < .12 ? 1 - Math.sin(Math.PI * o.t / .12) * .35 : 1; ctx.save(); ctx.translate(x, y); ctx.scale(1 + (1 - sq), sq); st89(0, 0, 2); ctx.restore(); once('lw89d' + o.i, () => spawn({ x, y: y - 2, shape: 'star', size: 3.5, life: .4, col: '#ffffff' })); }
+          else if (o.t > -.2) { const u = 1 - (-o.t) / .2; st89(x, lerp(y - 24, y, u * u), 2); } }); } } },
+  E: { name: 'Beaten hide', desc: 'A hide hangs over the bar at the front, its flaps above and below. Each skill-up a paddle swings down and beats it: a big cloud of dust bursts out above and below, and the beaten part behind is flat and darker.',
+    snd: i => { const v = fat45(i), n = pick45(i, 3); drum46(80 * semi(n / 3), 0, .04 * v); noise(0, .35, .014 * v, 450, .6, 'lowpass'); },
+    V: { grow(p, x0, y, L, f, t, I) { strap89(I, LWC.md, LWC.dk, 24); }, shake(I) { const o = near85(I, .3); if (!o || o.t < 0 || o.t > .15) return [0, 0]; return [0, 1.6 * (1 - o.t / .15)]; },
+      over(p, I) { const y = I.ly, fx = I.tipX, o = near85(I, .3); const g = ctx.createLinearGradient(0, y - 11, 0, y + 11); g.addColorStop(0, '#e2c49c'); g.addColorStop(1, '#a07850'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(fx - 2, y - 11, 14, 22, 4); ctx.fill();
+        let a = -1.25 + Math.sin(S.age * 1.3) * .05; if (o && o.t > -.3 && o.t < 0) a = lerp(-1.6, 0, Math.pow((o.t + .3) / .3, 2)); else if (o && o.t >= 0 && o.t < .4) a = lerp(0, -1.25, eOut(o.t / .4));
+        ctx.save(); ctx.translate(fx - 16, y - 2); ctx.rotate(a); ctx.strokeStyle = '#6a4424'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(14, 0); ctx.stroke(); ctx.fillStyle = '#9a6a3a'; ctx.beginPath(); ctx.roundRect(14, -3.5, 12, 7, 3); ctx.fill(); ctx.restore();
+        if (o && o.t >= 0) once('lw89e' + o.i, () => { puff89(fx + 5, y - 10, 9, 'rgba(210,190,160,.55)', 45); puff89(fx + 5, y + 10, 7, 'rgba(210,190,160,.55)', 45); }); } } },
+  F: { name: 'Patchwork from a pile', desc: 'A heap of leather scraps sits just left of the bar. The fill is a patchwork of straight-cut pieces in different tans. Each skill-up a scrap hops off the heap, flies along and drops into the gap at the front like a puzzle piece; its straight seam seals with a glint.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); pluck(110 * semi(n), .016 * v); sndPat89(i, 0, 130); },
+    V: { grow(p, x0, y, L, f, t, I) { for (let x = x0 - 2, k = 0; x < I.tipX; x += 7, k++) { const w = Math.min(7, I.tipX - x); hide83(x, x + w, y - 6, y + 6, SC89[k % 5], mix(SC89[k % 5], '#000000', .35), k); ctx.fillStyle = 'rgba(30,14,4,.55)'; ctx.fillRect(x + 6.5, y - 6, .8, 12); } },
+      over(p, I) { const y = I.ly, hx = I.x0 - 14, hy = y + 6; for (let k = 0; k < 7; k++) { ctx.save(); ctx.translate(hx + [-5, 0, 5, -3, 3, 0, -6][k], hy - [0, 0, 0, 3, 3, 6, 2][k]); ctx.rotate(k * .7); ctx.fillStyle = SC89[k % 5]; ctx.beginPath(); ctx.roundRect(-3, -2, 6, 4, 1); ctx.fill(); ctx.restore(); }
+        hits83(I).forEach(o => { if (o.t > -.45 && o.t < 0) { const u = (o.t + .45) / .45, x = lerp(hx, o.b - 3, u), yy = lerp(hy - 6, y, u) - Math.sin(Math.PI * u) * 22; ctx.save(); ctx.translate(x, yy); ctx.rotate((1 - u) * 5); ctx.fillStyle = SC89[(o.i + 2) % 5]; ctx.beginPath(); ctx.roundRect(-3.5, -3, 7, 6, 1); ctx.fill(); ctx.restore(); }
+          else if (o.t >= 0) once('lw89f' + o.i, () => spawn({ x: o.b - 1, y: y - 4, shape: 'star', size: 3.5, life: .45, col: '#fff4d0' })); }); } } },
+  G: { name: 'Shaped on a form', desc: 'A soft wet strip hangs limp over the front edge. Each skill-up a wooden block rises from under the bar and presses it up level: it creaks and steams, and when the block drops away the leather holds its new stiff shape; a fresh limp end sags down again.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(140 * semi(n / 3), 0, .014 * v, .32, 'triangle', 170 * semi(n / 3)); sndPat89(i, 0, 95); },
+    V: { grow(p, x0, y, L, f, t, I) { strap89(I, LWC.lt, LWC.md, 25); }, over(p, I) { const y = I.ly, fx = I.tipX, o = near85(I, .25); let droop = 1, blk = 1;
+        if (o && o.t > -.25 && o.t < .35) { droop = o.t < 0 ? 1 - (o.t + .25) / .25 : 0; blk = o.t < 0 ? 1 - (o.t + .25) / .25 : 0; }
+        if (o && o.t >= .35 && o.t < .8) { blk = clamp((o.t - .35) / .25); droop = clamp((o.t - .5) / .3); }
+        ctx.save(); ctx.translate(fx, y); ctx.rotate(droop * 1.15); const g = ctx.createLinearGradient(0, -6, 0, 6); g.addColorStop(0, '#d8a874'); g.addColorStop(1, '#8a5a30'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-1, -6, 13, 12, [0, 4, 4, 0]); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(0, -5, 12, 1.5); ctx.restore();
+        ctx.fillStyle = '#5a3a1e'; ctx.fillRect(fx - 1, y + 6 + blk * 9, 14, 6); ctx.fillStyle = 'rgba(255,230,190,.25)'; ctx.fillRect(fx - 1, y + 6 + blk * 9, 14, 1);
+        if (o && o.t >= 0) once('lw89g' + o.i, () => puff89(fx + 6, y - 7, 6, 'rgba(235,235,235,.45)')); } } },
+  H: { name: 'Armor pieces', desc: 'Each section of the bar (between notches) is a leather armor piece; the game would show real item icons on them. The section at the front fills in from scraps as you skill up; when it’s full, the finished plate locks on with a thump: it pops slightly larger than the bar and settles.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); noise(0, .05, .012 * v, 650, .8, 'lowpass', true); pluck(130 * semi(n), .012 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { const N = I.N, cw = (I.x1 - x0) / N; for (let j = 0; j < N; j++) { const a = x0 + j * cw; if (a >= I.tipX) break; if (a + cw > I.tipX) for (let x = a + 1, k = 0; x < I.tipX; x += 4, k++) { ctx.fillStyle = SC89[(j + k) % 5]; ctx.fillRect(x, y - 5 + (k % 3) * 3.5, 3.6, 3.2); } } },
+      over(p, I) { const y = I.ly, N = I.N, cw = (I.x1 - I.x0) / N, EM = ['\u{1F97E}', '\u{1F9E4}', '\u{1F392}', '\u{1F45C}']; const o = near85(I, .1);
+        for (let j = 0; j < N; j++) { const a = I.x0 + j * cw; if (a + cw > I.tipX + .5) break; let s = 1; if (o && o.t >= 0 && o.t < .4 && a + cw > o.a - .5 && a + cw <= o.b + .5) { s = 1 + .25 * (1 - eBack(clamp(o.t / .3))); once('lw89h' + o.i, () => drum46(90, 0, .03)); }
+          ctx.save(); ctx.translate(a + cw / 2, y); ctx.scale(s, s); const g = ctx.createLinearGradient(0, -8, 0, 8); g.addColorStop(0, LWC.hi); g.addColorStop(1, LWC.dk); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-cw / 2 + 1, -8, cw - 2, 16, 3); ctx.fill();
+          ctx.font = '9px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EM[j % 4], 0, .5); ctx.restore(); } } } },
+};
+function r89(K) { const Z = LW89[K]; return { get name() { return K + '. ' + (profName === 'Leatherworking' ? Z.name : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only; the sound is a placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r89('A'), PB: r89('B'), PC: r89('C'), PD: r89('D'), PE: r89('E'), PF: r89('F'), PG: r89('G'), PH: r89('H') });
+
+// ===== round 91 add-ons on the per-notch Pegged out (ADD91, r91), moved out 2026-11-16 (rebuilt per skill-up in round 93) =====
+const ADD91 = {
+  B: { name: '+ Mallet taps the pegs', desc: 'Pegged out, and when the hide reaches the next notch a small mallet taps the new pegs in: the top one, then the bottom one, a soft tok each, the hide jolting taut with each tap.',
+    over(p, I) { const c = cross91(I); if (!c || c.t < 0 || c.t > .7) return; const y = I.ly, hit = (t0, sy) => { const u = clamp((c.t - t0 + .14) / .14), back = clamp((c.t - t0) / .14); const d = c.t < t0 ? 1 - u : back; mallet91(c.nx + 1, y + sy * (8 + d * 9), sy < 0 ? -.2 - d * .5 : Math.PI + .2 + d * .5); };
+      if (c.t < .4) hit(.3, -1); else hit(.5, 1); if (c.t >= .5) once('lw91b' + c.o.i, () => tok90(.8)); },
+    shake(I) { const c = cross91(I); if (!c) return [0, 0]; const k = [.3, .5].reduce((s, t0) => s + (c.t >= t0 && c.t < t0 + .1 ? 1 - (c.t - t0) / .1 : 0), 0); return [0, 1.2 * k]; } },
+  C: { name: '+ Tension shiver', desc: 'Pegged out, and when the new pegs go in a shiver runs back along the whole pegged hide to its start: the older pegs wobble one after another and a ripple of light runs back over the leather.',
+    pre(I) { const c = cross91(I); PEGDY91 = !c || c.t < .3 ? null : x => { const tt = c.t - .3 - (c.nx - x) / 320; return tt > 0 && tt < .6 ? 1.4 * Math.exp(-tt * 7) * Math.sin(tt * 42) : 0; }; },
+    over(p, I) { const c = cross91(I); if (!c || c.t < .3) return; const u = (c.t - .3) / .7; if (u >= 1) return; const sx = lerp(c.nx, I.x0 - 10, u), y = I.ly, g = ctx.createLinearGradient(sx - 12, 0, sx + 12, 0); g.addColorStop(0, 'rgba(255,236,200,0)'); g.addColorStop(.5, `rgba(255,236,200,${.35 * (1 - u)})`); g.addColorStop(1, 'rgba(255,236,200,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 12, y - 5, 24, 10); if (c.t > .32) once('lw91c' + c.o.i, () => noise(0, .5, .006, 380, 2, 'bandpass')); } },
+  D: { name: '+ Scraps trimmed off', desc: 'Pegged out, and when the hide pulls taut at the new pegs the loose excess at the front is trimmed off: a few leather scraps drop away below the bar, tumbling, and fade.',
+    over(p, I) { const c = cross91(I); if (!c || c.t < .32) return; once('lw91d' + c.o.i, () => { [[-1, .9], [1, 1], [1, .7], [-1, .6], [1, .5]].forEach(([sy, s], k) => spawn({ x: c.nx + 2 + k, y: I.ly + sy * 5, vx: 8 + Math.random() * 25, vy: sy < 0 ? -30 : 10 + Math.random() * 20, g: 260, life: .85, size: 1.6 * s, shape: 'sq', vr: (Math.random() - .5) * 14, col: SC91[k % 3] })); noise(0, .05, .012, 600, .8, 'lowpass', true); }); } },
+  E: { name: '+ Stretched hide sheen', desc: 'Pegged out, and when the hide pulls taut at the new pegs a soft glint slides along the stretch it just finished (only that stretch, from the last pegs to the new ones), like leather drawn tight catching the light.',
+    over(p, I) { const c = cross91(I); if (!c || c.t < .35 || c.t > .8) return; const u = (c.t - .35) / .45, sx = lerp(c.xa - 4, c.nx + 4, eOut(u)), y = I.ly; ctx.save(); ctx.beginPath(); ctx.rect(c.xa, y - 5, c.nx - c.xa, 10); ctx.clip(); const g = ctx.createLinearGradient(sx - 7, 0, sx + 7, 0); g.addColorStop(0, 'rgba(255,248,230,0)'); g.addColorStop(.5, `rgba(255,248,230,${.6 * Math.sin(Math.PI * u)})`); g.addColorStop(1, 'rgba(255,248,230,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 7, y - 5, 14, 10); ctx.restore(); } },
+};
+const SC91 = ['#c89a6a', '#a87444', '#e0b480'];
+function r91(K) { const A = LW90.B, X = ADD91[K]; const V = !X ? A.V : { grow: A.V.grow, shake: X.shake, over(p, I) { if (X.pre) X.pre(I); try { A.V.over(p, I); } finally { PEGDY91 = null; } X.over(p, I); } };
+  return { get name() { return K + '. ' + (X ? X.name : 'Pegged out (the base)'); },
+    get desc() { return (X ? X.desc : 'The base, locked: the hide is pegged out at the notches; from the last pegs to the front it is pulled thin like a tarp (pale, see-through, pinched); each skill-up pulls it further with a creak and a shiver; reaching the next notch, a peg pair punches in and it settles into thick leather.') + ' (Try all three moments; the sound is a placeholder.)'; },
+    get note() { return (X ? X.name : 'pegged out').toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Leatherworking' || S.p !== PROF.Leatherworking) { profName = 'Leatherworking'; const s = build(); s.age = S.age; S = s; } LWS83 = A.snd; try { barModule(top, 'A', V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r91('A'), PB: r91('B'), PC: r91('C'), PD: r91('D'), PE: r91('E') });
+
+// ===== round 90 options (LW90, r90) and round 92 rest (pullFar92, LW92, r92), moved out 2026-11-16 (base locked: VAR21.Skinning.B on LWB92) =====
+const LW90 = {
+  A: { name: 'Pegged out, as it was (on Skinning’s bar)', desc: 'The Skinning round 21 option exactly as it was, shown on Skinning’s bar (the header says Skinning): the hide is stretched along the bar, held by pegs at its top and bottom edge; each skill-up a new pair of pegs punches in at the front and the loose hide pulls taut to them. Is this the one?', skin: true, V: VAR21.Skinning.B },
+  B: { name: 'Pulled thin to the next peg', desc: 'Leatherworking: the hide is pegged out at the notches. From the last pegs to the front the leather is pulled out thin like a tarp: pale, see-through, pinched in at the middle, tension lines running along it. Each skill-up it is pulled further with a creak and shivers; when it reaches the next notch a pair of pegs punches in and it settles into full, thick leather with a soft slap.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); tone(140 * semi(n / 3), 0, .016 * v, .32, 'triangle', 168 * semi(n / 3)); noise(0, .25, .005 * v, 400, 3, 'bandpass'); },
+    V: { grow(p, x0, y, L, f, t, I) { const { cw, at } = sec90(I), pk = x0 + at(I.tipX) * cw, o = near85(I, .1); let k = 0, shiv = 0, xs = pk;
+        if (o && o.t >= 0 && at(o.b) > at(o.a)) { xs = x0 + at(o.a) * cw; k = clamp((o.t - .3) / .25); if (k >= 1) xs = pk; else xs = x0 + at(o.a) * cw; }
+        if (o && o.t >= 0) shiv = 1.2 * Math.exp(-o.t * 6) * Math.sin(o.t * 30);
+        hide83(x0 - 2, xs, y - 5, y + 5, '#b0784a', '#7a4e2a', 30); tarp90(xs, I.tipX, y, k, shiv); },
+      over(p, I) { const { cw, at } = sec90(I), y = I.ly, o = near85(I, .1); peg90(I.x0 + .5, y); for (let j = 1; j <= at(I.tipX); j++) { const x = I.x0 + j * cw; let s = 1; if (o && o.t >= 0 && at(o.b) >= j && at(o.a) < j) { if (o.t < .3) continue; s = 1 + .8 * (1 - clamp((o.t - .3) / .12)); once('lw90b' + o.i, () => { tok90(fat45(o.i)); spawn({ x, y: y - 5, shape: 'star', size: 3, life: .4, col: '#fff4d0' }); }); } peg90(x, y, s); } } } },
+  C: { name: 'Tarp across the gap', desc: 'Leatherworking: the hide is pegged out at the notches, and the next pegs already wait at the next notch. Across that whole gap the leather is stretched thin like a tarp, see-through and pinched; each skill-up gives it a tug toward the next pegs (a jolt and a shiver), and it fills in thicker and darker. At the notch it is full leather, the next pegs pop in further on and a new thin tarp is stretched across.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); noise(0, .2, .006 * v, 450, 2, 'bandpass'); drum46(120 * semi(n / 3), 0, .02 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { const { cw, at } = sec90(I), j = at(I.tipX), a = x0 + j * cw, b = Math.min(I.x1, a + cw), o = near85(I, .1), k = clamp((I.tipX - a) / cw);
+        let shiv = 0; if (o && o.t >= 0) shiv = 1.4 * Math.exp(-o.t * 6) * Math.sin(o.t * 30);
+        hide83(x0 - 2, a, y - 5, y + 5, '#b0784a', '#7a4e2a', 31); tarp90(a, b, y, k * .85, shiv); },
+      over(p, I) { const { cw, at } = sec90(I), y = I.ly, j = at(I.tipX), o = near85(I, .1); for (let q = 0; q <= Math.min(I.N, j + 1); q++) { const x = I.x0 + q * cw + (q === 0 ? .5 : 0); let s = 1; if (q === j + 1 && o && o.t >= 0 && at(o.b) > at(o.a)) { s = eBack(clamp(o.t / .25)); once('lw90c' + o.i, () => tok90(fat45(o.i))); } if (s > .05) peg90(x, y, s); } } } },
+};
+function r90(K) { const Z = LW90[K]; return { get name() { return K + '. ' + Z.name; },
+  get desc() { return Z.desc + (Z.skin ? '' : ' (Base design only; the sound is a placeholder. Try “Five in a row”.)'); },
+  get note() { return Z.name.toLowerCase() + '.'; },
+  draw(top) { if (Z.skin) { const pn = profName; if (S.p !== PROF.Skinning) { profName = 'Skinning'; const s = build(); s.age = S.age; S = s; } profName = 'Skinning'; try { barModule(top, 'A', Z.V); } finally { profName = pn; } return; }
+    if (profName !== 'Leatherworking' || S.p !== PROF.Leatherworking) { profName = 'Leatherworking'; const s = build(); s.age = S.age; S = s; }
+    LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r90('A'), PB: r90('B'), PC: r90('C') }); delete FAM.PD; delete FAM.PE; delete FAM.PF; delete FAM.PG; delete FAM.PH;
+const pullFar92 = t => t < 0 ? 0 : t < .16 ? 30 * eOut(t / .16) : Math.max(0, 30 * Math.exp(-(t - .16) * 6) * Math.cos((t - .16) * 13));
+const LW92 = {
+  A: LW90.A,
+  B: { name: 'Bigger steps (to the next recipe)', prof: LWB92, desc: 'Leatherworking’s bar runs to the next recipe unlock (here 5 points: Hillman’s Leather Vest at 125), as Skinning’s runs to the next beasts, so each skill-up pegs about a fifth of the bar: a new peg pair punches in at the front and the loose hide pulls taut to it, exactly as on Skinning.', V: VAR21.Skinning.B },
+  C: { name: 'Pulled far, springs back', desc: 'The rank-long bar, pegged per notch. Each skill-up the hide is yanked far ahead of the front, stretched tissue-thin, then it springs back to the real front with a shiver; at the next notch the pegs punch in as before.', snd: LW90.B.snd,
+    V: { grow(p, x0, y, L, f, t, I) { LW90.B.V.grow(p, x0, y, L, f, t, I); const o = near85(I, .1); if (!o) return; const ext = pullFar92(o.t); if (ext > .5) tarp90(I.tipX - 1, Math.min(I.x1 + 1, I.tipX + ext), y, 0, 0); }, over: LW90.B.V.over } },
+};
+function r92(K) { const Z = LW92[K]; if (Z.skin) return r90('A');
+  return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (Try all three moments.)'; }, get note() { return Z.name.toLowerCase() + '.'; },
+    draw(top) { const P = Z.prof || PROF.Leatherworking; if (profName !== 'Leatherworking' || S.p !== P) { profName = 'Leatherworking'; const keep = PROF.Leatherworking; PROF.Leatherworking = P; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Leatherworking = keep; } }
+      const snd0 = S.p.snd; LWS83 = Z.snd || null; if (Z.prof) S.p.snd = k => { const v = fat45(Math.round(Math.log2(k) * 6)); tone(140 * semi(Math.round(Math.log2(k) * 6) % 5), 0, .014 * v, .3, 'triangle', 170); };
+      try { barModule(top, 'A', Z.V); } finally { LWS83 = null; S.p.snd = snd0; } } }; }
+LW92.D = { name: 'Tarp across the gap (round 90 C)', desc: LW90.C.desc, snd: LW90.C.snd, V: LW90.C.V };
+Object.assign(FAM, { PA: r92('A'), PB: r92('B'), PC: r92('C'), PD: r92('D') }); delete FAM.PE;
+
+// ===== round 94 A, B, D (Rawhide mallet, Silhouette mallet, One big blow; mallet94, swing94, malletRun94) and r94's FAM line, moved out 2026-11-16 (C locked) =====
+function mallet94(px, py, flip, ang, style, k = 1, a = 1) { if (a <= 0) return; ctx.save(); ctx.globalAlpha *= a; ctx.translate(px, py); ctx.scale(k, flip * k); ctx.rotate(ang);
+  if (style === 'sil') { ctx.fillStyle = '#24160a'; ctx.beginPath(); ctx.roundRect(-16, -1.1, 17, 2.2, 1.1); ctx.fill(); ctx.beginPath(); ctx.roundRect(-22, -5.5, 8.5, 11, 2.5); ctx.fill(); ctx.fillStyle = 'rgba(255,214,150,.75)'; ctx.fillRect(-21.2, -5.2, 6.9, 1.1); ctx.fillRect(-15, -1.1, 15, .7); ctx.restore(); return; }
+  const hg = ctx.createLinearGradient(0, -1.4, 0, 1.4); hg.addColorStop(0, '#d8a46a'); hg.addColorStop(1, '#6a4020'); ctx.fillStyle = hg; ctx.beginPath(); ctx.moveTo(1, -1.2); ctx.lineTo(-15, -1.5); ctx.lineTo(-15, 1.5); ctx.lineTo(1, 1.2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#4a2c14'; ctx.beginPath(); ctx.arc(1, 0, 1.5, 0, 7); ctx.fill();
+  const g = ctx.createLinearGradient(-22, 0, -13.5, 0); g.addColorStop(0, '#8a5a30'); g.addColorStop(.35, '#ecc898'); g.addColorStop(1, '#7a4c26'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-22, -5.5, 8.5, 11, 2); ctx.fill();
+  ctx.fillStyle = 'rgba(70,40,15,.55)'; ctx.fillRect(-22, -2.4, 8.5, 1); ctx.fillRect(-22, 1.4, 8.5, 1);
+  ctx.fillStyle = '#5a361a'; ctx.beginPath(); ctx.ellipse(-17.75, 5.3, 4.25, 1.1, 0, 0, 7); ctx.fill(); ctx.restore(); }
+// the swing: raised angle -> strike (contact at tc) -> rebound; returns the angle and whether it is mid-swing
+const swing94 = (t, tc, up = .95) => { if (t < tc - .14) return { a: .35, fast: 0 }; if (t < tc - .05) return { a: lerp(.35, up, eOut((t - tc + .14) / .09)), fast: 0 }; if (t < tc) { const u = (t - tc + .05) / .05; return { a: lerp(up, 0, u * u), fast: 1 }; } return { a: .3 * Math.sin(Math.PI * clamp((t - tc) / .12)) * Math.exp(-(t - tc) * 5), fast: 0 }; };
+function malletRun94(I, style, k) { const y = I.ly; pegs93(I).forEach(o => { if (o.t < .2 || o.t > .9) return; const x = o.b, fade = clamp((o.t - .2) / .08) * clamp((.9 - o.t) / .1);
+    [[.42, -1], [.6, 1]].forEach(([tc, sy], n) => { const live = n === 0 ? o.t < .52 : o.t >= .5; if (!live) return; const s = swing94(o.t, tc), py = y + sy * (12 * k), pxx = x + 18 * k;
+      if (s.fast) for (let g = 1; g <= 2; g++) mallet94(pxx, py, -sy, s.a + g * .22, style, k, .22 / g * fade);
+      mallet94(pxx, py, -sy, s.a, style, k, fade); if (o.t >= tc) once('lw94' + style + o.i + n, () => { tok90(.7); hit94(x, y + sy * 6.5); }); }); }); }
+  A: { name: 'Rawhide mallet + scraps', desc: 'A rawhide mallet (a wrapped leather head on a tapered wooden handle) swings from the wrist and taps the new pegs in, the top one then the bottom one: a quick wind-up, a fast swing with a short motion trail, a soft tok and a small ring where it lands, a little rebound. The trimmed scraps drop away as before.',
+    over(p, I) { malletRun94(I, 'raw', 1); } },
+  B: { name: 'Silhouette mallet + scraps', desc: 'The same taps with the mallet as one clean dark shape with a warm rim light along its top: no detail to look rough, just the motion. The trimmed scraps drop away as before.',
+    over(p, I) { malletRun94(I, 'sil', 1); } },
+  D: { name: 'One big blow + scraps', desc: 'A bigger rawhide mallet comes down once on each new peg pair from above: one heavy, slower blow drives both pegs in at once, the bar dips, a ring spreads from each peg, one deeper tok. The trimmed scraps drop away as before.',
+    shake(I) { const o = pegs93(I).pop(); if (!o || o.t < .42 || o.t > .54) return [0, 0]; return [0, 2 * (1 - (o.t - .42) / .12)]; },
+    over(p, I) { const y = I.ly; pegs93(I).forEach(o => { if (o.t < .17 || o.t > .9) return; const s = swing94(o.t, .42, 1.05), fade = clamp((o.t - .17) / .08) * clamp((.9 - o.t) / .1), x = o.b;
+      if (s.fast) for (let g = 1; g <= 2; g++) mallet94(x + 26, y - 14.6, 1, s.a + g * .2, 'raw', 1.45, .2 / g * fade);
+      mallet94(x + 26, y - 14.6, 1, s.a, 'raw', 1.45, fade); if (o.t >= .42) once('lw94d' + o.i, () => { drum46(95, 0, .03); tok90(.9); hit94(x, y - 6.5); hit94(x, y + 6.5); }); }); } },
+};
+Object.assign(FAM, { PA: r94('A'), PB: r94('B'), PC: r94('C'), PD: r94('D') }); delete FAM.PE;
+
+// ===== round 84 (LW84: A Unrolling hide (= LW83.A), D Grip wrap; pelt84, r84) and round 85 (LW85, r85), moved out 2026-11-16; both were liked references, not locked =====
+function pelt84(w, h, c0, c1) { const g = ctx.createRadialGradient(-w * .15, -h * .2, 1, 0, 0, w * .6); g.addColorStop(0, c0); g.addColorStop(1, c1); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, 7); ctx.fill();
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => { ctx.beginPath(); ctx.ellipse(sx * w * .36, sy * h * .42, w * .14, h * .2, sx * sy * .5, 0, 7); ctx.fill(); }); }
+const LW84 = {
+  A: LW83.A,
+  D: { name: 'Grip wrap', desc: 'The filled part is wrapped in a leather strap like a sword grip, slanted turns all the same way. The strap’s loose tail hangs from the front and sways. Each skill-up the tail swings round the bar, behind it and back over the top, and cinches one more turn tight with a creak; the new turn catches the light.',
+    snd: i => { const v = fat45(i), n = pick45(i, 4); noise(0, .18, .005 * v, 600, .6, 'lowpass'); tone(140 * semi(n / 3), 0, .016 * v, .28, 'triangle', 175 * semi(n / 3)); noise(0, .2, .005 * v, 380, 3, 'bandpass'); drum46(150, .02, .014 * v); },
+    V: { grow(p, x0, y, L, f, t, I) { const xe = I.tipX, o = last83(I); if (xe <= x0 - 2) return; ctx.save(); ctx.beginPath(); ctx.rect(x0 - 2, y - 7, xe - x0 + 2, 14); ctx.clip();
+        for (let x = x0 - 12; x < xe + 8; x += 6) { ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x + 5, y + 6); ctx.lineTo(x + 9, y - 6); ctx.lineTo(x + 4, y - 6); ctx.closePath();
+          const g = ctx.createLinearGradient(0, y - 6, 0, y + 6); g.addColorStop(0, LWC.md); g.addColorStop(.35, LWC.hi); g.addColorStop(1, LWC.dk); ctx.fillStyle = g; ctx.fill(); }
+        ctx.strokeStyle = 'rgba(30,14,4,.7)'; ctx.lineWidth = .9; for (let x = x0 - 12; x < xe + 8; x += 6) { ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x + 4, y - 6); ctx.stroke(); }
+        if (o && o.t >= 0 && o.t < .6) { ctx.fillStyle = `rgba(255,240,210,${.5 * (1 - o.t / .6)})`; ctx.fillRect(xe - 7, y - 6, 7, 12); }
+        ctx.restore(); },
+      over(p, I) { const y = I.ly, o = last83(I), fx = I.tipX; let th = 0;
+        if (o && o.t > -.3 && o.t < .05) th = clamp((o.t + .3) / .35) * Math.PI * 2;
+        const sway = Math.sin(S.age * 2.2) * .18 + (o && o.t >= .05 ? .5 * Math.exp(-(o.t - .05) * 5) * Math.sin((o.t - .05) * 14) : 0);
+        const R = 13, ang = th + sway, tx = fx + 4 + Math.sin(ang) * 3 + th * 1.2, ty = y + Math.cos(ang) * R, z = Math.sin(ang - Math.PI / 2) * -1, behind = th > Math.PI * .5 && th < Math.PI * 1.5;
+        ctx.save(); if (behind) ctx.globalAlpha *= .45; ctx.lineCap = 'round'; ctx.strokeStyle = behind ? LWC.dk : LWC.lt; ctx.lineWidth = 4.5;
+        ctx.beginPath(); ctx.moveTo(fx, y + (ty > y ? 5 : -5)); ctx.quadraticCurveTo(fx + 3, (y + ty) / 2 + (ty > y ? 3 : -3), tx, ty); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,236,200,.35)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); } } },
+};
+function r84(K) { const Z = LW84[K]; return { get name() { return K + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'A' ? ' (kept)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only: the finale and the real sound come later; the sound is a gentle placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r84('A'), PB: r84('B'), PC: r84('C'), PD: r84('D') });
+const LW85 = {
+  A: LW84.D,
+};
+function r85(K) { const Z = LW85[K]; return { get name() { return K + '. ' + (profName === 'Leatherworking' ? Z.name + (K === 'A' ? ' (kept)' : '') : ['Fishing', 'Herbalism', 'Skinning', 'Mining', 'Blacksmithing'].includes(profName) ? profName + ' (done)' : 'Leatherworking only this round'); },
+  get desc() { return profName === 'Leatherworking' ? Z.desc + ' (Base design only: the finale and the real sound come later; the sound is a gentle placeholder. Try “Five in a row”.)' : 'One profession at a time: this round is Leatherworking’s base. Others show their current look.'; },
+  get note() { return profName === 'Leatherworking' ? Z.name.toLowerCase() + '.' : 'the set bar.'; },
+  draw(top) { if (profName !== 'Leatherworking') return r82('A').draw(top); LWS83 = Z.snd; try { barModule(top, 'A', Z.V); } finally { LWS83 = null; } } }; }
+Object.assign(FAM, { PA: r85('A') });
+
+// ===== round 95 finales (FIN95: A Strike cascade, B Pegs pop + hide rolls up; r95), moved out 2026-11-16 (mixed in round 96) =====
+const FIN95 = {
+  A: { name: 'Strike cascade', finAt: F0_95 + .75, desc: 'Reaching the next recipe: a fast run of strike streaks re-sets every peg pair from the start of the bar to its end, a white ring and a tok on each, the toks climbing a soft scale; the last and biggest streak lands on the recipe’s icon, which lights.',
+    over(p, I) { const ts = ts95(); if (ts < F0_95) return; const xs = pegXs95(I), y = I.ly, gap = .07;
+      xs.forEach((x, j) => { const t0 = F0_95 + j * gap, u = (ts - t0 + .06) / .06; streak95(x, y - 6.5, -1, u); streak95(x, y + 6.5, 1, u);
+        if (ts >= t0) once('lw95a' + j, () => { hit94(x, y - 6.5); hit94(x, y + 6.5); tone(300 * semi(PENT42[j % 10]), 0, .014, .18, 'triangle'); drum46(140, 0, .012); }); });
+      const tb = F0_95 + xs.length * gap + .1, ux = I.x1 + 18; streak95(ux, y, -1, (ts - tb + .08) / .08, 1.6);
+      if (ts >= tb) once('lw95ab', () => { spawn({ x: ux, y, size: 3, shape: 'ring', grow: 18, life: .45, col: '#ffffff' }); drum46(110, 0, .028); }); } },
+  B: { name: 'Pegs pop, hide rolls up', finAt: F0_95 + 1.22, desc: 'Reaching the next recipe: the finished hide rolls up from the start of the bar, the pegs popping out one pair after another just ahead of the roll, which grows fatter as it goes; at the end the roll hops off the bar and tumbles into the recipe’s icon, which lights.',
+    clip(I) { const ts = ts95(); if (ts < F0_95) return null; const u = clamp((ts - F0_95) / .7); return lerp(I.x0 - 3, I.x1 + 3, eOut(u * .9 + u * u * .1)); },
+    over(p, I) { const ts = ts95(); if (ts < F0_95) return; const y = I.ly, rx = FIN95.B.clip(I), rolled = rx - I.x0, r = Math.min(8, 2.5 + rolled * .028);
+      pegXs95(I).forEach((x, j) => { if (rx >= x - 3) once('lw95b' + j, () => { [-1, 1].forEach(sy => spawn({ x, y: y + sy * 5, vx: 10 + Math.random() * 30, vy: sy * (40 + Math.random() * 30) - 20, g: 300, life: .7, size: 1.4, shape: 'sq', vr: 10, col: '#5a3a1e' })); tone(420 * semi(PENT42[j % 10]), 0, .01, .1, 'triangle'); }); });
+      const hop = clamp((ts - F0_95 - .75) / .4), ux = I.x1 + 18, cx = lerp(rx, ux, eOut(hop)), cy = lerp(y + 5 - r, y, hop) - Math.sin(Math.PI * hop) * 14, sc = 1 - hop * .6, ang = rolled / r + hop * 8;
+      if (hop >= 1) { once('lw95bi', () => { spawn({ x: ux, y, size: 3, shape: 'ring', grow: 16, life: .45, col: '#fff' }); drum46(100, 0, .026); }); return; }
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(1, r + .5, r * .9, 1.4, 0, 0, 7); ctx.fill();
+      const g = ctx.createRadialGradient(-r * .35, -r * .4, .5, 0, 0, r); g.addColorStop(0, '#d8a874'); g.addColorStop(.6, '#9a6a3e'); g.addColorStop(1, '#4a2c14'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(60,32,12,.75)'; ctx.lineWidth = .9; ctx.beginPath(); for (let a = 0; a < 5 * Math.PI; a += .2) { const rr = r * (.15 + .8 * a / (5 * Math.PI)); ctx.lineTo(Math.cos(a + ang) * rr, Math.sin(a + ang) * rr); } ctx.stroke(); ctx.restore(); } },
+};
+function r95(K) { const F = FIN95[K], L = LW94.C, base = VAR21.Skinning.B;
+  const V = { finAt: F.finAt, shake: L.shake || ADD93.B.shake,
+    grow(p, x0, y, Ln, f, t, I) { const cx = F.clip ? F.clip(I) : null; if (cx === null) return base.grow(p, x0, y, Ln, f, t, I); ctx.save(); ctx.beginPath(); ctx.rect(cx, y - 12, I.x1 + 8 - cx, 24); ctx.clip(); base.grow(p, x0, y, Ln, f, t, I); ctx.restore(); },
+    over(p, I) { L.over(p, I); ADD93.D.over(p, I); F.over(p, I); } };
+  return { get name() { return K + '. ' + F.name; }, get desc() { return F.desc + ' (Pick “Reaching the next unlock”. On the locked skill-up; the sound is a placeholder.)'; }, get note() { return 'finale: ' + F.name.toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Leatherworking' || S.p !== LWB92) { profName = 'Leatherworking'; const keep = PROF.Leatherworking; PROF.Leatherworking = LWB92; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Leatherworking = keep; } }
+      const snd0 = S.p.snd; S.p.snd = () => {}; window.PEGAT94 = .42; try { barModule(top, 'A', V); } finally { S.p.snd = snd0; window.PEGAT94 = 0; } } }; }
+Object.assign(FAM, { PA: r95('A'), PB: r95('B') }); delete FAM.PC; delete FAM.PD;
+
+// ===== round 93 C (Tension shiver), E (Stretched hide sheen), r93 + its FAM line; round 96 A (Cascade, then roll), moved out 2026-11-16 =====
+  C: { name: '+ Tension shiver', desc: 'Each skill-up, as the new pegs pull the hide taut, a shiver runs back along the whole pegged hide to its start: each older peg pair flashes and wobbles in turn and a ripple of light runs back over the leather.',
+    over(p, I) { const y = I.ly; pegs93(I).forEach(o => { if (o.t < .15 || o.t > .9) return; const u = (o.t - .15) / .75, sx = lerp(o.b, I.x0 - 10, u), g = ctx.createLinearGradient(sx - 14, 0, sx + 14, 0); g.addColorStop(0, 'rgba(255,236,200,0)'); g.addColorStop(.5, `rgba(255,236,200,${.4 * (1 - u)})`); g.addColorStop(1, 'rgba(255,236,200,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 14, y - 6, 28, 12);
+      for (let v = I.lo + 1; v <= S.v0 + o.i; v++) { const x = I.X(v), tt = o.t - .15 - (o.b - x) / 260; if (tt <= 0 || tt > .35) continue; const k = 1 - tt / .35, dy = Math.sin(tt * 45) * 1.3 * k; ctx.fillStyle = `rgba(255,240,210,${.7 * k})`; for (const sy of [-5, 5]) { ctx.beginPath(); ctx.arc(x, y + sy + dy, 2.2, 0, 7); ctx.fill(); } }
+      once('lw93c' + o.i, () => noise(0, .45, .006, 380, 2, 'bandpass')); }); } },
+  E: { name: '+ Stretched hide sheen', desc: 'Each skill-up, as the hide pulls taut, a soft glint slides along the stretch it just pegged (from the last pegs to the new ones), like leather drawn tight catching the light.',
+    over(p, I) { const y = I.ly; pegs93(I).forEach(o => { if (o.t < .15 || o.t > .6) return; const u = (o.t - .15) / .45, sx = lerp(o.a - 4, o.b + 4, eOut(u)); ctx.save(); ctx.beginPath(); ctx.rect(o.a, y - 5, o.b - o.a, 10); ctx.clip(); const g = ctx.createLinearGradient(sx - 9, 0, sx + 9, 0); g.addColorStop(0, 'rgba(255,248,230,0)'); g.addColorStop(.5, `rgba(255,248,230,${.6 * Math.sin(Math.PI * u)})`); g.addColorStop(1, 'rgba(255,248,230,0)'); ctx.fillStyle = g; ctx.fillRect(sx - 9, y - 5, 18, 10); ctx.restore(); }); } },
+function r93(K) { const base = VAR21.Skinning.B, X = ADD93[K], V = !X ? base : { grow: base.grow, shake: X.shake, over(p, I) { if (base.over) base.over(p, I); X.over(p, I); } };
+  return { get name() { return K + '. ' + (X ? X.name : 'Pegged out (locked base)'); },
+    get desc() { return (X ? 'Pegged out on the recipe bar, and: ' + X.desc : 'LOCKED: Pegged out exactly as on Skinning, on Leatherworking’s bar counted to the next recipe (here Hillman’s Leather Vest at 125, 5 points): the hide is pegged along the top and bottom edges; each skill-up a new peg pair punches in at the front and the loose hide pulls taut to them.') + ' (Try all three moments; sounds are placeholders.)'; },
+    get note() { return (X ? X.name : 'pegged out').toLowerCase() + '.'; },
+    draw(top) { if (profName !== 'Leatherworking' || S.p !== LWB92) { profName = 'Leatherworking'; const keep = PROF.Leatherworking; PROF.Leatherworking = LWB92; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Leatherworking = keep; } }
+      const snd0 = S.p.snd; S.p.snd = () => {}; try { barModule(top, 'A', V); } finally { S.p.snd = snd0; } } }; }
+Object.assign(FAM, { PA: r93('A'), PB: r93('B'), PC: r93('C'), PD: r93('D'), PE: r93('E') });
+  A: { name: 'Cascade, then roll', R0: F0_95 + .55, desc: 'The strike cascade first (streaks re-set every peg pair from the start to the end, a ring and a climbing tok each), a breath, then the hide rolls up from the start, popping the pegs out just ahead of the roll; the roll hops off the end into the recipe icon just as one big streak lands on it, and the icon lights.',
+    get finAt() { return this.R0 + 1.2; },
+    over(p, I) { const ts = ts95(); if (ts < F0_95) return; const y = I.ly, xs = pegXs95(I), R0 = FIN96.A.R0;
+      xs.forEach((x, j) => { const t0 = F0_95 + j * .07; strikePeg96(x, y, (ts - t0 + .06) / .06); if (ts >= t0) once('lw96a' + j, () => { hit94(x, y - 6.5); hit94(x, y + 6.5); toks96(j); }); });
+      const rx = rollAt96(I, ts, R0); if (rx === null) return; xs.forEach((x, j) => { if (rx >= x - 3) once('lw96ap' + j, () => popPeg96(x, y, j)); });
+      bigStrike96(I, ts, R0 + 1.1); roll96(I, rx, clamp((ts - R0 - .75) / .4), (rx - I.x0) / 5 + clamp((ts - R0 - .75) / .4) * 8); } },
