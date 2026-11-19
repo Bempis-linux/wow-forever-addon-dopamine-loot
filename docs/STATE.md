@@ -34,7 +34,7 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep: check
   patterns one at a time. sed: an unescaped apostrophe in a JS string breaks a page (use ’). No node or python here.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
-- Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.9.0 committed in the kit repo but NOT pushed; the new skill files were copied into the installed 0.8.1 cache so they load now. A plugin update before the push would drop them: push the kit first.
+- Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.9.0 (pushed and installed at user and project scope, 2026-11-19; adds `wow-design-ideas`).
 - Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
 - Crafting compare page: profession buttons 1-10; mute only the run (`play(); S.mute = true`); no `shadowBlur` inside
   rotated transforms (perf).
