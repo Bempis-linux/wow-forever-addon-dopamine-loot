@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-18 (stop point: Tailoring skill-up DONE, next Engineering). Kept short on purpose (the start-up hook loads it into every session): status, the current
+_Last checkpoint: 2026-11-19 (stop point: Engineering skill-up DONE, next Enchanting). Kept short on purpose (the start-up hook loads it into every session): status, the current
 focus and pointers. Detail lives in the workstream file named below; history in git log._
 
 ## Where things stand
@@ -10,11 +10,12 @@ focus and pointers. Detail lives in the workstream file named below; history in 
   to-do order is plan.md "1.4.0 order" (unchanged): 1 crafting API checks (done), **2 skill-up gains (now)**, 3 the
   Create All pile, 4 gathering, 5 the loot window, 6 build the professions; 7-10 XP, rep, level-up, build; 11 dungeon
   recap; 12 release. Crafting redesign: design DONE (`docs/mockups/craft-compare.html`).
-- **Current focus: skill-up gains. Next: Engineering. Read `docs/skillup.md` first, its "Next: Engineering (start here)"**
-  (the steps, Engineering's craft ring to avoid, the recipe-bar scale, the lessons, page housekeeping), then brainstorm.
-  Don't read plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed.
-  Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alchemy, **Tailoring** (2026-11-18, round 123). After Engineering:
-  Enchanting, then Cooking, First Aid. Then 1.4.0 item 3 (the Create All pile).
+- **Current focus: skill-up gains. Next: Enchanting. Read `docs/skillup.md` first, its "Next: Enchanting (start here)"**
+  (what Engineering taught, Enchanting's craft ring to avoid, the steps, the recipe-bar scale, page housekeeping),
+  then brainstorm. Don't read plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed.
+  Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alchemy, Tailoring, **Engineering**
+  (2026-11-19, round 166). After Enchanting: Cooking, First Aid. Then revisit Alchemy and Tailoring (the user, 2026-11-19).
+  Then 1.4.0 item 3 (the Create All pile). **Before any design pitch, use the kit skill `wow-design-ideas`.**
 - Side projects (not 1.4.0, don't read unless asked): `docs/side-projects/` (murloc/: the murloc + peon companion).
 
 ## Not yet verified in game
@@ -33,7 +34,7 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep: check
   patterns one at a time. sed: an unescaped apostrophe in a JS string breaks a page (use ’). No node or python here.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
-- Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.8.1.
+- Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.9.0 committed in the kit repo but NOT pushed; the new skill files were copied into the installed 0.8.1 cache so they load now. A plugin update before the push would drop them: push the kit first.
 - Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
 - Crafting compare page: profession buttons 1-10; mute only the run (`play(); S.mute = true`); no `shadowBlur` inside
   rotated transforms (perf).
@@ -43,6 +44,10 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-19: Engineering skill-up DONE (rounds 124-166: the Revolver drum gear train in a blueprint housing, inked
+  steps on long gaps; finale Overheat and blow-out + warning beacon + victory fountain; sound
+  Electric, refined: 3 soft events a skill-up, a quiet beating-chord unlock). Took 43 rounds; the lessons are in the
+  new kit skill `wow-design-ideas`.
 - 2026-11-18: Tailoring skill-up DONE (rounds 118-123: a clothesline in bar mode X, line dips; finale gust and fold;
   sound Wooden pegs). Brainstorm → base → finales for the two favorites → add-ons → sound took 6 rounds.
 - 2026-11-17: Alchemy skill-up DONE (rounds 98-117: a bench of bottles in bar mode X, neighbor clink; finale fizz,

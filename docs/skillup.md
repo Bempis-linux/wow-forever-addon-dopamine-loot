@@ -4,7 +4,17 @@ The current focus. Read this file (not plan.md) when working on skill-ups. Page:
 only page; its `<h1>` says the round). Every round is in `docs/skillup-rounds.md` (read only for an old round's detail).
 Design rules that apply everywhere are in CLAUDE.md and memory.
 
-## Next: Engineering (start here)
+## Next: Enchanting (start here)
+
+**Before any pitch: use the kit skill `wow-design-ideas`** (kit 0.9.0): the brief, the gates, the finale formula and the sound rules written from Engineering’s 43 rounds. **Revisit later (user, 2026-11-19): Alchemy and Tailoring**, which suffered the same struggles; redo them with that skill once the remaining professions are done (or when the user asks).
+
+Engineering is DONE (2026-11-19, rounds 124-166; see Done). Its round log is in `docs/skillup-rounds.md`. What Engineering
+taught (memory has the rules): whole designs, not reskins or add-ons; one idea per option; dramatic finales (a long
+build-up, a held beat, a big payoff, an aftermath); sounds mechanical (or fitting), never chimey, and check the phone
+can hear them (Phone boost). Enchanting's craft ring to avoid: **Motes + moon sparkle** (craft-compare `finalPick.Enchanting
+= 'F'`: motes draw the circle, then a moon sparkle). The steps below were written for Engineering and still apply.
+
+## How to run a profession (written before Engineering)
 
 1. **Brainstorm first, whole stories, the bar is an object** (barModule mode `X`). Pitch 6-8 one-liners via
    AskUserQuestion (multi-select), build only the picks. Alchemy took 20 rounds of tweaks before the bar became an
@@ -23,12 +33,20 @@ Design rules that apply everywhere are in CLAUDE.md and memory.
    simple shapes and real icons (emoji via `emo98`) over drawn objects; the effect follows the material; no zig-zags;
    name options by their page letter and confirm a letter that names another option; sounds soft from the start; no
    plucked timbre for Tailoring-like threads.
-6. **Page**: ~519 KB of the 524,288-byte cap. Before Engineering's first round move Tailoring's unused code out (keep
+6. **Page** (as of round 158): ~521 KB of the 524,288-byte cap; old code goes to `docs/mockups/skillup-p2-old-rounds.js` (check each moved block is balanced, and that the page still loads). Before Engineering’s first round move Tailoring’s unused code out (keep
    `r122('A')` and what it uses: `SET122.A`, `clothes121`, `line121`, `FN120.A1`, `posts120`, `line120`, `tlb118`,
    `WEAR118`, `CLR118`, `emo98`) and Alchemy's done `r117('C')` with its helpers. Checking: freeze + step time
    (`shG`), close the tab after a freeze (navigating does not reload).
 
-Then Enchanting; then Cooking, First Aid (one at a time).
+**Quality bar (user, 2026-11-18):** uniqueness and fidelity dropped after the first four (Herbalism, Fishing,
+Mining, Blacksmithing); too many "items on a shelf" (a row of N objects). Every base must **work with the bar**: name
+what the fill is made of, what happens at its front on a skill-up, and how the scene reacts beyond the frame; pitch
+the finale with it (the whole story). Fewer options built richer beats eight thin ones. Compare each round against the
+first four and the craft rings, not against the last profession.
+
+**Mining revisit note (user, 2026-11-18):** round 128 D Sapper’s rail cart also reads as Mining and the user likes it: consider a rail line + ore cart lurching forward for Mining later. Round 127 E Demolition front is close to Mining's animation; add its elements to the Mining skill-up later (scorched char fill with embers near the front, a red dynamite bundle that blows with flash/fireball/shockwave/debris, then a fresh bundle drops in). The user may also revisit Leatherworking, Alchemy and Tailoring later (quality bar above).
+
+After Enchanting: Cooking, First Aid (one at a time).
 
 ## Done
 
@@ -79,6 +97,31 @@ Then Enchanting; then Cooking, First Aid (one at a time).
   - Sound **Wooden pegs** (`SET122.A`): a soft air swish, two light wooden clicks, a soft low hum for the dip; finale: a
     gentle wind, cloth pats, wooden taps climbing for the folds, a two-note wooden close (via `window.SND97.pay`).
   - The locked whole: `r122('A')`.
+- **Engineering (2026-11-19, rounds 124-166):**
+  - Bar: **the Revolver drum gear train** in one blueprint housing (`A142`): a brass frame, rounded left with the
+    revolver drum sitting in the curve, square right next to the recipe icon; blueprint drawings of the cogs in the
+    empty slots; a trolley on a rail inside the frame with a jointed arm.
+  - Each skill-up: the arm fetches a cog from the drum (the drum turns one chamber only when a cog leaves it), carries
+    it over (it bobs and lines its teeth up while held), winds up and presses it into its drawing; the row turns two
+    teeth. Gaps over 15: each point inks a wedge of the next drawing into metal; the arm waits by the drum and sets the
+    cog on the last wedge.
+  - Finale **Overheat and blow-out** (`FX145`): the drum overheats to white-hot, heat creeps along the frame, the row
+    blurs, steam jets, cogs rattle; a held beat; BANG (radial flash, three shockwaves, hard shake), every cog thrown
+    up and the recipe launched; the cogs rain back into their slots, the recipe lands, the drum cools. No leftover
+    smoke, no end hatch.
+  - Add-ons (finale): **Warning beacon** (`WB149`: a red rotating beacon sweeping two beams, two-tone buzzer) and
+    **Victory fountain** (`VF149`: the rebuilt row spins up, golden sparks from the recipe). Base theme `BASE150`.
+  - Sound **Electric, refined** (`SS150.E2` on `SS150.EL`, `snd150`, quiet defaults `NO164`): each skill-up three soft
+    events: a gentle beating hum (two close sines) stepping through a 5-note scale with a tiny low spark as the cog
+    seats, two soft hum blips as the row turns, a hum blip + soft spark as the drum turns (no pickup sound); long gaps a
+    soft high blip. Finale: the hum climbs in three steps with soft crackles; silence in the held beat; the blast
+    powers down (a hum falling into a deep thump, a fading crackle); every returning cog a soft climbing hum blip; the
+    beacon, fountain and ping silent; the unlock is a soft beating chord ending on a spark, no louder than a skill-up
+    (`window.ENGPAY` replaces the default chime; the reveal ding is skipped for Engineering).
+  - Lessons (sound): woody vs metal (short bandpassed noise reads as wood); dropped the ka-thunk; the whole set was
+    over-stimulating next to the crafting animation until cut to 3 soft events per skill-up; the unlock must sit at the
+    skill-up's level; no pitch sweeps (siren); the phone boost must stay gentle (x2, light compressor).
+  - The locked whole: `r126('A')` with `ENG126.A = E150('E2')`.
 
 ## Crafting rings, as locked (don't echo them)
 
