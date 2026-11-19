@@ -4,17 +4,24 @@ The current focus. Read this file (not plan.md) when working on skill-ups. Page:
 only page; its `<h1>` says the round). Every round is in `docs/skillup-rounds.md` (read only for an old round's detail).
 Design rules that apply everywhere are in CLAUDE.md and memory.
 
-## Next: Cooking (start here; the user chose it over Enchanting, 2026-11-19)
+## Next: Enchanting (start here)
 
-Cooking's craft ring to avoid: **Toss the pan + burner** (craft-compare `finalPick.Cooking = 'A'`, phase 2b: a pan tossed over a burner). Start with `wow-design-ideas` (brief, gates), then pitch four whole ideas. Enchanting comes after (its ring to avoid is below).
+Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering, **Cooking**
+(2026-11-19). Left: **Enchanting**, then **First Aid**; then revisit **Alchemy and Tailoring** with `wow-design-ideas`
+(user, 2026-11-19). Optional revisits: the Mining and Leatherworking notes below.
 
-**Before any pitch: use the kit skill `wow-design-ideas`** (kit 0.9.0): the brief, the gates, the finale formula and the sound rules written from Engineering’s 43 rounds. New sessions: the mockup page still opens on Engineering; switch it to the new profession in the round’s code (see how `r126` sets `profName`). **Revisit later (user, 2026-11-19): Alchemy and Tailoring**, which suffered the same struggles; redo them with that skill once the remaining professions are done (or when the user asks).
-
-Engineering is DONE (2026-11-19, rounds 124-166; see Done). Its round log is in `docs/skillup-rounds.md`. What Engineering
-taught (memory has the rules): whole designs, not reskins or add-ons; one idea per option; dramatic finales (a long
-build-up, a held beat, a big payoff, an aftermath); sounds mechanical (or fitting), never chimey, and check the phone
-can hear them (Phone boost). Enchanting's craft ring to avoid: **Motes + moon sparkle** (craft-compare `finalPick.Enchanting
-= 'F'`: motes draw the circle, then a moon sparkle). The steps below were written for Engineering and still apply.
+- **Before any pitch: use the kit skill `wow-design-ideas`** (updated after Cooking: section 3b on satisfying motion, section
+  8 on what made Cooking fast, the sound notes on "tinky" and "a lot going on").
+- Enchanting's craft ring to avoid: **Motes + moon sparkle** (craft-compare `finalPick.Enchanting = 'F'`: motes draw a
+  triangle and a star, then a moon-phase sparkle). So no motes drawing shapes, no moon.
+- **How Cooking ran (17 rounds, 167-183; the user called it the most successful session):** pitch whole ideas and build only
+  the picks (several pitches in a row when the user wants more); critique my own build against the gates before redesigning;
+  when the user couldn't decide I recommended one with reasons; then look, motion (menus of named refinements), add-ons (each
+  its own option), finale (the user's idea arranged on the formula), a cleanup pass on stills, sound (lead with one set).
+- **Page first:** `skillup-p2.html` is at 523.5 KB of the 524,288-byte cap. Before Enchanting's first round move Cooking's
+  code to `skillup-p2-old-rounds.js` (everything from the `PROF.Cooking` line to the end of round 183, keeping only shared
+  helpers the new round reuses), check the page still loads (`typeof FAM`), and switch the page to Enchanting in the round's
+  code (see how `r167` sets `profName`). Cooking's locked whole stays recoverable from the old-rounds file and git.
 
 ## How to run a profession (written before Engineering)
 
@@ -48,7 +55,7 @@ first four and the craft rings, not against the last profession.
 
 **Mining revisit note (user, 2026-11-18):** round 128 D Sapper’s rail cart also reads as Mining and the user likes it: consider a rail line + ore cart lurching forward for Mining later. Round 127 E Demolition front is close to Mining's animation; add its elements to the Mining skill-up later (scorched char fill with embers near the front, a red dynamite bundle that blows with flash/fireball/shockwave/debris, then a fresh bundle drops in). The user may also revisit Leatherworking, Alchemy and Tailoring later (quality bar above).
 
-After Enchanting: Cooking, First Aid (one at a time).
+After Enchanting: First Aid; then revisit Alchemy and Tailoring (one at a time).
 
 ## Done
 
@@ -124,6 +131,23 @@ After Enchanting: Cooking, First Aid (one at a time).
     over-stimulating next to the crafting animation until cut to 3 soft events per skill-up; the unlock must sit at the
     skill-up's level; no pitch sweeps (siren); the phone boost must stay gentle (x2, light compressor).
   - The locked whole: `r126('A')` with `ENG126.A = E150('E2')`.
+- **Cooking (2026-11-19, rounds 167-183):**
+  - Base: **the angled board cleaver**: a board seen from ~30 degrees, the ingredient lying along it (Carrot, Cucumber or
+    Sausage links; it changes at random only after a finale, never inside a bar); at most 15 pieces to the next recipe
+    (`slots169`), a long gap scores the notch deeper each point.
+  - Each skill-up (chop v3, `chopV174` + `drawArc174`): the cleaver glides to the cut, rises on an elbow arc and hangs with a
+    glint, swings down with a smear and bites into the food (its near half drawn over the blade); hit-stop, shake, cut line,
+    board nick; the slice pops out in front-left of the blade, flips, lands with a squash and a second small bounce.
+  - Add-ons: slice ripple (a hop wave back through the stack; the still salt shaker at the back-left hops last), apex shing,
+    impact = board shockwave + chunk spray.
+  - Finale v2 (`fin179`): slam, the coins jump, one slash halves them in the air, the halves rain into a heap, mince finer chop
+    by chop; the cleaver flips and hangs; it sticks edge-first (shockwave), the mince clouds up and rains into a wooden bowl
+    that slid on, the shaker's quick sprinkle, the bowl hops into the recipe; the next ingredient slides on. No white board
+    flash (`V.noFlash`).
+  - Sound **v3 warm** (`SX183`): two sounds a skill-up (a weighted thock + a warm crunch, a squish for sausage; a low wooden
+    tock on landing); the finale six, one per beat (slam, air shhk, climbing mince chops, THUNK, a soft pour, three low woody
+    toks over a warm tone), the held beat silent.
+  - The locked whole: `r167('B', K183)` (`K183.B`) with its helpers.
 
 ## Crafting rings, as locked (don't echo them)
 
@@ -174,3 +198,7 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   tab and reopen fresh afterwards.
 - No node or python on this machine: insert code with `sed "<line>r file"` from the scratchpad; check the line
   number first (an empty one inserts after every line).
+- **Checking without the user (Cooking):** freeze the page (`frame = () => {}`), step a scene with a `goTo(fam, moment, age)`
+  helper (`S.age += 1/120`, draw, `stepP`), and paint crops of `cv` at 3x into an overlay canvas to read stills; the first
+  paint after a fresh load can come back blank, paint twice. Check sound code silently: `ac(); OUT.gain.value = 0`, sound on,
+  run every moment, then close the tab and reopen it fresh for the user.

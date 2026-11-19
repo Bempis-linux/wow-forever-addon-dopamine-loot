@@ -1040,3 +1040,158 @@ Sound rounds 159-166 (the progress log as kept, newest first):
 **Round 165:** B Electric picked (“nice”); my immediate improvements as `SS150.E2` (A): softer lower seat spark, a hum blip under the drum spark, the build climbs in three hum steps (no sweep), the blast powers down (a hum falling into the thump, no crack), every returning cog a soft climbing hum blip, the unlock chord beats like the hums and ends on a soft spark. B = Electric as in 164. Page 7 bytes under the cap: clear old code first next round (Steam works, Soft machinery, Pneumatic are still in the page, unused). **Round 164:** the unlock was still too loud for the animations and the user still disliked the sounds overall: four new whole sets (`SS150.ST/EL/SM/PN`, shared quiet defaults `NO164`: no pull, ping, alarm or fanfare sounds, 2 tooth ticks): A Steam works, B Electric, C Soft machinery, D Pneumatic; every unlock peaks at the skill-up seat’s level (~.003-.005), well under the blast. Calm + Safecracker sets moved out. **Round 163:** the finale got better, but the standard unlock chime was “very sudden” next to the calm sounds and everything “kind of annoying”. Likely causes: the x4 phone boost with a hard compressor (flattens and pumps; now x2, threshold -6, ratio 3), the chime ~8x louder than the calm set (now the same four notes at .011 with a soft attack over the deep 92 Hz seat note: `SS150.CA.unlock`), and the rising siren sweep in the build (removed). **Round 162:** the user: round 160’s skill-up sounded better, only a little monotone; the finale can be more dramatic (it is rare). A = `SS150.CA`: round 160’s skill-up timbre, the seat note moving in small steps ([0,2,3,5,7]); bigger finale (low swell + rising hum + accelerating ticks + a soft siren swell; one tiny tick in the beat; layered blast with a 1.8 s rumble and 10 debris clinks; returning cogs tap in a climbing line); standard unlock chime. B = round 160. **Round 161:** the calm set was “pretty nice” but monotone, the blast flat, and the unlock lost; Engineering was the only profession without the standard unlock. A = Calm, varied (`SS150.CA`: the seat steps through a 5-note scale `SC161` with a small bright edge, ticks and drum click shift pitch; fuller blast: whoosh in, falling boom, crunch, second thump, rumble, scattered clinks; unlock = the standard payoff chime: `ENGPAY` null; the reveal ding stays off for Engineering). B = round 160 as it was. LA-LD placing variants moved out. **Reopened (round 160): the whole Engineering sound, calmer, led by me.** The user: all of it is over-stimulating, especially combined with the crafting animation; “you drive it”. A = `SS150.CA` Calm (3 events per skill-up: a soft deep seat thoom, 2 muted ticks via `SS.mesh`, one soft drum click; finale: soft rising hum + spaced ticks, silent held beat, one warm boom + 2 clinks, soft taps on every other returning cog, unlock = soft latch + the deep thoom chord), B = the previous sound. Round 159 (rounded blast + 4 unlocks) moved out. Earlier: **round 159:** The user: the blast is too abrupt a snap, and the vault unlock sounds weird. Now a rounded blast (`bang159`: a swelling boom with weight, the cogs clattering as they fly, no sharp crack) and four unlocks on `SS150.LB` (`UN159`): A Vault door smooth, B Sealed latch, C Chest unlock, D Machine winds down; “Hear the blast” and “Hear the unlock” buttons. Lock one, then Engineering is done again.
 
 Round 166: **A. Electric refined** locked. **ENGINEERING DONE** again (2026-11-19).
+
+- **Round 167 (2026-11-19), Cooking, start clean:** brief per wow-design-ideas; pitched A Spit roast, B Rolling pin, C Sausage grinder, D Campfire to the pot; the user swapped C for a pick of Noodle pull + Ladle stew (from Noodle pull / Seasoning shaker / Ladle stew). Built A Spit roast (crank turns the spit, flames flare under the front, meat browns; finale flame wall, whoosh, roast flies to the recipe, fresh roast slides on), B Rolling pin (pin winds back and rolls the sheet out, lump shrinks; finale back-and-forth, lifted, slam, sheet rolls into a loaf, bakes, hops in), C Noodle pull (emoji fists lift, slap, stretch, strands multiply; finale pumps, raised, slap, noodles whip into the recipe), D Campfire to the pot (logs fly from a woodpile, fire spreads to a pot on a tripod; finale lid hops, held, lid blows, food fountain into the recipe, lid clanks back), E Ladle stew (ingredients arc from a basket, the ladle swirl carries the stew color forward; finale whirl, ladle lifted, wave runs the length and leaps into the recipe).
+
+- **Round 168 (2026-11-19), Cooking, new ideas:** the user liked 167 A + D as ideas but wanted new ideas first. Redesign pitch (A1 Coal shovel, A2 Spit wheel, D1 Bellows, D2 Sliding pot) set aside; new pitch: picked Hot stone flatbread (not Stone boiling, Smoker barrel, Piping bag) and asked for more incl. a knife through a long piece of something; second pitch: picked Knife chop + Brick oven peel (not Whisk and foam, Stone boiling). Built A Hot stone flatbread (dough ball from a bowl slapped onto a stone over embers, puffs, chars; finale one long balloon, burst of steam, folds and flips into the recipe), B Knife chop (a salami; the cleaver moves to the new cut, chops, slices tip onto the stack; finale mincing to a blur, raised, huge chop, slices stream into the recipe), C Brick oven peel (cutaway oven, fire at the far end, the peel handle inside is the fill, the loaf bakes deeper in; finale fire along the floor, chimney smokes, blast, loaf flies out into the recipe, peel back out with a fresh loaf). D/E show 167 Spit roast and Campfire to the pot.
+
+- **Round 169 (2026-11-19), Cooking:** the user was between Knife chop, Spit roast and Campfire; chose to work on Knife chop (likes the idea, not the execution) and Campfire. Pitched K1 Top-down board, K2 Bread knife saw, K3 Big coins, K4 Butcher block; C1 Bellows, C2 Sliding pot, C3 Log ramp, C4 Big pot rising fire. Picked K1, K3, K4, C1, C2, C3; built as A-F (`K169`). Round 167/168 option code moved to the old-rounds file.
+
+- **Round 170 (2026-11-19), Cooking:** user: likes K1 top-down look but K4 satisfying clunk; C2 needs a mechanism so the pot is not just sliding. Proposed an angled (~30 deg) board with K4 swing, and a winch (counterweight as alternative); user asked for the angled cleaver then the C2 winch, plus the ingredient changing at random after an endpoint (never mid-bar without the finale): carrots, cucumbers, meat as small pieces/bones (no long slim leg meat). Built A Angled board cleaver (Carrot/Cucumber/Ribs) and B C2 Winch; K4 and old C2 kept as C, D.
+
+- **Round 171 (2026-11-19), Cooking base LOCKED = the angled board cleaver** (the user could not decide and asked my view; I picked it over C2: no echo of the ring, works with the bar, ingredient variety). Look round: A as it is, B refined, C refined on an end-grain butcher block.
+
+- **Round 172 (2026-11-19), Cooking:** user: expected more refined animation; the meat looked janky (a bone on every end and one sticking out the side made no sense). Ribs -> sausage links (cut at the twist). A current motion vs B refined chop (anticipation, strike, bite, damped jolt, squash, the slice tips onto the stack, pull-out).
+
+- **Round 173 (2026-11-19), Cooking:** user wanted the chop refined more (could not describe it; picked from ideas: wrist arc + weight, hit-stop + shake, clean cut line, board nicks), pieces stay where cut (they sat low) and the finale sweeps them up, plus their own idea: the slice hops and flips after the cut. A 172 B, B v2 + flip, C v2 no flip.
+
+- **Round 174 (2026-11-19), Cooking:** user on v2: feels the same; wants a real wrist-arc rise and swing, the blade into the material, the piece in front-left of the cleaver, a satisfying jump + plink but not too many sounds; header crossing by the swing is fine here. Built chop v3 (B) vs v2 (A).
+
+- **Round 175 (2026-11-19), Cooking:** chop v3 locked ("much better" after the elbow-arc fix). Add-ons pitched: Seasoning shaker, Juice stains, Slice ripple, Kitchen cat; picked shaker + ripple. A none, B shaker, C ripple.
+
+- **Round 176 (2026-11-19), Cooking:** ripple locked ("definitely C"); shaker kept as a still accent the ripple reaches (the user's idea; it hops). Visual-effect add-ons asked by the user (the chop, the cut ingredient, a "shing" at the apex): A none, B apex shing, C impact burst, D juicy cut, E landing puff.
+
+- **Round 177 (2026-11-19), Cooking:** keepers A + B (shing); D, E dropped (too subtle); C (impact) liked as idea, not implementation. New impacts on top of the shing: B board shockwave, C chunk spray, D impact star.
+
+- **Round 178 (2026-11-19), Cooking finale:** impact locked = B + C. My pitch: knife flip, board catapult, juggle and slash, seasoning storm. The user's idea: sweep the coins to the end, chop everything into mince, mixing in 1, 3, 4. Built: sweep -> mince + seasoning storm -> flip + hang -> A Stuck / B Slash -> home + next ingredient.
+
+- **Round 179 (2026-11-19), Cooking finale v2:** user feedback on 178 (minced too early, shaker lingers, B slash as opener with A finisher, a pot like the Blacksmithing crate); my proposal (bowl instead of a pot, shaker cameo) accepted and built.
+
+- **Round 180 (2026-11-19), Cooking finale cleanup:** no white board flash, bowl left + cleaver stuck clear of the icon, bowl slides in with a puff and bobs, halves show the cut face, rounded mince in a taller mound.
+
+- **Round 181 (2026-11-19), Cooking:** finale locked. Sound: my lead Butcher's board (B) vs placeholders (A), with Hear the chop / Hear the unlock buttons.
+
+- **Round 182 (2026-11-19), Cooking sound v2:** user wants more satisfying sound and a better finale (could not describe). Diagnosed and built v2 (crunch, apex shing, woody tok, a finale with dynamics) vs v1.
+
+- **Round 183 (2026-11-19), Cooking sound v3:** user: the finale has too much going on, the regular sounds too tinky. v3 warm: 2 sounds a skill-up, 6 in the finale.
+
+## Cooking round notes (moved from skillup.md at the stop point, 2026-11-19; newest first)
+
+**Round 183 (2026-11-19), shown: sound v3 "warm"** (`SX183`, `K183.B`; A = v2). User on v2: "a lot going on in the finale;
+the regular sounds too tinky". Cause: high content (the 2.8/4.2 kHz shing, a 1.8 kHz click, crunch at 3.6-4.2 kHz) and 14
+finale events. v3: two sounds a skill-up (the chop = weighted thock + warm crunch at 1.7-2 kHz, no bright tick; a low wooden
+tock ~330 Hz on landing; the shing silent); finale six sounds, one per beat (slam, a soft air shhk, the mince chops, the THUNK,
+one soft pour, the unlock of three low woody toks over a warm tone); the held beat silent. Lesson: Cooking wants warm/low.
+
+**Round 182 (2026-11-19): sound v2.** User on v1: "not bad, a little more satisfying; the finale could use some work, not
+sure how to describe it". Diagnosis: thin chop (no crunch), the ripple patter inaudible (a wasted event), a vague landing pip,
+a finale with no dynamics. `SX182` / `K182.B`: chop = blade tick + weighted thock + vegetable crunch (sausage squish); apex
+blade shing; woody tok on landing (shing/tok only when a slice is cut: `cutAt182`); finale: weighty slam + whoosh, shing on the
+slash, halves patter, mince over a stepped low drone (55/62/73 Hz), whup-whup flip, glint, swell into a big THUNK + faint
+quiver, cloud sparkle, bowl patter, shaker shakes, bowl tok; unlock = three rising woody toks over a warm low tone. A = v1.
+Hear buttons play v2. **Page at 523.5 KB.**
+
+**Finale LOCKED (2026-11-19, "excellently done") = `fin179` after the round 180 cleanup.** **Round 181, shown: sound.** My lead
+**Butcher's board** (`SX181`, `K181.B`) vs the placeholders (A): each skill-up three soft events (a wooden tock: hit-shaped
+bandpass knock over a soft low sine body, narrow scale, `fat45` step-down; the landing pip (veg) / plop (sausage); a whisper
+ripple patter); finale: slam + whoosh, a fixed-filter shhk for the slash, halves patter, mince tocks climbing (hook `this.sx`
+in `fin179`), silence + one glint tink in the hold, deep wooden THUNK when it sticks, bowl patter, two shaker shakes, a bowl
+tock; unlock = two-note wooden close at the skill-up's level (`Z.pay` in `r167`). Buttons "Hear the chop", "Hear the unlock".
+Page at 523 KB.
+
+**Round 180 (2026-11-19), cleanup pass on finale v2** (user: "looks pretty good, a quick cleanup / improvement round"):
+the generic white payoff flash over the board removed for Cooking (`V.noFlash` in `r167`, checked in `barModule`); the bowl
+sits further left (BX = H - 19) and the cleaver sticks between it and the icon (IX = H + 8, handle clear of the icon); the bowl
+slides in from the board's left end (no fade), lands with a dust puff and bobs as the mince lands; halves show a pale cut face;
+mince bits are rounded with a light and a dark side, in a taller mound. Then the user's nitpick: the bowl showed its empty dark
+interior under the food; the food surface now fills the whole opening as it fills.
+
+**Round 179 (2026-11-19): finale v2** (`fin179`, `K179.A`, finAt 2.95). User on 178: the coins minced at once (should
+get finer as it chops); the shaker lingered; A better but B cool -> slam the coins up, slash, then mince, A as the finisher; a pot
+like Blacksmithing's crate -> I proposed a **wooden prep bowl** (a cooking pot echoes the ring's pan), they agreed to my whole
+proposal: slam (shockwave) -> coins jump -> one slash halves them in the air -> halves rain into a heap at the end -> mince
+finer chop by chop (level steps at each impact) -> flip + hang -> Stuck -> the mince clouds up and rains into a bowl that slid
+on -> the shaker's quick sprinkle (cameo, home again) -> the bowl hops into the recipe -> cleaver pulls free, next ingredient.
+The jump, slash and cloud stay under the header. Round comment blocks after line 2680 moved to the old-rounds file (history is
+here); page at 518 KB.
+
+**Round 178 (2026-11-19): the finale.** The user's idea (sweep the coins to the end of the board, chop them all into
+mince) mixed with my knife flip, juggle + slash, seasoning storm. `fin178` (option `fin`, hook `this.fin` in `K174.B`): build =
+sweep, mince with faster chops (pieces -> 48 smaller bits, `MC178` colors), the shaker hops to the left of the heap, tilts and
+pours seasoning; held = the cleaver flips spinning to an apex and hangs with a glint; payoff A **Stuck** (drops edge-first, sticks,
+shockwave, the mince floats up as a cloud with shings, streams into the recipe) or B **Slash** (slams flat, cloud, one horizontal
+slash bursts it into the recipe); aftermath = cleaver + shaker home, next ingredient slides on. `K178`, finAt 2.35. The old v2
+sweep finale (`K173`) is archived. Page at 522.4 KB.
+
+**Skill-up add-ons LOCKED (2026-11-19):** slice ripple + shaker accent (hopped by the ripple) + apex shing + impact = board
+shockwave AND chunk spray together (round 177 B + C: `fx: ['shing', 'wave', 'chunks']`). Next: the finale (user wants my
+ideas first, then pitches theirs).
+
+**Round 177 (2026-11-19):** keepers from 176: A (ripple + shaker accent) and **B apex shing**; D juicy cut + E landing
+puff dropped ("don't seem to do anything"); C impact burst: "like the idea, not the implementation". Three new impacts on top
+of the shing (`FX176.wave/chunks/star`, `this.fx` may be an array): B board shockwave, C chunk spray, D impact star; A = keepers
+alone (`K177`). **Page at 523.9 KB of 524.3 KB.**
+
+**Round 176 (2026-11-19):** **Slice ripple LOCKED** ("definitely C"). The shaker stays as a **still accent** (the user
+liked it but not its animation): `shaker175` is now static at the back-left, the ripple reaches it last (it hops and wobbles,
+a few grains puff from the cap). Visual-effect add-ons (`FX176`, hook `this.fx` in `K174.B`): A none, B **apex shing**, C
+**impact burst**, D **juicy cut**, E **landing puff**. **Page at 523.3 KB of 524.3 KB: archive before any addition.**
+
+**Chop v3 LOCKED (2026-11-19, "much better")** = `K174.B` with the elbow arc. **Round 175, shown: skill-up add-ons** (picked from
+Seasoning shaker, Juice stains, Slice ripple, Kitchen cat): `K175` A none, B **Seasoning shaker** (`shaker175`: back-left of the
+board, after a slice lands it lifts, tips, shakes once, grains arc onto the slice, a sparkle), C **Slice ripple** (`ripple175`:
+a hop wave back through the stack on every chop). Hooks `this.shaker` / `this.ripple` in `K174.B` (and the shaker in
+`K173.B`'s finale). No new sounds. The finale is still v2's sweep (not yet locked). **Page at 522.5 KB: archive first next time.**
+
+**Round 174 (2026-11-19):** user on v2: "pretty much exactly the same"; wanted a real rise and a wrist-arc swing, the
+blade going INTO the material, the cut piece in FRONT of the cleaver to its left, a more satisfying jump + a plink without too
+many sounds; **crossing the header with the quick swing is fine for Cooking** (it is brief, not a thing sitting over the text).
+**Fixed after the user's report** ("moves right, turns down 90 degrees, no up-down arc"): a negative canvas rotation turns the
+blade (left of its pivot) DOWN; every earlier "lift" was inverted. Now the cleaver turns about an elbow point 40 px right of the
+cut (`drawArc174`, `UP174` = .85 rad, positive = up) plus a wrist cock; the edge rises ~30 px up and back along a circle and
+comes down the same arc. `K174.B` chop v3 (`chopV174`: originally the blade tipped ~70 degrees with a depth scale, hangs + glint, fast swing with a 3-ghost smear,
+grows at impact; the near half of the food is redrawn over the blade while it bites; the slice pops left-front, hangs, flips,
+squash + a second small bounce + `plink174` (tok for carrot/cucumber, plop for sausage); two sounds a skill-up). Finale
+delegates to `K173.B` with `rest: restV174`. A = v2. Older cleaver code archived; page at 518 KB.
+
+**Round 173 (2026-11-19):** chop v2 (`K173`, `chopW173`): wrist arc + held top + overshoot, hit-stop (3 frames) + 1 px
+shake, a cut line, board nicks, the slice hops off the blade and **flips** (the user's idea) and lands flat where it was cut
+(pieces stay on the board as the fill, at the food's level). Finale: chops on the stub, held, a flat slam, the cleaver
+**sweeps every slice into a heap and tosses it into the recipe** (the user chose "stay, finale sweeps" over a bowl). A = 172 B,
+B = v2 + flip, C = v2 no flip. `PROF.Cooking.verb = 'cook'` (the reveal said "undefined"). **Page at 521.5 KB of 524.3 KB:
+archive before adding anything** (K172.A/K171.C/boardC171 are the easy cuts).
+
+**Round 172 (2026-11-19):** user on 171: "expected more refined animation", and the ribs made no sense (a bone on every
+end plus one out the side). Ribs replaced by **sausage links** (cut at the twist between links; `sausage172`, `pieceS172`,
+patched into `STY171.B/C`). `K172`: A current motion, B **refined chop** (`chopR172`: glide, wind-up tilt + glint with less lift
+under the header, fast strike, the blade bites the board, damped board jolt, food squash, the slice stands then tips onto the
+stack with a landing squash and a neighbor nudge, a rocking pull-out; the finale still delegates to `K170.A`). Page at 511 KB.
+
+**Cooking base LOCKED (2026-11-19): the angled board cleaver** (round 170 A; my pick when the user couldn't decide: it doesn't
+echo the ring's pan + burner, it works with the bar, the ingredients rotate). **Round 171, shown: the look.** `K171`: A as it is,
+B refined (`boardB171`, `foodR171`, `pieceR171`: groove board, glazed rack of ribs with bones toward you), C refined on an
+end-grain butcher block (`boardC171`). The cleaver draws through `STY171[this.sty]` (board/food/piece). K4 and the C2 pot +
+winch archived. Next after the look: the finale (now K4's story), add-ons, sound. Page at 503 KB.
+
+**Round 170 (earlier):** A Angled board cleaver (`K170.A`: K1's look from ~30 degrees + K4's
+swing and jolt; ingredient Carrot / Cucumber / Ribs changes at random **only after a finale**, never inside a bar: `ingI170`,
+`ingNext170`, ingredient buttons under the gap switch; user: meat must be small pieces or bones, nothing long and slim, so a
+rack of ribs) and B C2 Winch (`K170.B`: crank drum on the beam's end winds the rope and pulls the pot). C = K4, D = old C2.
+Unpicked round 169 options archived. Page at 511 KB.
+
+**Round 169 (earlier):** the user narrowed Cooking to Knife chop ("like the idea, not the
+execution") and Campfire to the pot. Whole redesigns built (`K169.A`-`F`, drawn by `r167(K, K169)`): A K1 Top-down board
+(cucumber from above, coins fan out; finale sweep into a heap), B K3 Big coins (carrot, ≤15 coins via `slots169`, coins turn
+face-on), C K4 Butcher block (ham, chunks tumble onto a pile; finale splits the bone), D C1 Bellows (laid logs catch one by one),
+E C2 Sliding pot (pot on a beam trolley, studs light behind it; finale boil-over eruption, pot rolls back), F C3 Log ramp (logs
+roll off a sloped pile; finale the pot launches on a flame column and pours). Helpers `cleaver169`, `chop169`, `pot169`,
+`lid169`, `logS169`/`logE169`, `trench169`. **The page is at 523.6 KB of the 524,288-byte cap:** move unpicked K169 options
+to the old-rounds file before adding anything.
+
+**Round 168 (earlier):** A Hot stone flatbread, B Knife chop (the user's idea), C Brick oven
+peel (`CK168`), plus D/E = round 167's Spit roast and Campfire to the pot (the user liked those as ideas, "not 100% on the
+implementation", but asked for new ideas first). `r167(K, T, label)` draws any of them (profile `ckb167`, helpers `*167`).
+Each has a finale (build 0-1.3 s, hold to 1.65, payoff, aftermath) and soft placeholder sounds. Round 167's B/C/E and the
+Tailoring + Engineering round code are in the old-rounds file. Next: explore only the pick (structure, look, finale, add-ons, sound).
+Not picked in the pitches: A1 Coal shovel, A2 Spit wheel, D1 Bellows, D2 Sliding pot, Stone boiling, Smoker barrel, Piping bag, Whisk and foam.
+
