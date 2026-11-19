@@ -4,9 +4,11 @@ The current focus. Read this file (not plan.md) when working on skill-ups. Page:
 only page; its `<h1>` says the round). Every round is in `docs/skillup-rounds.md` (read only for an old round's detail).
 Design rules that apply everywhere are in CLAUDE.md and memory.
 
-## Next: Enchanting (start here)
+## Next: Cooking (start here; the user chose it over Enchanting, 2026-11-19)
 
-**Before any pitch: use the kit skill `wow-design-ideas`** (kit 0.9.0): the brief, the gates, the finale formula and the sound rules written from Engineering’s 43 rounds. **Revisit later (user, 2026-11-19): Alchemy and Tailoring**, which suffered the same struggles; redo them with that skill once the remaining professions are done (or when the user asks).
+Cooking's craft ring to avoid: **Toss the pan + burner** (craft-compare `finalPick.Cooking = 'A'`, phase 2b: a pan tossed over a burner). Start with `wow-design-ideas` (brief, gates), then pitch four whole ideas. Enchanting comes after (its ring to avoid is below).
+
+**Before any pitch: use the kit skill `wow-design-ideas`** (kit 0.9.0): the brief, the gates, the finale formula and the sound rules written from Engineering’s 43 rounds. New sessions: the mockup page still opens on Engineering; switch it to the new profession in the round’s code (see how `r126` sets `profName`). **Revisit later (user, 2026-11-19): Alchemy and Tailoring**, which suffered the same struggles; redo them with that skill once the remaining professions are done (or when the user asks).
 
 Engineering is DONE (2026-11-19, rounds 124-166; see Done). Its round log is in `docs/skillup-rounds.md`. What Engineering
 taught (memory has the rules): whole designs, not reskins or add-ons; one idea per option; dramatic finales (a long

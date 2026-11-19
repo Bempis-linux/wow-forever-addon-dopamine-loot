@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-19 (stop point: Engineering skill-up DONE, next Enchanting). Kept short on purpose (the start-up hook loads it into every session): status, the current
+_Last checkpoint: 2026-11-19 (stop point: Engineering skill-up DONE, next Cooking). Kept short on purpose (the start-up hook loads it into every session): status, the current
 focus and pointers. Detail lives in the workstream file named below; history in git log._
 
 ## Where things stand
@@ -10,11 +10,11 @@ focus and pointers. Detail lives in the workstream file named below; history in 
   to-do order is plan.md "1.4.0 order" (unchanged): 1 crafting API checks (done), **2 skill-up gains (now)**, 3 the
   Create All pile, 4 gathering, 5 the loot window, 6 build the professions; 7-10 XP, rep, level-up, build; 11 dungeon
   recap; 12 release. Crafting redesign: design DONE (`docs/mockups/craft-compare.html`).
-- **Current focus: skill-up gains. Next: Enchanting. Read `docs/skillup.md` first, its "Next: Enchanting (start here)"**
-  (what Engineering taught, Enchanting's craft ring to avoid, the steps, the recipe-bar scale, page housekeeping),
+- **Current focus: skill-up gains. Next: Cooking (the user's choice). Read `docs/skillup.md` first, its "Next: Cooking (start here)"**
+  (Cooking's craft ring to avoid, what Engineering taught, the steps, the recipe-bar scale, page housekeeping),
   then brainstorm. Don't read plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed.
   Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alchemy, Tailoring, **Engineering**
-  (2026-11-19, round 166). After Enchanting: Cooking, First Aid. Then revisit Alchemy and Tailoring (the user, 2026-11-19).
+  (2026-11-19, round 166). After Cooking: Enchanting, First Aid. Then revisit Alchemy and Tailoring (the user, 2026-11-19).
   Then 1.4.0 item 3 (the Create All pile). **Before any design pitch, use the kit skill `wow-design-ideas`.**
 - Side projects (not 1.4.0, don't read unless asked): `docs/side-projects/` (murloc/: the murloc + peon companion).
 
