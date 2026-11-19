@@ -34,9 +34,9 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep: check
   patterns one at a time. sed: an unescaped apostrophe in a JS string breaks a page (use ’). No node or python here.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
-- Never delete a junction with `rm -rf`. Kit: wow-addon-kit 0.9.0 installed. The Cooking lessons were added to
-  `wow-design-ideas` in the kit repo (`C:/dev/wow-addons/wow-addon-kit`, sections 3b and 8, the sound notes) on 2026-11-19:
-  **uncommitted there** (waiting on the user's OK to commit, bump and push the kit).
+- Never delete a junction with `rm -rf`. Kit: **wow-addon-kit 0.9.1** (pushed and installed at user and project scope,
+  2026-11-19): `wow-design-ideas` gained the Cooking lessons (sections 3b and 8, the sound notes). New skill changes take
+  effect after a restart of Claude Code.
 - `skillup-p2.html` is at 523.5 KB of the 524,288-byte cap: archive Cooking's code first (see skillup.md "Next").
 - Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
 - Crafting compare page: profession buttons 1-10; mute only the run (`play(); S.mute = true`); no `shadowBlur` inside
