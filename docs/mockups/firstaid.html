@@ -54,7 +54,7 @@ canvas { position: absolute; inset: 0; }
 <body>
 <div id="panel">
 <h1>First Aid</h1>
-<small class="sub">Round 240: Wash the wound, four ways to wash (A waterskin gush, B bucket throw, C scrub and suds, D sponge slam), each with a sketched finale. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
+<small class="sub">Round 241: five new animations (L pop it back in, N ice the swelling, O stitch it shut, P cool the burn, R shake it off) and C scrub and suds from round 240, each with a sketched finale. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
 <div class="sec"><h2>Option</h2><div class="seg" id="fams"></div></div>
 <div class="sec"><h2>Moment</h2><div class="seg" id="moments"><button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button></div></div>
 <div class="sec"><h2>Sound &amp; playback</h2><div class="toggles"><label><input type="checkbox" id="snd" checked> Sound</label><label><input type="checkbox" id="loop"> Loop</label></div><div id="xrows"></div></div>
@@ -1585,66 +1585,6 @@ const wash240 = (t, v, d = .35) => { noise(t, d, .02 * v, 1400, .7, 'bandpass');
 const shineAt240 = ts => ts >= FP239 + .35 ? clamp((ts - FP239 - .35) / .6) : 0;
 const fin240 = (I, ts) => I.done && ts >= 0;
 
-// ---------- A. Waterskin gush: a waterskin at the start is squeezed, a gush runs along the clean skin and blasts the grime off the next stretch
-FA239.A = { name: 'Waterskin gush', desc: 'A waterskin hangs at the start. Each skill-up it is squeezed: a gush of water runs along the clean skin, hits the grime at the front in a splash and washes the next stretch clean (dirty water drips off underneath); the skin is left wet and beaded. Finale: three harder squeezes send gushes the whole way, the bag holds fully squeezed for a beat, then a wave rolls down the bar and crashes into the recipe in a splash crown, and a shine runs over the clean skin.',
-  draw(I, ly, t, ts) { const F = fr239(I, .35), fin = fin240(I, ts), bx = I.x0 - 26, by = ly - 3;
-    skin240(I, ly, F.x, { shine: fin ? shineAt240(ts) : 0 });
-    let s = 0; if (F.k >= 0 && F.t > -.3 && F.t < .35) s = F.t < -.12 ? eOut((F.t + .3) / .18) : F.t < .15 ? 1 : 1 - eBack(clamp((F.t - .15) / .2));
-    if (fin) { if (ts < FB239) [0, .45, .85].forEach(at => { const q = ts - at; if (q > 0 && q < .4) s = Math.max(s, q < .1 ? q / .1 : 1 - (q - .1) / .3); }); else if (ts < FP239) s = 1.35 + Math.sin(S.age * 60) * .05; else s = 1.35 * (1 - eBack(clamp((ts - FP239) / .35))); }
-    // the bag
-    ctx.save(); ctx.translate(bx, by); ctx.scale(1 - .22 * s, 1 + .16 * s); const bg = ctx.createRadialGradient(-3, -3, 1, 0, 0, 12); bg.addColorStop(0, '#b07a44'); bg.addColorStop(1, '#5e3a1c'); ctx.fillStyle = bg; ctx.beginPath(); ctx.ellipse(0, 0, 10, 9, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = '#4a2e16'; ctx.fillRect(8, -2.5, 6, 5); ctx.strokeStyle = '#3a2412'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(0, -10, 4, Math.PI, 0); ctx.stroke(); ctx.restore();
-    const sp = { x: bx + 14, y: by };
-    // the gush: head runs from the spout to the front, tail follows
-    const gush = (t0, end, w = 3) => { if (t0 < -.12 || t0 > .38) return; const xh = lerp(sp.x, end, clamp((t0 + .12) / .12)), xt = t0 < .2 ? sp.x : lerp(sp.x, end, clamp((t0 - .2) / .18)); if (xh - xt < 1) return; ctx.save(); ctx.lineCap = 'round';
-      const path = () => { ctx.beginPath(); ctx.moveTo(xt, xt < I.x0 ? lerp(sp.y, ly - 7, (xt - sp.x) / (I.x0 - sp.x)) : ly - 7); if (xt < I.x0) ctx.quadraticCurveTo(I.x0 - 4, ly - 7, Math.min(xh, I.x0), ly - 7); ctx.lineTo(xh, ly - 7); };
-      ctx.strokeStyle = 'rgba(120,190,240,.9)'; ctx.lineWidth = w; path(); ctx.stroke(); ctx.strokeStyle = 'rgba(235,248,255,.85)'; ctx.lineWidth = 1; ctx.setLineDash([4, 5]); ctx.lineDashOffset = -S.age * 120; path(); ctx.stroke(); ctx.restore(); };
-    if (F.k >= 0) gush(F.t, F.b);
-    if (F.k >= 0 && F.t >= 0) { once('ag' + F.k, () => { splash240(F.a, ly - 7, 12, 100, 1.6, .5); grit240(F.a, ly - 4, 4); }); if (F.t < .35 && Math.random() < .5) { splash240(F.x, ly - 7, 1, 70, 1.4, .6); drip240(F.x - 3, ly + 9); } }
-    if (fin && ts < FB239) [0, .45, .85].forEach((at, i) => { gush(ts - at, I.x1 + 2, 3 + i); if (ts - at >= 0) once('afs' + i, () => splash240(I.x1 + 6, ly - 7, 10 + i * 4, 110, 1.6, .2)); });
-    if (fin && ts >= FP239) { const q = clamp((ts - FP239) / .45), wx = lerp(I.x0 - 10, I.x1 + 22, eOut(q)), hgt = 16 * Math.sin(Math.min(1, q * 1.1) * Math.PI * .9 + .2);
-      if (q < 1) { ctx.save(); const wg = ctx.createLinearGradient(0, ly - 9 - hgt, 0, ly); wg.addColorStop(0, 'rgba(220,244,255,.95)'); wg.addColorStop(1, 'rgba(110,180,235,.75)'); ctx.fillStyle = wg; ctx.beginPath(); ctx.moveTo(I.x0 - 4, ly - 7); ctx.lineTo(wx - 30, ly - 8); ctx.quadraticCurveTo(wx - 8, ly - 9 - hgt, wx + 4, ly - 7 - hgt * .6); ctx.quadraticCurveTo(wx + 8, ly - 4, wx + 2, ly + 2); ctx.lineTo(I.x0 - 4, ly + 1); ctx.closePath(); ctx.globalAlpha *= 1 - q * .3; ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(wx - 2, ly - 8 - hgt * .8, 5, 2, -.3, 0, 7); ctx.fill(); ctx.restore(); if (Math.random() < .8) splash240(wx, ly - 8 - hgt * .6, 1, 60, 1.5, .4); }
-      if (q >= 1) once('acrown', () => { splash240(I.x1 + 14, ly - 4, 34, 170, 1.9, 0); spawn({ x: I.x1 + 16, y: ly, size: 10, shape: 'ring', grow: 40, life: .6, col: '#d8f0ff' }); for (let i = 0; i < 14; i++) drip240(lerp(I.x0, I.x1, Math.random()), ly + 9, '#9fd4ff'); }); }
-    if (fin && ts >= FB239 && ts < FP239) glint239(bx + 15, by, ts);
-  },
-  jolt(I) { const F = fr239(I, .35); return F.k >= 0 && F.t >= 0 && F.t < .12 ? [Math.sin(S.age * 90) * 1.2, 0] : [0, 0]; },
-  pre(v) { noise(0, .12, .012 * v, 300, 1, 'lowpass'); },
-  snd(v, i) { wash240(0, v); tone(note239(i), .02, .012 * v, .3, 'sine', null, .01); },
-  boom() { wash240(0, 1.6, .7); noise(.4, .3, .03, 900, .8, 'lowpass', true); [0, 4, 7].forEach((k, i) => tone(392 * semi(k), .45 + i * .04, .014, 1, 'sine', null, .01)); } };
-
-// ---------- B. Bucket throw: a bucket dips in the tub, swings and throws a slug of water onto the front; it smacks down and blasts the grime away
-FA239.B = { name: 'Bucket throw', desc: 'A wooden bucket stands by a tub at the start. Each skill-up it dips and fills, rocks back, swings and throws a slug of water that smacks onto the front: a splat, a fan of spray and flecks of grime blasted off, the stretch under it clean. Finale: three dips fill it to overflowing, it rears back and holds, then hurls a sheet of water the whole length of the bar, which slaps down left to right, crashes on the recipe and curtains off the bottom.',
-  draw(I, ly, t, ts) { const F = fr239(I, .16), fin = fin240(I, ts), tx = I.x0 - 26, ty = ly + 9;
-    skin240(I, ly, F.x, { shine: fin ? shineAt240(ts) : 0 });
-    // tub
-    ctx.save(); ctx.fillStyle = '#6a4424'; ctx.beginPath(); ctx.moveTo(tx - 13, ty - 5); ctx.lineTo(tx + 13, ty - 5); ctx.lineTo(tx + 10, ty + 5); ctx.lineTo(tx - 10, ty + 5); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#5aa8e0'; ctx.beginPath(); ctx.ellipse(tx, ty - 5, 12, 2.4, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#3a2412'; ctx.lineWidth = 1; ctx.strokeRect(tx - 11, ty - 1, 22, .1); ctx.restore();
-    // bucket pose
-    let bx = tx, by = ly - 12, ang = 0, full = 1, k = F.k, q = F.t;
-    if (k >= 0 && q > -.8 && q < .5) { if (q < -.5) { const u = Math.sin(clamp((q + .8) / .3) * Math.PI); by = lerp(ly - 12, ly + 2, u); full = clamp((q + .65) / .15); }
-      else if (q < -.24) { const u = eOut((q + .5) / .26); ang = -.5 * u; bx = tx - 3 * u; }
-      else if (q < -.14) { const u = (q + .24) / .1; ang = lerp(-.5, 1.7, u * u); bx = tx + 3 * u; full = 1 - u; }
-      else { const u = eOut(clamp((q + .14) / .5)); ang = lerp(1.7, 0, u); full = 0; } }
-    if (fin) { full = 1; if (ts < FB239) { [0, .45, .85].forEach(at => { const u = (ts - at) / .3; if (u > 0 && u < 1) by = lerp(ly - 12, ly + 2, Math.sin(u * Math.PI)); }); if (Math.random() < .25) splash240(bx + 4, by - 7, 1, 40, 1.2, .3); }
-      else if (ts < FP239) { ang = -.6; by = ly - 16; bx = tx - 4 + Math.sin(S.age * 60) * .8; } else { const u = clamp((ts - FP239) / .12); ang = u < 1 ? lerp(-.6, 1.8, u * u) : lerp(1.8, 0, eOut(clamp((ts - FP239 - .12) / .6))); full = u < 1 ? 1 - u : 0; by = ly - 14; } }
-    ctx.save(); ctx.translate(bx, by + 6); ctx.rotate(ang); ctx.translate(0, -6); ctx.fillStyle = '#9a6a38'; ctx.beginPath(); ctx.moveTo(-7, -6); ctx.lineTo(7, -6); ctx.lineTo(5.5, 7); ctx.lineTo(-5.5, 7); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#5a5f66'; ctx.fillRect(-6.6, -3, 13.2, 1.6); ctx.fillRect(-5.8, 3, 11.6, 1.6);
-    if (full > .05) { ctx.fillStyle = '#6ab8ee'; ctx.beginPath(); ctx.ellipse(0, -6 + (1 - full) * 4, 6.5, 1.8, 0, 0, 7); ctx.fill(); } ctx.strokeStyle = '#3a3e44'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, -6, 7, Math.PI, 0); ctx.stroke(); ctx.restore();
-    // the slug of water in flight (-.16 to 0), a flat arc to the front
-    if (k >= 0 && q > -.16 && q < 0) { const u = (q + .16) / .16, x = lerp(tx + 8, F.a, u), y = lerp(ly - 16, ly - 8, u) - Math.sin(u * Math.PI) * 10; ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(lerp(-6, 6, u), 30)); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 9); g.addColorStop(0, 'rgba(230,246,255,.95)'); g.addColorStop(1, 'rgba(110,180,235,.55)'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(-3, 0, 10, 4.5, 0, 0, 7); ctx.fill(); ctx.restore(); }
-    // splat on landing
-    if (k >= 0 && q >= 0 && q < .35) { const u = q / .35; ctx.save(); ctx.globalAlpha *= 1 - u; ctx.fillStyle = 'rgba(170,220,255,.8)'; ctx.beginPath(); ctx.ellipse((F.a + F.b) / 2, ly - 4, (F.b - F.a) / 2 + 8 + u * 10, 6 + u * 2, 0, 0, 7); ctx.fill(); ctx.restore(); }
-    if (k >= 0 && q >= 0) once('bs' + k, () => { splash240(F.a + 4, ly - 8, 20, 130, 2.2, .35); grit240(F.a + 6, ly - 4, 8); spawn({ x: F.a + 6, y: ly - 2, size: 4, shape: 'ring', grow: 16, life: .3, col: '#d8f0ff' }); for (let i = 0; i < 4; i++) drip240(lerp(F.a, F.b, Math.random()), ly + 9); });
-    // finale: the sheet lands left to right
-    if (fin && ts >= FP239 + .12) { const u = clamp((ts - FP239 - .12) / .4), lx = lerp(I.x0, I.x1 + 8, u);
-      if (u < 1) { ctx.save(); ctx.fillStyle = 'rgba(150,210,250,.7)'; ctx.beginPath(); ctx.moveTo(tx + 8, ly - 20); ctx.quadraticCurveTo((tx + lx) / 2, ly - 30, lx + 6, ly - 8); ctx.lineTo(lx - 10, ly - 6); ctx.quadraticCurveTo((tx + lx) / 2, ly - 22, tx + 8, ly - 15); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(200,235,255,.7)'; ctx.fillRect(I.x0 - 4, ly - 9, lx - I.x0 + 4, 4); ctx.restore(); if (Math.random() < .9) { splash240(lx, ly - 8, 2, 90, 1.4, .3); drip240(lx - 10, ly + 9, '#9fd4ff'); } }
-      else once('bcrash', () => { splash240(I.x1 + 14, ly - 4, 32, 170, 2, 0); spawn({ x: I.x1 + 16, y: ly, size: 10, shape: 'ring', grow: 40, life: .6, col: '#d8f0ff' }); }); }
-    if (fin && ts >= FB239 && ts < FP239) glint239(bx, by - 10, ts);
-  },
-  jolt(I) { const F = fr239(I, .16); return F.k >= 0 && F.t >= 0 && F.t < .1 ? [Math.sin(S.age * 110) * 2, Math.cos(S.age * 90) * 1.2] : [0, 0]; },
-  pre(v) { noise(0, .3, .01 * v, 400, .8, 'lowpass'); },
-  snd(v, i) { noise(0, .06, .03 * v, 700, 1, 'lowpass', true); wash240(.02, v * .9, .3); tone(note239(i) * .5, .03, .012 * v, .3, 'sine', null, .01); },
-  boom() { noise(0, .9, .02, 1200, .6, 'bandpass'); noise(.5, .12, .035, 600, .8, 'lowpass', true); [0, 4, 7].forEach((k, i) => tone(349 * semi(k), .55 + i * .04, .014, 1, 'sine', null, .01)); } };
-
 // ---------- C. Scrub and suds: a scrubbing brush works the front back and forth, foam builds, the suds pop and leave clean wet skin
 FA239.C = { name: 'Scrub and suds', desc: 'A scrubbing brush waits at the front. Each skill-up it drops on and scrubs hard back and forth along the next stretch; soap suds foam up behind it, wobble, then pop one by one to show clean wet skin. Finale: the brush scrubs the whole bar end to end and the foam piles up high, it lifts off and the heap trembles for a beat, then every bubble pops in a chain to the recipe, a shine runs over the skin and a few big bubbles float off and pop round the recipe.',
   draw(I, ly, t, ts) { const F = fr239(I, .6), fin = fin240(I, ts), sud = S.sud240 || (S.sud240 = []);
@@ -1671,33 +1611,148 @@ FA239.C = { name: 'Scrub and suds', desc: 'A scrubbing brush waits at the front.
   snd(v, i) { for (let k = 0; k < 6; k++) noise(k * .1, .07, .01 * v, 2200, 2, 'bandpass'); tone(note239(i), .62, .012 * v, .3, 'sine', null, .01); },
   boom() { for (let k = 0; k < 14; k++) tone(700 + k * 60, k * .03, .006, .08, 'sine', null, .002); [0, 4, 7, 12].forEach((k, i) => tone(392 * semi(k), .5 + i * .04, .013, 1, 'sine', null, .01)); } };
 
-// ---------- D. Sponge slam: a soaked sponge lifts and slams onto the front; it squashes flat, water squirts out both ways and the stretch under it is clean
-FA239.D = { name: 'Sponge slam', desc: 'A soaked sponge sits on the front. Each skill-up it lifts, slams down on the next stretch and squashes flat: water squirts out in two fans, dirty water runs off the edge and the skin under it is clean; the sponge springs back up with a wobble, dripping. Finale: the sponge soaks up three big gulps and swells, hangs high and trembles for a beat, then slams down on the end: a huge squash, a ring, water bursting both ways along the bar, and it bounces back wrung out.',
-  draw(I, ly, t, ts) { const F = fr239(I, .12), fin = fin240(I, ts), cxs = k => k >= 0 ? (I.X(S.v0 + k) + I.X(S.v0 + k + 1)) / 2 : F.x;
-    skin240(I, ly, F.x, { shine: fin ? shineAt240(ts) : 0 });
-    let x = F.x + 2, y = ly - 15, sqx = 1, sqy = 1, wet = .6, big = 1;
-    if (F.k >= 0 && F.t > -.45 && F.t < .5) { const c = cxs(F.k); if (F.t < -.1) { const u = eOut((F.t + .45) / .35); x = lerp(F.a + 2, c, u); y = lerp(ly - 15, ly - 21, u); sqy = 1 + .12 * u; sqx = 1 - .08 * u; }
-      else if (F.t < 0) { const u = (F.t + .1) / .1; x = c; y = lerp(ly - 21, ly - 12, u * u); sqy = 1.15; sqx = .9; }
-      else if (F.t < .1) { x = c; y = ly - 12; sqy = .45; sqx = 1.55; wet = .25; }
-      else { const u = clamp((F.t - .1) / .4), e = eBack(u); x = c; y = ly - 12 - 3 * e; sqy = lerp(.45, 1, e); sqx = lerp(1.55, 1, e); wet = lerp(.25, .6, u); } }
-    if (F.k >= 0 && F.t >= 0) once('ds' + F.k, () => { const c = cxs(F.k); splash240(c - 10, ly - 8, 10, 120, .8, -1.05); splash240(c + 10, ly - 8, 10, 120, .8, 1.05); spawn({ x: c, y: ly - 4, size: 6, shape: 'ring', grow: 16, life: .3, col: '#d8f0ff' }); for (let i = 0; i < 5; i++) drip240(c + (Math.random() - .5) * 20, ly + 9); grit240(c, ly - 4, 4); });
-    if (fin) { if (ts < FB239) { big = 1 + [0, .45, .85].filter(at => ts >= at).length * .18; wet = .6 + (big - 1); x = I.x1 - 4; y = ly - 16 - (big - 1) * 6; } else if (ts < FP239) { big = 1.54; wet = 1.2; x = I.x1 - 4 + Math.sin(S.age * 60) * .8; y = ly - 30 + Math.sin(S.age * 47) * .6; }
-      else { const u = (ts - FP239); x = I.x1 - 4; if (u < .06) { big = 1.54; y = lerp(ly - 30, ly - 12, (u / .06) ** 2); } else if (u < .2) { big = 1.54; y = ly - 12; sqy = .35; sqx = 1.9; } else { const e = eBack(clamp((u - .2) / .5)); big = lerp(1.54, .85, e); y = ly - 12 - 4 * e; sqy = lerp(.35, 1, e); sqx = lerp(1.9, 1, e); wet = .2; } }
-      if (ts >= FP239 + .06) { once('dslam', () => { spawn({ x, y: ly - 4, size: 10, shape: 'ring', grow: 70, life: .6, col: '#d8f0ff' }); splash240(x - 14, ly - 8, 22, 190, .9, -1.1); splash240(x + 8, ly - 8, 12, 150, 1.6, .3); for (let i = 0; i < 16; i++) drip240(lerp(I.x0, I.x1, Math.random()), ly + 9, '#9fd4ff'); });
-        const u = clamp((ts - FP239 - .06) / .45); if (u < 1) { const wx = lerp(x, I.x0 - 4, eOut(u)); ctx.save(); ctx.fillStyle = `rgba(180,228,255,${.8 * (1 - u)})`; ctx.beginPath(); ctx.ellipse(wx, ly - 8, 10, 3.5, 0, 0, 7); ctx.fill(); ctx.fillRect(wx, ly - 9, x - wx, 2.5); ctx.restore(); if (Math.random() < .8) splash240(wx, ly - 8, 1, 60, 1.4, -.4); } } }
-    if (Math.random() < .04 * wet && !(F.t >= 0 && F.t < .1)) drip240(x, y + 6 * big * sqy, '#9fd4ff');
-    // the sponge
-    ctx.save(); ctx.translate(x, y + 6 * big); ctx.scale(sqx * big, sqy * big); ctx.translate(0, -6); ctx.fillStyle = mix('#f2cc48', '#a88a2a', clamp(wet / 1.2) * .6); ctx.beginPath(); ctx.roundRect(-11, -6, 22, 12, 4); ctx.fill();
-    ctx.fillStyle = 'rgba(120,88,20,.55)'; [[-6, -2, 1.6], [-1, 2, 1.2], [4, -3, 1.4], [7, 2, 1], [-8, 3, 1], [1, -2, .9]].forEach(([px, py, r]) => { ctx.beginPath(); ctx.ellipse(px, py, r, r * .8, 0, 0, 7); ctx.fill(); }); ctx.fillStyle = 'rgba(255,250,220,.35)'; ctx.fillRect(-9, -5, 18, 1.4); ctx.restore();
-    if (fin && ts >= FB239 && ts < FP239) glint239(x + 10, y - 6, ts);
-    if (fin && ts < FB239) [0, .45, .85].forEach((at, i) => { if (ts >= at) once('dg' + i, () => spawn({ x, y, size: 8, shape: 'ring', grow: 10, life: .3, col: '#bfe6ff' })); });
-  },
-  jolt(I) { const F = fr239(I, .12); return F.k >= 0 && F.t >= 0 && F.t < .1 ? [0, 1.6] : [0, 0]; },
-  pre(v) { noise(0, .1, .008 * v, 500, 1, 'lowpass'); },
-  snd(v, i) { noise(0, .05, .03 * v, 400, 1, 'lowpass', true); noise(.02, .25, .014 * v, 1600, 1, 'bandpass'); tone(note239(i) * .5, .04, .012 * v, .25, 'sine', null, .01); },
-  boom() { noise(0, .08, .04, 300, 1, 'lowpass', true); wash240(.03, 1.4, .5); [0, 4, 7].forEach((k, i) => tone(330 * semi(k), .35 + i * .04, .014, 1, 'sine', null, .01)); } };
+// round 241: the user liked Scrub and suds (kept as 6, maybe reused), wanted four new animations; picked L Pop it back in, N Ice the swelling, O Stitch it shut, P Cool the burn, R Shake it off. Segment helpers: the bar's N pieces (g111), each fixed by the animated front
+const seg241 = (I, x) => { const G = g111(I), lv = I.Xi(x); return { G, p: k => clamp((lv - I.lo) / G.per - k), tk: hk => Math.min(G.N - 1, Math.floor((S.v0 + hk - I.lo) / G.per + 1e-6)) }; };
+const damp241 = (t, f = 40, k = 9) => t < 0 ? 0 : Math.sin(t * f) * Math.exp(-t * k);
+const hand241 = (x, y, rot = 0, al = 1) => { ctx.save(); ctx.globalAlpha *= al; ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = '#7a2a24'; ctx.beginPath(); ctx.roundRect(-3.5, -13, 7, 6, 2); ctx.fill(); ctx.fillStyle = '#e0aa82'; ctx.beginPath(); ctx.ellipse(0, -3, 4.6, 5.4, 0, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(120,70,40,.35)'; ctx.fillRect(-3, 0, 6, .8); ctx.restore(); };
+const steam241 = (x, y, n, s = 1) => { for (let i = 0; i < n; i++) spawn({ x: x + (Math.random() - .5) * 14 * s, y, vx: (Math.random() - .5) * 16, vy: -22 - Math.random() * 26 * s, life: .7 + Math.random() * .5, size: (2.5 + Math.random() * 3) * s, col: 'rgba(235,240,245,.55)' }); };
 
-Object.assign(FAM, { PA: r239('A'), PB: r239('B'), PC: r239('C'), PD: r239('D') }); ['PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
+// ---------- L. Pop it back in: bone segments knocked out of line; hands twist the next one and it snaps into line
+FA239.L = { name: 'Pop it back in', desc: 'The bar is a row of bone pieces knocked out of line. Each skill-up two hands grip the next piece, wrench it a little further out, then twist it back: it snaps into line with a crunch, a hit-stop and a jolt, wobbles and settles. Finale: the straightened row bends up into a bow with three creaks, holds trembling, then snaps straight in a chain of pops from end to end and glows.',
+  draw(I, ly, t, ts) { const F = fr239(I, .07), fin = fin240(I, ts), sg = seg241(I, F.x), G = sg.G, tk = F.k >= 0 ? sg.tk(F.k) : -1;
+    const bow = fin ? (ts < FB239 ? [0, .45, .85].filter(a => ts >= a).length / 3 * eOut(clamp(ts / .3)) : ts < FP239 ? 1 : 0) : 0, chain = fin && ts >= FP239 ? (ts - FP239) / .4 : -1;
+    for (let k = 0; k < G.N; k++) { const cx = G.sx(k), w = G.sw, side = k % 2 ? 1 : -1, mis = 1 - sg.p(k);
+      let dy = side * (3 + (k * 5) % 3) * mis, rot = -side * (.22 + (k * 3 % 4) * .05) * mis;
+      if (k === tk && F.t > -.35 && F.t < 0) { const u = eOut((F.t + .35) / .35); dy *= 1 + .5 * u; rot *= 1 + .7 * u; }
+      if (k === tk && F.t >= 0) { rot += damp241(F.t, 45, 10) * .12 * -side; dy += damp241(F.t, 45, 10) * 1.5 * side; }
+      if (bow) { const q = (cx - I.x0) / (I.x1 - I.x0) * 2 - 1; dy += -(1 - q * q) * 9 * bow + (ts >= FB239 && ts < FP239 ? Math.sin(S.age * 70 + k) * .5 : 0); rot += q * .25 * bow; }
+      const popped = chain >= 0 && chain * G.N >= k; if (chain >= 0 && popped) once('lc' + k, () => { spawn({ x: cx - w / 2, y: ly, size: 2, shape: 'ring', grow: 10, life: .3, col: '#fff4d8' }); tone(500 + k * 25, 0, .006, .05, 'sine', null, .002); });
+      ctx.save(); ctx.translate(cx, ly + dy); ctx.rotate(rot); const bw = w * .5 - 1.2, g = ctx.createLinearGradient(0, -5, 0, 5); g.addColorStop(0, '#fbf3dc'); g.addColorStop(.6, '#ddcfae'); g.addColorStop(1, '#9e8e6a'); ctx.fillStyle = g;
+      ctx.beginPath(); ctx.roundRect(-bw, -3.6, bw * 2, 7.2, 2); ctx.fill(); [-bw, bw].forEach(ex => { ctx.beginPath(); ctx.arc(ex, -2.6, 3, 0, 7); ctx.arc(ex, 2.6, 3, 0, 7); ctx.fill(); });
+      const glow = popped ? clamp(1 - (chain - k / G.N) / 1.5) : 0; if (glow > 0) { ctx.fillStyle = `rgba(255,236,170,${.6 * glow})`; ctx.beginPath(); ctx.roundRect(-bw - 3, -6, bw * 2 + 6, 12, 4); ctx.fill(); }
+      ctx.restore(); }
+    // the hands: come in, wrench, snap, let go
+    if (tk >= 0 && F.t > -.55 && F.t < .5) { const cx = G.sx(tk), side = tk % 2 ? 1 : -1, al = F.t < -.4 ? (F.t + .55) / .15 : F.t > .3 ? 1 - (F.t - .3) / .2 : 1, lift = F.t < -.4 ? (1 - (F.t + .55) / .15) * 10 : F.t > .3 ? (F.t - .3) / .2 * 10 : 0;
+      const tw = F.t < -.35 ? 0 : F.t < 0 ? eOut((F.t + .35) / .35) * .35 * side : 0; hand241(cx - G.sw * .35, ly - 4 - lift, tw - .2, al); hand241(cx + G.sw * .35, ly - 4 - lift, tw + .2, al); }
+    if (F.k >= 0 && F.t >= 0) once('lp' + F.k, () => { const cx = G.sx(tk); spawn({ x: cx, y: ly, size: 3, shape: 'ring', grow: 16, life: .3, col: '#fff' }); for (let i = 0; i < 7; i++) spawn({ x: cx, y: ly - 3, vx: (Math.random() - .5) * 90, vy: -30 - Math.random() * 50, g: 260, life: .4, size: .9, shape: 'sq', vr: 10, col: '#f4ead0' }); });
+    if (fin && ts >= FB239 && ts < FP239) glint239((I.x0 + I.x1) / 2, ly - 16, ts);
+    if (chain >= 1) once('lend', () => { spawn({ x: (I.x0 + I.x1) / 2, y: ly, size: 20, shape: 'ring', grow: 110, life: .6, col: '#fff0c8' }); pluses239(I.x1, ly - 6, 6, 60, '#ffd36a'); });
+  },
+  jolt(I) { const F = fr239(I, .07); return F.k >= 0 && F.t >= 0 && F.t < .08 ? [Math.sin(S.age * 120) * 1.6, 1] : [0, 0]; },
+  pre(v) { noise(0, .3, .006 * v, 300, 2, 'bandpass'); },
+  snd(v, i) { noise(0, .03, .04 * v, 900, 2, 'bandpass', true); noise(.01, .05, .02 * v, 300, 1, 'lowpass', true); tone(note239(i) * .5, .03, .012 * v, .25, 'sine', null, .01); },
+  boom() { noise(0, .06, .03, 500, 1, 'lowpass', true); [0, 4, 7].forEach((k, i) => tone(330 * semi(k), .4 + i * .04, .014, 1, 'sine', null, .01)); } };
+
+// ---------- N. Ice the swelling: purple bumps along the bar; an ice pack slaps onto the next one, frost puffs, the bump deflates with a wobble
+FA239.N = { name: 'Ice the swelling', desc: 'Purple swollen bumps run along the bar. Each skill-up the ice pack hops to the next bump and slaps down: it squashes, frost puffs out both sides, and the bump deflates with a wobble back to plain skin, frosted for a moment. Finale: a big swelling rises in the middle in three throbs, the pack hangs over it gathering frost, then slams: the swelling bursts flat in a frost ring and frost crystals run along the bar.',
+  draw(I, ly, t, ts) { const F = fr239(I, .25), fin = fin240(I, ts), sg = seg241(I, F.x), G = sg.G, tk = F.k >= 0 ? sg.tk(F.k) : -1, mid = (I.x0 + I.x1) / 2;
+    skin240(I, ly, I.x1 + 10);
+    for (let k = 0; k < G.N; k++) { const cx = G.sx(k), p = sg.p(k); let h = 7 * (1 - p); if (k === tk && F.t >= 0 && F.t < .8) h += damp241(F.t, 30, 6) * 2.5;
+      if (h > .3) { ctx.save(); const g = ctx.createRadialGradient(cx, ly - 7, 0, cx, ly - 7, G.sw * .6); g.addColorStop(0, '#b8608a'); g.addColorStop(1, '#5a2a6a'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx, ly - 8, G.sw * .46, Math.max(.5, h), 0, Math.PI, 0); ctx.lineTo(cx + G.sw * .46, ly - 8); ctx.fill(); ctx.fillStyle = `rgba(110,50,120,${.35 * (1 - p)})`; ctx.fillRect(cx - G.sw / 2, ly - 8, G.sw, 16); ctx.restore(); }
+      const fz = k === tk && F.t >= 0 ? clamp(1 - F.t / 1.2) : 0; if (fz > 0) { ctx.fillStyle = `rgba(220,242,255,${.55 * fz})`; ctx.fillRect(cx - G.sw / 2, ly - 9, G.sw, 18); } }
+    // finale swelling
+    const sw = fin ? (ts < FP239 ? [0, .45, .85].reduce((m, a) => ts >= a ? m + 5 * eBack(clamp((ts - a) / .25)) : m, 0) + (ts >= FB239 ? Math.sin(S.age * 40) * .6 : 0) : 15 * (1 - eOut(clamp((ts - FP239) / .12)))) : 0;
+    if (sw > .3) { ctx.save(); const g = ctx.createRadialGradient(mid, ly - 10, 0, mid, ly - 8, 36); g.addColorStop(0, '#c86a98'); g.addColorStop(1, '#5a2a6a'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(mid, ly - 8, 34, sw, 0, Math.PI, 0); ctx.lineTo(mid + 34, ly - 8); ctx.fill(); ctx.restore(); }
+    // the pack
+    let x = F.x + 2, y = ly - 14, sqx = 1, sqy = 1;
+    if (tk >= 0 && F.t > -.4 && F.t < .6) { const cx = G.sx(tk), from = F.a + 2; if (F.t < -.08) { const u = eOut((F.t + .4) / .32); x = lerp(from, cx, u); y = ly - 14 - Math.sin(u * Math.PI) * 7 - u * 3; } else if (F.t < 0) { x = cx; y = lerp(ly - 17, ly - 13, ((F.t + .08) / .08) ** 2); } else if (F.t < .1) { x = cx; y = ly - 12.5; sqx = 1.35; sqy = .6; } else { const e = eBack(clamp((F.t - .1) / .3)); x = cx; y = ly - 12.5 - e; sqx = lerp(1.35, 1, e); sqy = lerp(.6, 1, e); } }
+    if (fin) { if (ts < FB239) { x = mid; y = lerp(F.x === undefined ? y : ly - 14, ly - 26, clamp(ts / .4)); } else if (ts < FP239) { x = mid + Math.sin(S.age * 60) * .8; y = ly - 26; } else { const u = ts - FP239; x = mid; if (u < .06) y = lerp(ly - 26, ly - 12, (u / .06) ** 2); else if (u < .2) { y = ly - 12; sqx = 1.6; sqy = .5; } else { const e = eBack(clamp((u - .2) / .4)); y = ly - 12 - 2 * e; sqx = lerp(1.6, 1, e); sqy = lerp(.5, 1, e); } } }
+    if (tk >= 0 && F.t >= 0) once('np' + F.k, () => { const cx = G.sx(tk); for (let i = 0; i < 10; i++) { const d = i % 2 ? 1 : -1; spawn({ x: cx + d * 8, y: ly - 9, vx: d * (40 + Math.random() * 60), vy: -10 - Math.random() * 30, g: 40, life: .5, size: 1 + Math.random() * 1.4, col: i % 3 ? '#e0f4ff' : '#ffffff' }); } spawn({ x: cx, y: ly - 8, size: 4, shape: 'ring', grow: 12, life: .3, col: '#e0f4ff' }); });
+    if (fin && ts >= FP239 + .06) once('nslam', () => { spawn({ x: mid, y: ly - 6, size: 12, shape: 'ring', grow: 90, life: .7, col: '#e0f4ff' }); for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 120; spawn({ x: mid, y: ly - 8, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .5 - 20, life: .7, size: 1.5 + Math.random() * 1.5, shape: 'star', vr: 4, col: i % 3 ? '#e0f4ff' : '#ffffff' }); } });
+    if (fin && ts >= FP239 + .06) { const u = clamp((ts - FP239 - .06) / .5), fa = clamp(1 - (ts - FP239 - .5) / 1); if (fa > 0) { ctx.save(); ctx.globalAlpha *= fa; ctx.fillStyle = 'rgba(220,242,255,.5)'; const r = u * (I.x1 - I.x0) / 2 + 10; ctx.fillRect(Math.max(I.x0 - 4, mid - r), ly - 9, Math.min(I.x1 + 4, mid + r) - Math.max(I.x0 - 4, mid - r), 18); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; for (let k = 0; k < 9; k++) { const sx = mid + (k - 4) * 24; if (Math.abs(sx - mid) > r) continue; ctx.save(); ctx.translate(sx, ly); for (let j = 0; j < 3; j++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-3, 0); ctx.lineTo(3, 0); ctx.stroke(); } ctx.restore(); } ctx.restore(); } }
+    if (fin && ts >= FB239 && ts < FP239 && Math.random() < .3) spawn({ x: x + (Math.random() - .5) * 30, y: y - 16, vx: (x - (x + 0)) * 0, vy: 20, life: .4, size: 1, col: '#e0f4ff' });
+    ctx.save(); ctx.translate(x, y + 5); ctx.scale(sqx, sqy); ctx.translate(0, -5); ctx.fillStyle = 'rgba(170,215,245,.85)'; ctx.beginPath(); ctx.roundRect(-10, -5, 20, 10, 4); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; [[-5, -1], [1, 1], [5, -2], [-1, -2.5]].forEach(([a, b]) => ctx.fillRect(a - 1.6, b - 1.6, 3.2, 3.2)); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(-8, -4, 16, 1); ctx.restore();
+    if (fin && ts >= FB239 && ts < FP239) glint239(x + 10, y - 6, ts);
+  },
+  jolt(I) { const F = fr239(I, .25); return F.k >= 0 && F.t >= 0 && F.t < .08 ? [0, 1.5] : [0, 0]; },
+  pre(v) { noise(0, .06, .006 * v, 2000, 2, 'bandpass'); },
+  snd(v, i) { noise(0, .05, .03 * v, 500, 1, 'lowpass', true); noise(.02, .3, .008 * v, 3000, 1, 'bandpass'); tone(note239(i), .05, .011 * v, .4, 'sine', null, .01); },
+  boom() { noise(0, .08, .035, 400, 1, 'lowpass', true); noise(.03, .6, .012, 3500, 1, 'bandpass'); [0, 7, 12].forEach((k, i) => tone(523 * semi(k), .3 + i * .05, .011, 1.2, 'sine', null, .01)); } };
+
+// ---------- O. Stitch it shut: a curved needle dives through the gash at the front and pulls; the stitch cinches and the edges zip together
+FA239.O = { name: 'Stitch it shut', desc: 'The bar is a long gash. Each skill-up the curved needle dives through both edges at the front, comes out the other side and pulls: the thread goes taut, a new stitch cinches and the edges zip together over the next stretch. Finale: three tugs on the thread make the stitches flash, the needle holds high, then the thread snaps off, the stitches light up in a chain and the needle flies into the recipe.',
+  draw(I, ly, t, ts) { const F = fr239(I, .3), fin = fin240(I, ts), x0 = I.x0 - 4, x1 = I.x1 + 4, gy = x => ly + Math.sin(x * .05) * 1.2;
+    let cl = F.x; if (F.k >= 0 && F.t >= -.2 && F.t < 0) cl = F.a;
+    skin240(I, ly, x1 + 10, { shine: fin ? shineAt240(ts) : 0 });
+    if (cl < x1 - 6) { ctx.save(); ctx.lineCap = 'round'; const path = () => { ctx.beginPath(); for (let x = cl; x <= x1 - 6; x += 2) ctx.lineTo(x, gy(x)); }; ctx.strokeStyle = 'rgba(220,90,80,.3)'; ctx.lineWidth = 9; path(); ctx.stroke(); ctx.strokeStyle = '#b8302a'; ctx.lineWidth = 5; path(); ctx.stroke(); ctx.strokeStyle = '#4a0808'; ctx.lineWidth = 2.2; path(); ctx.stroke(); ctx.restore(); }
+    if (cl > x0 + 4) { ctx.strokeStyle = 'rgba(160,70,60,.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let x = x0 + 4; x <= cl; x += 2) ctx.lineTo(x, gy(x)); ctx.stroke(); }
+    // stitches every 7 px up to the closed front
+    const chain = fin && ts >= FP239 + .08 ? (ts - FP239 - .08) / .4 : -1, tug = fin && ts < FB239 ? [0, .45, .85].reduce((m, a) => Math.max(m, Math.sin(clamp((ts - a) / .25) * Math.PI)), 0) : 0;
+    for (let x = x0 + 7, j = 0; x <= cl - 1; x += 7, j++) { const lit = chain >= 0 ? clamp(1 - Math.abs(chain - (x - x0) / (x1 - x0)) * 3) : 0, fresh = F.k >= 0 && x > F.a - 1 && F.t >= 0 ? clamp(1 - F.t / .6) : 0;
+      ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = lit > 0 ? mix('#2a1a14', '#ffd36a', lit) : tug > 0 ? mix('#2a1a14', '#fff0c8', tug * .7) : '#2a1a14'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x - 1.5, gy(x) - 4); ctx.lineTo(x + 1.5, gy(x) + 4); ctx.stroke();
+      if (fresh > 0) { ctx.strokeStyle = `rgba(255,255,255,${fresh})`; ctx.lineWidth = .8; ctx.stroke(); } ctx.fillStyle = 'rgba(120,50,40,.5)'; ctx.fillRect(x - 2.2, gy(x) - 5, 1.4, 1.4); ctx.fillRect(x + 1, gy(x) + 3.6, 1.4, 1.4); ctx.restore(); }
+    if (chain >= 0 && chain < 1.6) { const fa = clamp(1 - (chain - 1) / .6); ctx.save(); ctx.globalAlpha *= fa; ctx.strokeStyle = 'rgba(255,220,140,.5)'; ctx.lineWidth = 6; ctx.beginPath(); for (let x = x0 + 4; x <= Math.min(cl, lerp(x0, x1, chain)); x += 2) ctx.lineTo(x, gy(x)); ctx.stroke(); ctx.restore(); }
+    // the needle: rest above the front, dive through, pull up with the thread
+    let nx = F.x + 8, ny = ly - 14, rot = -.4, under = 0;
+    if (F.k >= 0 && F.t > -.5 && F.t < .6) { if (F.t < -.2) { const u = eOut((F.t + .5) / .3); nx = lerp(F.a + 8, F.b, u); ny = lerp(ly - 14, ly - 13, u); rot = lerp(-.4, -1.4, u); }
+      else if (F.t < 0) { const u = (F.t + .2) / .2; nx = F.b; ny = ly; rot = lerp(-1.4, 1.6, u); under = Math.sin(u * Math.PI); }
+      else { const u = eOut(clamp(F.t / .35)); nx = lerp(F.b, F.b + 8, u); ny = lerp(ly + 2, ly - 14, u); rot = lerp(1.6, -.4, u); } }
+    if (fin) { if (ts < FB239) { const tg = [0, .45, .85].reduce((m, a) => Math.max(m, Math.sin(clamp((ts - a) / .25) * Math.PI)), 0); nx = cl + 8; ny = ly - 14 - tg * 6; } else if (ts < FP239) { nx = cl + 10; ny = ly - 22 + Math.sin(S.age * 60) * .7; rot = -.6; } else { const u = clamp((ts - FP239 - .1) / .45); nx = lerp(cl + 10, I.x1 + 18, u); ny = lerp(ly - 22, ly, u) - Math.sin(u * Math.PI) * 22; rot = -.6 + u * 6; } }
+    const cut = fin && ts >= FP239;
+    // thread from the last stitch to the needle's eye (sags when slack, taut on a pull)
+    const ex = nx - Math.cos(rot) * 7, ey = ny - Math.sin(rot) * 7, taut = (F.k >= 0 && F.t >= 0 && F.t < .5) || (fin && ts < FP239);
+    if (!cut) { ctx.strokeStyle = '#2a1a14'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cl, gy(cl)); ctx.quadraticCurveTo((cl + ex) / 2, taut ? (gy(cl) + ey) / 2 : Math.max(gy(cl), ey) + 6, ex, ey); ctx.stroke(); }
+    else { const u = clamp((ts - FP239) / .3); ctx.strokeStyle = '#2a1a14'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cl, gy(cl)); ctx.lineTo(cl + 4 + u * 2, gy(cl) - 6 + u * 10); ctx.stroke(); once('ocut', () => spawn({ x: cl + 5, y: ly - 8, size: 2, shape: 'ring', grow: 10, life: .25, col: '#fff' })); }
+    if (!(fin && ts >= FP239 + .55)) { ctx.save(); ctx.translate(nx, ny); ctx.rotate(rot); ctx.globalAlpha *= 1 - under * .4; ctx.strokeStyle = '#d8dde4'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, 4, 7, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = .6; ctx.beginPath(); ctx.arc(0, 4, 7, Math.PI * 1.2, Math.PI * 1.6); ctx.stroke(); ctx.restore(); }
+    if (F.k >= 0 && F.t >= 0) once('os' + F.k, () => { spawn({ x: F.b, y: ly, size: 2, shape: 'ring', grow: 8, life: .25, col: '#fff' }); for (let i = 0; i < 3; i++) spawn({ x: F.b, y: ly + 2, vx: (Math.random() - .5) * 30, vy: 20, g: 200, life: .35, size: .9, col: '#c83a30' }); });
+    if (fin && ts >= FB239 && ts < FP239) glint239(nx + 4, ny - 4, ts);
+    if (fin && ts >= FP239 + .55) once('oin', () => { spawn({ x: I.x1 + 18, y: ly, size: 8, shape: 'ring', grow: 26, life: .5, col: '#fff0c8' }); pluses239(I.x1 + 16, ly - 8, 6, 50, '#ffd36a'); });
+  },
+  jolt(I) { const F = fr239(I, .3); return F.k >= 0 && F.t >= 0 && F.t < .06 ? [0, -1] : [0, 0]; },
+  pre(v) { noise(0, .12, .006 * v, 2500, 3, 'bandpass'); },
+  snd(v, i) { noise(0, .18, .014 * v, 1800, 1.4, 'bandpass'); tone(note239(i), .16, .013 * v, .3, 'triangle', null, .005); },
+  boom() { noise(0, .03, .03, 2500, 2, 'bandpass', true); for (let k = 0; k < 8; k++) tone(523 * semi(PENT42[k]), .1 + k * .05, .008, .3, 'sine', null, .005); } };
+
+// ---------- P. Cool the burn: a glowing burn; a soaked cloth presses on the front, steam hisses up, the red cools to calm skin
+FA239.P = { name: 'Cool the burn', desc: 'The bar is a glowing burn, shimmering with heat. Each skill-up a soaked cloth presses down on the next stretch: steam bursts up hissing and the burn cools from angry red through pink to calm skin; the cloth lifts, dripping. Finale: the cloth gulps up three presses of steam along the bar, a steam cloud hangs for a beat, then a cool wave rolls the full length, the steam bursts off in a ring and the skin shines.',
+  draw(I, ly, t, ts) { const F = fr239(I, .55), fin = fin240(I, ts), x0 = I.x0 - 4, x1 = I.x1 + 4;
+    skin240(I, ly, x1 + 10, { shine: fin ? shineAt240(ts) : 0 });
+    // the burn from the front on, with a pink cooling edge behind it
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x0, ly - 9, x1 - x0, 18, 8); ctx.clip();
+    if (F.x < I.x1 - .5) { const fl = .85 + .15 * Math.sin(S.age * 9), g = ctx.createLinearGradient(0, ly - 9, 0, ly + 9); g.addColorStop(0, `rgba(255,150,70,${.85 * fl})`); g.addColorStop(.5, `rgba(220,50,30,${.9 * fl})`); g.addColorStop(1, 'rgba(120,20,10,.9)'); ctx.fillStyle = g; ctx.fillRect(F.x, ly - 9, x1 - F.x, 18);
+      for (let i = 0; i < 6; i++) { const bx = F.x + ((i * 41 + S.age * 25) % Math.max(1, x1 - F.x)); ctx.fillStyle = 'rgba(255,220,150,.35)'; ctx.beginPath(); ctx.ellipse(bx, ly - 2 + (i % 3) * 3, 6, 2, 0, 0, 7); ctx.fill(); }
+      if (Math.random() < .25) spawn({ x: F.x + Math.random() * (x1 - F.x), y: ly - 9, vy: -18 - Math.random() * 14, life: .5, size: .9, col: '#ffb060' }); }
+    const pk = ctx.createLinearGradient(F.x - 26, 0, F.x, 0); pk.addColorStop(0, 'rgba(230,120,110,0)'); pk.addColorStop(1, 'rgba(230,110,100,.55)'); ctx.fillStyle = pk; ctx.fillRect(F.x - 26, ly - 9, 26, 18); ctx.restore();
+    // the cloth
+    let x = F.x + 4, y = ly - 13, sqy = 1, heat = 0;
+    if (F.k >= 0 && F.t > -.4 && F.t < .95) { const c = (F.a + F.b) / 2; if (F.t < -.1) { const u = eOut((F.t + .4) / .3); x = lerp(F.a + 4, c, u); y = ly - 13 - Math.sin(u * Math.PI) * 6; } else if (F.t < 0) { x = c; y = lerp(ly - 16, ly - 12, ((F.t + .1) / .1) ** 2); } else if (F.t < .6) { x = c; y = ly - 12; sqy = .75; heat = Math.sin(clamp(F.t / .6) * Math.PI); } else { const u = eOut((F.t - .6) / .35); x = lerp(c, F.b + 4, u); y = lerp(ly - 12, ly - 13, u); } }
+    if (F.k >= 0 && F.t >= 0 && F.t < .5 && Math.random() < .6) steam241(x, ly - 12, 1);
+    if (F.k >= 0 && F.t >= 0) once('ps' + F.k, () => steam241(x, ly - 12, 6, 1.1));
+    if (fin) { if (ts < FB239) { const i = Math.min(2, Math.floor(ts / .45)), q = (ts - i * .45) / .45; x = lerp(I.x0 + 30, I.x1 - 30, i / 2); y = q < .2 ? ly - 12 : ly - 12 - Math.sin((q - .2) / .8 * Math.PI) * 6; sqy = q < .2 ? .75 : 1; heat = .6; if (Math.random() < .5) steam241(x, ly - 12, 1); }
+      else if (ts < FP239) { x = I.x1 - 30 + Math.sin(S.age * 60) * .6; y = ly - 20; } else { const u = clamp((ts - FP239) / .5); x = lerp(I.x1 - 30, I.x1 + 6, u); y = lerp(ly - 20, ly - 16, u); }
+      if (ts >= FB239 && ts < FP239) { ctx.save(); ctx.fillStyle = 'rgba(235,240,245,.25)'; for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.arc(lerp(I.x0, I.x1, k / 5), ly - 14 + Math.sin(S.age * 3 + k) * 2, 10 + (k % 3) * 3, 0, 7); ctx.fill(); } ctx.restore(); }
+      if (ts >= FP239) { once('pring', () => { spawn({ x: (I.x0 + I.x1) / 2, y: ly - 6, size: 18, shape: 'ring', grow: 110, life: .7, col: '#e8f4ff' }); for (let k = 0; k < 10; k++) steam241(lerp(I.x0, I.x1, k / 9), ly - 12, 2, 1.3); });
+        const u = clamp((ts - FP239) / .45); if (u < 1) { const wx = lerp(I.x0 - 20, I.x1 + 20, u), g = ctx.createLinearGradient(wx - 30, 0, wx + 6, 0); g.addColorStop(0, 'rgba(160,220,255,0)'); g.addColorStop(.85, 'rgba(190,232,255,.8)'); g.addColorStop(1, 'rgba(190,232,255,0)'); ctx.fillStyle = g; ctx.fillRect(wx - 30, ly - 9, 36, 18); } } }
+    ctx.save(); ctx.translate(x, y + 4); ctx.scale(1, sqy); ctx.translate(0, -4); ctx.fillStyle = mix('#a8bccc', '#c89a8a', heat * .6); ctx.beginPath(); ctx.roundRect(-12, -4, 24, 8, 2.5); ctx.fill(); ctx.strokeStyle = 'rgba(80,100,120,.5)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-6, -4); ctx.lineTo(-6, 4); ctx.moveTo(5, -4); ctx.lineTo(5, 4); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(-11, -3.4, 22, 1); ctx.restore();
+    if (Math.random() < .04) drip240(x, y + 4, '#9fd4ff');
+    if (fin && ts >= FB239 && ts < FP239) glint239(x + 12, y - 4, ts);
+  },
+  pre(v) { noise(0, .08, .006 * v, 600, 1, 'lowpass'); },
+  snd(v, i) { noise(0, .05, .02 * v, 400, 1, 'lowpass', true); noise(.03, .5, .009 * v, 4200, .8, 'bandpass'); tone(note239(i) * .75, .05, .011 * v, .4, 'sine', null, .02); },
+  boom() { noise(0, .7, .012, 4000, .7, 'bandpass'); noise(0, .2, .02, 500, .8, 'lowpass', true); [0, 4, 7].forEach((k, i) => tone(392 * semi(k), .35 + i * .05, .012, 1.1, 'sine', null, .02)); } };
+
+// ---------- R. Shake it off: a battered limb aches; each skill-up it shakes, the ache flecks off the next stretch and the color comes back
+FA239.R = { name: 'Shake it off', desc: 'The bar is a battered arm, dull and bruised. Each skill-up it winds up and shakes hard from the shoulder: the dull ache flecks off the next stretch as dust and the healthy color comes back, then the shake dies down. Finale: three shakes, each bigger, the arm tenses and trembles for a beat, then one huge snap shake: the dust bursts off, a muscle flexes up with a golden glow and a ring.',
+  draw(I, ly, t, ts) { const F = fr239(I, .35), fin = fin240(I, ts), px = I.x0 - 8, x1 = I.x1 + 6;
+    let rot = 0, dy = 0; if (F.k >= 0 && F.t > -.25 && F.t < .9) { if (F.t < 0) rot = -.04 * eOut((F.t + .25) / .25); else { rot = damp241(F.t, 48, 5) * .05; dy = damp241(F.t, 61, 6) * 1.5; } }
+    let flex = 0; if (fin) { if (ts < FB239) [0, .45, .85].forEach((a, i) => { if (ts >= a) { rot += damp241(ts - a, 48, 6) * (.04 + i * .025); } }); else if (ts < FP239) { rot = -.06 + Math.sin(S.age * 70) * .006; } else { rot = damp241(ts - FP239, 40, 4) * .1; flex = eBack(clamp((ts - FP239 - .1) / .35)) * clamp(1 - (ts - FP239 - 1.8) / .6); } }
+    ctx.save(); ctx.translate(px, ly + dy); ctx.rotate(rot); ctx.translate(-px, -ly);
+    const shape = () => { ctx.beginPath(); ctx.moveTo(px + 8, ly - 8); ctx.lineTo(x1 - 6, ly - 6); ctx.arc(x1 - 6, ly, 6, -Math.PI / 2, Math.PI / 2); ctx.lineTo(px + 8, ly + 8); ctx.arc(px + 8, ly, 8, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); };
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2; shape(); const sk = ctx.createLinearGradient(0, ly - 8, 0, ly + 8); sk.addColorStop(0, '#eec49a'); sk.addColorStop(.5, '#d29a70'); sk.addColorStop(1, '#8a5838'); ctx.fillStyle = sk; ctx.fill(); ctx.restore();
+    if (flex > 0) { ctx.save(); const bx = px + 70, g = ctx.createRadialGradient(bx, ly - 8, 0, bx, ly - 8, 22); g.addColorStop(0, '#f6d0a8'); g.addColorStop(1, '#c08860'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(bx, ly - 7, 24, 3 + flex * 7, 0, Math.PI, 0); ctx.fill(); ctx.strokeStyle = `rgba(255,211,106,${flex * .8})`; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore(); }
+    ctx.save(); shape(); ctx.clip(); if (F.x < I.x1 - .5) { ctx.fillStyle = 'rgba(78,70,110,.6)'; ctx.fillRect(F.x, ly - 10, x1 - F.x + 4, 20); ctx.strokeStyle = 'rgba(40,30,60,.55)'; ctx.lineWidth = 1; for (let x = I.x0 + 6; x < x1; x += 11) if (x > F.x) { ctx.beginPath(); ctx.moveTo(x, ly - 4 + (x % 3)); ctx.lineTo(x + 3, ly + 2 - (x % 2)); ctx.stroke(); } const eg = ctx.createLinearGradient(F.x - 10, 0, F.x + 2, 0); eg.addColorStop(0, 'rgba(78,70,110,0)'); eg.addColorStop(1, 'rgba(78,70,110,.6)'); ctx.fillStyle = eg; ctx.fillRect(F.x - 10, ly - 10, 12, 20); }
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(px, ly - 6, F.x - px, 1.4); if (flex > 0) { ctx.fillStyle = `rgba(255,224,150,${.35 * flex})`; ctx.fillRect(px, ly - 10, x1 - px, 20); } ctx.restore();
+    ctx.restore();
+    if (F.k >= 0 && F.t >= 0 && F.t < .35 && Math.random() < .8) { const x = lerp(F.a, F.b, Math.random()); spawn({ x, y: ly - 6 + Math.random() * 12, vx: (Math.random() - .5) * 80, vy: -30 - Math.random() * 50, g: 160, life: .5, size: .9 + Math.random() * .8, shape: 'sq', vr: 6, col: Math.random() < .5 ? '#6a6084' : '#9a90a8' }); }
+    if (fin && ts >= FP239) once('rsnap', () => { for (let i = 0; i < 30; i++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: ly - 6 + Math.random() * 12, vx: (Math.random() - .5) * 140, vy: -40 - Math.random() * 90, g: 160, life: .7, size: 1 + Math.random(), shape: 'sq', vr: 8, col: '#9a90a8' }); spawn({ x: I.x0 + 62, y: ly - 10, size: 10, shape: 'ring', grow: 60, life: .6, col: '#ffe0a0' }); pluses239(I.x0 + 62, ly - 14, 8, 60, '#ffd36a'); });
+    if (fin && ts >= FB239 && ts < FP239) glint239(I.x0 + 62, ly - 14, ts);
+  },
+  pre(v) { noise(0, .2, .006 * v, 300, 1, 'lowpass'); },
+  snd(v, i) { for (let k = 0; k < 4; k++) noise(k * .07, .06, .014 * v * (1 - k * .2), 350, 1, 'lowpass'); tone(note239(i), .05, .012 * v, .35, 'triangle', null, .01); },
+  boom() { noise(0, .06, .03, 350, 1, 'lowpass', true); [0, 4, 7, 12].forEach((k, i) => tone(294 * semi(k), .25 + i * .04, .013, 1, 'triangle', null, .01)); } };
+
+Object.assign(FAM, { PA: r239('L'), PB: r239('N'), PC: r239('O'), PD: r239('P'), PE: r239('R'), PF: r239('C') }); ['PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
 setTimeout(() => { if (document.getElementById('slowRow')) return; const m = document.querySelector('[data-m="unlock"]'); if (!m) return; const row = document.createElement('div'); row.id = 'slowRow'; setTimeout(() => (document.getElementById('xrows') || m.parentNode).appendChild(row), 0); row.innerHTML = '<small>Speed (to inspect a moment): </small>' + [['1', 'Normal'], ['.25', 'Slow ¼'], ['.1', 'Very slow'], ['0', 'Pause']].map(([v, n]) => `<button data-slow="${v}">${n}</button>`).join(' '); m.parentNode.appendChild(row);
   const mark = () => row.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.slow === (window.SLOWMO ?? 1))); row.querySelectorAll('button').forEach(b => b.onclick = () => { window.SLOWMO = +b.dataset.slow; mark(); }); mark(); }, 300);
 setTimeout(() => { profName = 'First Aid'; fam = 'PA'; const lp = document.getElementById('loop'); if (lp) lp.checked = true; if (typeof sync === 'function') sync(); const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching the next unlock')); if (b) b.click(); }, 260);

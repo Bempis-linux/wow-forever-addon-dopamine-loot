@@ -592,3 +592,8 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   throw (dip in a tub, swing, a slug of water smacks the front; finale: a sheet lands left to right), C Scrub and suds (a brush
   scrubs, the suds pop; finale: a foam heap pops in a chain), D Sponge slam (squash, two squirting fans; finale: it swells, then a
   huge slam). Per-hit jolts go through `Z.jolt`. Sounds are placeholders.
+- **Round 241:** the user liked **C Scrub and suds** (to reuse maybe) and wanted new animations. Pitched K Pluck the arrows,
+  L Pop it back in, M Knead the knots, N Ice the swelling, O Stitch it shut, P Cool the burn, Q Suck the venom, R Shake it off;
+  the user picked L, N, O, P and R. Round 240's A, B and D code was removed (it's in git, commit 55ae031). Built as `FA239.L/N/O/P/R`
+  (keys 1-5, C Scrub as 6). Helpers: `seg241` (the bar's pieces via g111, each fixed by the animated front), `damp241`, `hand241`,
+  `steam241`. Each one has a sketched finale. The sounds are placeholders.
