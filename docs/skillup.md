@@ -606,3 +606,13 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   finale ends in a thumbs-up), W3 The arm spins (it turns on its axis while the bands scroll like a screw; the roll rides on top
   and shrinks), W4 The flick (the roll flies in a loose spiral and the loops cinch with a snap; the finale is a lasso, then a whip
   crack). Keys 1-5.
+- **Round 243:** **W1 is the base.** The user: the wrap "awkwardly grows" while it wraps (the cause: W1 drew the whole wrap loose,
+  1.6 px fatter, during a skill-up). Using `wow-design-ideas`, I critiqued W1 (the roll bobs on a line instead of orbiting, the bands
+  come from a sliding edge, the arm doesn't react) and pitched changes plus new takes. The user picked all four changes (Laid by the
+  roll, True orbit, Arm reacts, Cinch snap) and two new takes (Kit-fed bandage, Pad then wrap). W2-W4 were removed (they're in git,
+  commit 74161ea). Shared state `wst243` (the old region tight, the new turns loose until the cinch, the band being laid cut
+  at `ycut` under the roll, the roll on a true orbit with `behind`), `react243` (a flinch on covering a cut, a clench on the tug,
+  the hand relaxing: `fist243`), `wrapAll243`; `wrap242` gained `left`, `ycut` and `noEdge`, and its bands sit at fixed
+  positions. Keys: 1 W1 (as it was), 2 V2 W1 refined, 3 K Kit-fed (an open kit by the elbow feeds the gauze, its roll empties;
+  finale: the lid slams, the gauze snaps free, the clip pins the end), 4 PW Pad then wrap (a hand presses a pad, then the roll
+  wraps over it; finale: the pads glow through like lanterns).
