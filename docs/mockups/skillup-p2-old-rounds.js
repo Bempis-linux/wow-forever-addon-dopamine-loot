@@ -5558,3 +5558,1758 @@ K181.B = Object.assign({}, K179.A, { name: 'Sound: Butcher’s board', sx: SX181
     at(5, L0, () => { tone(58, 0, .035, .35, 'sine', null, .003); noise(0, .16, .02, 350, .8, 'lowpass', true); noise(0, .05, .012, 1100, 2.5, 'bandpass', true); });
     at(6, 2.0, () => { SX181.patter(.8, 9, 1800, .045); noise(0, .45, .003, 600, .7, 'lowpass'); }); at(7, 2.45, () => { noise(0, .05, .004, 3000, 2, 'bandpass'); noise(.08, .05, .004, 3000, 2, 'bandpass'); });
     at(8, 2.6, () => SX181.tock(7, .6)); } });
+
+// ========== Cooking skill-up, rounds 167-183 (moved out 2026-11-19 before Enchanting; locked whole r167('B', K183)) ==========
+PROF.Cooking = { col: '#d8823a', light: '#ffd09a', tool: 'ToolHammer', motion: 'swing', mat: 'food', span: [75, 150], cspan: [75, 150], v: 122, five: 120, unlockV: 124, caps: [[150, 'Expert']], made: '\u{1F372}', snd() {}, hit() {} };
+const CKB167 = {}; const ckb167 = g => CKB167[g] || (CKB167[g] = Object.assign({}, PROF.Cooking, { span: [125 - g, 125], v: 122, five: g > 5 ? 125 - Math.min(g, 12) : 120, unlockV: 124, caps: undefined,
+  unlocks: [[125, 'Goblin Deviled Clams', '\u{1F9AA}'], [130, 'Seasoned Wolf Kabob', '\u{1F362}'], [140, 'Curiously Tasty Omelet', '\u{1F95A}'], [150, 'Hot Wolf Ribs', '\u{1F356}']] }));
+const FB167 = 1.3, FP167 = 1.65;
+const cur167 = I => hits101(I).filter(o => o.t > -.9 && o.t < 1.3).pop();
+const shk167 = (ts, big = 3) => { let a = 0; if (ts >= 0 && ts < FB167) a = 1.4 * ts / FB167; else if (ts >= FP167 && ts < FP167 + .4) a = big * (1 - (ts - FP167) / .4); return [(Math.random() - .5) * 2 * a, (Math.random() - .5) * 2 * a]; };
+function glow167(x, y, r, a, c = '255,170,60') { if (a <= 0) return; ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c},${a})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); }
+const puff167 = (x, y, n, col = 'rgba(255,250,235,.85)', sp = 40, up = 30) => { for (let q = 0; q < n; q++) spawn({ x: x + (Math.random() - .5) * 6, y, vx: (Math.random() - .5) * sp, vy: -Math.random() * up, g: 30, life: .5 + Math.random() * .4, size: .9 + Math.random() * .8, col }); };
+const ss167 = { // soft placeholders
+  thud: (t, f, v) => { tone(f, t, .02 * v, .16, 'sine', f * .7, .006); noise(t, .05, .006 * v, 500, 1, 'lowpass'); },
+  soft: (t, d, v, f = 900) => noise(t, d, .005 * v, f, .7, 'lowpass'),
+  blip: (t, n, v, f0 = 262) => tone(f0 * semi(n), t, .008 * v, .14, 'sine', null, .01),
+  boom: t => { tone(98, t, .03, .5, 'sine', 49, .005); noise(t, .35, .012, 700, .8, 'lowpass', true); },
+  close: () => [0, 4, 7].forEach((n, i) => tone(294 * semi(n), i * .09, .011, .55, 'triangle', null, .01)) };
+
+const CK167 = {};
+function r167(K, T = CK167, LB) { const Z = T[K];
+  const V = { finAt: Z.finAt, noFlash: true, shake() { return shk167(ts95()); }, grow(p, x0, y, L, f, t, I) { Z.draw(I, y, t, ts95()); },
+    over(p, I) { hits101(I).forEach(o => Z.snd(o, fat45(o.i), pick45(o.i, 4))); const ts = ts95(); if (ts >= 0) Z.fsnd(ts); } };
+  return { get name() { return (LB || K) + '. ' + Z.name + (LB ? ' (round 167)' : ''); }, get desc() { return Z.desc + ' (Cooking’s bar to the next recipe; try Five in a row, Reaching the next unlock and the gap switch. Sounds are soft placeholders; the sound is a later step.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
+    draw(top) { const P = ckb167(GAP104); if (profName !== 'Cooking' || S.p !== P || !S.slow101) { profName = 'Cooking'; const keep = PROF.Cooking; PROF.Cooking = P; try { const s = build(); s.hits = s.hits.map((h, k) => 1.15 + k * 1.5); s.dur = s.hits[s.hits.length - 1] + (s.reaches ? 5.4 : 2.6); s.slow101 = true; s.age = Math.min(S.age, .02); S = s; } finally { PROF.Cooking = keep; } }
+      window.SND97 = { pay: Z.pay || ss167.close }; try { barModule(top, 'X', V); } finally { window.SND97 = null; } } }; }
+const K169 = {};
+function cleaver169(x, e, rot = 0, s = 1) { ctx.save(); ctx.translate(x + 20 * s, e - 7.5 * s); ctx.rotate(rot); ctx.translate(-20 * s, 7.5 * s); ctx.scale(s, s);
+  const g = ctx.createLinearGradient(-6, 0, 6, 0); g.addColorStop(0, '#f0f4f8'); g.addColorStop(1, '#7a838e'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(6, 0); ctx.lineTo(6, -10); ctx.lineTo(-5, -10); ctx.quadraticCurveTo(-6, -10, -6, -8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(-6, -1.1, 12, 1.1); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.arc(-2.5, -7, 1.2, 0, 7); ctx.fill();
+  ctx.fillStyle = '#4a2c14'; ctx.beginPath(); ctx.roundRect(6, -9.5, 14, 4, 2); ctx.fill(); ctx.fillStyle = '#c8a050'; [9.5, 15.5].forEach(q => ctx.fillRect(q, -8.4, 1.2, 1.8)); ctx.restore(); }
+function slots169(I) { const G = g111(I), lo = I.lo, per = G.per, done = Math.min(G.N, Math.floor((I.v - lo) / per + 1e-6)), part = done >= G.N ? 0 : clamp((I.v - lo) / per - done);
+  const cutBy = o => { const a = Math.floor((S.v0 + o.i - lo) / per + 1e-6), b = Math.floor((S.v0 + o.i + 1 - lo) / per + 1e-6); return b > a ? Math.min(G.N - 1, b - 1) : -1; };
+  return { G, done, part, cutBy }; }
+
+const ING170 = ['Carrot', 'Cucumber', 'Ribs']; let ingI170 = 0, ingNext170 = null, ingS170 = null;
+const ingCol170 = ['#f8a040', '#b8e090', '#c8504a'];
+function food170(ii, a, E, cy, notchX, depth, t) { const r = x => ii === 0 ? lerp(4.8, 2.4, clamp(1 - (E - x) / 230)) : 4.3;
+  if (E > a + 1) { ctx.beginPath(); ctx.moveTo(a, cy - r(a)); for (let x = a; x <= E; x += 3) ctx.lineTo(x, cy - r(x)); ctx.lineTo(E, cy - r(E)); for (let x = E; x >= a; x -= 3) ctx.lineTo(x, cy + r(x)); ctx.closePath();
+    const g = ctx.createLinearGradient(0, cy - 5, 0, cy + 5); if (ii === 0) { g.addColorStop(0, '#ffb050'); g.addColorStop(.5, '#f07a1a'); g.addColorStop(1, '#a8460a'); } else if (ii === 1) { g.addColorStop(0, '#5a9a4a'); g.addColorStop(.5, '#2f6a2a'); g.addColorStop(1, '#1a3a16'); } else { g.addColorStop(0, '#e8b0a0'); g.addColorStop(.3, '#c8504a'); g.addColorStop(1, '#6a2420'); }
+    ctx.fillStyle = g; ctx.fill(); ctx.save(); ctx.clip();
+    if (ii === 0) { ctx.strokeStyle = 'rgba(120,50,10,.5)'; ctx.lineWidth = .7; for (let k = 0; k < 30; k++) { const x = E - 230 + skHash(k + 4) * 230; if (x < a + 2) continue; const yy = cy + (skHash(k + 2) - .5) * 5; ctx.beginPath(); ctx.moveTo(x - 1.5, yy); ctx.lineTo(x + 1.5, yy); ctx.stroke(); } }
+    else if (ii === 1) { ctx.fillStyle = 'rgba(170,220,130,.4)'; [-2, .5].forEach(d => ctx.fillRect(a, cy + d, E - a, .8)); }
+    else { ctx.fillStyle = 'rgba(250,230,210,.7)'; ctx.fillRect(a, cy - 4.3, E - a, 1.6); ctx.fillStyle = 'rgba(70,20,16,.55)'; for (let x = E - 230 + 7; x < E; x += 9) if (x > a + 1) ctx.fillRect(x, cy - 2.5, .8, 6.5); }
+    ctx.restore(); if (ii === 2) { ctx.fillStyle = '#f4ecd8'; for (let x = E - 230 + 3; x < E; x += 9) if (x > a + 1) { ctx.beginPath(); ctx.roundRect(x - 1, cy - 7.5, 2.2, 4, 1); ctx.fill(); } }
+    ctx.fillStyle = ii === 0 ? '#ffd08a' : ii === 1 ? '#d8eeb0' : '#d86a5a'; ctx.beginPath(); ctx.ellipse(a + .6, cy, 1.5, r(a) - .4, 0, 0, 7); ctx.fill();
+    if (depth > 0 && notchX < E) { ctx.strokeStyle = 'rgba(40,16,6,.9)'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(notchX, cy - r(notchX)); ctx.lineTo(notchX, cy - r(notchX) + 2 * r(notchX) * depth); ctx.stroke(); } }
+  if (ii === 0) { ctx.strokeStyle = '#4aa83a'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; [[6, -7], [8, -2], [3, -8]].forEach(([p, q]) => { ctx.beginPath(); ctx.moveTo(E + 1, cy); ctx.quadraticCurveTo(E + p * .4, cy + q * .7, E + p, cy + q); ctx.stroke(); }); }
+  else if (ii === 1) { ctx.fillStyle = '#2f6a2a'; ctx.beginPath(); ctx.ellipse(E, cy, 2.6, 4.3, 0, -1.57, 1.57); ctx.fill(); }
+  else { ctx.fillStyle = '#f4ecd8'; ctx.beginPath(); ctx.roundRect(E - 2, cy - 1.5, 6, 3, 1.5); ctx.fill(); ctx.beginPath(); ctx.arc(E + 4.5, cy - 1.6, 1.8, 0, 7); ctx.arc(E + 4.5, cy + 1.6, 1.8, 0, 7); ctx.fill(); } }
+let PS170 = 1; function piece170(ii, x, yy, rot = 0, al = 1, sc = PS170) { ctx.save(); ctx.globalAlpha *= al; ctx.translate(x, yy); ctx.rotate(rot); ctx.scale(sc, sc);
+  if (ii < 2) { const c = ii === 0 ? ['#c85a12', '#f08a2a', '#f8b060', '#ffd08a'] : ['#2f6a2a', '#d8eeb0', '#b8d890', '#f4f4dc']; ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(.6, 1.6, 4.6, 2.4, 0, 0, 7); ctx.fill(); ctx.fillStyle = c[0]; ctx.beginPath(); ctx.ellipse(0, .8, 4.6, 2.6, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = c[1]; ctx.beginPath(); ctx.ellipse(0, 0, 4.3, 2.3, 0, 0, 7); ctx.fill(); ctx.fillStyle = c[2]; ctx.beginPath(); ctx.ellipse(0, 0, 2.4, 1.3, 0, 0, 7); ctx.fill(); ctx.fillStyle = c[3]; ctx.beginPath(); ctx.ellipse(0, 0, ii === 0 ? 1 : 1.6, ii === 0 ? .55 : .8, 0, 0, 7); ctx.fill(); }
+  else { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(.6, 2.6, 5, 1.8, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#7a2a24'; ctx.beginPath(); ctx.roundRect(-4.5, -2.5, 9, 5, 2); ctx.fill(); ctx.fillStyle = '#c8504a'; ctx.beginPath(); ctx.roundRect(-4.5, -3.5, 8.5, 4.6, 2); ctx.fill(); ctx.fillStyle = 'rgba(250,230,210,.8)'; ctx.fillRect(-4, -3.5, 7.5, 1.3);
+    ctx.fillStyle = '#f4ecd8'; ctx.beginPath(); ctx.roundRect(-1, -6.5, 2.2, 4, 1); ctx.fill(); ctx.beginPath(); ctx.arc(.1, -6.6, 1.5, 0, 7); ctx.fill(); }
+  ctx.restore(); }
+const topQ171 = (x0, x1, y, i = 0) => { ctx.beginPath(); ctx.moveTo(x0 - 20 + i * 1.2, y - 6 + i); ctx.lineTo(x1 - i * .8, y - 6 + i); ctx.lineTo(x1 + 4 - i * 1.2, y + 9 - i); ctx.lineTo(x0 - 26 + i * 1.6, y + 9 - i); ctx.closePath(); };
+function boardB171(x0, x1, y) { const fg = ctx.createLinearGradient(0, y + 9, 0, y + 13); fg.addColorStop(0, '#6a4424'); fg.addColorStop(1, '#3a2412'); ctx.fillStyle = fg; ctx.beginPath(); ctx.roundRect(x0 - 26, y + 8.5, x1 - x0 + 30, 4.5, [0, 0, 2.5, 2.5]); ctx.fill();
+  const g = ctx.createLinearGradient(0, y - 6, 0, y + 9); g.addColorStop(0, '#a87442'); g.addColorStop(1, '#d4a066'); ctx.fillStyle = g; topQ171(x0, x1, y); ctx.fill();
+  ctx.strokeStyle = 'rgba(110,66,30,.28)'; ctx.lineWidth = .6; for (let k = 0; k < 7; k++) { const yy = y - 4.5 + k * 2.1; ctx.beginPath(); ctx.moveTo(x0 - 22 - k * .8 + skHash(k) * 20, yy); ctx.lineTo(x1 - 10 + skHash(k + 3) * 10, yy + .2); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(70,40,16,.45)'; ctx.lineWidth = 1; topQ171(x0, x1, y, 2.2); ctx.stroke(); ctx.strokeStyle = 'rgba(255,230,190,.35)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x0 - 26, y + 8.8); ctx.lineTo(x1 + 4, y + 8.8); ctx.stroke(); }
+function foodR171(ii, a, E, cy, notchX, depth, t) {
+  ctx.fillStyle = 'rgba(40,20,8,.35)'; ctx.beginPath(); ctx.ellipse((a + E) / 2 + 1, cy + 5, Math.max(0, (E - a) / 2 + 3), 2.2, 0, 0, 7); ctx.fill();
+  if (ii < 2) { food170(ii, a, E, cy, notchX, depth, t); if (E > a + 2) { ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.moveTo(a + 2, cy - (ii === 0 ? 2.6 : 2.8)); ctx.lineTo(E - 3, cy - (ii === 0 ? 1.6 : 2.8)); ctx.stroke(); }
+    if (ii === 1) { ctx.fillStyle = 'rgba(200,235,160,.65)'; for (let k = 0; k < 40; k++) { const x = E - 230 + skHash(k + 11) * 228; if (x < a + 2) continue; ctx.beginPath(); ctx.arc(x, cy + (skHash(k + 5) - .6) * 5, .55, 0, 7); ctx.fill(); } }
+    if (ii === 0) { ctx.lineCap = 'round'; [[9, -6, '#3a9a2a'], [10, -1, '#5ab83a'], [5, -9, '#5ab83a'], [12, -4, '#2a8a22']].forEach(([p, q, c]) => { ctx.strokeStyle = c; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(E + 1, cy); ctx.quadraticCurveTo(E + p * .45, cy + q * .8, E + p, cy + q); ctx.stroke(); }); }
+    return; }
+  if (E > a + 1) { const top = x => cy - 4.2 + Math.pow((x - a) / Math.max(1, E - a), 2) * 0; ctx.beginPath(); ctx.roundRect(a, cy - 4.4, E - a, 8, [1.5, 4, 3, 1.5]); const g = ctx.createLinearGradient(0, cy - 4.4, 0, cy + 3.6); g.addColorStop(0, '#9a3a1a'); g.addColorStop(.35, '#c8603a'); g.addColorStop(1, '#5a1e10'); ctx.fillStyle = g; ctx.fill();
+    ctx.save(); ctx.clip(); ctx.strokeStyle = 'rgba(40,10,4,.6)'; ctx.lineWidth = 1.1; for (let x = E - 230 + 2; x < E; x += 9) if (x > a) { ctx.beginPath(); ctx.moveTo(x, cy - 4.4); ctx.lineTo(x + 3, cy - 1.5); ctx.stroke(); } ctx.fillStyle = 'rgba(255,220,180,.35)'; ctx.fillRect(a, cy - 4, E - a, 1); ctx.restore();
+    ctx.fillStyle = '#f2e8d2'; for (let x = E - 230 + 6; x < E - 3; x += 9) if (x > a + 2) { ctx.beginPath(); ctx.roundRect(x - 1.1, cy + 2.5, 2.2, 4.4, 1); ctx.fill(); ctx.beginPath(); ctx.arc(x, cy + 7, 1.5, 0, 7); ctx.fill(); }
+    ctx.fillStyle = '#d86a5a'; ctx.beginPath(); ctx.ellipse(a + .7, cy - .4, 1.5, 3.8, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#f2e8d2'; ctx.beginPath(); ctx.arc(a + .8, cy + 1.2, .9, 0, 7); ctx.fill();
+    if (depth > 0 && notchX < E) { ctx.strokeStyle = 'rgba(40,10,4,.9)'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(notchX, cy - 4.4); ctx.lineTo(notchX, cy - 4.4 + 8 * depth); ctx.stroke(); } }
+  ctx.fillStyle = '#f2e8d2'; ctx.beginPath(); ctx.roundRect(E - 1, cy - 1.5, 6, 3, 1.5); ctx.fill(); ctx.beginPath(); ctx.arc(E + 5, cy - 1.6, 1.8, 0, 7); ctx.arc(E + 5, cy + 1.6, 1.8, 0, 7); ctx.fill(); }
+function pieceR171(ii, x, yy, rot = 0, al = 1, sc = PS170) { if (ii < 2) { piece170(ii, x, yy, rot, al, sc); ctx.save(); ctx.globalAlpha *= al * .55; ctx.translate(x, yy); ctx.rotate(rot); ctx.scale(sc, sc); ctx.strokeStyle = '#fff'; ctx.lineWidth = .7; ctx.beginPath(); ctx.ellipse(0, 0, 3.4, 1.7, 0, 3.6, 5.2); ctx.stroke(); ctx.restore(); return; }
+  ctx.save(); ctx.globalAlpha *= al; ctx.translate(x, yy); ctx.rotate(rot); ctx.scale(sc, sc); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(.6, 2.6, 5.2, 1.8, 0, 0, 7); ctx.fill();
+  const g = ctx.createLinearGradient(0, -3.5, 0, 2.5); g.addColorStop(0, '#9a3a1a'); g.addColorStop(.4, '#c8603a'); g.addColorStop(1, '#5a1e10'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-4, -3.5, 8, 6, 2.2); ctx.fill(); ctx.strokeStyle = 'rgba(40,10,4,.55)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.moveTo(-2.5, -3.5); ctx.lineTo(0, -1); ctx.stroke();
+  ctx.fillStyle = '#f2e8d2'; ctx.beginPath(); ctx.roundRect(2.5, -.6, 4.5, 2, 1); ctx.fill(); ctx.beginPath(); ctx.arc(7, -.9, 1.3, 0, 7); ctx.arc(7, 1.3, 1.3, 0, 7); ctx.fill(); ctx.restore(); }
+const STY171 = { B: { board: boardB171, food: foodR171, piece: pieceR171 } };
+ING170[2] = 'Sausage'; ingCol170[2] = '#c86a4a';
+let SW172 = 15, X0172 = 0;
+function link172(l, r, cy, R) { const g = ctx.createLinearGradient(0, cy - R, 0, cy + R); g.addColorStop(0, '#e0906a'); g.addColorStop(.35, '#b8502e'); g.addColorStop(1, '#6a2412'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(l, cy - R, r - l, 2 * R, R); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,230,210,.5)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(l + R * .7, cy - R * .55); ctx.lineTo(r - R * .7, cy - R * .55); ctx.stroke(); ctx.fillStyle = 'rgba(255,220,190,.35)'; for (let x = l + 3; x < r - 2; x += 4) ctx.fillRect(x, cy + (Math.round(x) % 3) - .5, .8, .8); }
+function sausage172(a, E, cy, notchX, depth) { const R = 3.9, sw = SW172, x0 = X0172; if (E > a + 1) { ctx.fillStyle = 'rgba(40,20,8,.35)'; ctx.beginPath(); ctx.ellipse((a + E) / 2 + 1, cy + 5, (E - a) / 2 + 2, 2, 0, 0, 7); ctx.fill(); }
+  for (let l = x0; l < E - .5; l += sw) { const L0 = Math.max(a, l), R0 = Math.min(E, l + sw); if (R0 > L0 + 1.5) link172(L0 + .7, R0 - .7, cy, R); }
+  for (let l = x0 + sw; l < E - 1; l += sw) if (l > a + 1) { ctx.fillStyle = '#6a2412'; ctx.beginPath(); ctx.ellipse(l, cy, 1, 2, 0, 0, 7); ctx.fill(); if (depth > 0 && Math.abs(l - notchX) < .6) { ctx.strokeStyle = 'rgba(30,8,4,.9)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(l, cy - R); ctx.lineTo(l, cy - R + 2 * R * depth); ctx.stroke(); } } }
+function pieceS172(x, yy, rot = 0, al = 1) { const Lp = Math.min(SW172 - 1.4, 18), R = 3.4; ctx.save(); ctx.globalAlpha *= al; ctx.translate(x, yy); ctx.rotate(rot); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(.6, R + .6, Lp / 2, 1.5, 0, 0, 7); ctx.fill(); link172(-Lp / 2, Lp / 2, 0, R);
+  ctx.fillStyle = '#6a2412'; [-Lp / 2, Lp / 2].forEach(e => { ctx.beginPath(); ctx.arc(e, 0, .9, 0, 7); ctx.fill(); }); ctx.restore(); }
+{ const fR0 = STY171.B.food, pR0 = STY171.B.piece; STY171.B.food = (ii, a, E, cy, nx, d, t) => ii === 2 ? sausage172(a, E, cy, nx, d) : fR0(ii, a, E, cy, nx, d, t);
+  STY171.B.piece = (ii, x, yy, rot, al, sc) => ii === 2 ? pieceS172(x, yy, rot, al) : pR0(ii, x, yy, rot, al, sc); }
+PROF.Cooking.verb = 'cook';
+const UP174 = .85;
+function chopV174(o, a, b, rest, low) { if (!o || o.t < -.72 || o.t > .5) return null; const te = Math.max(0, o.t - .05);
+  if (o.t < -.47) { const u = eOut(clamp((o.t + .72) / .25)); return { x: lerp(a, b, u), e: rest - 2 * Math.sin(Math.PI * u), A: 0, w: 0, s: 1.1 }; }
+  if (o.t < -.18) { const u = eOut(clamp((o.t + .47) / .29)); return { x: b, e: lerp(rest, low, u), A: UP174 * u, w: .3 * u, s: 1.1 - .15 * u }; }
+  if (o.t < -.09) { const u = clamp((o.t + .18) / .09); return { x: b, e: low, A: UP174, w: .3 + .04 * Math.sin(Math.PI * u), s: .95, glint: 1 }; }
+  if (o.t < 0) { const u = clamp((o.t + .09) / .09), q = u * u; return { x: b, e: low, A: lerp(UP174, -.03, q), w: lerp(.3, 0, q), s: lerp(.95, 1.2, q), smear: u }; }
+  if (te < .06) return { x: b, e: low, A: -.03 * (1 - te / .06), w: 0, s: lerp(1.2, 1.1, te / .06), bite: 1 };
+  if (te < .16) return { x: b, e: low, A: 0, w: 0, s: 1.1, bite: 1 };
+  const u = clamp((te - .16) / .29); return { x: b, e: lerp(low, rest, eOut(u)), A: 0, w: .12 * Math.sin(u * 15) * (1 - u), s: 1.1, bite: u < .5 ? 1 : 0 }; }
+function drawArc174(c, dy, t, al = 1) { const Px = c.x + 40, Py = c.e + dy - 6; ctx.save(); ctx.globalAlpha *= al; ctx.translate(Px, Py); ctx.rotate(c.A || 0); ctx.translate(-Px, -Py); cleaver169(c.x, c.e + dy, c.w || 0, c.s);
+  if (c.glint) { const s = c.s; ctx.translate(c.x + 20 * s, c.e + dy - 7.5 * s); ctx.rotate(c.w); ctx.translate(-20 * s, 7.5 * s); ctx.fillStyle = '#fff'; star4(-5 * s, -9.5 * s, 3.6, t * 4); } ctx.restore(); }
+const restV174 = (G, k, ii, cy) => [G.sx(k) - 2.5, cy + (ii === 2 ? 4 : 4.5)];
+function plink174(ii, n, v) { if (ii === 2) { tone(196 * semi(n * .5), 0, .016 * v, .1, 'sine', null, .004); noise(0, .05, .004 * v, 500, .8, 'lowpass'); }
+  else { const f = 784 * semi(n * .5); tone(f, 0, .009 * v, .08, 'triangle', null, .002); tone(f * 2.01, 0, .003 * v, .05, 'sine', null, .002); } }
+const K174 = {};
+K174.B = { name: 'Chop v3', sty: 'B', finAt: 2.4, flip: true, rest: restV174,
+  desc: 'Chop v3 (locked): elbow-arc swing, the blade into the food, the slice pops left-front, flips, lands with a plink.',
+  draw(I, y, t, ts) { if (ts >= 0) return this.fin.call(this, I, y, t, ts); if (ingS170 !== S) { ingS170 = S; if (ingNext170 !== null) { ingI170 = ingNext170; ingNext170 = null; } }
+    const SF = STY171.B, x0 = I.x0, x1 = I.x1, Z = slots169(I), G = Z.G, N = G.N, sw = G.sw, per = G.per, lo = I.lo, E = x1 - 6, cy = y - 2, bt = y + 2.5, ii = ingI170;
+    PS170 = clamp(sw / 10.5, 1, 1.5); SW172 = sw; X0172 = x0;
+    const vD = S.v0 + S.hits.filter(h => S.age >= h + HIT).length, done = Math.min(N, Math.floor((vD - lo) / per + 1e-6)), part = done >= N ? 0 : clamp((vD - lo) / per - done);
+    const bx = k => Math.min(E - 2, x0 + (k + 1) * sw), a = Math.min(E, x0 + done * sw), o = cur167(I);
+    let anim = -1, te = 0; if (o && o.t >= 0 && o.t < .95) { const kc = Z.cutBy(o); if (kc >= 0) anim = kc; te = Math.max(0, o.t - .05); }
+    let jolt = 0, sq = 1, shx = 0, shy = 0; if (o && o.t >= 0 && o.t < .55) { const k = anim >= 0 ? 1.8 : .8; jolt = o.t < .05 ? k : k * Math.exp(-te * 11) * Math.cos(te * 40); if (te < .12) sq = 1 - (anim >= 0 ? .14 : .07) * (1 - te / .12); if (o.t >= .05 && o.t < .15) { const m = 1.2 * (1 - (o.t - .05) / .1); shx = (skHash(Math.floor(S.age * 60)) - .5) * 2 * m; shy = (skHash(Math.floor(S.age * 60) + 9) - .5) * 2 * m; } }
+    const tgt = o ? bx(Math.min(N - 1, Math.floor((S.v0 + o.i + 1 - lo) / per - 1e-6))) : 0, rest = cy - 6.5;
+    let c = o ? chopV174(o, Math.min(E - 2, a), tgt, rest, bt) : null; if (!c) c = { x: Math.min(E - 2, Math.max(x0, a)), e: rest, rot: 0, s: 1.1 };
+    const food = () => SF.food(ii, a, E, cy, bx(done), part, t);
+    ctx.save(); ctx.translate(shx, shy); ctx.save(); ctx.translate(0, jolt); SF.board(x0, x1, y, t);
+    ctx.strokeStyle = 'rgba(70,40,16,.5)'; ctx.lineWidth = .7; for (let k = 0; k < done; k++) { const nx = x0 + (k + 1) * sw + (skHash(k + 3) - .5) * 1.4; ctx.beginPath(); ctx.moveTo(nx - .6, cy + 3.6); ctx.lineTo(nx + .4, cy + 5.4); ctx.stroke(); } if (this.shaker) shaker175(I, Z, G, x0, cy, ii);
+    ctx.save(); ctx.translate(0, cy + 4.5); ctx.scale(1, sq); ctx.translate(0, -(cy + 4.5)); food(); ctx.restore(); ctx.restore();
+    // the cleaver (with a smear on the swing), then the near half of the food over its edge while it is in the cut
+    if (c.smear) for (let g = 3; g >= 1; g--) { const q = Math.max(0, c.smear - g * .2); if (q <= 0) continue; const qq = q * q; drawArc174({ x: c.x, e: c.e, A: lerp(UP174, -.03, qq), w: lerp(.3, 0, qq), s: lerp(.95, 1.2, qq) }, 0, t, .24 / g); }
+    drawArc174(c, jolt, t);
+    if (c.bite || (c.smear && c.smear > .85)) { ctx.save(); ctx.translate(0, jolt); ctx.beginPath(); ctx.rect(c.x - 8, cy - .8, 40, 10); ctx.clip(); ctx.translate(0, cy + 4.5); ctx.scale(1, sq); ctx.translate(0, -(cy + 4.5)); food(); ctx.restore(); }
+    // the pieces, in front of the cleaver
+    ctx.save(); ctx.translate(0, jolt);
+    for (let k = 0; k < done; k++) { let [rx, ry] = restV174(G, k, ii, cy); if (this.ripple) ry -= ripple175(I, Z, k, done); if (anim >= 0 && k === anim - 1 && te > .55 && te < .7) rx -= 1.2 * Math.sin(Math.PI * (te - .55) / .15);
+      if (k !== anim) { SF.piece(ii, rx, ry, ii === 2 ? 0 : -.15); continue; }
+      const cutX = x0 + (k + 1) * sw;
+      if (te < .05) { const p = te / .05; if (ii === 2) SF.piece(ii, G.sx(k) - 1.5 * p, cy + .5, 0); else { ctx.save(); ctx.translate(cutX - 3 - p, cy + 1); ctx.scale(.35, 1.73); SF.piece(ii, 0, 0, 0, 1); ctx.restore(); } continue; }
+      const u = clamp((te - .05) / .5), e = eOut(u), land = te > .55 && te < .63 ? Math.sin(Math.PI * (te - .55) / .08) : 0, b2 = te >= .63 && te < .78 ? 2.5 * Math.sin(Math.PI * (te - .63) / .15) : 0;
+      const x0p = ii === 2 ? G.sx(k) - 1.5 : cutX - 4, y0p = ii === 2 ? cy + .5 : cy + 1, x = lerp(x0p, rx, e), yy = lerp(y0p, ry, u) - 13 * Math.pow(Math.sin(Math.PI * u), .7) - b2;
+      if (ii === 2) { ctx.save(); ctx.translate(x, yy); ctx.scale(1 + .12 * land, 1 - .22 * land); SF.piece(ii, 0, 0, 2 * Math.PI * eOut(Math.min(1, u / .85))); ctx.restore(); continue; }
+      let sx = lerp(.35, 1, e), sy = lerp(1.73, 1, e); sy *= Math.max(.12, Math.abs(Math.cos(2 * Math.PI * eOut(Math.min(1, u / .85))))); sy *= 1 - .28 * land; sx *= 1 + .14 * land;
+      ctx.save(); ctx.translate(x, yy); ctx.rotate(-.15 * e); ctx.scale(sx, sy); SF.piece(ii, 0, 0, 0, 1); ctx.restore(); }
+    if (anim >= 0 && o.t > -.02 && te < .1) { const cutX = x0 + (anim + 1) * sw; ctx.save(); ctx.globalAlpha *= 1 - te / .1; ctx.strokeStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 5; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(cutX - .5, cy - 5); ctx.lineTo(cutX - .5, cy + 5); ctx.stroke(); ctx.restore(); } if (this.fx) { const A = { I, Z, G, x0, cy, bt, ii, o, anim, te, sw, t, c: c.x }; [].concat(this.fx).forEach(k => FX176[k](A)); }
+    ctx.restore(); ctx.restore();
+    hits101(I).forEach(h => { if (h.t >= .05) once('v3c' + h.i, () => { for (let q = 0; q < 6; q++) spawn({ x: c.x - 2, y: cy, vx: -10 - Math.random() * 45, vy: -15 - Math.random() * 30, g: 260, life: .3, size: .8, col: q % 2 ? '#f4ecd8' : ingCol170[ii] }); spawn({ x: c.x, y: bt, size: 1.5, shape: 'ring', grow: 12, life: .22, col: '#fff' }); }); }); },
+  snd(o, v, n) { if (o.t >= .05) once('v3s1' + o.i, () => ss167.thud(0, 95 * semi(n * .5), v * 1.1)); if (o.t >= .6 && S.p) once('v3s2' + o.i, () => { const lo = S.p.span[0], per = Math.max(1, S.nx.lv - lo) / Math.min(15, Math.max(1, S.nx.lv - lo)), a = Math.floor((S.v0 + o.i - lo) / per + 1e-6), b = Math.floor((S.v0 + o.i + 1 - lo) / per + 1e-6); if (b > a) plink174(ingI170, n, v); }); },
+  fsnd() {} };
+function ripple175(I, Z, k, done) { let off = 0; hits101(I).forEach(h => { if (h.t < .05 || h.t > 1.3) return; const kc = Z.cutBy(h), s = kc >= 0 ? kc - 1 : done - 1, amp = kc >= 0 ? 3.4 : 1.8; if (k > s) return;
+  const tj = h.t - .1 - (s - k) * .035; if (tj > 0 && tj < .16) off += amp * Math.sin(Math.PI * tj / .16); }); return off; }
+function shaker175(I, Z, G, x0, cy, ii) { const sx0 = x0 - 15, sy0 = cy - 1, h = ripple175(I, Z, -1, Z.done) * 1.3;
+  hits101(I).forEach(o => { const s = (Z.cutBy(o) >= 0 ? Z.cutBy(o) - 1 : Z.done - 1) + 1, tj = o.t - .1 - s * .035; if (tj >= .08) once('sg' + o.i, () => { for (let q = 0; q < 5; q++) spawn({ x: sx0 + (Math.random() - .5) * 3, y: sy0 - 12, vx: (Math.random() - .5) * 18, vy: -14 - Math.random() * 14, g: 90, life: .45, size: .8, col: q % 2 ? '#f8f4ec' : '#6a6058' }); }); });
+  ctx.fillStyle = 'rgba(40,20,8,.3)'; ctx.beginPath(); ctx.ellipse(sx0 + 1, sy0 + 1, 4 - h * .3, 1.4, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(sx0, sy0 - h); ctx.rotate(.06 * h * Math.sin(S.age * 40)); ctx.fillStyle = 'rgba(228,236,242,.92)'; ctx.beginPath(); ctx.roundRect(-3, -9, 6, 9, 1.5); ctx.fill(); ctx.fillStyle = '#fbf8f0'; ctx.fillRect(-2.3, -4.8, 4.6, 4.2);
+  ctx.strokeStyle = 'rgba(120,130,140,.7)'; ctx.lineWidth = .6; ctx.beginPath(); ctx.roundRect(-3, -9, 6, 9, 1.5); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(-2.2, -8.3, .9, 7);
+  ctx.fillStyle = '#a8acb4'; ctx.beginPath(); ctx.roundRect(-3.4, -11.6, 6.8, 3, 1.2); ctx.fill(); ctx.fillStyle = '#4a4e56'; [-1.6, 0, 1.6].forEach(d => { ctx.beginPath(); ctx.arc(d, -11, .45, 0, 7); ctx.fill(); }); ctx.restore(); }
+const hopAt176 = (A, k, te) => { const { G, x0, cy, ii, sw } = A, [rx, ry] = restV174(G, k, ii, cy), u = clamp((te - .05) / .5), x0p = ii === 2 ? G.sx(k) - 1.5 : x0 + (k + 1) * sw - 4, y0p = ii === 2 ? cy + .5 : cy + 1;
+  return [lerp(x0p, rx, eOut(u)), lerp(y0p, ry, u) - 13 * Math.pow(Math.sin(Math.PI * u), .7)]; };
+const FX176 = {
+  shing(A) { const { anim, te } = A; if (anim < 0 || te < .24 || te > .48) return; const [x, y] = hopAt176(A, anim, te), u = (te - .24) / .24, s = 8 * Math.sin(Math.PI * u);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = '#fff6d0'; ctx.shadowColor = '#ffe08a'; ctx.shadowBlur = 8; star4(x + 2, y - 2, s, .4 + u); ctx.strokeStyle = `rgba(255,250,220,${.8 * Math.sin(Math.PI * u)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 9 * u - 2, y - 2); ctx.lineTo(x + 9 * u + 6, y - 2); ctx.stroke(); ctx.restore();
+    if (te > .3) once('shg' + anim, () => { for (let q = 0; q < 3; q++) spawn({ x: x + (Math.random() - .5) * 8, y: y - 2 + (Math.random() - .5) * 6, shape: 'star', size: 1.8, life: .4, col: '#fff8e0', vr: 4 }); }); },
+};
+Object.assign(FX176, {
+  wave(A) { const { o, bt, cy, c } = A; if (!o || o.t < 0 || o.t > .4) return; const u = o.t / .4, d = 4 + 70 * eOut(u), al = 1 - u; ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(255,220,160,${.14 * al})`; ctx.fillRect(c - d, bt - .5, 2 * d, 2.5); ctx.strokeStyle = `rgba(255,240,200,${.95 * al})`; ctx.lineWidth = .5 + 1.6 * al; ctx.lineCap = 'round';
+    [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(c + s * d, bt + .6); ctx.lineTo(c + s * Math.max(2, d - 3 - 12 * al), bt + .6); ctx.stroke(); });
+    if (o.t < .1) { ctx.strokeStyle = `rgba(255,255,255,${1 - o.t / .1})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 6; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(c - .5, cy - 6); ctx.lineTo(c - .5, bt + 1); ctx.stroke(); } ctx.restore(); },
+  chunks(A) { const { o, bt, cy, c, ii } = A; if (!o || o.t < 0 || o.t > .6) return; const col = ingCol170[ii];
+    if (o.t >= .03) once('ck' + o.i, () => { for (let q = 0; q < 12; q++) spawn({ x: c - 1, y: cy + 1, vx: (Math.random() - .62) * 95, vy: -40 - Math.random() * 65, g: 420, life: .5 + Math.random() * .25, size: .8 + Math.random() * .8, shape: 'sq', rot: Math.random() * 3, vr: (Math.random() - .5) * 22, col: q % 3 ? col : '#fff0d8' }); for (let q = 0; q < 4; q++) spawn({ x: c - 2, y: bt, vx: (Math.random() - .5) * 40, vy: -10 - Math.random() * 15, g: 200, life: .3, size: .7, col: 'rgba(255,255,255,.8)' }); });
+    if (o.t >= .03) { const u = (o.t - .03) / .57; ctx.save(); ctx.globalAlpha *= .65 * (1 - u); ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(c - 3, bt + 1.6, 3 + 2 * eOut(Math.min(1, u * 4)), 1.2, 0, 0, 7); ctx.fill(); [[-7, .8], [2, 1.4], [-11, 2]].forEach(([dx, dy]) => { ctx.beginPath(); ctx.arc(c + dx, bt + dy, .7, 0, 7); ctx.fill(); }); ctx.restore(); } } });
+const MC178 = [['#e0701a', '#ffb060'], ['#2f6a2a', '#d8eeb0'], ['#8a3018', '#d07a52']];
+function shakerAt178(x, y, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = 'rgba(228,236,242,.92)'; ctx.beginPath(); ctx.roundRect(-3, -9, 6, 9, 1.5); ctx.fill(); ctx.fillStyle = '#fbf8f0'; ctx.fillRect(-2.3, -4.8, 4.6, 4.2);
+  ctx.strokeStyle = 'rgba(120,130,140,.7)'; ctx.lineWidth = .6; ctx.beginPath(); ctx.roundRect(-3, -9, 6, 9, 1.5); ctx.stroke(); ctx.fillStyle = '#a8acb4'; ctx.beginPath(); ctx.roundRect(-3.4, -11.6, 6.8, 3, 1.2); ctx.fill(); ctx.restore(); }
+function fin179(I, y, t, ts) { const SF = STY171.B, x0 = I.x0, x1 = I.x1, ux = x1 + 18, G = slots169(I).G, N = G.N, sw = G.sw, E = x1 - 6, cy = y - 2, bt = y + 2.5, ii = ingI170, H = E - 18, rest = cy - 6.5, c = MC178[ii];
+  PS170 = clamp(sw / 10.5, 1, 1.5); SW172 = sw; X0172 = x0;
+  const SX = (x0 + H) / 2, L0 = FP167 + .07, IX = H + 8, BX = H - 19, M = 48, mv = ts - .8, mph = 2 * Math.PI * (2.6 * mv + 3.4 * mv * mv), mch = mv > 0 && ts < FB167 ? Math.floor(mph / (2 * Math.PI) + .5) : (ts >= FB167 ? 6 : 0), lv = Math.min(6, mch) / 6;
+  let shx = 0, shy = 0; const hit = (a, d, m) => { if (ts >= a && ts < a + d) { const k = m * (1 - (ts - a) / d); shx += (Math.random() - .5) * k; shy += (Math.random() - .5) * k; } }; hit(.14, .2, 2.4); hit(L0, .3, 3);
+  ctx.save(); ctx.translate(shx, shy); SF.board(x0, x1, y, t);
+  // the bowl: slides on from the start during the payoff, fills with the falling mince, hops into the recipe
+  const bIn = clamp((ts - L0) / .3), bHop = clamp((ts - 2.6) / .35); let bx = lerp(x0 - 22, BX, eOut(bIn)), by = bt + 3 + (ts > 2 && ts < 2.55 ? .8 * Math.abs(Math.sin(ts * 30)) * (1 - (ts - 2) / .55) : 0); if (bIn >= 1) once('bp', () => puff167(BX, bt + 3, 6, 'rgba(230,215,190,.6)', 40, 8)); const sc = 1 - .3 * bHop; if (bHop > 0) { bx = lerp(BX, ux, eOut(bHop)); by = lerp(bt + 3, y + 4, bHop) - 24 * Math.sin(Math.PI * bHop); }
+  const fill = clamp((ts - 2.0) / .5);
+  const bowl = () => { if (ts < L0 || bHop >= 1) return; ctx.save(); ctx.translate(bx, by); ctx.scale(sc, sc); ctx.fillStyle = 'rgba(40,20,8,.35)'; ctx.beginPath(); ctx.ellipse(1, 1, 12, 2.2, 0, 0, 7); ctx.fill();
+    const g = ctx.createLinearGradient(0, -9, 0, 0); g.addColorStop(0, '#b07a44'); g.addColorStop(1, '#6a4424'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, -8, 13, 8, 0, 0, Math.PI); ctx.fill(); ctx.fillStyle = '#4a2c14'; ctx.beginPath(); ctx.ellipse(0, -8, 13, 2.6, 0, 0, 7); ctx.fill();
+    if (fill > 0) { ctx.fillStyle = c[0]; const fw = Math.min(1, fill * 1.6); ctx.beginPath(); ctx.ellipse(0, -8, 12.6 * fw, 2.5 * fw, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(0, -8 - 2.5 * fill, 11.5 * Math.min(1, fill * 1.6), 2 + 2.5 * fill, 0, Math.PI, 0); ctx.fill(); ctx.fillStyle = c[1]; for (let q = 0; q < 9 * fill; q++) ctx.fillRect(-8 + skHash(q + 3) * 16, -9 - 3.5 * fill * skHash(q + 5), 1.3, 1); }
+    ctx.strokeStyle = 'rgba(255,230,190,.35)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.ellipse(0, -8, 13, 2.6, 0, Math.PI, 0); ctx.stroke(); ctx.restore(); };
+  bowl();
+  // the shaker: home; a quick sprinkle over the full bowl, then home
+  { const sx0 = x0 - 15, sy0 = cy - 1, tp = [BX - 10, bt - 16]; let sp = [sx0, sy0], sr = 0; if (ts >= 2.3 && ts < 2.45) { const p = (ts - 2.3) / .15; sp = [lerp(sx0, tp[0], p), lerp(sy0, tp[1], p) - 12 * Math.sin(Math.PI * p)]; sr = 2.3 * p; }
+    else if (ts >= 2.45 && ts < 2.58) { sp = tp; sr = 2.3 + .3 * Math.sin(ts * 55); const st = Math.floor(ts * 45); once('sb' + st, () => { for (let q = 0; q < 3; q++) spawn({ x: tp[0] + 8, y: tp[1] + 4, vx: 15 + Math.random() * 20, vy: 10 + Math.random() * 15, g: 160, life: .3, size: .9, col: q % 2 ? '#f8f4ec' : '#6a6058' }); if (st % 2) spawn({ x: BX + (Math.random() - .5) * 14, y: bt - 7, shape: 'star', size: 2.2, life: .35, col: '#fff8e0', vr: 3 }); }); }
+    else if (ts >= 2.58 && ts < 2.85) { const p = (ts - 2.58) / .27; sp = [lerp(tp[0], sx0, p), lerp(tp[1], sy0, p) - 12 * Math.sin(Math.PI * p)]; sr = 2.3 * (1 - p); } shakerAt178(sp[0], sp[1], sr); }
+  // the coins: launched by the slam, halved by the slash, rain into the heap; then the heap minces finer chop by chop
+  const slx = lerp(x0 - 12, E + 4, clamp((ts - .3) / .12)), heapAt = (j, n) => { const dx = (skHash(j * 3 + 1) - .5) * 18; return [H + dx, cy + 4.6 - Math.max(0, (1 - Math.abs(dx) / 10) * 8 * skHash(j + 7))]; };
+  const cloudAt = k => [BX - 16 + skHash(k + 11) * 32, cy - 13 - skHash(k + 13) * 7];
+  if (mch <= 0) for (let k = 0; k < N; k++) { const [rx, ry] = restV174(G, k, ii, cy), up = eOut(clamp((ts - .14) / .18)), ay = ry - (13 + 4 * skHash(k + 2)) * up, r0 = up * 5 * (skHash(k) - .5);
+      if (ts < .3 || slx < rx) { SF.piece(ii, rx, ay, r0 - .15); continue; }
+      const cut = clamp((ts - .3 - (rx - x0) / (E - x0) * .12) / .1); [-1, 1].forEach((s, h) => { const j = k * 2 + h, v = clamp((ts - .42 - k * .012) / .33), [hx, hy] = heapAt(j, 2 * N), x = lerp(rx + s * 2.5 * cut, hx, eOut(v)), yy = lerp(ay, hy, v * v);
+        ctx.save(); ctx.beginPath(); ctx.rect(s < 0 ? x - 12 : x, yy - 12, 12, 24); ctx.clip(); SF.piece(ii, x, yy, r0 * (1 - v) - .15 + s * .3 * v); ctx.restore(); if (cut > 0) { ctx.fillStyle = c[1]; ctx.fillRect(x - .6, yy - 3.2 * PS170, 1.2, 5 * PS170); } }); }
+  else if (ts < L0 + 1.5) { const cnt = Math.round(lerp(2 * N, M, lv)), sz = lerp(3.6, 1.4, lv);
+    for (let k = 0; k < cnt; k++) { let [hx, hy] = heapAt(k, cnt), r = k;
+      if (ts >= L0) { const v = ts - L0 - (k % 7) * .01, p = eOut(clamp(v / .3)), [cx2, cy2] = cloudAt(k); hx = lerp(hx, cx2, p); hy = lerp(hy, cy2, p) + Math.sin(t * 6 + k) * p; r += v * 6;
+        const w = clamp((ts - 2.0 - k * .004) / .3); if (w >= 1) continue; if (w > 0) { hx = lerp(hx, BX + (skHash(k + 4) - .5) * 14, w); hy = lerp(hy, bt - 7, w * w); } }
+      ctx.save(); ctx.translate(hx, hy); ctx.rotate(r); ctx.fillStyle = 'rgba(40,16,6,.55)'; ctx.beginPath(); ctx.ellipse(.3, .4, sz * .62, sz * .5, 0, 0, 7); ctx.fill(); ctx.fillStyle = c[0]; ctx.beginPath(); ctx.ellipse(0, 0, sz * .55, sz * .44, 0, 0, 7); ctx.fill(); ctx.fillStyle = c[1]; ctx.beginPath(); ctx.ellipse(-sz * .12, -sz * .12, sz * .28, sz * .2, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    if (ts >= L0) for (let j = 0; j < 8; j++) if (ts >= L0 + .22 + j * .03) once('cs' + j, () => { const [cx2, cy2] = cloudAt(j * 5); spawn({ x: cx2, y: cy2, shape: 'star', size: 3, life: .35, col: '#fff6d0', vr: 4 }); }); }
+  { const w = clamp((ts - 2.15) / .3); if (w < 1) { ctx.save(); if (ts >= L0) { const p = eOut(clamp((ts - L0) / .3)); ctx.translate(lerp(0, BX + 6 - E, Math.max(p * .3, w)), -16 * p * (1 - w) + lerp(0, bt - 6 - cy, w)); } SF.food(ii, E, E, cy, 0, 0, t); ctx.restore(); } }
+  if (ingNext170 !== null && ts >= 3.3) { const si = clamp((ts - 3.3) / .5); ctx.save(); ctx.globalAlpha *= clamp(si * 3); ctx.translate(lerp(-80, 0, eOut(si)), 0); SF.food(ingNext170, x0, E, cy, 0, 0, t); ctx.restore(); }
+  if (ts >= .14 && ts < .5) FX176.wave({ o: { t: ts - .14 }, bt, cy, c: SX }); if (ts >= L0 && ts < L0 + .4) FX176.wave({ o: { t: ts - L0 }, bt, cy, c: IX });
+  ctx.restore();
+  // the cleaver: lift, slam, the slash across, mince, flip and hang, stuck, pull free, home
+  const spin = (x, yy, a, g) => { ctx.save(); ctx.translate(x, yy); ctx.rotate(a); cleaver169(-5.5, 6.6, 0, 1.1); if (g) { ctx.fillStyle = '#fff'; star4(-10, -3, 5, t * 4); } ctx.restore(); }, apex = [H + 4, cy - 34];
+  if (ts < .14) { const p = ts / .14; cleaver169(lerp(E - 2, SX, p), lerp(rest, rest - 12, Math.sin(Math.PI * p * .8)) + (p > .8 ? (p - .8) * 5 * (bt - rest + 12) : 0), .5 * Math.sin(Math.PI * p), 1.1); }
+  else if (ts < .3) { const p = (ts - .14) / .16; cleaver169(SX, lerp(bt, cy - 20, eOut(p)), 0, 1.1); }
+  else if (ts < .42) { spin(slx, cy - 13, -Math.PI / 2, 0); ctx.save(); ctx.strokeStyle = 'rgba(255,250,230,.9)'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 6; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x0 - 12, cy - 13); ctx.lineTo(slx, cy - 13); ctx.stroke(); ctx.restore(); }
+  else if (ts < .8) { const p = clamp((ts - .42) / .3); ctx.save(); ctx.globalAlpha *= 1 - clamp((ts - .42) / .12); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x0 - 12, cy - 13); ctx.lineTo(E + 4, cy - 13); ctx.stroke(); ctx.restore(); spin(lerp(E + 4, H - 4, eOut(p)), lerp(cy - 13, rest - 6, p), lerp(-Math.PI / 2, 0, eOut(p)), 0); }
+  else if (ts < FB167) { const cc = (1 + Math.cos(mph)) / 2; cleaver169(H - 4 + 5 * Math.sin(mch * 2.3), lerp(bt, rest - 2, cc), .3 * cc, 1.1);
+    once('fm' + mch, () => { if (mch > 0) { if (this.sx) this.sx.mince(mch); else ss167.thud(0, 110 * semi(PENT42[mch % 10] * .5), .3 + mch * .05); for (let q = 0; q < 5; q++) spawn({ x: H + (Math.random() - .5) * 10, y: cy + 1, vx: (Math.random() - .5) * 60, vy: -20 - Math.random() * 40, g: 380, life: .35, size: .8, shape: 'sq', vr: 12, col: c[q % 2] }); } }); }
+  else if (ts < FP167) { const p = clamp((ts - FB167) / .2); spin(lerp(H, apex[0], eOut(p)), lerp(cy - 6, apex[1], eOut(p)), 4 * Math.PI * eOut(p), p >= 1); }
+  else if (ts < L0) { const p = (ts - FP167) / (L0 - FP167); spin(lerp(apex[0], IX + 5, p), lerp(apex[1], bt - 6, p * p), 0, 0); }
+  else if (ts < 2.9) { const v = ts - L0; cleaver169(IX, bt + 3, .12 * Math.sin(v * 40) * Math.exp(-v * 5), 1.1); }
+  else { const p = clamp((ts - 2.9) / .55); cleaver169(lerp(IX, x0, eOut(p)), lerp(bt + 3, rest, Math.min(1, p * 3)) - 6 * Math.sin(Math.PI * p), 0, 1.1); }
+  if (ts >= .14) once('slam', () => { glow167(SX, bt, 70, .45, '255,240,220'); spawn({ x: SX, y: bt, size: 5, shape: 'ring', grow: 70, life: .5, col: '#fff' }); });
+  if (ts >= L0) once('fx179', () => { ingNext170 = (ii + 1 + Math.floor(Math.random() * (ING170.length - 1))) % ING170.length; glow167(IX, bt, 110, .6, '255,240,220'); spawn({ x: IX, y: bt, size: 6, shape: 'ring', grow: 90, life: .6, col: '#fff' }); spawn({ x: IX, y: bt, size: 10, shape: 'ring', grow: 140, life: .8, col: '#ffd070' }); for (let q = 0; q < 12; q++) spawn({ x: IX, y: cy, vx: (Math.random() - .5) * 110, vy: -40 - Math.random() * 60, g: 420, life: .5, size: 1, shape: 'sq', vr: 15, col: c[q % 2] }); }); }
+const K179 = { A: Object.assign({}, K174.B, { name: 'Finale v2', ripple: true, shaker: true, fx: ['shing', 'wave', 'chunks'], fin: fin179, finAt: 2.95,
+  desc: 'Finale v2 (locked).',
+  fsnd(ts) { if (ts >= .14) once('g1', () => { ss167.thud(0, 80, 1); ss167.soft(0, .15, .8, 500); }); if (ts >= .3) once('g2', () => ss167.soft(0, .15, 1.2, 1600)); if (ts >= FP167 + .07) once('g3', () => { ss167.boom(0); ss167.thud(0, 70, 1.2); }); if (ts >= 2.0) once('g4', () => ss167.soft(0, .4, .7, 900)); if (ts >= 2.45) once('g5', () => ss167.soft(0, .15, .5, 2400)); if (ts >= 2.6) once('g6', () => ss167.blip(0, 7, .6, 330)); } }) };
+Object.assign(FAM, { PA: r167('A', K179) }); ['PB', 'PC', 'PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]); fam = 'PA';
+setTimeout(() => { const m = document.getElementById('boostB'); if (!m || document.getElementById('hearC')) return; [['hearC', 'Hear the chop', () => SX181.tock(4, 1)], ['hearU', 'Hear the unlock', () => SX181.pay()]].forEach(([id, t, fn]) => { const b = document.createElement('button'); b.id = id; b.textContent = t; b.onclick = fn; m.parentNode.appendChild(b); }); }, 600);
+const SX182 = {
+  chop(n, v, ii) { tone(95, 0, .02 * v, .14, 'sine', null, .002); tone(185 * semi(n * .25), 0, .016 * v, .09, 'triangle', null, .002); noise(0, .03, .012 * v, 2200, 1.5, 'bandpass', true);
+    if (ii < 2) { noise(.004, .05, .011 * v, 3600, .9, 'bandpass', true); noise(.022, .04, .007 * v, 4200, 1.1, 'bandpass', true); } else noise(0, .07, .009 * v, 900, .8, 'lowpass', true); },
+  shing(n, v, b = 1) { tone(2794 * semi(n * .15), 0, .0022 * v * b, .2 * b, 'sine', null, .002); tone(4186 * semi(n * .15), 0, .0012 * v * b, .14 * b, 'sine', null, .002); noise(0, .06 * b, .0018 * v * b, 6500, 3, 'bandpass', true); },
+  tok(n, v, ii) { if (ii === 2) { tone(190 * semi(n * .3), 0, .014 * v, .08, 'sine', null, .006); noise(0, .04, .005 * v, 600, .8, 'lowpass', true); } else { tone(660 * semi(n * .25), 0, .008 * v, .06, 'triangle', null, .002); noise(0, .02, .006 * v, 1800, 2.5, 'bandpass', true); } },
+  mince(m) { SX182.chop(PENT42[m % 10] * 1.2, .55 + m * .07, ingI170); },
+  pay() { [4, 7, 11].forEach((n, i) => setTimeout(() => SX182.tok(n, 1, 0), i * 110)); tone(98, .2, .007, .6, 'sine', null, .1); tone(147, .2, .005, .6, 'sine', null, .1); } };
+const cutAt182 = o => { if (!S.p) return false; const lo = S.p.span[0], g = Math.max(1, S.nx.lv - lo), per = g / Math.min(15, g); return Math.floor((S.v0 + o.i + 1 - lo) / per + 1e-6) > Math.floor((S.v0 + o.i - lo) / per + 1e-6); };
+const K182 = {};
+K182.B = Object.assign({}, K179.A, { name: 'Sound: Butcher’s board v2', sx: SX182, pay: SX182.pay,
+  desc: 'v2: each skill-up a fuller chop (blade tick, board thock, the crunch; a squish for sausage), a soft blade shing as the slice peaks, a woody tok as it lands. Finale with a shape: a weighty slam, a shing on the slash, mince climbing over a stepped drone, a whup-whup flip, near-silence, a big THUNK, a patter into the bowl, three rising toks to close.',
+  snd(o, v, n) { if (o.t >= .05) once('c2c' + o.i, () => SX182.chop(n, v, ingI170)); if (o.t >= .35) once('c2s' + o.i, () => { if (cutAt182(o)) SX182.shing(n, v); }); if (o.t >= .6) once('c2t' + o.i, () => { if (cutAt182(o)) SX182.tok(n, v, ingI170); }); },
+  fsnd(ts) { const L0 = FP167 + .07, at = (k, s, f) => { if (ts >= s) once('c2f' + k, f); };
+    at(1, .14, () => { tone(50, 0, .032, .35, 'sine', null, .003); tone(150, 0, .02, .12, 'triangle', null, .002); noise(0, .18, .016, 350, .8, 'lowpass', true); noise(.02, .18, .006, 900, .8, 'bandpass'); });
+    at(2, .3, () => { SX182.shing(5, 1.6, 1.5); noise(0, .1, .009, 2600, 1.2, 'bandpass'); });
+    at(3, .45, () => { for (let i = 0; i < 8; i++) { tone(520 * semi(PENT42[i % 10] * .3), i * .04, .004, .04, 'triangle', null, .002); noise(i * .04, .012, .003, 2000, 3, 'bandpass', true); } });
+    [.8, 1, 1.15].forEach((s, k) => at(10 + k, s, () => { const f = 55 * semi([0, 2, 5][k]); tone(f, 0, .009 + .003 * k, .35, 'sine', null, .08); tone(f * 2, 0, .003 + .001 * k, .3, 'sine', null, .08); }));
+    at(4, FB167, () => [0, .07, .13, .18].forEach((d, i) => noise(d, .05, .005 * (1 - i * .15), 700, 1.2, 'bandpass')));
+    at(5, 1.5, () => tone(1760, 0, .004, .15, 'sine', null, .003)); at(6, FP167, () => noise(0, .07, .008, 500, .7, 'lowpass'));
+    at(7, L0, () => { tone(45, 0, .04, .5, 'sine', null, .003); tone(110, 0, .025, .2, 'triangle', null, .002); noise(0, .25, .022, 380, .8, 'lowpass', true); noise(0, .04, .014, 2000, 1.4, 'bandpass', true); [0, .06, .12, .18].forEach((d, i) => tone(620, .05 + d, .0016 * (1 - i * .2), .05, 'sine', null, .002)); });
+    at(8, 1.85, () => { for (let i = 0; i < 6; i++) tone(2400 * semi(PENT42[i] * .2), i * .05, .0015, .08, 'sine', null, .002); });
+    at(9, 2.0, () => { for (let i = 0; i < 10; i++) noise(i * .04, .015, .004 * (1 - i * .06), 1600, 4, 'bandpass', true); noise(0, .45, .004, 600, .7, 'lowpass'); });
+    at(13, 2.45, () => { noise(0, .05, .004, 3000, 2, 'bandpass'); noise(.08, .05, .004, 3000, 2, 'bandpass'); }); at(14, 2.6, () => SX182.tok(7, .9, 0)); } });
+setTimeout(() => { const c = document.getElementById('hearC'), u = document.getElementById('hearU'); if (c) { c.textContent = 'Hear the chop (v2)'; c.onclick = () => SX182.chop(4, 1, ingI170); } if (u) { u.textContent = 'Hear the unlock (v2)'; u.onclick = () => SX182.pay(); } }, 900);
+// round 183: sound v3, warm and simple (user on v2: "a lot going on in the finale; the regular sounds too tinky").
+const SX183 = {
+  chop(n, v, ii) { tone(95, 0, .02 * v, .14, 'sine', null, .002); tone(160 * semi(n * .25), 0, .016 * v, .09, 'triangle', null, .002);
+    if (ii < 2) { noise(.004, .05, .01 * v, 1700, .8, 'bandpass', true); noise(.022, .035, .006 * v, 2000, 1, 'bandpass', true); } else noise(0, .07, .009 * v, 800, .8, 'lowpass', true); },
+  land(n, v, ii) { if (ii === 2) { tone(180 * semi(n * .3), 0, .013 * v, .08, 'sine', null, .006); noise(0, .04, .005 * v, 500, .8, 'lowpass', true); }
+    else { tone(330 * semi(n * .25), 0, .009 * v, .07, 'triangle', null, .003); tone(165 * semi(n * .25), 0, .006 * v, .08, 'sine', null, .003); noise(0, .025, .004 * v, 900, .8, 'lowpass', true); } },
+  mince(m) { SX183.chop(PENT42[m % 10] * 1.2, .55 + m * .07, ingI170); },
+  pay() { [0, 4, 7].forEach((n, i) => setTimeout(() => SX183.land(n, 1, 0), i * 110)); tone(98, .2, .007, .6, 'sine', null, .1); tone(147, .2, .005, .6, 'sine', null, .1); } };
+const K183 = { A: Object.assign({}, K182.B, { name: 'Sound v2' }) };
+K183.B = Object.assign({}, K182.B, { name: 'Sound v3: warm', sx: SX183, pay: SX183.pay,
+  desc: 'v3, warmer and simpler. Each skill-up two sounds: the chop (a weighted board thock and a warm, rounded crunch; a squish for sausage; no bright tick) and a low wooden tock as the slice lands (a plop for sausage); the shing is silent. Finale: six sounds, one per beat: the slam, a soft air shhk for the slash, the mince chops climbing, the THUNK when it sticks, one soft pour into the bowl, and the unlock (three rising low woody toks over a warm tone). The held beat is silent.',
+  snd(o, v, n) { if (o.t >= .05) once('c3c' + o.i, () => SX183.chop(n, v, ingI170)); if (o.t >= .6) once('c3t' + o.i, () => { if (cutAt182(o)) SX183.land(n, v, ingI170); }); },
+  fsnd(ts) { const L0 = FP167 + .07, at = (k, s, f) => { if (ts >= s) once('c3f' + k, f); };
+    at(1, .14, () => { tone(50, 0, .032, .35, 'sine', null, .003); tone(150, 0, .02, .12, 'triangle', null, .002); noise(0, .18, .016, 350, .8, 'lowpass', true); });
+    at(2, .3, () => noise(0, .12, .008, 1400, .8, 'bandpass'));
+    at(3, L0, () => { tone(45, 0, .04, .5, 'sine', null, .003); tone(110, 0, .025, .2, 'triangle', null, .002); noise(0, .25, .022, 380, .8, 'lowpass', true); });
+    at(4, 2.0, () => noise(0, .5, .006, 700, .7, 'lowpass')); } });
+Object.assign(FAM, { PA: r167('A', K183), PB: r167('B', K183) }); ['PC', 'PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]); fam = 'PB';
+setTimeout(() => { const c = document.getElementById('hearC'), u = document.getElementById('hearU'); if (c) { c.textContent = 'Hear the chop (v3)'; c.onclick = () => SX183.chop(4, 1, ingI170); } if (u) { u.textContent = 'Hear the unlock (v3)'; u.onclick = () => SX183.pay(); } }, 1000);
+setTimeout(() => { const row = document.createElement('div'); row.innerHTML = '<small>Ingredient (A): </small>' + ING170.map((n, i) => `<button data-ing="${i}">${n}</button>`).join(' '); const gap = [...document.querySelectorAll('[data-gap]')].pop(); (gap ? gap.parentNode : document.querySelector('[data-m="unlock"]').parentNode).after(row);
+  const mark = () => row.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.ing === ingI170)); row.querySelectorAll('button').forEach(b => b.onclick = () => { ingI170 = +b.dataset.ing; ingNext170 = null; mark(); play(); }); mark(); setInterval(mark, 500); }, 0);
+setTimeout(() => { profName = 'Cooking'; fam = 'PB'; if (typeof sync === 'function') sync(); const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 260);
+
+// ========== Enchanting round 184, the unpicked B Runed rod and G Runestone frame (moved out 2026-11-19; helpers RUNES184/rune184/vd184/sl184 stay on the page) ==========
+// B. Runed rod: a copper rod, crystal head at the start; a crystal stylus etches runes; a pulse runs back to the head
+EN184.B = { name: 'Runed rod', finAt: FP184 + .2,
+  desc: 'A long runed copper rod with a violet crystal head at the start. Each skill-up a crystal stylus glides to the next spot and etches a rune into the copper (a long gap etches it a bit each point); the rune flares and a pulse of light runs back along the rod into the crystal head. Finale: the runes ignite one by one as the rod heats, a held beat with only the crystal glinting, then the head fires an arc of light over the rod into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.45), G = sl184(I, v), xa = I.x0 - 4, xb = I.x1 + 2, r = 5.5, hx = I.x0 - 13, ux = I.x1 + 18;
+    const heat = ts < 0 ? 0 : ts < FB184 ? ts / FB184 : ts < FP184 ? .12 : Math.max(0, 1 - (ts - FP184) / 1.4) * .9, held = ts >= FB184 && ts < FP184, pay = ts >= FP184 ? clamp(1 - (ts - FP184) / .8) : 0;
+    ctx.save(); const g = ctx.createLinearGradient(0, y - r, 0, y + r); g.addColorStop(0, mix('#b06a32', '#c8a8ff', heat)); g.addColorStop(.3, mix('#f0b070', '#fff0ff', heat)); g.addColorStop(1, mix('#4a2410', '#3a2068', heat));
+    if (heat > .05) { ctx.shadowColor = '#a07aff'; ctx.shadowBlur = 16 * heat; } ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(xa, y - r, xb - xa, 2 * r, r); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(30,12,4,.85)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(40,16,4,.5)'; [xa + 5, xb - 5].forEach(x => ctx.fillRect(x, y - r + .5, 2, 2 * r - 1)); ctx.restore();
+    // the pulse back to the head after a rune lands; the head flashes when it arrives
+    let headFl = 0; if (o && o.t >= 0) { const k = G.kOf(S.v0 + o.i), u = o.t / .45; if (u < 1) { const px = lerp(G.sx(k), hx + 4, eOut(u)); glow184(px, y, 12, .9); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(230,215,255,.7)'; ctx.fillRect(px - 5, y - 2.5, 10, 1.5); ctx.restore(); } else headFl = clamp(1 - (o.t - .45) / .5); if (u >= 1) once('enhd' + o.i, () => spawn({ x: hx, y, size: 5, shape: 'ring', grow: 12, life: .45, col: '#dcd0ff' })); }
+    // the runes: scratched guides, then glowing cuts
+    for (let k = 0; k < G.N; k++) { const x = G.sx(k), q = G.fr(k), rs = Math.min(3.8, G.sw * .3);
+      rune184(rk184(k), x, y, rs, 1, 'rgba(50,20,6,.5)', 1);
+      if (q > 0) { let b = 0; if (o && o.t >= 0 && G.kOf(S.v0 + o.i) === k) b = clamp(1 - o.t / .7);
+        if (ts >= 0 && ts < FB184) { const ig = ts - k / G.N * 1.1; b = Math.max(b, ig >= 0 ? clamp(1 - ig / .35) + .5 : 0); }
+        if (pay > 0) b = Math.max(b, pay);
+        ctx.save(); if (held) ctx.globalAlpha *= .3; rune184(rk184(k), x, y, rs, q, mix('#b890ff', '#ffffff', clamp(b)), 1.6, b > .1 ? '#c8a8ff' : '#7a4ae0'); ctx.restore(); if (b > .3) glow184(x, y, 9, b * .5); } }
+    // the crystal head
+    const hg = .35 + headFl * .6 + (ts >= 0 && ts < FB184 ? ts / FB184 * .6 : 0) + pay;
+    ctx.save(); ctx.fillStyle = '#5a3018'; ctx.fillRect(hx + 4, y - 3.5, 4, 7); ctx.translate(hx, y); const cg = ctx.createLinearGradient(-6, 0, 6, 0); cg.addColorStop(0, '#e8dcff'); cg.addColorStop(.5, '#9a6ae8'); cg.addColorStop(1, '#4a2a9a');
+    ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 6 + 10 * Math.min(1.5, hg); ctx.fillStyle = cg; ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(0, -5.5); ctx.lineTo(5, 0); ctx.lineTo(0, 5.5); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-5, -.5); ctx.lineTo(0, -4.5); ctx.stroke(); ctx.restore(); glow184(hx, y, 14, hg * .5);
+    if (held) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; const gl = Math.sin(clamp((ts - FB184) / (FP184 - FB184)) * Math.PI); ctx.globalAlpha *= gl; star4(hx - 1, y - 2, 3 + gl * 4, ts * 2); ctx.restore(); }
+    // the stylus: rests above the last rune, glides to the next, traces it
+    const kCur = o ? G.kOf(S.v0 + o.i) : G.kOf(Math.max(I.lo, v - 1e-3)), kPrev = o ? G.kOf(Math.max(I.lo, S.v0 + o.i - 1e-3)) : kCur; let sx = G.sx(kCur), sy = y - 7;
+    if (o && o.t < -.45) { const u = eOut(clamp((o.t + 1) / .45)); sx = lerp(G.sx(kPrev), G.sx(kCur), u); sy = y - 7 - Math.sin(u * Math.PI) * 2; }
+    else if (o && o.t < 0) { const pen = rune184(rk184(kCur), G.sx(kCur), y, Math.min(3.8, G.sw * .3), G.fr(kCur), 'rgba(255,255,255,.9)', 1.2, '#fff'); const d = clamp((o.t + .45) / .08); if (pen) { sx = lerp(sx, pen.x, d); sy = lerp(y - 7, pen.y, d); }
+      if (d >= 1 && Math.floor(o.t * 40) % 3 === 0) once('ens' + o.i + Math.floor(o.t * 40), () => sparks184(sx, sy, 1, 30, 20)); glow184(sx, sy, 6, .8, '230,215,255'); }
+    else if (o && o.t < .3) { const u = eOut(clamp(o.t / .3)); sy = lerp(y - 4, y - 7, u); }
+    if (ts >= FP184) sy -= 4 * Math.max(0, Math.sin(clamp((ts - FP184) / .5) * Math.PI));
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(.55); const sg = ctx.createLinearGradient(-2, 0, 2, 0); sg.addColorStop(0, '#f4eeff'); sg.addColorStop(1, '#8a5ad8'); ctx.fillStyle = sg; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(1.8, -4); ctx.lineTo(1.2, -9); ctx.lineTo(-1.2, -9); ctx.lineTo(-1.8, -4); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = "#5a3018"; ctx.fillRect(-1.5, -11, 3, 2.5); ctx.restore();
+    // the finale arc of light from the head into the recipe
+    if (ts >= FP184) { const u = clamp((ts - FP184) / .2), fa = clamp(1 - (ts - FP184 - .3) / .7), cx = (hx + ux) / 2, cy = y - 22;
+      once('enfp', () => { spawn({ x: hx, y, size: 6, shape: 'ring', grow: 26, life: .5, col: '#fff' }); sparks184(hx, y, 10, 90, 70); });
+      if (u >= 1) once('enfl', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 34, life: .6, col: '#dcd0ff' }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 22, life: .45, col: '#fff' }); sparks184(ux, y, 16, 120, 90); });
+      if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; const seg = n => { ctx.beginPath(); for (let i = 0; i <= n; i++) { const s = u * i / n, px = (1 - s) * (1 - s) * hx + 2 * (1 - s) * s * cx + s * s * ux, py = (1 - s) * (1 - s) * y + 2 * (1 - s) * s * cy + s * s * y; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.stroke(); };
+        ctx.globalAlpha *= fa; ctx.strokeStyle = 'rgba(160,110,255,.55)'; ctx.lineWidth = 7; ctx.shadowColor = '#a07aff'; ctx.shadowBlur = 14; seg(30); ctx.shadowBlur = 0; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; seg(30); ctx.restore(); } } },
+  snd(o, v, n) { if (o.t >= -.4) once('enB1' + o.i, () => ss184.scratch(0, v)); if (o.t >= 0) once('enB2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// G. Runestone frame: a carved stone frame with sockets; rune stones rise from a dust pile at the start and click in; light links them
+EN184.G = { name: 'Runestone frame', finAt: FP184 + .15,
+  desc: 'A carved stone frame with empty rune sockets and a basin of glowing dust at the start. Each skill-up a rune stone rises edge-on out of the dust, flies over turning face-on and clicks into its socket; a line of light runs to it from the stone before (a long gap: dust flies to the stone and its rune lights a bit more each point). Finale: pulses race along the links faster and faster as the stones tremble, a held beat in the dark, then the stones hop, every rune flares and rays from all of them meet in the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.15), G = sl184(I, v), ux = I.x1 + 18, fa = I.x0 - 22, held = ts >= FB184 && ts < FP184, pay = ts >= FP184 ? clamp(1 - (ts - FP184) / .9) : 0, pileX = I.x0 - 12;
+    const sw2 = clamp(G.sw - 7, 7, 11), sh2 = 12;
+    // the frame, the basin, the sockets, the link channels
+    ctx.save(); const fg = ctx.createLinearGradient(0, y - 11, 0, y + 11); fg.addColorStop(0, '#6e6878'); fg.addColorStop(1, '#34303c'); ctx.fillStyle = fg; ctx.beginPath(); ctx.roundRect(fa, y - 11, I.x1 + 3 - fa, 22, 4); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.75)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fillRect(fa + 3, y - 10.5, I.x1 - fa - 3, 1);
+    ctx.fillStyle = '#17141d'; ctx.beginPath(); ctx.roundRect(fa + 3, y - 7, 15, 14, 3); ctx.fill();
+    const pg = ctx.createRadialGradient(pileX, y + 4, 0, pileX, y + 4, 9); pg.addColorStop(0, '#f0e8ff'); pg.addColorStop(1, '#8a6ad0'); ctx.fillStyle = pg; ctx.beginPath(); ctx.ellipse(pileX, y + 5, 6.5, 4.5, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#fff'; for (let q = 0; q < 4; q++) { ctx.globalAlpha = .3 + .7 * Math.abs(Math.sin(t * 5 + q * 1.7)); ctx.fillRect(pileX - 4 + q * 2.6, y + 2 + (q % 2) * 1.5, 1, 1); } ctx.globalAlpha = 1; glow184(pileX, y + 3, 10, .3);
+    for (let k = 0; k < G.N; k++) { const x = G.sx(k); ctx.fillStyle = '#17141d'; ctx.beginPath(); ctx.roundRect(x - sw2 / 2 - 1, y - sh2 / 2 - 1, sw2 + 2, sh2 + 2, 2.5); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fillRect(x - sw2 / 2, y + sh2 / 2, sw2, 1); }
+    ctx.restore();
+    // which stones sit in their sockets
+    const kH = o ? G.kOf(S.v0 + o.i) : -1, newStone = !!o && (S.v0 + o.i - I.lo) / G.per - kH < 1 / G.per - 1e-6; // this point starts slot kH
+    const placed = k => G.fr(k) > 0 && !(newStone && k === kH && o.t < 0);
+    // links between neighbours: a channel of light, drawn to a new stone after it lands
+    for (let k = 1; k < G.N; k++) { if (!placed(k) || !placed(k - 1)) continue; const xa = G.sx(k - 1) + sw2 / 2 + 1, xb = G.sx(k) - sw2 / 2 - 1; let u = 1; if (newStone && k === kH && o.t >= 0) u = eOut(clamp(o.t / .35));
+      ctx.save(); ctx.strokeStyle = held ? 'rgba(150,110,240,.25)' : '#a07aff'; ctx.lineWidth = 1.6; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = held ? 0 : 6; ctx.beginPath(); ctx.moveTo(xa, y); ctx.lineTo(lerp(xa, xb, u), y); ctx.stroke(); ctx.restore(); }
+    // finale build-up: pulses racing along the chain
+    if (ts >= 0 && ts < FB184) { const ph = ts * ts * 2.2 + ts * .8; for (let r = 0; r < 2; r++) { const px = I.x0 + ((ph + r * .5) % 1) * (I.x1 - I.x0); glow184(px, y, 9 + ts * 4, .7 + ts * .3, '230,215,255'); } }
+    // the stones
+    const stone = (x, yy, k, q, sx, b) => { ctx.save(); ctx.translate(x, yy); ctx.scale(sx, 1); const sg = ctx.createLinearGradient(0, -sh2 / 2, 0, sh2 / 2); sg.addColorStop(0, '#c4bcd0'); sg.addColorStop(1, '#6e6680'); ctx.fillStyle = sg; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 3; ctx.shadowOffsetY = 1;
+      ctx.beginPath(); ctx.roundRect(-sw2 / 2, -sh2 / 2, sw2, sh2, 3); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.strokeStyle = 'rgba(30,20,40,.8)'; ctx.lineWidth = 1; ctx.stroke();
+      if (sx > .5) { const rs = Math.min(3.4, sw2 * .32); rune184(rk184(k), 0, 0, rs, 1, 'rgba(40,30,60,.6)', 1.2); if (q > 0) rune184(rk184(k), 0, 0, rs, q, mix('#8a5ae8', '#ffffff', clamp(b)), 1.4, b > .3 ? '#b890ff' : null); } ctx.restore(); if (b > .3) glow184(x, yy, 10, b * .5); };
+    for (let k = 0; k < G.N; k++) { if (!placed(k)) continue; let yy = y, b = 0, jx = 0; if (o && k === kH && o.t >= 0) b = clamp(1 - o.t / .6) + (newStone ? 0 : .2);
+      if (newStone && k === kH && o.t >= 0 && o.t < .15) yy -= 1.5 * (1 - o.t / .15);
+      if (ts >= 0 && ts < FB184) { jx = (Math.random() - .5) * ts / FB184 * 1.4; const px = (ts * ts * 2.2 + ts * .8) % 1, d = Math.abs((G.sx(k) - I.x0) / (I.x1 - I.x0) - px); b = Math.max(b, clamp(1 - d * 8) * .9); }
+      if (held) b = 0; if (pay > 0) { b = Math.max(b, pay * 1.2); yy -= 5 * Math.max(0, Math.sin(clamp((ts - FP184) / .45) * Math.PI)); }
+      ctx.save(); if (held) ctx.globalAlpha *= .6; stone(G.sx(k) + jx, yy, k, G.fr(k), 1, b); ctx.restore(); }
+    if (held) { const gl = Math.sin(clamp((ts - FB184) / (FP184 - FB184)) * Math.PI), lk = G.N - 1; ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; ctx.globalAlpha *= gl; star4(G.sx(lk) + 3, y - 4, 3 + gl * 4, ts * 2); ctx.restore(); }
+    // a new stone: rises edge-on from the dust, flies over turning face-on, drops in
+    if (newStone && o.t < 0) { const tx = G.sx(kH); let x, yy, sx;
+      if (o.t < -.75) { const u = eOut(clamp((o.t + 1.05) / .3)); x = pileX; yy = lerp(y + 6, y - 9, u); sx = .22; once('enGr' + o.i, () => sparks184(pileX, y + 2, 5, 30, 25)); }
+      else if (o.t < -.15) { const u = clamp((o.t + .75) / .6), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; x = lerp(pileX, tx, e); yy = y - 9 - Math.sin(u * Math.PI) * 4; sx = lerp(.22, 1, eOut(u)); }
+      else { const u = clamp((o.t + .15) / .15); x = tx; yy = lerp(y - 9, y, u * u); sx = 1; }
+      ctx.save(); ctx.globalAlpha *= clamp((o.t + 1.05) / .1); stone(x, yy, kH, 0, sx, .2); ctx.restore(); }
+    // a long gap: dust flies from the basin to the stone
+    if (o && !newStone && o.t > -.6 && o.t < 0) { const tx = G.sx(kH); ctx.save(); ctx.fillStyle = '#e8dcff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4; for (let q = 0; q < 5; q++) { const u = clamp((o.t + .6 - q * .05) / .45); if (u <= 0 || u >= 1) continue; ctx.beginPath(); ctx.arc(lerp(pileX, tx, u), y - 6 - Math.sin(u * Math.PI) * 6, 1.1, 0, 7); ctx.fill(); } ctx.restore(); }
+    if (o && o.t >= 0) once('enGl' + o.i, () => { if (newStone) { for (let q = 0; q < 6; q++) spawn({ x: G.sx(kH) + (Math.random() - .5) * sw2, y: y + sh2 / 2, vx: (Math.random() - .5) * 40, vy: -8 - Math.random() * 14, g: 40, life: .5, size: 1, col: '#b8b0c4' }); } sparks184(G.sx(kH), y - 3, 4, 40, 30); });
+    // the payoff: rays from every stone meet in the recipe
+    if (ts >= FP184) { const u = clamp((ts - FP184) / .15), fa2 = clamp(1 - (ts - FP184 - .25) / .6);
+      once('enGp', () => { for (let k = 0; k < G.N; k++) sparks184(G.sx(k), y, 2, 40, 40); });
+      if (u >= 1) once('enGa', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 34, life: .6, col: '#dcd0ff' }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 20, life: .45, col: '#fff' }); sparks184(ux, y, 14, 110, 80); });
+      if (fa2 > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa2; ctx.lineCap = 'round'; for (let k = 0; k < G.N; k++) { const sx0 = G.sx(k), sy0 = y - 5, ex = lerp(sx0, ux, u), ey = lerp(sy0, y, u) - Math.sin(u * Math.PI) * 6;
+        ctx.strokeStyle = 'rgba(160,110,255,.45)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(sx0, sy0); ctx.lineTo(ex, ey); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(sx0, sy0); ctx.lineTo(ex, ey); ctx.stroke(); } ctx.restore(); } } },
+  snd(o, v, n) { if (o.t >= 0) { once('enG1' + o.i, () => ss184.knock(0, v)); once('enG2' + o.i, () => ss184.hum(.06, n, v)); } },
+  fsnd: ts => fsnd184(ts) };
+
+
+// ========== Enchanting round 185, the rejected I Essence rolls the dust, J Dust through a stencil, L Dust brush stroke (moved out 2026-11-19; helpers sm185/held185/glint185/vellum185/dustPuff185 stay) ==========
+// I. Essence rolls the dust: heaps of dust along a ledge; an essence orb rolls over each and grows
+EN184.I = { name: 'Essence rolls the dust', finAt: FP184 + .35,
+  desc: 'Small heaps of Strange Dust sit along a stone ledge, one per notch. A glowing essence orb at the start winds back, rolls forward over the next heap and takes the dust in with a puff, a little bigger and brighter each time (a long gap: it takes a bite of the heap each point). Finale: the full orb spins faster and faster, a held beat, then it hops into the recipe in a burst of dust.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.5), G = sl184(I, v), ux = I.x1 + 18, fy = y + 5, held = held185(ts);
+    ctx.save(); const sg = ctx.createLinearGradient(0, fy, 0, fy + 4); sg.addColorStop(0, '#6a6472'); sg.addColorStop(1, '#2a2630'); ctx.fillStyle = sg; ctx.beginPath(); ctx.roundRect(I.x0 - 16, fy, I.x1 - I.x0 + 20, 4, 2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.15)'; ctx.fillRect(I.x0 - 14, fy, I.x1 - I.x0 + 16, 1); ctx.restore();
+    for (let k = 0; k < G.N; k++) { const left = 1 - G.fr(k); if (left <= .02) continue; const x = G.sx(k), hw = Math.min(G.sw - 3, 11) / 2 * (.45 + .55 * left), hh = 4.5 * (.3 + .7 * left);
+      ctx.save(); const hg = ctx.createLinearGradient(0, fy - hh, 0, fy); hg.addColorStop(0, '#f2ecfa'); hg.addColorStop(1, '#9a8ab8'); ctx.fillStyle = hg; ctx.beginPath(); ctx.ellipse(x, fy, hw, hh, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 4 + k * 1.3)); ctx.fillRect(x - hw * .3, fy - hh * .6, 1, 1); ctx.restore(); }
+    let ve = v; if (o && o.t > -.5 && o.t < 0) ve = S.v0 + o.i + sm185((o.t + .5) / .5);
+    const f = clamp((ve - I.lo) / G.n), r = lerp(4, 8.5, f); let ox = I.X(ve) - G.sw / 2, oy = fy - r, sqx = 1, sqy = 1, spin = ox / r, fl = 0;
+    if (o && o.t > -.75 && o.t <= -.5) ox -= 2.5 * Math.sin(clamp((o.t + .75) / .25) * Math.PI / 2);
+    if (o && o.t >= 0 && o.t < .3) { const e = 1 - o.t / .3; sqx = 1 + .16 * e; sqy = 1 - .14 * e; fl = e; }
+    if (o && o.t >= 0) once('enIp' + o.i, () => { dustPuff185(ox + r * .6, fy - 1, 9); spawn({ x: ox, y: oy, size: r, shape: 'ring', grow: 10, life: .4, col: '#dcd0ff' }); });
+    if (ts >= 0 && ts < FB184) { spin += ts * ts * 9; fl = Math.max(fl, ts / FB184 * .8); const w = ts / FB184; ox += (Math.random() - .5) * w * 1.2; }
+    let gone = false; if (ts >= FP184) { const u = clamp((ts - FP184) / .35); if (u >= 1) { gone = true; once('enIa', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 30, life: .55, col: '#dcd0ff' }); sparks184(ux, y, 14, 110, 80); dustPuff185(ux, y + 6, 10, 90); }); }
+      else { once('enIt', () => dustPuff185(ox, fy - 1, 14, 90)); const sx0 = ox, sy0 = oy; ox = lerp(sx0, ux, u); oy = lerp(sy0, y, u) - Math.sin(u * Math.PI) * 12; sqx = sqy = lerp(1, .7, u); spin += u * 8; fl = 1; } }
+    if (ox > I.x0 - 14) { ctx.save(); ctx.strokeStyle = held ? 'rgba(150,110,240,.3)' : 'rgba(200,170,255,.75)'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(I.x0 - 14, fy + .5); ctx.lineTo(Math.min(ox, I.x1 + 2), fy + .5); ctx.stroke(); ctx.restore(); }
+    if (!gone) { ctx.save(); if (held) ctx.globalAlpha *= .55; glow184(ox, oy, r * 2.6, .4 + fl * .5);
+      ctx.translate(ox, oy); ctx.scale(sqx, sqy); const og = ctx.createRadialGradient(-r * .3, -r * .35, 0, 0, 0, r); og.addColorStop(0, '#ffffff'); og.addColorStop(.45, mix('#c8a8ff', '#ffffff', fl * .5)); og.addColorStop(1, '#5a2ab8');
+      ctx.fillStyle = og; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,.65)'; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, 0, r * .58, spin, spin + 2.2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, r * .3, spin + 3.1, spin + 4.9); ctx.stroke(); ctx.restore(); }
+    if (held) glint185(ox + 2, oy - r * .5, ts); },
+  snd(o, v, n) { if (o.t >= -.5) once('enI1' + o.i, () => ss184.rustle(0, v * .8)); if (o.t >= 0) once('enI2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// J. Dust through a stencil: a vellum; a brass stencil with a dust hopper sifts each rune, slides on and leaves it in dust, which lights
+EN184.J = { name: 'Dust through a stencil', finAt: FP184 + .6,
+  desc: 'Dust and vellum in one. A brass rune stencil with a little dust hopper on top lies on the vellum; each skill-up it settles, shakes and sifts dust through, then lifts and slides on, leaving the rune in dust, which lights up violet (a long gap sifts a bit more each point). The hopper empties as the bar fills. Finale: the stencil slides back to the start, every dust rune flares in turn, a held beat, then the dust lifts off the vellum as a glowing cloud into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.6), G = sl184(I, v), ux = I.x1 + 18, held = held185(ts), pw = clamp(G.sw - 1, 12, 16), s = Math.min(5, G.sw * .36), f = clamp((v - I.lo) / G.n);
+    vellum185(I.x0 - 4, I.x1 + 2, y);
+    for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const x = G.sx(k), dep = FP184 + k * .035; if (ts >= dep) continue; let b = 0;
+      if (o && G.kOf(S.v0 + o.i) === k && o.t >= 0) b = clamp(1 - o.t / 1);
+      if (ts >= 0 && ts < FB184) { const ig = ts - k / G.N * 1.1; if (ig >= 0) b = Math.max(b, clamp(1 - ig / .3) * .6 + .5); }
+      const lit = !(o && G.kOf(S.v0 + o.i) === k && o.t < 0) || q > G.fr(k) + 1;
+      sigil184(k, x, y, s, q, '#d8cee8', 2.2); ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.8)'; for (let j = 0; j < 3; j++) { ctx.globalAlpha = .3 + .7 * Math.abs(Math.sin(t * 5 + k * 2 + j)); ctx.fillRect(x - s * .6 + j * s * .6, y - s * .5 + (j % 2) * s, 1, 1); } ctx.restore();
+      if (lit) { ctx.save(); if (held) ctx.globalAlpha *= .35 + .2 * Math.sin(ts * 14); sigil184(k, x, y, s, q, mix('#8a5ae8', '#ffffff', clamp(b)), 1.1, '#b890ff'); ctx.restore(); } }
+    // the stencil: rests just right of the last worked slot, lifted; settles, sifts, lifts, slides on
+    const restX = lv => lv - I.lo < 1e-3 ? I.x0 - pw / 2 - 6 : Math.min(I.x1 - pw / 2, G.sx(G.kOf(lv - 1e-3)) + pw + 2);
+    let px = restX(v), lift = 1, shake = 0;
+    if (o && o.t < 0) { const b0 = S.v0 + o.i, kW = G.kOf(b0), r0 = restX(b0), r1 = restX(b0 + 1);
+      if (o.t < -.75) px = lerp(r0, G.sx(kW), sm185(clamp((o.t + 1.05) / .3)));
+      else if (o.t < -.25) { px = G.sx(kW); lift = o.t < -.65 ? 1 - (o.t + .75) / .1 : 0; if (o.t >= -.65) shake = Math.sin(t * 70) * .9; }
+      else if (o.t < -.15) { px = G.sx(kW); lift = (o.t + .25) / .1; }
+      else px = lerp(G.sx(kW), r1, sm185(clamp((o.t + .15) / .15))); }
+    if (ts >= 0) px = lerp(px, I.x0 - pw / 2 - 6, sm185(clamp(ts / .5)));
+    if (shake) { ctx.save(); ctx.fillStyle = '#e8e0f4'; for (let q = 0; q < 4; q++) ctx.fillRect(px - pw / 2 - 1 + hash184(q + Math.floor(t * 20)) * (pw + 2), y + 8 + hash184(q * 3 + Math.floor(t * 20)) * 2, 1, 1); ctx.restore(); }
+    const kS = o && o.t < 0 ? G.kOf(S.v0 + o.i) : G.kOf(Math.min(G.n - 1e-3 + I.lo, v)), sc = 1 + lift * .08;
+    ctx.save(); ctx.translate(px + shake, y); ctx.scale(sc, sc); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 3 + lift * 5; ctx.shadowOffsetY = 1 + lift * 3;
+    const bg = ctx.createLinearGradient(0, -9, 0, 9); bg.addColorStop(0, '#e0b860'); bg.addColorStop(1, '#7a5a24'); ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(-pw / 2, -9, pw, 18, 2); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.strokeStyle = 'rgba(40,24,6,.8)'; ctx.lineWidth = 1; ctx.stroke(); sigil184(kS, 0, 0, Math.min(s, pw * .32), 1, '#2a1e10', 2);
+    ctx.fillStyle = '#a07a38'; ctx.beginPath(); ctx.moveTo(-pw / 2 + 1, -9); ctx.lineTo(pw / 2 - 1, -9); ctx.lineTo(pw / 2 + 1, -14); ctx.lineTo(-pw / 2 - 1, -14); ctx.closePath(); ctx.fill(); ctx.stroke();
+    const lvl = 1 - f * .85; ctx.fillStyle = '#e4dcf0'; ctx.fillRect(-pw / 2 + 1, -9 - 4.5 * lvl, pw - 2, 4.5 * lvl); ctx.restore();
+    if (held) glint185(I.x1 - 4, y - 5, ts);
+    // the dust cloud into the recipe
+    if (ts >= FP184) { once('enJf', () => spawn({ x: (I.x0 + I.x1) / 2, y, size: 8, shape: 'ring', grow: 22, life: .45, col: '#fff4d8' }));
+      for (let k = 0; k < G.N; k++) { const dep = FP184 + k * .035; if (ts < dep) continue; for (let j = 0; j < 5; j++) { const u = clamp((ts - dep - j * .03) / .6); if (u <= 0 || u >= 1) continue; const x = G.sx(k) + (j - 2) * 2, p = home184(x, y + (j % 2 ? 2 : -2), x + (hash184(k * 5 + j) - .5) * 8, y - 10 - hash184(k + j) * 5, ux, y, .4, u);
+        ctx.save(); ctx.fillStyle = j % 2 ? '#e8dcff' : '#b890ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, 7); ctx.fill(); ctx.restore(); } }
+      if (ts >= FP184 + .6) once('enJa', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 30, life: .55, col: '#dcd0ff' }); sparks184(ux, y, 10, 90, 70); }); } },
+  snd(o, v, n) { if (o.t >= -.65) once('enJ1' + o.i, () => ss184.pour(0, v * .8)); if (o.t >= 0) once('enJ2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// L. Dust brush stroke: a bowl of glowing dust at the start of a dark slab; a brush dips and paints one broad straight stroke
+EN184.L = { name: 'Dust brush stroke', finAt: FP184 + .4,
+  desc: 'A bowl of glowing dust at the start of a dark slab. Each skill-up an enchanter’s brush flies back to the bowl, dips, returns and sweeps the next span of one broad straight stroke, which sets into glowing violet (a long gap: a short dab each point). Finale: the brush dips and glazes the whole stroke in one fast sweep, a held beat, then the stroke lifts off the slab and races into the recipe; the brush goes back into the bowl.',
+  draw(I, y, t, ts) { const o = vd184(I, -.15).o, ux = I.x1 + 18, held = held185(ts), bx = I.x0 - 14, by = y + 3;
+    const a = o ? I.X(S.v0 + o.i) : I.X(I.v), b = o ? I.X(S.v0 + o.i + 1) : a; let sf = o ? (o.t < -.15 ? a : o.t < 0 ? lerp(a, b, eOut((o.t + .15) / .15)) : b) : I.X(I.v);
+    ctx.save(); const sg = ctx.createLinearGradient(0, y - 8, 0, y + 8); sg.addColorStop(0, '#3e3a46'); sg.addColorStop(1, '#1c1a22'); ctx.fillStyle = sg; ctx.beginPath(); ctx.roundRect(I.x0 - 3, y - 8, I.x1 - I.x0 + 6, 16, 3); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(I.x0 - 1, y - 7.5, I.x1 - I.x0 + 2, 1); ctx.restore();
+    // the stroke (gone once it races off)
+    const pu = ts >= FP184 ? clamp((ts - FP184) / .4) : 0, xl = lerp(I.x0, ux, pu * pu), xr = lerp(Math.max(sf, I.x0), ux, clamp((pu - .2) / .8) ** 2), dy = ts >= FP184 ? -4 * clamp((ts - FP184) / .08) : 0, glaze = ts >= 0 && ts < FB184 ? clamp((ts - .5) / .7) : 0;
+    if (xr - xl > .5 && pu < 1) { ctx.save(); if (held) ctx.globalAlpha *= .5; ctx.beginPath(); ctx.roundRect(xl, y - 4.5 + dy, xr - xl, 9, [1, 4.5, 4.5, 1]); ctx.save(); ctx.clip();
+      const g = ctx.createLinearGradient(0, y - 4.5, 0, y + 4.5); g.addColorStop(0, mix('#d8c4ff', '#ffffff', pu)); g.addColorStop(.5, mix('#9a6ae8', '#e8dcff', pu)); g.addColorStop(1, mix('#4a2490', '#b890ff', pu)); ctx.fillStyle = g; ctx.fillRect(xl, y - 5 + dy, xr - xl, 10);
+      for (let j = 0; j < 6; j++) { ctx.fillStyle = `rgba(255,255,255,${.08 + hash184(j) * .18})`; ctx.fillRect(xl, y - 3.5 + j * 1.4 + dy, xr - xl, .7); }
+      if (glaze > 0) { const gx = lerp(I.x0, I.x1, glaze); ctx.fillStyle = 'rgba(255,245,255,.35)'; ctx.fillRect(xl, y - 5, gx - xl, 10); }
+      if (o && o.t >= -.15 && o.t < .8) { const fr2 = o.t < 0 ? 1 : 1 - o.t / .8; ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(255,235,255,${.7 * fr2})`; ctx.fillRect(a, y - 5, sf - a, 10); }
+      ctx.restore(); ctx.restore(); if (pu > 0) glow184(xl + (xr - xl) * .7, y + dy, 14, .6); if (ts >= 0 && ts < FB184) glow184(sf - 4, y, 12, ts / FB184 * .5); }
+    if (pu >= 1) once('enLa', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 30, life: .55, col: '#dcd0ff' }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 18, life: .4, col: '#fff' }); sparks184(ux, y, 14, 110, 80); });
+    // the bowl
+    ctx.save(); ctx.fillStyle = '#d8ccec'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.ellipse(bx, by - 1, 6.5, 2, 0, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    const wg = ctx.createLinearGradient(0, by - 1, 0, by + 6); wg.addColorStop(0, '#8a6a4a'); wg.addColorStop(1, '#3a2614'); ctx.fillStyle = wg; ctx.beginPath(); ctx.ellipse(bx, by - 1, 7.5, 7, 0, 0, Math.PI); ctx.fill(); ctx.strokeStyle = '#2a1a0c'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+    // the brush: tip position and how loaded it is
+    let tx = Math.max(I.x0 + 2, sf + 1), ty = y - 5, load = 0;
+    if (o && o.t < 0) { const from = a + 1; if (o.t < -.65) { const u = sm185(clamp((o.t + 1.05) / .4)); tx = lerp(from, bx + 1, u); ty = y - 5 - Math.sin(u * Math.PI) * 2; }
+      else if (o.t < -.45) { const u = clamp((o.t + .65) / .2); tx = bx + 1; ty = y - 5 + Math.sin(u * Math.PI) * 7; load = u > .5 ? 1 : 0; if (u > .5) once('enLd' + o.i, () => dustPuff185(bx, by - 2, 5, 30)); }
+      else if (o.t < -.15) { const u = sm185(clamp((o.t + .45) / .3)); tx = lerp(bx + 1, a, u); ty = y - 5 - Math.sin(u * Math.PI) * 2; load = 1; }
+      else { tx = sf; ty = y - 1; load = 1; } }
+    else if (o && o.t < .25) { const u = clamp(o.t / .25); ty = lerp(y - 1, y - 5, u); load = 1 - u; }
+    if (ts >= 0) { if (ts < .5) { const u = sm185(clamp(ts / .35)); tx = lerp(tx, bx + 1, u); ty = y - 5 + (ts > .3 ? Math.sin(clamp((ts - .3) / .2) * Math.PI) * 7 : 0); }
+      else if (ts < 1.2) { const u = clamp((ts - .5) / .7); tx = lerp(I.x0, I.x1, u); ty = y - 1; load = 1; } else if (ts < FP184 + .5) { tx = I.x1; ty = y - 5; } else { const u = sm185(clamp((ts - FP184 - .5) / .6)); tx = lerp(I.x1, bx + 1, u); ty = y - 5 + u * 5; } }
+    ctx.save(); ctx.translate(tx, ty); ctx.rotate(-.55); if (load > 0) glow184(0, 0, 6, load * .7);
+    ctx.fillStyle = mix('#c8b088', '#e8dcff', load); ctx.beginPath(); ctx.moveTo(0, 1); ctx.quadraticCurveTo(-2.2, -3, -1.8, -6); ctx.lineTo(1.8, -6); ctx.quadraticCurveTo(2.2, -3, 0, 1); ctx.fill();
+    ctx.fillStyle = '#b8b0a8'; ctx.fillRect(-1.9, -8, 3.8, 2.2); ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(0, -15); ctx.stroke(); ctx.restore();
+    if (held) glint185(I.x1 - 2, y - 3, ts); },
+  snd(o, v, n) { if (o.t >= -.15) once('enL1' + o.i, () => ss184.scratch(0, v)); if (o.t >= 0) once('enL2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// ========== Enchanting rounds 184-186: C Dust to arcane glass, F Vellum scroll (184), N Essence merge, O Wand carving (186), moved out 2026-11-19 when the user asked for a complete pivot ==========
+// C. Dust to arcane glass: a stone groove; a pouch pours Strange Dust at the front, a small rod's spark fuses it into violet glass
+EN184.C = { name: 'Dust to arcane glass', finAt: FP184 + .6,
+  desc: 'A stone groove. Each skill-up a small pouch over the front tips and pours Strange Dust into the groove, a little runed rod dips into the heap, and its spark fuses the dust into glowing violet glass, white-hot at first, cooling to violet. Finale: light floods the glass and straight cracks run through it, a held beat with the cracks glowing, then the glass bursts upward and the shards stream into the recipe; the groove is left clean and the pouch waits at the start.',
+  draw(I, y, t, ts) { const o = vd184(I, -.45).o, ux = I.x1 + 18, gy0 = y - 3, gy1 = y + 6, fin = ts >= 0;
+    const a = o ? I.X(S.v0 + o.i) : I.X(I.v), b = o ? I.X(S.v0 + o.i + 1) : a, front = o ? (o.t < 0 ? a : b) : I.X(I.v);
+    // the stone
+    ctx.save(); const sg = ctx.createLinearGradient(0, y - 7, 0, y + 10); sg.addColorStop(0, '#6a6470'); sg.addColorStop(1, '#2e2a34'); ctx.fillStyle = sg; ctx.beginPath(); ctx.roundRect(I.x0 - 8, y - 7, I.x1 - I.x0 + 13, 17, 4); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(I.x0 - 5, y - 6.5, I.x1 - I.x0 + 7, 1);
+    ctx.fillStyle = '#16131c'; ctx.beginPath(); ctx.roundRect(I.x0 - 2, gy0, I.x1 - I.x0 + 3, gy1 - gy0, 3); ctx.fill(); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(I.x0, gy0, I.x1 - I.x0, 1.5); ctx.restore();
+    // the glass (gone after the burst)
+    const gone = ts >= FP184, flood = ts < 0 ? 0 : ts < FB184 ? ts / FB184 : 0, held = ts >= FB184 && ts < FP184;
+    if (!gone && front > I.x0) { ctx.save(); ctx.beginPath(); ctx.roundRect(I.x0 - 1, gy0 + .5, front - I.x0 + 1, gy1 - gy0 - 1, 2.5); ctx.clip();
+      const gg = ctx.createLinearGradient(0, gy0, 0, gy1); gg.addColorStop(0, mix('#d8c4ff', '#ffffff', flood)); gg.addColorStop(.45, mix('#8a5ae8', '#e0d0ff', flood)); gg.addColorStop(1, mix('#3a1a7a', '#9a7af0', flood)); ctx.fillStyle = gg; if (held) ctx.globalAlpha *= .55;
+      ctx.fillRect(I.x0 - 2, gy0, front - I.x0 + 3, gy1 - gy0); ctx.globalAlpha = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.lineWidth = 1; for (let x = I.x0 + 6; x < front + 8; x += 13) { ctx.beginPath(); ctx.moveTo(x, gy0); ctx.lineTo(x - 5, gy1); ctx.stroke(); }
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(I.x0, gy0 + 1, front - I.x0, 1);
+      const dr = I.x0 + ((t * 28) % Math.max(10, front - I.x0)); glow184(dr, y + 1, 10, .35);
+      if (o && o.t >= 0 && o.t < 1) { const hot = 1 - eOut(clamp(o.t / .9)); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(255,240,255,${hot})`; ctx.fillRect(a - 1, gy0, b - a + 2, gy1 - gy0); }
+      if (fin) { const nC = 9; for (let c = 0; c < nC; c++) { const at = c / nC * FB184; if (ts < at) continue; const cx0 = I.x0 + hash184(c) * (front - I.x0), sl = (hash184(c + 9) - .5) * 1.2, len = clamp((ts - at) / .2);
+        ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = held ? '#f4eaff' : 'rgba(40,10,80,.8)'; ctx.lineWidth = held ? 1.4 : 1; if (held) { ctx.shadowColor = '#c8a8ff'; ctx.shadowBlur = 6; } ctx.beginPath(); ctx.moveTo(cx0, gy0); ctx.lineTo(cx0 + sl * 9 * len, gy0 + (gy1 - gy0) * len); ctx.stroke(); ctx.shadowBlur = 0; } }
+      ctx.restore(); if (flood > 0) for (let x = I.x0 + 15; x < front; x += 30) glow184(x, y, 16, flood * .4); }
+    // the dust heap while pouring, the stream from the pouch
+    const hxm = (a + b) / 2, hw = Math.max(8, b - a);
+    if (o && o.t > -.85 && o.t < 0) { const hh = 5 * eOut(clamp((o.t + .8) / .6)); ctx.save(); ctx.fillStyle = '#cfc6e0'; ctx.beginPath(); ctx.ellipse(hxm, gy1 - 1, hw / 2, hh + 1, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#fff'; for (let q = 0; q < 5; q++) { const px = hxm + (hash184(q + o.i * 7) - .5) * hw * .8, py = gy1 - 2 - hash184(q + 3) * hh; ctx.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 9 + q)); ctx.fillRect(px, py, 1, 1); } ctx.restore(); }
+    // the pouch and the rod: ride over the front; in the finale they wait at the start
+    let px = front + 6, rot = 0, rodDip = 0; const hold = I.x0 - 16;
+    if (o && o.t < -.85) px = lerp(a + 6, hxm + 7, eOut(clamp((o.t + 1.05) / .2)));
+    else if (o && o.t < 0) { px = hxm + 7; rot = -2.3 * eOut(clamp((o.t + .85) / .15)) * clamp((-o.t - .15) / .15); rodDip = o.t > -.18 ? Math.sin(clamp((o.t + .18) / .18) * Math.PI / 2) : 0; }
+    else if (o && o.t < .4) { px = lerp(hxm + 7, b + 6, eOut(clamp(o.t / .4))); }
+    if (fin) px = lerp(px, hold, eOut(clamp(ts / .5)));
+    if (o && o.t > -.75 && o.t < -.25) { ctx.save(); ctx.fillStyle = '#e8e0f4'; for (let q = 0; q < 6; q++) { const u = (t * 5 + q / 6) % 1, sx = hxm + Math.sin(q * 2.1 + t * 7) * 1.2; ctx.globalAlpha = .9; ctx.fillRect(sx, lerp(y - 6, gy1 - 3, u), 1.2, 1.6); } ctx.restore(); }
+    ctx.save(); ctx.translate(px, y - 11); ctx.rotate(rot); ctx.scale(1.25, 1.25); ctx.fillStyle = "#8a5a34"; ctx.strokeStyle = '#3a2210'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(0, 0, 4.6, 4.2, 0, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#a8764a'; ctx.beginPath(); ctx.moveTo(-2, -4); ctx.lineTo(2, -4); ctx.lineTo(3, -7); ctx.lineTo(-3, -7); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c8a8ff'; ctx.fillRect(-2.4, -4.8, 4.8, 1.3); ctx.restore();
+    const rx = px - 9, rtop = y - 16, rtip = y - 5 + rodDip * 4; ctx.save(); ctx.strokeStyle = '#c87a3a'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx - 3, rtop); ctx.lineTo(rx + 1, rtip - 2); ctx.stroke();
+    ctx.fillStyle = '#c8a8ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4 + rodDip * 10; ctx.beginPath(); ctx.moveTo(rx + 1, rtip - 3.5); ctx.lineTo(rx + 2.6, rtip - 1); ctx.lineTo(rx + 1.4, rtip + 1.5); ctx.lineTo(rx - .4, rtip - 1); ctx.closePath(); ctx.fill(); ctx.restore();
+    if (o && o.t >= 0) once('enfu' + o.i, () => { spawn({ x: hxm, y: y + 1, size: 3, shape: 'ring', grow: 16, life: .45, col: '#dcd0ff' }); sparks184(hxm, gy0, 8, 70, 45); for (let q = 0; q < 3; q++) spawn({ x: hxm, y: gy0, vx: (Math.random() - .5) * 40, vy: -30 - Math.random() * 30, g: 60, life: .6, size: 2.2, shape: 'star', vr: 4, col: '#fff' }); });
+    if (o && o.t >= 0 && o.t < .3) glow184(hxm, y + 1, 16, 1 - o.t / .3, '255,230,255');
+    // the burst: shards fly up and stream into the recipe
+    if (ts >= FP184) { const NS = 24, span = Math.max(20, I.x1 - I.x0); once('enbu', () => { spawn({ x: (I.x0 + I.x1) / 2, y, size: 8, shape: 'ring', grow: 24, life: .45, col: '#e8dcff' }); });
+      for (let j = 0; j < NS; j++) { const sx0 = I.x0 + (j + .5) / NS * span, lx = sx0 + (hash184(j) - .5) * 14, ly = y - 9 - hash184(j + 5) * 8, dep = j * .012, u = clamp((ts - FP184 - dep) / (.55 + hash184(j + 2) * .15)); if (u >= 1) { once('ensh' + j, () => sparks184(ux, y, 1, 40, 30)); continue; } if (ts < FP184 + dep) continue;
+        const p = home184(sx0, y + 1, lx, ly, ux, y, .4, u); ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(t * 8 + j); ctx.fillStyle = j % 3 ? '#b890ff' : '#f4eaff'; ctx.shadowColor = '#a07aff'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(-2.4, -1); ctx.lineTo(.5, -2.2); ctx.lineTo(2.2, 1.4); ctx.lineTo(-1, 1.8); ctx.closePath(); ctx.fill(); ctx.restore(); }
+      if (ts >= FP184 + .6) once('enar', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 30, life: .55, col: '#dcd0ff' }); }); } },
+  snd(o, v, n) { if (o.t >= -.8) once('enC1' + o.i, () => ss184.pour(0, v)); if (o.t >= 0) once('enC2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// F. Vellum scroll: a dowel at the start, the roll at the front unrolls; glyphs are written in light
+EN184.F = { name: 'Vellum scroll', finAt: FP184 + .6,
+  desc: 'An enchanting vellum held by a dowel at the start; the rest is rolled up at the front. Each skill-up the roll unrolls one span, then a point of light writes a glowing sigil onto the fresh vellum (a long gap writes it a bit each point), its ink shimmering as it settles. Finale: the sigils light up one by one, a held beat, then they lift off the vellum as light and stream into the recipe; the blank vellum rolls back up to the dowel.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.45), G = sl184(I, v), ux = I.x1 + 18, vy0 = y - 8, vy1 = y + 8;
+    const a = o ? I.X(S.v0 + o.i) : I.X(I.v), b = o ? I.X(S.v0 + o.i + 1) : a; let fx = o ? (o.t < -.95 ? a : o.t < -.5 ? lerp(a, b, eOut((o.t + .95) / .45)) : b) : I.X(I.v);
+    const back = ts >= FP184 + .75 ? eOut(clamp((ts - FP184 - .75) / .9)) : 0; fx = lerp(fx, I.x0, back);
+    const L = I.x1 - I.x0, rr = lerp(7, 4, clamp((fx - I.x0) / L)), held = ts >= FB184 && ts < FP184;
+    // the dowel
+    ctx.save(); const dg = ctx.createLinearGradient(I.x0 - 9, 0, I.x0 - 3, 0); dg.addColorStop(0, '#5a3a1e'); dg.addColorStop(.5, '#b88450'); dg.addColorStop(1, '#5a3a1e'); ctx.fillStyle = dg; ctx.fillRect(I.x0 - 9, y - 11, 6, 22);
+    ctx.fillStyle = '#8a5a30'; [y - 12, y + 12].forEach(yy => { ctx.beginPath(); ctx.arc(I.x0 - 6, yy, 3, 0, 7); ctx.fill(); }); ctx.restore();
+    // the vellum
+    if (fx > I.x0 - 3) { ctx.save(); const vg = ctx.createLinearGradient(0, vy0, 0, vy1); vg.addColorStop(0, '#efe2c2'); vg.addColorStop(1, '#cdb88e'); ctx.fillStyle = vg; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillRect(I.x0 - 3, vy0, fx - I.x0 + 3, vy1 - vy0); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      if (held) { ctx.fillStyle = 'rgba(20,10,40,.35)'; ctx.fillRect(I.x0 - 3, vy0, fx - I.x0 + 3, vy1 - vy0); }
+      if (ts >= 0 && ts < FB184) for (let x = I.x0 + 15; x < fx; x += 30) glow184(x, y, 16, ts / FB184 * .3, '255,230,180');
+      ctx.strokeStyle = 'rgba(120,90,50,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(I.x0 - 3, vy0 + .5); ctx.lineTo(fx, vy0 + .5); ctx.moveTo(I.x0 - 3, vy1 - .5); ctx.lineTo(fx, vy1 - .5); ctx.stroke();
+      ctx.beginPath(); ctx.rect(I.x0 - 3, vy0, fx - I.x0 + 3, vy1 - vy0); ctx.clip();
+      // the sigils (each leaves the vellum when the finale lifts it)
+      for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const x = G.sx(k), dep = FP184 + k * .035; if (ts >= dep) continue; let b2 = 0;
+        if (o && G.kOf(S.v0 + o.i) === k && o.t > -.45) b2 = o.t < 0 ? 1 : clamp(1 - o.t / 1.1);
+        if (ts >= 0 && ts < FB184) { const ig = ts - k / G.N * 1.1; if (ig >= 0) b2 = Math.max(b2, clamp(1 - ig / .3) * .6 + .6); }
+        const shim = b2 > 0 ? .85 + .15 * Math.sin(t * 22 + k) : 1, s = Math.min(5, G.sw * .36);
+        ctx.save(); ctx.globalAlpha *= (held ? .35 + .2 * Math.sin(ts * 14) : 1) * shim; sigil184(k, x, y, s, q, mix('#6a3ac0', '#e8dcff', clamp(b2)), 1.3, b2 > .1 ? '#b890ff' : null); ctx.restore(); }
+      ctx.restore(); }
+    // the point of light writing
+    if (o && o.t >= -.45 && o.t < 0) { const k = G.kOf(S.v0 + o.i), pen = sigil184(k, G.sx(k), y, Math.min(5, G.sw * .36), G.fr(k), 'rgba(0,0,0,0)', .1); if (pen) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#c8a8ff'; ctx.shadowBlur = 8; star4(pen.x, pen.y, 3.2, t * 6); ctx.restore(); glow184(pen.x, pen.y, 7, .7, '230,215,255'); } }
+    // the roll at the front (stripes turn as it rolls)
+    ctx.save(); const rg = ctx.createLinearGradient(fx, 0, fx + 2 * rr, 0); rg.addColorStop(0, '#bfa878'); rg.addColorStop(.4, '#f4e8cc'); rg.addColorStop(1, '#8a7450'); ctx.fillStyle = rg; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4; ctx.fillRect(fx, y - 9.5, 2 * rr, 19); ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(110,80,40,.55)'; ctx.lineWidth = 1; const ph = fx / rr; for (let k = 0; k < 3; k++) { const an = ph + k * 2.094; if (Math.cos(an) < 0) continue; const sx = fx + rr + rr * Math.sin(an) * .9; ctx.beginPath(); ctx.moveTo(sx, y - 9); ctx.lineTo(sx, y + 9); ctx.stroke(); }
+    ctx.fillStyle = '#e8dab8'; ctx.strokeStyle = 'rgba(110,80,40,.6)'; [y - 9.5, y + 9.5].forEach(yy => { ctx.beginPath(); ctx.ellipse(fx + rr, yy, rr, 1.8, 0, 0, 7); ctx.fill(); ctx.stroke(); }); ctx.restore();
+    if (held) { const gl = Math.sin(clamp((ts - FB184) / (FP184 - FB184)) * Math.PI); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8; ctx.globalAlpha *= gl; star4(fx + rr, y - 9, 3 + gl * 4, ts * 2); ctx.restore(); }
+    // the finale: sigils lift off and stream into the recipe
+    if (ts >= FP184) { once('enfF', () => { spawn({ x: (I.x0 + fx) / 2, y, size: 8, shape: 'ring', grow: 22, life: .45, col: '#fff4d8' }); });
+      for (let k = 0; k < G.N; k++) { const dep = FP184 + k * .035, u = clamp((ts - dep) / .55); if (ts < dep) continue; if (u >= 1) { once('enFa' + k, () => sparks184(ux, y, 2, 50, 40)); continue; }
+        const x = G.sx(k), p = home184(x, y, x + 2, y - 12, ux, y, .35, u), sc = 1 + .4 * Math.sin(u * Math.PI); ctx.save(); ctx.globalCompositeOperation = 'lighter'; sigil184(k, p.x, p.y, Math.min(5, G.sw * .36) * sc, 1, '#e8dcff', 1.5, '#b890ff'); ctx.restore(); }
+      if (ts >= FP184 + .6) once('enFl', () => spawn({ x: ux, y, size: 8, shape: 'ring', grow: 30, life: .55, col: '#dcd0ff' })); } },
+  snd(o, v, n) { if (o.t >= -.95) once('enF1' + o.i, () => ss184.rustle(0, v)); if (o.t >= -.4) once('enF2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= FP184 + .75) once('enFr', () => ss184.rustle(0, 1)); }) };
+
+// ---------- round 186 (2026-11-19): Enchanting, dust as a material worked by something each skill-up (like Engineering's cogs and Cooking's
+// slices), not a fill sliding right. Picked: N Essence merge, O Wand carving. C and F stay for comparison; I, J, L moved out ----------
+function dish186(x, y, t) { ctx.save(); ctx.fillStyle = '#e4dcf4'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.ellipse(x, y - 1, 6, 4, 0, Math.PI, 0); ctx.fill(); ctx.shadowBlur = 0;
+  const g = ctx.createLinearGradient(0, y - 1, 0, y + 5); g.addColorStop(0, '#6a6472'); g.addColorStop(1, '#2a2630'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y - 1, 7.5, 6, 0, 0, Math.PI); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = '#fff'; for (let q = 0; q < 3; q++) { ctx.globalAlpha = .3 + .7 * Math.abs(Math.sin(t * 5 + q * 2.1)); ctx.fillRect(x - 3 + q * 3, y - 2 + (q % 2), 1, 1); } ctx.restore(); }
+function clump186(x, y, s = 1) { ctx.save(); glow184(x, y, 7 * s, .5); ctx.fillStyle = '#efe8fa'; [[0, 0, 2], [-1.8, .8, 1.4], [1.7, .6, 1.5], [.3, -1.4, 1.2]].forEach(c => { ctx.beginPath(); ctx.arc(x + c[0] * s, y + c[1] * s, c[2] * s, 0, 7); ctx.fill(); }); ctx.restore(); }
+const fly186 = (x0, y0, x1, y1, u, h = 9) => { const e = sm185(u); return { x: lerp(x0, x1, e), y: lerp(y0, y1, e) - Math.sin(u * Math.PI) * h }; };
+function heap186(x, fy, w, h, t, k) { if (h <= .2) return; ctx.save(); const g = ctx.createLinearGradient(0, fy - h, 0, fy); g.addColorStop(0, '#f2ecfa'); g.addColorStop(1, '#9a8ab8'); ctx.fillStyle = g; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4; ctx.beginPath(); ctx.ellipse(x, fy, w, h, 0, Math.PI, 0); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fff'; ctx.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 4 + k * 1.3)); ctx.fillRect(x - w * .3, fy - h * .6, 1, 1); ctx.restore(); }
+function essence186(x, y, r, spin, br, greater) { ctx.save(); glow184(x, y, r * 2.4, .35 + br * .5, greater ? '140,170,255' : '170,130,255'); ctx.translate(x, y);
+  const g = ctx.createRadialGradient(-r * .3, -r * .35, 0, 0, 0, r); g.addColorStop(0, '#ffffff'); g.addColorStop(.45, greater ? '#b8c8ff' : '#c8a8ff'); g.addColorStop(1, greater ? '#3a3ab8' : '#5a2ab8');
+  ctx.fillStyle = g; ctx.shadowColor = greater ? '#90a8ff' : '#b890ff'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = r > 6 ? 1.4 : 1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, 0, r * .6, spin, spin + 2.3); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, r * .32, spin + 3.2, spin + 5); ctx.stroke();
+  if (greater) { ctx.fillStyle = '#fff'; ctx.globalAlpha *= .7 + .3 * Math.sin(spin * 2); star4(r * .55, -r * .55, 3, spin); } ctx.restore(); }
+
+// N. Essence merge: pinches of dust fly from a dish into a tray; three fuse into a Lesser essence, three Lessers into a Greater
+EN184.N = { name: 'Essence merge', finAt: FP184 + .35,
+  desc: 'WoW’s own essence combining. A dish of Strange Dust sits at the start of a stone tray with a faint dimple per notch. Each skill-up a pinch of dust flies from the dish into the next dimple with a puff (a long gap: the pinch grows each point). Every three pinches slide together and fuse into a swirling Lesser Essence with a pop; three Lessers fuse into a bigger, bluer Greater Essence. Finale: everything slides to the middle and fuses into one big essence that pulses harder and harder, a held beat, then it pops into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.15), G = sl184(I, v), N = G.N, ux = I.x1 + 18, held = held185(ts), dx = I.x0 - 15, fy = y + 5, c = (I.x0 + I.x1) / 2;
+    ctx.save(); const tg = ctx.createLinearGradient(0, y - 8, 0, y + 8); tg.addColorStop(0, '#46424e'); tg.addColorStop(1, '#1e1c24'); ctx.fillStyle = tg; ctx.beginPath(); ctx.roundRect(I.x0 - 4, y - 8, I.x1 - I.x0 + 7, 16, 4); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(I.x0 - 2, y - 7.5, I.x1 - I.x0 + 3, 1);
+    for (let k = 0; k < N; k++) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(G.sx(k), fy + .5, Math.min(5, G.sw * .32), 1.6, 0, 0, 7); ctx.fill(); } ctx.restore();
+    dish186(dx, y + 3, t);
+    const kH = o ? G.kOf(S.v0 + o.i) : -1, mT = o && o.t >= 0 ? o.t : 9, full = k => G.fr(k) >= 1 - 1e-6;
+    const lesser = g => { const k2 = 3 * g + 2; if (k2 >= N || !full(k2)) return -1; return kH === k2 && mT < .3 ? mT / .3 : 1; };
+    const greater = q => { const g2 = 3 * q + 2, k2 = 3 * g2 + 2; if (lesser(g2) < 1) return -1; if (kH === k2 && mT < .75) return mT < .45 ? -1 : (mT - .45) / .3; return 1; };
+    const items = [], cov = {}; // {type, x, r, s}
+    for (let q = 0; 9 * q + 8 < N; q++) { const gs = greater(q); if (gs < 0) continue; const cx = (G.sx(9 * q) + G.sx(9 * q + 8)) / 2; for (let k = 9 * q; k < 9 * q + 9; k++) cov[k] = 1;
+      if (gs < 1) for (let j = 0; j < 3; j++) items.push({ type: 'L', x: lerp(G.sx(9 * q + 3 * j + 1), cx, eOut(gs)), s: 1 - gs * .3 });
+      else { items.push({ type: 'G', x: cx, s: 1 }); } if (gs >= 1 && kH === 9 * q + 8 && mT < 1.1) items[items.length - 1].s = eBack(clamp((mT - .75) / .3)); if (gs >= 1 && kH === 9 * q + 8) once('enNg' + q + '_' + o.i, () => { spawn({ x: cx, y, size: 7, shape: 'ring', grow: 22, life: .5, col: '#c8d4ff' }); sparks184(cx, y, 10, 80, 60, ['#ffffff', '#b8c8ff', '#c8a8ff']); }); }
+    for (let g = 0; 3 * g + 2 < N; g++) { if (cov[3 * g]) continue; const ls = lesser(g); if (ls < 0) continue; const cx = G.sx(3 * g + 1); for (let k = 3 * g; k < 3 * g + 3; k++) cov[k] = 1;
+      if (ls < 1) for (let j = 0; j < 3; j++) items.push({ type: 'D', x: lerp(G.sx(3 * g + j), cx, eOut(ls)), s: 1, k: 3 * g + j });
+      else { items.push({ type: 'L', x: cx, s: kH === 3 * g + 2 && mT < .6 ? eBack(clamp((mT - .3) / .3)) : 1 }); if (kH === 3 * g + 2) once('enNl' + g + '_' + o.i, () => { spawn({ x: cx, y, size: 5, shape: 'ring', grow: 16, life: .45, col: '#dcd0ff' }); sparks184(cx, y, 7, 60, 45); }); } }
+    for (let k = 0; k < N; k++) if (!cov[k] && G.fr(k) > 0) items.push({ type: 'D', x: G.sx(k), s: G.fr(k), k });
+    // the finale: everything slides to the middle and fuses
+    const fz = ts >= 0 ? clamp(ts / 1.1) : 0, fused = ts >= 1.1, spin = t * 2 + (ts > 0 ? ts * ts * 6 : 0);
+    if (!fused) items.forEach(it => { const x = lerp(it.x, c, fz * fz), yy = it.type === 'D' ? fy : y;
+      if (it.type === 'D') heap186(x, fy, Math.min(6, G.sw * .38) * (.5 + .5 * it.s), 5.5 * it.s, t, it.k || 0);
+      else essence186(x, y, (it.type === 'G' ? 8 : 5.6) * it.s, spin + x * .05, fz, it.type === 'G'); });
+    if (fused) { once('enNf', () => { spawn({ x: c, y, size: 8, shape: 'ring', grow: 26, life: .5, col: '#fff' }); sparks184(c, y, 14, 100, 70, ['#ffffff', '#b8c8ff', '#c8a8ff']); });
+      let bx = c, by = y, r = 10 * eBack(clamp((ts - 1.1) / .2)) * (1 + (ts < FB184 ? 0 : 0) + (ts < FP184 && ts >= 1.1 ? .06 * Math.sin(ts * 40) : 0)), gone = false;
+      if (ts >= FP184) { const u = clamp((ts - FP184) / .35); if (u >= 1) { gone = true; once('enNa', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 32, life: .6, col: '#c8d4ff' }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 20, life: .45, col: '#fff' }); sparks184(ux, y, 16, 120, 90, ['#ffffff', '#b8c8ff', '#c8a8ff']); }); } else { bx = lerp(c, ux, u); by = y - Math.sin(u * Math.PI) * 12; r *= lerp(1, .6, u); } }
+      if (!gone) { ctx.save(); if (held) ctx.globalAlpha *= .55; essence186(bx, by, r, spin, held ? 0 : 1, true); ctx.restore(); if (held) glint185(bx + 3, by - 5, ts); } }
+    // the pinch in flight from the dish
+    if (o && o.t >= -1 && o.t < -.15) { const p = fly186(dx, y + 1, G.sx(kH), fy - 2, clamp((o.t + 1) / .85), 10); clump186(p.x, p.y, .9); }
+    if (o && o.t >= -.15) once('enNp' + o.i, () => dustPuff185(G.sx(kH), fy - 1, 7, 40)); },
+  snd(o, v, n) { if (o.t >= -.15) once('enN1' + o.i, () => ss184.rustle(0, v * .8)); if (o.t >= .3) once('enN2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= 1.1) once('enNfs', () => ss184.hum(0, 0, 1.2)); }) };
+
+// O. Wand carving: a wand blank with a crystal tip; a knife pulls a stroke (a shaving curls off), dust from a dish lights the new groove
+EN184.O = { name: 'Wand carving', finAt: FP184 + .1,
+  desc: 'The Lesser Magic Wand recipe. A wooden wand blank with bark lies along the bar, a violet crystal at its tip by the recipe and a dish of dust at the handle. Each skill-up a knife pulls one stroke along the next span: the bark comes off, a pale wood shaving curls up off the blade and drops; it nicks a rune into the fresh wood, and a pinch of dust flies in from the dish and lights the rune (a long gap: a shorter stroke each point). Finale: the wand lifts, the runes ignite one by one toward the crystal, a held beat, then the light runs into the crystal and it bursts into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.15), G = sl184(I, v), ux = I.x1 + 18, held = held185(ts), dx = I.x0 - 16, L = I.x1 - I.x0;
+    const a = o ? I.X(S.v0 + o.i) : I.X(I.v), b = o ? I.X(S.v0 + o.i + 1) : a, fx = o ? (o.t < -.55 ? a : o.t < -.3 ? lerp(a, b, sm185((o.t + .55) / .25)) : b) : I.X(I.v);
+    const lift = ts >= 0 ? (ts < .4 ? sm185(ts / .4) : ts < FP184 + .5 ? 1 : 1 - sm185(clamp((ts - FP184 - .5) / .5))) * 4 : 0, wy = y - lift, th = x => lerp(12, 8, clamp((x - I.x0) / L));
+    dish186(dx, y + 4, t);
+    // the wand: bark ahead, carved pale wood behind the front
+    const xa = I.x0 - 4, xb = I.x1 - 2, body = () => { ctx.beginPath(); ctx.moveTo(xa, wy - th(xa) / 2); ctx.lineTo(xb, wy - th(xb) / 2); ctx.lineTo(xb, wy + th(xb) / 2); ctx.lineTo(xa, wy + th(xa) / 2); ctx.closePath(); };
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1 + lift * .6; body(); const bg = ctx.createLinearGradient(0, wy - 5, 0, wy + 5); bg.addColorStop(0, '#8a5a32'); bg.addColorStop(1, '#3e2410'); ctx.fillStyle = bg; ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    body(); ctx.clip(); ctx.fillStyle = 'rgba(30,16,6,.55)'; for (let x = xa + 3; x < xb; x += 11) ctx.fillRect(x + (hash184(x) * 4), wy - 3 + hash184(x + 1) * 4, 5 + hash184(x + 2) * 4, 1.2);
+    if (fx > xa) { const cg = ctx.createLinearGradient(0, wy - 5, 0, wy + 5); cg.addColorStop(0, '#f2d8a8'); cg.addColorStop(1, '#a87a48'); ctx.fillStyle = cg; ctx.fillRect(xa, wy - 6, fx - xa, 12); ctx.strokeStyle = 'rgba(140,96,50,.35)'; ctx.lineWidth = .6; for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.moveTo(xa, wy + j * 1.8); ctx.lineTo(fx, wy + j * 1.8); ctx.stroke(); }
+      if (o && o.t >= -.55 && o.t < .4) { ctx.fillStyle = `rgba(255,250,235,${o.t < -.3 ? .5 : .5 * clamp(1 - (o.t + .3) / .7)})`; ctx.fillRect(a, wy - 6, fx - a, 12); } }
+    ctx.restore(); ctx.save(); body(); ctx.strokeStyle = 'rgba(20,10,2,.85)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+    // the runes: nicked dark, then lit by the dust; in the finale they ignite toward the crystal
+    const pay = ts >= FP184 ? clamp(1 - (ts - FP184) / .8) : 0;
+    for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const x = G.sx(k), rs = Math.min(3.4, G.sw * .24), cur = o && kH186(G, o) === k, nick = cur && o.t < 0 ? clamp((o.t + .3) / .12) : 1, litQ = cur && o.t < 0 ? G.fr(k) - 1 / G.per * 0 : q;
+      rune184(rk184(k), x, wy, rs, q * nick, 'rgba(60,30,10,.85)', 1.3);
+      if (!(cur && o.t < 0)) { let b2 = cur ? clamp(1 - o.t / .8) : 0; if (ts >= 0 && ts < FB184) { const ig = ts - .3 - k / G.N * .9; if (ig >= 0) b2 = Math.max(b2, clamp(1 - ig / .3) * .6 + .5); } if (pay > 0) b2 = Math.max(b2, pay);
+        ctx.save(); if (held) ctx.globalAlpha *= .3; rune184(rk184(k), x, wy, rs, litQ, mix('#9a6ae8', '#ffffff', clamp(b2)), 1.2, '#b890ff'); ctx.restore(); if (b2 > .4) glow184(x, wy, 8, b2 * .45); } }
+    // the crystal tip
+    const cxr = xb + 4, cgl = .35 + (ts >= 0 && ts < FB184 ? ts / FB184 * .8 : 0) + pay * 1.2 + (held ? .2 : 0);
+    ctx.save(); ctx.fillStyle = '#b8b0a8'; ctx.fillRect(xb - 1, wy - 3.2, 2.5, 6.4); ctx.translate(cxr, wy); const kg = ctx.createLinearGradient(-5, 0, 5, 0); kg.addColorStop(0, '#4a2a9a'); kg.addColorStop(.5, '#9a6ae8'); kg.addColorStop(1, '#f0e8ff'); ctx.fillStyle = kg; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 6 + cgl * 10;
+    ctx.beginPath(); ctx.moveTo(-3.5, 0); ctx.lineTo(0, -4); ctx.lineTo(5, 0); ctx.lineTo(0, 4); ctx.closePath(); ctx.fill(); ctx.restore(); glow184(cxr, wy, 10, cgl * .5);
+    if (held) glint185(cxr + 1, wy - 3, ts);
+    if (ts >= FB184 * .75 && ts < FP184) { const u = clamp((ts - FB184 * .75) / .3); if (u < 1) glow184(lerp(I.x0, cxr, u), wy, 10, .8, '230,215,255'); }
+    if (ts >= FP184) { const u = clamp((ts - FP184) / .12); once('enOp', () => { spawn({ x: cxr, y: wy, size: 5, shape: 'ring', grow: 24, life: .5, col: '#fff' }); sparks184(cxr, wy, 12, 140, 90); });
+      if (u >= 1) once('enOa', () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 34, life: .6, col: '#dcd0ff' }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 50, life: .7, col: '#b890ff' }); sparks184(ux, y, 18, 160, 110); });
+      const fa = clamp(1 - (ts - FP184 - .15) / .4); if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(170,130,255,.7)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cxr, wy); ctx.lineTo(lerp(cxr, ux, u), lerp(wy, y, u)); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore(); glow184(cxr, wy, 26, fa); } }
+    // the shaving: curls off the blade during the stroke, then drops below the wand and fades
+    if (o && o.t >= -.55) { const sw = Math.max(3, b - a); if (o.t < -.3) { const u = (o.t + .55) / .25; ctx.save(); ctx.strokeStyle = '#f0d8a8'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(fx - 2, wy - 6, 2 + u * 1.5, Math.PI * .5, Math.PI * (.5 + 1.6 * u)); ctx.stroke(); ctx.restore(); }
+      else if (o.t < 1.1) { const tt = o.t + .3, py = Math.min(wy + 9, wy - 6 + 60 * tt * tt), px = b - 2 + tt * 8, al = clamp(1 - (tt - .4) / .8); ctx.save(); ctx.globalAlpha *= al; ctx.strokeStyle = '#e8cc98'; ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(px, py, 3.2 * Math.min(1, sw / 8 + .4), tt * 6, tt * 6 + Math.PI * 1.6); ctx.stroke(); ctx.restore(); } }
+    // the dust pinch from the dish to the fresh rune
+    if (o && o.t >= -.45 && o.t < -.15 && kH186(G, o) >= 0) { const p = fly186(dx, y + 2, G.sx(kH186(G, o)), wy - 1, clamp((o.t + .45) / .3), 10); clump186(p.x, p.y, .8); }
+    if (o && o.t >= -.15) once('enOd' + o.i, () => sparks184(G.sx(kH186(G, o)), wy - 2, 6, 40, 30));
+    // the knife: rests above the front; winds in, pulls the stroke, lifts away
+    // (kx, ky) is the blade's tip; the handle points up-right
+    let kx = fx + 5, ky = wy - 6, rot = -.75;
+    if (o && o.t < -.55) { const u = sm185(clamp((o.t + 1.05) / .5)); kx = lerp(a + 5, a, u); ky = lerp(wy - 6, wy - 3, u); rot = lerp(-.75, -.55, u); }
+    else if (o && o.t < -.3) { kx = fx; ky = wy - 3; rot = -.55; }
+    else if (o && o.t < 0) { const u = sm185(clamp((o.t + .3) / .3)); kx = lerp(b, b + 5, u); ky = lerp(wy - 3, wy - 6, u); rot = lerp(-.55, -.75, u); }
+    if (ts >= 0) { kx = lerp(kx, I.x1 - 40, sm185(clamp(ts / .4))); ky = wy - 6; }
+    ctx.save(); ctx.translate(kx, ky); ctx.rotate(rot); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 2; const kb = ctx.createLinearGradient(0, -1.8, 0, 1.8); kb.addColorStop(0, '#f4f6fa'); kb.addColorStop(1, '#8a92a0'); ctx.fillStyle = kb; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(9, -1.8); ctx.lineTo(9, 1.6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#4a2c14'; ctx.beginPath(); ctx.roundRect(9, -1.9, 7, 3.8, 1.5); ctx.fill(); ctx.restore(); },
+  snd(o, v, n) { if (o.t >= -.55) once('enO1' + o.i, () => ss184.scratch(0, v)); if (o.t >= 0) once('enO2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+const kH186 = (G, o) => G.kOf(S.v0 + o.i);
+
+// ========== Enchanting round 187, the rejected fresh start: R Riffling tome, T Animated broom, U Animated armor, V Sword vs. dummy, W Golem and boulder (moved out 2026-11-19) ==========
+// ---------- round 187 (2026-11-19): Enchanting, a complete pivot (the user: "fresh ideas"): big objects or enchanted things brought to life,
+// a satisfying action every skill-up. R Riffling tome, T Animated broom, U Animated armor, V Sword vs. dummy, W Golem and boulder.
+// C, F (184) and N, O (186) moved to the old-rounds file ----------
+const pos187 = (I, o, t0, t1, ease = sm185) => { if (!o) return I.X(I.v); const a = I.X(S.v0 + o.i), b = I.X(S.v0 + o.i + 1); return o.t < t0 ? a : o.t < t1 ? lerp(a, b, ease(clamp((o.t - t0) / (t1 - t0)))) : b; };
+function floor187(I, y, x0 = I.x0 - 36) { ctx.save(); const g = ctx.createLinearGradient(0, y + 8, 0, y + 12); g.addColorStop(0, '#5a5662'); g.addColorStop(1, '#24222a'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x0, y + 8, I.x1 + 4 - x0, 4, 2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fillRect(x0 + 2, y + 8, I.x1 + 2 - x0, 1); ctx.restore(); }
+const grit187 = (x, y, n, dir = -1, col = '#8a8494') => { for (let q = 0; q < n; q++) spawn({ x, y, vx: dir * (20 + Math.random() * 50), vy: -15 - Math.random() * 35, g: 260, life: .5, size: 1 + Math.random() * .6, shape: 'sq', vr: 8, col }); };
+const hitIcon187 = (ux, y, cols) => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 32, life: .6, col: '#dcd0ff' }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 20, life: .45, col: '#fff' }); sparks184(ux, y, 16, 130, 90, cols); };
+function pageArc187(xm, by, W, th, h, col, lw, glow) { const ex = xm + Math.cos(th) * W, ey = by - Math.sin(th) * h; ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineCap = 'round'; if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 8; }
+  ctx.beginPath(); ctx.moveTo(xm, by); ctx.quadraticCurveTo(xm + Math.cos(th) * W * .55, by - Math.sin(th) * h * 1.15 - 3, ex, ey); ctx.stroke(); ctx.restore(); }
+
+// R. Riffling tome: an open tome edge-on; each skill-up a glowing page arcs over from the right block to the left
+EN184.R = { name: 'Riffling tome', finAt: FP184 + .3,
+  desc: 'A thick enchanting tome lies open along the bar, seen edge-on: two page blocks either side of the spine. Each skill-up a page on the right lifts, arcs over the spine glowing, and lands on the left block with a puff of sparkles; the left block grows thicker as the right one thins (a long gap: a page each point, the blocks move less). Finale: the pages riffle back over faster and faster in a storm of light, a held beat as the empty cover rises, then the cover slams shut and the light bursts into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, 0), G = sl184(I, v), ux = I.x1 + 18, held = held185(ts), xm = (I.x0 + I.x1) / 2, W = xm - I.x0 - 3, base = y + 6;
+    const rif = ts >= 0 ? clamp(ts / FB184) : 0, p = G.N * Math.pow(rif, 1.6), shut = ts >= FP184;
+    const f = ts >= 0 ? 1 - clamp(p / G.N) : clamp((v - I.lo) / G.n), hL = lerp(2, 13, f), hR = lerp(13, 2, f);
+    ctx.save(); ctx.fillStyle = '#4a2a6a'; ctx.beginPath(); ctx.roundRect(shut ? xm - 2 : I.x0 - 4, base, shut ? W + 8 : I.x1 - I.x0 + 8, 3, 1.5); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.45)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+    const block = (xo, xi, h, dark) => { if (h <= .3) return; ctx.save(); const g = ctx.createLinearGradient(0, base - h, 0, base); g.addColorStop(0, dark ? '#d8c8a4' : '#f2e6c8'); g.addColorStop(1, '#bfa87a'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(xo, base); ctx.lineTo(xo, base - h); ctx.quadraticCurveTo((xo + xi) / 2, base - h - 1, xi, base - h * .35); ctx.lineTo(xi, base); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(120,90,50,.45)'; ctx.lineWidth = .6; for (let yy = base - 1.6; yy > base - h + .8; yy -= 1.6) { ctx.beginPath(); ctx.moveTo(xo + .5, yy); ctx.lineTo(xi - 3, yy + (base - yy) * 0); ctx.stroke(); } ctx.restore(); };
+    if (!shut) { block(I.x0 - 2, xm - 1, hL); block(I.x1 + 2, xm + 1, hR, true); if (ts >= 0 && ts < FB184) { glow184(xm - W / 2, base - 4, 26, rif * .4); glow184(xm + W / 2, base - 4, 26, rif * .4); } }
+    else { block(I.x1 + 2, xm + 1, 13, true); }
+    // the page in flight on a skill-up: a little lift, then the arc over the spine
+    if (o && o.t > -.8 && o.t < 0 && ts < 0) { const th = o.t < -.55 ? .14 * Math.sin(clamp((o.t + .8) / .25) * Math.PI / 2) : lerp(.14, Math.PI, sm185((o.t + .55) / .55)), lit = Math.sin(clamp(th / Math.PI) * Math.PI);
+      pageArc187(xm, base - 5, W, th, 20, mix('#f2e6c8', '#ffffff', lit), 3.4, lit > .2 ? '#c8a8ff' : null); if (lit > .3) glow184(xm + Math.cos(th) * W * .6, base - 4 - Math.sin(th) * 14, 14, lit * .5); }
+    if (o && o.t >= 0) once('enRl' + o.i, () => { sparks184(xm - W * .6, base - hL - 2, 8, 70, 35); });
+    // the riffle: several pages back over, ever faster
+    if (ts >= 0 && ts < FB184) for (let j = Math.max(0, Math.floor(p) - 3); j <= Math.min(G.N - 1, Math.floor(p)); j++) { const u = clamp((p - j) / 2.5); if (u <= 0 || u >= 1) continue; const th = Math.PI * (1 - u); pageArc187(xm, base - 5, W, th, 20, '#ffffff', 2.6, '#c8a8ff'); }
+    // held: the empty left cover rises; payoff: it slams over to the right
+    if (held || (shut && ts < FP184 + .12)) { const th = held ? lerp(Math.PI, Math.PI / 2, eOut(clamp((ts - FB184) / (FP184 - FB184)))) : lerp(Math.PI / 2, 0, clamp((ts - FP184) / .12) ** 2); pageArc187(xm, base + 1, W + 2, th, 20, '#4a2a6a', 3.2); if (held) glint185(xm + Math.cos(th) * W, base - Math.sin(th) * 20, ts); }
+    if (shut && ts >= FP184 + .12) { ctx.save(); ctx.fillStyle = '#4a2a6a'; ctx.beginPath(); ctx.roundRect(xm - 2, base - 16.5, W + 8, 3.2, 1.5); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+      once('enRs', () => { spawn({ x: xm + W / 2, y: base - 6, size: 8, shape: 'ring', grow: 30, life: .5, col: '#fff' }); sparks184(xm + W / 2, base - 8, 18, 160, 60); });
+      const u = clamp((ts - FP184 - .12) / .18), fa = clamp(1 - (ts - FP184 - .3) / .5); if (u >= 1) once('enRa', () => hitIcon187(ux, y)); if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(170,130,255,.7)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(I.x1 + 4, base - 6); ctx.lineTo(lerp(I.x1 + 4, ux, u), lerp(base - 6, y, u)); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); glow184(xm + W / 2, base - 6, 40, fa * .7); } } },
+  snd(o, v, n) { if (o.t >= -.55) once('enR1' + o.i, () => ss184.rustle(0, v)); if (o.t >= 0) once('enR2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// T. Animated broom: a broom brought to life sweeps one tile per skill-up; the swept tile shows a glowing rune
+function broom187(x, y, rot, glow) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); if (glow > 0) glow184(0, -6, 12, glow * .6);
+  ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(-6, -21); ctx.stroke();
+  const g = ctx.createLinearGradient(0, -7, 0, 0); g.addColorStop(0, '#e8c870'); g.addColorStop(1, '#b08a3a'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-2.5, -7); ctx.lineTo(2.5, -7); ctx.lineTo(5, 0); ctx.lineTo(-5, 0); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,80,20,.6)'; ctx.lineWidth = .6; for (let i = -3; i <= 3; i += 1.5) { ctx.beginPath(); ctx.moveTo(i * .5, -6.5); ctx.lineTo(i, -.3); ctx.stroke(); }
+  ctx.fillStyle = '#9a6ae8'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 6; ctx.fillRect(-2.8, -8.6, 5.6, 2); ctx.restore(); }
+EN184.T = { name: 'Animated broom', finAt: FP184 + .3,
+  desc: 'Karazhan’s enchanted brooms. A broom brought to life works along a grimy stone floor, one tile per notch. Each skill-up it rears back and sweeps the next tile in one big stroke: the grime flies off and the clean tile lights up with a glowing rune (a long gap: a short sweep each point). Finale: the broom sways and sweeps faster and faster, a held beat with it reared back, then one huge sweep sends a wave of light skidding along the floor into the recipe, and the broom bows.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.1), G = sl184(I, v), N = G.N, ux = I.x1 + 18, held = held185(ts), ty = y + 2, th = 7;
+    let wave = -1; if (ts >= FP184) wave = lerp(I.x0, ux, clamp((ts - FP184) / .3));
+    for (let k = 0; k < N; k++) { const x = I.x0 + k * G.sw, q = G.fr(k), cur = o && G.kOf(S.v0 + o.i) === k && o.t < -.1, cx = x + G.sw / 2;
+      ctx.save(); ctx.fillStyle = q > 0 ? '#6a6676' : '#45414e'; ctx.fillRect(x + .5, ty, G.sw - 1, th); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(x + .5, ty, G.sw - 1, 1);
+      const grime = q >= 1 ? 0 : cur ? 1 - q - clamp((o.t + .45) / .35) / G.per : 1 - q; if (grime > 0) { ctx.fillStyle = `rgba(30,24,18,${.75 * Math.min(1, grime)})`; for (let j = 0; j < 3; j++) { ctx.beginPath(); ctx.ellipse(x + 2 + hash184(k * 3 + j) * (G.sw - 4), ty + 2 + hash184(k + j * 7) * 3, 1.6 + hash184(j + k) * 1.4, 1, 0, 0, 7); ctx.fill(); } }
+      ctx.restore(); if (q > 0 && !cur) { let b = o && G.kOf(S.v0 + o.i) === k && o.t >= -.1 ? clamp(1 - (o.t + .1) / .8) : 0; if (wave >= 0 && Math.abs(wave - cx) < 14) b = 1; ctx.save(); if (held) ctx.globalAlpha *= .4; rune184(rk184(k), cx, ty + th / 2, Math.min(2.6, G.sw * .2), q, mix('#9a6ae8', '#ffffff', b), 1.1, '#b890ff'); ctx.restore(); if (b > .3) glow184(cx, ty + 3, 9, b * .5); } }
+    // the broom: rests at the front; rears back, sweeps across the tile, settles
+    const a = o ? I.X(S.v0 + o.i) : I.X(v), b = o ? I.X(S.v0 + o.i + 1) : a; let bx = Math.max(I.x0 - 4, I.X(v) - 2), by = ty + 1, rot = Math.sin(t * 3) * .05, gl = .3;
+    if (o && o.t < -.45) { const u = clamp((o.t + .7) / .25); bx = a - 2 - Math.sin(u * Math.PI / 2) * 3; rot = -.4 * Math.sin(u * Math.PI / 2); by = ty + 1 - Math.sin(u * Math.PI) * 2; }
+    else if (o && o.t < -.1) { const u = sm185((o.t + .45) / .35); bx = lerp(a - 5, b + 1, u); rot = lerp(-.4, .35, u); gl = .8; if (Math.floor(o.t * 30) % 2 === 0) once('enTg' + o.i + Math.floor(o.t * 30), () => grit187(bx + 4, ty, 2, 1, '#2a2218')); }
+    else if (o && o.t < .3) { const u = clamp((o.t + .1) / .4); bx = b + 1 - u * 3; rot = .35 * (1 - eOut(u)); }
+    if (o && o.t >= -.1) once('enTs' + o.i, () => spawn({ x: (a + b) / 2, y: ty + 3, size: 3, shape: 'ring', grow: 12, life: .4, col: '#dcd0ff' }));
+    if (ts >= 0) { bx = I.x1 - 22; if (ts < FB184) { const w = ts / FB184, ph = ts * (6 + ts * 10); bx += Math.sin(ph) * (4 + 6 * w); rot = Math.sin(ph) * (.2 + .25 * w); gl = .4 + w * .6; if (Math.sin(ph) > .9) once('enTf' + Math.floor(ph / 6.283), () => grit187(bx + 4, ty, 3, 1, '#e8dcff')); }
+      else if (ts < FP184) { rot = -.5; bx -= 3; gl = .6; } else if (ts < FP184 + .3) { const u = clamp((ts - FP184) / .12); rot = lerp(-.5, .5, u); bx += u * 14; gl = 1; } else { const u = clamp((ts - FP184 - .5) / .6); bx += 14; rot = .5 * (1 - u) + .45 * Math.sin(u * Math.PI); gl = .4; } }
+    broom187(bx, by, rot, gl); if (held) glint185(bx - 5, by - 18, ts);
+    if (wave >= 0 && wave < ux) { glow184(wave, ty + 3, 18, .9, '220,200,255'); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(220,200,255,.5)'; ctx.fillRect(Math.max(I.x0, wave - 40), ty + 1, Math.min(40, wave - I.x0), 5); ctx.restore(); }
+    if (wave >= ux) once('enTa', () => hitIcon187(ux, y)); },
+  snd(o, v, n) { if (o.t >= -.45) once('enT1' + o.i, () => ss184.scratch(0, v)); if (o.t >= -.1) once('enT2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// U. Animated armor: an empty suit of armor clanks one step per skill-up; glowing footprints behind it
+function armor187(x, fy, lean, lift, eye, rune) { ctx.save(); ctx.translate(x, fy); ctx.rotate(lean); const st = (yy0, yy1) => { const g = ctx.createLinearGradient(0, yy0, 0, yy1); g.addColorStop(0, '#d8dee8'); g.addColorStop(1, '#5e6878'); return g; }; ctx.strokeStyle = '#22262e'; ctx.lineWidth = .9;
+  ctx.fillStyle = st(-8, 0); ctx.beginPath(); ctx.roundRect(-4.5, -8, 3.4, 8, 1); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.roundRect(1, -8 - lift, 3.4, 8, 1); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = st(-18, -7); ctx.beginPath(); ctx.moveTo(-5.5, -18); ctx.lineTo(5.5, -18); ctx.lineTo(4, -7.5); ctx.lineTo(-4, -7.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(4.6, -17, 2.6, 7.5, 1); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = st(-25, -18); ctx.beginPath(); ctx.roundRect(-3.6, -25, 7.2, 7, [3, 3, 1, 1]); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c8a8ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4 + eye * 8; ctx.fillRect(-1, -22.5, 4.2, 1.3); ctx.shadowBlur = 0;
+  rune184(2, 0, -12.8, 2.2, 1, mix('#9a6ae8', '#ffffff', clamp(rune)), 1.1, '#b890ff'); ctx.restore(); if (rune > .3) glow184(x, fy - 13, 10, rune * .5); }
+EN184.U = { name: 'Animated armor', finAt: FP184 + .15,
+  desc: 'An empty suit of armor brought to life marches along a stone floor toward the recipe, violet light in its visor. Each skill-up it leans back, lifts a foot, and stomps one step forward with a clank, a puff of dust and a little shake; a glowing footprint stays where it landed, and the rune on its breastplate flares (a long gap: a short step each point). Finale: it stamps in place faster and faster, a held beat with its visor glinting, then it thrusts its sword at the recipe and light bursts into it.',
+  draw(I, y, t, ts) { const o = vd184(I, 0).o, ux = I.x1 + 18, held = held185(ts), fy = y + 8; floor187(I, y);
+    const vv = Math.floor(I.v + 1e-6); for (let lv = I.lo + 1; lv <= vv && lv <= S.nx.lv; lv++) { const x = I.X(lv) - 16 + ((lv % 2) ? 2.5 : -1), nw = o && lv === S.v0 + o.i + 1 && o.t < 1 ? clamp(1 - o.t) : 0; ctx.save(); ctx.fillStyle = mix('#7a4ad0', '#ffffff', nw); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4 + nw * 6; ctx.globalAlpha *= held ? .35 : .8; ctx.beginPath(); ctx.ellipse(x, fy + 1, 2.2, .9, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    let ax = pos187(I, o, -.15, 0) - 16, lean = 0, lift = 0, rune = 0, eye = .3;
+    if (o && o.t > -.5 && o.t < -.15) { const u = clamp((o.t + .5) / .35); lean = -.12 * Math.sin(u * Math.PI / 2); lift = 3.5 * Math.sin(u * Math.PI / 2); }
+    else if (o && o.t >= -.15 && o.t < 0) { const u = (o.t + .15) / .15; lean = lerp(-.12, .06, u); lift = 3.5 * (1 - u * u); }
+    else if (o && o.t >= 0 && o.t < .35) { lean = .06 * (1 - o.t / .35); rune = clamp(1 - o.t / .6); eye = 1 - o.t / .35 * .7; }
+    if (o && o.t >= 0) once('enUs' + o.i, () => { grit187(ax + 3, fy, 4, 1, '#a8a2b0'); grit187(ax - 2, fy, 3, -1, '#a8a2b0'); });
+    if (ts >= 0) { if (ts < FB184) { const ph = ts * (5 + ts * 9); lift = Math.max(0, Math.sin(ph)) * 3; rune = .3 + ts / FB184 * .7; eye = rune; if (Math.sin(ph) < -.95) once('enUf' + Math.floor(ph / 6.283), () => grit187(ax + 3, fy, 2, 1, '#a8a2b0')); } else { rune = held ? .2 : 1; eye = held ? 1 : .8; } }
+    armor187(ax, fy, lean, lift, eye, rune); if (held) glint185(ax + 1, fy - 22, ts);
+    if (ts >= FP184) { const u = clamp((ts - FP184) / .15), sx = ax + 7, sy = fy - 13, ex = lerp(sx + 4, ux - 9, u), fa = clamp(1 - (ts - FP184 - .5) / .5);
+      if (fa > 0) { ctx.save(); ctx.globalAlpha *= fa; ctx.strokeStyle = '#4a2c14'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + 4, sy); ctx.stroke(); ctx.strokeStyle = '#e8eef8'; ctx.lineWidth = 2.2; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(sx + 4, sy); ctx.lineTo(ex, lerp(sy, y, u)); ctx.stroke(); ctx.restore(); }
+      if (u >= 1) once('enUa', () => hitIcon187(ux, y)); } },
+  snd(o, v, n) { if (o.t >= 0) { once('enU1' + o.i, () => ss184.knock(0, v)); once('enU2' + o.i, () => ss184.hum(.05, n, v * .8)); } },
+  fsnd: ts => fsnd184(ts) };
+
+// V. Sword vs. dummy: a floating sword slashes; the dummy is knocked back one notch, a glowing slash mark stays where it stood
+function dummy187(x, fy, rot) { ctx.save(); ctx.translate(x, fy); ctx.rotate(rot); ctx.strokeStyle = '#6a4424'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -18); ctx.moveTo(-6, -12); ctx.lineTo(6, -12); ctx.stroke();
+  ctx.fillStyle = '#c8a060'; ctx.strokeStyle = '#6a4a20'; ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(0, -10, 4.6, 6, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(0, -19, 3.4, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(110,70,20,.7)'; ctx.beginPath(); ctx.moveTo(-4, -8); ctx.lineTo(4, -8); ctx.moveTo(-4, -12); ctx.lineTo(4, -12); ctx.stroke(); ctx.restore(); }
+function sword187(x, y, rot, glow) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5 + glow * 8; const g = ctx.createLinearGradient(0, -1.5, 0, 1.5); g.addColorStop(0, '#f4f6fa'); g.addColorStop(1, '#8a92a0'); ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(2, -1.4); ctx.lineTo(15, -1); ctx.lineTo(18, 0); ctx.lineTo(15, 1); ctx.lineTo(2, 1.4); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#c8a050'; ctx.fillRect(1, -4, 1.8, 8); ctx.fillStyle = '#4a2c14'; ctx.fillRect(-4, -1, 5, 2); ctx.fillStyle = '#9a6ae8'; ctx.beginPath(); ctx.arc(-4.5, 0, 1.4, 0, 7); ctx.fill(); ctx.restore(); }
+function smear187(x, y, r, a0, a1, al) { if (al <= 0) return; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = `rgba(220,200,255,${al})`; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x, y, r, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke(); ctx.restore(); }
+EN184.V = { name: 'Sword vs. dummy', finAt: FP184 + .35,
+  desc: 'A floating enchanted sword spars with a straw training dummy on its own. Each skill-up the sword rises and winds back, then slashes down on an arc with a smear (a hit-stop, a puff of straw), and the dummy is knocked back one notch, wobbling; a glowing slash mark stays on the floor where it stood (a long gap: a short knock each point). Finale: a flurry of slashes as straw flies, a held beat with the sword raised, then one huge slash sends the dummy spinning into the recipe.',
+  draw(I, y, t, ts) { const o = vd184(I, 0).o, ux = I.x1 + 18, held = held185(ts), fy = y + 8; floor187(I, y);
+    const vv = Math.floor(I.v + 1e-6); for (let lv = I.lo + 1; lv <= vv && lv <= S.nx.lv; lv++) { const x = I.X(lv - 1) + 4, nw = o && lv === S.v0 + o.i + 1 && o.t < 1 ? clamp(1 - o.t) : 0; ctx.save(); ctx.strokeStyle = mix('#8a5ae8', '#ffffff', nw); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5 + nw * 6; ctx.globalAlpha *= held ? .35 : .85; ctx.lineWidth = 1.3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - 2.5, fy + 2.5); ctx.lineTo(x + 2.5, fy - .5); ctx.stroke(); ctx.restore(); }
+    const hs = o && o.t >= 0 && o.t < .06; let dx = pos187(I, o, .06, .3, eOut) + 4, drot = 0; if (o && o.t >= .06 && o.t < .9) { const u = o.t - .06; drot = -.45 * Math.exp(-u * 6) * Math.cos(u * 18); }
+    let sx = dx - 18, sy = y - 1 + Math.sin(t * 2.5) * 1, rot = -.35, gl = .3, sm = null;
+    if (o && o.t > -.6 && o.t < -.2) { const u = sm185((o.t + .6) / .4); rot = lerp(-.35, -1.9, u); sx -= 3 * u; sy -= 2 * u; }
+    else if (o && o.t >= -.2 && o.t < 0) { const u = ((o.t + .2) / .2) ** 2; rot = lerp(-1.9, .9, u); sx -= 3 * (1 - u); sy -= 2 * (1 - u); sm = [-1.9, rot, .8]; gl = 1; }
+    else if (o && o.t >= 0 && o.t < .5) { const u = hs ? 0 : sm185(clamp((o.t - .06) / .44)); rot = lerp(.9, -.35, u); sm = [-1.9, .9, .8 * (1 - clamp(o.t / .2))]; gl = 1 - u; }
+    if (o && o.t >= 0) once('enVh' + o.i, () => { for (let q = 0; q < 8; q++) spawn({ x: dx, y: fy - 10, vx: 20 + Math.random() * 60, vy: -30 - Math.random() * 40, g: 200, life: .6, size: 1, shape: 'sq', vr: 10, col: q % 2 ? '#e8c870' : '#c8a060' }); });
+    let gone = false, flyX = dx, flyY = fy, flyR = drot;
+    if (ts >= 0) { sx = I.x1 - 15; if (ts < FB184) { const ph = ts * (8 + ts * 12), w = ts / FB184; rot = -.5 + Math.sin(ph) * (.6 + .5 * w); sm = [rot - Math.cos(ph) * .8, rot, .5 + .4 * w]; gl = .5 + w * .5; flyR = Math.sin(ph * 1.3) * .15 * w; if (Math.sin(ph) > .95) once('enVf' + Math.floor(ph / 6.283), () => spawn({ x: dx, y: fy - 10, vx: 30 + Math.random() * 40, vy: -40, g: 200, life: .5, size: 1, shape: 'sq', vr: 10, col: '#e8c870' })); }
+      else if (ts < FP184) { rot = -2; sy -= 3; gl = .7; } else { const u = clamp((ts - FP184) / .1); rot = lerp(-2, 1.2, u); sm = [-2, rot, 1 - clamp((ts - FP184 - .1) / .3)]; gl = 1;
+        const v2 = clamp((ts - FP184 - .05) / .35); if (v2 >= 1) { gone = true; once('enVa', () => { hitIcon187(ux, y); for (let q = 0; q < 10; q++) spawn({ x: ux, y, vx: (Math.random() - .5) * 120, vy: -40 - Math.random() * 60, g: 200, life: .7, size: 1.1, shape: 'sq', vr: 10, col: '#e8c870' }); }); } else { flyX = lerp(dx, ux, v2); flyY = lerp(fy, y + 10, v2) - Math.sin(v2 * Math.PI) * 14; flyR = v2 * 9; } } }
+    if (!gone) { ctx.save(); if (held) ctx.globalAlpha *= .7; dummy187(flyX, flyY, flyR); ctx.restore(); }
+    if (sm) smear187(sx, sy, 14, sm[0], sm[1], sm[2]); sword187(sx, sy, rot, gl); if (held) glint185(sx + Math.cos(rot) * 17, sy + Math.sin(rot) * 17, ts); },
+  snd(o, v, n) { if (o.t >= -.2) once('enV1' + o.i, () => ss184.scratch(0, v)); if (o.t >= 0) once('enV2' + o.i, () => ss184.knock(0, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// W. Golem and boulder: a small stone golem shoves a runed boulder one notch per skill-up
+function golem187(x, fy, squash, lunge, rune, armTo) { ctx.save(); ctx.translate(x, fy); const st = (a, b) => { const g = ctx.createLinearGradient(0, a, 0, b); g.addColorStop(0, '#a49eae'); g.addColorStop(1, '#4e4a58'); return g; }; ctx.strokeStyle = '#26232c'; ctx.lineWidth = .9;
+  ctx.fillStyle = st(-5, 0); ctx.fillRect(-5, -5, 4, 5); ctx.strokeRect(-5, -5, 4, 5); ctx.fillRect(1, -5, 4, 5); ctx.strokeRect(1, -5, 4, 5);
+  ctx.translate(lunge, 0); ctx.scale(1, squash); ctx.fillStyle = st(-17, -4); ctx.beginPath(); ctx.roundRect(-6.5, -17, 13, 12.5, 3); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.roundRect(-3.5, -23, 7, 6, 1.5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#c8a8ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5; ctx.fillRect(-1.6, -21, 1.3, 1.3); ctx.fillRect(.6, -21, 1.3, 1.3); ctx.shadowBlur = 0;
+  rune184(4, 0, -11, 2.4, 1, mix('#9a6ae8', '#ffffff', clamp(rune)), 1.2, '#b890ff');
+  ctx.fillStyle = st(-14, -9); ctx.beginPath(); ctx.roundRect(5, -14, Math.max(4, armTo - lunge - 5), 4.5, 2); ctx.fill(); ctx.stroke(); ctx.restore(); if (rune > .3) glow184(x + lunge, fy - 11 * squash, 10, rune * .5); }
+function boulder187(x, cy, r, ang, rune) { ctx.save(); ctx.translate(x, cy); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4; const g = ctx.createRadialGradient(-r * .35, -r * .4, 0, 0, 0, r); g.addColorStop(0, '#b8b2c2'); g.addColorStop(1, '#4a4654'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = '#26232c'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.rotate(ang); ctx.strokeStyle = 'rgba(30,26,36,.6)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-r * .7, r * .3); ctx.lineTo(-r * .2, r * .5); ctx.stroke(); rune184(1, 0, 0, r * .45, 1, mix('#9a6ae8', '#ffffff', clamp(rune)), 1.3, '#b890ff'); ctx.restore(); if (rune > .3) glow184(x, cy, r * 1.6, rune * .5); }
+EN184.W = { name: 'Golem and boulder', finAt: FP184 + .3,
+  desc: 'A small stone golem with a glowing rune in its chest pushes a big runed boulder along a stone floor; a glowing groove stays behind the boulder. Each skill-up the golem crouches and braces, then heaves: the boulder rolls one notch (its rune turning and flaring) with grit kicking up, and the golem follows it (a long gap: a short shove each point). Finale: both runes blaze brighter and brighter, a held beat, then one huge shove sends the boulder rolling into the recipe, and the golem dusts its hands off.',
+  draw(I, y, t, ts) { const o = vd184(I, 0).o, ux = I.x1 + 18, held = held185(ts), fy = y + 8, r = 8; floor187(I, y);
+    let bx = pos187(I, o, -.22, 0, eOut) - r, sq = 1, lg = 0, rune = .25, brn = .25;
+    if (o && o.t > -.6 && o.t < -.22) { const u = sm185((o.t + .6) / .38); sq = 1 - .12 * u; lg = -2 * u; }
+    else if (o && o.t >= -.22 && o.t < 0) { const u = (o.t + .22) / .22; sq = lerp(.88, 1.03, u); lg = lerp(-2, 2.5, u); brn = u; rune = .6; }
+    else if (o && o.t >= 0 && o.t < .4) { const u = o.t / .4; lg = 2.5 * (1 - u); brn = 1 - u * .75; rune = .6 * (1 - u) + .25; }
+    if (o && o.t >= 0) once('enWg' + o.i, () => grit187(bx - 2, fy - 1, 6, -1));
+    let gone = false; if (ts >= 0) { if (ts < FB184) { rune = brn = .3 + ts / FB184 * .7; } else if (ts < FP184) { rune = brn = held ? .25 : 1; sq = .88; lg = -2; } else { const u = clamp((ts - FP184) / .3); lg = 4 * (1 - clamp((ts - FP184 - .3) / .3)); rune = 1; brn = 1; if (u >= 1) { gone = true; once('enWa', () => { hitIcon187(ux, y); grit187(ux - 6, fy - 2, 8, -1); }); } else bx = lerp(bx, ux, u * u); }
+      if (ts > FP184 + 1) { const cl = ts - FP184 - 1; [0, .3].forEach((at, j) => { if (cl >= at) once('enWd' + j, () => dustPuff185(bx - r - 13, fy - 12, 5, 30)); }); } }
+    const gx = Math.min(bx, I.x1 - r) - r - 9;
+    ctx.save(); ctx.strokeStyle = held ? 'rgba(150,110,240,.3)' : 'rgba(190,160,255,.8)'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(I.x0 - 34, fy + .5); ctx.lineTo(Math.min(bx, I.x1), fy + .5); ctx.stroke(); ctx.restore();
+    if (!gone) boulder187(bx, fy - r, r, bx / r, brn);
+    golem187(gx, fy, sq, lg, rune, (gone ? gx + 14 : bx - r) - gx + 1); if (held) glint185(gx + 1, fy - 22, ts); },
+  snd(o, v, n) { if (o.t >= -.22) once('enW1' + o.i, () => ss184.rustle(0, v)); if (o.t >= 0) once('enW2' + o.i, () => ss184.knock(0, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// ========== Enchanting round 188: F2 Vellum scroll v2 and C2 Dust to glass v2 (moved out 2026-11-19; C and F are already above; M stays on the page) ==========
+// F2. Vellum scroll, reworked: a bigger scroll with a weighty roll; a point of light writes a bold sigil in glowing dust
+EN184.F2 = { name: 'Vellum scroll v2', finAt: FP184 + .6,
+  desc: 'F reworked: a bigger scroll held by a dowel with a violet tie, the roll at the front with spiral ends. Each skill-up the roll nudges back, rolls out one span with weight (an overshoot and a settle), then a bright point of light writes a bold sigil onto the fresh vellum, leaving glowing dust in its strokes that shimmers as it settles (a long gap: a bit more each point). Finale: the sigils light up one by one, a held beat, then they lift off as light into the recipe and the blank vellum rolls back up.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.5), G = sl184(I, v), ux = I.x1 + 18, held = held185(ts), s = Math.min(6, G.sw * .38);
+    let fx = front188(I, o, -1, -.7); const back = ts >= FP184 + .75 ? eOut(clamp((ts - FP184 - .75) / .9)) : 0; fx = lerp(fx, I.x0, back);
+    const rr = scroll188(I, y, fx, held, ts >= 0 && ts < FB184 ? ts / FB184 : 0); sigilsOn188(I, y, G, o, ts, held, t, fx, -.5, s);
+    if (o && o.t >= -.5 && o.t < 0) { const k = G.kOf(S.v0 + o.i), pen = sigil184(k, G.sx(k), y, s, G.fr(k), 'rgba(0,0,0,0)', .1); if (pen) { ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = '#c8a8ff'; ctx.shadowBlur = 10; star4(pen.x, pen.y, 4.5, t * 6); ctx.restore(); glow184(pen.x, pen.y, 10, .8, '230,215,255'); if (Math.floor(o.t * 30) % 2 === 0) once('enF2s' + o.i + Math.floor(o.t * 30), () => spawn({ x: pen.x, y: pen.y, vx: (Math.random() - .5) * 20, vy: -10 - Math.random() * 15, g: 40, life: .4, size: .9, col: '#e8dcff' })); } }
+    roll188(fx, y, rr, fx / rr); if (held) glint185(fx + rr, y - 10, ts); liftOff188(I, y, G, ts, ux, s); },
+  snd(o, v, n) { if (o.t >= -1) once('enF21' + o.i, () => ss184.rustle(0, v)); if (o.t >= -.45) once('enF22' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= FP184 + .75) once('enF2r', () => ss184.rustle(0, 1)); }) };
+
+// C2. Dust to arcane glass, reworked: a bigger pouch and runed rod; the heap slumps into a faceted glass chunk per notch
+EN184.C2 = { name: 'Dust to glass v2', finAt: FP184 + .6,
+  desc: 'C reworked: a deeper stone groove, a big leather pouch and a runed rod riding over the front. Each skill-up the pouch tips and pours a heap of glittering dust onto the next span, the rod dips into it, and with a flash the heap slumps and fuses into a faceted chunk of violet glass, white-hot at first and cooling (a long gap: the chunk grows a layer each point). Finale: light floods the chunks and cracks run through them, a held beat, then the glass bursts into shards that stream into the recipe, leaving the groove clean.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, 0), G = sl184(I, v), ux = I.x1 + 18, gy0 = y - 4, gy1 = y + 7, held = held185(ts), gone = ts >= FP184, flood = ts >= 0 && ts < FB184 ? ts / FB184 : 0;
+    ctx.save(); const sg = ctx.createLinearGradient(0, y - 8, 0, y + 11); sg.addColorStop(0, '#6e6874'); sg.addColorStop(1, '#2a2630'); ctx.fillStyle = sg; ctx.beginPath(); ctx.roundRect(I.x0 - 8, y - 8, I.x1 - I.x0 + 13, 19, 4); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.75)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.13)'; ctx.fillRect(I.x0 - 5, y - 7.5, I.x1 - I.x0 + 7, 1);
+    ctx.fillStyle = '#16131c'; ctx.beginPath(); ctx.roundRect(I.x0 - 2, gy0, I.x1 - I.x0 + 3, gy1 - gy0, 3); ctx.fill(); ctx.restore();
+    // the glass chunks
+    if (!gone) for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const xa = I.x0 + k * G.sw + .8, w = G.sw - 1.6, h = (gy1 - gy0 - 1) * q, top = gy1 - .5 - h, cur = o && G.kOf(S.v0 + o.i) === k && o.t < 1, hot = cur && o.t >= 0 ? 1 - eOut(clamp(o.t / .9)) : 0;
+      ctx.save(); const gg = ctx.createLinearGradient(0, top, 0, gy1); gg.addColorStop(0, mix('#dccaff', '#ffffff', Math.max(flood, hot))); gg.addColorStop(.5, mix('#8a5ae8', '#f0e0ff', Math.max(flood, hot * .9))); gg.addColorStop(1, mix('#3a1a7a', '#9a7af0', flood)); ctx.fillStyle = gg; if (held) ctx.globalAlpha *= .55;
+      ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4 + hot * 10; ctx.beginPath(); ctx.roundRect(xa, top, w, h, 1.5); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(xa + 1, top + .6, w - 2, 1);
+      ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(xa + w * .65, top + .5); ctx.lineTo(xa + w * .3, top + h - .5); ctx.stroke(); ctx.strokeStyle = 'rgba(30,10,60,.5)'; ctx.beginPath(); ctx.moveTo(xa + w - .4, top); ctx.lineTo(xa + w - .4, top + h); ctx.stroke();
+      if (ts >= 0 && ts < FP184 && ts > hash184(k) * FB184) { ctx.strokeStyle = held ? '#f4eaff' : 'rgba(40,10,80,.85)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(xa + hash184(k + 3) * w, top); ctx.lineTo(xa + hash184(k + 5) * w, top + h); ctx.stroke(); }
+      ctx.restore(); if (hot > 0) glow184(xa + w / 2, (top + gy1) / 2, 14, hot); }
+    if (flood > 0) for (let x = I.x0 + 15; x < I.X(I.v); x += 30) glow184(x, y + 1, 16, flood * .4);
+    // the pour and the heap
+    const kC = o ? G.kOf(S.v0 + o.i) : G.kOf(Math.min(I.lo + G.n - 1e-3, v)), hx = G.sx(kC), qC = G.fr(kC), hTop = gy1 - .5 - (gy1 - gy0 - 1) * qC;
+    if (o && o.t > -.8 && o.t < .08) { const hh = 7 * eOut(clamp((o.t + .75) / .5)) * (o.t > 0 ? 1 - o.t / .08 : 1), hw = Math.max(5, G.sw / 2); ctx.save(); const g = ctx.createLinearGradient(0, hTop - hh, 0, hTop); g.addColorStop(0, '#f6f0ff'); g.addColorStop(1, '#a898c8'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(hx, hTop, hw, hh, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#fff'; for (let q = 0; q < 6; q++) { ctx.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 9 + q)); ctx.fillRect(hx + (hash184(q + o.i * 7) - .5) * hw * 1.4, hTop - 1 - hash184(q + 3) * hh * .8, 1, 1); } ctx.restore(); }
+    let px = hx + 9, rot = 0, rodDip = 0; const hold = I.x0 - 18;
+    if (o && o.t < -.85) px = lerp(G.sx(G.kOf(Math.max(I.lo, S.v0 + o.i - 1e-3))) + 9, hx + 9, sm185(clamp((o.t + 1.05) / .2)));
+    else if (o && o.t < 0) { rot = -1.9 * eOut(clamp((o.t + .85) / .15)) * clamp((-o.t - .25) / .15); rodDip = o.t > -.2 ? Math.sin(clamp((o.t + .2) / .2) * Math.PI / 2) : 0; }
+    if (ts >= 0) px = lerp(px, hold, sm185(clamp(ts / .5)));
+    if (o && o.t > -.75 && o.t < -.3) { ctx.save(); ctx.fillStyle = '#efe8fa'; for (let q = 0; q < 8; q++) { const u = (t * 5 + q / 8) % 1; ctx.fillRect(hx + 1 + Math.sin(q * 2.1 + t * 7) * 1.5, lerp(y - 9, hTop - 2, u), 1.3, 1.8); } ctx.restore(); }
+    ctx.save(); ctx.translate(px, y - 10); ctx.rotate(rot); ctx.fillStyle = '#8a5a34'; ctx.strokeStyle = '#3a2210'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(0, 0, 6, 5.4, 0, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#a8764a'; ctx.beginPath(); ctx.moveTo(-2.4, -5); ctx.lineTo(2.4, -5); ctx.lineTo(3.6, -8.5); ctx.lineTo(-3.6, -8.5); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c8a8ff'; ctx.fillRect(-2.8, -6, 5.6, 1.5); ctx.restore();
+    const rx = px - 16, rtip = y - 5 + rodDip * 5; ctx.save(); ctx.strokeStyle = '#c87a3a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx - 5, y - 19); ctx.lineTo(rx + 1, rtip - 3); ctx.stroke(); ctx.strokeStyle = 'rgba(60,30,10,.7)'; ctx.lineWidth = .8; [.3, .55].forEach(f2 => { const xx = lerp(rx - 5, rx + 1, f2), yy = lerp(y - 19, rtip - 3, f2); ctx.beginPath(); ctx.moveTo(xx - 1.5, yy); ctx.lineTo(xx + 1.5, yy); ctx.stroke(); });
+    ctx.fillStyle = '#c8a8ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5 + rodDip * 12; ctx.beginPath(); ctx.moveTo(rx + 1, rtip - 5); ctx.lineTo(rx + 3.2, rtip - 1.5); ctx.lineTo(rx + 1.6, rtip + 2); ctx.lineTo(rx - 1, rtip - 1.5); ctx.closePath(); ctx.fill(); ctx.restore();
+    if (o && o.t >= 0) once('enC2f' + o.i, () => { spawn({ x: hx, y: y + 1, size: 4, shape: 'ring', grow: 18, life: .45, col: '#fff' }); sparks184(hx, gy0, 10, 80, 50); });
+    if (o && o.t >= 0 && o.t < .25) glow184(hx, y + 1, 20, 1 - o.t / .25, '255,235,255');
+    if (ts >= FP184) { const NS = 26, span = Math.max(20, I.x1 - I.x0); once('enC2b', () => spawn({ x: (I.x0 + I.x1) / 2, y, size: 8, shape: 'ring', grow: 26, life: .45, col: '#e8dcff' }));
+      for (let j = 0; j < NS; j++) { const sx0 = I.x0 + (j + .5) / NS * span, dep = j * .012, u = clamp((ts - FP184 - dep) / (.55 + hash184(j + 2) * .15)); if (u >= 1) { once('enC2s' + j, () => sparks184(ux, y, 1, 40, 30)); continue; } if (ts < FP184 + dep) continue;
+        const p = home184(sx0, y + 1, sx0 + (hash184(j) - .5) * 14, y - 9 - hash184(j + 5) * 8, ux, y, .4, u); ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(t * 8 + j); ctx.fillStyle = j % 3 ? '#b890ff' : '#f4eaff'; ctx.shadowColor = '#a07aff'; ctx.shadowBlur = 5; ctx.beginPath(); ctx.moveTo(-2.8, -1.2); ctx.lineTo(.6, -2.6); ctx.lineTo(2.6, 1.6); ctx.lineTo(-1.2, 2.1); ctx.closePath(); ctx.fill(); ctx.restore(); }
+      if (ts >= FP184 + .6) once('enC2a', () => hitIcon187(ux, y)); } },
+  snd(o, v, n) { if (o.t >= -.75) once('enC21' + o.i, () => ss184.pour(0, v)); if (o.t >= 0) once('enC22' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// ========== Enchanting round 188: helpers (scroll188 etc.) and M Seal stamp (moved out 2026-11-19 for the broadsword variants; dish186/hitIcon187 stay) ==========
+// ---------- round 188 (2026-11-19): back to the dust and the vellum (the user: round 187 "not hitting"). M Seal stamp (F's unrolling + dust
+// pressed by a heavy seal, Cooking-like weight), C2 Dust to glass reworked (bigger pouch and rod, glass built in chunks), F2 Vellum scroll reworked
+// (bigger scroll, a roll with weight, bolder sigils). C and F stay as they were (keys 1-2) ----------
+function scroll188(I, y, fx, held, warm) { const L = I.x1 - I.x0, rr = lerp(8, 5, clamp((fx - I.x0) / L));
+  ctx.save(); const dg = ctx.createLinearGradient(I.x0 - 10, 0, I.x0 - 3, 0); dg.addColorStop(0, '#5a3a1e'); dg.addColorStop(.5, '#c08a54'); dg.addColorStop(1, '#5a3a1e'); ctx.fillStyle = dg; ctx.fillRect(I.x0 - 10, y - 12, 7, 24);
+  ctx.fillStyle = '#8a5a30'; [y - 13, y + 13].forEach(yy => { ctx.beginPath(); ctx.arc(I.x0 - 6.5, yy, 3.4, 0, 7); ctx.fill(); }); ctx.fillStyle = '#9a6ae8'; ctx.fillRect(I.x0 - 10, y - 2, 7, 3); ctx.restore();
+  if (fx > I.x0 - 3) { ctx.save(); const vg = ctx.createLinearGradient(0, y - 9, 0, y + 9); vg.addColorStop(0, '#f2e6c8'); vg.addColorStop(1, '#c8b288'); ctx.fillStyle = vg; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillRect(I.x0 - 3, y - 9, fx - I.x0 + 3, 18); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    if (held) { ctx.fillStyle = 'rgba(20,10,40,.35)'; ctx.fillRect(I.x0 - 3, y - 9, fx - I.x0 + 3, 18); } if (warm > 0) for (let x = I.x0 + 15; x < fx; x += 30) glow184(x, y, 16, warm * .3, '255,230,180');
+    ctx.strokeStyle = 'rgba(120,90,50,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(I.x0 - 3, y - 8.5); ctx.lineTo(fx, y - 8.5); ctx.moveTo(I.x0 - 3, y + 8.5); ctx.lineTo(fx, y + 8.5); ctx.stroke(); ctx.restore(); }
+  return rr; }
+function roll188(fx, y, rr, spin) { ctx.save(); const rg = ctx.createLinearGradient(fx, 0, fx + 2 * rr, 0); rg.addColorStop(0, '#c4ac7c'); rg.addColorStop(.4, '#f6ead0'); rg.addColorStop(1, '#8a7450'); ctx.fillStyle = rg; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4; ctx.fillRect(fx, y - 10.5, 2 * rr, 21); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(110,80,40,.55)'; ctx.lineWidth = 1; for (let k = 0; k < 3; k++) { const an = spin + k * 2.094; if (Math.cos(an) < 0) continue; const sx = fx + rr + rr * Math.sin(an) * .9; ctx.beginPath(); ctx.moveTo(sx, y - 10); ctx.lineTo(sx, y + 10); ctx.stroke(); }
+  ctx.fillStyle = '#ece0c0'; ctx.strokeStyle = 'rgba(110,80,40,.7)'; [y - 10.5, y + 10.5].forEach(yy => { ctx.beginPath(); ctx.ellipse(fx + rr, yy, rr, 2, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.ellipse(fx + rr, yy, rr * .45, .9, 0, 0, 7); ctx.stroke(); }); ctx.restore(); }
+// the unrolled front: a weighty roll (a nudge back, the roll, an overshoot, a settle)
+function front188(I, o, t0, t1) { if (!o) return I.X(I.v); const a = I.X(S.v0 + o.i), b = I.X(S.v0 + o.i + 1), d = b - a; if (o.t < t0 - .12) return a; if (o.t < t0) return a - Math.sin((o.t - t0 + .12) / .12 * Math.PI) * Math.min(2, d * .3);
+  if (o.t < t1) return lerp(a, b, sm185((o.t - t0) / (t1 - t0))); const u = (o.t - t1) / .25; return u < 1 ? b + Math.sin(u * Math.PI) * Math.min(2.5, d * .3) : b; }
+function sigilsOn188(I, y, G, o, ts, held, t, x1c, from, s) { ctx.save(); ctx.beginPath(); ctx.rect(I.x0 - 3, y - 9, x1c - I.x0 + 3, 18); ctx.clip();
+  for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const x = G.sx(k), dep = FP184 + k * .035; if (ts >= dep) continue; let b = 0;
+    if (o && G.kOf(S.v0 + o.i) === k && o.t > from) b = o.t < 0 ? 1 : clamp(1 - o.t / 1.1);
+    if (ts >= 0 && ts < FB184) { const ig = ts - k / G.N * 1.1; if (ig >= 0) b = Math.max(b, clamp(1 - ig / .3) * .6 + .6); }
+    ctx.save(); ctx.globalAlpha *= held ? .35 + .2 * Math.sin(ts * 14) : 1; sigil184(k, x, y, s, q, '#d8cee8', 2.6); sigil184(k, x, y, s, q, mix('#7a4ad0', '#ffffff', clamp(b)), 1.4, '#b890ff'); ctx.restore(); if (b > .4) glow184(x, y, 10, b * .45); }
+  ctx.restore(); }
+function liftOff188(I, y, G, ts, ux, s) { if (ts < FP184) return; for (let k = 0; k < G.N; k++) { const dep = FP184 + k * .035, u = clamp((ts - dep) / .55); if (ts < dep) continue; if (u >= 1) { once('en188a' + k, () => sparks184(ux, y, 2, 50, 40)); continue; }
+    const x = G.sx(k), p = home184(x, y, x + 2, y - 12, ux, y, .35, u), sc = 1 + .4 * Math.sin(u * Math.PI); ctx.save(); ctx.globalCompositeOperation = 'lighter'; sigil184(k, p.x, p.y, s * sc, 1, '#e8dcff', 1.6, '#b890ff'); ctx.restore(); }
+  if (ts >= FP184 + .6) once('en188l', () => spawn({ x: ux, y, size: 8, shape: 'ring', grow: 30, life: .55, col: '#dcd0ff' })); }
+
+// M. Seal stamp: the scroll unrolls a step; a brass rune seal dips in dust, swings over, hangs, slams; a rune in glowing dust stays
+function seal188(x, by, rot, glow) { ctx.save(); ctx.translate(x, by); ctx.rotate(rot); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+  const bg = ctx.createLinearGradient(0, -4, 0, 0); bg.addColorStop(0, '#f0c870'); bg.addColorStop(1, '#8a6224'); ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(-7, -4, 14, 4, 1.2); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.fillStyle = '#b08840'; ctx.fillRect(-2.5, -9, 5, 5); const hg = ctx.createLinearGradient(-3, 0, 3, 0); hg.addColorStop(0, '#5a3a1e'); hg.addColorStop(.5, '#a87040'); hg.addColorStop(1, '#5a3a1e'); ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(0, -11.5, 3.2, 0, 7); ctx.fill();
+  if (glow > 0) { ctx.fillStyle = `rgba(232,220,255,${glow})`; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 6; ctx.fillRect(-6.5, -1, 13, 1.4); } ctx.restore(); }
+EN184.M = { name: 'Seal stamp', finAt: FP184 + .6,
+  desc: 'F’s unrolling with dust pressed in by a heavy seal. A dish of glowing dust waits by the dowel. Each skill-up the scroll rolls out one step (a nudge back, a roll, a little overshoot); the brass rune seal dips into the dust, swings over on an arc, hangs, and slams onto the fresh vellum: a hit-stop, a jolt, a puff of dust; it lifts to leave the rune pressed in glowing dust (a long gap: a lighter press each point). Finale: faster and faster stamps, a held beat with the seal raised, one huge stamp, then every rune lifts off into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, 0), G = sl184(I, v), ux = I.x1 + 18, held = held185(ts), dx = I.x0 - 22, s = Math.min(6, G.sw * .38);
+    const kC = o ? G.kOf(S.v0 + o.i) : G.kOf(Math.max(I.lo, v - 1e-3)), jolt = o && o.t >= 0 && o.t < .12 ? 1 - o.t / .12 : 0; ctx.save(); if (jolt) ctx.translate((Math.random() - .5) * 2 * jolt, (Math.random() - .5) * 2 * jolt);
+    dish186(dx, y + 9, t); let fx = front188(I, o, -1, -.75); const back = ts >= FP184 + .8 ? eOut(clamp((ts - FP184 - .8) / .9)) : 0; fx = lerp(fx, I.x0, back);
+    const rr = scroll188(I, y, fx, held, ts >= 0 && ts < FB184 ? ts / FB184 : 0); sigilsOn188(I, y, G, o, ts, held, t, fx, -.001, s); roll188(fx, y, rr, fx / rr); liftOff188(I, y, G, ts, ux, s);
+    // the seal: rests hovering over the last rune; to the dish, dips, swings over, hangs, slams, lifts
+    const sx0 = G.sx(kC); let sx = o ? G.sx(G.kOf(Math.max(I.lo, S.v0 + o.i - 1e-3))) : sx0, by = y - 6, rot = 0, gl = 0;
+    if (o && o.t < 0) { if (o.t < -.8) { const u = sm185(clamp((o.t + 1.05) / .25)); sx = lerp(sx, dx, u); by = y - 6 - Math.sin(u * Math.PI) * 2; }
+      else if (o.t < -.65) { const u = clamp((o.t + .8) / .15); sx = dx; by = y - 6 + Math.sin(u * Math.PI) * 7; gl = u > .5 ? 1 : 0; if (u > .5) once('enMd' + o.i, () => dustPuff185(dx, y + 6, 5, 30)); }
+      else if (o.t < -.35) { const u = sm185((o.t + .65) / .3); sx = lerp(dx, sx0, u); by = y - 6 - Math.sin(u * Math.PI) * 2; rot = -.25 * u; gl = 1; }
+      else if (o.t < -.18) { sx = sx0; by = y - 6 - 1.5 * Math.sin((o.t + .35) / .17 * Math.PI / 2); rot = -.25; gl = 1; }
+      else { const u = ((o.t + .18) / .18) ** 2; sx = sx0; by = lerp(y - 7.5, y + 5, u); rot = lerp(-.25, 0, u); gl = 1; } }
+    else if (o && o.t < .35) { sx = sx0; by = o.t < .06 ? y + 5 : lerp(y + 5, y - 6, eOut((o.t - .06) / .29)); }
+    if (o && o.t >= 0) once('enMs' + o.i, () => { dustPuff185(sx0 - 6, y + 4, 5, 50); dustPuff185(sx0 + 6, y + 4, 5, 50); spawn({ x: sx0, y: y + 2, size: 5, shape: 'ring', grow: 14, life: .4, col: '#e8dcff' }); });
+    if (ts >= 0) { const kL = G.N - 1; sx = G.sx(kL); if (ts < FB184) { const ph = ts * (6 + ts * 12), dn = Math.max(0, Math.sin(ph)); by = lerp(y - 6, y + 5, dn ** 3); if (dn > .97) once('enMf' + Math.floor(ph / 6.283), () => dustPuff185(sx, y + 4, 3, 40)); gl = 1; }
+      else if (ts < FP184) { by = y - 8; rot = -.3; gl = 1; } else if (ts < FP184 + .5) { const u = clamp((ts - FP184) / .08); by = lerp(y - 8, y + 5, u * u); rot = lerp(-.3, 0, u); if (u >= 1) once('enMb', () => { spawn({ x: sx, y: y + 2, size: 8, shape: 'ring', grow: 40, life: .55, col: '#fff' }); dustPuff185(sx, y + 4, 16, 120); }); }
+      else { const u = eOut(clamp((ts - FP184 - .5) / .4)); by = lerp(y + 5, y - 6, u); sx = lerp(sx, dx, clamp((ts - FP184 - .8) / .8)); } }
+    seal188(sx, by, rot, gl); if (held) glint185(sx, by - 14, ts); ctx.restore(); },
+  snd(o, v, n) { if (o.t >= -1) once('enM0' + o.i, () => ss184.rustle(0, v * .6)); if (o.t >= 0) { once('enM1' + o.i, () => ss184.knock(0, v * 1.2)); once('enM2' + o.i, () => ss184.hum(.06, n, v * .8)); } },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= FP184 + .8) once('enMr', () => ss184.rustle(0, 1)); }) };
+
+
+// ========== Enchanting rounds 189-190, the broadsword builds SW, SB, SC, SD and the first SE (moved out 2026-11-19; SE rebuilt in round 191 with elements) ==========
+// ---------- round 189 (2026-11-19): Enchanting, the user's idea: runes written across a broadsword; at the finale the sword powers up with the
+// complete enchantment. Built as said first (the writer is an enchanting rod, the profession's own tool). M stays for comparison ----------
+function blade189(I, y) { const xa = I.x0 - 1, xb = I.x1 - 6, tip = I.x1 + 4, w = 6; return { xa, xb, tip, w, path() { ctx.beginPath(); ctx.moveTo(xa, y - w); ctx.lineTo(xb, y - w * .8); ctx.lineTo(tip, y); ctx.lineTo(xb, y + w * .8); ctx.lineTo(xa, y + w); ctx.closePath(); } }; }
+function hilt189(I, y, gem) { const gx = I.x0 - 1; ctx.save(); const lg = ctx.createLinearGradient(0, y - 3, 0, y + 3); lg.addColorStop(0, '#7a4a2a'); lg.addColorStop(1, '#3a2010'); ctx.fillStyle = lg; ctx.fillRect(gx - 16, y - 2.6, 13, 5.2);
+  ctx.strokeStyle = 'rgba(20,10,4,.7)'; ctx.lineWidth = .8; for (let x = gx - 15; x < gx - 3; x += 2.6) { ctx.beginPath(); ctx.moveTo(x, y - 2.6); ctx.lineTo(x + 1.6, y + 2.6); ctx.stroke(); }
+  const gg = ctx.createLinearGradient(gx - 4, 0, gx, 0); gg.addColorStop(0, '#f0c870'); gg.addColorStop(1, '#8a6224'); ctx.fillStyle = gg; ctx.beginPath(); ctx.roundRect(gx - 4, y - 12, 4, 24, 1.5); ctx.fill(); ctx.strokeStyle = '#3a2810'; ctx.lineWidth = .8; ctx.stroke();
+  ctx.fillStyle = '#c8a050'; ctx.beginPath(); ctx.arc(gx - 19, y, 4, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = mix('#7a4ad0', '#ffffff', clamp(gem * .5)); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4 + gem * 12; ctx.beginPath(); ctx.arc(gx - 19, y, 2.2, 0, 7); ctx.fill(); ctx.restore(); if (gem > .2) glow184(gx - 19, y, 10, gem * .5); }
+function rod189(px, py, dip) { ctx.save(); ctx.strokeStyle = '#c87a3a'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px + 2, py - 3); ctx.lineTo(px + 8, py - 13); ctx.stroke(); ctx.strokeStyle = 'rgba(60,30,10,.75)'; ctx.lineWidth = .8; [.35, .65].forEach(f => { const x = lerp(px + 2, px + 8, f), yy = lerp(py - 3, py - 13, f); ctx.beginPath(); ctx.moveTo(x - 1.4, yy - .8); ctx.lineTo(x + 1.4, yy + .8); ctx.stroke(); });
+  ctx.fillStyle = '#d8c0ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 6 + dip * 10; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 3.2, py - 2.2); ctx.lineTo(px + 2.4, py - 4.6); ctx.lineTo(px - .6, py - 2.4); ctx.closePath(); ctx.fill(); ctx.restore(); if (dip > 0) glow184(px, py, 7, dip * .8, '230,215,255'); }
+EN184.SW = { name: 'Runed broadsword', finAt: FP184 + .15,
+  desc: 'Your idea. A broadsword lies along the bar, hilt at the start, its point at the recipe. Each skill-up a runed enchanting rod glides to the next spot on the blade and traces a rune into the steel with its crystal tip, leaving a bright line that cools to violet; the rune flares and a soft shimmer spreads over the steel around it (a long gap: a few strokes each point). Finale: the runes ignite one by one from hilt to point and the edges start to glow, a held beat with a glint at the point, then the sword powers up: a flash down the whole blade, a shockwave, sparks off the edges and a beam from the point into the recipe; the full enchant glow stays on the blade, a sheen running along it.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, -.55), G = sl184(I, v), ux = I.x1 + 18, held = held185(ts), B = blade189(I, y), rs = Math.min(4, G.sw * .3);
+    const build = ts >= 0 && ts < FB184 ? ts / FB184 : 0, powered = ts >= FP184, pf = powered ? clamp(1 - (ts - FP184) / .5) : 0, lift = ts >= 0 ? (ts < .4 ? sm185(ts / .4) : ts < FP184 + .6 ? 1 : 1 - sm185(clamp((ts - FP184 - .6) / .6))) * 2 : 0;
+    ctx.save(); ctx.translate(0, -lift);
+    // the enchant aura round the blade (grows in the build-up, flares at the power-up, then stays)
+    const aura = powered ? .55 + pf * .6 : build * .5 + (held ? .15 : 0);
+    if (aura > 0) { ctx.save(); ctx.shadowColor = '#a07aff'; ctx.shadowBlur = 10 + aura * 18; ctx.strokeStyle = `rgba(190,160,255,${Math.min(1, aura)})`; ctx.lineWidth = 2 + aura * 2; B.path(); ctx.stroke(); ctx.restore(); }
+    // the steel
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2; B.path(); const sg = ctx.createLinearGradient(0, y - 6, 0, y + 6); sg.addColorStop(0, '#f0f4fa'); sg.addColorStop(.45, '#b8c2d0'); sg.addColorStop(.55, '#8e98a8'); sg.addColorStop(1, '#5e6878'); ctx.fillStyle = sg; ctx.fill(); ctx.restore();
+    ctx.save(); B.path(); ctx.clip(); ctx.fillStyle = 'rgba(40,46,58,.35)'; ctx.fillRect(B.xa, y - 1.6, B.xb - B.xa - 10, 3.2); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(B.xa, y - 5.3); ctx.lineTo(B.xb, y - 4.3); ctx.lineTo(B.tip - 1, y - .3); ctx.stroke();
+    if (powered || held || build > 0) { const sh = powered ? (t * .9) % 1.6 - .3 : -1; if (sh > -.3) { const sx = lerp(B.xa, B.tip, sh); const g2 = ctx.createLinearGradient(sx - 30, 0, sx + 30, 0); g2.addColorStop(0, 'rgba(200,170,255,0)'); g2.addColorStop(.5, 'rgba(225,205,255,.55)'); g2.addColorStop(1, 'rgba(200,170,255,0)'); ctx.fillStyle = g2; ctx.fillRect(sx - 30, y - 7, 60, 14); }
+      ctx.fillStyle = `rgba(170,130,255,${(powered ? .18 : build * .2)})`; ctx.fillRect(B.xa, y - 7, B.tip - B.xa, 14); }
+    if (pf > 0) { ctx.fillStyle = `rgba(255,255,255,${pf * .9})`; ctx.fillRect(B.xa, y - 7, B.tip - B.xa, 14); }
+    // shimmer round a fresh rune
+    if (o && o.t >= 0 && o.t < 1) { const k = G.kOf(S.v0 + o.i), x = G.sx(k), u = o.t, g3 = ctx.createRadialGradient(x, y, 0, x, y, 6 + u * 22); g3.addColorStop(0, `rgba(200,170,255,${.5 * (1 - u)})`); g3.addColorStop(1, 'rgba(200,170,255,0)'); ctx.fillStyle = g3; ctx.fillRect(x - 30, y - 7, 60, 14); }
+    ctx.restore();
+    ctx.save(); B.path(); ctx.strokeStyle = 'rgba(30,34,44,.85)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+    // the runes
+    for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const x = G.sx(k), cur = o && G.kOf(S.v0 + o.i) === k; let b = cur && o.t >= -.55 ? (o.t < 0 ? 1 : clamp(1 - o.t / .9)) : 0;
+      if (build > 0) { const ig = ts - k / G.N * 1.1; if (ig >= 0) b = Math.max(b, clamp(1 - ig / .3) * .6 + .55); } if (powered) b = Math.max(b, pf + .45);
+      ctx.save(); if (held) ctx.globalAlpha *= .4; rune184(rk184(k), x, y, rs, q, 'rgba(40,30,70,.6)', 1.8); rune184(rk184(k), x, y, rs, q, mix('#8a5ae8', '#ffffff', clamp(b)), 1.2, '#b890ff'); ctx.restore(); if (b > .4) glow184(x, y, 9, b * .45); }
+    hilt189(I, y, powered ? .6 + pf : build + (o && o.t >= 0 && o.t < .5 ? .4 * (1 - o.t / .5) : 0) + .2);
+    if (held) glint185(B.tip - 1, y - 2, ts);
+    // the rod: hovers over the last rune; glides to the next spot, touches down, traces the rune
+    const kC = o ? G.kOf(S.v0 + o.i) : G.kOf(Math.max(I.lo, v - 1e-3)), kP = o ? G.kOf(Math.max(I.lo, S.v0 + o.i - 1e-3)) : kC; let px = G.sx(kC) + 3, py = y - 6, dip = 0;
+    if (o && o.t < -.6) { const u = sm185(clamp((o.t + 1.05) / .45)); px = lerp(G.sx(kP) + 3, G.sx(kC) - 2, u); py = y - 7 - Math.sin(u * Math.PI) * 2; }
+    else if (o && o.t < 0) { const pen = rune184(rk184(kC), G.sx(kC), y, rs, G.fr(kC), 'rgba(255,255,255,.95)', 1.3, '#fff'), d = clamp((o.t + .6) / .06); if (pen) { px = lerp(G.sx(kC) - 2, pen.x, d); py = lerp(y - 7, pen.y, d); } dip = d;
+      if (d >= 1 && Math.floor(o.t * 40) % 3 === 0) once('enSWs' + o.i + Math.floor(o.t * 40), () => sparks184(px, py, 1, 30, 20)); }
+    else if (o && o.t < .3) { const u = eOut(o.t / .3); px = G.sx(kC) + lerp(0, 3, u); py = lerp(y - 1, y - 7, u); }
+    if (ts >= 0) { px = lerp(px, I.x0 - 32, sm185(clamp(ts / .5))); py = y - 6; }
+    rod189(px, py - lift, dip);
+    // the power-up: shockwave, edge sparks, the beam from the point
+    if (powered) { once('enSWp', () => { spawn({ x: (B.xa + B.tip) / 2, y, size: 8, shape: 'ring', grow: 16, life: .45, col: '#fff' }); for (let q = 0; q < 16; q++) { const x = lerp(B.xa, B.tip, Math.random()); spawn({ x, y: y + (q % 2 ? -6 : 6), vx: (Math.random() - .5) * 60, vy: (q % 2 ? -1 : 1) * (30 + Math.random() * 50), g: 60, life: .5, size: 1, col: q % 3 ? '#d8c0ff' : '#fff' }); } });
+      const u = clamp((ts - FP184) / .15), fa = clamp(1 - (ts - FP184 - .25) / .4); if (u >= 1) once('enSWa', () => hitIcon187(ux, y));
+      if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(170,130,255,.7)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(B.tip, y - lift); ctx.lineTo(lerp(B.tip, ux, u), y); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); } } },
+  snd(o, v, n) { if (o.t >= -.55) once('enSW1' + o.i, () => ss184.scratch(0, v)); if (o.t >= 0) once('enSW2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= FP184) once('enSWh', () => ss184.hum(.1, 7, 1.2)); }) };
+// ---------- round 190 (2026-11-19): the broadsword direction, four structurally different builds (the user: "not just slight differences"):
+// B runes fly from a tome, C drawn from a scabbard, D reforged from shards, E a rune ring scans the blade. SW (round 189) stays as A ----------
+// a sword in local space: guard at x = 0, the blade toward +x (length len), the grip toward -x
+function bladePath190(len, from = 0, to = len) { const w = 6, top = x => x < len - 10 ? -w + w * .2 * x / (len - 10) : -w * .8 * (len - x) / 10; ctx.beginPath(); ctx.moveTo(from, top(from)); for (let x = from; x <= to; x += Math.max(2, (to - from) / 20)) ctx.lineTo(x, top(x)); ctx.lineTo(to, top(to)); ctx.lineTo(to, -top(to)); for (let x = to; x >= from; x -= Math.max(2, (to - from) / 20)) ctx.lineTo(x, -top(x)); ctx.lineTo(from, -top(from)); ctx.closePath(); }
+function sword190(len, S0) { // S0: { aura, pf, t, powered, held, gem, segs: [[from, to]] (drawn parts), ghost (outline the rest) }
+  const segs = S0.segs || [[0, len]];
+  if (S0.ghost) { ctx.save(); ctx.setLineDash([2, 2]); ctx.strokeStyle = 'rgba(190,200,220,.35)'; ctx.lineWidth = 1; bladePath190(len); ctx.stroke(); ctx.restore(); }
+  if (S0.aura > 0) segs.forEach(s => { ctx.save(); ctx.shadowColor = '#a07aff'; ctx.shadowBlur = 10 + S0.aura * 18; ctx.strokeStyle = `rgba(190,160,255,${Math.min(1, S0.aura)})`; ctx.lineWidth = 2 + S0.aura * 2; bladePath190(len, s[0], s[1]); ctx.stroke(); ctx.restore(); });
+  segs.forEach(s => { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2; bladePath190(len, s[0], s[1]); const g = ctx.createLinearGradient(0, -6, 0, 6); g.addColorStop(0, '#f0f4fa'); g.addColorStop(.45, '#b8c2d0'); g.addColorStop(.55, '#8e98a8'); g.addColorStop(1, '#5e6878'); ctx.fillStyle = g; ctx.fill(); ctx.restore();
+    ctx.save(); bladePath190(len, s[0], s[1]); ctx.clip(); ctx.fillStyle = 'rgba(40,46,58,.35)'; ctx.fillRect(0, -1.6, len - 12, 3.2); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(0, -5.4, len, .8);
+      if (S0.powered) { const sh = (S0.t * .9) % 1.6 - .3; if (sh > -.3) { const sx = sh * len, g2 = ctx.createLinearGradient(sx - 30, 0, sx + 30, 0); g2.addColorStop(0, 'rgba(200,170,255,0)'); g2.addColorStop(.5, 'rgba(225,205,255,.55)'); g2.addColorStop(1, 'rgba(200,170,255,0)'); ctx.fillStyle = g2; ctx.fillRect(sx - 30, -7, 60, 14); } }
+      if (S0.aura > 0) { ctx.fillStyle = `rgba(170,130,255,${Math.min(.25, S0.aura * .2)})`; ctx.fillRect(0, -7, len, 14); } if (S0.pf > 0) { ctx.fillStyle = `rgba(255,255,255,${S0.pf * .9})`; ctx.fillRect(0, -7, len, 14); } ctx.restore();
+    ctx.save(); bladePath190(len, s[0], s[1]); ctx.strokeStyle = 'rgba(30,34,44,.85)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); });
+  if (S0.noHilt) return; ctx.save(); const lg = ctx.createLinearGradient(0, -3, 0, 3); lg.addColorStop(0, '#7a4a2a'); lg.addColorStop(1, '#3a2010'); ctx.fillStyle = lg; ctx.fillRect(-17, -2.6, 13, 5.2); ctx.strokeStyle = 'rgba(20,10,4,.7)'; ctx.lineWidth = .8; for (let x = -16; x < -4; x += 2.6) { ctx.beginPath(); ctx.moveTo(x, -2.6); ctx.lineTo(x + 1.6, 2.6); ctx.stroke(); }
+  const gg = ctx.createLinearGradient(-4, 0, 0, 0); gg.addColorStop(0, '#f0c870'); gg.addColorStop(1, '#8a6224'); ctx.fillStyle = gg; ctx.beginPath(); ctx.roundRect(-4, -12, 4, 24, 1.5); ctx.fill(); ctx.strokeStyle = '#3a2810'; ctx.stroke();
+  ctx.fillStyle = '#c8a050'; ctx.beginPath(); ctx.arc(-20, 0, 4, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = mix('#7a4ad0', '#ffffff', clamp(S0.gem * .5)); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 4 + S0.gem * 12; ctx.beginPath(); ctx.arc(-20, 0, 2.2, 0, 7); ctx.fill(); ctx.restore(); }
+// the shared finale state and the power-up beats (runes ignite, held glint, flash, shockwave, edge sparks, beam into the recipe)
+function fin190(ts) { const build = ts >= 0 && ts < FB184 ? ts / FB184 : 0, powered = ts >= FP184, pf = powered ? clamp(1 - (ts - FP184) / .5) : 0; return { build, powered, pf, held: held185(ts), aura: powered ? .55 + pf * .6 : build * .5 + (held185(ts) ? .15 : 0) }; }
+function runeB190(k, N, ts, F, base) { let b = base; if (F.build > 0) { const ig = ts - k / N * 1.1; if (ig >= 0) b = Math.max(b, clamp(1 - ig / .3) * .6 + .55); } if (F.powered) b = Math.max(b, F.pf + .45); return b; }
+function drawRune190(k, x, y, rs, q, b, held) { ctx.save(); if (held) ctx.globalAlpha *= .4; rune184(rk184(k), x, y, rs, q, 'rgba(40,30,70,.6)', 1.8); rune184(rk184(k), x, y, rs, q, mix('#8a5ae8', '#ffffff', clamp(b)), 1.2, '#b890ff'); ctx.restore(); if (b > .4) glow184(x, y, 9, b * .45); }
+function power190(ts, F, xa, xb, y, ux, key) { if (!F.powered) return; once(key + 'p', () => { spawn({ x: (xa + xb) / 2, y, size: 8, shape: 'ring', grow: 16, life: .45, col: '#fff' }); for (let q = 0; q < 16; q++) spawn({ x: lerp(xa, xb, Math.random()), y: y + (q % 2 ? -6 : 6), vx: (Math.random() - .5) * 60, vy: (q % 2 ? -1 : 1) * (30 + Math.random() * 50), g: 60, life: .5, size: 1, col: q % 3 ? '#d8c0ff' : '#fff' }); });
+  const u = clamp((ts - FP184) / .15), fa = clamp(1 - (ts - FP184 - .25) / .4); if (u >= 1) once(key + 'a', () => hitIcon187(ux, y));
+  if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(170,130,255,.7)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(xb, y); ctx.lineTo(lerp(xb, ux, u), y); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); } }
+const SWL190 = I => I.x1 + 5 - I.x0; // the blade's length when the guard sits at x0 - 1
+const pos187 = (I, o, t0, t1, ease = sm185) => { if (!o) return I.X(I.v); const a = I.X(S.v0 + o.i), b = I.X(S.v0 + o.i + 1); return o.t < t0 ? a : o.t < t1 ? lerp(a, b, ease(clamp((o.t - t0) / (t1 - t0)))) : b; };
+
+// B. Runes from the tome
+function tome190(x, y, riffle, shut) { ctx.save(); ctx.fillStyle = '#4a2a6a'; ctx.beginPath(); ctx.roundRect(x - 12, y + 3, 24, 2.6, 1); ctx.fill(); ctx.strokeStyle = 'rgba(255,211,106,.5)'; ctx.lineWidth = .8; ctx.stroke();
+  const pg = ctx.createLinearGradient(0, y - 4, 0, y + 3); pg.addColorStop(0, '#f2e6c8'); pg.addColorStop(1, '#bfa87a'); ctx.fillStyle = pg;
+  if (shut) { ctx.fillRect(x - 11, y - 1, 22, 4); ctx.fillStyle = '#4a2a6a'; ctx.fillRect(x - 12, y - 3, 24, 2.4); }
+  else { ctx.beginPath(); ctx.moveTo(x - 11, y + 3); ctx.lineTo(x - 11, y - 2); ctx.quadraticCurveTo(x - 5, y - 4, x, y); ctx.quadraticCurveTo(x + 5, y - 4, x + 11, y - 2); ctx.lineTo(x + 11, y + 3); ctx.closePath(); ctx.fill();
+    if (riffle > 0) { const th = (riffle * 40) % Math.PI; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.4; ctx.shadowColor = '#c8a8ff'; ctx.shadowBlur = 6; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(th) * 6, y - Math.sin(th) * 9 - 2, x + Math.cos(th) * 11, y - Math.sin(th) * 8); ctx.stroke(); } }
+  ctx.restore(); }
+EN184.SB = { name: 'Runes from the tome', finAt: FP184 + .15,
+  desc: 'An open enchanting tome lies by the hilt. Each skill-up a rune lifts off its page as glowing light, flies along the blade in an arc and sinks into the next spot with a ring, burning into the steel white-hot and cooling to violet (a long gap: a part of the rune each point). Finale: the tome riffles and the runes ignite hilt to point, a held beat with a glint at the point, then the book shuts and the sword powers up and fires into the recipe; the enchant glow stays.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, 0), G = sl184(I, v), ux = I.x1 + 18, F = fin190(ts), len = SWL190(I), gx = I.x0 - 1, rs = Math.min(4, G.sw * .3), tx = I.x0 - 44, ty = y + 5;
+    tome190(tx, ty, F.build, F.powered);
+    ctx.save(); ctx.translate(gx, y); sword190(len, { aura: F.aura, pf: F.pf, t, powered: F.powered, gem: F.powered ? .6 + F.pf : F.build + .2 }); ctx.restore();
+    for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const cur = o && G.kOf(S.v0 + o.i) === k && o.t >= 0; drawRune190(k, G.sx(k), y, rs, q, runeB190(k, G.N, ts, F, cur ? clamp(1 - o.t / .9) : 0), F.held); if (cur && o.t < .3) glow184(G.sx(k), y, 14, 1 - o.t / .3, '255,240,255'); }
+    if (o && o.t > -1.05 && o.t < 0) { const k = G.kOf(S.v0 + o.i), u = clamp((o.t + 1.05) / .9), x = lerp(tx, G.sx(k), sm185(u)), yy = lerp(ty - 3, y, u) - Math.sin(u * Math.PI) * 14, sc = 1.6 - .6 * u;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; rune184(rk184(k), x, yy, rs * sc, 1, '#f0e8ff', 1.5, '#b890ff'); ctx.restore(); glow184(x, yy, 10, .6); if (Math.floor(o.t * 30) % 2 === 0) once('enSBt' + o.i + Math.floor(o.t * 30), () => spawn({ x, y: yy, vx: (Math.random() - .5) * 15, vy: 5, life: .4, size: .8, col: '#e8dcff' })); }
+    if (o && o.t >= 0) once('enSBl' + o.i, () => { spawn({ x: G.sx(G.kOf(S.v0 + o.i)), y, size: 3, shape: 'ring', grow: 14, life: .4, col: '#fff' }); sparks184(G.sx(G.kOf(S.v0 + o.i)), y - 3, 5, 40, 30); });
+    if (F.held) glint185(gx + len - 1, y - 2, ts); power190(ts, F, gx, gx + len, y, ux, 'enSB'); },
+  snd(o, v, n) { if (o.t >= -1) once('enSB1' + o.i, () => ss184.rustle(0, v * .7)); if (o.t >= 0) once('enSB2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts) };
+
+// C. Drawn from the scabbard: the scabbard lies on the left, mouth to the right; the hilt is pulled toward the recipe a notch each skill-up
+EN184.SC = { name: 'Drawn from the scabbard', finAt: FP184 + .15,
+  desc: 'The sword starts sheathed in a dark scabbard, its hilt sticking out toward the recipe; a ring of runes glows at the scabbard’s mouth. Each skill-up the hilt is tugged one notch toward the recipe (a little push back, the pull, a click) and the enchanted mouth inscribes a rune onto the steel as it slides out, so the drawn blade is covered in glowing runes. Finale: one long last draw, the empty scabbard drops away, the sword turns end over end to point at the recipe, a held beat, then it powers up and fires into the recipe.',
+  draw(I, y, t, ts) { const o = vd184(I, 0).o, n = Math.max(1, S.nx.lv - I.lo), N = Math.min(n, 15), ux = I.x1 + 18, F = fin190(ts), xm = (I.x0 + I.x1) / 2 - 8, len = I.x1 - 14 - xm, rs = Math.min(3.4, len / N * .32);
+    let p = clamp((I.v - I.lo) / n); if (o) { const a = (S.v0 + o.i - I.lo) / n, b = (S.v0 + o.i + 1 - I.lo) / n; p = o.t < -.4 ? a : o.t < -.25 ? a - Math.sin((o.t + .4) / .15 * Math.PI) * .006 : o.t < 0 ? lerp(a, b, sm185((o.t + .25) / .25)) : b; }
+    const gxs = xm + 14 + p * len; // the guard's x: the blade runs left from it into the scabbard
+    // the scabbard (drops away in the finale)
+    const drop = ts >= .35 ? clamp((ts - .35) / .6) : 0; if (drop < 1) { ctx.save(); ctx.globalAlpha *= 1 - drop * drop; ctx.translate(0, drop * drop * 18); ctx.rotate(drop * .08); const sg = ctx.createLinearGradient(0, y - 7, 0, y + 7); sg.addColorStop(0, '#5a3a6a'); sg.addColorStop(1, '#22142a'); ctx.fillStyle = sg; ctx.beginPath(); ctx.moveTo(xm, y - 7.5); ctx.lineTo(xm - len + 8, y - 6); ctx.lineTo(xm - len - 2, y); ctx.lineTo(xm - len + 8, y + 6); ctx.lineTo(xm, y + 7.5); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#120a16'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = '#c8a050'; ctx.fillRect(xm - len - 4, y - 2, 4, 4); ctx.fillRect(xm - len * .5, y - 7, 3, 14); ctx.restore(); }
+    // the sword: before the finale the point is to the left (inside the scabbard); in the finale it turns to point at the recipe
+    const turn = ts >= .6 ? sm185(clamp((ts - .6) / .5)) : 0, cxs = gxs - len / 2, ang = Math.PI * (1 - turn);
+    ctx.save(); ctx.translate(cxs, y - Math.sin(turn * Math.PI) * 4); ctx.scale(Math.cos(ang) * -1 || .001, 1); ctx.scale(-1, 1); ctx.translate(-len / 2, 0); // local: guard at 0... blade to +x, so with ang = pi the blade points left
+    const vis = turn > 0 ? len : clamp(gxs - xm, 0, len); // drawn part (from the guard)
+    sword190(len, { aura: F.aura, pf: F.pf, t, powered: F.powered, gem: F.powered ? .6 + F.pf : F.build + .2, segs: [[0, Math.max(.5, vis)]] });
+    for (let k = 0; k < N; k++) { const lx = (k + .5) / N * len; if (lx > vis) continue; const b = runeB190(N - 1 - k, N, ts, F, o && o.t >= 0 && Math.abs(lx - vis) < len / N * 1.2 ? clamp(1 - o.t / .9) : 0); drawRune190(k, lx, 0, rs, 1, b, F.held); }
+    ctx.restore();
+    if (drop < .5) { const fl = o && o.t > -.25 && o.t < .3 ? 1 - Math.abs(o.t) / .3 : 0; ctx.save(); ctx.strokeStyle = mix('#8a5ae8', '#ffffff', fl); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 6 + fl * 10; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(xm, y, 2.5, 9, 0, 0, 7); ctx.stroke(); ctx.restore(); if (fl > .3) glow184(xm, y, 12, fl * .6); }
+    if (o && o.t >= 0) once('enSCc' + o.i, () => sparks184(xm, y, 6, 40, 30));
+    const tipX = cxs + len / 2 + 0; if (F.held) glint185(tipX, y - 2, ts); power190(ts, F, cxs - len / 2, cxs + len / 2, y, ux, 'enSC'); },
+  snd(o, v, n) { if (o.t >= -.25) once('enSC1' + o.i, () => ss184.scratch(0, v)); if (o.t >= 0) once('enSC2' + o.i, () => ss184.hum(0, n, v)); },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= .35) once('enSCd', () => ss184.knock(0, .8)); }) };
+
+// D. Reforged from shards: the hilt and a stub; ghost outlines of the missing blade; shards fly in from a heap and snap into place
+EN184.SD = { name: 'Reforged from shards', finAt: FP184 + .15,
+  desc: 'A shattered broadsword: the hilt and a stub of blade, the missing pieces drawn as faint outlines; a heap of steel shards lies under the hilt. Each skill-up a shard lifts from the heap, flies over turning to fit, and snaps into place at the front; a rune flares across the new seam, welding it in light (a long gap: the next shard arrives over a few points, the weld finishing on the last). Finale: cracks of light race along every seam, a held beat, then the blade reforges in one flash (the seams vanish) and powers up into the recipe.',
+  draw(I, y, t, ts) { const { v, o } = vd184(I, 0), G = sl184(I, v), ux = I.x1 + 18, F = fin190(ts), len = SWL190(I), gx = I.x0 - 1, rs = Math.min(3.6, G.sw * .28), hx = I.x0 - 24, hy = y + 11, sw = len / G.N;
+    const seg = k => [k * sw, (k + 1) * sw], done = k => G.fr(k) >= 1 - 1e-6 || (G.fr(k) > 0 && !(o && G.kOf(S.v0 + o.i) === k && o.t < 0));
+    ctx.save(); ctx.fillStyle = '#7a8494'; for (let q = 0; q < 6; q++) { ctx.save(); ctx.translate(hx + (q - 2.5) * 3.2, hy - (q % 2) * 1.5); ctx.rotate(q * 1.3); ctx.beginPath(); ctx.moveTo(-3, 1); ctx.lineTo(0, -2); ctx.lineTo(3, 1.5); ctx.closePath(); ctx.fill(); ctx.restore(); } ctx.restore();
+    const segs = [[0, 3]]; for (let k = 0; k < G.N; k++) if (G.fr(k) > 0 && (done(k) || G.fr(k) > 0)) { const s = seg(k); if (!(o && G.kOf(S.v0 + o.i) === k && o.t < 0 && G.fr(k) <= 1 / G.per + 1e-6)) segs.push([Math.max(3, s[0]), s[1]]); }
+    const whole = F.powered; ctx.save(); ctx.translate(gx, y); sword190(len, { aura: F.aura, pf: F.pf, t, powered: F.powered, gem: F.powered ? .6 + F.pf : F.build + .2, segs: whole ? [[0, len]] : segs, ghost: !whole }); ctx.restore();
+    // seams with their weld runes; in the build-up light races along them
+    for (let k = 1; k < G.N; k++) { if (whole || G.fr(k) <= 0) continue; const x = gx + k * sw, cur = o && G.kOf(S.v0 + o.i) === k; if (cur && o.t < 0) continue; let b = cur ? clamp(1 - o.t / .9) : 0; if (F.build > 0) { const ph = (ts * 3 - k / G.N) % 1; b = Math.max(b, ph > 0 && ph < .25 ? 1 : .3); }
+      ctx.save(); ctx.strokeStyle = mix('#5e6878', '#ffffff', clamp(b)); ctx.shadowColor = '#b890ff'; ctx.shadowBlur = b * 10; ctx.lineWidth = 1 + b; ctx.beginPath(); ctx.moveTo(x - 1, y - 5.5); ctx.lineTo(x + 1, y); ctx.lineTo(x - .5, y + 5.5); ctx.stroke(); ctx.restore(); }
+    for (let k = 0; k < G.N; k++) { const q = G.fr(k); if (q <= 0) continue; const cur = o && G.kOf(S.v0 + o.i) === k; if (cur && o.t < 0 && q <= 1 / G.per + 1e-6) continue; drawRune190(k, gx + (k + .5) * sw, y, rs, q, runeB190(k, G.N, ts, F, cur && o.t >= 0 ? clamp(1 - o.t / .9) : 0), F.held); }
+    // a shard in flight: lifts from the heap, turns to fit, snaps in
+    if (o && o.t > -1.05 && o.t < 0 && G.fr(G.kOf(S.v0 + o.i)) <= 1 / G.per + 1e-6) { const k = G.kOf(S.v0 + o.i), s = seg(k), u = clamp((o.t + 1.05) / 1.05), e = sm185(u), cx0 = gx + (s[0] + s[1]) / 2, x = lerp(hx, cx0, e), yy = lerp(hy, y, e) - Math.sin(u * Math.PI) * 13, rot = (1 - e) * 2.2;
+      ctx.save(); ctx.translate(x, yy); ctx.rotate(rot); ctx.translate(-(s[0] + s[1]) / 2, 0); sword190(len, { aura: 0, pf: 0, t, powered: false, gem: 0, segs: [s], noHilt: true }); ctx.restore(); }
+    if (o && o.t >= 0) once('enSDs' + o.i, () => { const x = gx + G.kOf(S.v0 + o.i) * sw; spawn({ x, y, size: 3, shape: 'ring', grow: 14, life: .4, col: '#fff' }); sparks184(x, y, 8, 60, 40); });
+    if (F.powered) once('enSDf', () => sparks184((gx + gx + len) / 2, y, 12, 120, 50));
+    if (F.held) glint185(gx + len - 1, y - 2, ts); power190(ts, F, gx, gx + len, y, ux, 'enSD'); },
+  snd(o, v, n) { if (o.t >= -1) once('enSD1' + o.i, () => ss184.rustle(0, v * .6)); if (o.t >= 0) { once('enSD2' + o.i, () => ss184.knock(0, v)); once('enSD3' + o.i, () => ss184.hum(.05, n, v * .8)); } },
+  fsnd: ts => fsnd184(ts) };
+
+// E. Rune ring scan: a ring of turning runes around the blade slides one notch per skill-up, printing runes behind it
+EN184.SE = { name: 'Rune ring scan', finAt: FP184 + .15,
+  desc: 'A floating ring of turning runes circles the blade like a band. Each skill-up it pulses, slides one notch toward the point, and the runes it passes over are printed onto the steel behind it, glowing (a long gap: it creeps a little each point). Finale: the ring spins faster and faster and slides to the point, shrinking tight round it, a held beat, then it bursts outward and the whole blade powers up into the recipe.',
+  draw(I, y, t, ts) { const o = vd184(I, 0).o, G = sl184(I, I.v), ux = I.x1 + 18, F = fin190(ts), len = SWL190(I), gx = I.x0 - 1, rs = Math.min(4, G.sw * .3);
+    let rx = pos187(I, o, -.3, 0); const pulse = o && o.t > -.6 && o.t < -.3 ? Math.sin((o.t + .6) / .3 * Math.PI) : 0; let ry = 10 + pulse * 2, spin = t * 2, burst = 0;
+    if (ts >= 0) { const u = clamp(ts / FB184); spin = t * 2 + ts * ts * 14; rx = lerp(I.x1, gx + len - 4, sm185(u)); ry = lerp(10, 5, u); }
+    if (F.powered) burst = clamp((ts - FP184) / .35);
+    const ring = (back) => { if (burst >= 1) return; ctx.save(); const r2 = ry * (1 + burst * 2.5); ctx.globalAlpha *= 1 - burst; ctx.strokeStyle = back ? 'rgba(150,110,240,.45)' : '#c8a8ff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = back ? 0 : 8; ctx.lineWidth = back ? 1.5 : 2.2; ctx.beginPath(); ctx.ellipse(rx, y, r2 * .32, r2, 0, back ? Math.PI * .5 : -Math.PI * .5, back ? Math.PI * 1.5 : Math.PI * .5); ctx.stroke();
+      ctx.fillStyle = '#fff'; for (let j = 0; j < 6; j++) { const an = spin + j * 1.047, s = Math.sin(an); if ((Math.cos(an) < 0) !== back) continue; ctx.globalAlpha = (1 - burst) * (back ? .4 : 1); ctx.fillRect(rx + Math.cos(an) * r2 * .32 - .8, y + s * r2 - .8, 1.6, 1.6); } ctx.restore(); };
+    ring(true);
+    ctx.save(); ctx.translate(gx, y); sword190(len, { aura: F.aura, pf: F.pf, t, powered: F.powered, gem: F.powered ? .6 + F.pf : F.build + .2 }); ctx.restore();
+    for (let k = 0; k < G.N; k++) { const x = G.sx(k), q = clamp((rx - (x - G.sw * .3)) / (G.sw * .6)); if (q <= 0) continue; const fresh = clamp(1 - Math.abs(rx - x) / (G.sw * .8)); drawRune190(k, x, y, rs, q, runeB190(k, G.N, ts, F, fresh * .8), F.held); }
+    ring(false); glow184(rx, y, 12, .35 + pulse * .4 + (ts >= 0 && ts < FP184 ? .4 : 0));
+    if (o && o.t >= 0) once('enSEp' + o.i, () => sparks184(rx, y, 5, 40, 30));
+    if (F.held) glint185(gx + len - 1, y - 2, ts); if (F.powered) once('enSEb', () => spawn({ x: rx, y, size: 6, shape: 'ring', grow: 20, life: .45, col: '#e8dcff' })); power190(ts, F, gx, gx + len, y, ux, 'enSE'); },
+  snd(o, v, n) { if (o.t >= -.6) once('enSE1' + o.i, () => ss184.hum(0, n, v * .6)); if (o.t >= 0) once('enSE2' + o.i, () => ss184.knock(0, v * .7)); },
+  fsnd: ts => fsnd184(ts) };
+
+// ========== Enchanting round 191 v1: bladePath191, sword191, rune191, se191 (moved out 2026-11-19; EL191, bolt191, flames191 stay for v2) ==========
+function bladePath191(len) { const w = 6, top = x => x < len - 10 ? -w + w * .2 * x / (len - 10) : -w * .8 * (len - x) / 10; ctx.beginPath(); ctx.moveTo(0, top(0)); for (let x = 0; x <= len; x += len / 20) ctx.lineTo(x, top(x)); ctx.lineTo(len, 0); for (let x = len; x >= 0; x -= len / 20) ctx.lineTo(x, -top(x)); ctx.closePath(); }
+function sword191(len, A) { // A: { E (palette), aura, pf, t, powered, gem }
+  const E = A.E; if (A.aura > 0) { ctx.save(); ctx.shadowColor = E.aura; ctx.shadowBlur = 10 + A.aura * 18; ctx.strokeStyle = `rgba(${E.auraS},${Math.min(1, A.aura)})`; ctx.lineWidth = 2 + A.aura * 2; bladePath191(len); ctx.stroke(); ctx.restore(); }
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2; bladePath191(len); const g = ctx.createLinearGradient(0, -6, 0, 6); g.addColorStop(0, '#f0f4fa'); g.addColorStop(.45, '#b8c2d0'); g.addColorStop(.55, '#8e98a8'); g.addColorStop(1, '#5e6878'); ctx.fillStyle = g; ctx.fill(); ctx.restore();
+  ctx.save(); bladePath191(len); ctx.clip(); ctx.fillStyle = 'rgba(40,46,58,.35)'; ctx.fillRect(0, -1.6, len - 12, 3.2); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(0, -5.4, len, .8);
+  if (A.powered) { const sh = (A.t * .9) % 1.6 - .3; if (sh > -.3) { const sx = sh * len, g2 = ctx.createLinearGradient(sx - 30, 0, sx + 30, 0); g2.addColorStop(0, `rgba(${E.sheen},0)`); g2.addColorStop(.5, `rgba(${E.sheen},.55)`); g2.addColorStop(1, `rgba(${E.sheen},0)`); ctx.fillStyle = g2; ctx.fillRect(sx - 30, -7, 60, 14); } }
+  if (A.aura > 0) { ctx.fillStyle = `rgba(${E.tint},${Math.min(.25, A.aura * .2)})`; ctx.fillRect(0, -7, len, 14); } if (A.pf > 0) { ctx.fillStyle = `rgba(255,255,255,${A.pf * .9})`; ctx.fillRect(0, -7, len, 14); } ctx.restore();
+  ctx.save(); bladePath191(len); ctx.strokeStyle = 'rgba(30,34,44,.85)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+  ctx.save(); const lg = ctx.createLinearGradient(0, -3, 0, 3); lg.addColorStop(0, '#7a4a2a'); lg.addColorStop(1, '#3a2010'); ctx.fillStyle = lg; ctx.fillRect(-17, -2.6, 13, 5.2); ctx.strokeStyle = 'rgba(20,10,4,.7)'; ctx.lineWidth = .8; for (let x = -16; x < -4; x += 2.6) { ctx.beginPath(); ctx.moveTo(x, -2.6); ctx.lineTo(x + 1.6, 2.6); ctx.stroke(); }
+  const gg = ctx.createLinearGradient(-4, 0, 0, 0); gg.addColorStop(0, '#f0c870'); gg.addColorStop(1, '#8a6224'); ctx.fillStyle = gg; ctx.beginPath(); ctx.roundRect(-4, -12, 4, 24, 1.5); ctx.fill(); ctx.strokeStyle = '#3a2810'; ctx.stroke();
+  ctx.fillStyle = '#c8a050'; ctx.beginPath(); ctx.arc(-20, 0, 4, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = mix(E.rune, '#ffffff', clamp(A.gem * .5)); ctx.shadowColor = E.sh; ctx.shadowBlur = 4 + A.gem * 12; ctx.beginPath(); ctx.arc(-20, 0, 2.2, 0, 7); ctx.fill(); ctx.restore(); }
+function rune191(E, k, x, y, rs, q, b, dim) { ctx.save(); if (dim) ctx.globalAlpha *= .4; rune184(rk184(k), x, y, rs, q, 'rgba(40,30,50,.6)', 1.8); rune184(rk184(k), x, y, rs, q, mix(E.rune, '#ffffff', clamp(b)), 1.2, E.sh); ctx.restore(); if (b > .4) glow184(x, y, 9, b * .45, E.glow); }
+// a smooth arc of lightning (a jittered curve, re-drawn each frame; never a zig-zag)
+function se191(fixed) { return { finAt: FP184 + .25,
+  get name() { return fixed ? 'SE ' + EL191[fixed].name : 'SE rotating'; },
+  get desc() { const d = 'The picked base: a ring of turning runes circles a broadsword and slides one notch per skill-up, printing glowing runes on the steel behind it (a long gap: it creeps a little each point). '; return d + (fixed === 'arcane' ? 'Arcane: violet runes. Finale: the ring spins faster and tightens round the point, a held beat, it bursts; a flash down the blade, a shockwave, edge sparks and a violet beam into the recipe; a violet aura and sheen stay.'
+    : fixed === 'fire' ? 'Fire: orange runes. Finale: the ring spins to the point as the blade heats and flames start licking along its edges, a held beat in the embers’ glow, the ring bursts; the blade bursts into flame and a fireball flies from the point into the recipe, embers raining; the sword keeps burning softly.'
+    : fixed === 'storm' ? 'Lightning: light-blue runes. Finale: the ring spins to the point as small arcs crackle between the runes, a held beat, the ring bursts; a white-blue flash and three arcs of lightning leap from the point into the recipe (smooth arcs, no zig-zags), sparks scatter; small arcs keep crawling on the blade.'
+    : 'Rotating: a new sword after each finale takes another element at random (never the same twice), like Cooking’s ingredients; replay a finale to see the next one.'); },
+  draw(I, y, t, ts) { if (!fixed && elNext191 && S.age < .1) { elNext191 = false; elCur191 = (elCur191 + 1 + Math.floor(Math.random() * 2)) % 3; } const el = fixed || ELS191[elCur191], E = EL191[el];
+    const o = vd184(I, 0).o, G = sl184(I, I.v), ux = I.x1 + 18, len = I.x1 + 5 - I.x0, gx = I.x0 - 1, tip = gx + len, rs = Math.min(4, G.sw * .3);
+    const build = ts >= 0 && ts < FB184 ? ts / FB184 : 0, held = held185(ts), powered = ts >= FP184, pf = powered ? clamp(1 - (ts - FP184) / .5) : 0, aura = powered ? .5 + pf * .6 : build * .5 + (held ? .15 : 0);
+    if (!fixed && ts >= FP184 + 1.2) once('elNext', () => { elNext191 = true; });
+    let rx = pos187(I, o, -.3, 0); const pulse = o && o.t > -.6 && o.t < -.3 ? Math.sin((o.t + .6) / .3 * Math.PI) : 0; let ry = 10 + pulse * 2, spin = t * 2, burst = powered ? clamp((ts - FP184) / .35) : 0;
+    if (ts >= 0) { const u = clamp(ts / FB184); spin = t * 2 + ts * ts * 14; rx = lerp(I.x1, tip - 4, sm185(u)); ry = lerp(10, 5, u); }
+    const ring = back => { if (burst >= 1) return; ctx.save(); const r2 = ry * (1 + burst * 2.5); ctx.globalAlpha *= 1 - burst; ctx.strokeStyle = back ? E.ringB : E.ring; ctx.shadowColor = E.sh; ctx.shadowBlur = back ? 0 : 8; ctx.lineWidth = back ? 1.5 : 2.4; ctx.beginPath(); ctx.ellipse(rx, y, r2 * .32, r2, 0, back ? Math.PI * .5 : -Math.PI * .5, back ? Math.PI * 1.5 : Math.PI * .5); ctx.stroke();
+      ctx.fillStyle = '#fff'; for (let j = 0; j < 6; j++) { const an = spin + j * 1.047; if ((Math.cos(an) < 0) !== back) continue; ctx.globalAlpha = (1 - burst) * (back ? .4 : 1); ctx.fillRect(rx + Math.cos(an) * r2 * .32 - .8, y + Math.sin(an) * r2 - .8, 1.6, 1.6); } ctx.restore(); };
+    ring(true);
+    // the steady enchant after the finale, and the element's build-up
+    const fireAmt = el === 'fire' ? (powered ? .55 + pf * .9 : build * .7 + (held ? .15 : 0)) : 0;
+    ctx.save(); ctx.translate(gx, y); sword191(len, { E, aura, pf, t, powered, gem: powered ? .6 + pf : build + .2 }); ctx.restore();
+    flames191(gx, y, len, fireAmt, t);
+    for (let k = 0; k < G.N; k++) { const x = G.sx(k), q = clamp((rx - (x - G.sw * .3)) / (G.sw * .6)); if (q <= 0) continue; let b = clamp(1 - Math.abs(rx - x) / (G.sw * .8)) * .8;
+      if (build > 0) { const ig = ts - k / G.N * 1.1; if (ig >= 0) b = Math.max(b, clamp(1 - ig / .3) * .6 + .55); } if (powered) b = Math.max(b, pf + .45); rune191(E, k, x, y, rs, q, b, held); }
+    ring(false); glow184(rx, y, 12, .35 + pulse * .4 + (ts >= 0 && ts < FP184 ? .4 : 0), E.glow);
+    if (o && o.t >= 0) once('enSEp' + o.i, () => sparks184(rx, y, 5, 40, 30, E.spark));
+    if (el === 'fire' && (build > .2 || powered) && Math.floor(t * 12) !== Math.floor((t - 1 / 60) * 12)) spawn({ x: lerp(gx + 8, tip - 6, Math.random()), y: y - 5, vx: (Math.random() - .5) * 10, vy: -15 - Math.random() * 20, life: .7, size: .9, col: Math.random() < .5 ? '#ffb040' : '#ff6a1a' });
+    if (el === 'storm') { const n = build > 0 ? 1 + Math.floor(build * 3) : powered ? 1 : 0, live = build > 0 ? true : powered && (Math.floor(t * 3) % 2 === 0); if (live) for (let j = 0; j < n; j++) { const k1 = Math.floor(hash184(j + Math.floor(t * 8) * 3) * G.N), k2 = Math.min(G.N - 1, k1 + 1 + Math.floor(hash184(j * 5 + Math.floor(t * 8)) * 3)); if (k2 > k1) bolt191(G.sx(k1), y - 1, G.sx(k2), y - 1, 6, .9, E, j + 1); } }
+    if (held) { const gl = Math.sin(clamp((ts - FB184) / (FP184 - FB184)) * Math.PI); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 8; ctx.globalAlpha *= gl; star4(tip - 1, y - 2, 3 + gl * 4, ts * 2); ctx.restore(); }
+    // the payoff, per element
+    if (powered) { once('enSEb', () => spawn({ x: rx, y, size: 6, shape: 'ring', grow: 20, life: .45, col: E.ring }));
+      once('enSEf', () => { spawn({ x: (gx + tip) / 2, y, size: 8, shape: 'ring', grow: 16, life: .45, col: '#fff' }); for (let q = 0; q < 16; q++) spawn({ x: lerp(gx, tip, Math.random()), y: y + (q % 2 ? -6 : 6), vx: (Math.random() - .5) * 60, vy: (q % 2 ? -1 : 1) * (30 + Math.random() * 50), g: 60, life: .5, size: 1, col: E.spark[q % 3] }); });
+      const hit = () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 32, life: .6, col: E.ring }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 20, life: .45, col: '#fff' }); sparks184(ux, y, 16, 130, 90, E.spark); };
+      if (el === 'arcane') { const u = clamp((ts - FP184) / .15), fa = clamp(1 - (ts - FP184 - .25) / .4); if (u >= 1) once('enSEa', hit);
+        if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa; ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${E.glow},.7)`; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(tip, y); ctx.lineTo(lerp(tip, ux, u), y); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); } }
+      else if (el === 'fire') { const u = clamp((ts - FP184) / .25); if (u < 1) { const fx = (1 - u) * (1 - u) * tip + 2 * (1 - u) * u * (tip - 10) + u * u * ux, fy = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * (y - 30) + u * u * y; glow184(fx, fy, 14, 1, '255,140,40'); ctx.save(); const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, 5); g.addColorStop(0, '#fff8d0'); g.addColorStop(.5, '#ffb040'); g.addColorStop(1, '#ff4a10'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(fx, fy, 5, 0, 7); ctx.fill(); ctx.restore();
+          if (Math.random() < .7) spawn({ x: fx, y: fy, vx: -20 - Math.random() * 30, vy: (Math.random() - .5) * 20, life: .4, size: 1.2, col: Math.random() < .5 ? '#ffb040' : '#ff6a1a' }); }
+        else once('enSEa', () => { hit(); for (let q = 0; q < 14; q++) spawn({ x: ux + (Math.random() - .5) * 20, y: y - 12, vx: (Math.random() - .5) * 20, vy: 10 + Math.random() * 30, g: 40, life: .9, size: 1, col: q % 2 ? '#ffb040' : '#ff6a1a' }); }); }
+      else { const u = clamp((ts - FP184) / .06), fa = clamp(1 - (ts - FP184 - .1) / .4); if (u >= 1) once('enSEa', hit); if (fa > 0) { ctx.save(); ctx.globalAlpha *= fa; for (let j = 0; j < 3; j++) { const sx0 = lerp(gx + 20, tip, [.25, .6, 1][j]); bolt191(sx0, y - 2, lerp(sx0, ux, u), lerp(y - 2, y, u), 10 + (1 - j / 2) * 10, 1.3, E, 20 + j); } ctx.restore(); }
+        if (pf > .5) glow184(tip, y, 28, (pf - .5) * 1.6, '200,235,255'); } } },
+  snd(o, v, n) { if (o.t >= -.6) once('enSE1' + o.i, () => ss184.hum(0, n, v * .6)); if (o.t >= 0) once('enSE2' + o.i, () => ss184.knock(0, v * .7)); },
+  fsnd: ts => fsnd184(ts, ts2 => { const el = fixed || ELS191[elCur191]; if (ts2 >= FP184) once('enSEx', () => { if (el === 'fire') noise(0, .5, .012, 700, .6, 'lowpass'); else if (el === 'storm') noise(0, .25, .01, 1600, 1, 'bandpass', true); }); }) }; }
+EN184.SEa = se191('arcane'); EN184.SEf = se191('fire'); EN184.SEl = se191('storm'); EN184.SEr = se191(null);
+
+// ========== Enchanting cleanup before round 195 (2026-11-19): sigil184 set, vellum185, dish186, sword192/band192 (v2 look), swordDark193, swordIcon193 and their option lines (moved out; stones193 stays) ==========
+// sigils for the vellum: arcs and lines (no crescents), as polylines
+const arc184 = (cx, cy, r, a0, a1, n = 10) => Array.from({ length: n + 1 }, (_, i) => [cx + Math.cos(lerp(a0, a1, i / n)) * r, cy + Math.sin(lerp(a0, a1, i / n)) * r]);
+const SIG184 = [
+  [[[0, 1], [0, -.3]], arc184(0, -.65, .35, Math.PI / 2, Math.PI * 2.5)],
+  [arc184(0, -.3, .65, Math.PI, 0), [[0, .35], [0, 1]], [[-.45, .7], [.45, .7]]],
+  [[[-.7, -.8], [.7, -.8]], [[0, -.8], [0, 1]], arc184(0, .45, .4, -Math.PI / 2, Math.PI * 1.5)],
+  [arc184(-.1, 0, .55, 0, Math.PI * 1.6), [[.45, -.3], [.8, -1]], [[-.6, 1], [.6, 1]]],
+  [[[-.6, -1], [-.6, 1]], [[.6, -1], [.6, 1]], [[-.6, 0], [.6, 0]], arc184(0, -.55, .25, 0, Math.PI * 2, 8)],
+  [[[0, -1], [0, .5]], arc184(.35, .5, .35, Math.PI, Math.PI * 2.2), [[-.5, -.5], [.5, -.5]]]];
+function sigil184(k, x, y, s, q, col, lw, glow) { const strokes = SIG184[(k * 5 + 1) % SIG184.length], segLen = st => st.reduce((a, p, i) => i ? a + Math.hypot(p[0] - st[i - 1][0], p[1] - st[i - 1][1]) : 0, 0), tot = strokes.reduce((a, st) => a + segLen(st), 0); let left = q * tot, pen = null;
+  ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 6; } ctx.beginPath();
+  strokes.forEach(st => { if (left <= 1e-6) return; ctx.moveTo(x + st[0][0] * s, y + st[0][1] * s); for (let i = 1; i < st.length && left > 1e-6; i++) { const d = Math.hypot(st[i][0] - st[i - 1][0], st[i][1] - st[i - 1][1]), u = Math.min(1, left / d); left -= d; const px = x + lerp(st[i - 1][0], st[i][0], u) * s, py = y + lerp(st[i - 1][1], st[i][1], u) * s; ctx.lineTo(px, py); pen = { x: px, y: py }; } });
+  ctx.stroke(); ctx.restore(); return pen; }
+function vellum185(xa, xb, y) { ctx.save(); const vg = ctx.createLinearGradient(0, y - 8, 0, y + 8); vg.addColorStop(0, '#efe2c2'); vg.addColorStop(1, '#cdb88e'); ctx.fillStyle = vg; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1; ctx.fillRect(xa, y - 8, xb - xa, 16); ctx.restore(); }
+function dish186(x, y, t) { ctx.save(); ctx.fillStyle = '#e4dcf4'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.ellipse(x, y - 1, 6, 4, 0, Math.PI, 0); ctx.fill(); ctx.shadowBlur = 0;
+  const g = ctx.createLinearGradient(0, y - 1, 0, y + 5); g.addColorStop(0, '#6a6472'); g.addColorStop(1, '#2a2630'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y - 1, 7.5, 6, 0, 0, Math.PI); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = '#fff'; for (let q = 0; q < 3; q++) { ctx.globalAlpha = .3 + .7 * Math.abs(Math.sin(t * 5 + q * 2.1)); ctx.fillRect(x - 3 + q * 3, y - 2 + (q % 2), 1, 1); } ctx.restore(); }
+function bladePath192(len, w = 7) { const top = x => x < len - 12 ? -w + w * .18 * x / (len - 12) : -w * .82 * (len - x) / 12; ctx.beginPath(); ctx.moveTo(0, top(0)); for (let x = 0; x <= len; x += len / 24) ctx.lineTo(x, top(x)); ctx.lineTo(len, 0); for (let x = len; x >= 0; x -= len / 24) ctx.lineTo(x, -top(x)); ctx.closePath(); }
+function sword192(len, A) { // A: { E, aura, pf, t, powered, gem, ench (local x the enchantment reaches), pulse (local x of a pulse or -1) }
+  const E = A.E; ctx.save(); ctx.globalAlpha *= .35; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(len * .45, 12, len * .52, 2.4, 0, 0, 7); ctx.fill(); ctx.restore();
+  if (A.aura > 0) { ctx.save(); ctx.shadowColor = E.aura; ctx.shadowBlur = 10 + A.aura * 18; ctx.strokeStyle = `rgba(${E.auraS},${Math.min(1, A.aura)})`; ctx.lineWidth = 2 + A.aura * 2; bladePath192(len); ctx.stroke(); ctx.restore(); }
+  ctx.save(); bladePath192(len); ctx.clip();
+  const up = ctx.createLinearGradient(0, -7, 0, 0); up.addColorStop(0, '#f4f7fc'); up.addColorStop(1, '#c4ccd8'); ctx.fillStyle = up; ctx.fillRect(-1, -8, len + 2, 8);
+  const dn = ctx.createLinearGradient(0, 0, 0, 7); dn.addColorStop(0, '#8e98a8'); dn.addColorStop(1, '#4e5868'); ctx.fillStyle = dn; ctx.fillRect(-1, 0, len + 2, 8);
+  ctx.fillStyle = 'rgba(30,36,48,.45)'; ctx.fillRect(0, -1.3, len * .72, 2.6); ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fillRect(0, -.4, len - 4, .7);
+  if (A.ench > 0) { const eg = ctx.createLinearGradient(0, 0, A.ench, 0); eg.addColorStop(0, `rgba(${E.tint},.22)`); eg.addColorStop(Math.max(0, 1 - 18 / Math.max(18, A.ench)), `rgba(${E.tint},.22)`); eg.addColorStop(1, `rgba(${E.tint},.05)`); ctx.fillStyle = eg; ctx.fillRect(0, -8, A.ench, 16);
+    ctx.strokeStyle = `rgba(${E.glow},.85)`; ctx.shadowColor = E.sh; ctx.shadowBlur = 5; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.min(A.ench, len * .72), 0); ctx.stroke(); ctx.shadowBlur = 0; }
+  if (A.pulse >= 0) { const g = ctx.createLinearGradient(A.pulse - 18, 0, A.pulse + 6, 0); g.addColorStop(0, `rgba(${E.sheen},0)`); g.addColorStop(.75, `rgba(${E.sheen},.7)`); g.addColorStop(1, `rgba(${E.sheen},0)`); ctx.fillStyle = g; ctx.fillRect(A.pulse - 18, -8, 24, 16); }
+  if (A.powered) { const sh = (A.t * .9) % 1.6 - .3; if (sh > -.3) { const sx = sh * len, g2 = ctx.createLinearGradient(sx - 30, 0, sx + 30, 0); g2.addColorStop(0, `rgba(${E.sheen},0)`); g2.addColorStop(.5, `rgba(${E.sheen},.55)`); g2.addColorStop(1, `rgba(${E.sheen},0)`); ctx.fillStyle = g2; ctx.fillRect(sx - 30, -8, 60, 16); } }
+  if (A.aura > 0) { ctx.fillStyle = `rgba(${E.tint},${Math.min(.25, A.aura * .2)})`; ctx.fillRect(0, -8, len, 16); } if (A.pf > 0) { ctx.fillStyle = `rgba(255,255,255,${A.pf * .9})`; ctx.fillRect(0, -8, len, 16); } ctx.restore();
+  ctx.save(); bladePath192(len); ctx.strokeStyle = 'rgba(22,26,36,.9)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+  // the hilt: a flared guard with a gem, a wrapped grip, a pommel
+  ctx.save(); const lg = ctx.createLinearGradient(0, -3, 0, 3); lg.addColorStop(0, '#7a4a2a'); lg.addColorStop(1, '#2e180a'); ctx.fillStyle = lg; ctx.beginPath(); ctx.roundRect(-19, -2.8, 15, 5.6, 1.5); ctx.fill(); ctx.strokeStyle = 'rgba(15,8,2,.8)'; ctx.lineWidth = .8; for (let x = -18; x < -4; x += 2.4) { ctx.beginPath(); ctx.moveTo(x, -2.8); ctx.lineTo(x + 1.6, 2.8); ctx.stroke(); }
+  const gg = ctx.createLinearGradient(0, -13, 0, 13); gg.addColorStop(0, '#ffe08a'); gg.addColorStop(.5, '#c8963a'); gg.addColorStop(1, '#7a5418'); ctx.fillStyle = gg; ctx.beginPath(); ctx.moveTo(-5, -3); ctx.lineTo(-3, -11); ctx.quadraticCurveTo(-1, -14, 1, -12); ctx.lineTo(0, -3); ctx.lineTo(0, 3); ctx.lineTo(1, 12); ctx.quadraticCurveTo(-1, 14, -3, 11); ctx.lineTo(-5, 3); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#3a2408'; ctx.lineWidth = .9; ctx.stroke();
+  ctx.fillStyle = mix(E.rune, '#ffffff', clamp(A.gem * .6)); ctx.shadowColor = E.sh; ctx.shadowBlur = 4 + A.gem * 14; ctx.beginPath(); ctx.moveTo(-2.5, -2.6); ctx.lineTo(-.6, 0); ctx.lineTo(-2.5, 2.6); ctx.lineTo(-4.4, 0); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
+  const pg = ctx.createRadialGradient(-23, -1.5, 0, -22, 0, 4.4); pg.addColorStop(0, '#ffe08a'); pg.addColorStop(1, '#7a5418'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(-22, 0, 4.2, 0, 7); ctx.fill(); ctx.strokeStyle = '#3a2408'; ctx.stroke(); ctx.restore(); if (A.gem > .3) glow184(-2.5, 0, 12, A.gem * .5, E.glow); }
+function band192(rx, y, ry, spin, E, back, alpha, squash) { if (alpha <= 0) return; const rxx = ry * .34 * squash, a0 = back ? Math.PI * .5 : -Math.PI * .5, a1 = back ? Math.PI * 1.5 : Math.PI * .5; ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.lineCap = 'round'; ctx.strokeStyle = back ? E.ringB : E.ring; ctx.shadowColor = E.sh; ctx.shadowBlur = back ? 2 : 10; ctx.lineWidth = back ? 2.4 : 3.6; ctx.beginPath(); ctx.ellipse(rx, y, rxx, ry, 0, a0, a1); ctx.stroke();
+  if (!back) { ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(rx, y, rxx, ry - 1, 0, a0 + .3, a1 - .3); ctx.stroke(); }
+  for (let j = 0; j < 8; j++) { const an = spin + j * .785; if ((Math.cos(an) < 0) !== back) continue; const px = rx + Math.cos(an) * rxx, py = y + Math.sin(an) * ry; ctx.fillStyle = back ? `rgba(${E.glow},.5)` : '#fff'; ctx.fillRect(px - .7, py - 1.6, 1.4, 3.2); } ctx.restore(); }
+function swordDark193(len, A) { const E = A.E, en = Math.max(0, A.ench || 0);
+  ctx.save(); ctx.globalAlpha *= .4; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(len * .45, 12, len * .52, 2.6, 0, 0, 7); ctx.fill(); ctx.restore();
+  if (A.aura > 0) { ctx.save(); ctx.shadowColor = E.aura; ctx.shadowBlur = 12 + A.aura * 18; ctx.strokeStyle = `rgba(${E.auraS},${Math.min(1, A.aura)})`; ctx.lineWidth = 2 + A.aura * 2; bladePath192(len, 7.5); ctx.stroke(); ctx.restore(); }
+  ctx.save(); bladePath192(len, 7.5); ctx.clip(); const g = ctx.createLinearGradient(0, -8, 0, 8); g.addColorStop(0, '#6a707c'); g.addColorStop(.42, '#343944'); g.addColorStop(.5, '#22262e'); g.addColorStop(1, '#0e1014'); ctx.fillStyle = g; ctx.fillRect(-1, -9, len + 2, 18);
+  ctx.fillStyle = 'rgba(150,160,175,.35)'; ctx.fillRect(0, -.5, len - 6, 1); if (en > 0) { ctx.fillStyle = `rgba(${E.tint},.28)`; ctx.fillRect(0, -9, en, 18); }
+  if (A.pulse >= 0) { const pg = ctx.createLinearGradient(A.pulse - 18, 0, A.pulse + 6, 0); pg.addColorStop(0, `rgba(${E.sheen},0)`); pg.addColorStop(.75, `rgba(${E.sheen},.8)`); pg.addColorStop(1, `rgba(${E.sheen},0)`); ctx.fillStyle = pg; ctx.fillRect(A.pulse - 18, -9, 24, 18); }
+  if (A.powered) { const sh = (A.t * .9) % 1.6 - .3; if (sh > -.3) { const sx = sh * len, g2 = ctx.createLinearGradient(sx - 30, 0, sx + 30, 0); g2.addColorStop(0, `rgba(${E.sheen},0)`); g2.addColorStop(.5, `rgba(${E.sheen},.6)`); g2.addColorStop(1, `rgba(${E.sheen},0)`); ctx.fillStyle = g2; ctx.fillRect(sx - 30, -9, 60, 18); } }
+  if (A.pf > 0) { ctx.fillStyle = `rgba(255,255,255,${A.pf * .9})`; ctx.fillRect(0, -9, len, 18); } ctx.restore();
+  ctx.save(); bladePath192(len, 7.5); ctx.strokeStyle = '#06070a'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
+  // the edges: bare steel ahead, the element's line behind the ring
+  const topY = x => { const w0 = 7.5; return x < len - 12 ? -w0 + w0 * .18 * x / (len - 12) : -w0 * .82 * (len - x) / 12; };
+  const edges = (x0, x1, col, w, glow) => { if (x1 <= x0) return; ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = w; if (glow) { ctx.shadowColor = E.sh; ctx.shadowBlur = 8; } [1, -1].forEach(s => { ctx.beginPath(); for (let x = x0; x <= x1; x += 3) ctx.lineTo(x, s * (topY(x) + .9)); ctx.lineTo(x1, s * (topY(x1) + .9)); ctx.stroke(); }); ctx.restore(); };
+  edges(0, len, 'rgba(190,200,215,.55)', .8, false); edges(0, Math.min(len, en), mix(E.rune, '#ffffff', .35), 1.4, true);
+  // the angular iron guard, a big gem, a dark wrapped grip with element bands, an angular pommel
+  ctx.save(); ctx.fillStyle = '#16141a'; ctx.beginPath(); ctx.roundRect(-20, -3, 16, 6, 1); ctx.fill(); ctx.fillStyle = E.rune; ctx.globalAlpha *= .8; [-16, -10].forEach(x => ctx.fillRect(x, -3, 1.4, 6)); ctx.globalAlpha = 1;
+  const ig = ctx.createLinearGradient(0, -14, 0, 14); ig.addColorStop(0, '#aab0bc'); ig.addColorStop(.5, '#565c6a'); ig.addColorStop(1, '#16181e'); ctx.fillStyle = ig; ctx.beginPath(); ctx.moveTo(-6, -4); ctx.lineTo(-3, -14); ctx.lineTo(2, -12); ctx.lineTo(1, -4); ctx.lineTo(1, 4); ctx.lineTo(2, 12); ctx.lineTo(-3, 14); ctx.lineTo(-6, 4); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#06070a'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = mix(E.rune, '#ffffff', clamp(.2 + A.gem * .55)); ctx.shadowColor = E.sh; ctx.shadowBlur = 8 + A.gem * 16; ctx.beginPath(); ctx.moveTo(-2.5, -4.2); ctx.lineTo(.2, 0); ctx.lineTo(-2.5, 4.2); ctx.lineTo(-5.2, 0); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(-3.4, -2.2, 1.2, 1.6);
+  ctx.fillStyle = ig; ctx.beginPath(); ctx.moveTo(-20, -4); ctx.lineTo(-26, 0); ctx.lineTo(-20, 4); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); glow184(-2.5, 0, 14, .35 + A.gem * .5, E.glow); }
+function swordIcon193(len, A) { const E = A.E, en = Math.max(0, A.ench || 0), w = 8.5;
+  ctx.save(); ctx.globalAlpha *= .35; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(len * .45, 13, len * .5, 2.4, 0, 0, 7); ctx.fill(); ctx.restore();
+  if (A.aura > 0) { ctx.save(); ctx.shadowColor = E.aura; ctx.shadowBlur = 10 + A.aura * 18; ctx.strokeStyle = `rgba(${E.auraS},${Math.min(1, A.aura)})`; ctx.lineWidth = 3 + A.aura * 2; bladePath192(len, w); ctx.stroke(); ctx.restore(); }
+  ctx.save(); bladePath192(len, w); ctx.clip(); ctx.fillStyle = '#dfe8f2'; ctx.fillRect(-1, -10, len + 2, 10); ctx.fillStyle = '#8496b0'; ctx.fillRect(-1, 0, len + 2, 10); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = .85; ctx.beginPath(); ctx.roundRect(4, -6, len * .62, 2.2, 1.1); ctx.fill(); ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgba(70,84,108,.55)'; ctx.fillRect(0, 2.5, len - 10, 1.6); if (en > 0) { ctx.fillStyle = `rgba(${E.tint},.3)`; ctx.fillRect(0, -10, en, 20); }
+  if (A.pulse >= 0) { ctx.fillStyle = `rgba(${E.sheen},.75)`; ctx.fillRect(A.pulse - 6, -10, 8, 20); }
+  if (A.powered) { const sh = (A.t * .9) % 1.6 - .3; if (sh > -.3) { ctx.fillStyle = `rgba(${E.sheen},.55)`; ctx.fillRect(sh * len - 8, -10, 16, 20); } }
+  if (A.pf > 0) { ctx.fillStyle = `rgba(255,255,255,${A.pf * .9})`; ctx.fillRect(0, -10, len, 20); } ctx.restore();
+  ctx.save(); bladePath192(len, w); ctx.strokeStyle = '#140e0a'; ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.lineJoin = 'round'; ctx.strokeStyle = '#140e0a'; ctx.lineWidth = 2;
+  ctx.fillStyle = '#8a4a22'; ctx.beginPath(); ctx.roundRect(-21, -3.6, 17, 7.2, 2); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#b8682e'; ctx.fillRect(-20, -2.6, 15, 2); ctx.strokeStyle = '#140e0a'; ctx.lineWidth = 1.2; [-16, -11].forEach(x => { ctx.beginPath(); ctx.moveTo(x, -3.6); ctx.lineTo(x, 3.6); ctx.stroke(); });
+  ctx.lineWidth = 2; ctx.fillStyle = '#f2b830'; ctx.beginPath(); ctx.roundRect(-6, -15, 7, 30, 3); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ffe48a'; ctx.fillRect(-4.6, -13, 2, 26);
+  ctx.fillStyle = mix(E.rune, '#ffffff', clamp(.15 + A.gem * .5)); ctx.shadowColor = E.sh; ctx.shadowBlur = 6 + A.gem * 14; ctx.beginPath(); ctx.arc(-2.5, 0, 3.6, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-3.6, -1.2, 1.1, 0, 7); ctx.fill();
+  ctx.fillStyle = '#f2b830'; ctx.beginPath(); ctx.arc(-25, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ffe48a'; ctx.beginPath(); ctx.arc(-26.2, -1.4, 1.6, 0, 7); ctx.fill(); ctx.restore(); }
+EN184.Dka = se192('arcane', 'dark'); EN184.Dkf = se192('fire', 'dark'); EN184.Dkl = se192('storm', 'dark'); EN184.Ica = se192('arcane', 'icon'); EN184.Icf = se192('fire', 'icon'); EN184.Icl = se192('storm', 'icon');
+EN184.V2a = se192('arcane'); EN184.V2f = se192('fire'); EN184.V2l = se192('storm'); EN184.V2r = se192(null);
+
+// ========== Enchanting round 195, B orbiting rune stones, C revolver collar, D branding clamp (moved out 2026-11-19; the user kept the clean band A) ==========
+// ---------- round 195 (2026-11-19): the clean Fire runeblade; ideas for the ring, the animation and the rune placement (Fire only).
+// A the current band (round 194); B orbiting rune stones (the user liked the Icon style's spinning stones): one breaks orbit and slams in as an
+// inlaid rune stone; C a revolver collar indexes one rune face and deposits it in a cartouche; D a branding clamp heats, clamps, and brands a big rune ----------
+function fireFin195(ts, tip, ux, y, E, key) { if (ts < FP184) return; const u = clamp((ts - FP184) / .25), hit = () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 32, life: .6, col: E.ring }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 20, life: .45, col: '#fff' }); sparks184(ux, y, 16, 130, 90, E.spark); for (let q = 0; q < 12; q++) spawn({ x: ux + (Math.random() - .5) * 20, y: y - 12, vx: (Math.random() - .5) * 20, vy: 10 + Math.random() * 30, g: 40, life: .9, size: 1, col: q % 2 ? '#ffb040' : '#ff6a1a' }); };
+  once(key + 'f', () => { spawn({ x: (tip - 120 + tip) / 2, y, size: 8, shape: 'ring', grow: 16, life: .45, col: '#fff' }); for (let q = 0; q < 14; q++) spawn({ x: tip - Math.random() * 200, y: y + (q % 2 ? -6 : 6), vx: (Math.random() - .5) * 60, vy: (q % 2 ? -1 : 1) * (30 + Math.random() * 50), g: 60, life: .5, size: 1, col: E.spark[q % 3] }); });
+  if (u < 1) { const fx = (1 - u) * (1 - u) * tip + 2 * (1 - u) * u * (tip - 10) + u * u * ux, fy = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * (y - 30) + u * u * y; glow184(fx, fy, 14, 1, '255,140,40'); ctx.save(); const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, 5); g.addColorStop(0, '#fff8d0'); g.addColorStop(.5, '#ffb040'); g.addColorStop(1, '#ff4a10'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(fx, fy, 5, 0, 7); ctx.fill(); ctx.restore(); if (Math.random() < .7) spawn({ x: fx, y: fy, vx: -20 - Math.random() * 30, vy: (Math.random() - .5) * 20, life: .4, size: 1.2, col: Math.random() < .5 ? '#ffb040' : '#ff6a1a' }); }
+  else once(key + 'a', hit); }
+const heat195 = h => h < .5 ? mix('#3a3e48', '#d8401a', h * 2) : mix('#d8401a', '#fff0c0', (h - .5) * 2);
+function se195(kind) { const E = EL191.fire; return { finAt: FP184 + .25,
+  get name() { return { B: 'Orbiting rune stones', C: 'Revolver collar', D: 'Branding clamp' }[kind]; },
+  get desc() { return { B: 'Five small rune stones orbit the blade at the front (the spinning stones from the Icon look, in the clean dark style). Each skill-up they spin up, the front stone breaks orbit, arcs up and slams down into the blade, setting as an inlaid rune stone (a square socket with a glowing rune); the orbit moves on and an ember runs up from the guard’s gem to become a new stone. Finale: the orbit tightens and races to the point, a held beat, the stones burst out and the sword fires.',
+    C: 'A heavy iron collar round the blade carries rune faces like a revolver drum. Each skill-up it indexes one face (the faces roll, a click, the one facing the blade glows), slides forward, and deposits that rune in an ember-gold cartouche that stamps into place. Finale: the collar spins its faces into a blur at the point, a held beat, it bursts and the sword fires.',
+    D: 'A pair of branding jaws hovers at the front. Each skill-up the jaws heat from iron to red to white, close fast on the blade, and brand a big rune into it: a short freeze, a hiss of steam, the rune white-hot, cooling to ember orange; the jaws open and move on. Finale: the jaws clamp the point white-hot, a held beat, they spring open and the sword fires.' }[kind] + ' (Fire only for now; the other elements later.)'; },
+  draw(I, y, t, ts) { const o = vd184(I, 0).o, G = sl184(I, I.v), ux = I.x1 + 18, len = I.x1 + 5 - I.x0, gx = I.x0 - 1, tip = gx + len, F = { build: ts >= 0 && ts < FB184 ? ts / FB184 : 0, held: held185(ts), powered: ts >= FP184 }; F.pf = F.powered ? clamp(1 - (ts - FP184) / .5) : 0; F.aura = F.powered ? .45 + F.pf * .6 : F.build * .5;
+    const a = o ? I.X(S.v0 + o.i) : I.X(I.v), b = o ? I.X(S.v0 + o.i + 1) : a, kH = o ? G.kOf(S.v0 + o.i) : -1, hitT = o && o.t >= 0 && o.t < 1 ? o.t : -1, jolt = hitT >= 0 && hitT < .1 ? 1 - hitT / .1 : 0;
+    const visible = k => G.fr(k) > 0 && !(o && kH === k && o.t < 0 && G.fr(k) <= 1 / G.per + 1e-6), front = o && o.t < 0 ? a : I.X(I.v);
+    ctx.save(); if (jolt) ctx.translate((Math.random() - .5) * 2 * jolt, (Math.random() - .5) * 2 * jolt);
+    // the mechanism behind the blade (back half)
+    let mx = front + 6, spin = t * 2.4; if (ts >= 0) mx = lerp(mx, tip - 8, sm185(clamp(ts / .8)));
+    if (kind === 'B') { let sp = t * 2.4; if (o && o.t > -.75 && o.t < 0) sp += (o.t + .75) ** 2 * 8; if (ts >= 0) sp = t * 2.4 + ts * ts * 12; spin = sp; if (!F.powered) stones193(mx, y, ts >= 0 ? lerp(11, 7, clamp(ts / FB184)) : 11, spin, E, true, 1, 1); }
+    ctx.save(); ctx.translate(gx, y); swordClean194(len, { E, aura: F.aura, pf: F.pf, t, powered: F.powered, gem: F.powered ? .6 + F.pf : F.build + (hitT >= .25 && hitT < .7 ? .6 * (1 - (hitT - .25) / .45) : 0) + .2, ench: Math.max(0, (ts >= 0 ? tip : front) - gx), pulse: hitT >= 0 && hitT < .4 ? lerp(b - gx, 0, eOut(hitT / .4)) : -1 }); ctx.restore();
+    flames191(gx, y, len, F.powered ? .3 + F.pf * .9 : F.build * .7, t);
+    // the runes, placed per idea
+    for (let k = 0; k < G.N; k++) { if (!visible(k)) continue; const x = G.sx(k), q = G.fr(k); let bb = .4; if (kH === k && hitT >= 0) bb = 1.4 * clamp(1 - hitT / .6) + .4; if (F.build > 0) { const ig = ts - k / G.N * 1.1; if (ig >= 0) bb = Math.max(bb, clamp(1 - ig / .3) * .6 + .55); } if (F.powered) bb = Math.max(bb, F.pf + .45);
+      ctx.save(); if (F.held) ctx.globalAlpha *= .45;
+      if (kind === 'B') { const s = Math.min(4.6, G.sw * .36); ctx.fillStyle = '#121418'; ctx.strokeStyle = 'rgba(170,180,195,.45)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.roundRect(x - s, y - s, 2 * s, 2 * s, 1); ctx.fill(); ctx.stroke(); rune184(rk184(k), x, y, s * .7, q, mix(E.ring, '#ffffff', clamp(bb * .7)), 1.1, E.sh); }
+      else if (kind === 'C') { const w = Math.min(10, G.sw - 2.5), sc = kH === k && hitT >= 0 && hitT < .2 ? 1 + .45 * (1 - hitT / .2) : 1; ctx.translate(x, y); ctx.scale(sc, sc); ctx.strokeStyle = mix('#a8743a', '#ffd890', clamp(bb * .6)); ctx.lineWidth = .9; ctx.beginPath(); ctx.roundRect(-w / 2, -4.6, w, 9.2, 4); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-w / 2 - 1.5, 0); ctx.lineTo(-w / 2, 0); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2 + 1.5, 0); ctx.stroke(); rune184(rk184(k), 0, 0, Math.min(3.2, w * .3), q, mix(E.ring, '#ffffff', clamp(bb * .7)), 1.2, E.sh); }
+      else { const cool = kH === k && hitT >= 0 ? clamp(1 - hitT / 1) : 0, rs = Math.min(5.2, G.sw * .38); rune184(rk184(k), x, y, rs, q, cool > 0 ? heat195(.55 + cool * .45) : mix('#ff7a2a', '#ffd8a0', clamp(bb * .5)), 1.6, cool > .2 ? '#fff0c0' : E.sh); if (cool > 0) glow184(x, y, 12, cool * .9, '255,160,60'); }
+      ctx.restore(); }
+    // the mechanism in front
+    if (kind === 'A') {}
+    else if (kind === 'B') { if (!F.powered) stones193(mx, y, ts >= 0 ? lerp(11, 7, clamp(ts / FB184)) : 11, spin, E, false, 1, 1);
+      if (o && o.t > -.3 && o.t < 0 && ts < 0) { const u = clamp((o.t + .3) / .3), x = lerp(a + 6, G.sx(kH), u), yy = lerp(y - 11, y, u * u) - Math.sin(u * Math.PI) * 9, s = 3.2 - u * .6; ctx.save(); ctx.translate(x, yy); ctx.rotate(u * 6); ctx.fillStyle = '#7a7486'; ctx.strokeStyle = '#140e0a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(-s, -s, 2 * s, 2 * s, 1.2); ctx.fill(); ctx.stroke(); ctx.fillStyle = E.ring; ctx.fillRect(-.6, -s * .6, 1.2, s * 1.2); ctx.restore(); glow184(x, yy, 8, .6, E.glow); }
+      if (hitT >= .2 && hitT < .6) { const u = (hitT - .2) / .4, ex = lerp(gx - 2, mx, eOut(u)); glow184(ex, y, 7, .9, E.glow); ctx.save(); ctx.fillStyle = '#fff4d0'; ctx.beginPath(); ctx.arc(ex, y, 1.4, 0, 7); ctx.fill(); ctx.restore(); }
+      if (F.powered) once('enB5b', () => { for (let q = 0; q < 5; q++) { const an = q * 1.257; spawn({ x: mx, y, vx: Math.cos(an) * 90, vy: Math.sin(an) * 70 - 20, g: 160, life: .6, size: 2.2, shape: 'sq', vr: 10, col: '#7a7486' }); } spawn({ x: mx, y, size: 6, shape: 'ring', grow: 20, life: .45, col: E.ring }); }); }
+    else if (kind === 'C') { let cx = mx, idx = t * .2; if (o && o.t < 0) { if (o.t < -.35) { cx = a + 6; idx = Math.floor((S.v0 + o.i)) + sm185(clamp((o.t + .6) / .25)); } else { cx = lerp(a + 6, b + 6, eOut(clamp((o.t + .3) / .25))); idx = S.v0 + o.i + 1; } } else idx = Math.floor(I.v); if (ts >= 0) { cx = mx; idx = Math.floor(I.v) + ts * ts * 8; }
+      if (!F.powered || ts < FP184 + .3) { const bu = F.powered ? clamp((ts - FP184) / .3) : 0; ctx.save(); ctx.globalAlpha *= 1 - bu; const hh = 12 + bu * 8; const ig = ctx.createLinearGradient(cx - 5, 0, cx + 5, 0); ig.addColorStop(0, '#2a2d34'); ig.addColorStop(.45, '#7a808c'); ig.addColorStop(1, '#1c1e24'); ctx.fillStyle = ig; ctx.beginPath(); ctx.roundRect(cx - 5, y - hh, 10, hh * 2, 2.5); ctx.fill(); ctx.strokeStyle = '#07080b'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.beginPath(); ctx.rect(cx - 5, y - hh, 10, hh * 2); ctx.clip(); const fr = idx % 1; for (let j = -2; j <= 2; j++) { const fy = y + (j - fr) * 8.5, cen = clamp(1 - Math.abs(fy - y) / 6); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(cx - 5, fy - 4.25); ctx.lineTo(cx + 5, fy - 4.25); ctx.stroke(); rune184(rk184(Math.floor(idx) + j), cx, fy, 2.6, 1, mix('#6a5040', '#fff0c0', cen), 1, cen > .5 ? E.sh : null); } ctx.restore(); glow184(cx, y, 10, .4, E.glow); }
+      if (o && Math.abs(o.t + .35) < .02) once('enC5k' + o.i, () => sparks184(a + 6, y - 10, 3, 30, 20, E.spark)); }
+    else { let jx = front + 7, gap = 12, h = .1; if (o && o.t < 0) { if (o.t < -.35) { jx = a + 7; h = clamp((o.t + .75) / .4) * .9; } else if (o.t < -.25) { jx = lerp(a + 7, G.sx(kH), sm185((o.t + .35) / .1)); h = .9; } else { jx = G.sx(kH); h = 1; gap = lerp(12, 7, eOut(clamp((o.t + .25) / .2))); } } else if (hitT >= 0 && hitT < .5) { jx = b - G.sw / 2; h = 1 - hitT * 1.6; gap = hitT < .15 ? 7 : lerp(7, 12, eOut((hitT - .15) / .35)); }
+      if (ts >= 0) { jx = lerp(jx, tip - 6, sm185(clamp(ts / .6))); h = Math.min(1, ts / FB184 * 1.1); gap = ts < FB184 * .8 ? 12 : 7; if (F.held) { gap = 7; h = 1; } if (F.powered) { gap = lerp(7, 18, eOut(clamp((ts - FP184) / .2))); h = 1 - clamp((ts - FP184) / .8); } }
+      const col = heat195(h); [-1, 1].forEach(s => { ctx.save(); ctx.fillStyle = col; ctx.strokeStyle = '#07080b'; ctx.lineWidth = 1; if (h > .4) { ctx.shadowColor = '#ff8030'; ctx.shadowBlur = h * 10; } ctx.beginPath(); ctx.roundRect(jx - 5, s > 0 ? y + gap - 1 : y - gap - 4, 10, 5, 1.5); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0; ctx.fillStyle = '#3a3e48'; ctx.fillRect(jx - 1, s > 0 ? y + gap + 4 : y - gap - 8, 2, 4); ctx.restore(); });
+      if (hitT >= 0 && hitT < .9) once('enD5s' + o.i, () => { for (let q = 0; q < 6; q++) spawn({ x: b - G.sw / 2 + (Math.random() - .5) * 8, y: y - 4, vx: (Math.random() - .5) * 12, vy: -12 - Math.random() * 14, g: -6, life: .9, size: 2 + Math.random() * 1.5, col: 'rgba(200,190,180,.35)' }); sparks184(b - G.sw / 2, y, 6, 50, 40, E.spark); }); }
+    if (kind === 'A') {}
+    if (F.held) glint185(tip - 1, y - 2, ts);
+    fireFin195(ts, tip, ux, y, E, 'en5' + kind); ctx.restore(); },
+  snd(o, v, n) { if (o.t >= -.7) once('en5a' + kind + o.i, () => ss184.hum(0, n, v * .45)); if (o.t >= 0) { once('en5b' + kind + o.i, () => ss184.knock(0, v)); if (kind === 'D') once('en5c' + o.i, () => noise(0, .35, .006 * v, 2400, .8, 'bandpass')); } },
+  fsnd: ts => fsnd184(ts, ts2 => { if (ts2 >= FP184) once('en5x', () => noise(0, .5, .012, 700, .6, 'lowpass')); }) }; }
+EN184.A = EN184.Clf; EN184.B = se195('B'); EN184.C = se195('C'); EN184.D = se195('D');
+
+// ========== Enchanting round 197: the unpicked Fire add-ons embers, runeflame, wave and the F1-F4 options (moved out 2026-11-19; heat stays) ==========
+  // E1 each skill-up: embers trail the snap, burst up on the hit and rain back onto the blade with tiny sizzles
+  embers(s) { const { o, b, y, smear, hitT, rx, gx, E } = s; if (smear > .2 && Math.random() < .8) spawn({ x: rx - 3 - Math.random() * 6, y: y + (Math.random() - .5) * 8, vx: -10 - Math.random() * 15, vy: -10 - Math.random() * 15, g: 20, life: .5, size: .9, col: Math.random() < .5 ? '#ffb040' : '#ff6a1a' });
+    if (o && o.t >= 0) once('ae1' + o.i, () => { for (let q = 0; q < 12; q++) spawn({ x: b - 4 + Math.random() * 6, y: y - 3, vx: (Math.random() - .5) * 70, vy: -50 - Math.random() * 50, g: 210, life: .75 + Math.random() * .2, size: 1 + Math.random() * .5, col: q % 3 ? '#ffb040' : '#fff0c0' }); });
+    if (o && hitT >= .35 && hitT < .8) for (let j = 0; j < 4; j++) if (Math.abs(hitT - (.4 + j * .1)) < .01) once('ae1s' + o.i + j, () => { const x = lerp(gx + 10, b, hash184(o.i * 7 + j)); spawn({ x, y: y - 5, size: 1, shape: 'ring', grow: 5, life: .25, col: '#ffd890' }); spawn({ x, y: y - 6, vx: 0, vy: -12, g: -4, life: .5, size: 1.6, col: 'rgba(200,190,180,.3)' }); }); },
+  // E3 each skill-up: a flame jets up from the new rune and stays dancing on it; the old one gutters out in a wisp when the next one lands
+  runeflame(s) { const { o, G, y, t, ts, hitT, I } = s; if (ts > .3) return; const kOf = lv => G.kOf(Math.max(I.lo, lv - 1e-3)), cur = o ? G.kOf(S.v0 + o.i) : kOf(I.v);
+    if (!o && I.v - I.lo < 1e-3) return; const kL = o && o.t < 0 ? kOf(S.v0 + o.i) : cur; let h = 9, x = G.sx(kL);
+    if (o && o.t < 0) { if (S.v0 + o.i - I.lo < 1e-3) return; h = 9 * clamp(-o.t / .4); if (o.t > -.05) once('ae3w' + o.i, () => spawn({ x, y: y - 6, vx: 0, vy: -14, g: -4, life: .7, size: 2, col: 'rgba(200,190,180,.35)' })); }
+    else if (o && hitT >= 0) h = hitT < .12 ? 18 * (hitT / .12) : lerp(18, 9, eOut(clamp((hitT - .12) / .4)));
+    if (ts >= 0) h *= clamp(1 - ts / .3); flame197(x, y - 2, h, 3.6, t, kL); if (h > 1) glow184(x, y - h * .4, 6 + h * .5, .35, '255,140,40'); },
+  // E4 the finale: a wall of flame sweeps from the guard to the point as the sword fires
+  wave(s) { const { ts, gx, tip, y, t } = s; if (ts < FP184 - .05 || ts > FP184 + .6) return; const u = clamp((ts - FP184 + .05) / .25), fx = lerp(gx, tip, eOut(u));
+    for (let x = gx + 4; x < fx; x += 6) { const d = (fx - x) / 70, h = 14 * Math.max(0, 1 - d) * clamp(1 - (ts - FP184 - .25) / .35); flame197(x, y - 5, h, 3, t, x); }
+    if (u < 1) glow184(fx, y, 16, .8, '255,150,50'); } };
+EN184.F1 = wrapAdd197('Ember rain (each skill-up)', 'A + Ember rain: embers trail the band’s snap; on the hit a burst of embers flies up from the new rune and rains back onto the blade, each landing with a tiny sizzle and a wisp.', ADDF197.embers);
+EN184.F2 = wrapAdd197('Heat bloom (each skill-up)', 'A + Heat bloom: on the hit the steel round the new rune blooms white-hot, spreads red and cools back to dark over a second; a faint warm afterglow stays on the steel just behind the band.', ADDF197.heat);
+EN184.F3 = wrapAdd197('Rune flame (each skill-up)', 'A + Rune flame: a flame jets up from the new rune and settles into a small flame dancing on it; when the next skill-up charges it gutters out in a wisp of smoke and the new rune takes the flame.', ADDF197.runeflame);
+EN184.F4 = wrapAdd197('Flame wave (finale)', 'A + Flame wave: as the sword fires, a wall of flame sweeps along the blade from the guard to the point, then falls back to the steady burn.', ADDF197.wave);
+
+// ========== Enchanting cleanup before round 201 (2026-11-19): round-196 band variations and PL195 entries, round-198 ringfire/trail/scorch and H0-H3, L0, L2, round-200 fountain/flash and K3, K4, K0 (moved out; Fire locked = flame ring .7 + heat + fireWave + flare) ==========
+function bandTilt196(rx, y, ry, spin, E, back, alpha, squash) { ctx.save(); ctx.translate(rx, y); ctx.rotate(.38 * LEAN195); ctx.translate(-rx, -y); bandClean194(rx, y, ry, spin, E, back, alpha, squash * (1 + .25 * LEAN195)); ctx.restore(); }
+function bandDouble196(rx, y, ry, spin, E, back, alpha, squash) { bandClean194(rx - 2.6, y, ry, spin, E, back, alpha * .9, squash * .85); bandClean194(rx + 2.6, y, ry, spin + .5, E, back, alpha * .9, squash * .85);
+  if (!back && alpha > 0) { ctx.save(); ctx.globalAlpha *= alpha; ctx.strokeStyle = E.ring; ctx.lineWidth = .8; [-ry, ry].forEach(dy => { ctx.beginPath(); ctx.moveTo(rx - 2.6, y + dy * .96); ctx.lineTo(rx + 2.6, y + dy * .96); ctx.stroke(); }); ctx.restore(); } }
+function bandCarry196(rx, y, ry, spin, E, back, alpha, squash) { bandClean194(rx, y, ry, spin, E, back, alpha, squash);
+  if (!back && CARRY195 && CARRY195.on && alpha > 0) { const b = Math.min(1, CARRY195.b); ctx.save(); ctx.globalAlpha *= alpha * (.55 + .45 * b); rune184(rk184(CARRY195.k), rx, y, 3.8, 1, mix(E.ring, '#ffffff', .5 * b), 1.3, E.sh); ctx.restore(); glow184(rx, y, 9, .3 + b * .4, E.glow); } }
+  clean2: { y: () => 0, s: .9, pre(gx, rx, y, E, G, held) { const x0 = G.sx(0) - G.sw * .45, x1 = Math.max(x0, rx - 2); if (x1 <= x0) return; ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+      ctx.strokeStyle = mix(E.rune, '#ffffff', .2); ctx.globalAlpha *= held ? .35 : .85; ctx.shadowColor = E.sh; ctx.shadowBlur = 3; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); ctx.shadowBlur = 0;
+      ctx.fillStyle = mix(E.rune, '#ffffff', .3); for (let k = 0; k < G.N - 1; k++) { const x = G.sx(k) + G.sw / 2; if (x > x1) break; ctx.beginPath(); ctx.moveTo(x, y - 1.6); ctx.lineTo(x + 1.2, y); ctx.lineTo(x, y + 1.6); ctx.lineTo(x - 1.2, y); ctx.closePath(); ctx.fill(); } ctx.restore(); } },
+  clean3: { y: k => k % 2 ? 2.9 : -2.9, s: .62 },
+  clean4: { y: () => 0, s: 1.05 } };
+SWD193.clean2 = SWD193.clean3 = SWD193.clean4 = swordClean194; BND193.clean2 = bandTilt196; BND193.clean3 = bandDouble196; BND193.clean4 = bandCarry196;
+EN184.A2 = se192('fire', 'clean2'); EN184.A3 = se192('fire', 'clean3'); EN184.A4 = se192('fire', 'clean4');
+const wrap196 = (Z, n, d) => ({ finAt: Z.finAt, name: n, desc: d, draw: Z.draw, snd: Z.snd, fsnd: Z.fsnd });
+EN184.A = wrap196(EN184.Clf, 'Clean band (round 194)', 'The current clean Fire runeblade: a crisp band slides along the blade and prints a rune on the center line each skill-up (charge, snap, hit, a pulse back to the gem).');
+EN184.A2 = wrap196(EN184.A2, 'Leaning band + script', 'Variation: the band leans into its slide (tilting forward as it snaps, straightening as it clamps), and the runes are joined by an engraved script line down the fuller with small diamond stops between them, so the blade reads as one inscription.');
+EN184.A3 = wrap196(EN184.A3, 'Double band, two rows', 'Variation: a double band (two rims joined top and bottom) prints smaller runes in two staggered rows along the upper and lower bevels, a denser, more ornate engraving.');
+EN184.A4 = wrap196(EN184.A4, 'Band carries the rune', 'Variation: the next rune glows inside the band as it waits and charges; on the hit the band hands it to the blade (it pops in at full brightness) and the band moves on empty until the next charge.');
+Object.assign(ADDF197, {
+  ringfire(s) { const { rx, y, t, ts, charge, hitT, powered } = s; if (powered) return; const burst = hitT >= 0 && hitT < .6 ? Math.exp(-hitT * 6) : 0;
+    for (let j = 0; j < 8; j++) { const an = j / 8 * 6.283 + t * .8, px = rx + Math.cos(an) * 3, py = y + Math.sin(an) * 10, top = Math.sin(an) < -.3, h = (3.5 + 6 * charge + 9 * burst) * (top ? .7 : 1) * (.8 + .2 * Math.sin(t * 11 + j * 2)); flame197(px, py, Math.min(h, top ? 8 : 14), 1.5 + burst, t, j * 3); }
+    if (burst > .2) glow184(rx, y, 16, burst * .8, '255,140,40'); },
+  trail(s) { const { I, G, y, t } = s; S.hits.forEach((h0, i) => { const aa = I.X(S.v0 + i) - 10, bb = I.X(S.v0 + i + 1), st = h0 + HIT - .3; if (S.age < st || S.age > st + 1.4) return;
+    for (let x = aa; x <= bb; x += 3.5) { const tp = st + .2 * clamp((x - aa) / Math.max(1, bb - aa)), age = S.age - tp; if (age < 0 || age > 1.1) continue; const f = Math.pow(1 - age / 1.1, 1.4), j = Math.floor(x);
+      flame197(x, y - 5.2, 6.5 * f * (.75 + .25 * hash184(j)), 1.6, t, j); flame197(x + 1.7, y + 6, 3.5 * f, 1.3, t, j + 7); if (age > .9 && age < .93) once('aet' + i + j, () => spawn({ x, y: y - 6, vx: (Math.random() - .5) * 8, vy: -14, life: .5, size: .8, col: '#ff8a30' })); } }); },
+  scorch(s) { const { I, G, y, gx, len, rx, ts } = s; const lastHit = {}; S.hits.forEach((h0, i) => { if (S.age >= h0 + HIT) lastHit[G.kOf(S.v0 + i)] = S.age - h0 - HIT; });
+    ctx.save(); ctx.translate(gx, y); bladePath194(len); ctx.clip(); ctx.translate(-gx, -y);
+    for (let k = 0; k < G.N; k++) { const x = G.sx(k); if (G.fr(k) <= 0 || x > (ts >= 0 ? gx + len : rx) - 2) continue; const r = Math.min(8.5, G.sw * .62);
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, .82); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, 'rgba(8,5,3,0)'); g.addColorStop(.55, 'rgba(8,5,3,0)'); g.addColorStop(.75, 'rgba(10,6,4,.55)'); g.addColorStop(1, 'rgba(10,6,4,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
+      const age = lastHit[k], rim = age === undefined ? .14 : .14 + .8 * Math.pow(clamp(1 - age / 1.5), 1.5); ctx.strokeStyle = `rgba(255,${Math.round(110 + 100 * (rim - .14))},40,${rim})`; ctx.lineWidth = .8; ctx.shadowColor = '#ff7a20'; ctx.shadowBlur = rim * 8; ctx.beginPath(); ctx.arc(0, 0, r * .72, 0, 7); ctx.stroke(); ctx.restore(); }
+    ctx.restore(); } });
+const both198 = fn => s => { ADDF197.heat(s); fn(s); };
+EN184.H0 = wrapAdd197('Heat bloom (fixed)', 'Heat bloom, fixed: on the hit the steel round the new rune blooms white-hot, spreads red and fades out fully over 1.6 s (every hit in a run blooms on its own); the warm afterglow is a rounded glow that wraps round the ring.', ADDF197.heat);
+EN184.H1 = wrapAdd197('Heat bloom + Ring of fire', 'Heat bloom + Ring of fire: the band catches fire; small flame tongues lick round it while it waits, flare up as it charges, and burst out on the hit before settling.', both198(ADDF197.ringfire));
+EN184.H2 = wrapAdd197('Heat bloom + Fire trail', 'Heat bloom + Fire trail: as the band snaps forward its path catches, a short run of flames along both edges behind it that burns down to embers over a second.', both198(ADDF197.trail));
+EN184.H3 = wrapAdd197('Heat bloom + Scorch halo', 'Heat bloom + Scorch halo: each new rune leaves a lasting dark soot halo on the steel with a thin glowing rim that cools; the enchanted stretch builds up a scorched, forged texture rune by rune.', both198(ADDF197.scorch));
+EN184.L2 = flame199('Living flame ring, stronger', 'Heat bloom + the living flame ring, stronger: the same, with a livelier ripple and taller licks at the top.', 1.4);
+EN184.L0 = wrapAdd197('Current ring (comparison)', 'Heat bloom with the current crisp ring, for comparison (with the edge-line fix).', ADDF197.heat);
+  fountain(s) { const { y } = s; hits200(s, .05, (u, ht, x, i) => once('a200f' + i, () => { for (let q = 0; q < 24; q++) { const an = -Math.PI / 2 + (Math.random() - .35) * 1.5, sp = 70 + Math.random() * 110; spawn({ x, y: y - 2, vx: Math.cos(an) * sp + 20, vy: Math.sin(an) * sp, g: 320, life: .55 + Math.random() * .35, size: .7 + Math.random() * .7, col: q % 4 ? '#ffc060' : '#fff4d0' }); } })); },
+  flash(s) { const { y, gx, len } = s; hits200(s, .3, (u, ht, x) => { const a = Math.pow(1 - u, 2); glow184(x, y + 4, 70, a * .45, '255,140,50');
+    ctx.save(); ctx.translate(gx, y); bladePath194(len); ctx.clip(); ctx.translate(-gx, -y); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(255,170,90,${a * .3})`; ctx.fillRect(gx - 2, y - 8, len + 4, 16); ctx.restore();
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; const r = 5 + eOut(u) * 10, g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(255,255,240,${a})`); g.addColorStop(.5, `rgba(255,190,110,${a * .6})`); g.addColorStop(1, 'rgba(255,120,40,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); }); } });
+EN184.K3 = hit200('Spark fountain (hit)', 'Locked base + Spark fountain: the hit throws a dense fan of bright molten sparks up and forward that arc and fall back past the blade.', ADDF197.fountain);
+EN184.K4 = hit200('Flash + firelight (hit)', 'Locked base + Flash and firelight: a white-hot flash at the contact point, the whole blade catches the light for an instant, and warm firelight flares on the space round the sword and dies down.', ADDF197.flash);
+EN184.K0 = hit200('Locked base (comparison)', 'The locked Fire base: the subtle living-flame ring and Heat bloom, no hit add-on.', () => {});
+
+// ========== moved out 2026-11-19 before round 202 for page room: Leatherworking r96/SET97/r97 (its locked whole is r97('C'), recorded in skillup.md), home184, Lightning S0-S4 options ==========
+function r96(K) { const F = FIN96[K], L = LW94.C, base = VAR21.Skinning.B;
+const V = { get finAt() { return F.finAt; }, shake: ADD93.B.shake,
+grow(p, x0, y, Ln, f, t, I) { const ts = ts95(); let cx = rollAt96(I, ts, F.R0); if (cx !== null && K === 'B') { const xs = pegXs95(I); /* the knocked-out pegs vanish just ahead of the roll */ cx = Math.max(cx, ...xs.filter((x, j) => ts >= F.R0 + clamp((x - 8 - I.x0 + 3) / (I.x1 - I.x0 + 6)) * .7).map(x => x + 3), cx); }
+if (cx === null) return base.grow(p, x0, y, Ln, f, t, I); ctx.save(); ctx.beginPath(); ctx.rect(Math.min(cx, I.x1 + 3), y - 12, I.x1 + 8 - Math.min(cx, I.x1 + 3), 24); ctx.clip(); base.grow(p, x0, y, Ln, f, t, I); ctx.restore();
+if (K === 'B' && cx > rollAt96(I, ts, F.R0) + .5) { const rx = rollAt96(I, ts, F.R0); hide83(rx, Math.min(cx, I.x1 + 2), y - 4.5, y + 4.5, '#b0784a', '#7a4e2a', 40); } },
+over(p, I) { L.over(p, I); ADD93.D.over(p, I); F.over(p, I); } };
+return { get name() { return K + '. ' + F.name; }, get desc() { return F.desc + ' (Pick “Reaching the next unlock”; the sound is a placeholder.)'; }, get note() { return 'finale: ' + F.name.toLowerCase() + '.'; },
+draw(top) { if (profName !== 'Leatherworking' || S.p !== LWB92) { profName = 'Leatherworking'; const keep = PROF.Leatherworking; PROF.Leatherworking = LWB92; try { const s = build(); s.age = S.age; S = s; } finally { PROF.Leatherworking = keep; } }
+const snd0 = S.p.snd; S.p.snd = () => {}; window.PEGAT94 = .42; try { barModule(top, 'A', V); } finally { S.p.snd = snd0; window.PEGAT94 = 0; } } }; }
+Object.assign(FAM, { PA: r96('B') }); delete FAM.PB;
+const SET97 = {
+A: { name: 'Soft leather', desc: 'Muted and woody: the hide pulls taut with a soft low rub; each peg a low wooden tok on a varied note (the bottom one a step lower); the scraps two faint pats; the finale’s toks climb a soft scale, a low thump on the icon and a warm two-note close.',
+taut: i => noise(0, .18, .012 * fat45(i), 350, .7, 'lowpass'),
+strike: (i, n) => { const v = fat45(i), d = pick45(i, 3) - n * 2; drum46(95 * semi(d / 3), 0, .022 * v); tone(196 * semi(d), 0, .008 * v, .14, 'triangle'); },
+scraps: i => { const v = fat45(i); noise(0, .03, .006 * v, 700, .8, 'lowpass', true); noise(.05, .03, .005 * v, 650, .8, 'lowpass', true); },
+ftok: j => { tone(220 * semi(PENT42[j % 10]), 0, .014, .2, 'triangle'); drum46(130, 0, .01); },
+big: () => { drum46(80, 0, .03); noise(0, .2, .01, 400, .7, 'lowpass'); },
+pay: () => { tone(196, 0, .02, .6, 'triangle'); tone(294, .08, .016, .6, 'triangle'); } },
+B: { name: 'Hide drum', desc: 'The pegged hide is a drum skin: the pull a faint brush on the skin; each peg a soft frame-drum tap with a little skin slap, the notes varied; the scraps a ghost tap; the finale a quick climbing drum roll, a deep tap on the icon and two low hits to close.',
+taut: i => noise(0, .15, .006 * fat45(i), 500, .8, 'bandpass'),
+strike: (i, n) => { const v = fat45(i), d = pick45(i, 3); drum46(120 * semi(d / 2) * (n ? .85 : 1), 0, .026 * v); noise(0, .03, .009 * v, 900, .8, 'lowpass', true); },
+scraps: i => drum46(220, .02, .005 * fat45(i)),
+ftok: j => drum46(100 * semi(PENT42[j % 10] / 2), 0, .02),
+big: () => { drum46(72, 0, .034); drum46(108, .06, .018); },
+pay: () => { drum46(90, 0, .025); drum46(135, .12, .02); } },
+C: { name: 'Wooden mallet + creak', desc: 'Workshop sounds: the hide pulls taut with a gentle leather creak; each peg a soft wooden mallet knock on a varied note; the scraps a faint rustle; the finale’s knocks climb the scale, a low knock on the icon and a soft two-note mallet close.',
+taut: i => { const v = fat45(i), d = pick45(i, 4); tone(150 * semi(d / 3), 0, .012 * v, .3, 'triangle', 172 * semi(d / 3)); noise(0, .25, .004 * v, 420, 3, 'bandpass'); },
+strike: (i, n) => { const v = fat45(i), d = pick45(i, 3) - n * 2; mallet(262 * semi(d), 0, .02 * v); },
+scraps: i => noise(0, .12, .006 * fat45(i), 800, .7, 'lowpass'),
+ftok: j => mallet(262 * semi(PENT42[j % 10]), 0, .022),
+big: () => { mallet(131, 0, .03); drum46(90, 0, .016); },
+pay: () => { mallet(196, 0, .024); mallet(294, .1, .02); } },
+D: { name: 'Plucked lace', desc: 'Like a taut leather lace being plucked: the pull a soft stretching breath; each peg a low pluck on a varied note (the bottom one a fifth below); the scraps a soft pat; the finale’s plucks climb the scale, a deep pluck on the icon and a low pluck with its fifth to close.',
+taut: i => noise(0, .25, .007 * fat45(i), 500, .6, 'lowpass'),
+strike: (i, n) => { const v = fat45(i), d = pick45(i, 3); pluck(110 * semi(d - n * 7), .018 * v); },
+scraps: i => noise(0, .04, .006 * fat45(i), 650, .8, 'lowpass', true),
+ftok: j => pluck(110 * semi(PENT42[j % 10]), .018),
+big: () => { pluck(73, .03); drum46(90, 0, .018); },
+pay: () => { pluck(110, .025); pluck(165, .02, .1); } },
+};
+function r97(K) { const Z = SET97[K], B = r96('B');
+return { get name() { return K + '. ' + Z.name; }, get desc() { return 'The locked look (Pegged out, strike streaks, scraps; finale One sweep) with a sound set: ' + Z.desc + ' Long sessions: notes vary and after two in a row each is a step quieter. (Sound on; try all three moments.)'; },
+get note() { return 'sound: ' + Z.name.toLowerCase() + '.'; },
+draw(top) { window.SND97 = Z; try { if (S && S.p === LWB92) S.hits.forEach((h, i) => { if (S.age >= h + HIT + .1) once('lw97t' + i, () => Z.taut(i)); }); B.draw(top); } finally { window.SND97 = null; } } }; }
+{ const D97 = r97('C'); Object.assign(FAM, { PA: { get name() { return 'A. Leatherworking (done)'; }, get desc() { return 'DONE: ' + D97.desc; }, get note() { return D97.note; }, draw: top => D97.draw(top) } }); } delete FAM.PB; delete FAM.PC; delete FAM.PD;
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching')); if (b) b.click(); }, 60);
+setTimeout(() => { profName = 'Leatherworking'; if (typeof sync === 'function') { sync(); play(); } }, 0);
+setTimeout(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Five in a row')); if (b) b.click(); }, 0);
+// arrival path into the icon: from (x, y) up to a lift, then curving in
+function home184(x, y, lx, ly, ux, uy, u1, u) { if (u < u1) { const e = eOut(u / u1); return { x: lerp(x, lx, e), y: lerp(y, ly, e) }; } const e = clamp((u - u1) / (1 - u1)), e2 = e * e, cx = (lx + ux) / 2, cy = Math.min(ly, uy) - 8;
+  return { x: (1 - e2) * (1 - e2) * lx + 2 * (1 - e2) * e2 * cx + e2 * e2 * ux, y: (1 - e2) * (1 - e2) * ly + 2 * (1 - e2) * e2 * cy + e2 * e2 * uy }; }
+EN184.S0 = storm201('Storm ring + Charge glow', 'The Lightning base: the band is a living storm ring (its outline shimmers fast and flickers, small arcs jump off it), and each skill-up the steel round the new rune flashes blue-white and crackles, fading over a second (the counterpart of Heat bloom).', () => {});
+EN184.S1 = storm201('+ Arc burst (hit)', 'Base + Arc burst: on the hit three or four arcs leap from the contact point, forward onto the bare steel and back onto the last two runes, and flicker out.', ADDF197.arcBurst);
+EN184.S2 = storm201('+ Chain to the gem (hit)', 'Base + Chain to the gem: on the hit the charge hops rune to rune back down the blade, one arc after another, and the guard’s gem flares when it arrives.', ADDF197.chain);
+EN184.S3 = storm201('+ Static shockwave (hit)', 'Base + Static shockwave: the hit’s shockwave is a ring of short arcs that expands from the band and fades.', ADDF197.staticWave);
+EN184.S4 = storm201('+ Spark crawl (each skill-up)', 'Base + Spark crawl: for a second after each hit, small arcs crawl along the blade’s edges behind the band.', ADDF197.crawl);
+
+// ========== Enchanting rounds 201-202, replaced Lightning code (moved out 2026-11-19; Lightning locked = Z1): bandStorm201, the round-201 arcBurst/chain/staticWave/crawl, BASE201/storm201, OLD202, Z2, Z0 ==========
+let STORMAMP201 = 1;
+function bandStorm201(rx, y, ry, spin, E, back, alpha, squash) { if (alpha <= 0) return; const T = S.age, amp = STORMAMP201, rxx = ry * .3 * squash, a0 = back ? Math.PI * .5 : -Math.PI * .5, a1 = back ? Math.PI * 1.5 : Math.PI * .5, fl = .75 + .25 * Math.sin(T * 53) * Math.sin(T * 31);
+  const path = () => { ctx.beginPath(); for (let i = 0; i <= 28; i++) { const th = lerp(a0, a1, i / 28), w = 1 + amp * (.07 * Math.sin(3 * th + T * 31) + .05 * Math.sin(7 * th - T * 47)), px = rx + Math.cos(th) * rxx * w, py = y + Math.sin(th) * ry * w; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } };
+  ctx.save(); ctx.globalAlpha *= alpha * (back ? .5 : fl); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  path(); ctx.strokeStyle = 'rgba(90,170,255,.5)'; ctx.lineWidth = back ? 2.6 : 4; ctx.shadowColor = '#6ac4ff'; ctx.shadowBlur = back ? 2 : 8; ctx.stroke(); ctx.shadowBlur = 0;
+  path(); ctx.strokeStyle = '#8ad4ff'; ctx.lineWidth = back ? 1.4 : 2; ctx.stroke(); if (!back) { path(); ctx.strokeStyle = 'rgba(240,250,255,.95)'; ctx.lineWidth = .8; ctx.stroke(); }
+  ctx.restore();
+  if (!back) { const n = Math.floor(T * 14); for (let j = 0; j < 2; j++) { if (hash184(n * 3 + j) > .55 * amp) continue; const th = -Math.PI / 2 + (hash184(n + j * 9) - .5) * 2.6, px = rx + Math.cos(th) * rxx, py = y + Math.sin(th) * ry, d = 5 + hash184(n * 7 + j) * 5; bolt191(px, py, px + Math.cos(th) * d + 2, py + Math.sin(th) * d, 3, .7, E, n + j); } } }
+  // hit: three or four arcs leap from the contact point, forward onto bare steel and back onto the last runes
+  arcBurst(s) { const { y, G, E } = s; hits200(s, .35, (u, ht, x, i) => { const k = G.kOf(S.v0 + i), tg = [[x + 14, y - 5], [x + 20, y + 4], [G.sx(Math.max(0, k - 1)), y - 3], [G.sx(Math.max(0, k - 2)), y + 3]]; ctx.save(); ctx.globalAlpha *= Math.pow(1 - u, 1.2); tg.forEach((p, j) => bolt191(x, y, p[0], p[1], 7, 1.1, E, i * 9 + j)); ctx.restore(); glow184(x, y, 14, (1 - u) * .8, E.glow); }); },
+  // hit: the charge hops rune to rune back to the guard's gem, one arc after another, and the gem flares
+  chain(s) { const { y, G, E, gx } = s; hits200(s, .55, (u, ht, x, i) => { const k = G.kOf(S.v0 + i), pts = [x]; for (let j = k; j >= 0; j--) pts.push(G.sx(j)); pts.push(gx - 3); const n = pts.length - 1, head = u * 1.25 * n;
+    for (let j = 0; j < n; j++) { const age = head - j; if (age < 0 || age > 1.6) continue; ctx.save(); ctx.globalAlpha *= clamp(1 - age / 1.6); bolt191(pts[j], y - 1, pts[j + 1], y - 1, 5, 1, E, i * 31 + j); ctx.restore(); }
+    if (head >= n && head < n + 1.6) glow184(gx - 3, y, 14, clamp(1 - (head - n) / 1.6), E.glow); }); },
+  // hit: a crackling ring of arcs expands from the band and fades
+  staticWave(s) { const { y, E } = s; hits200(s, .45, (u, ht, x, i) => { const rx = 3 + eOut(u) * 16, ry = 10 + eOut(u) * 9; ctx.save(); ctx.globalAlpha *= Math.pow(1 - u, 1.3);
+    for (let j = 0; j < 8; j++) { const a0 = j / 8 * 6.283, a1 = (j + 1) / 8 * 6.283; bolt191(x + Math.cos(a0) * rx, y + Math.sin(a0) * ry, x + Math.cos(a1) * rx, y + Math.sin(a1) * ry, 2.5, .8, E, i * 17 + j); } ctx.restore(); }); },
+  // each skill-up: for a second after the hit, small arcs crawl along the blade's edges behind the band
+  crawl(s) { const { y, E, gx, I } = s; S.hits.forEach((h0, i) => { const ht = S.age - h0 - HIT; if (!(ht >= 0 && ht < 1.1)) return; const xe = I.X(S.v0 + i + 1), n = 3; for (let j = 0; j < n; j++) { const sd = Math.floor(S.age * 16) * 5 + j * 3 + i, x0 = lerp(gx + 4, xe - 6, hash184(sd)), side = hash184(sd + 1) < .5 ? -1 : 1;
+    ctx.save(); ctx.globalAlpha *= clamp(1 - ht / 1.1) * .9; bolt191(x0, y + side * 5, x0 + 6 + hash184(sd + 2) * 8, y + side * 5.5, 2, .6, E, sd); ctx.restore(); } }); } });
+const BASE201 = se192('storm', 'cleanS');
+const storm201 = (n, d, fn) => ({ finAt: BASE201.finAt, name: n, desc: d, draw(I, y, t, ts) { window.ADD197 = s => { ADDF197.charge(s); fn(s); }; try { BASE201.draw(I, y, t, ts); } finally { window.ADD197 = null; } }, snd: BASE201.snd, fsnd: BASE201.fsnd });
+EN184.Z2 = zap202('Lightning, new sparks, intense', 'The same, more intense: more and longer discharges off the ring, more branches, wider arcs in the burst.', 1.6);
+EN184.Z0 = { finAt: BASE201.finAt, name: 'Lightning, old sparks (comparison)', desc: 'Lightning as kept, with the round-201 electricity: single re-rolling curves, no branches, no strike.', draw(I, y, t, ts) { window.ADD197 = s => { ADDF197.charge(s); OLD202.arc(s); OLD202.chain(s); OLD202.crawl(s); }; try { BASE201.draw(I, y, t, ts); } finally { window.ADD197 = null; } }, snd: BASE201.snd, fsnd: BASE201.fsnd };
+
+// ========== Leatherworking helpers (tok90 .. FIN96) moved out 2026-11-19 for page room (ts95 stays) ==========
+const tok90 = (v = 1) => { if (window.SND97) return; drum46(150, 0, .026 * v); tone(330, 0, .008 * v, .12, 'triangle'); };
+PROF.Leatherworking.v = 124;
+let PEGDY91 = null;
+function mallet91(x, y, ang) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.strokeStyle = '#6a4424'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(13, -9); ctx.stroke();
+const g = ctx.createLinearGradient(-4, -3, 4, 3); g.addColorStop(0, '#c8946a'); g.addColorStop(1, '#6e4422'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-4.5, -3, 9, 6, 2); ctx.fill(); ctx.restore(); }
+const SC91 = ['#c89a6a', '#a87444', '#e0b480'];
+const LWB92 = Object.assign({}, PROF.Leatherworking, { span: [120, 125], v: 122, five: 120, unlockV: 124, caps: undefined,
+unlocks: [[125, 'Hillman’s Leather Vest', '\u{1F9BA}'], [130, 'Fine Leather Gloves', '\u{1F9E4}'], [135, 'Guardian Pants', '\u{1F456}'], [140, 'Barbaric Shoulders', '\u{1F9E5}']] });
+const pegs93 = I => S.hits.map((h, i) => ({ i, t: S.age - h - HIT, a: I.X(S.v0 + i), b: I.X(S.v0 + i + 1) })).filter(o => o.t > -.3 && o.t < 1.2);
+const ADD93 = {
+B: { name: '+ Mallet taps the pegs', desc: 'Each skill-up a small mallet taps the new pegs in: the top one, then the bottom one, a soft tok each, the hide jolting taut with each tap.',
+over(p, I) { const y = I.ly; pegs93(I).forEach(o => { if (o.t < -.1 || o.t > .45) return; const at = (t0, sy) => { const d = o.t < t0 ? 1 - clamp((o.t - t0 + .12) / .12) : clamp((o.t - t0) / .12); mallet91(o.b + 1, y + sy * (8 + d * 9), sy < 0 ? -.2 - d * .5 : Math.PI + .2 + d * .5); }; if (o.t < .16) at(.06, -1); else at(.24, 1); if (o.t >= .24) once('lw93b' + o.i, () => tok90(.7)); }); },
+shake(I) { const o = pegs93(I).pop(); if (!o) return [0, 0]; const k = [.42, .6].reduce((s, t0) => s + (o.t >= t0 && o.t < t0 + .1 ? 1 - (o.t - t0) / .1 : 0), 0); return [0, 1.2 * k]; } },
+D: { name: '+ Scraps trimmed off', desc: 'Each skill-up, as the hide pulls taut to the new pegs, the loose excess at the front is trimmed off: a few leather scraps drop away below the bar, tumbling, and fade.',
+over(p, I) { pegs93(I).forEach(o => { if (o.t < .72) return; once('lw93d' + o.i, () => { [[-1, .9], [1, 1], [1, .7], [-1, .6], [1, .5]].forEach(([sy, s], k) => spawn({ x: o.b + 2 + k, y: I.ly + sy * 5, vx: 8 + Math.random() * 25, vy: sy < 0 ? -30 : 10 + Math.random() * 20, g: 260, life: .85, size: 1.6 * s, shape: 'sq', vr: (Math.random() - .5) * 14, col: SC91[k % 3] })); if (window.SND97) SND97.scraps(o.i); else noise(0, .05, .01, 600, .8, 'lowpass', true); }); }); } },
+};
+const hit94 = (x, y) => spawn({ x, y, size: 1.5, shape: 'ring', grow: 7, life: .25, col: 'rgba(255,236,200,.9)' });
+const LW94 = {
+C: { name: 'Strike only + scraps', desc: 'No mallet at all: each peg gets a quick bright swing streak arcing down onto it and a white impact ring, a soft tok, the peg squashing in. The trimmed scraps drop away as before.',
+over(p, I) { const y = I.ly; pegs93(I).forEach(o => [[.42, -1], [.6, 1]].forEach(([tc, sy], n) => { const u = (o.t - tc + .06) / .06; if (u > 0 && u < 1.6) { const a = clamp(1.6 - u) / 1.6, x = o.b, cx = x + 16, cy = y + sy * 12, r = 17, a0 = Math.PI + sy * .95 * (1 - clamp(u)), a1 = Math.PI + sy * .95;
+ctx.strokeStyle = `rgba(255,240,210,${.7 * a})`; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, cy, r, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke(); ctx.lineCap = 'butt'; }
+if (o.t >= tc) once('lw94c' + o.i + n, () => { tok90(.7); if (window.SND97) SND97.strike(o.i, n); hit94(o.b, y + sy * 6.5); spawn({ x: o.b, y: y + sy * 6.5, size: 1, shape: 'ring', grow: 12, life: .35, col: '#ffffff' }); }); })); } },
+};
+const F0_95 = .8;
+const ts95 = () => S.closeAt === undefined ? -1 : S.age - S.closeAt;
+function streak95(x, y, sy, u, k = 1) { if (u <= 0 || u >= 1.6) return; const a = clamp(1.6 - u) / 1.6, cx = x + 16 * k, cy = y + sy * 12 * k, a0 = Math.PI + sy * .95 * (1 - clamp(u)), a1 = Math.PI + sy * .95;
+ctx.strokeStyle = `rgba(255,240,210,${.75 * a})`; ctx.lineWidth = 2 * k; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, cy, 17 * k, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke(); ctx.lineCap = 'butt'; }
+const pegXs95 = I => { const o = []; for (let v = I.lo + 1; v <= S.nx.lv; v++) o.push(I.X(v)); return o; };
+delete FAM.PC; delete FAM.PD;
+function roll96(I, rx, hop, ang) { const y = I.ly, rolled = rx - I.x0, r = Math.min(8, 2.5 + rolled * .028), ux = I.x1 + 18, cx = lerp(rx, ux, eOut(hop)), cy = lerp(y + 5 - r, y, hop) - Math.sin(Math.PI * hop) * 14, sc = 1 - hop * .6; if (hop >= 1) return;
+ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(1, r + .5, r * .9, 1.4, 0, 0, 7); ctx.fill();
+const g = ctx.createRadialGradient(-r * .35, -r * .4, .5, 0, 0, r); g.addColorStop(0, '#d8a874'); g.addColorStop(.6, '#9a6a3e'); g.addColorStop(1, '#4a2c14'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
+ctx.strokeStyle = 'rgba(60,32,12,.75)'; ctx.lineWidth = .9; ctx.beginPath(); for (let a = 0; a < 5 * Math.PI; a += .2) { const rr = r * (.15 + .8 * a / (5 * Math.PI)); ctx.lineTo(Math.cos(a + ang) * rr, Math.sin(a + ang) * rr); } ctx.stroke(); ctx.restore(); }
+const popPeg96 = (x, y, j) => [-1, 1].forEach(sy => spawn({ x, y: y + sy * 5, vx: 10 + Math.random() * 30, vy: sy * (40 + Math.random() * 30) - 20, g: 300, life: .7, size: 1.4, shape: 'sq', vr: 10, col: '#5a3a1e' }));
+const strikePeg96 = (x, y, u) => { streak95(x, y - 6.5, -1, u); streak95(x, y + 6.5, 1, u); };
+const toks96 = j => { if (window.SND97) return SND97.ftok(j); tone(300 * semi(PENT42[j % 10]), 0, .014, .18, 'triangle'); drum46(140, 0, .012); };
+const bigStrike96 = (I, ts, tb) => { const ux = I.x1 + 18, y = I.ly; streak95(ux, y, -1, (ts - tb + .08) / .08, 1.6); if (ts >= tb) once('lw96big', () => { spawn({ x: ux, y, size: 3, shape: 'ring', grow: 18, life: .45, col: '#ffffff' }); if (window.SND97) SND97.big(); else drum46(105, 0, .028); }); };
+const rollAt96 = (I, ts, R0, D = .7) => ts < R0 ? null : lerp(I.x0 - 3, I.x1 + 3, clamp((ts - R0) / D));
+const FIN96 = {
+B: { name: 'One sweep', R0: F0_95, desc: 'One pass: the hide rolls up from the start while a strike streak lands on each peg pair just ahead of the roll and knocks it out (a ring, a tok climbing a soft scale, the pegs flying off); at the end the roll hops off into the recipe icon as one big streak lands on it, and the icon lights.',
+get finAt() { return this.R0 + 1.2; },
+over(p, I) { const ts = ts95(); if (ts < F0_95) return; const y = I.ly, xs = pegXs95(I), R0 = FIN96.B.R0, rx = rollAt96(I, ts, R0);
+xs.forEach((x, j) => { const t0 = R0 + clamp((x - 8 - I.x0 + 3) / (I.x1 - I.x0 + 6)) * .7; strikePeg96(x, y, (ts - t0 + .06) / .06); if (ts >= t0) once('lw96b' + j, () => { hit94(x, y - 6.5); hit94(x, y + 6.5); toks96(j); popPeg96(x, y, j); }); });
+bigStrike96(I, ts, R0 + 1.1); roll96(I, rx, clamp((ts - R0 - .75) / .4), (rx - I.x0) / 5 + clamp((ts - R0 - .75) / .4) * 8); } },
+};
+
+// ========== Enchanting round 203 options R1, R2, R5 and the ripple/glints/runeWave add-ons were not picked (R3 echo and R4 stream kept); option lines moved out 2026-11-19 ==========
+EN184.R1 = arc203('+ Ripple (hit)', 'Base + Ripple: on the hit three thin rings ripple out from the contact point one after another and fade.', ADDF197.ripple);
+EN184.R2 = arc203('+ Glint burst (hit)', 'Base + Glint burst: the hit sprays a ring of four-point star glints that spin and twinkle out.', ADDF197.glints);
+EN184.R3 = arc203('+ Rune echo (hit)', 'Base + Rune echo: a ghost of the new rune lifts off the blade, growing as it rises, and fades.', ADDF197.echo);
+EN184.R4 = arc203('+ Mana stream (hit)', 'Base + Mana stream: a stream of mana flows from the new rune back down the fuller into the guard’s gem, which flares.', ADDF197.stream);
+EN184.R5 = arc203('+ Rune wave (each skill-up)', 'Base + Rune wave: after each hit a shimmer runs back along the earlier runes toward the guard, each rune flaring as it passes.', ADDF197.runeWave);
+
+// ========== Enchanting rounds 203-204 unpicked Arcane add-ons (ripple, glints, runeWave, blink, trail), Q options, BASE197/wrapAdd197, Clf/A (moved out 2026-11-19; Arcane locked = kept + missiles + prism) ==========
+EN184.Clf = se192('fire', 'clean');
+EN184.A = EN184.Clf;
+const BASE197 = se192('fire', 'clean');
+const wrapAdd197 = (n, d, fn) => ({ finAt: BASE197.finAt, name: n, desc: d, draw(I, y, t, ts) { window.ADD197 = fn; try { BASE197.draw(I, y, t, ts); } finally { window.ADD197 = null; } }, snd: BASE197.snd, fsnd: BASE197.fsnd });
+  // hit: three thin rings ripple out from the contact point one after another, like a stone dropped in still water
+  ripple(s) { const { y, E } = s; hits200(s, .7, (u, ht, x) => { for (let j = 0; j < 3; j++) { const v = (ht - j * .1) / .55; if (v <= 0 || v >= 1) continue; ctx.save(); ctx.strokeStyle = j ? E.ring : '#ffffff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 6; ctx.globalAlpha *= Math.pow(1 - v, 1.5); ctx.lineWidth = 1.4 * (1 - v) + .4; ctx.beginPath(); ctx.ellipse(x, y, 3 + eOut(v) * 18, 9 + eOut(v) * 10, 0, 0, 7); ctx.stroke(); ctx.restore(); } }); },
+  // hit: a burst of star glints sprays out from the band and twinkles out
+  glints(s) { const { y } = s; hits200(s, .05, (u, ht, x, i) => once('a203g' + i, () => { for (let q = 0; q < 12; q++) { const an = q / 12 * 6.283 + Math.random() * .4, sp = 40 + Math.random() * 50; spawn({ x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp * .7 - 10, g: 30, life: .6 + Math.random() * .3, size: 2.4 + Math.random() * 1.6, shape: 'star', vr: (Math.random() - .5) * 8, col: q % 3 ? '#d8c0ff' : '#ffffff' }); } })); },
+  // each skill-up: after the hit a shimmer runs back along the earlier runes, each flaring as it passes
+  runeWave(s) { const { y, G, E, gx } = s; hits200(s, .8, (u, ht, x, i) => { const k0 = G.kOf(S.v0 + i), wx = lerp(G.sx(k0), gx, u), rs = Math.min(4.2, G.sw * .3); for (let k = 0; k < k0; k++) { const d = Math.abs(G.sx(k) - wx), b = clamp(1 - d / 10); if (b <= 0) continue; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= b; rune184(rk184(k), G.sx(k), y, rs, 1, '#f4ecff', 1.3, E.sh); ctx.restore(); } }); } });
+  // the band blinks: it vanishes mid-snap leaving a fading afterimage where it stood, and reappears at its new spot in a flash
+  blink(s) { const { y, I, E } = s; const o = snap204(); if (!o || o.t < -.3 || o.t > .1) return; const a = I.X(S.v0 + o.i), b = I.X(S.v0 + o.i + 1);
+    if (o.t < -.12) { const u = (o.t + .3) / .18; ctx.save(); ctx.globalAlpha *= 1 - u; ctx.strokeStyle = '#d8c4ff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 8; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.ellipse(a, y, 3 * (1 - u * .6), 10 * (1 + u * .3), 0, 0, 7); ctx.stroke(); ctx.restore(); glow184(a, y, 10 * (1 - u), (1 - u) * .7, E.glow); }
+    else { const u = (o.t + .12) / .22; glow184(b, y, 16, (1 - u) * 1.1, '230,215,255'); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 10; ctx.globalAlpha *= 1 - u; star4(b, y, 4 + u * 6, u * 2); ctx.restore(); } },
+  // the band leaves a trail of tiny star glints along its path that linger and twinkle out
+  trail(s) { const { y, I } = s; S.hits.forEach((h0, i) => { const tt = S.age - h0 - HIT, a = I.X(S.v0 + i) - 8, b = I.X(S.v0 + i + 1); if (tt < -.3 || tt > 1.2) return;
+    for (let x = a, j = 0; x <= b; x += 3, j++) { const tp = -.3 + .2 * clamp((x - a) / Math.max(1, b - a)), age = tt - tp; if (age < 0 || age > .9) continue; const u = age / .9, tw = .5 + .5 * Math.sin(S.age * 14 + j * 2.3), yy = y + (hash184(i * 17 + j) - .5) * 14 - u * 5;
+      ctx.save(); ctx.globalAlpha *= (1 - u) * (.4 + .6 * tw); ctx.fillStyle = j % 3 ? '#e0d0ff' : '#ffffff'; ctx.shadowColor = '#b890ff'; ctx.shadowBlur = 5; star4(x, yy, 1.2 + 1.8 * hash184(j + i), S.age * 3 + j); ctx.restore(); } }); } });
+EN184.Q0 = arc204('Arcane as kept', 'Arcane as kept: the mana-weave ring, Arcane surge, Rune echo and Mana stream.', () => {});
+EN184.Q1 = arc204('+ Blink (the snap)', 'Kept + Blink: instead of sliding, the band blinks: it vanishes mid-snap leaving a fading afterimage where it stood and reappears at its new spot in a flash and a star glint.', ADDF197.blink, true);
+EN184.Q2 = arc204('+ Arcane missiles (the charge)', 'Kept + Arcane missiles: while the band charges, three small arcane missiles fly from the guard’s gem along the blade into it, one after another, each landing with a little flash.', ADDF197.missiles);
+EN184.Q3 = arc204('+ Prismatic split (hit)', 'Kept + Prismatic split: on the hit the new rune splits into three coloured copies (rose, ice blue, violet) that drift apart and recombine.', ADDF197.prism);
+EN184.Q4 = arc204('+ Star trail (the snap)', 'Kept + Star trail: as the band snaps forward it leaves a trail of tiny star glints along its path that linger and twinkle out.', ADDF197.trail);
+
+// ========== the page's full-line comments, as they stood 2026-11-19 (stripped from skillup-p2.html for room; line numbers are the page's at the time) ==========
+// [2586]// ---------- round 118 (2026-11-17): Tailoring, the base. Brainstorm first (whole stories, the bar is an object, mode 'X'); picked: A Clothesline, B Cloth bolt unrolls, C Clothes rack,
+// [2587]// D Measuring tape, E Loom weaving. Avoid the ring's spool and plucked thread. The bar counts to the next recipe (the gap switch works here too). Finales come later ----------
+// [2591]// ---------- round 184 (2026-11-19): Enchanting, the base. Picked from two pitches: B Runed rod, C Dust to arcane glass, F Vellum scroll,
+// [2592]// G Runestone frame. Avoid the ring's motes drawing shapes and the moon. Mode 'X'; the bar counts to the next recipe (gap switch).
+// [2593]// Finales sketched on the formula (build-up, held beat, payoff, aftermath); sounds are soft placeholders ----------
+// [2602]// the level shown by the scene: the point counts in from s0 (seconds before the landing) to the landing
+// [2605]// runes: straight strokes in a -1..1 box; drawn up to a portion q; returns the pen point
+// [2630]// ---------- round 185 (2026-11-19): Enchanting, more ideas around the two the user likes (dust as the material, the vellum). C and F stay as
+// [2631]// they were; new: I Essence rolls the dust, J Dust through a stencil, L Dust brush stroke. B and G moved to the old-rounds file ----------
+// [2638]// ---------- round 191 (2026-11-19): Enchanting, the picked base SE (a ring of runes slides along a broadsword, printing runes). The user: like
+// [2639]// Cooking's ingredients, each finished sword gets its own element with its own finale: arcane (violet), fire (red-orange), lightning (light blue).
+// [2640]// The element changes only after a finale (at random, never the same twice). Lightning is drawn as smooth arcs, no zig-zags ----------
+// [2649]// fire tongues along the blade's edges (soft teardrops, flickering, rising)
+// [2653]// ---------- round 192 (2026-11-19): SE v2, a pass on look, cohesion and the skill-up's impact (the user: "currently there really isn't one").
+// [2654]// Self-critique of v1: the ring just glides (no beat), the ring is a thin outline, the sword is flat and floats, the enchanted part of the blade
+// [2655]// looks like bare steel. v2: a beveled sword with a shaped guard and a shadow; the enchanted stretch carries the element's tint and a charged line;
+// [2656]// a solid rune band; each skill-up charges, snaps forward, clamps and hits (hit-stop, squash, shockwave, sparks, a jolt, a pulse back to the guard) ----------
+// [2664]    // the beat of a skill-up
+// [2681]    // charge sparks drawn into the band; the smear of the snap; the shockwave of the hit
+// [2704]// ---------- round 193 (2026-11-19): two whole sword looks on v2's beat (the user: the impact is good, "nothing visually changed design wise").
+// [2705]// Dark runeblade: blackened steel, element lines along the edges as the enchantment spreads, an angular iron guard with a big gem.
+// [2706]// Icon style: drawn like a WoW inventory icon (thick dark outline, flat two-tone shading, a bold highlight, chunky); the ring is a set of rune stones ----------
+// [2707]// the icon-style ring: rune stones orbiting the blade (the back ones behind it, smaller and dimmer)
+// [2714]// ---------- round 194 (2026-11-19): the Dark runeblade picked; the user: "heavily clean up the design"; Fire only for now. Clean pass: a crisp
+// [2715]// slimmer silhouette with a faceted point and one bevel line, no shadow blob, no tinted wash (the enchanted stretch shows as thin element
+// [2716]// edge lines and the runes), crisp bright runes without dark grooves or glow halos, a readable iron hilt (straight guard with angled tips,
+// [2717]// a socketed gem, a banded grip, a round pommel), a crisp ring band with little bloom ----------
+// [2728]  // the edges: a faint steel line all along; the element's line on the enchanted stretch
+// [2731]  // the hilt
+// [2742]// ---------- round 196 (2026-11-19): the clean band (A) stays the base; three variations of it, Fire only. A2 the band leans into its slide
+// [2743]// and the runes are joined by an engraved script line down the fuller; A3 a double band prints runes in two staggered rows along the bevels;
+// [2744]// A4 the band carries the next rune glowing inside it and hands it to the blade on the hit ----------
+// [2747]// ---------- round 197 (2026-11-19): A is the base ("we can easily do add-ons"); add-ons per element, Fire first. Each option is A + one add-on,
+// [2748]// labelled with its moment (each skill-up or the finale), to mix and match. Hook: se192 calls window.ADD197(state) at the end of its draw ----------
+// [2752]  // E2 each skill-up: the steel round the new rune blooms red-hot and cools; a faint warm afterglow stays near the front
+// [2760]// ---------- round 198 (2026-11-19): Fire add-ons, each skill-up. Heat bloom kept (fixed: a rounded glow that wraps the ring instead of a square
+// [2761]// that ends before it; every recent hit blooms and fades out fully over 1.6 s). New, each stacked on Heat bloom: Ring of fire, Fire trail,
+// [2762]// Scorch halo. Finales come after the add-ons for each element ----------
+// [2763]// ---------- round 199 (2026-11-19): the user's idea: the ring ripples slightly like a living flame. Fixed too: the glowing edge lines ended flat at the
+// [2764]// ring (the square edge seen while it moves); they now fade out over the last 18 px into it ----------
+// [2776]// ---------- round 200 (2026-11-19): Fire locked so far: the subtle living-flame ring + Heat bloom. The user wants add-ons for the skill-up hit.
+// [2777]// Four hit add-ons, each on the locked base: Fire shockwave, Flame flare, Spark fountain, Flash + firelight ----------
+// [2791]// ---------- round 201 (2026-11-19): Lightning, the same way as Fire. Base: a living storm ring (the band shimmers and crackles, small arcs
+// [2792]// jump off it) + Charge glow on each skill-up (the counterpart of Heat bloom). Hit add-ons: Arc burst, Chain to the gem, Static shockwave;
+// [2793]// each skill-up add-on: Spark crawl. Arcs are smooth curves, never zig-zags ----------
+// [2796]  // each skill-up: the steel round the new rune flashes blue-white and crackles, then fades over 1.2 s (the counterpart of Heat bloom)
+// [2803]// ---------- round 202 (2026-11-19): Lightning kept: the storm ring + Charge glow, Arc burst, Chain to the gem, Spark crawl. The user: improve the
+// [2804]// electricity itself on the storm ring and the arc burst. bolt202: an arc that bends irregularly through several points on a smooth path
+// [2805]// (tapered ends, no zig-zags), forks into thin branches, strikes from its source (grows in ~40 ms), flickers and re-strikes on a new path,
+// [2806]// drawn in three layers (a wide blue glow, a blue body, a white-hot core) ----------
+// [2817]// the storm ring: a shimmering, flickering band; arcs crawl round its surface, hot spots flare on it, branching discharges leap off it
+// [2824]  // arcs hugging the surface: short hops between two points on the band
+// [2826]  // hot spots flaring on the band
+// [2828]  // branching discharges leaping off
+// [2834]  // hit: arcs strike from the contact point to the bare steel ahead and to the last runes, flicker, and re-strike on new paths, with impact flashes
+// [2846]// ---------- round 203 (2026-11-19): Arcane, the same way as Fire and Lightning. Base: a mana-weave ring (two thin violet strands twisting round
+// [2847]// each other, the band breathing, star glints running round it) + Arcane surge on each skill-up (the counterpart of Heat bloom and Charge glow).
+// [2848]// Hit add-ons: Ripple, Glint burst, Rune echo, Mana stream; each skill-up add-on: Rune wave. No motes drawing shapes, no moon (the craft ring's) ----------
+// [2858]  // each skill-up: the steel round the new rune blooms violet-white and a star glint twinkles on the rune, fading over 1.3 s; a soft violet afterglow trails the band
+// [2865]  // hit: a ghost of the new rune lifts off the blade, growing and fading
+// [2867]  // hit: a stream of mana flows from the new rune back down the fuller into the guard's gem
+// [2873]// ---------- round 204 (2026-11-19): Arcane kept: the mana-weave ring + Arcane surge + Rune echo (R3) + Mana stream (R4). A new round of add-ons that
+// [2874]// are Arcane's own (not counterparts of Fire or Lightning): Blink, Arcane missiles, Prismatic split, Star trail; each on the kept set ----------
+// [2880]  // three arcane missiles fly from the guard's gem along the blade into the band while it charges, each landing with a small flash
+// [2884]  // the new rune splits into three coloured copies that drift apart and recombine
+
+// ========== round 205 finales engulf (rejected), sky, ball, barrage, well and their options (moved out 2026-11-19 to make room for Fire first; the user: not dramatic enough yet) ==========
+  // Fire, Engulfed: flames creep from the guard to the point; held, they sink to embers; the whole sword bursts into flame and a stream of fire pours from the point into the recipe; it settles to a steady burn
+  engulf(s) { const { ts, gx, tip, y, t, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, xf = ts < FB184 ? lerp(gx, tip, ts / FB184) : tip;
+    let hm = ts < FB184 ? 7 : P < 0 ? 2.5 : P < .5 ? 15 * Math.sin(Math.min(1, P / .12) * Math.PI / 2) : lerp(15, 4, eOut(clamp((P - .5) / 1)));
+    for (let x = gx + 4, j = 0; x < xf; x += 5, j++) { const h = hm * (ts < FB184 ? clamp((xf - x) / 30) : 1) * (.7 + .3 * hash184(j)); flame197(x, y - 5, Math.min(14, h), 2.4, t, j); flame197(x + 2.5, y + 6, Math.min(8, h * .5), 1.8, t, j + 40); }
+    if (P >= 0 && P < .6) { glow184((gx + tip) / 2, y, 70, (1 - P / .6) * .6, '255,130,40'); if (P < .05) once('f5e', () => { for (let q = 0; q < 30; q++) spawn({ x: lerp(gx, tip, Math.random()), y: y - 6, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 60, g: 60, life: .9, size: 1.1, col: q % 2 ? '#ffb040' : '#ff6a1a' }); }); }
+    if (P >= 0 && P < .5) { const u = clamp(P / .2), fa = clamp(1 - (P - .25) / .25); for (let k = 0; k < 4; k++) flame197(lerp(tip, ux, u * (k + 1) / 4), y + 3, 8 * fa, 3, t, k * 9); beam205(tip, y, lerp(tip, ux, u), y, fa, '255,140,40', 7); if (u >= 1) hitR205(ux, y, E, 'f5h'); } },
+  // Lightning, Sky strike: arcs build between every rune, faster and faster; held in the dark with one spark at the point; a huge bolt strikes down onto the point and it discharges into the recipe
+  sky(s) { const { ts, gx, tip, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184;
+    if (ts < FB184) { const n = 1 + Math.floor(ts / FB184 * 5); for (let j = 0; j < n; j++) { const k1 = Math.floor(hash184(j * 7 + Math.floor(ts * 10)) * (G.N - 1)), k2 = Math.min(G.N - 1, k1 + 1 + Math.floor(hash184(j + Math.floor(ts * 10) * 3) * 4)); bolt202(G.sx(k1), y - 1, G.sx(k2), y - 1, 4, .8, E, j * 13 + Math.floor(ts * 10)); } }
+    else if (P < 0) { clipB205(s, () => { ctx.fillStyle = 'rgba(0,0,10,.45)'; ctx.fillRect(gx, y - 8, tip - gx, 16); }); glow184(tip - 2, y, 6, .9, '200,235,255'); }
+    else if (P < .7) { const fa = clamp(1 - (P - .3) / .4); ctx.save(); ctx.globalAlpha *= fa; bolt202(tip + 14, y - 62, tip - 2, y - 2, 9, 2.2, E, 401, { grow: P / .05, branches: 3, rate: 16 }); ctx.restore(); if (P < .25) glow184(tip, y, 50, (1 - P / .25) * .9, '210,240,255');
+      if (P > .08) { const u = clamp((P - .08) / .12); ctx.save(); ctx.globalAlpha *= fa; for (let j = 0; j < 2; j++) bolt202(tip, y, ux, y + (j ? 3 : -3), 6, 1.3, E, 410 + j, { grow: u / .5 }); ctx.restore(); if (u >= 1) hitR205(ux, y, E, 's5k'); } } },
+  // Lightning, Ball lightning: the charge chains guard to point, lap after lap, faster each lap; held, the band collapses into a crackling ball at the point; the ball shoots into the recipe and bursts
+  ball(s) { const { ts, gx, tip, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184;
+    if (ts < FB184) { const ph = ts * ts * 2.4 + ts * .6, p = ph % 1, hx = lerp(gx, tip, p); bolt202(Math.max(gx, hx - 30), y - 1, hx, y - 1, 3, 1, E, Math.floor(ph) * 7, { rate: 24 }); glow184(hx, y, 10, .9, '200,235,255'); }
+    let bx = tip + 2, r = ts < FB184 ? 0 : 3 + Math.min(1, (ts - FB184) / .3) * 4; if (P >= 0) { const u = clamp(P / .25); bx = lerp(tip + 2, ux, u * u); r = 7 * (1 - u * .3); if (u >= 1) { hitR205(ux, y, E, 's5b'); for (let j = 0; j < 6; j++) once('s5br' + j, () => {}); r = 0; } }
+    if (r > 0) { glow184(bx, y, r * 3, 1, '150,210,255'); ctx.save(); const g = ctx.createRadialGradient(bx - r * .3, y - r * .3, 0, bx, y, r); g.addColorStop(0, '#ffffff'); g.addColorStop(.5, '#a8e0ff'); g.addColorStop(1, 'rgba(60,150,255,.2)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, y, r, 0, 7); ctx.fill(); ctx.restore();
+      for (let j = 0; j < 4; j++) { const a = hash184(Math.floor(S.age * 20) + j * 5) * 6.283; bolt202(bx, y, bx + Math.cos(a) * r * 2.2, y + Math.sin(a) * r * 1.6, 2, .6, E, 450 + j); } }
+    if (P >= .25 && P < .7) { const u = (P - .25) / .45; ctx.save(); ctx.globalAlpha *= 1 - u; for (let j = 0; j < 6; j++) { const a = j / 6 * 6.283; bolt202(ux, y, ux + Math.cos(a) * (10 + u * 18), y + Math.sin(a) * (8 + u * 12), 3, .8, E, 470 + j); } ctx.restore(); } },
+  // Arcane, Missile barrage: missiles stream from the gem along the blade, faster and faster; held, every rune's ghost lifts above the blade; the ghosts collapse into the point and a violet beam fires with ripples
+  barrage(s) { const { ts, gx, tip, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, rs = Math.min(4.2, G.sw * .3);
+    if (ts < FB184) { for (let j = 0; j < 14; j++) { const L = FB184 * Math.sqrt(j / 14), u = (ts - L) / .22; if (u < 0 || u > 1) continue; const x = lerp(gx - 3, tip - 6, eOut(u)), yy = y - Math.sin(u * Math.PI) * (3 + (j % 3) * 2) * (j % 2 ? -1 : 1); glow184(x, yy, 5, .9, E.glow); ctx.save(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, yy, 1.6, 0, 7); ctx.fill(); ctx.restore(); } }
+    const lift = ts < FB184 ? 0 : P < 0 ? eOut(clamp((ts - FB184) / .3)) : 1, col = P < 0 ? 0 : clamp(P / .15);
+    if (lift > 0 && col < 1) for (let k = 0; k < G.N; k++) { const x = lerp(G.sx(k), tip, col * col), yy = lerp(y - lift * 9, y, col); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= .8; rune184(rk184(k), x, yy, rs * (1 - col * .5), 1, ['#ff7ad8', '#7ad8ff', '#d8c4ff'][k % 3], 1.2, E.sh); ctx.restore(); }
+    if (P >= .15) { const u = clamp((P - .15) / .12), fa = clamp(1 - (P - .35) / .4); beam205(tip, y, lerp(tip, ux, u), y, fa, E.glow); if (u >= 1) hitR205(ux, y, E, 'a5b'); for (let j = 0; j < 3; j++) { const v = (P - .15 - j * .08) / .5; if (v <= 0 || v >= 1) continue; ctx.save(); ctx.strokeStyle = E.ring; ctx.globalAlpha *= 1 - v; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(tip, y, 4 + v * 16, 10 + v * 10, 0, 0, 7); ctx.stroke(); ctx.restore(); } } },
+  // Arcane, Mana well: mana streams from every rune into the guard's gem, which swells into an orb; held, the orb pulses; it releases a wave down the blade and a beam into the recipe
+  well(s) { const { ts, gx, tip, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, ox = gx - 2;
+    if (ts < FB184) { for (let k = 0; k < G.N; k++) { const ph = (ts * 1.6 + k * .13) % 1, x = lerp(G.sx(k), ox, ph); glow184(x, y, 4, .7 * (1 - ph * .5), E.glow); } }
+    const r = P < 0 ? (ts < FB184 ? 2 + 6 * (ts / FB184) : 8 + Math.sin(ts * 26) * .8) : Math.max(0, 8 * (1 - P / .2)); if (r > 0) { glow184(ox, y, r * 2.5, .9, E.glow); ctx.save(); const g = ctx.createRadialGradient(ox, y, 0, ox, y, r); g.addColorStop(0, '#ffffff'); g.addColorStop(.6, '#c8a8ff'); g.addColorStop(1, 'rgba(140,90,255,.2)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ox, y, r, 0, 7); ctx.fill(); ctx.restore(); }
+    if (P >= 0) { const w = clamp(P / .2), wx = lerp(gx, tip, w); if (w < 1) clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(wx - 30, 0, wx + 4, 0); g.addColorStop(0, 'rgba(200,170,255,0)'); g.addColorStop(1, 'rgba(240,230,255,.9)'); ctx.fillStyle = g; ctx.fillRect(wx - 30, y - 8, 34, 16); });
+      if (P >= .2) { const u = clamp((P - .2) / .08), fa = clamp(1 - (P - .4) / .4); beam205(tip, y, lerp(tip, ux, u), y, fa, E.glow); if (u >= 1) hitR205(ux, y, E, 'a5w'); } } } };
+EN184.FE = fin205('fire', 'Fire: Engulfed', 'Fire as locked, finale Engulfed: flames creep along the blade from the guard to the point; a held beat as they sink to embers; then the whole sword bursts into flame and a stream of fire pours from the point into the recipe; it settles to a steady burn.', FIN205.engulf);
+EN184.LS = fin205('storm', 'Lightning: Sky strike', 'Lightning as locked, finale Sky strike: arcs build between the runes, faster and more of them; a held beat in the dark with one spark at the point; a huge branching bolt strikes down onto the point from above and the sword discharges into the recipe.', FIN205.sky);
+EN184.LB = fin205('storm', 'Lightning: Ball lightning', 'Lightning as locked, finale Ball lightning: the charge chains from the guard to the point, lap after lap, faster each lap; a held beat as the band collapses into a crackling ball at the point; the ball shoots into the recipe and bursts in a ring of arcs.', FIN205.ball);
+EN184.AB = fin205('arcane', 'Arcane: Missile barrage', 'Arcane as locked, finale Missile barrage: arcane missiles stream from the gem along the blade, faster and faster; a held beat as every rune’s ghost lifts above the blade in rose, ice and violet; the ghosts collapse into the point and a violet beam fires into the recipe with ripples.', FIN205.barrage);
+EN184.AW = fin205('arcane', 'Arcane: Mana well', 'Arcane as locked, finale Mana well: mana streams from every rune into the guard’s gem, which swells into a bright orb; a held beat as it pulses; the orb releases a wave down the blade and a violet beam fires into the recipe.', FIN205.well);
+
+// ========== moved out 2026-11-19 before round 207: se192 old payoff block (all finales now own their payoff via NOPAY205), stones193, the SP (normal plume) and FM (Molten core) options. Fire finale locked = SPB ==========
+    if (powered && !window.NOPAY205) { once('enSEb', () => spawn({ x: rx, y, size: 6, shape: 'ring', grow: 20, life: .45, col: E.ring }));
+      once('enSEf', () => { spawn({ x: (gx + tip) / 2, y, size: 8, shape: 'ring', grow: 16, life: .45, col: '#fff' }); for (let q = 0; q < 16; q++) spawn({ x: lerp(gx, tip, Math.random()), y: y + (q % 2 ? -6 : 6), vx: (Math.random() - .5) * 60, vy: (q % 2 ? -1 : 1) * (30 + Math.random() * 50), g: 60, life: .5, size: 1, col: E.spark[q % 3] }); });
+      const hit = () => { spawn({ x: ux, y, size: 8, shape: 'ring', grow: 32, life: .6, col: E.ring }); spawn({ x: ux, y, size: 4, shape: 'ring', grow: 20, life: .45, col: '#fff' }); sparks184(ux, y, 16, 130, 90, E.spark); };
+      if (el === 'arcane') { const u = clamp((ts - FP184) / .15), fa = clamp(1 - (ts - FP184 - .25) / .4); if (u >= 1) once('enSEa', hit);
+        if (fa > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= fa; ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${E.glow},.7)`; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(tip, y); ctx.lineTo(lerp(tip, ux, u), y); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); } }
+      else if (el === 'fire') { const u = clamp((ts - FP184) / .25); if (u < 1) { const fx = (1 - u) * (1 - u) * tip + 2 * (1 - u) * u * (tip - 10) + u * u * ux, fy = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * (y - 30) + u * u * y; glow184(fx, fy, 14, 1, '255,140,40'); ctx.save(); const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, 5); g.addColorStop(0, '#fff8d0'); g.addColorStop(.5, '#ffb040'); g.addColorStop(1, '#ff4a10'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(fx, fy, 5, 0, 7); ctx.fill(); ctx.restore();
+          if (Math.random() < .7) spawn({ x: fx, y: fy, vx: -20 - Math.random() * 30, vy: (Math.random() - .5) * 20, life: .4, size: 1.2, col: Math.random() < .5 ? '#ffb040' : '#ff6a1a' }); }
+        else once('enSEa', () => { hit(); for (let q = 0; q < 14; q++) spawn({ x: ux + (Math.random() - .5) * 20, y: y - 12, vx: (Math.random() - .5) * 20, vy: 10 + Math.random() * 30, g: 40, life: .9, size: 1, col: q % 2 ? '#ffb040' : '#ff6a1a' }); }); }
+      else { const u = clamp((ts - FP184) / .06), fa = clamp(1 - (ts - FP184 - .1) / .4); if (u >= 1) once('enSEa', hit); if (fa > 0) { ctx.save(); ctx.globalAlpha *= fa; for (let j = 0; j < 3; j++) { const sx0 = lerp(gx + 20, tip, [.25, .6, 1][j]); bolt191(sx0, y - 2, lerp(sx0, ux, u), lerp(y - 2, y, u), 10 + (1 - j / 2) * 10, 1.3, E, 20 + j); } ctx.restore(); }
+        if (pf > .5) glow184(tip, y, 28, (pf - .5) * 1.6, '200,235,255'); } }
+function stones193(rx, y, ry, spin, E, back, alpha, squash) { if (alpha <= 0) return; const rxx = ry * .4 * squash; ctx.save(); ctx.globalAlpha *= alpha;
+  if (!back) { ctx.strokeStyle = `rgba(${E.glow},.35)`; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(rx, y, rxx, ry, 0, -Math.PI / 2, Math.PI / 2); ctx.stroke(); }
+  for (let j = 0; j < 5; j++) { const an = spin + j * 1.257, front = Math.cos(an) >= 0; if (front === back) continue; const px = rx + Math.cos(an) * rxx, py = y + Math.sin(an) * ry, s = back ? 2.2 : 3; ctx.save(); ctx.translate(px, py); if (back) ctx.globalAlpha *= .55;
+    ctx.fillStyle = '#7a7486'; ctx.strokeStyle = '#140e0a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.roundRect(-s, -s, 2 * s, 2 * s, 1.2); ctx.fill(); ctx.stroke(); ctx.fillStyle = mix(E.rune, '#ffffff', .4); ctx.shadowColor = E.sh; ctx.shadowBlur = back ? 2 : 6; ctx.fillRect(-.6, -s * .6, 1.2, s * 1.2); ctx.fillRect(-s * .5, -.5, s, 1); ctx.restore(); }
+  ctx.restore(); }
+EN184.FM = fin205('fire', 'Fire: Molten core', 'Fire as locked, finale Molten core: white heat crawls out from the guard and the runes melt into one molten line; a held beat with the blade white-hot and quivering; a ring of flame bursts out along the blade and a fireball flies into the recipe; the steel cools back to dark with glowing runes.', FIN205.molten);
+EN184.SP = spear206('Fire: Spear thrust', 'Fire as locked, finale Spear thrust (from your reference): Molten core’s heating (white heat crawls out from the guard, the runes melt into one molten line, a white-hot held beat), then the sword lunges forward like a spear and its point pierces the recipe while the fire tears backward off the blade in a widening plume, white at the core, then yellow, orange and red, trailing smoke and streaking embers; it eases back as the plume breaks up and the steel cools.', false);
+
+// ========== Fire finale LOCKED = Spear thrust, bigger plume (SPB): molten, thrust206, plume206, FIN205.spear, spear206, SPB, FIRE2, plus the unused FIRE/STORM option lines (moved out 2026-11-19 for page room; rebuild from here) ==========
+  // Fire, Molten core: white heat crawls out from the guard and the runes melt into one molten line; held, the blade white and quivering; a ring of flame bursts out and a fireball flies into the recipe; the steel cools to dark
+  molten(s) { const { ts, gx, tip, y, t, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, xh = ts < FB184 ? lerp(gx, tip, eOut(ts / 1.2)) : tip, cool = P > 0 ? clamp(P / 1.4) : 0, white = ts >= FB184 ? (P < 0 ? 1 : Math.max(0, 1 - P / .3)) : 0;
+    clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(gx, 0, Math.max(gx + 1, xh), 0); g.addColorStop(0, `rgba(200,40,10,${.5 * (1 - cool)})`); g.addColorStop(.7, `rgba(255,140,40,${.6 * (1 - cool)})`); g.addColorStop(1, `rgba(255,245,210,${.85 * (1 - cool)})`); ctx.fillStyle = g; ctx.fillRect(gx, y - 8, xh - gx, 16);
+      if (white > 0) { ctx.fillStyle = `rgba(255,250,235,${.6 * white})`; ctx.fillRect(gx + (Math.random() - .5) * 1.2, y - 8, tip - gx, 16); } });
+    const lineA = P < 0 ? 1 : Math.max(0, 1 - P / 1.2); if (lineA > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= lineA; ctx.strokeStyle = mix('#ffb040', '#fff4d0', white); ctx.shadowColor = '#ff8030'; ctx.shadowBlur = 8; ctx.lineWidth = 2.4 + white; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(gx + 6, y); ctx.lineTo(Math.max(gx + 6, xh - 4), y); ctx.stroke(); ctx.restore(); }
+    if (P >= 0) { const u = clamp(P / .55), a = Math.pow(1 - u, 1.3); if (a > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= a; ctx.strokeStyle = 'rgba(255,90,20,.7)'; ctx.lineWidth = 5 * (1 - u) + 1; ctx.beginPath(); ctx.ellipse((gx + tip) / 2, y, 30 + eOut(u) * 110, 8 + eOut(u) * 12, 0, 0, 7); ctx.stroke(); ctx.strokeStyle = '#ffd070'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore(); }
+      const v = clamp(P / .25); if (v < 1) { const fx = lerp(tip, ux, v), fy = y - Math.sin(v * Math.PI) * 14; glow184(fx, fy, 14, 1, '255,140,40'); ctx.save(); ctx.fillStyle = '#fff2c0'; ctx.shadowColor = '#ff6a1a'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(fx, fy, 4.5, 0, 7); ctx.fill(); ctx.restore(); } else hitR205(ux, y, E, 'f5m'); } } };
+const thrust206 = P => P < 0 ? 0 : P < .1 ? 24 * eOut(P / .1) : P < .5 ? 24 : 24 * (1 - sm185(clamp((P - .5) / .6)));
+function plume206(s, I0, big) { const { gx, tip, y, t } = s, tail = gx - (big ? 110 : 85), span = tip - tail, N = big ? 80 : 64, Wm = big ? 40 : 32; { const fl = 1 + .06 * Math.sin(t * 13), up = Wm * .55 * I0 * fl; ctx.save(); ctx.globalCompositeOperation = 'lighter'; const cg = ctx.createLinearGradient(tip, 0, tail, 0); cg.addColorStop(0, `rgba(255,250,225,${.75 * I0})`); cg.addColorStop(.25, `rgba(255,180,60,${.6 * I0})`); cg.addColorStop(.6, `rgba(240,80,20,${.4 * I0})`); cg.addColorStop(1, 'rgba(160,30,10,0)'); ctx.fillStyle = cg; ctx.beginPath(); ctx.moveTo(tip + 2, y); ctx.quadraticCurveTo(lerp(tip, tail, .45), y - up * .7, tail, y - up - 4); ctx.quadraticCurveTo(tail - 14, y, tail, y + up * .8); ctx.quadraticCurveTo(lerp(tip, tail, .45), y + up * .6, tip + 2, y); ctx.fill(); ctx.restore(); }
+  for (let pass = 0; pass < 2; pass++) for (let j = 0; j < N; j++) { const ph = (t * (big ? 2.6 : 2.2) + j / N) % 1, x = lerp(tip - 6, tail, ph), w = lerp(5, Wm, ph) * (.6 + .4 * I0), yy = y + (hash184(j * 3) - .5) * w * 1.1 + Math.sin(t * 9 + j) * 2 - ph * 4, r = (4 + ph * (big ? 24 : 19)) * (.55 + .45 * I0), a = Math.min(1, (1 - ph) * I0 * 1.3);
+    if (pass === 0) { if (ph < .55) continue; ctx.save(); ctx.globalAlpha *= a * .45; ctx.fillStyle = 'rgba(40,18,8,.5)'; ctx.beginPath(); ctx.ellipse(x, yy, r * 1.3, r * .8, 0, 0, 7); ctx.fill(); ctx.restore(); continue; }
+    const c = ph < .18 ? '255,245,215' : ph < .4 ? '255,190,70' : ph < .7 ? '255,110,30' : '200,50,15'; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(x, yy); ctx.scale(1.6, .75); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, `rgba(${c},${.8 * a})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.restore(); }
+  for (let j = 0; j < (big ? 14 : 10); j++) { const ph = (t * 3.4 + j / (big ? 14 : 10)) % 1, x = lerp(tip - 4, tail + 10, ph), yy = y + (hash184(j * 5 + 1) - .5) * lerp(4, Wm * 1.2, ph), L = 10 + 18 * (1 - ph); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= (1 - ph) * I0; ctx.strokeStyle = ph < .3 ? '#fff4d0' : '#ffb040'; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x - L, yy - 1); ctx.stroke(); ctx.restore(); }
+  clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(gx, 0, tip, 0); g.addColorStop(0, `rgba(255,120,40,${.3 * I0})`); g.addColorStop(1, `rgba(255,240,200,${.6 * I0})`); ctx.fillStyle = g; ctx.fillRect(gx, y - 8, tip - gx, 16); });
+  glow184(tip - 4, y, 24, I0 * .9, '255,220,150'); if (I0 > .3) for (let q = 0; q < (big ? 4 : 3); q++) spawn({ x: lerp(gx, tip, Math.random()), y: y + (Math.random() - .5) * 8, vx: -140 - Math.random() * 140, vy: (Math.random() - .5) * 30 - 10, life: .5 + Math.random() * .3, size: .8 + Math.random() * .6, col: Math.random() < .5 ? '#ffb040' : '#fff0c0' }); }
+FIN205.spear = big => s => { const { ts, I, E, y, gx, tip } = s; if (ts < 0) return; const P = ts - FP184; if (P < 0) { FIN205.molten(s); return; }
+  const I0 = P < .1 ? P / .1 : P < .5 ? 1 : Math.max(0, 1 - (P - .5) / (big ? 1.1 : .9)); if (I0 > 0) plume206(s, I0, big);
+  const cool = clamp(P / 1.4); if (cool < 1) clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(255,${Math.round(240 - 150 * cool)},${Math.round(200 - 170 * cool)},${.32 * (1 - cool)})`; ctx.fillRect(gx, y - 8, tip - gx, 16); });
+  if (P >= .1) hitR205(I.x1 + 18, y, E, 'f6s' + (big ? 'b' : '')); if (P < .08) once('f6k' + (big ? 'b' : ''), () => { spawn({ x: tip, y, size: 8, shape: 'ring', grow: 26, life: .45, col: '#fff' }); }); };
+const spear206 = (n, d, big) => { const B = fin205('fire', n, d, FIN205.spear(big)), d0 = B.draw; B.draw = (I, y, t, ts) => { window.THX205 = thrust206(ts95() - FP184); try { d0(I, y, t, ts); } finally { window.THX205 = 0; } }; return B; };
+EN184.SPB = spear206('Fire: Spear thrust, bigger plume', 'The same with a bigger plume: longer and wider behind the hilt, more flame, more smoke and embers, lasting a little longer.', true);
+EN184.FIRE = hit200('Fire (locked)', 'Fire as locked: the subtle living-flame ring, Heat bloom, and on the hit a Fire shockwave and a Flame flare.', s => { ADDF197.fireWave(s); ADDF197.flare(s); });
+EN184.STORM = zap202('Lightning (locked)', 'Lightning as locked: the storm ring, Charge glow, Arc burst, Chain to the gem and Spark crawl, with the round-202 electricity at normal strength.', 1);
+EN184.FIRE2 = EN184.SPB;
+
+// ========== rounds 207-208 Lightning finales (Storm call, Overcharge, Railgun, Thunder spear, Chain reaction, Tesla coil), all rejected as not dramatic (moved out 2026-11-19) ==========
+// round 207: Fire's finale locked (Spear thrust, bigger plume). Lightning finales with drama: Storm call (the storm gathers, three bolts strike the sword, it discharges into the recipe) and Overcharge (arcs lash out from the blade, collapse into the point, one massive discharge)
+const dark207 = (s, a, c = "4,6,14", k = .7) => { if (a <= 0) return; const { gx, tip, y } = s, cx = (gx + tip) / 2; ctx.save(); ctx.translate(cx, y); ctx.scale(1, .16); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 200); g.addColorStop(0, `rgba(${c},${a * k})`); g.addColorStop(.6, `rgba(${c},${a * k * .7})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 200, 0, 7); ctx.fill(); ctx.restore(); };
+FIN205.storm = s => { const { ts, gx, tip, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, b = ts < FB184 ? ts / FB184 : 1;
+  dark207(s, P < 0 ? (ts < FB184 ? b * .7 : .95) : Math.max(0, .95 - P / .6));
+  if (ts < FB184) { if (hash184(Math.floor(ts * 6)) < .5 + b * .4) { const x = lerp(gx - 60, tip + 40, hash184(Math.floor(ts * 6) * 3)); if (x < I.x0 + 40 || x > I.x1 - 10) { ctx.save(); ctx.globalAlpha *= .25 + b * .3; bolt202(x, y - 58, x + 6, y - 26, 6, .7, E, 700 + Math.floor(ts * 6), { grow: ((ts * 6) % 1) / .2 }); ctx.restore(); } }
+    const n = 1 + Math.floor(b * 5); for (let j = 0; j < n; j++) { const k1 = Math.floor(hash184(j * 7 + Math.floor(ts * 12)) * (G.N - 1)), k2 = Math.min(G.N - 1, k1 + 1 + Math.floor(hash184(j + Math.floor(ts * 12) * 3) * 4)); bolt202(G.sx(k1), y - 1, G.sx(k2), y - 1, 4, .8, E, j * 13 + Math.floor(ts * 12)); } }
+  else if (P < 0) glow184(tip - 2, y, 7, .9 + .1 * Math.sin(ts * 40), '210,240,255');
+  if (P >= 0 && P < .75) { const fa = clamp(1 - (P - .3) / .45); [gx + 4, I.x0 + 26, tip - 4].forEach((x, j) => { ctx.save(); ctx.globalAlpha *= fa; bolt202(x + (j - 1) * 10, y - 72, x, y - 2, 11, 2.4, E, 720 + j, { grow: (P - j * .03) / .05, branches: 3, rate: 16 }); ctx.restore(); });
+    if (P < .18) { ctx.save(); ctx.globalCompositeOperation = "lighter"; dark207(s, 1 - P / .18, "200,230,255", .6); ctx.restore(); }
+    if (P > .1) { const u = clamp((P - .1) / .1); ctx.save(); ctx.globalAlpha *= fa; for (let j = 0; j < 3; j++) bolt202(tip, y, ux, y + (j - 1) * 4, 7, 1.5, E, 740 + j, { grow: u / .5, branches: 1 }); ctx.restore(); if (u >= 1) hitR205(ux, y, E, 's7c'); } }
+  if (P >= 0 && P < .05) once('s7cf', () => { for (let q = 0; q < 24; q++) spawn({ x: lerp(gx, tip, Math.random()), y, vx: (Math.random() - .5) * 140, vy: -40 - Math.random() * 80, g: 220, life: .6, size: 1, col: q % 2 ? '#c8ecff' : '#ffffff' }); }); };
+FIN205.over = s => { const { ts, gx, tip, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, b = ts < FB184 ? ts / FB184 : 1;
+  if (ts < FP184 + .4) clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; const a = P < 0 ? b * .3 : Math.max(0, .3 - P / .4 * .3); ctx.fillStyle = `rgba(190,230,255,${a})`; ctx.fillRect(gx, y - 8, tip - gx, 16); });
+  if (ts < FB184) { const n = 1 + Math.floor(b * 7); for (let j = 0; j < n; j++) { const sd = j * 11 + Math.floor(ts * 10), x0 = lerp(gx + 6, tip - 6, hash184(sd)), a = -Math.PI / 2 + (hash184(sd + 1) - .5) * 2.8 + (hash184(sd + 2) < .3 ? Math.PI : 0), d = 12 + b * 16 * hash184(sd + 3); bolt202(x0, y + Math.sin(a) * 4, x0 + Math.cos(a) * d, y + Math.max(-20, Math.min(20, Math.sin(a) * d)), 4, .8, E, 760 + sd, { grow: ((ts * 10) % 1) / .25, branches: b > .6 ? 1 : 0 }); }
+    if (Math.random() < b * .5) spawn({ x: lerp(gx, tip, Math.random()), y, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 70, life: .35, size: .8, col: '#e0f4ff' }); }
+  else if (P < 0) { const h = clamp((ts - FB184) / (FP184 - FB184)); for (let j = 0; j < 4; j++) { const sd = j * 5 + 800, x0 = lerp(gx, tip, hash184(sd)), xr = lerp(x0, tip, h); if (h < .9) bolt202(xr, y - 4 + j * 2, tip, y, 3, .7, E, sd + Math.floor(ts * 20), { rate: 30 }); } glow184(tip, y, 6 + h * 10, .6 + h * .4, '210,240,255'); }
+  if (P >= 0 && P < .8) { const u = clamp(P / .06), fa = clamp(1 - (P - .35) / .45); ctx.save(); ctx.globalAlpha *= fa; bolt202(tip, y, ux, y, 5, 3, E, 820, { grow: u, branches: 4, rate: 18 }); [.15, .4, .65].forEach((f2, j) => { const sx0 = lerp(gx + 10, tip, f2); bolt202(sx0, y - 3, ux, y, 14 + j * 4, 1.6, E, 822 + j, { grow: u, branches: 2, rate: 18 }); }); ctx.restore(); if (P < .3) glow184(tip, y, 40, (1 - P / .3), '200,235,255');
+    for (let j = 0; j < 2; j++) { const v = (P - j * .1) / .5; if (v <= 0 || v >= 1) continue; ctx.save(); ctx.strokeStyle = '#c8ecff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 8; ctx.globalAlpha *= 1 - v; ctx.lineWidth = 2 * (1 - v) + .5; ctx.beginPath(); ctx.ellipse(tip, y, 6 + v * 50, 8 + v * 26, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+    if (u >= 1) { hitR205(ux, y, E, 's7o'); if (P < .5) for (let j = 0; j < 6; j++) { const a = j / 6 * 6.283; ctx.save(); ctx.globalAlpha *= 1 - P / .5; bolt202(ux, y, ux + Math.cos(a) * 18, y + Math.sin(a) * 14, 3, .8, E, 830 + j); ctx.restore(); } } } };
+EN184.LC1 = fin205('storm', 'Lightning: Storm call', 'Lightning as locked, finale Storm call: the module darkens like a storm gathering, distant bolts flicker behind the bar, arcs race between more and more runes; a held beat in near-darkness with one spark at the point; three huge branching bolts strike down onto the guard, the blade and the point in a white flash, and the sword discharges a chain of arcs into the recipe; the dark lifts.', FIN205.storm);
+EN184.LC2 = fin205('storm', 'Lightning: Overcharge', 'Lightning as locked, finale Overcharge: the blade glows white-blue as arcs lash out from it in all directions, more and longer, sparks spitting; a held beat as every arc is pulled back into the point, a single blinding spot; then one massive branching discharge blasts from the point into the recipe with two shockwave rings, and arcs burst round the recipe.', FIN205.over);
+// round 208: four more Lightning finales: Railgun, Thunder spear, Chain reaction, Tesla coil
+const runeLit208 = (s, k, b) => { const { G, y, E } = s; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= b; rune184(rk184(k), G.sx(k), y, Math.min(4.2, G.sw * .3), 1, '#f0faff', 1.4, E.sh); ctx.restore(); glow184(G.sx(k), y, 6, Math.min(1, b) * .3, E.glow); };
+const rings208 = (x, y, P, n, sx = 50, sy = 26) => { for (let j = 0; j < n; j++) { const v = (P - j * .1) / .5; if (v <= 0 || v >= 1) continue; ctx.save(); ctx.strokeStyle = '#c8ecff'; ctx.shadowColor = '#6ac4ff'; ctx.shadowBlur = 8; ctx.globalAlpha *= 1 - v; ctx.lineWidth = 2 * (1 - v) + .5; ctx.beginPath(); ctx.ellipse(x, y, 6 + v * sx, 8 + v * sy, 0, 0, 7); ctx.stroke(); ctx.restore(); } };
+Object.assign(FIN205, {
+  // Railgun: runes charge one by one like capacitors; held, a sphere swells at the point; a straight beam fires through the recipe, a recoil kick back, arcs spiral round the beam
+  rail(s) { const { ts, tip, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184;
+    if (P < .3) for (let k = 0; k < G.N; k++) { const on = ts - k / G.N * 1.15; if (on >= 0) { runeLit208(s, k, (P < 0 ? 1 : 1 - P / .3) * (on < .1 ? 1 : .75)); if (on < .03) once('r8c' + k, () => sparks184(G.sx(k), y, 3, 30, 20, E.spark)); } }
+    const r = ts < FB184 ? 0 : P < 0 ? 2 + 6 * clamp((ts - FB184) / (FP184 - FB184)) : Math.max(0, 8 - P * 40); if (r > 0) { glow184(tip + 2, y, r * 3, .9, '200,235,255'); ctx.save(); ctx.fillStyle = '#fff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(tip + 2, y, r, 0, 7); ctx.fill(); ctx.restore(); }
+    if (P >= 0 && P < .7) { const fa = clamp(1 - (P - .25) / .45), xe = ux + 60; beam205(tip, y, xe, y, fa, '150,210,255', 9); ctx.save(); ctx.globalAlpha *= fa; for (let j = 0; j < 2; j++) bolt202(tip, y + (j ? 4 : -4), xe, y + (j ? 4 : -4), 6, .9, E, 1040 + j); ctx.restore();
+      hitR205(ux, y, E, 'r8h'); rings208(tip, y, P, 2); } },
+  // Thunder spear: the sword draws back, arcs coil round it tighter; held; it lunges, a forked bolt leading from the point, a shredded wake of arcs behind
+  tspear(s) { const { ts, gx, tip, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184;
+    if (P < 0) { const c = ts < FB184 ? ts / FB184 : 1, n = 2 + Math.floor(c * 4); for (let j = 0; j < n; j++) { const x0 = lerp(gx, tip, (j + ((ts * 2) % 1)) / n), amp = 9 * (1 - c * .6); bolt202(x0, y - amp, x0 + 18, y + amp, 3, .8, E, 900 + j + Math.floor(ts * 14)); } if (ts >= FB184) glow184(tip, y, 8, .9, '210,240,255'); }
+    else if (P < .8) { const fa = clamp(1 - (P - .3) / .5); ctx.save(); ctx.globalAlpha *= fa; bolt202(tip, y, ux + 30, y, 6, 2.2, E, 920, { grow: P / .06, branches: 3, rate: 18 }); for (let j = 0; j < 7; j++) { const x0 = lerp(gx + 4, tip, j / 7), ph = hash184(j + Math.floor(S.age * 16)), L = 20 + 40 * ph; bolt202(x0, y + (ph - .5) * 8, x0 - L, y + (ph - .5) * 26, 4, .9, E, 930 + j); } ctx.restore(); hitR205(ux, y, E, 'r8t'); if (P < .2) glow184(tip, y, 30, 1 - P / .2, '200,235,255'); } },
+  // Chain reaction: an arc hops rune to rune, growing each hop, each rune popping; held at the last rune; one huge arc into the recipe that branches to strike the ground below
+  chainR(s) { const { ts, y, E, I, G } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184;
+    if (ts < FB184) { const h = ts / FB184 * (G.N - 1), k = Math.floor(h); for (let j = 0; j <= k; j++) runeLit208(s, j, j === k ? 1.2 : .5); if (k >= 1) bolt202(G.sx(k - 1), y - 1, G.sx(k), y - 1, 3 + k * .5, .7 + k * .08, E, 950 + k, { grow: (h - k) / .3, branches: k > G.N / 2 ? 1 : 0 }); once('r8p' + k, () => sparks184(G.sx(k), y, 4 + k, 40, 30, E.spark)); }
+    else if (P < 0) { for (let j = 0; j < G.N; j++) runeLit208(s, j, .5); runeLit208(s, G.N - 1, 1); glow184(G.sx(G.N - 1), y, 10 + Math.sin(ts * 30) * 2, 1, '210,240,255'); }
+    else if (P < .8) { const fa = clamp(1 - (P - .3) / .5), sx0 = G.sx(G.N - 1); ctx.save(); ctx.globalAlpha *= fa; const ax = (sx0 + ux) / 2 - 20; bolt202(sx0, y, ax, y - 30, 6, 2.6, E, 980, { grow: P / .04, branches: 2, rate: 16 }); if (P > .04) bolt202(ax, y - 30, ux, y, 6, 2.6, E, 981, { grow: (P - .04) / .04, branches: 2, rate: 16 }); if (P > .08) for (let j = 0; j < 3; j++) bolt202(ux, y + 8, ux + (j - 1) * 22, y + 26, 5, 1, E, 985 + j, { grow: (P - .08) / .06 }); ctx.restore(); hitR205(ux, y, E, 'r8x'); if (P < .25) glow184(ux, y, 34, 1 - P / .25, '200,235,255'); } },
+  // Tesla coil: arcs climb the blade in rungs like a Jacob's ladder, rising and widening; held at the top; they snap off into one big arc that whips over into the recipe
+  tesla(s) { const { ts, gx, tip, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184;
+    if (P < 0) { const c = ts < FB184 ? ts / FB184 : 1; for (let j = 0; j < 3; j++) { const u = ((ts * (1 + c * 1.5) + j / 3) % 1), x = lerp(gx + 10, tip - 4, u), w = 6 + u * 14; bolt202(x, y - w, x + 3, y + w * .6, 2.5, .9, E, 1000 + j + Math.floor(ts * 12)); } if (ts >= FB184) { bolt202(tip - 6, y - 20, tip - 2, y + 12, 4, 1.1, E, 1010 + Math.floor(ts * 20)); glow184(tip - 4, y - 4, 12, .8, '200,235,255'); } }
+    else if (P < .8) { const u = clamp(P / .12), fa = clamp(1 - (P - .3) / .5), cx = (tip + ux) / 2 - 24, top = y - 34; ctx.save(); ctx.globalAlpha *= fa; const mx = lerp(tip, cx, u), my = lerp(y - 20, top, u); bolt202(tip - 4, y - 18, mx, my, 5, 2, E, 1020, { branches: 2 }); if (u >= 1) bolt202(cx, top, ux, y, 6, 2, E, 1021, { grow: (P - .12) / .06, branches: 2 }); ctx.restore(); if (P > .18) { hitR205(ux, y, E, 'r8l'); rings208(ux, y, P - .18, 2, 30, 18); } } } });
+EN184.LC3 = fin205('storm', 'Lightning: Railgun', 'Lightning as locked, finale Railgun: the runes charge one by one from the guard like capacitors, each with a spark; a held beat as a white sphere swells at the point; then a straight beam of lightning fires through the recipe and beyond, two arcs spiralling round it, with shockwave rings at the point.', FIN205.rail);
+EN184.LC4 = fin205('storm', 'Lightning: Thunder spear', 'Lightning as locked, finale Thunder spear (the electric cousin of Fire’s thrust): arcs coil round the blade, tighter and more of them; a held beat; the sword lunges, a forked bolt leading from the point through the recipe while a shredded wake of arcs streams back off the blade.', FIN205.tspear);
+EN184.LC5 = fin205('storm', 'Lightning: Chain reaction', 'Lightning as locked, finale Chain reaction: an arc hops rune to rune from the guard, growing at every hop, each rune popping with sparks; a held beat at the last rune, crackling; one huge arc jumps into the recipe and branches down to strike the ground below.', FIN205.chainR);
+EN184.LC6 = fin205('storm', 'Lightning: Tesla coil', 'Lightning as locked, finale Tesla coil: arcs climb the blade in rungs like a Jacob’s ladder, rising faster and wider; a held beat as one crackles at the top; it snaps off into one big arc that whips up and over into the recipe, with rings.', FIN205.tesla);
+{ const lunge = P => P < 0 ? 0 : P < .1 ? 24 * eOut(P / .1) : P < .5 ? 24 : 24 * (1 - sm185(clamp((P - .5) / .6))), d0 = EN184.LC4.draw; EN184.LC4.draw = (I, y, t, ts) => { window.THX205 = lunge(ts95() - FP184); try { d0(I, y, t, ts); } finally { window.THX205 = 0; } }; }
+
+// ========== Thunderstrike v2 explosion before round 212 (core, thin rings, radial arcs) ==========
+    const core = clamp(1 - P / .45); if (core > 0) { const r = 10 + eOut(clamp(P / .2)) * 34; glow184(tip, y, r * 1.8, core, '220,240,255'); ctx.save(); ctx.globalAlpha *= core; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(tip, y, r * .55, 0, 7); ctx.fill(); ctx.restore(); }
+    for (let j = 0; j < 3; j++) { const v = (P - j * .09) / .7; if (v <= 0 || v >= 1) continue; const R = eOut(v) * (210 - j * 40); ctx.save(); ctx.globalAlpha *= 1 - v; ctx.strokeStyle = j ? '#a8dcff' : '#ffffff'; ctx.shadowColor = E.sh; ctx.shadowBlur = j ? 0 : 8; ctx.lineWidth = 4 * (1 - v) + 1; ctx.beginPath(); ctx.ellipse(tip, y, R, R * .78, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+    const v = clamp(P / .6); if (v < 1) { const R = eOut(v) * 190; ctx.save(); ctx.globalAlpha *= (1 - v) * .9; for (let j = 0; j < 9; j++) { const a = (j + .5) / 9 * 6.283; bolt202(tip + Math.cos(a) * R * .15, y + Math.sin(a) * R * .12, tip + Math.cos(a) * R, y + Math.sin(a) * R * .78, 8, 1.1, E, 1520 + j, { rate: 14 }); } ctx.restore(); }
+
+// ========== round 209 Lightning blade (lblade, LX1) and Thunderstrike v1 (thunder, LX2), moved out 2026-11-19 (v2 = LX3 is the pick) ==========
+Object.assign(FIN205, {
+  lblade(s) { const { ts, gx, tip, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, b = ts < FB184 ? ts / FB184 : 1, Lmax = 150, A0 = -1.25, A1 = .45;
+    veil209((gx + tip) / 2 + 60, y, 300, 70, '2,4,12', P < 0 ? b * .55 : Math.max(0, .55 - P / 1.2 * .55));
+    let ang = A0, L = 0; if (ts < FB184) { L = Lmax * eOut(b) * .85; ang = lerp(0, A0, sm185(b)); } else if (P < 0) { L = Lmax * .85 + Math.sin(ts * 40) * 3; } else { const u = clamp(P / .16); ang = lerp(A0, A1, eOut(u)); L = Lmax; if (P > .55) L = Lmax * Math.max(0, 1 - (P - .55) / .45); }
+    if (P >= 0 && P < .4) { const sw = clamp(P / .16); for (let j = 1; j <= 6; j++) { const a2 = lerp(A0, A1, eOut(clamp(sw - j * .05))); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= (1 - j / 7) * .35 * (1 - P / .4); ctx.strokeStyle = '#a8e0ff'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(tip, y); ctx.lineTo(tip + Math.cos(a2) * Lmax, y + Math.sin(a2) * Lmax); ctx.stroke(); ctx.restore(); }
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= (1 - P / .4) * .8; ctx.strokeStyle = '#e8f8ff'; ctx.lineWidth = 3; ctx.shadowColor = E.sh; ctx.shadowBlur = 14; ctx.beginPath(); ctx.arc(tip, y, Lmax * .9, A0, lerp(A0, A1, eOut(sw))); ctx.stroke(); ctx.restore(); }
+    eblade209(tip, y, ang, L, 3.2 + (P >= 0 && P < .3 ? 2 : 0), E, 1, 1100);
+    if (P >= .1 && P < .5) { veil209(ux + 40, y + 20, 260, 90, '220,240,255', (1 - (P - .1) / .4) * .55); hitR205(ux, y, E, 'b9s'); once('b9d', () => { for (let q = 0; q < 40; q++) spawn({ x: ux + (Math.random() - .5) * 120, y: y + 10 + Math.random() * 30, vx: (Math.random() - .5) * 200, vy: -60 - Math.random() * 120, g: 260, life: .9, size: 1 + Math.random(), col: q % 3 ? '#c8ecff' : '#ffffff' }); }); }
+    if (P >= .1 && P < .7) shake209(6 * (1 - (P - .1) / .6)); else if (P < 0 && ts >= FB184) shake209(1); },
+  thunder(s) { const { ts, gx, tip, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, b = ts < FB184 ? ts / FB184 : 1, cx = (gx + tip) / 2;
+    veil209(cx, y - 10, 340, 90, '3,5,14', P < 0 ? .25 + b * .55 : Math.max(0, .8 - P / 1.4 * .8));
+    if (P < 0) { const n = Math.floor(ts * 7); if (hash184(n) < .35 + b * .45) { const sx0 = cx + (hash184(n * 3) - .5) * 520, life = (ts * 7) % 1; if (Math.abs(sx0 - cx) > 90) { ctx.save(); ctx.globalAlpha *= (.35 + b * .45) * (life < .3 ? 1 : 0); bolt202(sx0, y - 90, sx0 + 20, y + 40, 18, 1.4, E, 1200 + n, { grow: life / .12, branches: 2 }); ctx.restore(); veil209(sx0, y - 40, 90, 60, '160,200,255', (life < .2 ? .25 : 0) * b); } }
+      if (ts >= FB184) { glow184(tip, y, 9, .9, '210,240,255'); shake209(.6); } }
+    else { if (P < .5) { const fa = clamp(1 - (P - .25) / .25); ctx.save(); ctx.globalAlpha *= fa; for (let j = 0; j < 2; j++) bolt202(tip + 40 - j * 30, y - 140, tip, y, 22, 3.4 - j, E, 1300 + j, { grow: P / .05, branches: 4, rate: 16 }); ctx.restore(); }
+      if (P < .35) veil209(cx + 40, y, 420, 140, '235,246,255', (1 - P / .35) * .85);
+      const v = clamp(P / .55); if (v < 1) { const R = eOut(v) * 230; ctx.save(); ctx.globalAlpha *= 1 - v; ctx.strokeStyle = '#d8f0ff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 14; ctx.lineWidth = 3 * (1 - v) + 1; ctx.beginPath(); ctx.ellipse(tip, y, R, R * .42, 0, Math.PI, 0); ctx.stroke(); ctx.restore();
+        ctx.save(); ctx.globalAlpha *= (1 - v) * .9; for (let j = 0; j < 9; j++) { const a = Math.PI + (j + .5) / 9 * Math.PI; bolt202(tip, y, tip + Math.cos(a) * R, y + Math.sin(a) * R * .42, 8, 1.1, E, 1320 + j, { branches: 1 }); } ctx.restore(); }
+      hitR205(ux, y, E, 't9h'); once('t9r', () => { for (let q = 0; q < 50; q++) spawn({ x: tip + (Math.random() - .5) * 300, y: y - 40 - Math.random() * 40, vx: (Math.random() - .5) * 40, vy: 20 + Math.random() * 60, g: 120, life: 1.1, size: .9 + Math.random() * .7, col: q % 3 ? '#c8ecff' : '#ffffff' }); });
+      if (P < .8) shake209(7 * (1 - P / .8)); } } });
+EN184.LX1 = big209('Lightning: Lightning blade', 'Lightning as locked, finale Lightning blade: the area darkens as the steel overloads and a huge crackling energy blade grows out of the point, three times the sword’s length, rising; a held beat as it hums high, trembling; then it slashes down through the recipe in a giant arc of light that sweeps the whole area, with a white flash, a hard shake and a spray of sparks; the energy blade crackles apart and retracts.', FIN205.lblade);
+EN184.LX2 = big209('Lightning: Thunderstrike', 'Lightning as locked, finale Thunderstrike: a dark storm builds wide round the module, distant bolts flashing inside it, more and more; a held beat in the dark with one spark at the point; a massive branching bolt slams down onto the point from far above, the whole module flashes white, a shockwave dome of arcs bursts 200 px out from the sword with a hard shake, and sparks rain down.', FIN205.thunder);
+
+// ========== unused option lines L1, K1, K2, Z1, R0 and ringArcs214 (moved out 2026-11-19 for room) ==========
+EN184.L1 = flame199('Living flame ring, subtle', 'Heat bloom + the ring as a living flame, subtle: the band’s outline wavers softly and its top licks upward in a slow flicker, drawn in layers (a red glowing edge, an orange body, a hot pale core), shedding the odd ember. The skill-up beat stays the same.', .7);
+EN184.K1 = hit200('Fire shockwave (hit)', 'Locked base (subtle flame ring + Heat bloom) + Fire shockwave: the hit’s shockwave is a ring of flame, a fiery ellipse that bursts out from the band, licks up at the top and burns out.', ADDF197.fireWave);
+EN184.K2 = hit200('Flame flare (hit)', 'Locked base + Flame flare: on the hit the band erupts, a fan of flame tongues shoots out from the contact point round a white-hot core, then collapses back in under half a second.', ADDF197.flare);
+EN184.Z1 = zap202('Lightning, new sparks', 'Lightning as kept (storm ring, Charge glow, Arc burst, Chain to the gem, Spark crawl) with the new electricity: arcs bend irregularly along smooth paths, fork into thin branches, strike from their source, flicker and re-strike on new paths, in a blue glow with a white-hot core. The ring: arcs crawl round its surface, hot spots flare on it, and branching discharges leap off it. The arc burst strikes three times on fresh paths, each target flashing.', 1);
+EN184.R0 = arc203('Mana-weave ring + Arcane surge', 'The Arcane base: the band is a mana weave, two thin violet strands twisting round each other as it breathes, with star glints running round it; each skill-up the steel round the new rune blooms violet-white and a star glint twinkles on the rune, fading over a second (the counterpart of Heat bloom and Charge glow).', () => {});
+function ringArcs214(tip, y, R, a, E) { if (a <= 0) return; for (let j = 0; j < 6; j++) { const a0 = j / 6 * 6.283 + hash184(j * 9) * .6, sp = .38, fl = hash184(Math.floor(S.age * 22) + j * 13) > .3 ? 1 : .35, pts = []; for (let i = 0; i <= 7; i++) { const th = a0 + sp * i / 7, rr = R + (i && i < 7 ? (hash184(j * 17 + i + Math.floor(S.age * 6) * 3) - .5) * 5 : 0); pts.push([tip + Math.cos(th) * rr, y + Math.sin(th) * rr * .78]); } drawChan214(pts, a * fl, 1.4, E); } }
+
+// ========== pops214 v1 (spidery crackle lines), replaced 2026-11-19 ==========
+function pops214(tip, y, P, E) { for (let j = 0; j < 26; j++) { const t0 = .04 + hash184(j * 3) * 1.15, u = (P - t0) / .2; if (u < 0 || u >= 1) continue; const an = hash184(j * 5) * 6.283, d = 26 + hash184(j * 7) * 170, x = tip + Math.cos(an) * d, yy = y + Math.sin(an) * d * .78, fl = 1 - u;
+    glow184(x, yy, 10 + 6 * fl, fl * .9, '200,235,255'); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, yy, 1.4 + 2.2 * fl, 0, 7); ctx.fill();
+    for (let q = 0; q < 5; q++) { const a = hash184(j * 11 + q) * 6.283, L = 5 + u * 12 + hash184(j + q) * 4, mx = x + Math.cos(a + .5) * L * .5, my = yy + Math.sin(a + .5) * L * .5; ctx.strokeStyle = `rgba(230,246,255,${fl})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x, yy); ctx.quadraticCurveTo(mx, my, x + Math.cos(a) * L, yy + Math.sin(a) * L); ctx.stroke(); } ctx.restore(); } }
+
+// ========== Lightning finale LOCKED = Thunderstrike v2 (LX3): its code, moved out 2026-11-19 to make room for the Arcane finale (smooth214, chan214, drawChan214, veil209, shake209, big209 stay on the page) ==========
+function eblade209(x0, y0, ang, L, w, E, a, seed) { if (a <= 0 || L < 2) return; const x1 = x0 + Math.cos(ang) * L, y1 = y0 + Math.sin(ang) * L, nx = -Math.sin(ang), ny = Math.cos(ang);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= a; ctx.lineCap = 'round'; [[w * 3.4, `rgba(${E.glow},.22)`, 18], [w * 1.6, 'rgba(120,200,255,.75)', 8], [w * .7, '#ffffff', 0]].forEach(([lw, c, bl]) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.shadowColor = E.sh; ctx.shadowBlur = bl; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); }); ctx.restore();
+  ctx.save(); ctx.globalAlpha *= a; for (let j = 0; j < 4; j++) { const u0 = hash184(seed + j + Math.floor(S.age * 18)) * .9, side = j % 2 ? 1 : -1, px = x0 + Math.cos(ang) * L * u0, py = y0 + Math.sin(ang) * L * u0; bolt202(px + nx * w * .6 * side, py + ny * w * .6 * side, px + Math.cos(ang) * 22 + nx * w * 2.2 * side, py + Math.sin(ang) * 22 + ny * w * 2.2 * side, 3, .7, E, seed * 7 + j); } ctx.restore(); }
+// round 210: Thunderstrike picked (dramatic). v2: a godzilla-ray power-up, "whum.... whum... whumwhumwhum", each whum a wave of light down the blade and a pulse at the point, faster and brighter; a held beat as arcs are sucked into the point; then the bolt from above and a full circular explosion (rings, arcs all round, sparks every way). Longer timeline: build 2.4 s, payoff at 2.75 s
+const PUL210 = [0, .65, 1.18, 1.56, 1.84, 2.04, 2.18, 2.28, 2.36, 2.42, 2.47, 2.51, 2.54].map((t, i, a) => [t, (a[i + 1] || t + .03) - t]);
+// round 214: the strike and the shockwave arcs rebuilt like real lightning (fixed shapes that flicker, never re-rolled scribbles); spark pops in the style the user liked (Zinogre-like crackle: bright points that flash and snap into a tiny crackling burst)
+const cut214 = (pts, f) => { const n = pts.length - 1, k = Math.max(1, Math.ceil(f * n)), o = pts.slice(0, k + 1), r = f * n - (k - 1); if (k <= n) { const a = pts[k - 1], b = pts[k]; o[k] = [lerp(a[0], b[0], clamp(r)), lerp(a[1], b[1], clamp(r))]; } return o; };
+const FLK214 = [[0, 1], [.06, .3], [.1, 1], [.15, .4], [.2, .85], [.27, .55], [.5, 0]];
+function strike214(tip, y, P, E) { if (P < -.1 || P > .5) return; const main = chan214(tip + 34, y - 150, tip, y, 7, 12, 16), br = [[3, -.7, 34], [6, .8, 28], [8, -.9, 20]].map(([i, da, L], j) => { const p = main[i], a = Math.atan2(y - (y - 150), tip - (tip + 34)) + da; return chan214(p[0], p[1], p[0] + Math.cos(a) * L, p[1] + Math.sin(a) * L, 20 + j, 5, 8); });
+  if (P < 0) { const f = (P + .1) / .1; drawChan214(cut214(main, f), .55, .7, E); br.forEach((b, j) => { const f2 = (f * 12 - [3, 6, 8][j]) / 4; if (f2 > 0) drawChan214(cut214(b, Math.min(1, f2)), .4, .5, E); }); return; }
+  let I = 0; for (let i = 0; i < FLK214.length - 1; i++) if (P >= FLK214[i][0] && P < FLK214[i + 1][0]) I = i === FLK214.length - 2 ? lerp(FLK214[i][1], 0, (P - FLK214[i][0]) / (FLK214[i + 1][0] - FLK214[i][0])) : FLK214[i][1];
+  drawChan214(main, I, 2.4, E); br.forEach(b => drawChan214(b, I * .8, 1.2, E)); if (P < .1) glow184(tip, y - 40, 60, (1 - P / .1) * .5, '220,240,255'); }
+function pops214(tip, y, P, E) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; for (let j = 0; j < 26; j++) { const t0 = .04 + hash184(j * 3) * 1.15, u = (P - t0) / .35; if (u < 0 || u >= 1) continue; const an = hash184(j * 5) * 6.283, d = 26 + hash184(j * 7) * 170, x = tip + Math.cos(an) * d, yy = y + Math.sin(an) * d * .78, fl = (1 - u) * (1 - u);
+    glow184(x, yy, 5 + 9 * Math.sqrt(u), fl * .8, '200,235,255'); ctx.fillStyle = `rgba(255,255,255,${fl})`; ctx.beginPath(); ctx.arc(x, yy, .8 + 1.4 * (1 - u), 0, 7); ctx.fill();
+    for (let q = 0; q < 4; q++) { const a = hash184(j * 11 + q) * 6.283, r1 = 2 + eOut(u) * (7 + 5 * hash184(j + q)), r0 = Math.max(1, r1 - 4), g = ctx.createLinearGradient(x + Math.cos(a) * r0, yy + Math.sin(a) * r0, x + Math.cos(a) * r1, yy + Math.sin(a) * r1); g.addColorStop(0, 'rgba(160,215,255,0)'); g.addColorStop(1, `rgba(240,250,255,${fl})`); ctx.strokeStyle = g; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * r0, yy + Math.sin(a) * r0); ctx.lineTo(x + Math.cos(a) * r1, yy + Math.sin(a) * r1); ctx.stroke(); } } ctx.restore(); }
+function curl215(tip, y, h, E) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; for (let j = 0; j < 6; j++) { const a0 = j / 6 * 6.283 + .3, R = (52 + 10 * hash184(j)) * (1 - .55 * h), pts = []; for (let i = 0; i <= 10; i++) { const u = i / 10, r = R * (1 - u), th = a0 + u * 1.5, jit = i && i < 10 ? (hash184(j * 23 + i + Math.floor(S.age * 14) * 5) - .5) * 3.5 * (1 - u) : 0; pts.push([tip + Math.cos(th) * (r + jit), y + Math.sin(th) * (r + jit) * .6]); }
+    const g = (al, w) => { const gr = ctx.createLinearGradient(pts[0][0], pts[0][1], tip, y); gr.addColorStop(0, `rgba(150,210,255,0)`); gr.addColorStop(.6, `rgba(170,220,255,${al * .6})`); gr.addColorStop(1, `rgba(245,252,255,${al})`); ctx.strokeStyle = gr; ctx.lineWidth = w; smooth214(pts); ctx.stroke(); };
+    const fl = hash184(Math.floor(S.age * 20) + j * 7) > .25 ? 1 : .5; g(.18 * fl, 5); g(.5 * fl, 2); g(.95 * fl, .8); } ctx.restore(); }
+function wisps216(tip, y, P) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; for (let j = 0; j < 14; j++) { const t0 = .12 + hash184(j * 13) * .45, u = (P - t0) / 1.1; if (u < 0 || u >= 1) continue; const a = hash184(j * 3 + 1) * 6.283, d = 50 + hash184(j * 9) * 130 + eOut(u) * 26, hx = tip + Math.cos(a) * d, hy = y + Math.sin(a) * d * .78 - u * 14, cv2 = (hash184(j) - .5) * 1.6, al = Math.sin(Math.min(1, u * 4) * Math.PI / 2) * (1 - u), pts = [];
+    for (let i = 0; i <= 6; i++) { const k = i / 6, back = k * (14 + 10 * hash184(j * 5)), px = hx - Math.cos(a) * back - Math.sin(a) * cv2 * k * k * 10, py = hy - Math.sin(a) * back * .78 + Math.cos(a) * cv2 * k * k * 10 + k * 3; pts.push([px, py]); }
+    const g = ctx.createLinearGradient(hx, hy, pts[6][0], pts[6][1]); g.addColorStop(0, `rgba(235,248,255,${al * .9})`); g.addColorStop(1, 'rgba(140,200,255,0)'); ctx.strokeStyle = g; ctx.lineWidth = 1.3; smooth214(pts); ctx.stroke(); glow184(hx, hy, 5, al * .7, '200,235,255'); } ctx.restore(); }
+FIN205.thunder2 = s => { const { ts, gx, tip, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, cx = (gx + tip) / 2, held = ts >= FP184 - .2 && P < 0;
+  let k = -1; PUL210.forEach((p, i) => { if (ts >= p[0] && p[0] < FP184 - .2) k = i; }); const c = (k + 1) / PUL210.length;
+  veil209(cx, y - 10, 340, 90, '3,5,14', P < 0 ? .3 + c * .55 : Math.max(0, .85 - P / 1.4 * .85));
+  if (P < 0) { const n = Math.floor(ts * 6); if (hash184(n) < .3 + c * .5) { const sx0 = cx + (hash184(n * 3) - .5) * 460, sy0 = y - 20 + (hash184(n * 7) - .5) * 40, life = (ts * 6) % 1, fl = life < .08 ? 1 : life < .14 ? .3 : life < .22 ? .8 : Math.max(0, 1 - (life - .22) / .3) * .5; ctx.save(); ctx.globalCompositeOperation = 'lighter'; veil209(sx0, sy0, 70 + 40 * hash184(n), 34, '130,175,255', fl * (.18 + c * .22)); veil209(sx0, sy0, 26, 14, '200,225,255', fl * (.15 + c * .2)); ctx.restore(); }
+    clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(gx, 0, tip, 0); g.addColorStop(0, `rgba(170,220,255,${c * .12})`); g.addColorStop(1, `rgba(200,235,255,${c * .3})`); ctx.fillStyle = g; ctx.fillRect(gx, y - 8, tip - gx, 16); });
+    PUL210.forEach((p, i) => { const a = ts - p[0]; if (a < 0 || a > .5 || p[0] >= FP184 - .2) return; const d = clamp(p[1] * .8, .08, .3), wx = lerp(gx, tip, clamp(a / d)), wa = clamp(1 - a / (d + .15));
+      if (wa > 0) clipB205(s, () => { ctx.globalCompositeOperation = 'lighter'; ctx.translate(wx, y); ctx.scale(1, .32); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 30); g.addColorStop(0, `rgba(245,252,255,${wa})`); g.addColorStop(.4, `rgba(170,220,255,${wa * .55})`); g.addColorStop(1, 'rgba(140,200,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 30, 0, 7); ctx.fill(); });
+      const ra = clamp(1 - a / .35); if (ra > 0) { ctx.save(); ctx.strokeStyle = '#c8ecff'; ctx.shadowColor = E.sh; ctx.shadowBlur = 8; ctx.globalAlpha *= ra * (.5 + .5 * i / PUL210.length); ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(tip, y, 4 + (1 - ra) * 30, 5 + (1 - ra) * 26, 0, 0, 7); ctx.stroke(); ctx.restore(); } });
+    glow184(tip, y, 6 + c * 16 + (held ? 10 : 0), .6 + c * .4, '210,240,255');
+    { const n = Math.round(4 + c * 9); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; for (let j = 0; j < n; j++) { const sp = .9 + c * .7, ph = (ts * sp + hash184(j * 7)) % 1, a0 = hash184(j * 3) * 6.283 + ph * 1.6, r = (1 - ph) * (44 + 30 * hash184(j)), a1 = a0 - .25, r1 = r + 10; const px = tip + Math.cos(a0) * r, py = y + Math.sin(a0) * r * .6, qx = tip + Math.cos(a1) * r1, qy = y + Math.sin(a1) * r1 * .6, g = ctx.createLinearGradient(qx, qy, px, py); g.addColorStop(0, 'rgba(150,210,255,0)'); g.addColorStop(1, `rgba(235,248,255,${.85 * Math.min(1, ph * 3)})`); ctx.strokeStyle = g; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(px, py); ctx.stroke(); } ctx.restore(); }
+    strike214(tip, y, P, E); if (held) { curl215(tip, y, clamp((ts - FP184 + .2) / .2), E); shake209(1.5); }
+    else shake209(c * 1.4 * (k >= 0 && ts - PUL210[k][0] < .1 ? 1 : .3)); }
+  else { strike214(tip, y, P, E); pops214(tip, y, P, E); wisps216(tip, y, P);
+    if (P < .4) veil209(tip, y, 300, 220, '235,246,255', (1 - P / .4) * .9);
+    { const oval = (r, fn) => { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(tip, y); ctx.scale(1, .78); fn(); ctx.restore(); };
+      const pr = P < .16 ? 52 * eOut(P / .16) : 52 * Math.max(0, 1 - (P - .16) / .5) ** .7; if (pr > 1) oval(pr, () => { const g = ctx.createRadialGradient(0, 0, 0, 0, 0, pr); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.35, 'rgba(200,238,255,.9)'); g.addColorStop(.7, 'rgba(90,170,255,.45)'); g.addColorStop(1, 'rgba(60,130,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, pr, 0, 7); ctx.fill(); });
+      [[0, 230, 22, 1], [.12, 170, 12, .7]].forEach(([d, Rm, w, k]) => { const v = (P - d) / .75; if (v <= 0 || v >= 1) return; const R = eOut(v) * Rm, a = (1 - v) ** 1.3 * k; oval(R, () => { const g = ctx.createRadialGradient(0, 0, Math.max(0, R - w), 0, 0, R + 2); g.addColorStop(0, 'rgba(120,200,255,0)'); g.addColorStop(.7, `rgba(150,215,255,${a * .55})`); g.addColorStop(.92, `rgba(245,252,255,${a})`); g.addColorStop(1, 'rgba(200,235,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R + 2, 0, 7); ctx.fill(); });
+        });
+      if (P < .3) { const u = P / .3; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; for (let j = 0; j < 14; j++) { const a = (j + hash184(j * 3) * .6) / 14 * 6.283, r0 = 20 + u * 60, r1 = r0 + 30 + 60 * hash184(j), xa = tip + Math.cos(a) * r0, ya = y + Math.sin(a) * r0 * .78, xb = tip + Math.cos(a) * r1, yb = y + Math.sin(a) * r1 * .78, sg = ctx.createLinearGradient(xa, ya, xb, yb); sg.addColorStop(0, `rgba(230,246,255,${(1 - u) * .7})`); sg.addColorStop(1, "rgba(150,210,255,0)"); ctx.strokeStyle = sg; ctx.lineWidth = 1.6 * (1 - u) + .4; ctx.beginPath(); ctx.moveTo(tip + Math.cos(a) * r0, y + Math.sin(a) * r0 * .78); ctx.lineTo(tip + Math.cos(a) * r1, y + Math.sin(a) * r1 * .78); ctx.stroke(); } ctx.restore(); }
+    }
+    hitR205(ux, y, E, 't10h'); if (P < 1) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; for (let q = 0; q < 30; q++) { const a = hash184(q * 11) * 6.283, D = 80 + 160 * hash184(q * 5), life = .55 + .4 * hash184(q * 2), u = P / life; if (u >= 1) continue; const d = D * (1 - Math.exp(-P * 7)), sp = D * 7 * Math.exp(-P * 7), L = Math.min(26, sp * .045) + 2, px = tip + Math.cos(a) * d, py = y + Math.sin(a) * d * .78, qx = px - Math.cos(a) * L, qy = py - Math.sin(a) * L * .78, g = ctx.createLinearGradient(qx, qy, px, py); g.addColorStop(0, 'rgba(120,200,255,0)'); g.addColorStop(1, `rgba(${q % 3 ? '210,240,255' : '255,255,255'},${1 - u})`); ctx.strokeStyle = g; ctx.lineWidth = 1.5 * (1 - u) + .4; ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(px, py); ctx.stroke(); } ctx.restore(); }
+    if (P < .9) shake209(8 * (1 - P / .9)); } };
+const whum210 = ts => { PUL210.forEach((p, i) => { if (ts >= p[0] && p[0] < FP184 - .2) once('w10' + i, () => { const f = 52 * semi(i * .7), v = .02 + .02 * i / PUL210.length; tone(f, 0, v, .5, 'sine', null, .07); tone(f * 2.01, 0, v * .35, .35, 'sine', null, .07); noise(0, .3, v * .3, 260, .7, 'lowpass'); }); });
+  if (ts >= FP184) once('w10x', () => { tone(48, 0, .05, 1.4, 'sine', null, .005); noise(0, 1, .03, 380, .6, 'lowpass', true); noise(0, .2, .02, 1500, 1, 'bandpass', true); }); };
+{ const B = big209('Lightning: Thunderstrike v2', 'Thunderstrike v2: a storm builds with sheet lightning; the sword powers up with a whum that speeds up, energy spiralling in; tendrils curl into the point; a bolt strikes and the point blows out in a circular explosion with crackling spark pops. (Sound on; use the Speed row to inspect.)', FIN205.thunder2); B.fb = 2.4; B.fp = 2.75; B.finAt = 3.0; B.fsnd = ts => whum210(ts); EN184.LX3 = B; }
+
+// ========== round 219 Reality rift (rejected: "not put together") and Shattered time, moved out 2026-11-19 ==========
+  rift(s) { const { ts, tip, gx, y, E, I } = s; if (ts < 0) return; const ux = I.x1 + 18, P = ts - FP184, rx = tip - 46, ry = y - 44, PU = [0, .3, .52, .7, .84, .95].map(f => f * FB184), held = ts >= FB184 && P < 0;
+    let o = 0; PU.forEach((p, i) => { if (ts >= p) o += eOut(clamp((ts - p) / .15)) / PU.length; }); const c = ts < FB184 ? o : 1;
+    veil209((gx + tip) / 2, y - 16, 330, 100, '8,4,18', P < 0 ? c * .7 : Math.max(0, .7 - P / 1.2 * .7));
+    let w = held ? 14 + Math.sin(ts * 30) * .8 : P < 0 ? 1 + o * 13 : P < .35 ? 14 : Math.max(0, 14 * (1 - (P - .35) / .08)); if (P < 0) shake209(held ? 1.2 : c * .8);
+    if (w > .2) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; veil209(rx, ry, 40 + w * 3, 40, '150,90,255', .25 + c * .35); ctx.restore(); const lens = () => { ctx.beginPath(); ctx.moveTo(rx, ry - 26); ctx.quadraticCurveTo(rx - w, ry, rx, ry + 26); ctx.quadraticCurveTo(rx + w, ry, rx, ry - 26); };
+      ctx.save(); lens(); const g = ctx.createRadialGradient(rx, ry, 0, rx, ry, 26); g.addColorStop(0, '#ffffff'); g.addColorStop(.35, '#f0e0ff'); g.addColorStop(.75, '#9a5ae8'); g.addColorStop(1, '#3a1470'); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = 'rgba(220,190,255,.9)'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
+      if (held) for (let j = 0; j < 5; j++) { const a = -Math.PI / 2 + (j - 2) * .5 + Math.sin(ts * 3 + j) * .05; ctx.save(); ctx.globalCompositeOperation = 'lighter'; const x1 = rx + Math.cos(a + Math.PI / 2) * 70, y1 = ry + Math.sin(a + Math.PI / 2) * 50, gr = ctx.createLinearGradient(rx, ry, x1, y1); gr.addColorStop(0, 'rgba(230,210,255,.45)'); gr.addColorStop(1, 'rgba(160,110,255,0)'); ctx.strokeStyle = gr; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(x1, y1); ctx.stroke(); ctx.restore(); } }
+    if (P < 0) flecks219(rx, ry, (ts % 1.2), 10, 40 + c * 40, .8, '190,150,255');
+    if (P >= .35 && P < .55) { const u = (P - .35) / .2; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = `rgba(255,240,255,${1 - u})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rx, ry - 30 * (1 - u * .5)); ctx.lineTo(rx, ry + 30 * (1 - u * .5)); ctx.stroke(); ctx.restore(); glow184(rx, ry, 16, 1 - u, '230,210,255'); }
+    if (P >= 0 && P < .5) { const fa = P < .06 ? P / .06 : 1 - (P - .06) / .44, fl = .8 + .2 * Math.sin(ts * 60); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; [[22, .12], [13, .2], [6, .5], [2.2, 1]].forEach(([lw, al], i) => { ctx.strokeStyle = i === 3 ? `rgba(255,250,255,${fa * fl})` : `rgba(180,120,255,${al * fa})`; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(rx, ry + 18); ctx.lineTo(tip, y); ctx.stroke(); }); ctx.restore(); }
+    if (P >= .08) { const Q = P - .08; if (Q < .35) veil209(tip, y, 280, 200, '240,220,255', (1 - Q / .35) * .8); bands219(tip, y, Q, 220, '170,120,255'); const v = clamp(Q / .8); glyphRing219(tip, y, eOut(v) * 150, (1 - v) * (1 - v), E, Q * 1.5); flecks219(tip, y, Q, 18, 150, .9, '200,160,255'); hitR205(ux, y, E, 'a19r'); if (Q < .8) shake209(7 * (1 - Q / .8)); } },
+  shatter(s) { const { ts, tip, gx, y, E, I } = s; if (ts < 0) return; const P = ts - FP184, held = ts >= FB184 && P < 0, b = ts < FB184 ? ts / FB184 : 1;
+    window.WARP = P >= 0 ? 1 : held ? .07 : lerp(1, .18, b * b);
+    if (P < .02) { const d = held ? 1 : b; ctx.save(); ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = `rgba(120,100,165,${d * .62})`; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+    const shards = []; for (let i = 0; i < 12; i++) { const a0 = (i + hash184(i) * .3) / 12 * 6.283, a1 = (i + 1 + hash184(i + 1) * .3) / 12 * 6.283, am = (a0 + a1) / 2, r1 = 60 + hash184(i * 5) * 40, r2 = 170, p = (a, r) => [tip + Math.cos(a) * r, y + Math.sin(a) * r * .7]; shards.push({ pts: [[tip, y], p(a0, r1), p(am, r2), p(a1, r1)], am }); }
+    if (held) { const f = clamp((ts - FB184) / (FP184 - FB184)); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; shards.forEach((sh, i) => { const L = clamp(f * 1.6 - hash184(i) * .5); if (L <= 0) return; const q = sh.pts[1]; ctx.strokeStyle = `rgba(235,220,255,${.5 + .5 * L})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tip, y); ctx.lineTo(lerp(tip, q[0], L), lerp(y, q[1], L)); if (L > .6) { const r = sh.pts[2], k = (L - .6) / .4; ctx.lineTo(lerp(q[0], r[0], k), lerp(q[1], r[1], k)); } ctx.stroke(); }); ctx.restore(); glow184(tip, y, 10, .9, '230,210,255'); }
+    if (P >= 0 && P < .02) once('a19shot', () => { const c2 = document.createElement('canvas'); c2.width = cv.width; c2.height = cv.height; c2.getContext('2d').drawImage(cv, 0, 0); S.shot219 = c2; });
+    if (P >= 0 && S.shot219 && P < 1) { if (P < .25) veil209(tip, y, 280, 200, '235,215,255', (1 - P / .25) * .7); shards.forEach((sh, i) => { const u = clamp(P / .9), d = eOut(u) * (90 + 70 * hash184(i * 3)), rot = (hash184(i * 9) - .5) * 1.6 * u, dx = Math.cos(sh.am) * d, dy = Math.sin(sh.am) * d * .7 + u * u * 30, cxs = (sh.pts[1][0] + sh.pts[2][0] + sh.pts[3][0] + tip) / 4, cys = (sh.pts[1][1] + sh.pts[2][1] + sh.pts[3][1] + y) / 4;
+        ctx.save(); ctx.globalAlpha *= 1 - u; ctx.translate(cxs + dx, cys + dy); ctx.rotate(rot); ctx.translate(-cxs, -cys); ctx.beginPath(); sh.pts.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.save(); ctx.clip(); ctx.drawImage(S.shot219, 0, 0, W, H); ctx.restore(); ctx.strokeStyle = 'rgba(220,190,255,.9)'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore(); });
+      bands219(tip, y, P, 200, '170,120,255'); flecks219(tip, y, P, 16, 140, .9, '200,160,255'); hitR205(I.x1 + 18, y, E, 'a19s'); if (P < .6) shake209(6 * (1 - P / .6)); } } });
+EN184.AR1 = bigA219('Arcane: Reality rift', 'Arcane as locked, finale Reality rift: the area darkens and the air above the point cracks into a glowing violet tear that opens wider with each pulse, light flecks drifting out; a held beat as it gapes, rays streaming from it, trembling; a torrent of arcane light crashes down from the rift onto the point and blows out in a violet nova (soft rings, a ring of glyphs, a flash); the rift snaps shut with a bright line.', FIN205.rift, 2, 2.35, sndA219('rift'));
+EN184.AR3 = bigA219('Arcane: Shattered time', 'Arcane as locked, finale Shattered time: everything slows down (the band, the sparks, the glow) and the colour drains to violet; a held beat in near-total stillness as cracks race out from the point; reality shatters like glass, panes of the frozen scene flying outward as violet light, colour and time snapping back. (Slows the whole page on purpose.)', FIN205.shatter, 1.3, 1.6, sndA219('shatter'));

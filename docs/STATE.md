@@ -1,6 +1,6 @@
 # Session state — Dopamine Loot
 
-_Last checkpoint: 2026-11-19 (stop point: Cooking skill-up DONE, next Enchanting). Kept short on purpose (the start-up hook loads it into every session): status, the current
+_Last checkpoint: 2026-11-20 (stop point: Enchanting skill-up DONE, next First Aid). Kept short on purpose (the start-up hook loads it into every session): status, the current
 focus and pointers. Detail lives in the workstream file named below; history in git log._
 
 ## Where things stand
@@ -10,11 +10,15 @@ focus and pointers. Detail lives in the workstream file named below; history in 
   to-do order is plan.md "1.4.0 order" (unchanged): 1 crafting API checks (done), **2 skill-up gains (now)**, 3 the
   Create All pile, 4 gathering, 5 the loot window, 6 build the professions; 7-10 XP, rep, level-up, build; 11 dungeon
   recap; 12 release. Crafting redesign: design DONE (`docs/mockups/craft-compare.html`).
-- **Current focus: skill-up gains. Next: Enchanting. Read `docs/skillup.md` first, its "Next: Enchanting (start here)"**
-  (Enchanting's craft ring to avoid, how Cooking ran, the page cap housekeeping to do first), then brainstorm. Don't read
+- **Current focus: skill-up gains, next First Aid.** **Enchanting DONE** (2026-11-20, rounds 184-238, page
+  `docs/mockups/enchant.html`): the clean dark runeblade with a sliding rune band, an element per finished sword (Fire /
+  Lightning / Arcane, rotating after each finale), each with its own ring, add-ons, finale (Spear thrust / Thunderstrike
+  v2 / Starfall) and sound (Kindle + Blaze crack / Power-up + Storm with the whums / Mana swell + Glass rain); the sound
+  lessons are in `docs/skillup.md` (Enchanting entries at the end). `skillup-p2.html` is near its 524,288-byte cap: for
+  First Aid, archive old code first or prune a page of its own like enchant.html. The user views on the phone now (`/view`). Don't read
   plan.md or `docs/skillup-rounds.md` unless an old round's detail is needed. Done: Herbalism, Fishing, Skinning, Mining,
-  Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering, **Cooking** (2026-11-19, rounds 167-183). Left: Enchanting,
-  First Aid; then revisit Alchemy and Tailoring (the user, 2026-11-19); then 1.4.0 item 3 (the Create All pile).
+  Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering, Cooking, **Enchanting**. Left: **First Aid**; then
+  revisit Alchemy and Tailoring (the user, 2026-11-19); then 1.4.0 item 3 (the Create All pile).
   **Before any design pitch, use the kit skill `wow-design-ideas`** (updated after Cooking, see Gotchas).
 - Side projects (not 1.4.0, don't read unless asked): `docs/side-projects/` (murloc/: the murloc + peon companion).
 
@@ -47,6 +51,8 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Paste `docs/curseforge.md` into CurseForge; update the release copy to 1.3.1 in the app.
 
 ## Recent history (newest first)
+- 2026-11-20: Enchanting skill-up DONE (rounds 184-238, 55 rounds): the runeblade with three rotating elements,
+  each with its own ring, add-ons, finale and sound; sound lessons: a tone leads, the finale lands as an impact, no long roars.
 - 2026-11-19: Cooking skill-up DONE (rounds 167-183, 17 rounds; the user's most successful session): the angled
   board cleaver (Carrot, Cucumber, Sausage, rotating after a finale), elbow-arc chop with hit-stop and a flipping slice; slice
   ripple + still shaker, apex shing, board shockwave + chunk spray; finale slam, slash, mince, flip, stuck, the mince into a

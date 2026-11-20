@@ -4,10 +4,10 @@ The current focus. Read this file (not plan.md) when working on skill-ups. Page:
 only page; its `<h1>` says the round). Every round is in `docs/skillup-rounds.md` (read only for an old round's detail).
 Design rules that apply everywhere are in CLAUDE.md and memory.
 
-## Next: Enchanting (start here)
+## Next: First Aid (start here)
 
 Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering, **Cooking**
-(2026-11-19). Left: **Enchanting**, then **First Aid**; then revisit **Alchemy and Tailoring** with `wow-design-ideas`
+(2026-11-19), **Enchanting** (2026-11-20, rounds 184-238, page `docs/mockups/enchant.html`; its entries are at the end of this file). Left: **First Aid**; then revisit **Alchemy and Tailoring** with `wow-design-ideas`
 (user, 2026-11-19). Optional revisits: the Mining and Leatherworking notes below.
 
 - **Before any pitch: use the kit skill `wow-design-ideas`** (updated after Cooking: section 3b on satisfying motion, section
@@ -18,7 +18,342 @@ Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alche
   the picks (several pitches in a row when the user wants more); critique my own build against the gates before redesigning;
   when the user couldn't decide I recommended one with reasons; then look, motion (menus of named refinements), add-ons (each
   its own option), finale (the user's idea arranged on the formula), a cleanup pass on stills, sound (lead with one set).
-- **Page first:** `skillup-p2.html` is at 523.5 KB of the 524,288-byte cap. Before Enchanting's first round move Cooking's
+- **Round 184 (2026-11-19, in progress):** Cooking's code moved to the old-rounds file (page 476 KB, then 513 KB with
+  r184). Pitched A Blade glow, B Runed rod, C Dust to arcane glass, D Crystal spine, E Arcane tether, F Vellum scroll,
+  G Runestone frame, H Ley line; the user picked B, C, F, G, built as `r184(K)` (`EN184`, profile `enb184`, page keys
+  1-4) with sketched finales and placeholder sounds. The user liked C's dust idea (not its build) and F, wanted more ideas.
+- **Round 185:** B and G moved to the old-rounds file. Pitched I Essence rolls the dust, J Dust through a stencil, K Dust
+  runs the tablet, L Dust brush stroke; picked I, J, L, built as `EN184.I/J/L` beside C and F (keys 1-5: C, F, I, J, L).
+  Page 514 KB. The user disliked all three (moved out). What they want: **dust as a material worked by something each
+  skill-up, like Engineering's cogs and Cooking's slices, not a fill sliding right**; from F they liked the unrolling.
+- **Round 186:** pitched M Rune seal on the scroll, N Essence merge, O Wand carving, P Shard grindstone; picked N and O,
+  built as `EN184.N/O` (keys 3-4; C and F kept as 1-2). Page 515 KB. The user wanted a complete pivot (no dust).
+- **Round 187:** C, F, N, O moved out. Pitched Q Sword in the stone, R Riffling tome, S Levitating bridge, T Animated broom,
+  then U Animated armor, V Sword vs. dummy, W Golem and boulder; picked R, T, U, V, W, built as `EN184.R/T/U/V/W`
+  (keys 1-5; helpers `pos187`, `floor187`). Page 512 KB. The user: "not really hitting", back to the vellum or dust.
+- **Round 188:** round 187 moved out; C and F restored (keys 1-2). Built M Seal stamp (F's unrolling + a brass seal dipped
+  in dust that slams onto the fresh vellum), C2 Dust to glass v2 (bigger pouch and rod, glass in chunks), F2 Vellum scroll
+  v2 (bigger scroll, weighty roll, bold sigils) as `EN184.M/C2/F2` (keys 3-5; helpers `scroll188`, `roll188`,
+  `front188`, `sigilsOn188`, `liftOff188`). Page 519 KB (near the cap: move unpicked options out first next round).
+- **Round 189 (the user's idea):** runes written across a broadsword; at the finale the sword powers up with the complete
+  enchantment. Built as `EN184.SW` (key 1; `blade189`, `hilt189`, `rod189`): the blade is the bar (hilt at the start, point
+  at the recipe), an enchanting rod traces each rune; finale: runes ignite, edges glow, held glint at the point, power-up
+  flash + shockwave + edge sparks + beam into the recipe, the enchant glow and a sheen stay on the blade. M kept as key 2;
+  C, F, C2, F2 moved out. Page 505 KB. The user: go this direction, with structurally different builds.
+- **Round 190:** M moved out. Built four more sword builds on shared helpers (`sword190` local sword, `fin190`,
+  `runeB190`, `drawRune190`, `power190`): SB runes fly from a tome by the hilt, SC drawn from a scabbard (hilt pulled
+  toward the recipe, the mouth's rune ring inscribes; finale: scabbard drops, the sword flips to point at the recipe),
+  SD reforged from shards (ghost outline, a heap under the hilt, shards snap in with seam runes), SE a rune ring slides
+  along the blade printing runes. Keys 1-5: SW, SB, SC, SD, SE. Page 515 KB.
+- **Round 191: picked SE (the rune ring scan).** The user: like Cooking's ingredients, each finished sword gets its own
+  element with its own finale: arcane (violet), fire (red-orange), lightning (light blue). Rounds 189-190 moved out; SE
+  rebuilt as `se191(el)` with palettes `EL191` (`sword191`, `rune191`, `bolt191` smooth lightning arcs, `flames191`):
+  arcane = beam; fire = edge flames build, the blade bursts into flame, a fireball arcs into the recipe, embers, it
+  keeps burning; lightning = arcs crackle between runes, a flash, three arcs from along the blade into the recipe, arcs
+  keep crawling. Keys 1-4: Arcane, Fire, Lightning, rotating (`elCur191`, a new element after each finale, never the
+  same twice). Page 501 KB. The user: "pretty cool start"; next general improvements (look, cohesion, the skill-up's impact).
+- **Round 192: SE v2** (`se192`, `sword192`, `band192`): a beveled sword (two-tone bevels, fuller, flared gold guard with an
+  element gem, wrapped grip, pommel, a shadow); the enchanted stretch carries the element tint + a charged fuller line; the
+  ring is a solid band with rune ticks. Each skill-up: charge (tightens, spins up, sparks drawn in), a hair of pull-back,
+  a snap with a smear, an overshoot and clamp; the hit: freeze, squash, the rune burns in white, a shockwave ellipse, a
+  spark spray, a jolt, a pulse back to the guard gem. Keys 1-4 v2 (Arcane, Fire, Lightning, rotating), 5 v1 rotating.
+  Page 517 KB (near the cap). The user: impact good, but the design looked unchanged.
+- **Round 193:** v1 moved out; `se192(el, style)` takes a look (`SWD193`, `BND193`): Dark runeblade (`swordDark193`:
+  blackened steel, element lines along the edges behind the ring, angular iron guard, big gem) and Icon style
+  (`swordIcon193`: thick dark outline, flat two-tone shading, bold highlight, chunky gold hilt; `stones193` rune stones
+  orbit instead of a band). Keys 1-3 Dark, 4-6 Icon (Arcane, Fire, Lightning), 7 v2 Arcane. Page 514 KB.
+- **Round 194: Dark runeblade picked; "heavily clean up the design"; work on Fire only for now (other elements later).**
+  Style `clean` (`swordClean194`, `bandClean194`, knobs in `se192` keyed on `style === 'clean'`): slimmer crisp blade with a
+  faceted point and one bevel line, no shadow blob, no tinted wash (thin element edge lines + crisp bright runes, no dark
+  grooves or halos), a readable iron hilt (straight guard, socketed gem, banded grip, round pommel), a crisp ring with
+  little bloom, calmer steady flames after the finale. Keys: 1 Clean Fire, 2 Dark Fire.
+- **Round 195** (the user: "definitely going the right way"; wants ideas for the ring, animations and rune placement, and
+  liked the Icon look's spinning stones). Cleanup moved sigils, vellum, dish, v2/Dark/Icon swords out (se192 now falls back
+  to the clean sword and band). `se195(kind)` on the clean Fire sword (`fireFin195` shared fire payoff, `heat195`):
+  A current band (`EN184.A` = Clf); B orbiting rune stones (`stones193`): the front stone breaks orbit and slams in as an
+  inlaid rune in a square socket, an ember from the gem becomes a new stone; C revolver collar: indexes a rune face, slides,
+  deposits it in an ember-gold cartouche; D branding clamp: jaws heat iron to white, clamp, brand a big rune (steam),
+  it cools to ember. Keys 1-4. Page 517 KB.
+- **Round 196:** the user kept A (the clean band) and asked for variations of it. B, C, D moved out. se192 gained hooks:
+  `cln` (any style starting with "clean"), `PL195[style]` (rune y offset, scale, a `pre` draw), `LEAN195` (the snap's
+  smear) and `CARRY195` (the next rune). A2 `bandTilt196` + an engraved script line with diamond stops; A3 `bandDouble196`
+  + two staggered rune rows on the bevels; A4 `bandCarry196` (the next rune glows inside the band, handed over on the
+  hit). `wrap196` sets names/descs. Keys 1-4: A, A2, A3, A4. Page 509 KB.
+- **Round 197: A locked as the base** ("we can easily do add-ons"); add-ons per element, Fire first. Hook: se192 calls
+  `window.ADD197(state)` at the end of its draw; `wrapAdd197(name, desc, fn)` on `BASE197 = se192('fire', 'clean')`.
+  `ADDF197`: embers (trail + burst + sizzles, each skill-up), heat (white-hot bloom on the steel round the new rune +
+  a warm afterglow, each skill-up), runeflame (a flame jets from the new rune and dances there until the next, each
+  skill-up), wave (a wall of flame sweeps the blade as it fires, finale). Keys 1-4 add-ons, 5 plain A. Page 515 KB.
+- **Round 198:** the user kept **Heat bloom**; finales wait until every element's add-ons are done (Fire first). Heat bloom
+  fixed: the afterglow is a rounded glow wrapping the ring (it was a square that ended before it), and every hit in
+  `S.hits` blooms and fades out fully over 1.6 s (se192's `hitT` stops at .6 and `o` moves on, which cut it short).
+  New, each on Heat bloom (`both198`): `ringfire` (flame tongues round the band, flare on charge, burst on the hit),
+  `trail` (flames along both edges behind the snap, burning down), `scorch` (a lasting soot halo + cooling rim per rune).
+  Keys: 1 Heat bloom, 2 + Ring of fire, 3 + Fire trail, 4 + Scorch halo. Page 519 KB (near the cap).
+- **Round 199:** the user's idea: the ring ripples slightly like a living flame (`bandFlame199`, amplitude `FLAMEAMP199`:
+  a wavering outline, the top licking up in a flicker, red edge / orange body / pale core, the odd ember; style `cleanF`,
+  `BASE199`, `flame199(name, desc, amp)` with Heat bloom). The user also saw a square edge while the ring moves: it was
+  the clean sword's glowing edge lines ending flat at the ring (hidden by the ring's glow at rest); they now fade out over
+  their last 18 px. Unpicked round-197 add-ons moved out. Keys: 1 subtle (.7), 2 stronger (1.4), 3 current ring, 4-6
+  Heat bloom + Ring of fire / Fire trail / Scorch halo. Page 519 KB.
+- **Round 200: Fire locked so far = the subtle living-flame ring (amp .7) + Heat bloom** (Ring of fire, Fire trail,
+  Scorch halo not picked). The user wants add-ons for the skill-up hit: `hits200` (per hit in `S.hits`), `ADDF197`
+  fireWave (a flaming shockwave ellipse), flare (a fan of flame tongues round a white core), fountain (a dense spray of
+  molten sparks), flash (a white-hot flash, the blade catches the light, warm firelight flares round the sword);
+  `hit200` wraps them on the locked base. Keys 1-4, 5 the base alone.
+- **Round 201: Fire LOCKED** = the subtle living-flame ring (`bandFlame199`, amp .7) + Heat bloom + Fire shockwave (K1) +
+  Flame flare (K2): `EN184.FIRE`. Unpicked code moved out (PL195 kept as `{}`, `LEAN195`/`CARRY195` still declared).
+  **Lightning, the same way:** base = storm ring (`bandStorm201`: fast shimmer, flicker, little arcs jumping off; style
+  `cleanS`) + Charge glow (`ADDF197.charge`, blue-white bloom + crackle, the Heat bloom counterpart); hit add-ons arcBurst
+  (arcs to bare steel and the last runes), chain (rune to rune back to the gem), staticWave (a ring of short arcs); each
+  skill-up crawl (arcs along the edges for a second). `storm201` wraps them. Keys 1 base, 2-5 add-ons, 6 Fire locked.
+  Page 521 KB. Then Arcane the same way; finales after all three elements' add-ons.
+- **Round 202: Lightning kept** = storm ring + Charge glow + Arc burst (S1) + Chain to the gem (S2) + Spark crawl (S4).
+  The user: improve the electricity on the ring and the arc burst. `bolt202` (irregular bends on a smooth path, tapered,
+  forks, strikes in ~40 ms via `grow`, flickers and re-strikes, glow/body/white core); `bandStorm202` (shimmering band,
+  arcs hugging its surface, flaring hot spots, branching discharges kept below the header); arcBurst re-strikes three
+  times with target flashes; chain and crawl use bolt202. `BASE202`, `zap202(name, desc, ZAP202)`; old sparks kept as
+  `EN184.Z0` (`OLD202`). Keys 1 normal, 2 intense, 3 old, 4 Fire locked. Leatherworking r96/r97 + home184 moved to the
+  old-rounds file for room. Page 522 KB.
+- **Round 203: Lightning LOCKED** = Z1 (`EN184.STORM` = `zap202(..., 1)`): storm ring (`bandStorm202`) + Charge glow +
+  Arc burst + Chain to the gem + Spark crawl, `bolt202` at normal strength. Replaced Lightning code and the old
+  Leatherworking helpers (tok90..FIN96; ts95 kept) moved out. **Arcane, the same way:** base = mana-weave ring
+  (`bandWeave203`: two violet strands twisting round each other, breathing, star glints running round; style `cleanA`)
+  + Arcane surge (`ADDF197.surge`: violet-white bloom + a twinkling star glint on the new rune). Hit add-ons ripple
+  (three rings out), glints (a burst of spinning star glints), echo (a ghost of the rune lifts and grows), stream (mana
+  flows down the fuller into the gem); each skill-up runeWave (a shimmer runs back along the runes). `arc203` wraps them.
+  Keys 1 base, 2-6 add-ons. Page 519 KB. After Arcane: finales for all three elements.
+- **Round 204: Arcane kept** = mana-weave ring + Arcane surge + Rune echo (R3) + Mana stream (R4) (`kept204`). The user
+  asked for another round, not counterparts of the other elements: blink (the band vanishes mid-snap, an afterimage, it
+  reappears in a flash; `BLINK204` scales the band via style `cleanA2`), missiles (three arcane missiles fly from the
+  gem into the band while it charges), prism (the new rune splits into rose/ice/violet copies and recombines), trail
+  (star glints along the snap's path). `arc204(name, desc, fn, blink)`, `BASE204`. Keys 1 kept, 2-5 add-ons.
+  **Page 523 KB: at the cap; move unpicked code out before the next round.**
+- **Round 205: Arcane LOCKED** = mana-weave ring + Arcane surge + Rune echo + Mana stream + Arcane missiles (Q2) +
+  Prismatic split (Q3). `LOCK205[el]` holds each element's locked add-ons (Fire: heat, fireWave, flare; Lightning:
+  charge, arcBurst, chain, crawl; Arcane: surge, echo, stream, missiles, prism); `BASES205` the locked bases. **Finales**
+  (`FIN205`, `fin205(el, name, desc, fn)`; se192 switches `NOPAY205` (no old payoff) and `NOFL205` (no old build-up
+  flames)): Fire molten (heat crawls out, runes melt into a molten line, white held beat, a ring of flame + fireball,
+  cools) and engulf (the user's "bursts into flame": flames creep along, sink to embers, the whole sword bursts, a stream
+  of fire into the recipe, settles); Lightning sky (arcs build, dark held beat, a big branching bolt from above onto the
+  point, discharge into the recipe) and ball (laps guard to point faster, the band collapses into a ball, it shoots into
+  the recipe and bursts); Arcane barrage (missiles stream faster, rune ghosts lift in rose/ice/violet, collapse into the
+  point, beam + ripples) and well (mana streams into the gem, an orb swells, a wave down the blade, a beam). Keys 1-6.
+  To fit, the page's full-line comments were stripped (archived in the old-rounds file) and unpicked add-ons moved out.
+  **Page 524,052 bytes, 236 under the cap: anything new needs code moved out first.**
+- **Round 206:** the user: the finales aren't dramatic enough; Fire first. Keep Molten core's heating; a new payoff from
+  the user's reference image (a sword thrust like a spear, fire tearing backward off the blade in a big billowing plume,
+  white core to yellow, orange, red, smoke, embers streaking back). `FIN205.spear(big)`: Molten core's build-up and held
+  beat, then the whole scene lunges 24 px (`THX205`, a new offset in se192) so the point pierces the recipe, a solid
+  widening fire cone + billowing flame clouds + ember streaks behind the hilt (`plume206`), then it eases back, the plume
+  breaks up, the steel cools. Lightning and Arcane finales (sky, ball, barrage, well) moved to the old-rounds file for
+  room; redo them after Fire. Keys 1 spear, 2 bigger plume, 3 Molten core. Page 520 KB.
+- **Round 207: Fire finale LOCKED = Spear thrust, bigger plume (`EN184.SPB`).** se192's old payoff block, stones193, SP
+  and FM moved out. Lightning finales (`FIN205.storm`, `FIN205.over`; `dark207` a soft elliptical darkening/flash):
+  Storm call (the module darkens, distant bolts behind, arcs race between runes; held dark beat with one spark at the
+  point; three branching bolts strike the guard, blade and point with a flash; arcs discharge into the recipe) and
+  Overcharge (the blade glows, arcs lash out in all directions; held beat as they're pulled into the point; one massive
+  branching discharge plus three arcs from along the blade into the recipe, two shockwave rings, arcs burst round the
+  recipe). Keys 1 Storm call, 2 Overcharge, 3 Fire locked. Page 521 KB.
+- **Round 208:** the user asked for more Lightning finale ideas; built all four picks: rail (runes charge like capacitors,
+  a white sphere swells at the point, a straight beam through the recipe with two arcs along it), tspear (arcs coil round
+  the blade, it lunges via `THX205` with a forked bolt leading and a shredded wake of arcs), chainR (an arc hops rune to
+  rune, growing; the last hop arcs up and over into the recipe and branches down to the ground), tesla (Jacob's-ladder
+  rungs climb the blade; a big arc whips up and over into the recipe). Keys 1-6: Storm call, Overcharge, Railgun,
+  Thunder spear, Chain reaction, Tesla coil. For room, the locked Fire finale code (molten, plume206, spear206, SPB) and
+  the unused FIRE/STORM option lines moved to the old-rounds file (rebuild Fire's finale from there). Page 522 KB.
+  Lesson: the point sits ~14 px from the recipe, so any payoff "from the point" must arc up and over or start along the
+  blade, or it doesn't read.
+- **Round 209:** the user: none of the six read as dramatic; "2 new big and bold ideas, much more dramatic". The strip-sized
+  finales moved out. Both new ones break far out of the bar (se192 gained `THY205` for a vertical shake; `shake209`,
+  `veil209` soft elliptical darkening/flash, `eblade209` an energy blade, `big209` wrapper): lblade (the area darkens, a
+  150 px crackling energy blade grows from the point and rises steeply, hums, then slashes down through the recipe in a
+  giant arc with afterimages, a white flash, a hard shake, sparks; it retracts) and thunder (a wide dark storm with
+  distant bolts flashing in it; a dark held beat; a massive branching bolt slams the point from far above, the whole
+  module flashes white, a 230 px shockwave dome of arcs, hard shake, sparks rain). Keys 1-2. Page 516 KB.
+  Lesson: the phone/pane screen is narrow (~500 px): big effects must go up or around, not far to the right.
+- **Round 210: Thunderstrike picked.** The user: a circular explosion instead of the arc, and a godzilla-ray power-up
+  ("whum.... whum..... whumwhumwhum"). `FB184`/`FP184` are now `let` and r184's draw sets them per option (`Z.fb`, `Z.fp`,
+  default 1.3/1.65); Thunderstrike v2 (`FIN205.thunder2`, `EN184.LX3`) uses fb 2.4, fp 2.75, finAt 3.0. Pulses `PUL210`
+  (13 whums, 0.65 s apart slowing to 0.03 s), each a wave of light down the blade, a pulse ring at the point, the blade
+  and point brighter, a small shake; a held beat (FP-.2) with arcs sucked into the point; then the bolt from above, a
+  white core, three full expanding rings, 14 radial arcs, sparks in every direction, a hard shake. Sound `whum210` (a low
+  sine whum rising in pitch, louder each time; a deep boom + crack). Keys 1 v2, 2 v1. Page 521 KB.
+- **Round 211:** the user likes v2; fixes: the power-up waves looked "square-y" (a gradient rectangle with a hard
+  front) and are now soft oval glows; the blade wash is a gradient guard→point; the explosion was laggy at the end:
+  radial arcs 14 → 9 without branches, sparks 70 → 34, ring blur only on the first ring, the second sky bolt without
+  branches (worst explosion frame ~6 ms in the pane).
+- **Round 212:** the user: improve the final explosion. Replaced the white dot, thin rings and straight radial arcs with:
+  a plasma fireball (white → ice blue, swells in .16 s and fades), two thick soft shockwave bands (radial gradients,
+  230 and 170 px), arcs crawling along the first band's edge as it grows, 14 light streaks fading toward their tips, and
+  22 twinkling static stars that linger. Gradients only, no shadow blur (worst frame ~5 ms). Old explosion in the
+  old-rounds file.
+- **Round 213:** the user: the sparks around and before the explosion need work. Power-up: energy streaks spiral into
+  the point (4 → 18 as the charge builds, gradient-tailed). Held beat: six steady tendrils reach in from round the point
+  (rate 12, no per-frame reroll). Explosion: the gravity-falling dots became 30 bright streaks that burst outward and slow
+  to a stop (drag, gradient tails). Lightning blade (LX1) and Thunderstrike v1 (LX2) moved out for room (page was over the
+  cap); the page shows only `LX3`. Worst frame ~5 ms (warm). Page 520 KB.
+- **Round 214:** the user meant the bolt flash right before the shockwave and the arcs during/after it (re-rolled
+  scribbles). Rebuilt like real lightning: `strike214` a fixed channel (`chan214`, smoothed, never re-rolled) with three
+  fixed branches: a thin leader crawls down in the last .1 s of the held beat, then the return stroke flashes and
+  re-strikes on the same path (`FLK214` flicker) and fades by .5 s; `ringArcs214` arcs that follow the shockwave curve,
+  holding shape and flickering. The user likes Zinogre-style sparks (a style cue only): `pops214`, 26 bright points that
+  flash and snap into a tiny crackling burst around the blast over 1.2 s (replacing the twinkling stars). Whirl-ins
+  slowed (speed .9 + .7c, at most 13). Worst frame ~4.5 ms. Page 523 KB.
+- **Round 215:** the user: the lightning arcs still look "too rectangular" (and likes the end sparks). Guess: every arc's
+  glow was one wide, flat, hard-edged translucent stroke round the core, which reads as a rectangular band. `bolt202` and
+  `drawChan214` now draw a soft falloff (three wide strokes at low alpha, then the body and a thin core), no shadow blur.
+  Added a **speed control** (Normal, ¼, very slow, Pause; `window.SLOWMO` scales `frame`'s dt) under the moment buttons
+  so the user can freeze the fast moments and point at them.
+- **Round 216:** with the speed control the user caught it: (1) the arcs round the point in the held beat (short
+  squiggles starting/stopping abruptly) and (2) the distant storm bolts, which start and end mid-air ("clipped within an
+  invisible square window"). (1) `curl215`: six tendrils curl inward along a spiral into the point, each fading from
+  nothing at its outer end to bright at the point, slight jitter, flicker. (2) the storm bolts are gone; the storm shows
+  as sheet lightning (soft flashes lighting patches of the dark, flicker pattern). The strike from above stays. LX3's
+  desc shortened to fit: page 524,246 bytes, 42 under the cap (move code out before adding anything).
+  Lesson: an effect that ends mid-air with a hard tip reads as clipped; fade ends or start them off-screen.
+- **Round 217:** the user also meant the arcs riding the shockwave round the final sparks; wants "wispy remainder sparks".
+  `ringArcs214` removed; `wisps216`: 14 wisps drift out and up after the blast, each a bright head with a softly curving
+  tail fading to nothing, over ~1.1 s. Spark pops kept. Unused option lines (L1, K1, K2, Z1, R0) moved out for room.
+  Page 523 KB.
+- **Round 218:** the user's screenshot showed the culprit after the explosion: the spark pops' crackle lines (5 curved
+  lines up to ~20 px, spider-leg-like). `pops214` redesigned: a bright point blooming into a soft glow, with 4 tiny flecks
+  (≤12 px, gradient tails) flicking outward, over .35 s; no long lines. Old version in the old-rounds file.
+- **Lightning finale LOCKED (2026-11-19) = Thunderstrike v2, `EN184.LX3`** (`FIN205.thunder2`, fb 2.4 / fp 2.75 / finAt 3.0):
+  sheet-lightning storm; whum power-up (`PUL210`, soft oval waves down the blade, point pulses, energy streaks spiralling
+  in); held beat with `curl215` tendrils curling into the point and the leader descending; `strike214` fixed-path strike
+  with re-strikes; plasma fireball, two soft shockwave bands, light streaks, outward spark streaks, `pops214` soft pops,
+  `wisps216` drifting wisps; `whum210` sound. **Next: the Arcane finale**, big and bold from the start (the lessons
+  below), then the rotating whole (Fire / Lightning / Arcane, a new element after each finale) and the sound pass.
+  Lessons from Fire and Lightning finales: strip-sized effects never read as dramatic; go far out of the bar (up and
+  around, the screen is narrow); nothing may end mid-air with a hard tip; arcs re-rolled every frame look like scribbles,
+  hold a shape and flicker instead; glow must fade softly, never a flat hard-edged band; give the user the Speed row to
+  point at fast moments.
+- **Round 219: Arcane finales**, big from the start (the Lightning finale code is parked in the old-rounds file like
+  Fire's; `smooth214`, `chan214`, `drawChan214`, `veil209`, `shake209` stay). `bigA219(name, desc, fn, fb, fp, snd)`.
+  `rift` (Reality rift: darkness, a violet tear above the point opening with six pulses, flecks; held: it gapes with
+  rays; a torrent of light down onto the point, a nova of soft bands + a glyph ring; the rift snaps shut), `nova` (runes
+  lift off and orbit the sword faster with afterimages; held: frozen, tinted violet; they slam back, a nova of two glyph
+  rings + bands + a pink-white flash), `shatter` (Shattered time: the page really slows, `window.WARP` scales frame's dt,
+  r184 resets it each frame; colour drains to violet via a source-atop tint; held: cracks race out; then a snapshot of
+  the frozen frame shatters into 12 panes flying out, time snaps back). Sounds `sndA219`. Keys 1-3. Page 522 KB.
+- **Round 220:** the user: Arcane nova "pretty cool", wants more drama; Reality rift "not put together" (dropped; rift and
+  shatter moved out). Built the user's picks: `nova2` Nova, amplified (`EN184.AN2`, fb 2.2/fp 2.55: the runes spread into a
+  huge spinning glyph circle with two soft rings and afterimages, the sword rising into it via `THY205`; held: it locks
+  and blazes; three cascading novas with glyph rings, bands, a violet-white flash, hard shakes) and `starfall`
+  (`EN184.AST`: 26 falling stars, accelerating, each lighting its rune; held: a huge star gathers above the point with
+  turning rays; it crashes down: flash, bands, a crater ring, a spray of star particles). `softRing220`, sounds `snd220`
+  (gentle pentatonic tinks per star). Glyph rings and orbit runes draw without shadow blur (perf). Keys 1 Nova amplified,
+  2 Starfall, 3 Arcane nova. Page 523 KB.
+- **Arcane finale LOCKED (2026-11-19) = Starfall (`EN184.AST`, `FIN205.starfall`, fb 2 / fp 2.4).** All three elements are
+  now locked (ring, add-ons, finale). **Next: the rotating whole** (one option: Fire / Lightning / Arcane, a new element
+  after each finale, never the same twice) **and the sound pass.** The page can't hold all three finales at once (cap
+  524,288; Fire's and Lightning's finale code are parked in the old-rounds file): make a dedicated Enchanting page
+  (`docs/mockups/enchant.html`: a copy of skillup-p2.html with the other professions' old rounds cut, keeping
+  barModule and its helpers) and assemble Fire SPB + Lightning LX3 + Arcane AST there.
+- **Round 221: the whole, on its own page `docs/mockups/enchant.html`** (353 KB). Built from skillup-p2.html by a pruning
+  script (scratchpad `prune.ps1`: lines 250 to `PROF.Enchanting` are split into top-level statements by bracket depth,
+  and only definitions reachable from the rest are kept; the other professions' FAM/setTimeout lines are dropped), then
+  the parked Fire finale (molten, plume206, spear206, SPB) and Lightning finale (PUL210 … LX3) pasted back from the
+  old-rounds file. `ROTFAM221`: Rotating (a new element after each finale, never the same twice, `rotI221`), plus Fire,
+  Lightning, Arcane alone. Opens on "Reaching the next unlock" with Loop on. Checked: all moments/gaps, six finales in a
+  row rotated Fire, Lightning, Arcane, Fire, Arcane, Fire; warm frames under 4 ms. skillup-p2.html stays as the round
+  history (other professions' done looks). **Next: the sound pass** for the whole (each skill-up's sounds per element,
+  the finales; the sound-fatigue rules).
+- **Round 222: sound pass v1** (enchant.html): `HIT222[el](v, n)` two sounds a skill-up: a warm low thump (104-118 Hz) +
+  the element's texture (Fire a soft lowpass crackle, Lightning a short muffled bandpass zap, Arcane nothing extra), then
+  a scale note (`PENT42`, folded into one octave) as the rune settles (Fire triangle at 196, Lightning two detuned sines
+  at 220, Arcane a sine at 262 + a faint fifth), stepping down via `fat45`. `snd222(el)` on SPB/LX3/AST. Finales: Fire
+  three rising roars, held silent, boom + whoosh (`FINSND222.fire`); Lightning keeps `whum210`; Arcane soft low triangle
+  chimes on every other star, held silent, boom + a low chord (`FINSND222.arcane`). "Hear a skill-up" row (Fire,
+  Lightning, Arcane). Checked silently (no errors, no negative offsets); not listened to.
+- **Round 223:** the user: the Lightning and Arcane finales sounded better before. Lightning's finale sound (`whum210`)
+  never changed; only its skill-up hit did, so `EN184.LX3.snd = BASE202.snd` again (se192's: a soft hum while charging, a
+  wooden knock, a second hum a step up). Arcane's finale back to `snd220('star')` (a chime on every star climbing the
+  pentatonic scale, boom + the higher closing chord); Arcane's skill-up keeps `snd222('arcane')`. Fire keeps the new set.
+  The Lightning Hear button plays the restored sound.
+- **Round 224:** the user: the page shows the three locked element families; 2-3 sound design families for skill-ups and
+  finales (finales dramatic; skill-ups impactful but lowkey, in line with the crafting animation). Options 1 Fire, 2
+  Lightning, 3 Arcane, 4 Rotating. `SFAM224` with a Sound family row (`SF224`): A Deep impact (low punchy thump + a
+  whisper of the element + a settling note; finale: low tones rising per beat, silent held beat, sub boom + low chord),
+  B Resonant (one struck ringing low note per skill-up coloured per element; finale: a drone building a tone per beat,
+  silence, a ringing chord bloom over a boom), C Elemental (Fire whoomph + faint crackles, Lightning low zap, Arcane
+  shimmer-in + low glass ping; finales Fire roars / Lightning whums / Arcane star chimes). Build beats per element
+  (`BEATS224`: Fire 0/.45/.9, Lightning the whum times, Arcane every other star). `sfSnd224`/`sfFin224` on SPB/LX3/AST;
+  Hear buttons play the current family. Checked silently (no errors, no negative offsets).
+- **Round 225:** the user: A/B/C not liked; Elemental is the way; Resonant suits Arcane's charging finale (Starfall);
+  "a little too safe", but skill-ups must stay in line with the crafting animation; and since the step-down (`fat45`:
+  1, 1, .85, .7, .55, .5) quiets repeats, there's room for some drama. `SFAM224.D` Elemental, bolder (default): Fire
+  80 Hz body + a big lowpass whoomph + 6 scattered crackles (`crackle225`) + a settle note; Lightning 98 Hz body + a zap
+  + a snap + a short detuned buzz + a settle pair; Arcane a shimmer-in, a low whoom, a ringing glass note (`ring224`).
+  An accent layer only on loud hits (`acc(v)`: full at v=1, gone at v≤.6): Fire a short rising whoosh into the hit,
+  Lightning a rolling rumble, Arcane a high shimmer tail. Finales: Fire heavier roars with a low tone stepping up +
+  crackles, silent held, sub boom + long whoosh + crackling + rumble tail; Lightning louder whums into a thunderclap
+  (crack + snap + sub + a long rolling rumble); Arcane the Resonant beat drone per star + the Resonant bloom + a sub +
+  a shimmer tail. A, B, C stay to compare. Checked silently.
+- **Round 228:** the user: D was "just louder"; wanted new sounds with Elemental as the reference. New synth helpers
+  (`nz228` noise with a moving filter cutoff, `osc228` oscillator through a moving lowpass, `fm228` FM with a decaying
+  index, `grains228` crackle grains; pitch never sweeps). Families: **E Material** (Fire a torch breath bright→dark +
+  wood crackle; Lightning an arc-welder sputter of grains over a thump; Arcane rubbed glass swelling into an FM glass
+  ping; finales: breaths into a torch roar / FM hum pulses into a thunder crack + long rumble / a glass tone ringing per
+  star into a glass-bell bloom), **F Spellcraft** (Fire an FM growl flare; Lightning a ring-mod zap; Arcane a bell
+  swelling in from a filtered rush; finales: growls stacking a step per beat / FM hum pulses into a zap cluster /
+  FM bells per star into a bell-chord bloom), **G Cinematic** (every hit a whoosh-in + sub/punch impact + the
+  element; finales: sawtooth braams whose filter opens per beat, silent held, a massive impact + braam chord + the
+  element's tail; Arcane uses the Resonant beats/bloom). Arcane's finale charge rings per star in every family (the
+  user liked Resonant there). A, B, D removed; row shows C (reference), E, F, G; default E. Long sessions (user,
+  2026-11-20): the step-down is the fatigue protection; in the addon step to a ~40% floor by ~10 and reset after a
+  ~10 s pause. Checked silently.
+- **Round 229: Lightning sound first.** The user: likes a crackling electricity sound with some depth on the skill-up;
+  no super-loud finales (Fire's and the "snap" explosion: "a stick being snapped, not an explosion"). `crk229` a real
+  crackle (sparse random pops of varying size in one buffer, bandpassed ~1.1-1.3 kHz, lowpassed 3.2 kHz; shapes decay /
+  swell / even), `hum229` a low electric hum (detuned pair + 2nd/3rd harmonics). `LV229` variants with a row and
+  Hear skill-up / Hear finale end buttons (`LSEL229`): 1 Live wire (crackle burst over a 60 Hz hum + thump; pay: soft
+  45 Hz boom, rolling rumble, fading crackle), 2 Arc (crackle swelling in as the band charges, an FM buzz hum on the
+  hit; pay: a crackle surge over a deep FM hum and a low boom), 3 Static discharge (a tight crackle + a sparse sizzle
+  tail over a sub thump; pay: boom + rumble + lingering crackle pops). Finale build for all: the whums with crackle
+  thickening from the 3rd whum; no sharp crack anywhere. Measured offline (peak / loudest 50 ms): hits ~.03 / .01 vs
+  the old hit .018 / .009; pays .05-.07 / .02-.03 vs the old explosion .065 / .033. The page opens on Lightning.
+- **Round 230:** the user: not into round 229; clean the page up (easy settings, reads well on mobile and PC); start
+  Lightning sound from scratch via `wow-design-ideas`; no sound families; only Lightning on the page (my phone-speaker
+  theory was wrong: it's taste). enchant.html panel rebuilt: "Enchanting · Lightning", Moment (segmented), Sound &
+  playback (Sound, Loop, the Lightning sound row, Hear buttons, Speed, Phone boost), the description; at ≤760 px the
+  panel becomes a bottom sheet under the scene with bigger buttons. Only Lightning in FAM; old family rows hidden.
+  Pitched four directions, the user picked all: `LV230` (`hit(t, v, n)`, optional `pre`, `build(t, i, c)` per whum,
+  `pay(t)`): 1 Tesla coil (detuned sawtooth buzz through a closing filter + dense crackle; finale buzz opening per whum
+  into a roaring arc), 2 Pocket storm (a tiny thunder roll + crackle edge; finale rolling thunder closer per whum into a
+  deep crash, no sharp transient), 3 Plasma charge (an FM charging hum into an FM thrum + crackle; finale FM charge
+  stepping up per whum into a deep plasma blast), 4 Electric sizzle (a hot sizzle + crackle + a low inharmonic FM
+  metal ring; finale sizzle swelling into a burst with a ringing metal chord). Hear "Skill-up" / "Whole finale".
+  Measured: hits at the old hit's level, payoffs under the old explosion.
+- **Round 231:** the user: crackle should be an accent, not the front; Pocket storm sounded like a drum (a low sine thump
+  + a short low noise roll reads as a drum). Remade `LV230` (Pocket storm and Electric sizzle replaced): a tone leads,
+  crackle faint and late (~.01, after .15-.3 s), no low thumps. 1 Tesla coil (detuned saw buzz with an octave layer
+  through a closing filter), 2 Plasma charge (FM charge swell into an FM thrum), 3 Power-up (new: a two-step filtered
+  saw "vmm–VMM"; finale a power-up step per whum into an opening saw chord), 4 Charged metal (a low inharmonic FM ring
+  + a breath of air; finale rings stacking per whum into a ringing chord + whoosh). Measured loudest 50 ms: hits
+  .007-.009 (old hit .009), payoffs .020-.025 (old explosion .032).
+- **Round 232:** the user likes the **Power-up skill-up** and wants a slight crackle behind it matching the arcs on the
+  hit; no finale landed; the finale should sound like a storm. Lesson (user): **don't match the finale to the
+  skill-up's timbre**; design the finale as its own sound. `SKILL232`: Power-up + three soft crackles at 0/.12/.24 s
+  (the arc burst's strikes). Storm finales `LFIN232` (events per beat on the build, a silent hush, a payoff):
+  G Gathering storm (wind `gust232` rising, distant rolls `roll232` closer each time, hush, `thunder232`: five ripping
+  lowpassed bursts over .2 s + a long rolling rumble + a slow-attack sub, no fast thump), W Storm with the whums (early
+  whums low rolling swells, the fast late ones soft crackle), D Downpour (`rain232` building + wind + rolls; thunder,
+  rain lingering). New row (the old sound row hidden): Hear skill-up, finale picker, Hear the finale. Measured: skill-up
+  .007, builds .006-.007, thunder .022-.023 (old explosion .032).
+- **Round 233:** the user picked **Storm with the whums** (likes the whums and the explosion); didn't like the wind
+  bed ("gathering cloud/rain" hiss); the whole finale was a little too loud next to the skill-ups. W now has no wind;
+  rolls and late crackle x.7, `thunder232(t, .68)`; default LF232 = 'W'. Measured loudest 50 ms: skill-up .0068,
+  build .0046, thunder .0163 (was .023).
+- **Lightning sound LOCKED (2026-11-20):** skill-up `SKILL232` (Power-up: a two-step filtered saw "vmm–VMM" + three soft
+  crackles on the arc strikes); finale **Storm with the whums** (`LFIN232.W`: early whums low rolling swells, late ones
+  soft crackle, no wind, a silent hush, `thunder232(t, .68)` ripping crack + rolling rumble + slow-attack sub).
+  **Sound lessons (Lightning, apply to Fire and Arcane):** a tone leads the skill-up; crackle/texture is a faint accent,
+  never the front; no fast low thumps (low sine + short low noise = a drum); **design the finale as its own sound, not a
+  bigger skill-up**; the user loves the whums; keep the finale only ~2.4x a skill-up's loudest 50 ms; measure offline
+  against the old sounds. **Next: Fire sound** (same method), then Arcane.
+- **(done)** `skillup-p2.html` was at 523.5 KB of the 524,288-byte cap. Before Enchanting's first round move Cooking's
   code to `skillup-p2-old-rounds.js` (everything from the `PROF.Cooking` line to the end of round 183, keeping only shared
   helpers the new round reuses), check the page still loads (`typeof FAM`), and switch the page to Enchanting in the round's
   code (see how `r167` sets `profName`). Cooking's locked whole stays recoverable from the old-rounds file and git.
@@ -55,7 +390,7 @@ first four and the craft rings, not against the last profession.
 
 **Mining revisit note (user, 2026-11-18):** round 128 D Sapper’s rail cart also reads as Mining and the user likes it: consider a rail line + ore cart lurching forward for Mining later. Round 127 E Demolition front is close to Mining's animation; add its elements to the Mining skill-up later (scorched char fill with embers near the front, a red dynamite bundle that blows with flash/fireball/shockwave/debris, then a fresh bundle drops in). The user may also revisit Leatherworking, Alchemy and Tailoring later (quality bar above).
 
-After Enchanting: First Aid; then revisit Alchemy and Tailoring (one at a time).
+Next: First Aid; then revisit Alchemy and Tailoring (one at a time).
 
 ## Done
 
@@ -202,3 +537,43 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   helper (`S.age += 1/120`, draw, `stepP`), and paint crops of `cv` at 3x into an overlay canvas to read stills; the first
   paint after a fresh load can come back blank, paint twice. Check sound code silently: `ac(); OUT.gain.value = 0`, sound on,
   run every moment, then close the tab and reopen it fresh for the user.
+
+- **Round 234 (Fire sound, from scratch):** enchant.html now shows Fire only (Lightning's rows hidden). Four skill-ups, each a
+  different mechanism with a tone in front and embers as a faint accent: A Kindle (a rising glide), B Forge ring (struck hot
+  metal, FM), C Flame breath (a pitched resonant whoosh), D Catch (a two-note chord whose filter opens, slow attack). Four
+  finales on the Molten core beats (0 / .45 / .9, hush, thrust at FP): Forge heart (three heat whums, blowtorch roar), Furnace
+  door (a growing roar cut to silence, then a dragon breath panning right to left with the plume), Heat chord (a note per
+  beat, the chord opens and bends down as it cools), Ignition (a pilot whistle climbing, a round WHUMPH, a jet roar panning
+  off). Trimmed offline (trim234) to the Lightning levels: skill-ups .0068, finales about .0165.
+- **Round 235:** Fire skill-up **Kindle (A) LOCKED**. The round-234 finales: none liked, "way too loud in comparison" (they
+  measured equal to Lightning's finale, but broad noise roars sound far louder than they measure: lesson, for fire keep
+  roar out and set finales lower, about 1.5x a skill-up, .0105). New finales, tone- or air-led: Bellows (three breaths
+  brightening a glow tone, a soft fwoom, a rising warm tone), Rising glow (one tone climbing through the heating, a chord
+  blooming), Phoenix (soft storm-style whums, a soaring cry, two wingbeats), Flame flutter (a flutter growing per beat,
+  sweeping right to left over a sinking tone).
+- **Round 236:** the round-235 finales don't hit: "I want something more like an impact". Four impacts on the thrust over
+  one shared build (three soft storm-style whums, held beat silent): Fireball (crack, bloom, a sinking boom, embers), Anvil
+  slam (a heavy ringing clang, low weight, a spark whoosh off behind), Inhale and slam (the held beat a rising inhale cut by
+  a hard slam), Blaze crack (a warm ripping crack, layered like the thunderclap, into a crackling blaze). Impacts trimmed to
+  .013 loudest 50 ms (about 1.9x a skill-up; short, so it reads quieter than the long roars of round 234).
+- **Fire sound LOCKED (2026-11-20):** skill-up **Kindle** (FSK234.A: a warm triangle+filtered-saw glide up a fifth, a
+  soft air breath, faint embers; trim .78). Finale **Blaze crack** (FFIN236.B): three soft storm-style heat whums
+  (whum236, trim 1.38) on the Molten core beats, a silent held beat, then a warm layered ripping crack into a crackling
+  blaze (trim 1.43, .013 loudest 50 ms). Lessons: the user wants the finale to land as an **impact** (a transient, a body,
+  a tail), not a swell or a tune; long wide-band roars sound far louder than they measure, so keep them out; the
+  thunderclap-style layered rip worked for both Lightning and Fire; the whums carry across elements. Next: Arcane sound.
+- **Round 237 (Arcane sound, from scratch):** enchant.html now shows Arcane only (Fire rows hidden, Fire's locked sounds
+  stay wired on SPB). Skill-ups (tone-led, a faint high glint the only accent, all .0068): A Singing bowl (inharmonic ring),
+  B Rune chime (two FM bells a fifth apart), C Mana swell (detuned sines swelling in), D Arcane voice (a formant "ahh",
+  vox237). Starfall finales (stars land at FB*.95*sqrt(j/26)+.32; the crash at FP+.12), each ending in an impact at .013,
+  builds about .006-.008: Falling chimes (a chime per star climbing a scale, a rising tone on the held beat, glassy crack +
+  boom + bowl), Arcane whums (five violet whums speeding up, a hush, a crystal ripping crack + bowl), Glass rain (glass
+  grains per star, a high bowl note held, a big bowl struck hard), Star choir (a voice added per half second, one high
+  voice held, the full choir opening over a boom).
+- **Arcane sound LOCKED (2026-11-20):** skill-up **Mana swell** (ASK237.C: two detuned sines swelling in, a fifth and a
+  soft octave, a faint glint; trim .93); finale **Glass rain** (AFIN237.G: glass grains per landing star, a high 784 Hz
+  bowl note held while the big star gathers, then a big bowl struck hard with a low weight under it; build trim 2.2,
+  impact .53 = .013). **All Enchanting sound LOCKED.** Round 238: enchant.html is the rotating whole again (FAM PA =
+  ROTFAM221) with every locked sound wired (checked silently: each element fires its own skill-up and finale through the
+  rotation), plus a row hearing each element's skill-up and finale on its own. Levels: skill-ups .0068, builds .006-.01,
+  impacts .013 (Lightning's thunder .0163). The user approved the whole: **Enchanting DONE (2026-11-20).** Next: First Aid.
