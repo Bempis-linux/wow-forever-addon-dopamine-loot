@@ -616,3 +616,11 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   positions. Keys: 1 W1 (as it was), 2 V2 W1 refined, 3 K Kit-fed (an open kit by the elbow feeds the gauze, its roll empties;
   finale: the lid slams, the gauze snaps free, the clip pins the end), 4 PW Pad then wrap (a hand presses a pad, then the roll
   wraps over it; finale: the pads glow through like lanterns).
+- **Round 244:** the user: V2, K and PW "were add-ons, not redesigns"; they rejected structural pitches (Tabletop, Roll the bandage,
+  Rip the linen, Wrapped hand) and asked for new designs of the linen, the arm, the hand and the animation on the same base. Built
+  four whole looks, each with its own motion (`ST244`, `r244(K)`, `FA239.A-D`; `geom244`: a shaped forearm with a muscle swell and
+  a slim wrist; `hand244`: a real hand with fingers that open as more is covered). A Painted (warm, woven linen; smooth), B Bold (thick
+  outlines, flat cel shading, chunky fist; snappy squash and stretch, a comic burst), C Battle-worn (scarred dirty arm, a leather
+  bracer, a fingerless glove, rough stained linen with frayed fibers; hurried, two jerky tugs, dust), D Mageweave (violet cloth with
+  gold-trimmed bands and a sheen, an open hand that glows; floating roll, a light pulse, no jolt). V2 is key 5. K and PW are
+  in git (commit 63d41e9).
