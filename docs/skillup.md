@@ -585,3 +585,10 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   D Salve seal, E Field cot, F Bandage roller; the user picked A, B, D, E, built as `FA239.A/B/D/E` through `r239(K)`
   (profile `fab239`, unlock Mageweave Bandage at 150; front helper `fr239`; finale beats FB239 1.2 / FP239 1.6, shared whums
   `whum239`; page keys 1-4). Each one has a base and a sketched finale. The sounds are placeholders.
+- **Round 240:** none of round 239 liked: "too much bandage", "not fun enough"; start fresh. Pitched G Draw the venom, H Knit the
+  bone, I Wash the wound, J Back on your feet; the user picked **I**. Round 239's code was replaced (it's still in git, commit 7857d82).
+  There are four ways to wash, each a different mechanism, built as `FA239.A-D` on `skin240` (grimy skin, washed clean from the front,
+  wet beads, a finale shine): A Waterskin gush (squeezed bag, a gush along the bar; finale: a wave crashes into the recipe), B Bucket
+  throw (dip in a tub, swing, a slug of water smacks the front; finale: a sheet lands left to right), C Scrub and suds (a brush
+  scrubs, the suds pop; finale: a foam heap pops in a chain), D Sponge slam (squash, two squirting fans; finale: it swells, then a
+  huge slam). Per-hit jolts go through `Z.jolt`. Sounds are placeholders.
