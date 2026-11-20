@@ -597,3 +597,12 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   the user picked L, N, O, P and R. Round 240's A, B and D code was removed (it's in git, commit 55ae031). Built as `FA239.L/N/O/P/R`
   (keys 1-5, C Scrub as 6). Helpers: `seg241` (the bar's pieces via g111, each fixed by the animated front), `damp241`, `hand241`,
   `steam241`. Each one has a sketched finale. The sounds are placeholders.
+- **Round 242:** the user went back to round 239's **A Wrapped limb** and wants the look and the animation heavily reworked.
+  Rounds 240 and 241 were removed from the page (they're in git, commit 731dbe0; the user liked C Scrub and suds, which may be reused).
+  The page now has A (round 239) for reference plus four redesigns on one shared look: `arm242` (a rounder shaded forearm, wounds
+  that can turn, `fist242`), `wrap242` (shaded helical gauze bands with a slanted leading edge; options loose, phase, glow,
+  wave, blur), `roll242` (a 3D roll with an end spiral), `strand242`, `lint242`, `seeps242`. W1 Close-up 3D wrap (the roll orbits
+  in depth, a tug snugs the wrap in), W2 Medic's hands (one hand passes the roll over and under, the other pins and pats; the
+  finale ends in a thumbs-up), W3 The arm spins (it turns on its axis while the bands scroll like a screw; the roll rides on top
+  and shrinks), W4 The flick (the roll flies in a loose spiral and the loops cinch with a snap; the finale is a lasso, then a whip
+  crack). Keys 1-5.
