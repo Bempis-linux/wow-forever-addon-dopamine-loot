@@ -577,3 +577,11 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   ROTFAM221) with every locked sound wired (checked silently: each element fires its own skill-up and finale through the
   rotation), plus a row hearing each element's skill-up and finale on its own. Levels: skill-ups .0068, builds .006-.01,
   impacts .013 (Lightning's thunder .0163). The user approved the whole: **Enchanting DONE (2026-11-20).** Next: First Aid.
+
+## First Aid (started 2026-11-20)
+
+- **Round 239:** a page of its own, `docs/mockups/firstaid.html` (pruned from enchant.html: the shared harness up to the gap
+  switch + round 239 + the speed row and the shared tail; 303 KB). Pitched A Wrapped limb, B Unit-frame heal, C Heartbeat vein,
+  D Salve seal, E Field cot, F Bandage roller; the user picked A, B, D, E, built as `FA239.A/B/D/E` through `r239(K)`
+  (profile `fab239`, unlock Mageweave Bandage at 150; front helper `fr239`; finale beats FB239 1.2 / FP239 1.6, shared whums
+  `whum239`; page keys 1-4). Each one has a base and a sketched finale. The sounds are placeholders.
