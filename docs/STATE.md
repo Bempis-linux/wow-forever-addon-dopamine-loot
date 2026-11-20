@@ -39,7 +39,7 @@ focus and pointers. Detail lives in the workstream file named below; history in 
   patterns one at a time. sed: an unescaped apostrophe in a JS string breaks a page (use ’). No node or python here.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
 - Never delete a junction with `rm -rf`. Kit: **wow-addon-kit 0.9.1** (pushed and installed at user and project scope,
-  2026-11-19): `wow-design-ideas` gained the Cooking lessons (sections 3b and 8, the sound notes). New skill changes take
+  2026-11-19): `wow-design-ideas` gained the Cooking lessons (sections 3b and 8, the sound notes). 2026-11-20: the Enchanting lessons added to its section 6 (sound) and a new section 9, **uncommitted in the kit repo** (commit, bump, push and reinstall the kit to use them). New skill changes take
   effect after a restart of Claude Code.
 - `skillup-p2.html` is at 523.5 KB of the 524,288-byte cap: archive Cooking's code first (see skillup.md "Next").
 - Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
