@@ -655,3 +655,9 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   (`tent248`): a canvas awning with a green trim and tabs over the whole module (the title is the stall's sign), poles, a plank floor,
   a supplies table at the start; finale: a green-cross banner unfurls by the left pole and the tabs flutter. Also: the crates are lower
   (base ly+13, hh <= 18) and the open lids lean back (.38π) so they stay out of the header. Keys: 1 WG, 2 TS, 3 A2.
+- **Round 249: Supply wagon picked**, but "awkwardly long". A compact wagon (`FA239.WG`; the round-248 wagon is `WGold`): the crate area is
+  136 px (`WGA249`, `wlay249`), and the whole wagon is about 190 px with the tailboard, from cx-94 to cx+94, plus a short tongue toward
+  the recipe; it sits higher (base ly+9) with a front rail (a wagon bed), wheels of r 7. Up to 6 crates stand in one row; more load in two
+  staggered rows (`wsize249`, `wpos249`: the back row first, raised 7 px, then the front row, whose crates build from a dashed outline
+  with a pop). `draw246` hooks: `by` (base), `dx`/`dy` (station), `size`, `lay`, `exists`, `back`, `front`. Known: the "N to X" line
+  overlaps the wagon's deck (it's drawn over it).
