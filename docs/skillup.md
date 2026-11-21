@@ -714,3 +714,12 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   near-upright wheelie (-.62 rad), a much faster exit (1500q²), scorch marks from the start point, orange sparks off the iron rims
   (burnout and launch), a bigger flash, three rings, a billowing dust cloud, a stronger shake. Wind streaks are now separate particles
   (`S.sk258`): born at random heights, each with its own speed, length and width, tapered, growing then fading.
+- **Round 259: finale LOCKED** (the exaggerated Roll out, round 258). **Sound:** led with one set, the "Wagon set" (`SFX258`, on by
+  default; the placeholders are kept for an A/B through `window.SFX258on`, with a switch and Hear buttons for Skill-up, Seal and Finale in a row
+  in Sound & playback): landing = a warm triangle note from PENT42 at 294 Hz stepping (+ a soft octave, a faint straw rustle); seal = a
+  soft lid thup + the stamp's warm two-note tone (the root + a fifth) (the nail taps are silent with the set); finale = three whums on the
+  burnout beats (`whum`, each a step higher, faint grit), a silent hold, an impact (a 1.4 kHz crack, a low noise body, a triangle chord
+  98/147/196, a dust whoosh tail), a soft landing thump; unlock chime lowered (.016 -> .009). r239 skips its own whums when
+  `Z.noWhum()`. Measured offline (`meas259`, the loudest 50 ms RMS, no boost): land .0069, lid .0035, stamp .0069, whum .0082,
+  impact .0125, thump .0026, unlock .0072 (targets from Enchanting: skill-up .0068, impact .013). I checked silently: every moment at
+  every gap, no errors.
