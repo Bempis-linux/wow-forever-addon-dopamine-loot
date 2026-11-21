@@ -678,3 +678,9 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   (iron corner brackets and straps with rivets, iron rims, a leather grip), F2 Painted medic cart (a cream sideboard with a green
   border and lettering, brass corner caps, green rims), F3 Field hospital (dark stain, gold trim and corner diamonds, serif gold lettering,
   gold hubs, a green pennant at the back corner that flutters in the finale). Keys: 1 F1, 2 F2, 3 F3, 4 WG2 (plain).
+- **Round 253: F1 Iron-bound LOCKED as the wagon look.** Skill-up add-ons (`window.ADD253`, a switch row in Sound & playback,
+  all on): on landing **Crate rock** (rocks on a corner, `damp241`), **Straw burst** (12 straws, one straw stays poking out),
+  **Ribbon tail** (the falling roll trails a ribbon that snaps in as it lands); on sealing **Nail pops** (two nails into the lid's lip
+  with glints and taps, via `window._nl253` into `lid246`), **Shine sweep** (a shine across the front + the plus glows), **Crates
+  jump** (the user's idea: the other crates jump in a ripple on the lid slam and on the stamp). Pitched but not picked: Leaf springs,
+  Healing motes, Wagon lantern. Page shows F1 only.
