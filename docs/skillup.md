@@ -661,3 +661,7 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   staggered rows (`wsize249`, `wpos249`: the back row first, raised 7 px, then the front row, whose crates build from a dashed outline
   with a pop). `draw246` hooks: `by` (base), `dx`/`dy` (station), `size`, `lay`, `exists`, `back`, `front`. Known: the "N to X" line
   overlaps the wagon's deck (it's drawn over it).
+- **Round 250:** the user: "much better"; the crates should fit the wagon better; at the 50-point gap a "random green bit" (the anti-venom
+  vial) went in instead of a bandage. Now: bandage rolls only (`itemType245`); a real wagon bed (the deck floor drawn in depth, 9 px, with
+  plank lines and a back rail; the back row sits on the back half at base-6, x+5, the front row on the front half, centred between them;
+  one row at base-3); the crates fill the bed's width (cell = 136 / per-row count).
