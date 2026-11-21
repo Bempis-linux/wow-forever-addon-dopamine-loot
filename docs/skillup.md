@@ -744,3 +744,12 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
 - **Round 263:** finale **B Crack and rattle picked**, but the launch snap "sounds like a wooden stick breaking" (a short, bright, narrow crack;
   the same lesson as Lightning: avoid it). B's beats and the crate rattle stay (`rattle263`); four replacement hits (`HIT263`, trimmed to .0085):
   B1 Gravel burst, B2 Whoomp, B3 Crate jolt, B4 Wood-ping hit. Row `#sfx263`; I checked silently, no errors.
+- **First Aid sound LOCKED / First Aid DONE (2026-11-20, round 264):** finale sound = B's beats (a gravel crackle + a rising wood ping) +
+  **B3 Crate jolt** (every crate thunks at once, a deep rounded knock) + the crate rattle; the unlock = the wood ping rising. The whole:
+  `firstaid.html` key 1 (F1). Rounds 239-264. Lessons: (1) the theme mattered more than polish: wraps and wounds never worked; the user's own
+  concept (crates packed across the bar) did; (2) cohesion = one setting that holds every piece (the wagon), not loose props;
+  (3) "different design" means different parts, not a recolour; (4) finales must be exaggerated (cartoon squash, stretch, wheelie) to feel
+  impactful; (5) sound: generic music notes "don't match"; foley of the visible action + one small reward ping did; short bright narrow
+  cracks read as "a stick breaking" (twice now); finales quieter (~1.25x a skill-up) and crisp, no long rumbles.
+- **Next:** revisit Alchemy and Tailoring (one at a time), then 1.4.0 item 3. The user also doesn't like the locked First Aid craft ring
+  (splint): maybe a crate-themed ring to match (ask).

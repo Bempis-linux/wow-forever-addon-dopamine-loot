@@ -54,7 +54,7 @@ canvas { position: absolute; inset: 0; }
 <body>
 <div id="panel">
 <h1>First Aid</h1>
-<small class="sub">Round 263: the skill-up sound is locked (the foley + Wood ping); the finale is B Crack and rattle with the snap replaced. Pick the launch hit (B1-B4) under Sound &amp; playback; each button plays the whole finale.</small>
+<small class="sub">First Aid, DONE (round 264): the iron-bound supply wagon with the pennant; crafted bandages drop into crates, which are sealed and stamped; the skill-up add-ons; the Roll out finale (a burnout, a squat, a blast-off wheelie). Sound: the foley + Wood ping, with the finale's gravel crackle, a Crate jolt launch and the crate rattle.</small>
 <div class="sec"><h2>Option</h2><div class="seg" id="fams"></div></div>
 <div class="sec"><h2>Moment</h2><div class="seg" id="moments"><button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button></div></div>
 <div class="sec"><h2>Sound &amp; playback</h2><div class="toggles"><label><input type="checkbox" id="snd" checked> Sound</label><label><input type="checkbox" id="loop"> Loop</label></div><div id="xrows"></div></div>
@@ -2480,7 +2480,7 @@ const HIT263 = {
   B2: { name: 'Whoomp', hit(g) { noise(0, .16, .09 * g, 320, 1.1, 'bandpass', true); noise(0, .1, .04 * g, 150, .8, 'lowpass', true); noise(.02, .25, .015 * g, 800, .8, 'bandpass'); } },
   B3: { name: 'Crate jolt', hit(g) { [0, .012, .022, .03].forEach((d, k) => noise(d, .06, .05 * g, 240 + k * 30, 2.5, 'bandpass', true)); noise(0, .08, .04 * g, 140, .8, 'lowpass', true); } },
   B4: { name: 'Wood-ping hit', hit(g) { noise(0, .05, .03 * g, 260, .9, 'lowpass', true); [0, 4, 7].forEach((s, k) => wp262(392 * semi(s), g * 2.2, k * .008)); } } };
-let HIT263sel = 'B1'; const TR263 = {};
+let HIT263sel = 'B3'; const TR263 = {}; // LOCKED (round 264): B3 Crate jolt
 FN262sel = 'B';
 SFX258.impact = () => { const g = TR263[HIT263sel] || 1; HIT263[HIT263sel].hit(g); rattle263((TR262.im.B || 1) * .9); };
 (async () => { while (!window.TR262done) await new Promise(r => setTimeout(r, 100)); FN262sel = 'B'; for (const K in HIT263) { const m = await meas259(() => HIT263[K].hit(1), 1.2); TR263[K] = m ? .0085 / m : 1; } window.TR263done = true; })();
