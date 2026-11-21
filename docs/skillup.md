@@ -665,3 +665,11 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   vial) went in instead of a bandage. Now: bandage rolls only (`itemType245`); a real wagon bed (the deck floor drawn in depth, 9 px, with
   plank lines and a back rail; the back row sits on the back half at base-6, x+5, the front row on the front half, centred between them;
   one row at base-3); the crates fill the bed's width (cell = 136 / per-row count).
+- **Round 251:** the user: the wagon is messy (crates clipping its sides, not cohesive) and needs a heavy clean-up; the stamp and the
+  basket on the wagon are awkward. Picked: One clean wagon bed, Text on the sideboard, the crafted bandage drops in from above, the stamp
+  rises from behind (not picked: the 8-crate cap; up to 8 crates are one row, more are two rows inside the bed). `FA239.WG2`: `bed251`
+  (a box bed cx±92 with a depth of 7: floor, back wall, left end inner face, front sideboard drawn after the crates (`frontEarly`),
+  right end outer face; two wheels behind), `wsize251` and `wpos251` (the crates fill the bed), `sPose251` and `finPose251` (the stamp rises
+  behind the crate (drawn before the crates while `behind`), swings over toward us, turns, thumps the front, swings back and
+  sinks). New `draw246` hooks: `noStation`, `drop` (the item falls from ly-75 and fades in), `stampPose`, `finPose`, `frontEarly`; `barModule`
+  takes `V.noText` (r239 passes `Z.noText`), and the line is drawn on the sideboard between two green crosses. Keys: 1 WG2, 2 WG (round 250).

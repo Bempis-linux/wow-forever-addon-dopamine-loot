@@ -54,7 +54,7 @@ canvas { position: absolute; inset: 0; }
 <body>
 <div id="panel">
 <h1>First Aid</h1>
-<small class="sub">Round 249: the supply wagon, shorter (two rows of crates above 6 points); the long wagon of round 248 for comparison. Try all three gaps. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
+<small class="sub">Round 251: the clean wagon (one box bed, the line painted on the sideboard, the bandage drops in from above, the stamp rises from behind); the round-250 wagon for comparison. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
 <div class="sec"><h2>Option</h2><div class="seg" id="fams"></div></div>
 <div class="sec"><h2>Moment</h2><div class="seg" id="moments"><button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button></div></div>
 <div class="sec"><h2>Sound &amp; playback</h2><div class="toggles"><label><input type="checkbox" id="snd" checked> Sound</label><label><input type="checkbox" id="loop"> Loop</label></div><div id="xrows"></div></div>
@@ -1392,7 +1392,7 @@ const FL = typeof V.tip === 'function' ? V.tip : flourish; if (V.tip) S.hits.for
 if (done && S.age >= payAt && !V.noFlash) { const fl = clamp(1 - (S.age - payAt) / .5); if (fl > 0) { ctx.save(); track(); ctx.fillStyle = `rgba(255,255,255,${fl * .8})`; ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fill(); ctx.restore(); } }
 icon(V.unlockX ? V.unlockX(info) + (ux - (x1 + 15)) : ux, ly + (V.unlockY ? V.unlockY(info) : 0), 20 + pop * 6 + (V.iconPulse ? V.iconPulse(info) : 0), nx.emo, lit ? 1 : .5, lit ? p.light : null);
 if (V.after) V.after(p, info);
-const left = Math.max(0, nx.lv - st.shown); text(lit ? 'Unlocked!' : `${left} to ${nx.cap ? nx.lv : nx.name}`, cx, ly + 22, '600 11px system-ui', '#f0ead8', 'center');
+const left = Math.max(0, nx.lv - st.shown); if (!V.noText) text(lit ? 'Unlocked!' : `${left} to ${nx.cap ? nx.lv : nx.name}`, cx, ly + 22, '600 11px system-ui', '#f0ead8', 'center');
 ctx.restore();
 if (S.reaches) reveal(cx, ly + 34, (S.closeAt === undefined ? 99 : S.closeAt + (V.finAt || 0)) + .35, '600 13px system-ui', false); }
 let FISHV = 'A';
@@ -1557,7 +1557,7 @@ const pluses239 = (x, y, n, sp = 50, col = '#fff0c8') => { for (let i = 0; i < n
 const whum239 = (t, i) => { tone(98 * semi([0, 3, 7][i]), t, .03, .55, 'sine', null, .12); noise(t, .45, .012, 260 + i * 80, .8, 'lowpass'); };
 const sh239 = (ts, I) => { if (ts < 0) return [0, 0]; if (ts < FB239) { const k = ts / FB239 * 1.4; return [Math.sin(S.age * 70) * k, Math.cos(S.age * 53) * k * .6]; } if (ts >= FP239 && ts < FP239 + .25) { const k = (1 - (ts - FP239) / .25) * 3; return [Math.sin(S.age * 90) * k, Math.cos(S.age * 77) * k]; } return [0, 0]; };
 function r239(K) { const Z = FA239[K];
-  const V = { finAt: FP239 + .25, noFlash: true, shake(I) { const a = sh239(ts95(), I), j = Z.jolt ? Z.jolt(I) : [0, 0]; return [a[0] + j[0], a[1] + j[1]]; }, grow(p, x0, y, L, f, t, I) { Z.draw(I, y, t, ts95()); },
+  const V = { noText: Z.noText, finAt: FP239 + .25, noFlash: true, shake(I) { const a = sh239(ts95(), I), j = Z.jolt ? Z.jolt(I) : [0, 0]; return [a[0] + j[0], a[1] + j[1]]; }, grow(p, x0, y, L, f, t, I) { Z.draw(I, y, t, ts95()); },
     over(p, I) { hits101(I).forEach(o => { if (o.t >= 0) once('fa' + K + o.i, () => Z.snd(fat45(o.i), o.i)); if (Z.pre && o.t >= -.5) once('fp' + K + o.i, () => Z.pre(fat45(o.i), o.i)); }); const ts = ts95();
       if (ts >= 0) { [0, .45, .85].forEach((at, i) => { if (ts >= at && ts < FB239) once('fw' + K + i, () => whum239(0, i)); }); if (ts >= FP239) once('fpay' + K, () => Z.boom()); } } };
   return { get name() { return K + '. ' + Z.name; }, get desc() { return Z.desc + ' (First Aid’s bar to the next recipe; try Five in a row, Reaching the next unlock and the gap switch. The finale and the sounds are sketches.)'; }, get note() { return Z.name.toLowerCase() + ', ' + GAP104 + '-point gap.'; },
@@ -2082,14 +2082,14 @@ function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + ((windo
     if (t < .18) { const u = eOut((t - .07) / .11); return { x, y: fy - u * 3, th: 1, sc: lerp(1, 1.5, u) }; }
     if (t < .28) { const u = sm242((t - .18) / .1); return { x, y: lerp(fy - 3, hov.y, u), th: 1 - u, sc: lerp(1.5, 1, u) }; }
     const u = sm242((t - .28) / .17); return { x: lerp(x, padP.x, u), y: lerp(hov.y, padP.y, u) - Math.sin(u * Math.PI) * 8, th: 0, sc: 1 }; };
-  Q.ev.forEach(e => { if (e.full) { const p = sPose(e, PX(e.k), TY(e.k)); if (p) sp = p; } });
+  Q.ev.forEach(e => { if (e.full) { const p = (Hk.stampPose || sPose)(e, PX(e.k), TY(e.k), Q); if (p) sp = p; } });
   const finStamp = fin && ts >= FB239 - .3 && ts < FP239 + .45;
-  ctx.save(); ctx.translate(sdx, sdy); station245(I, ly, !!sp || finStamp); ctx.restore();
+  if (!Hk.noStation) { ctx.save(); ctx.translate(sdx, sdy); station245(I, ly, !!sp || finStamp); ctx.restore(); }
   // basket squash on each launch
-  Q.ev.forEach(e => { const t = S.age - (e.T - .55); if (t >= 0 && t < .2) once('bl' + e.i, () => spawn({ x: st.bx, y: st.by - 2, size: 3, shape: 'ring', grow: 8, life: .2, col: '#e8c860' })); });
+  if (!Hk.noStation) Q.ev.forEach(e => { const t = S.age - (e.T - .55); if (t >= 0 && t < .2) once('bl' + e.i, () => spawn({ x: st.bx, y: st.by - 2, size: 3, shape: 'ring', grow: 8, life: .2, col: '#e8c860' })); });
   const hop = k => { if (!fin || ts >= FB239) return 0; let y = 0; [0, .45, .85].forEach((a, i) => { const q = (ts - a - k / N * (.35 - i * .08)) / .18; if (q > 0 && q < 1) y = Math.max(y, Math.sin(q * Math.PI) * (2 + i)); }); return y; };
   const chain = fin && ts >= FP239 + .07 ? (ts - FP239 - .07) / .4 : -1, lastFly = fin && ts >= FP239 + .55 ? clamp((ts - FP239 - .55) / .4) : 0;
-  const slams = Q.ev.filter(e => e.full).map(e => ({ k: e.k, t: S.age - e.lidT }));
+  const slams = Q.ev.filter(e => e.full).map(e => ({ k: e.k, t: S.age - e.lidT })); const fpz = Hk.finPose && finStamp ? Hk.finPose(ts, PX(N - 1), TY(N - 1), Q) : null; if (sp && sp.behind) stampMorph247(sp.x, sp.y, sp.th, sp.sc, sp.sq || 0, W1, H1); if (fpz && fpz.behind) stampMorph247(fpz.x, fpz.y, fpz.th, fpz.sc, fpz.sq || 0, W1, H1);
   for (let k = 0; k < N; k++) { const x = PX(k), base = PB(k), topY = base - Q.hh, m = Q.tot[k], evs = Q.ev.filter(e => e.k === k); let count = Q.before[k], sq = 0, lid = 0, mark = 0, markAge, jig = 0;
     evs.forEach(e => { if (S.age >= e.T) { count++; const t = S.age - e.T; if (t < .3) sq = Math.max(sq, damp241(t, 30, 9) * .45); } });
     slams.forEach(s => { if (Math.abs(s.k - k) === 1 && s.t >= 0 && s.t < .4) jig += damp241(s.t, 50, 10) * 1.2 * Math.sign(k - s.k); });
@@ -2104,12 +2104,13 @@ function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + ((windo
     evs.forEach(e => { if (S.age >= e.T) once('c6' + e.i, () => { for (let i = 0; i < 6; i++) spawn({ x: x + (Math.random() - .3) * Q.w * .6, y: topY - 2, vx: (Math.random() - .5) * 50, vy: -25 - Math.random() * 30, g: 200, life: .45, size: .8, shape: 'sq', vr: 10, col: i % 2 ? '#e8c860' : '#c8a040' }); });
       if (e.full && S.age >= e.lidT) once('l6' + e.i, () => { noise(0, .05, .024, 480, 1, 'lowpass', true); for (let i = 0; i < 5; i++) spawn({ x: x + (Math.random() - .5) * Q.w, y: topY - 1, vx: (Math.random() - .5) * 40, vy: -8 - Math.random() * 14, g: -10, life: .5, size: 1.2 + Math.random(), col: 'rgba(200,170,120,.5)' }); });
       if (e.full && S.age >= e.stampT) once('s6' + e.i, () => { noise(0, .04, .03, 300, 1, 'lowpass', true); tone(note239(e.i) * 1.5, .02, .012, .3, 'sine', null, .005); for (let i = 0; i < 7; i++) { const a = Math.random() * 6.28; spawn({ x: x + Math.cos(a) * Q.w * .35, y: topY + Q.hh * .5 + Math.sin(a) * Q.hh * .3, vx: Math.cos(a) * 50, vy: Math.sin(a) * 30 - 10, g: 150, life: .35, size: .8, col: '#46d060' }); } }); }); }
+  if (Hk.front && Hk.frontEarly) Hk.front(I, ly, Q, base, topY, fin, ts);
   // the roll in flight: launched from the basket, spinning, hangs at the apex, drops into the opening (hidden below the front boards' top)
-  Q.ev.forEach(e => { const t = S.age - e.T; if (t < -.55 || t >= 0) return; const u = (t + .55) / .55, x = PX(e.k) + Q.d * .4, topY = TY(e.k), ux = sm242(u), sx = st.bx, sy = st.by - 4, ex = x, ey = topY - 1, peak = Math.min(8, 4 + Math.abs(ex - sx) * .06);
-    const px = lerp(sx, ex, ux), py = lerp(sy, ey, ux) - Math.sin(ux * Math.PI) * peak; ctx.save(); if (u > .75) { ctx.beginPath(); ctx.rect(px - 20, py - 30, 40, topY - (py - 30)); ctx.clip(); } item245(itemType245(Q.tot[e.k], e.j), px, py, Q.s * (1 + Math.sin(ux * Math.PI) * .12), u * 10); ctx.restore(); });
-  if (sp) stampMorph247(sp.x, sp.y, sp.th, sp.sc, sp.sq || 0, W1, H1);
+  Q.ev.forEach(e => { const t = S.age - e.T; if (t < -.55 || t >= 0) return; const u = (t + .55) / .55, x = PX(e.k) + Q.d * .4, topY = TY(e.k), ux = Hk.drop ? u * u : sm242(u), sx = Hk.drop ? x : st.bx, sy = Hk.drop ? ly - 75 : st.by - 4, ex = x, ey = topY - 1, peak = Hk.drop ? 0 : Math.min(8, 4 + Math.abs(ex - sx) * .06);
+    const px = lerp(sx, ex, ux), py = lerp(sy, ey, ux) - Math.sin(ux * Math.PI) * peak; ctx.save(); if (Hk.drop) ctx.globalAlpha *= clamp(u / .2); if (u > .75) { ctx.beginPath(); ctx.rect(px - 20, py - 30, 40, topY - (py - 30)); ctx.clip(); } item245(itemType245(Q.tot[e.k], e.j), px, py, Q.s * (1 + Math.sin(ux * Math.PI) * .12), u * 10); ctx.restore(); });
+  if (sp && !sp.behind) stampMorph247(sp.x, sp.y, sp.th, sp.sc, sp.sq || 0, W1, H1); if (fpz && !fpz.behind) stampMorph247(fpz.x, fpz.y, fpz.th, fpz.sc, fpz.sq || 0, W1, H1); if (fpz && ts >= FB239 && ts < FP239) glint239(PX(N - 1) + 9, TY(N - 1) - 8, ts);
   // the finale's stamp on the last crate's front: over, turns to face it and hangs big, thumps, turns back and home
-  if (finStamp) { const x = PX(N - 1), topY = TY(N - 1), fy = topY + Q.hh * .5, hov = topY - 12; let p;
+  if (finStamp && !Hk.finPose) { const x = PX(N - 1), topY = TY(N - 1), fy = topY + Q.hh * .5, hov = topY - 12; let p;
     if (ts < FB239 - .1) { const u = sm242(clamp((ts - FB239 + .3) / .2)); p = { x: lerp(padP.x, x, u), y: lerp(padP.y, hov, u) - Math.sin(u * Math.PI) * 7, th: 0, sc: 1 }; }
     else if (ts < FB239 + .1) { const u = sm242(clamp((ts - FB239 + .1) / .2)); p = { x, y: lerp(hov, fy - 2, u), th: u, sc: lerp(1, 2.1, u) }; }
     else if (ts < FP239) p = { x: x + Math.sin(S.age * 60) * .6, y: fy - 2, th: 1, sc: 2.1 };
@@ -2120,7 +2121,7 @@ function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + ((windo
     stampMorph247(p.x, p.y, p.th, p.sc, p.sq || 0, W1, H1); if (ts >= FB239 && ts < FP239) glint239(x + 9, fy - 12, ts); }
   if (fin && ts >= FP239 + .07) once('f6', () => { const x = PX(N - 1), topY = TY(N - 1); spawn({ x, y: topY + Q.hh / 2, size: 8, shape: 'ring', grow: 90, life: .7, col: '#7aff8a' }); for (let i = 0; i < 18; i++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: topY - 4, vx: (Math.random() - .5) * 50, vy: -40 - Math.random() * 70, g: 40, life: 1.1, size: 2 + Math.random(), shape: 'star', col: i % 3 ? '#c8ffd0' : '#ffd36a' }); });
   if (fin && ts >= FP239 + .95) once('fi6', () => spawn({ x: I.x1 + 18, y: ly, size: 8, shape: 'ring', grow: 26, life: .5, col: '#c8ffd0' }));
-  if (Hk.front) Hk.front(I, ly, Q, base, topY, fin, ts); }
+  if (Hk.front && !Hk.frontEarly) Hk.front(I, ly, Q, base, topY, fin, ts); }
 FA239.A2 ={ name: 'Toss and lid v2', desc: 'A, reworked: real crates (planks with gaps and grain, corner posts, a diagonal brace, nails, straw inside), bigger crates and rolls. Each skill-up the basket squashes as it launches a roll; it spins, hangs at the top of its arc, drops in through the opening and bounces once in the straw (it stays inside, behind the front boards). When a crate is full its lid swings shut faster and faster, slams with a jolt, a puff of dust and a little rebound, and the crates either side jiggle; then the stamp hops off the green pad, turns to face the crate, holds, thumps the front boards and lifts away, and the green plus pops onto the front. Finale: the crates hop in a wave, the stamp hangs big in front of the last crate, thumps it, every plus flashes and the last crate hops into the recipe.',
   draw(I, ly, t, ts) { draw246(I, ly, ts); }, jolt(I) { const Q = plan246(I); for (const e of Q.ev) { if (!e.full) continue; const a = S.age - e.lidT, b = S.age - e.stampT; if (a >= 0 && a < .06) return [0, 1.4]; if (b >= 0 && b < .06) return [0, -1.2]; } return [0, 0]; },
   pre(v) { noise(0, .3, .006 * v, 900, 1, 'bandpass'); }, snd(v, i) { noise(0, .06, .022 * v, 420, 1, 'lowpass', true); noise(0, .15, .006 * v, 2400, 1, 'bandpass'); tone(note239(i) * .75, .01, .013 * v, .3, 'triangle', null, .005); }, boom: FA239.A.boom };
@@ -2178,7 +2179,48 @@ FA239.WG = { name: 'Supply wagon, short', desc: 'The wagon is shorter: the load 
     [dx0 + 12, dx1 - 10].forEach(x => wheel248(x + wx, base + 7, 7, wx / 7));
   },
   jolt: FA239.A2.jolt, pre: FA239.A2.pre, snd: FA239.A2.snd, boom: FA239.WGold.boom };
-Object.assign(FAM, { PA: r239('WG'), PB: r239('WGold') }); ['PC', 'PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
+// round 251: the user: the wagon is messy (crates clipping its sides, not cohesive); heavily clean it up; the stamp and the basket on the wagon are awkward. Picked: One clean wagon bed (a box bed, the crates inside it behind the front sideboard, nothing past its ends, two wheels; no stakes, tailboard, rails or tongue), Text on the sideboard (the "N to X" line painted on it), the bandage you just crafted drops in from above, the stamp rises from behind the full crate. Up to 8 crates in one row, more in two rows inside the bed
+const bed251 = I => { const cx = I.x0 + 128; return { cx, x0: cx - 92, x1: cx + 92, D: 7 }; };
+function wsize251(Q, I) { const N = Q.G.N, B = bed251(I), A = B.x1 - B.x0 - 6, two = N > 8, nb = two ? Math.ceil(N / 2) : N, cell = (A - (two ? 4 : 0)) / nb; Object.assign(Q, { two, nb, cell, B, w: cell - 3.5 }); Q.hh = Math.min(two ? 12 : 16, Math.max(9, Q.w * .7)); Q.d = Math.min(5, Math.max(3, Q.w * .2)); Q.s = Math.min(4.8, Math.max(2.6, Q.w * .22)); }
+const wpos251 = (Q, k, fb) => { const B = Q.B, N = Q.G.N; if (!Q.two) return { x: B.x0 + 3 + (k + .5) * Q.cell, base: fb }; if (k < Q.nb) return { x: B.x0 + 3 + (k + .5) * Q.cell + 4, base: fb - 4 }; return { x: B.x0 + 3 + (k - Q.nb + .5) * Q.cell + (Q.nb - (N - Q.nb)) * Q.cell / 2, base: fb }; };
+// the stamp rises from behind the crate, swings over its top toward us, turns, holds, thumps the front, swings back over and sinks out of sight
+function sPose251(e, x, topY, Q) { const t = S.age - e.stampT; if (t < -.55 || t > .5) return null; const fy = topY + Q.hh * .5, bx = x + Q.d + 1, over = topY - 13;
+  if (t < -.32) { const u = eOut((t + .55) / .23); return { behind: true, x: bx, y: lerp(topY + 8, over, u), th: 0, sc: 1 }; }
+  if (t < -.2) { const u = sm242((t + .32) / .12); return { behind: false, x: lerp(bx, x, u), y: lerp(over, fy - 2, u) - Math.sin(u * Math.PI) * 4, th: u, sc: lerp(1, 1.6, u) }; }
+  if (t < -.1) return { x, y: fy - 2, th: 1, sc: 1.6 + Math.sin((t + .2) / .1 * Math.PI) * .04 };
+  if (t < 0) { const u = (t + .1) / .1; return { x, y: fy, th: 1, sc: lerp(1.6, 1, u * u) }; }
+  if (t < .07) return { x, y: fy, th: 1, sc: 1, sq: 1 };
+  if (t < .2) { const u = eOut((t - .07) / .13); return { x, y: fy - u * 3, th: 1, sc: lerp(1, 1.5, u) }; }
+  if (t < .32) { const u = sm242((t - .2) / .12); return { behind: u > .6, x: lerp(x, bx, u), y: lerp(fy - 3, over, u) - Math.sin(u * Math.PI) * 4, th: 1 - u, sc: lerp(1.5, 1, u) }; }
+  const u = sm242((t - .32) / .18); return { behind: true, x: bx, y: lerp(over, topY + 8, u), th: 0, sc: 1 }; }
+function finPose251(ts, x, topY, Q) { const fy = topY + Q.hh * .5, bx = x + Q.d + 1, over = topY - 14;
+  if (ts < FB239 - .05) { const u = eOut(clamp((ts - FB239 + .3) / .25)); return { behind: true, x: bx, y: lerp(topY + 8, over, u), th: 0, sc: 1 }; }
+  if (ts < FB239 + .12) { const u = sm242(clamp((ts - FB239 + .05) / .17)); return { x: lerp(bx, x, u), y: lerp(over, fy - 2, u) - Math.sin(u * Math.PI) * 4, th: u, sc: lerp(1, 2.1, u) }; }
+  if (ts < FP239) return { x: x + Math.sin(S.age * 60) * .6, y: fy - 2, th: 1, sc: 2.1 };
+  if (ts < FP239 + .07) return { x, y: fy, th: 1, sc: lerp(2.1, 1, ((ts - FP239) / .07) ** 2) };
+  if (ts < FP239 + .15) return { x, y: fy, th: 1, sc: 1, sq: 1 };
+  if (ts < FP239 + .3) { const u = sm242((ts - FP239 - .15) / .15); return { behind: u > .6, x: lerp(x, bx, u), y: lerp(fy, over, u), th: 1 - u, sc: lerp(1.4, 1, u) }; }
+  const u = sm242(clamp((ts - FP239 - .3) / .2)); return { behind: true, x: bx, y: lerp(over, topY + 8, u), th: 0, sc: 1 }; }
+FA239.WG2 = { name: 'Clean wagon', noText: true, desc: 'The wagon, cleaned up: one box bed (the crates stand inside it, the front sideboard hiding their bottoms, nothing past its ends) on two wheels, with the "N to Mageweave Bandage" line painted on the sideboard between two green crosses. No basket or ink pad: the bandage you just crafted drops in from above, spinning, into the open crate and bounces in the straw. When a crate is full its lid slams, and the stamp rises from behind it, swings over the top toward you, turns, thumps the front and sinks back out of sight. Up to 8 crates stand in one row; more load in two rows inside the bed. Finale: the crates hop in a wave and the wagon rocks, the stamp rises behind the last crate, hangs big in front of it, thumps, the wagon lurches and the last crate hops into the recipe.',
+  draw(I, ly, t, ts) { const fin = fin240(I, ts); let wy = thump248(I), wx = 0; if (fin && ts < FB239) wy += [0, .45, .85].reduce((m, a) => m + Math.max(0, damp241(ts - a, 20, 5)) * .8, 0); if (fin && ts >= FP239) { const u = clamp((ts - FP239 - .1) / .5); wx = Math.sin(u * Math.PI) * 9 * (u < 1 ? 1 : 0); wy += damp241(ts - FP239, 30, 7) * 1.6; }
+    const B = bed251(I), D = B.D, fb = ly + 8, top = ly + 3, bot = ly + 15;
+    [B.x0 + 20, B.x1 - 18].forEach(x => wheel248(x + wx, ly + 16, 7.5, wx / 7.5));
+    window.H248 = { by: 8, noStation: true, drop: true, frontEarly: true, size: wsize251, lay: (Q, k) => wpos251(Q, k, fb), stampPose: sPose251, finPose: finPose251,
+      exists(k, Q, evs) { if (!Q.two || k < Q.nb || Q.before[k] > 0) return 1; const e = evs.find(e => e.j === 0); return e ? clamp((S.age - (e.T - 1)) / .3) : 0; },
+      back() { // the back wall and the left end's inner face, the floor between
+        const fg = ctx.createLinearGradient(0, fb - D, 0, fb); fg.addColorStop(0, '#6a4426'); fg.addColorStop(1, '#8a5a32'); ctx.fillStyle = fg; ctx.beginPath(); ctx.moveTo(B.x0, fb); ctx.lineTo(B.x1, fb); ctx.lineTo(B.x1 + D, fb - D); ctx.lineTo(B.x0 + D, fb - D); ctx.closePath(); ctx.fill();
+        plank248(B.x0 + D, top - D, B.x1 - B.x0, fb - top, ['#7a4e2a', '#5e3c20']); ctx.fillStyle = '#9a6a3a'; ctx.fillRect(B.x0 + D, top - D, B.x1 - B.x0, 1.4);
+        ctx.fillStyle = '#5a381c'; ctx.beginPath(); ctx.moveTo(B.x0, top); ctx.lineTo(B.x0 + D, top - D); ctx.lineTo(B.x0 + D, bot - D); ctx.lineTo(B.x0, bot); ctx.closePath(); ctx.fill(); },
+      front(I, ly) { // the front sideboard with the painted line, the right end's outer face
+        ctx.fillStyle = '#6a4426'; ctx.beginPath(); ctx.moveTo(B.x1, top); ctx.lineTo(B.x1 + D, top - D); ctx.lineTo(B.x1 + D, bot - D); ctx.lineTo(B.x1, bot); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#9a6a3a'; ctx.beginPath(); ctx.moveTo(B.x1, top); ctx.lineTo(B.x1 + D, top - D); ctx.lineTo(B.x1 + D, top - D + 1.4); ctx.lineTo(B.x1, top + 1.4); ctx.closePath(); ctx.fill();
+        const g = ctx.createLinearGradient(0, top, 0, bot); g.addColorStop(0, '#b8844c'); g.addColorStop(1, '#8a5a30'); ctx.fillStyle = g; ctx.fillRect(B.x0, top, B.x1 - B.x0, bot - top); ctx.fillStyle = '#c8945a'; ctx.fillRect(B.x0, top, B.x1 - B.x0, 1.6); ctx.fillStyle = 'rgba(30,16,6,.6)'; ctx.fillRect(B.x0, bot - 1, B.x1 - B.x0, 1); ctx.strokeStyle = 'rgba(30,16,6,.7)'; ctx.lineWidth = .8; ctx.strokeRect(B.x0, top, B.x1 - B.x0, bot - top);
+        [B.x0 + 8, B.x1 - 8].forEach(x => plus245(x, (top + bot) / 2 + .5, 7, .9, 1));
+        const st0 = state(), lit = fin && ts >= FP239 + .25, left = Math.max(0, S.nx.lv - st0.shown), txt = lit ? 'Unlocked!' : `${left} to ${S.nx.cap ? S.nx.lv : S.nx.name}`;
+        ctx.save(); ctx.font = '700 8.5px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(40,22,8,.55)'; ctx.fillText(txt, B.cx + .5, (top + bot) / 2 + 1.5); ctx.fillStyle = lit ? '#c8ffd0' : 'rgba(255,240,214,.92)'; ctx.fillText(txt, B.cx, (top + bot) / 2 + 1); ctx.restore(); } };
+    ctx.save(); ctx.translate(wx, wy); try { draw246(I, ly, ts); } finally { window.H248 = null; ctx.restore(); }
+  },
+  jolt: FA239.A2.jolt, pre() {}, snd: FA239.A2.snd, boom: FA239.WGold.boom };
+Object.assign(FAM, { PA: r239('WG2'), PB: r239('WG') }); ['PC', 'PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
 setTimeout(() => { if (document.getElementById('slowRow')) return; const m = document.querySelector('[data-m="unlock"]'); if (!m) return; const row = document.createElement('div'); row.id = 'slowRow'; setTimeout(() => (document.getElementById('xrows') || m.parentNode).appendChild(row), 0); row.innerHTML = '<small>Speed (to inspect a moment): </small>' + [['1', 'Normal'], ['.25', 'Slow ¼'], ['.1', 'Very slow'], ['0', 'Pause']].map(([v, n]) => `<button data-slow="${v}">${n}</button>`).join(' '); m.parentNode.appendChild(row);
   const mark = () => row.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.slow === (window.SLOWMO ?? 1))); row.querySelectorAll('button').forEach(b => b.onclick = () => { window.SLOWMO = +b.dataset.slow; mark(); }); mark(); }, 300);
 setTimeout(() => { profName = 'First Aid'; fam = 'PA'; const lp = document.getElementById('loop'); if (lp) lp.checked = true; if (typeof sync === 'function') sync(); const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching the next unlock')); if (b) b.click(); }, 260);
