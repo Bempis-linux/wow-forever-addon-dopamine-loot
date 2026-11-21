@@ -642,3 +642,8 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   the front), `plan246` (lid slam at +.45, stamp at +1.0). Motion: a basket puff on launch, a low arc (it must stay under the header)
   with spin, a bounce in the straw, an accelerating lid slam with a rebound and jiggling neighbours, a stamp wind-up, a thump with
   ink flecks. Keys: 1 A2, 2 A (round 245).
+- **Round 247:** the user: "much better direction"; the stamp "clips all of a sudden" (it switched from side-on to a big face-on
+  block in one frame). `stampMorph247`: one shape that turns (th 0 = side-on: the rubber strip below and the handle up; th 1 = face-on
+  from behind: a rubber frame and the knob in the middle). Path: pad, then an arc to above the crate, then it turns and comes forward
+  (scale 1.6), presses in, thumps, lifts, turns back and goes home; the finale's stamp does the same, held big. I checked the frames
+  in a 12-still strip.
