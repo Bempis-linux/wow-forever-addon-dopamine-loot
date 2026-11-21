@@ -689,3 +689,6 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   falls level and spins on its own axis (`item245`'s new `spin` arg: a tick on the end face, a band moving over the body), and the strip
   unwinds off its top, as wide as the roll, trailing up and winding back in as it lands; the outlines only draw with `Hk.ghosts` (off), so
   front-row crates just pop in with dust.
+- **Round 255:** the user: make the wagon differ more from the crates (both were mid-brown wood) and add the green pennant from F3.
+  `ST252.F1d` dark oak, `F1g` painted green, `F1r` barn red (F1's iron straps and brackets via `s.iron`, the pennant via `s.flag`; the
+  lettering is cream on the painted ones); F1 as it was, plus the pennant, for comparison. Keys: 1 F1d, 2 F1g, 3 F1r, 4 F1.
