@@ -673,3 +673,8 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   behind the crate (drawn before the crates while `behind`), swings over toward us, turns, thumps the front, swings back and
   sinks). New `draw246` hooks: `noStation`, `drop` (the item falls from ly-75 and fades in), `stampPose`, `finPose`, `frontEarly`; `barModule`
   takes `V.noText` (r239 passes `Z.noText`), and the line is drawn on the sideboard between two green crosses. Keys: 1 WG2, 2 WG (round 250).
+- **Round 252:** the clean wagon is the base ("much better"); "fancify" it and add handles on the left. `wagon252(K)` with `ST252` looks,
+  `wheel252` (8 spokes, rim, hub), `handles252` (two pull shafts, the back one behind the bed, a crossbar grip), `rivet252`: F1 Iron-bound
+  (iron corner brackets and straps with rivets, iron rims, a leather grip), F2 Painted medic cart (a cream sideboard with a green
+  border and lettering, brass corner caps, green rims), F3 Field hospital (dark stain, gold trim and corner diamonds, serif gold lettering,
+  gold hubs, a green pennant at the back corner that flutters in the finale). Keys: 1 F1, 2 F2, 3 F3, 4 WG2 (plain).
