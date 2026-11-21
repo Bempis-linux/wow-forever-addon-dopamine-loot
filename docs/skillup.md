@@ -708,3 +708,9 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   the crates rattle, the handles lift, the pennant whips; hold: it squats back, the wheels lock, silent; payoff: a white flash + two
   shockwave rings + a cone of dust and grit behind it, a strong module shake (`F1.jolt`), a wheelie (-.24 rad), it rockets right
   (560q²) with long speed streaks, the crates bounce up and thump down as the front lands (.42 s), and it fades out.
+- **Round 258:** the user: better, but expecting an exaggerated launch; the horizontal wind lines are too static. Cartoon exaggeration
+  (`roll256`, `rollFx256`, `wr256` redefined again; the last declaration wins): the hold pulls it 12 px back and squashes it (scale 1.12 x .84);
+  the launch stretches it like a rubber band (1.55 x .72 snapping back), the crates lag behind (`window._cl256`) then catch up, a
+  near-upright wheelie (-.62 rad), a much faster exit (1500q²), scorch marks from the start point, orange sparks off the iron rims
+  (burnout and launch), a bigger flash, three rings, a billowing dust cloud, a stronger shake. Wind streaks are now separate particles
+  (`S.sk258`): born at random heights, each with its own speed, length and width, tapered, growing then fading.
