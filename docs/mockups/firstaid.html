@@ -54,7 +54,7 @@ canvas { position: absolute; inset: 0; }
 <body>
 <div id="panel">
 <h1>First Aid</h1>
-<small class="sub">Round 244: the same wrap, four whole new looks for the linen, arm, hand and motion: A painted, B bold, C battle-worn, D mageweave. V2 (round 243) for reference. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
+<small class="sub">Round 245: supply crates packed across the bar (your concept). A toss and lid, B roll along the lids, C flap box, D paper parcel. Try all three gaps: above 15 points each crate takes several items. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
 <div class="sec"><h2>Option</h2><div class="seg" id="fams"></div></div>
 <div class="sec"><h2>Moment</h2><div class="seg" id="moments"><button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button></div></div>
 <div class="sec"><h2>Sound &amp; playback</h2><div class="toggles"><label><input type="checkbox" id="snd" checked> Sound</label><label><input type="checkbox" id="loop"> Loop</label></div><div id="xrows"></div></div>
@@ -1929,7 +1929,100 @@ function r244(K) { const sty = ST244[K]; return { name: sty.name, desc: ({ A: 'P
       if (fin && ts >= FP239 + .45) once('i4' + K, () => spawn({ x: I.x1 + 18, y: ly, size: 8, shape: 'ring', grow: 26, life: .5, col: finCol244[K][0] }));
     } }; }
 ['A', 'B', 'C', 'D'].forEach(K => { FA239[K] = r244(K); });
-Object.assign(FAM, { PA: r239('A'), PB: r239('B'), PC: r239('C'), PD: r239('D'), PE: r239('V2') }); ['PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
+// round 245: the user's own concept: supply crates packed across the bar. Gap <= 15: one crate per point, each gets a bandage roll, then is shut and stamped with a green plus. Gap > 15: 15 crates, each takes several items (rolls and anti-venom vials) before it is packed. A Toss + lid (as described), B Roll along the lids, C Flap box (cardboard, flaps fold, tape), D Paper parcel (the paper folds up round the items). The basket of supplies and the ink pad with the stamp sit at the start
+function plan245(I) { const G = g111(I), lo = I.lo, n = G.n, tot = new Array(G.N).fill(0), before = new Array(G.N).fill(0); for (let L = lo; L < lo + n; L++) { const k = G.kOf(L); tot[k]++; if (L < S.v0) before[k]++; }
+  const ev = [], seen = before.slice(); S.hits.forEach((h, i) => { const L = S.v0 + i; if (L >= lo + n) return; const k = G.kOf(L), j = seen[k]++, T = h + HIT, full = seen[k] >= tot[k]; ev.push({ i, k, j, T, full, lidT: T + .3, stampT: T + .75 }); });
+  const w = Math.min(G.sw - 3, 28), hh = Math.min(16, Math.max(10, w * .8)); return { G, tot, before, ev, w, hh, d: Math.min(4, w * .25), base: 0 }; }
+const itemType245 = (m, j) => m > 1 && j % 2 ? 'vial' : 'roll';
+function item245(type, x, y, s, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  if (type === 'roll') { const g = ctx.createLinearGradient(0, -s, 0, s); g.addColorStop(0, '#fffaf0'); g.addColorStop(1, '#bcb096'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-s * .9, -s * .75, s * 1.8, s * 1.5, 1.5); ctx.fill(); ctx.fillStyle = '#f4ecda'; ctx.strokeStyle = 'rgba(110,96,70,.7)'; ctx.lineWidth = .6; ctx.beginPath(); ctx.ellipse(s * .9, 0, s * .32, s * .75, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c8a878'; ctx.beginPath(); ctx.ellipse(s * .9, 0, s * .1, s * .24, 0, 0, 7); ctx.fill(); }
+  else { ctx.fillStyle = 'rgba(80,200,110,.9)'; ctx.beginPath(); ctx.roundRect(-s * .55, -s * .5, s * 1.1, s * 1.2, s * .35); ctx.fill(); ctx.fillStyle = '#8a6a44'; ctx.fillRect(-s * .25, -s * 1, s * .5, s * .5); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(-s * .35, -s * .35, s * .2, s * .6); }
+  ctx.restore(); }
+function plus245(x, y, s, a = 1, sy = .55) { ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(1, sy); ctx.fillStyle = '#3ec85a'; ctx.fillRect(-s / 2, -s / 6, s, s / 3); ctx.fillRect(-s / 6, -s / 2, s / 3, s); ctx.fillStyle = 'rgba(200,255,200,.35)'; ctx.fillRect(-s / 2, -s / 6, s, s / 10); ctx.restore(); }
+// the supplies basket and the ink pad with the stamp, left of the bar
+function station245(I, ly, stampAway) { const bx = I.x0 - 20, px = I.x0 - 42, by = ly + 8;
+  ctx.save(); ctx.fillStyle = '#2a3a2a'; ctx.beginPath(); ctx.roundRect(px - 8, by - 3, 16, 4, 1.5); ctx.fill(); ctx.fillStyle = '#3ec85a'; ctx.fillRect(px - 6.5, by - 3, 13, 1.6);
+  [[-4, -5, 'roll'], [3, -6, 'vial'], [-1, -8, 'roll']].forEach(([dx, dy, tp]) => item245(tp, bx + dx, by + dy, 3.2, dx * .1));
+  const g = ctx.createLinearGradient(0, by - 10, 0, by); g.addColorStop(0, '#c8985a'); g.addColorStop(1, '#7a5230'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(bx - 10, by - 8); ctx.lineTo(bx + 10, by - 8); ctx.lineTo(bx + 8, by); ctx.lineTo(bx - 8, by); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(70,44,20,.6)'; ctx.lineWidth = .7; for (let y = by - 6; y < by; y += 2.2) { ctx.beginPath(); ctx.moveTo(bx - 9, y); ctx.lineTo(bx + 9, y); ctx.stroke(); } ctx.restore();
+  if (!stampAway) stamp245(px, by - 4, 0); return { bx, by: by - 8, px, py: by - 4 }; }
+function stamp245(x, y, sq = 0) { ctx.save(); ctx.translate(x, y); ctx.scale(1 + sq * .2, 1 - sq * .2); ctx.fillStyle = '#3ec85a'; ctx.fillRect(-5, -1.5, 10, 1.5); ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.roundRect(-5.5, -5, 11, 3.6, 1); ctx.fill(); ctx.fillStyle = '#8a5a34'; ctx.fillRect(-1.2, -11, 2.4, 6.4); ctx.beginPath(); ctx.arc(0, -12, 2.8, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,220,180,.35)'; ctx.fillRect(-.8, -13.5, 1.2, 2); ctx.restore(); }
+// a wooden crate in 3/4 view: open (lid standing on its back edge, items peeking out) or shut and stamped
+function crate245(x, base, w, hh, d, o) { const l = x - w / 2, r = x + w / 2, top = base - hh, sq = o.sq || 0; ctx.save(); ctx.translate(x, base); ctx.scale(1 + sq * .12, 1 - sq * .12); ctx.translate(-x, -base);
+  const box = o.kind === 'box', wood = box ? ['#d8b07a', '#a87a48', '#6a4a28'] : ['#b88450', '#8a5a34', '#4a2e18'];
+  ctx.fillStyle = box ? '#3a2a18' : '#24160a'; ctx.beginPath(); ctx.moveTo(l, top); ctx.lineTo(r, top); ctx.lineTo(r + d, top - d); ctx.lineTo(l + d, top - d); ctx.closePath(); ctx.fill();
+  (o.items || []).forEach(it => { if (it.hidden) return; item245(it.type, it.x, top - it.up, Math.min(3.6, w * .2), it.rot || 0); });
+  ctx.fillStyle = wood[2]; ctx.beginPath(); ctx.moveTo(r, base); ctx.lineTo(r, top); ctx.lineTo(r + d, top - d); ctx.lineTo(r + d, base - d); ctx.closePath(); ctx.fill();
+  const g = ctx.createLinearGradient(0, top, 0, base); g.addColorStop(0, wood[0]); g.addColorStop(1, wood[1]); ctx.fillStyle = g; ctx.fillRect(l, top, w, hh);
+  if (!box) { ctx.fillStyle = 'rgba(40,24,10,.5)'; ctx.fillRect(l, top + hh * .5 - .4, w, .8); ctx.fillStyle = wood[2]; ctx.fillRect(l, top, 1.4, hh); ctx.fillRect(r - 1.4, top, 1.4, hh); ctx.fillRect(l, base - 1.2, w, 1.2); }
+  else { ctx.fillStyle = 'rgba(90,60,30,.35)'; ctx.fillRect(l, top, w, 1); }
+  // closing: a lid swings down from standing on the back edge (u 0 -> 1); box: two flaps fold in, then tape
+  if (!box) { const u = o.lid; if (u !== undefined) { const L = d + 3, b1 = { x: l + d, y: top - d }, b2 = { x: r + d, y: top - d }, a = (1 - u) * Math.PI * .62, fx = -Math.cos(a) * d, fy = -Math.sin(a) * L + Math.cos(a) * d;
+      ctx.fillStyle = u >= 1 ? '#c89058' : mix('#6a4426', '#c89058', u); ctx.beginPath(); ctx.moveTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y); ctx.lineTo(b2.x + fx, b2.y + fy); ctx.lineTo(b1.x + fx, b1.y + fy); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(60,36,16,.6)'; ctx.lineWidth = .6; ctx.stroke();
+      if (u >= 1) { ctx.fillStyle = '#9a6438'; ctx.fillRect(l, top - 1.2, w, 1.4); } } }
+  else { const u = o.lid ?? 0, f1 = clamp(u * 2), f2 = clamp(u * 2 - 1), fl = (side, f) => { const hx = side < 0 ? l + d / 2 : r + d / 2, ang = (1 - f) * 1.1 * side, len = w / 2 + .5; ctx.save(); ctx.translate(hx, top - d / 2); ctx.rotate(ang); ctx.fillStyle = f >= 1 ? '#c8a070' : '#b89060'; ctx.fillRect(side < 0 ? 0 : -len, -1, len, 2.2); ctx.restore(); };
+    if (u > 0 || o.open) { fl(-1, f1); fl(1, f2); } if (o.tape > 0) { ctx.fillStyle = 'rgba(120,200,130,.9)'; ctx.fillRect(x + d / 2 - 1.2, top - d, 2.4, d * clamp(o.tape)); ctx.fillRect(x - .9, top, 1.8, hh * .45 * clamp(o.tape)); } }
+  if (o.mark > 0) { if (box) plus245(x, top + hh * .55, Math.min(8, w * .4), o.mark, 1); else plus245(x + d / 2, top - d / 2 - .4, Math.min(8, w * .38), o.mark); }
+  if (o.flash > 0) { ctx.fillStyle = `rgba(120,255,140,${o.flash * .45})`; ctx.fillRect(l, top - d, w + d, hh + d); }
+  ctx.restore(); }
+// a paper parcel: a flat sheet on the floor, items on it, then the two halves fold up and over into a parcel (u 0 -> 1)
+function parcel245(x, base, w, hh, o) { const u = o.lid ?? -1, s = o.sq || 0; ctx.save(); ctx.translate(x, base); ctx.scale(1 + s * .12, 1 - s * .12); ctx.translate(-x, -base);
+  const ph = Math.min(hh, 10), pw = w * .92;
+  if (u < 0) { ctx.fillStyle = '#b88a58'; ctx.beginPath(); ctx.moveTo(x - pw / 2 - 3, base); ctx.lineTo(x + pw / 2 + 3, base); ctx.lineTo(x + pw / 2 + 6, base - 3); ctx.lineTo(x - pw / 2, base - 3); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(90,60,30,.4)'; ctx.lineWidth = .5; ctx.stroke();
+    (o.items || []).forEach(it => item245(it.type, it.x, base - 3 - it.up + 1, Math.min(3.6, w * .2), it.rot || 0)); }
+  else { if (u < 1) (o.items || []).forEach(it => item245(it.type, it.x, base - 3 - it.up + 1, Math.min(3.6, w * .2), it.rot || 0));
+    const g = ctx.createLinearGradient(0, base - ph, 0, base); g.addColorStop(0, '#d0a26a'); g.addColorStop(1, '#8e6438'); ctx.fillStyle = g;
+    const half = (side) => { const a = (1 - u) * 1.35 * side; ctx.save(); ctx.translate(x + side * pw / 2, base); ctx.rotate(-a); ctx.beginPath(); ctx.roundRect(side < 0 ? 0 : -pw / 2, -ph, pw / 2, ph, 2); ctx.fill(); ctx.restore(); }; half(-1); half(1);
+    if (u >= 1) { ctx.strokeStyle = 'rgba(90,60,30,.55)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(x, base - ph); ctx.lineTo(x, base); ctx.moveTo(x - pw / 2, base - ph * .5); ctx.lineTo(x - pw / 2 + 3, base - ph); ctx.moveTo(x + pw / 2, base - ph * .5); ctx.lineTo(x + pw / 2 - 3, base - ph); ctx.stroke(); ctx.fillStyle = 'rgba(255,230,190,.25)'; ctx.fillRect(x - pw / 2 + 1, base - ph + .6, pw - 2, 1); } }
+  if (o.mark > 0) plus245(x, base - ph * .5, Math.min(8, w * .36), o.mark, 1);
+  if (o.flash > 0) { ctx.fillStyle = `rgba(120,255,140,${o.flash * .45})`; ctx.fillRect(x - pw / 2, base - ph, pw, ph); }
+  ctx.restore(); }
+// how an item gets from the basket to its crate: tossed in an arc (A, C, D) or rolled along the shut lids (B)
+function carry245(kind, Q, st, e, x, topY) { const t = S.age - e.T; if (t < -.55 || t >= 0) return; const u = (t + .55) / .55, sx = st.bx, sy = st.by - 3, type = itemType245(Q.tot[e.k], e.j), s = Math.min(3.6, Q.w * .2);
+  if (kind !== 'roll') { const peak = Math.min(16, 6 + Math.abs(x - sx) * .12), px = lerp(sx, x, u), py = lerp(sy, topY - 2, u) - Math.sin(u * Math.PI) * peak; item245(type, px, py, s, u * 9); return; }
+  // B: up out of the basket, along the lids (small hops from crate to crate), then a drop into the open one
+  const G = Q.G, lidY = (xx) => topY - Q.d - 1.6 - s * .75, x0 = G.sx(0) - Q.w / 2; let px, py; if (u < .15) { const v = u / .15; px = lerp(sx, x0, v); py = lerp(sy, lidY(x0), v) - Math.sin(v * Math.PI) * 6; }
+  else if (u < .85) { const v = (u - .15) / .7; px = lerp(x0, x - Q.w / 2 + 1, v); const cell = (px - (G.sx(0) - G.sw / 2)) / G.sw, fr = cell - Math.floor(cell); py = lidY(px) - (fr > .82 || fr < .12 ? Math.sin(((fr + .18) % 1) / .3 * Math.PI) * 2.2 : 0); }
+  else { const v = (u - .85) / .15; px = lerp(x - Q.w / 2 + 1, x, v); py = lerp(lidY(x), topY - 2, v * v); } item245(type, px, py, s, px * .4); }
+// the stamp: off the pad, over the crate, slam, lift, back to the pad
+function stampPose245(st, e, x, topY) { const t = S.age - e.stampT; if (t < -.35 || t > .4) return null; if (t < -.1) { const u = sm242((t + .35) / .25); return { x: lerp(st.px, x, u), y: lerp(st.py, topY - 14, u) - Math.sin(u * Math.PI) * 6, sq: 0 }; }
+  if (t < 0) { const u = (t + .1) / .1; return { x, y: lerp(topY - 14, topY - 1, u * u), sq: 0 }; } if (t < .08) return { x, y: topY - 1, sq: 1 }; const u = sm242((t - .08) / .32); return { x: lerp(x, st.px, u), y: lerp(topY - 1, st.py, u) - Math.sin(u * Math.PI) * 8, sq: 0 }; }
+const KIND245 = { A: { pack: 'crate', carry: 'toss' }, B: { pack: 'crate', carry: 'roll' }, C: { pack: 'box', carry: 'toss' }, D: { pack: 'paper', carry: 'toss' } };
+function draw245(K, I, ly, ts) { const Q = plan245(I), G = Q.G, kind = KIND245[K], base = ly + 9, fin = fin240(I, ts), N = G.N;
+  let stampBusy = null;
+  const st = { bx: I.x0 - 20, by: ly, px: I.x0 - 42, py: ly + 4 }; Q.ev.forEach(e => { if (!e.full) return; const p = stampPose245(st, e, G.sx(e.k) + (kind.pack === 'crate' ? Q.d / 2 : 0), base - Q.hh - (kind.pack === 'crate' ? Q.d : 0)); if (p) stampBusy = p; }); if (fin && ts >= FB239 - .2 && ts < FP239 + .45) stampBusy = stampBusy || {}; station245(I, ly, !!stampBusy); stampBusy = null;
+  // the finale: crates hop in a wave (three, faster), hold, then a big stamp on the last crate, the marks flash in a chain, the last crate hops into the recipe
+  const hop = k => { if (!fin || ts >= FB239) return 0; let y = 0; [0, .45, .85].forEach((a, i) => { const q = (ts - a - k / N * (.35 - i * .08)) / .18; if (q > 0 && q < 1) y = Math.max(y, Math.sin(q * Math.PI) * (2 + i)); }); return y; };
+  const chain = fin && ts >= FP239 ? (ts - FP239) / .4 : -1, lastFly = fin && ts >= FP239 + .5 ? clamp((ts - FP239 - .5) / .4) : 0;
+  for (let k = 0; k < N; k++) { const x = G.sx(k), m = Q.tot[k], evs = Q.ev.filter(e => e.k === k); let count = Q.before[k], sq = 0, lid, mark = 0, tape = 0, last = null;
+    evs.forEach(e => { if (S.age >= e.T) { count++; last = e; const t = S.age - e.T; if (t < .25) sq = Math.max(sq, damp241(t, 30, 9) * .5); } });
+    const sealedBefore = Q.before[k] >= m, fe = evs.find(e => e.full);
+    if (sealedBefore) { lid = 1; mark = 1; tape = 1; } else if (fe) { const tl = S.age - fe.lidT; lid = tl < -.22 ? (kind.pack === 'paper' ? -1 : 0) : clamp((tl + .22) / .22); if (kind.pack === 'paper' && tl < -.22) lid = -1; if (tl >= 0 && tl < .2) sq = Math.max(sq, damp241(tl, 34, 10) * .7); tape = clamp((S.age - fe.lidT - .05) / .25); const tsT = S.age - fe.stampT; mark = tsT >= 0 ? clamp(tsT / .06) : 0; if (tsT >= 0 && tsT < .2) sq = Math.max(sq, damp241(tsT, 40, 12) * 1); }
+    else lid = kind.pack === 'paper' ? -1 : 0;
+    const items = []; for (let j = 0; j < count; j++) { const ix = x - Q.w / 2 + (j + .5) * Q.w / Math.max(1, m); const e = evs.find(e => e.j === j); const land = e ? S.age - e.T : 9; items.push({ type: itemType245(m, j), x: m > 1 ? ix : x, up: 2.5 + (land < .2 ? damp241(land, 28, 8) * 3 : 0), rot: (j * 1.7) % 1 - .5 }); }
+    let flash = chain >= 0 ? clamp(1 - Math.abs(chain - k / N) * 4) : 0, dy = -hop(k);
+    ctx.save(); if (k === N - 1 && lastFly > 0) { const tx = I.x1 + 18; ctx.translate(lerp(0, tx - x, lastFly), -Math.sin(lastFly * Math.PI) * 16 + lerp(0, ly - base + Q.hh / 2, lastFly)); ctx.globalAlpha *= 1 - clamp((lastFly - .8) / .2); } ctx.translate(0, dy);
+    if (kind.pack === 'paper') parcel245(x, base, Q.w, Q.hh, { lid, items, mark, sq, flash }); else crate245(x, base, Q.w, Q.hh, Q.d, { kind: kind.pack === 'box' ? 'box' : 'crate', lid: kind.pack === 'box' ? lid : (lid === 0 ? 0 : lid), open: true, items: lid >= 1 && kind.pack !== 'paper' ? [] : items, mark, sq, tape, flash }); ctx.restore();
+    evs.forEach(e => { if (S.age >= e.T) once('c5' + e.i, () => { for (let i = 0; i < 4; i++) spawn({ x: x + (Math.random() - .5) * Q.w * .6, y: base - Q.hh - 1, vx: (Math.random() - .5) * 40, vy: -20 - Math.random() * 25, g: 180, life: .4, size: .8, shape: 'sq', vr: 8, col: '#e8c860' }); }); if (e.full && S.age >= e.lidT) once('l5' + e.i, () => noise(0, .05, .02, 520, 1, 'lowpass', true)); if (e.full && S.age >= e.stampT) once('s5' + e.i, () => { noise(0, .04, .026, 300, 1, 'lowpass', true); tone(392, .01, .01, .25, 'sine', null, .005); spawn({ x: x + 1, y: base - Q.hh - 2, size: 3, shape: 'ring', grow: 14, life: .3, col: '#7aff8a' }); for (let i = 0; i < 4; i++) spawn({ x, y: base - Q.hh - 2, vx: (Math.random() - .5) * 50, vy: -15 - Math.random() * 20, g: 120, life: .35, size: .8, col: '#3ec85a' }); }); }); }
+  // items in flight and the stamp in flight (over the crates)
+  Q.ev.forEach(e => carry245(kind.carry, Q, st, e, G.sx(e.k), base - Q.hh));
+  Q.ev.forEach(e => { if (!e.full) return; const p = stampPose245(st, e, G.sx(e.k) + (kind.pack === 'crate' ? Q.d / 2 : 0), base - Q.hh - (kind.pack === 'crate' ? Q.d : 0)); if (p) stampBusy = p; });
+  if (fin && ts >= FB239 - .2 && ts < FP239 + .45) { const x = G.sx(N - 1) + Q.d / 2, ty = base - Q.hh - Q.d; let p; if (ts < FB239) { const u = sm242((ts - FB239 + .2) / .2); p = { x: lerp(st.px, x, u), y: lerp(st.py, ty - 22, u), sq: 0 }; } else if (ts < FP239) p = { x: x + Math.sin(S.age * 60) * .7, y: ty - 22, sq: 0 }; else if (ts < FP239 + .06) p = { x, y: lerp(ty - 22, ty - 1, ((ts - FP239) / .06) ** 2), sq: 0 }; else p = { x, y: ty - 1 - (ts - FP239 - .06) * 30, sq: ts < FP239 + .14 ? 1 : 0 }; stampBusy = p; if (ts >= FB239 && ts < FP239) glint239(x, ty - 36, ts); }
+  if (stampBusy) stamp245(stampBusy.x, stampBusy.y, stampBusy.sq);
+  if (fin && ts >= FP239) once('f5' + K, () => { const x = G.sx(N - 1); spawn({ x, y: base - Q.hh, size: 8, shape: 'ring', grow: 90, life: .7, col: '#7aff8a' }); for (let i = 0; i < 18; i++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: base - Q.hh - 4, vx: (Math.random() - .5) * 50, vy: -40 - Math.random() * 70, g: 40, life: 1.1, size: 2 + Math.random(), shape: 'star', col: i % 3 ? '#c8ffd0' : '#ffd36a' }); });
+  if (fin && ts >= FP239 + .9) once('fi5' + K, () => spawn({ x: I.x1 + 18, y: ly, size: 8, shape: 'ring', grow: 26, life: .5, col: '#c8ffd0' }));
+}
+const DESC245 = { A: 'Your concept: supply crates across the bar (one per point up to 15; above that each crate takes several items, bandage rolls and anti-venom vials). Each skill-up a bandage roll is tossed from the supply basket at the start into the open crate with a bounce and a puff of straw; when the crate is full its lid, standing open on the back edge, swings shut with a thunk, and the stamp hops off the green ink pad, slams a green plus onto the lid and hops back. Finale: the crates hop in a wave three times, the stamp hangs over the last crate, then slams: a green ring, every plus flashes in a chain and the last crate hops into the recipe.',
+  B: 'As A, but the roll travels along the tops of the shut crates: up out of the basket, rolling across the lids with a small hop from crate to crate, then it drops into the open crate.',
+  C: 'As A with cardboard boxes instead of crates: when a box is full its two flaps fold in one after the other, a strip of green tape runs over the seam and down the front, and the stamp prints the green plus on the front.',
+  D: 'As A with paper parcels: each slot is a flat sheet of brown paper on the floor; the items land on it, and when it is full the two halves of the paper fold up and over them into a neat parcel, then the green plus is stamped on its side.' };
+['A', 'B', 'C', 'D'].forEach(K => { FA239[K] = { name: { A: 'Toss and lid', B: 'Roll along the lids', C: 'Flap box', D: 'Paper parcel' }[K], desc: DESC245[K], draw(I, ly, t, ts) { draw245(K, I, ly, ts); },
+  jolt(I) { const Q = plan245(I); for (const e of Q.ev) { const t = S.age - e.stampT; if (e.full && t >= 0 && t < .06) return [0, 1.2]; } return [0, 0]; },
+  pre(v) { noise(0, .25, .006 * v, 900, 1, 'bandpass'); },
+  snd(v, i) { noise(0, .05, .02 * v, 420, 1, 'lowpass', true); tone(note239(i) * .75, .01, .014 * v, .3, 'triangle', null, .005); },
+  boom() { noise(0, .07, .035, 300, 1, 'lowpass', true); [0, 4, 7, 12].forEach((k, i) => tone(330 * semi(k), .08 + i * .04, .016, 1.1, 'triangle', null, .01)); } }; });
+// the lid and the stamp sounds on their own beat (over() fires snd at landing; these follow when a crate fills)
+Object.assign(FAM, { PA: r239('A'), PB: r239('B'), PC: r239('C'), PD: r239('D') }); ['PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
 setTimeout(() => { if (document.getElementById('slowRow')) return; const m = document.querySelector('[data-m="unlock"]'); if (!m) return; const row = document.createElement('div'); row.id = 'slowRow'; setTimeout(() => (document.getElementById('xrows') || m.parentNode).appendChild(row), 0); row.innerHTML = '<small>Speed (to inspect a moment): </small>' + [['1', 'Normal'], ['.25', 'Slow ¼'], ['.1', 'Very slow'], ['0', 'Pause']].map(([v, n]) => `<button data-slow="${v}">${n}</button>`).join(' '); m.parentNode.appendChild(row);
   const mark = () => row.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.slow === (window.SLOWMO ?? 1))); row.querySelectorAll('button').forEach(b => b.onclick = () => { window.SLOWMO = +b.dataset.slow; mark(); }); mark(); }, 300);
 setTimeout(() => { profName = 'First Aid'; fam = 'PA'; const lp = document.getElementById('loop'); if (lp) lp.checked = true; if (typeof sync === 'function') sync(); const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching the next unlock')); if (b) b.click(); }, 260);

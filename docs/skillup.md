@@ -624,3 +624,13 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   bracer, a fingerless glove, rough stained linen with frayed fibers; hurried, two jerky tugs, dust), D Mageweave (violet cloth with
   gold-trimmed bands and a sheen, an open hand that glows; floating roll, a light pulse, no jolt). V2 is key 5. K and PW are
   in git (commit 63d41e9).
+- **Round 245 (a new theme, the user's concept):** the user doesn't like the First Aid theme (wraps, wounds) or the locked First Aid
+  ring much. I suggested supply crates; the user ruled out one long crate and gave the concept: **crates across the bar**. Up to
+  15 points it's one crate per point, each getting a bandage roll, then shut and stamped with a green plus; above 15, each crate
+  takes several items before it's packed. Built as `FA239.A-D` on `draw245` (`plan245`: crates via g111, items per crate, an event
+  per hit with land, lid and stamp times; `crate245` is a 3/4-view wooden crate whose lid stands open on its back edge and swings
+  shut, or a cardboard box with flaps and tape; `parcel245` is paper that folds up; `station245` is the supplies basket plus the green ink
+  pad and stamp at the start; `carry245` tosses or rolls along the lids; `stampPose245`). A Toss and lid (as described), B Roll along
+  the lids, C Flap box, D Paper parcel. Finale (shared sketch): the crates hop in a wave three times, the stamp hangs over the
+  last crate, slams, every plus flashes in a chain, and the last crate hops into the recipe. The wrap rounds (239-244) are in git
+  (commit 5b27d1c). A ring redesign for the crate theme was mentioned, but nothing is decided.
