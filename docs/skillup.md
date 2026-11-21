@@ -728,3 +728,10 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   B Whip and wheels, C Blast-off, D Fanfare hit; each with `beat(i)` for the three burnout beats + `impact`), picked separately in a row
   (`#sfx260`, which replaces the Wagon/Placeholder row); the buttons play their sound; Hear: Skill-up, Five, Seal, Finale. Every option is
   measured offline at load (`TR260`) and trimmed to the skill-up .0068 / beat .008 / impact .013 targets; I checked silently, no errors.
+- **Round 261:** round 260 was "generic music notes, they don't match or feel like a proper skill-up"; finales disliked too. I asked: the user
+  picked **Foley + a reward ping** (other choices were plain foley, WoW's own sounds, or their own description). `FOL261` foley: land = a soft
+  cloth thud (lowpass 200) + a straw rustle (5 grains, 900-1260 Hz); lid = a wooden clap (bandpass 650) + a low knock; stamp = a firm thunk;
+  finale beats `BEAT261` = gravel sprays (denser each beat) + a wheel rumble; impacts `FN261`: A Gravel blast, B Catapult crack, C Whip
+  and roll, D Dust boom; pings `SK261` (587-990 Hz, scale-stepped): A Soft ding, B Two-note lift, C Wood ping, D Iron clink; the seal's
+  ping is a fifth up; the unlock (`window.PAY261` through r239's SND97) = the ping family rising 0/4/7. Levels auto-trimmed at load
+  (`TR261`): foley .0055, ping .0055, beat .008, impact .013, unlock .007; I checked silently, no errors.
