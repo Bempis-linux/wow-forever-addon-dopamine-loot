@@ -39,10 +39,13 @@ focus and pointers. Detail lives in the workstream file named below; history in 
 - Bash collapses `\\`: write Lua with Write/Edit. `grep -F -i -f` on the privacy file crashes Git Bash's grep: check
   patterns one at a time. sed: an unescaped apostrophe in a JS string breaks a page (use ’). No node or python here.
 - Forever: no `MouseIsOver`; `SetRotation` only on square textures; models after `Show()`; no AnimationGroups.
-- Never delete a junction with `rm -rf`. Kit: **wow-addon-kit 0.9.2** (pushed and installed at user and project scope,
-  2026-11-19): `wow-design-ideas` gained the Cooking lessons (sections 3b and 8, the sound notes). 2026-11-20: **kit 0.9.2** (pushed, installed at user and project scope): the Enchanting lessons in section 6 (sound) and a new section 9. New skill changes take
-  effect after a restart of Claude Code.
-- `skillup-p2.html` is at 523.5 KB of the 524,288-byte cap: archive Cooking's code first (see skillup.md "Next").
+- Never delete a junction with `rm -rf`. Kit: **wow-addon-kit 0.9.3** (2026-11-20, pushed, installed at user and project
+  scope): `wow-design-ideas` has the Cooking (3b, 8), Enchanting (6, 9) and **First Aid (new failure rows, section 10)** lessons;
+  `wow-design-rounds` gained checking notes (the browser pane's local-page snapshot: close the tab and reopen after edits;
+  stills via a frozen loop + `goTo`; append and redefine per round). New skill changes take effect after a restart.
+- Mockup pages per profession now: `enchant.html`, `firstaid.html` (each pruned from the shared harness). `skillup-p2.html`
+  is near its 524,288-byte cap; for the Alchemy revisit, start a page of its own the same way.
+- Git Bash `grep -i` crashes here: for privacy scans, lowercase with `tr` and use `grep -F` without `-i`.
 - Words: "Leatherworking" sometimes means Skinning; the pile = the Create All tray.
 - Crafting compare page: profession buttons 1-10; mute only the run (`play(); S.mute = true`); no `shadowBlur` inside
   rotated transforms (perf).
