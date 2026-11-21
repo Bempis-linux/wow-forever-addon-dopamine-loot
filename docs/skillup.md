@@ -701,3 +701,10 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   at FP239 it lurches and accelerates right (it reaches the recipe as it unlocks) with a dust burst and speed lines, and fades out past
   110 px. `draw246` `Hk.noFin` turns off the old shared finale (hops, chain flash, the big stamp, the last crate's flight). Sound is a
   placeholder.
+- **Round 257:** the user: Roll out "doesn't feel very impactful, it just slides to the right". Picked Burnout build-up + Wheelie launch,
+  and the launch should feel like an aggressive blast-off. `roll256` and `rollFx256` redefined (the later declarations win) + `wr256`
+  (the wheelie rotation about the rear wheel), `wsAt257` (the burnout wheel spin), `window._rattle256` / `_cb256` (the crates rattle, then
+  bounce up at launch). Build: the wheels spin in place faster and faster, dirt and gravel spray back from both wheels, the shake grows,
+  the crates rattle, the handles lift, the pennant whips; hold: it squats back, the wheels lock, silent; payoff: a white flash + two
+  shockwave rings + a cone of dust and grit behind it, a strong module shake (`F1.jolt`), a wheelie (-.24 rad), it rockets right
+  (560q²) with long speed streaks, the crates bounce up and thump down as the front lands (.42 s), and it fades out.
