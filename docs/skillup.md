@@ -695,3 +695,9 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
 - **After round 255:** the user: they wanted a different design, not a recolour; they rejected four wagon designs (Iron-frame, Canvas-sided,
   Stake-rack, Wicker) and changing the crates instead. **Keep F1 and the crates as they are, with the pennant; LOCKED.** The page shows F1 only.
   Next: the finale.
+- **Round 256 (finale):** pitched Big seal, Crate tower, Banner hoist, Roll out; the user picked **Roll out**. `roll256` and `rollFx256` (on
+  `ST252.F1.rollout`): after the last seal the handles lift (`window._hl256` into `handles252`), it strains and rocks on three beats
+  (`RB256` .55 / .8 / 1.02) with dust at the wheels, and the pennant whips (`window._pf256`); the held beat leans it back and freezes it;
+  at FP239 it lurches and accelerates right (it reaches the recipe as it unlocks) with a dust burst and speed lines, and fades out past
+  110 px. `draw246` `Hk.noFin` turns off the old shared finale (hops, chain flash, the big stamp, the last crate's flight). Sound is a
+  placeholder.
