@@ -634,3 +634,11 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   the lids, C Flap box, D Paper parcel. Finale (shared sketch): the crates hop in a wave three times, the stamp hangs over the
   last crate, slams, every plus flashes in a chain, and the last crate hops into the recipe. The wrap rounds (239-244) are in git
   (commit 5b27d1c). A ring redesign for the crate theme was mentioned, but nothing is decided.
+- **Round 246: A (Toss and lid) picked.** The user: the bandages clip through; the stamp belongs on the front, not the top; make the
+  crates look good and crate-like, with bigger bandages; better, more satisfying animation. `FA239.A2` = `draw246`: `crate246`
+  (front planks with gaps and grain, corner posts, rails, a diagonal brace, nails, straw, a floor shadow; the open lid stands behind
+  the opening (`lid246`, drawn first) and is drawn over the top once past halfway; items are clipped above the front boards and hidden
+  as the lid shuts), `stampFace246` (the stamp face-on: it turns to face the crate, holds, presses the front, and the plus pops on
+  the front), `plan246` (lid slam at +.45, stamp at +1.0). Motion: a basket puff on launch, a low arc (it must stay under the header)
+  with spin, a bounce in the straw, an accelerating lid slam with a rebound and jiggling neighbours, a stamp wind-up, a thump with
+  ink flecks. Keys: 1 A2, 2 A (round 245).
