@@ -692,3 +692,6 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
 - **Round 255:** the user: make the wagon differ more from the crates (both were mid-brown wood) and add the green pennant from F3.
   `ST252.F1d` dark oak, `F1g` painted green, `F1r` barn red (F1's iron straps and brackets via `s.iron`, the pennant via `s.flag`; the
   lettering is cream on the painted ones); F1 as it was, plus the pennant, for comparison. Keys: 1 F1d, 2 F1g, 3 F1r, 4 F1.
+- **After round 255:** the user: they wanted a different design, not a recolour; they rejected four wagon designs (Iron-frame, Canvas-sided,
+  Stake-rack, Wicker) and changing the crates instead. **Keep F1 and the crates as they are, with the pennant; LOCKED.** The page shows F1 only.
+  Next: the finale.
