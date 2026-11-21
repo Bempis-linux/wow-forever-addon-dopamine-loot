@@ -741,3 +741,6 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   chord launch (rising wood pings on the beats; a clack + a wood-ping chord), B Crack and rattle (gravel crackle; a sharp crack + the crates
   rattling), C Pop and whoosh (airy puffs rising; a pop + a short whoosh), D Skid and knock (skid scrapes; a crack + a double wooden knock).
   Row `#sfx262`; I checked silently, no errors.
+- **Round 263:** finale **B Crack and rattle picked**, but the launch snap "sounds like a wooden stick breaking" (a short, bright, narrow crack;
+  the same lesson as Lightning: avoid it). B's beats and the crate rattle stay (`rattle263`); four replacement hits (`HIT263`, trimmed to .0085):
+  B1 Gravel burst, B2 Whoomp, B3 Crate jolt, B4 Wood-ping hit. Row `#sfx263`; I checked silently, no errors.
