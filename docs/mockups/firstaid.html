@@ -54,7 +54,7 @@ canvas { position: absolute; inset: 0; }
 <body>
 <div id="panel">
 <h1>First Aid</h1>
-<small class="sub">Round 261: the sound is foley of the action (a cloth thud into straw, a wooden lid, an ink stamp, gravel and wheels) plus a reward ping. Pick the ping (A-D) and the launch impact (A-D) under Sound &amp; playback; each button plays it, and Hear plays a moment on its own. The wagon, add-ons and finale are locked.</small>
+<small class="sub">Round 262: the skill-up sound is locked (the foley + Wood ping). Pick a finale sound (A-D, crisper and quieter) under Sound &amp; playback; each button plays the whole finale, and Hear plays a moment on its own.</small>
 <div class="sec"><h2>Option</h2><div class="seg" id="fams"></div></div>
 <div class="sec"><h2>Moment</h2><div class="seg" id="moments"><button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button></div></div>
 <div class="sec"><h2>Sound &amp; playback</h2><div class="toggles"><label><input type="checkbox" id="snd" checked> Sound</label><label><input type="checkbox" id="loop"> Loop</label></div><div id="xrows"></div></div>
@@ -2451,6 +2451,28 @@ setTimeout(() => { ['sfxRow', 'sfx260'].forEach(id => { const o = document.getEl
   const wake = () => { ac(); if (AC.state !== 'running') AC.resume(); const sb = document.getElementById('snd'); if (!sb.checked) sb.checked = true; };
   row.querySelectorAll('[data-sk1]').forEach(b => b.onclick = () => { SK261sel = b.dataset.sk1; mark(); wake(); HEAR261['Skill-up'](); }); row.querySelectorAll('[data-fn1]').forEach(b => b.onclick = () => { FN261sel = b.dataset.fn1; mark(); wake(); HEAR261.Finale(); });
   row.querySelectorAll('[data-h61]').forEach(b => b.onclick = () => { wake(); HEAR261[b.dataset.h61](); }); mark(); }, 360);
+// round 262: skill-up sound LOCKED: the foley + C Wood ping. The finale: none liked, "dull and unnecessarily loud" (the impacts were low muffled noise with long rumbling tails, set to .013 = about twice a skill-up). New finales: crisp short transients in the warm mid range (no long rumbles), quieter (beats .005, impact .0085), tied to the wood ping. A Wood chord launch, B Crack and rattle, C Pop and whoosh, D Skid and knock
+SK261sel = 'C';
+const wp262 = (f, g, t = 0) => SK261.C.ping(f, (TR261.ping.C || 1) * g, t);
+const FN262 = {
+  A: { name: 'Wood chord launch', beat(i, g) { wp262(587 * semi([0, 4, 7][i]), g * 1.4); gravel261(g * .4, 0, 3, .12, 900); },
+    impact(g) { noise(0, .03, .05 * g, 1100, 2.2, 'bandpass', true); noise(0, .06, .03 * g, 260, .9, 'lowpass', true); [0, 4, 7, 12].forEach((s, k) => wp262(392 * semi(s), g * 1.8, .02 + k * .015)); noise(.03, .3, .008 * g, 900, .7, 'bandpass'); } },
+  B: { name: 'Crack and rattle', beat(i, g) { for (let k = 0; k < 6 + i * 3; k++) noise(k * .035, .018, .02 * g, 1000 + (k % 3) * 120, 1.6, 'bandpass', true); wp262(587 * semi([0, 2, 4][i]), g * .7, .02); },
+    impact(g) { noise(0, .02, .08 * g, 1200, 2.4, 'bandpass', true); noise(.004, .05, .03 * g, 300, .9, 'lowpass', true); for (let k = 0; k < 7; k++) noise(.06 + k * .045, .025, .03 * g * (1 - k / 8), 700 + (k % 2) * 200, 2, 'bandpass', true); } },
+  C: { name: 'Pop and whoosh', beat(i, g) { noise(0, .22, .03 * g, 600 + i * 250, 1.2, 'bandpass'); wp262(587 * semi([0, 4, 7][i]), g * .6, .05); },
+    impact(g) { noise(0, .015, .09 * g, 1300, 2.2, 'bandpass', true); tone(330, 0, .02 * g, .12, 'triangle', null, .002); noise(.01, .4, .03 * g, 1000, .9, 'bandpass'); wp262(784, g * 1.4, .05); } },
+  D: { name: 'Skid and knock', beat(i, g) { noise(0, .12 + i * .03, .025 * g, 1000 - i * 80, 1.4, 'bandpass'); wp262(587 * semi([0, 3, 7][i]), g * .6, .06); },
+    impact(g) { noise(0, .02, .08 * g, 1150, 2.4, 'bandpass', true); noise(.05, .03, .06 * g, 520, 3, 'bandpass', true); noise(.13, .03, .05 * g, 600, 3, 'bandpass', true); noise(.05, .08, .03 * g, 200, .9, 'lowpass', true); } } };
+let FN262sel = 'A'; const TR262 = { bt: {}, im: {} };
+SFX258.whum = (i = 0) => FN262[FN262sel].beat(i, TR262.bt[FN262sel] || 1);
+SFX258.impact = () => FN262[FN262sel].impact(TR262.im[FN262sel] || 1);
+(async () => { while (!window.TR261done) await new Promise(r => setTimeout(r, 100)); SK261sel = 'C';
+  for (const K in FN262) { let b = 0; for (let i = 0; i < 3; i++) b = Math.max(b, await meas259(() => FN262[K].beat(i, 1), 1.2)); TR262.bt[K] = b ? .005 / b : 1; const m = await meas259(() => FN262[K].impact(1), 1.5); TR262.im[K] = m ? .0085 / m : 1; } window.TR262done = true; })();
+setTimeout(() => { ['sfxRow', 'sfx260', 'sfx261'].forEach(id => { const o = document.getElementById(id); if (o) o.remove(); }); const host = document.getElementById('xrows'); if (!host || document.getElementById('sfx262')) return; const row = document.createElement('div'); row.id = 'sfx262';
+  row.innerHTML = '<small>Skill-up sound: locked (the foley + Wood ping).</small><small style="margin-top:6px">Finale sound (crisper, quieter):</small>' + Object.keys(FN262).map(k => `<button data-fn2="${k}">${k}. ${FN262[k].name}</button>`).join(' ') + '<small style="margin-top:6px">Hear on its own:</small>' + Object.keys(HEAR261).map(k => `<button data-h62="${k}">${k}</button>`).join(' ');
+  host.prepend(row); const mark = () => row.querySelectorAll('[data-fn2]').forEach(b => b.classList.toggle('on', b.dataset.fn2 === FN262sel));
+  const wake = () => { ac(); if (AC.state !== 'running') AC.resume(); const sb = document.getElementById('snd'); if (!sb.checked) sb.checked = true; };
+  row.querySelectorAll('[data-fn2]').forEach(b => b.onclick = () => { FN262sel = b.dataset.fn2; mark(); wake(); HEAR261.Finale(); }); row.querySelectorAll('[data-h62]').forEach(b => b.onclick = () => { wake(); HEAR261[b.dataset.h62](); }); mark(); }, 380);
 Object.assign(FAM, { PA: r239('F1') }); ['PB', 'PC', 'PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
 setTimeout(() => { if (document.getElementById('slowRow')) return; const m = document.querySelector('[data-m="unlock"]'); if (!m) return; const row = document.createElement('div'); row.id = 'slowRow'; setTimeout(() => (document.getElementById('xrows') || m.parentNode).appendChild(row), 0); row.innerHTML = '<small>Speed (to inspect a moment): </small>' + [['1', 'Normal'], ['.25', 'Slow ¼'], ['.1', 'Very slow'], ['0', 'Pause']].map(([v, n]) => `<button data-slow="${v}">${n}</button>`).join(' '); m.parentNode.appendChild(row);
   const mark = () => row.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.slow === (window.SLOWMO ?? 1))); row.querySelectorAll('button').forEach(b => b.onclick = () => { window.SLOWMO = +b.dataset.slow; mark(); }); mark(); }, 300);

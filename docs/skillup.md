@@ -735,3 +735,9 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   and roll, D Dust boom; pings `SK261` (587-990 Hz, scale-stepped): A Soft ding, B Two-note lift, C Wood ping, D Iron clink; the seal's
   ping is a fifth up; the unlock (`window.PAY261` through r239's SND97) = the ping family rising 0/4/7. Levels auto-trimmed at load
   (`TR261`): foley .0055, ping .0055, beat .008, impact .013, unlock .007; I checked silently, no errors.
+- **Round 262: skill-up sound LOCKED** = the `FOL261` foley + **C Wood ping** (`SK261sel = 'C'`; the seal's ping a fifth up; the unlock = the wood ping
+  rising 0/4/7). Finale: none of round 261 liked, "dull and unnecessarily loud" (low muffled noise with long rumble tails at .013, about twice
+  a skill-up). `FN262`: crisp, short mid-range transients, no long tails, quieter (beats .005, impact .0085), tied to the wood ping: A Wood
+  chord launch (rising wood pings on the beats; a clack + a wood-ping chord), B Crack and rattle (gravel crackle; a sharp crack + the crates
+  rattling), C Pop and whoosh (airy puffs rising; a pop + a short whoosh), D Skid and knock (skid scrapes; a crack + a double wooden knock).
+  Row `#sfx262`; I checked silently, no errors.
