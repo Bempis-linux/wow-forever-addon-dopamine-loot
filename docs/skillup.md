@@ -684,3 +684,8 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   with glints and taps, via `window._nl253` into `lid246`), **Shine sweep** (a shine across the front + the plus glows), **Crates
   jump** (the user's idea: the other crates jump in a ripple on the lid slam and on the stamp). Pitched but not picked: Leaf springs,
   Healing motes, Wagon lantern. Page shows F1 only.
+- **Round 254:** the user: "pretty good"; (1) the ribbon trail didn't match the roll's spin (the roll tumbled end over end in 2D while
+  a thin strip trailed off its top); (2) no outlines for the unfilled two-row crates (one row has none). Now: with Ribbon tail on, the roll
+  falls level and spins on its own axis (`item245`'s new `spin` arg: a tick on the end face, a band moving over the body), and the strip
+  unwinds off its top, as wide as the roll, trailing up and winding back in as it lands; the outlines only draw with `Hk.ghosts` (off), so
+  front-row crates just pop in with dust.
