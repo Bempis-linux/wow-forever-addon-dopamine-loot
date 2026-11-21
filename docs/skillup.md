@@ -647,3 +647,11 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   from behind: a rubber frame and the knob in the middle). Path: pad, then an arc to above the crate, then it turns and comes forward
   (scale 1.6), presses in, thumps, lifts, turns back and goes home; the finale's stamp does the same, held big. I checked the frames
   in a 12-still strip.
+- **Round 248:** the user: make it more cohesive; the stamp, basket and crates "are all just sitting there". Pitched Packing bench,
+  Supply wagon, Medic's tent stall and Shared look only; the user picked **Supply wagon** and **Medic's tent stall**. `draw246` takes hooks
+  through `window.H248` (`dy` for the station, `back` and `front` draws); one wood (`WOOD248`, `plank248`) and one green.
+  WG: a flatbed deck with stakes, the basket and pad on the tailboard, two spoked wheels (`wheel248`) off the springs; the
+  load bounces (`thump248`: lands, lid slams, stamps); finale: it rocks with the hop waves, then lurches a wheel-turn forward. TS
+  (`tent248`): a canvas awning with a green trim and tabs over the whole module (the title is the stall's sign), poles, a plank floor,
+  a supplies table at the start; finale: a green-cross banner unfurls by the left pole and the tabs flutter. Also: the crates are lower
+  (base ly+13, hh <= 18) and the open lids lean back (.38π) so they stay out of the header. Keys: 1 WG, 2 TS, 3 A2.

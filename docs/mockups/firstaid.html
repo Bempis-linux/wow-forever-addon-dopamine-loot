@@ -54,7 +54,7 @@ canvas { position: absolute; inset: 0; }
 <body>
 <div id="panel">
 <h1>First Aid</h1>
-<small class="sub">Round 246: A (toss and lid) reworked: A2 the new crates, bigger rolls, the stamp on the front, more satisfying motion; A as it was for comparison. Try all three gaps and Slow ¼. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
+<small class="sub">Round 248: one setting for every piece. WG supply wagon, TS medic’s tent stall; A2 (round 247) for comparison. Pick an option, then try the moments (Reaching the next unlock plays the finale). Sounds are placeholders.</small>
 <div class="sec"><h2>Option</h2><div class="seg" id="fams"></div></div>
 <div class="sec"><h2>Moment</h2><div class="seg" id="moments"><button data-m="up" class="on">Skill-up</button><button data-m="five">Five in a row</button><button data-m="unlock">Reaching the next unlock</button></div></div>
 <div class="sec"><h2>Sound &amp; playback</h2><div class="toggles"><label><input type="checkbox" id="snd" checked> Sound</label><label><input type="checkbox" id="loop"> Loop</label></div><div id="xrows"></div></div>
@@ -2025,7 +2025,7 @@ const DESC245 = { A: 'Your concept: supply crates across the bar (one per point 
 // round 246: A (Toss and lid) picked. Fixes: the rolls no longer clip (they drop in through the opening, sit inside behind the front boards, the lid covers them), the stamp prints on the FRONT (it turns to face the crate and presses into the boards), a real crate look (planks with gaps and grain, corner posts, a diagonal brace, nails, straw), bigger crates and rolls, and satisfying motion (a launch squash, a hang at the apex, a bounce in the straw, an accelerating lid slam with a rebound and jiggling neighbours, a stamp wind-up, hold, thump and a plus that pops)
 function plan246(I) { const G = g111(I), lo = I.lo, n = G.n, tot = new Array(G.N).fill(0), before = new Array(G.N).fill(0); for (let L = lo; L < lo + n; L++) { const k = G.kOf(L); tot[k]++; if (L < S.v0) before[k]++; }
   const ev = [], seen = before.slice(); S.hits.forEach((h, i) => { const L = S.v0 + i; if (L >= lo + n) return; const k = G.kOf(L), j = seen[k]++, T = h + HIT; ev.push({ i, k, j, T, full: seen[k] >= tot[k], lidT: T + .45, stampT: T + 1 }); });
-  const w = Math.min(G.sw - 4, 30), hh = Math.min(20, Math.max(11, w * .72)); return { G, tot, before, ev, w, hh, d: Math.min(5, Math.max(3, w * .2)), s: Math.min(4.8, Math.max(2.6, w * .22)) }; }
+  const w = Math.min(G.sw - 4, 30), hh = Math.min(18, Math.max(11, w * .68)); return { G, tot, before, ev, w, hh, d: Math.min(5, Math.max(3, w * .2)), s: Math.min(4.8, Math.max(2.6, w * .22)) }; }
 const nail246 = (x, y) => { ctx.fillStyle = '#2a1a0c'; ctx.fillRect(x - .6, y - .6, 1.2, 1.2); ctx.fillStyle = 'rgba(255,230,190,.35)'; ctx.fillRect(x - .6, y - .6, .6, .6); };
 function crate246(x, base, w, hh, d, o) { const l = x - w / 2, r = x + w / 2, top = base - hh, u = o.lid || 0; ctx.save(); ctx.translate(x + (o.jig || 0), base); ctx.scale(1 + (o.sq || 0) * .1, 1 - (o.sq || 0) * .1); ctx.translate(-x, -base);
   // shadow on the floor
@@ -2055,7 +2055,7 @@ function crate246(x, base, w, hh, d, o) { const l = x - w / 2, r = x + w / 2, to
   if (o.flash > 0) { ctx.fillStyle = `rgba(120,255,140,${o.flash * .4})`; ctx.fillRect(l, top - d, w + d, hh + d); }
   ctx.restore(); }
 function lid246(x, base, w, hh, d, u) { const l = x - w / 2, r = x + w / 2, top = base - hh;
-  { const L = d + 4, a = (1 - clamp(u)) * Math.PI * .6, fx = -Math.cos(a) * d, fy = -Math.sin(a) * L + Math.cos(a) * d, b1 = { x: l + d, y: top - d }, b2 = { x: r + d, y: top - d };
+  { const L = d + 2, a = (1 - clamp(u)) * Math.PI * .38, fx = -Math.cos(a) * d, fy = -Math.sin(a) * L + Math.cos(a) * d, b1 = { x: l + d, y: top - d }, b2 = { x: r + d, y: top - d };
     const q = [b1, b2, { x: b2.x + fx, y: b2.y + fy }, { x: b1.x + fx, y: b1.y + fy }]; ctx.fillStyle = u >= 1 ? '#c8935a' : mix('#5e3c20', '#c8935a', clamp(u)); ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(20,10,4,.7)'; ctx.lineWidth = .7; ctx.stroke();
     ctx.strokeStyle = 'rgba(40,22,8,.5)'; ctx.lineWidth = .5; [1 / 3, 2 / 3].forEach(t => { ctx.beginPath(); ctx.moveTo(lerp(b1.x, b2.x, t), lerp(b1.y, b2.y, t)); ctx.lineTo(lerp(q[3].x, q[2].x, t), lerp(q[3].y, q[2].y, t)); ctx.stroke(); });
     if (u >= .98) { ctx.fillStyle = '#9a6436'; ctx.fillRect(l - .5, top - 1.6, w + 1, 1.8); ctx.fillStyle = 'rgba(255,230,190,.3)'; ctx.fillRect(l - .5, top - 1.6, w + 1, .6); } } }
@@ -2069,7 +2069,8 @@ function stampMorph247(x, y, th, sc, sq, W1, H1) { const bw = lerp(11, W1, th), 
   const kr = lerp(2.8, Math.min(W1, H1) * .3, th), ky = lerp(-bh / 2 - 7.9, 0, th); ctx.fillStyle = th > .5 ? '#6a4426' : '#8a5a34'; ctx.beginPath(); ctx.arc(0, ky, kr, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,220,180,.35)'; ctx.beginPath(); ctx.arc(-kr * .35, ky - kr * .35, kr * .4, 0, 7); ctx.fill(); ctx.restore(); }
 function stampFace246(x, y, w, h, sc, sq = 0) { ctx.save(); ctx.translate(x, y); ctx.scale(sc * (1 + sq * .08), sc * (1 - sq * .08)); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-w / 2 + 1, -h / 2 + 1.5, w, h); ctx.fillStyle = '#46d060'; ctx.fillRect(-w / 2 - .8, -h / 2 - .8, w + 1.6, h + 1.6);
   const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2); g.addColorStop(0, '#9a6a3e'); g.addColorStop(1, '#5a3a20'); ctx.fillStyle = g; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.fillStyle = '#6a4426'; ctx.beginPath(); ctx.arc(0, 0, Math.min(w, h) * .3, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,220,180,.35)'; ctx.beginPath(); ctx.arc(-1, -1, Math.min(w, h) * .12, 0, 7); ctx.fill(); ctx.restore(); }
-function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + 11, fin = fin240(I, ts), N = G.N, topY = base - Q.hh, st = { bx: I.x0 - 20, by: ly, px: I.x0 - 42, py: ly + 4 };
+function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + 13, fin = fin240(I, ts), N = G.N, topY = base - Q.hh, Hk = window.H248 || {}, sdy = Hk.dy || 0, st = { bx: I.x0 - 20, by: ly + sdy, px: I.x0 - 42, py: ly + 4 + sdy };
+  if (Hk.back) Hk.back(I, ly, Q, base, topY, fin, ts);
   // the stamp's flight for this moment: on the pad (side view), up and over, turns to face the crate, holds, thumps the front, back off and home
   // round 247: the stamp no longer pops between views: it turns smoothly from side-on (handle up) to face-on (pressing the front) and back (stampMorph247, th 0 -> 1)
   const W1 = Math.min(14, Q.w * .62), H1 = Math.min(12, Q.hh * .62), padP = { x: st.px, y: st.py - 3.2 };
@@ -2083,7 +2084,7 @@ function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + 11, fin
     const u = sm242((t - .28) / .17); return { x: lerp(x, padP.x, u), y: lerp(hov.y, padP.y, u) - Math.sin(u * Math.PI) * 8, th: 0, sc: 1 }; };
   Q.ev.forEach(e => { if (e.full) { const p = sPose(e, G.sx(e.k)); if (p) sp = p; } });
   const finStamp = fin && ts >= FB239 - .3 && ts < FP239 + .45;
-  station245(I, ly, !!sp || finStamp);
+  ctx.save(); ctx.translate(0, sdy); station245(I, ly, !!sp || finStamp); ctx.restore();
   // basket squash on each launch
   Q.ev.forEach(e => { const t = S.age - (e.T - .55); if (t >= 0 && t < .2) once('bl' + e.i, () => spawn({ x: st.bx, y: st.by - 2, size: 3, shape: 'ring', grow: 8, life: .2, col: '#e8c860' })); });
   const hop = k => { if (!fin || ts >= FB239) return 0; let y = 0; [0, .45, .85].forEach((a, i) => { const q = (ts - a - k / N * (.35 - i * .08)) / .18; if (q > 0 && q < 1) y = Math.max(y, Math.sin(q * Math.PI) * (2 + i)); }); return y; };
@@ -2117,11 +2118,50 @@ function draw246(I, ly, ts) { const Q = plan246(I), G = Q.G, base = ly + 11, fin
     else { const u = sm242(clamp((ts - FP239 - .3) / .2)); p = { x: lerp(x, padP.x, u), y: lerp(hov, padP.y, u) - Math.sin(u * Math.PI) * 8, th: 0, sc: 1 }; }
     stampMorph247(p.x, p.y, p.th, p.sc, p.sq || 0, W1, H1); if (ts >= FB239 && ts < FP239) glint239(x + 9, fy - 12, ts); }
   if (fin && ts >= FP239 + .07) once('f6', () => { const x = G.sx(N - 1); spawn({ x, y: topY + Q.hh / 2, size: 8, shape: 'ring', grow: 90, life: .7, col: '#7aff8a' }); for (let i = 0; i < 18; i++) spawn({ x: lerp(I.x0, I.x1, Math.random()), y: topY - 4, vx: (Math.random() - .5) * 50, vy: -40 - Math.random() * 70, g: 40, life: 1.1, size: 2 + Math.random(), shape: 'star', col: i % 3 ? '#c8ffd0' : '#ffd36a' }); });
-  if (fin && ts >= FP239 + .95) once('fi6', () => spawn({ x: I.x1 + 18, y: ly, size: 8, shape: 'ring', grow: 26, life: .5, col: '#c8ffd0' })); }
-FA239.A2 = { name: 'Toss and lid v2', desc: 'A, reworked: real crates (planks with gaps and grain, corner posts, a diagonal brace, nails, straw inside), bigger crates and rolls. Each skill-up the basket squashes as it launches a roll; it spins, hangs at the top of its arc, drops in through the opening and bounces once in the straw (it stays inside, behind the front boards). When a crate is full its lid swings shut faster and faster, slams with a jolt, a puff of dust and a little rebound, and the crates either side jiggle; then the stamp hops off the green pad, turns to face the crate, holds, thumps the front boards and lifts away, and the green plus pops onto the front. Finale: the crates hop in a wave, the stamp hangs big in front of the last crate, thumps it, every plus flashes and the last crate hops into the recipe.',
+  if (fin && ts >= FP239 + .95) once('fi6', () => spawn({ x: I.x1 + 18, y: ly, size: 8, shape: 'ring', grow: 26, life: .5, col: '#c8ffd0' }));
+  if (Hk.front) Hk.front(I, ly, Q, base, topY, fin, ts); }
+FA239.A2 ={ name: 'Toss and lid v2', desc: 'A, reworked: real crates (planks with gaps and grain, corner posts, a diagonal brace, nails, straw inside), bigger crates and rolls. Each skill-up the basket squashes as it launches a roll; it spins, hangs at the top of its arc, drops in through the opening and bounces once in the straw (it stays inside, behind the front boards). When a crate is full its lid swings shut faster and faster, slams with a jolt, a puff of dust and a little rebound, and the crates either side jiggle; then the stamp hops off the green pad, turns to face the crate, holds, thumps the front boards and lifts away, and the green plus pops onto the front. Finale: the crates hop in a wave, the stamp hangs big in front of the last crate, thumps it, every plus flashes and the last crate hops into the recipe.',
   draw(I, ly, t, ts) { draw246(I, ly, ts); }, jolt(I) { const Q = plan246(I); for (const e of Q.ev) { if (!e.full) continue; const a = S.age - e.lidT, b = S.age - e.stampT; if (a >= 0 && a < .06) return [0, 1.4]; if (b >= 0 && b < .06) return [0, -1.2]; } return [0, 0]; },
   pre(v) { noise(0, .3, .006 * v, 900, 1, 'bandpass'); }, snd(v, i) { noise(0, .06, .022 * v, 420, 1, 'lowpass', true); noise(0, .15, .006 * v, 2400, 1, 'bandpass'); tone(note239(i) * .75, .01, .013 * v, .3, 'triangle', null, .005); }, boom: FA239.A.boom };
-Object.assign(FAM, { PA: r239('A2'), PB: r239('A') }); ['PC', 'PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
+// round 248: the user: more cohesive, the stamp, basket and crates "are all just sitting there". Picked: Supply wagon and Medic's tent stall (one setting that holds every piece, one wood, one green). draw246 takes hooks through window.H248 (dy for the station, back and front draws)
+const WOOD248 = ['#b07a46', '#8a5a30', '#5a3a1e'];
+const plank248 = (x, y, w, h, c = WOOD248) => { const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, c[0]); g.addColorStop(1, c[1]); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.fillStyle = 'rgba(255,230,190,.25)'; ctx.fillRect(x, y, w, .7); ctx.fillStyle = 'rgba(20,10,4,.5)'; ctx.fillRect(x, y + h - .6, w, .6); };
+function wheel248(x, y, r, a) { ctx.save(); ctx.translate(x, y); ctx.strokeStyle = WOOD248[2]; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.stroke(); ctx.strokeStyle = '#9a6a3a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, r - .4, 0, 7); ctx.stroke();
+  ctx.strokeStyle = WOOD248[1]; ctx.lineWidth = 1.1; for (let i = 0; i < 6; i++) { const an = a + i * Math.PI / 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(an) * (r - 1), Math.sin(an) * (r - 1)); ctx.stroke(); } ctx.fillStyle = '#4a4e56'; ctx.beginPath(); ctx.arc(0, 0, 1.6, 0, 7); ctx.fill(); ctx.restore(); }
+// how the load reacts: a thump per landing, a bigger one per lid slam, one per stamp (a sum of damped bounces)
+function thump248(I) { const Q = plan246(I); let y = 0; Q.ev.forEach(e => { const a = S.age - e.T, b = S.age - e.lidT, c = S.age - e.stampT; if (a >= 0) y += damp241(a, 30, 8) * .7; if (e.full && b >= 0) y += damp241(b, 32, 8) * 1.4; if (e.full && c >= 0) y += damp241(c, 36, 10) * .9; }); return y; }
+
+// ---------- Supply wagon
+FA239.WG = { name: 'Supply wagon', desc: 'The crates ride on a flatbed supply wagon: one long deck with stakes at both ends and two spoked wheels; the basket and the ink pad ride on the tailboard at the start. The deck dips and bounces on its wheels with every roll that lands, every lid that slams and every stamp. Finale: the crates hop in a wave and the wagon rocks with them, the stamp hangs over the last crate, thumps it, the wagon lurches forward a wheel-turn with every plus flashing, and the last crate hops into the recipe.',
+  draw(I, ly, t, ts) { const fin = fin240(I, ts); let wy = thump248(I), wx = 0; if (fin && ts < FB239) wy += [0, .45, .85].reduce((m, a) => m + Math.max(0, damp241(ts - a, 20, 5)) * .8, 0); if (fin && ts >= FP239) { const u = clamp((ts - FP239 - .1) / .5); wx = Math.sin(u * Math.PI) * 9 * (u < 1 ? 1 : 0); wy += damp241(ts - FP239, 30, 7) * 1.6; }
+    const dx0 = I.x0 - 54, dx1 = I.x1 + 6, rw = 6;
+    window.H248 = { dy: 5, back(I, ly, Q, base) { plank248(dx0, base, dx1 - dx0, 3.2); ctx.fillStyle = WOOD248[2]; ctx.fillRect(dx0 + 4, base + 3.2, dx1 - dx0 - 8, 2); [dx0 + 1, dx1 - 3].forEach(x => plank248(x, base - 9, 2.4, 9.5)); },
+      front(I, ly, Q, base) {} };
+    ctx.save(); ctx.translate(wx, wy); try { draw246(I, ly, ts); } finally { window.H248 = null; ctx.restore(); }
+    // wheels (not on the springs): turn with the lurch
+    const base = ly + 13; [dx0 + 16, dx1 - 14].forEach(x => wheel248(x + wx, base + 7, rw, wx / rw));
+  },
+  jolt: FA239.A2.jolt, pre: FA239.A2.pre, snd: FA239.A2.snd, boom() { FA239.A2.boom(); noise(.12, .5, .012, 260, .8, 'lowpass'); } };
+
+// ---------- Medic's tent stall
+function tent248(I, ly, fin, ts, base) { const top = ly - 34, ax0 = I.x0 - 62, ax1 = I.x1 + 40, p0 = I.x0 - 58, p1 = I.x1 + 36, ay = top - 14;
+  // floor planks between the poles
+  plank248(p0, base, p1 - p0, 3); ctx.fillStyle = 'rgba(20,10,4,.35)'; for (let x = p0 + 18; x < p1; x += 18) ctx.fillRect(x, base, .7, 3);
+  // poles
+  [p0, p1].forEach(x => { plank248(x - 1.3, ay + 2, 2.6, base - ay - 1, [WOOD248[0], WOOD248[1]]); ctx.fillStyle = WOOD248[1]; ctx.beginPath(); ctx.arc(x, ay - 1, 2.2, 0, 7); ctx.fill(); });
+  // the supplies table at the start (the basket and the pad sit on it)
+  plank248(I.x0 - 54, ly + 6, 48, 2.4); ctx.fillStyle = WOOD248[1]; [I.x0 - 51, I.x0 - 10].forEach(x => ctx.fillRect(x, ly + 8.4, 1.8, base - ly - 8.4));
+  // the awning: canvas with a green trim and hanging tabs (they flutter in the finale)
+  const fl = fin && ts >= FP239 ? damp241(ts - FP239, 18, 3) : 0; const cg = ctx.createLinearGradient(0, ay, 0, ay + 8); cg.addColorStop(0, '#fbf4e2'); cg.addColorStop(1, '#d8ccb0'); ctx.fillStyle = cg; ctx.beginPath(); ctx.moveTo(ax0, ay + 8); ctx.lineTo(ax0 + 6, ay); ctx.lineTo(ax1 - 6, ay); ctx.lineTo(ax1, ay + 8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#46d060'; ctx.fillRect(ax0, ay + 7, ax1 - ax0, 1.6); for (let x = ax0 + 4, i = 0; x < ax1 - 6; x += 11, i++) { ctx.save(); ctx.translate(x + 3, ay + 8.6); ctx.rotate(fl * .5 * Math.sin(i * 1.7 + S.age * 20)); ctx.fillStyle = '#efe6cf'; ctx.fillRect(-3, 0, 6, 3.4); ctx.fillStyle = '#46d060'; ctx.fillRect(-3, 2.6, 6, .8); ctx.restore(); }
+  // the banner by the left pole: rolled up under the awning, unfurls in the finale
+  const bx = I.x0 - 44, u = fin && ts >= FP239 ? eBack(clamp((ts - FP239 - .05) / .35)) : 0, bh = 17 * u, sw = u > 0 ? damp241(ts - FP239 - .05, 10, 3) * .08 : 0;
+  ctx.save(); ctx.translate(bx, ay + 9); ctx.rotate(sw); if (bh > .5) { ctx.fillStyle = '#efe6cf'; ctx.fillRect(-7, 0, 14, bh); ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(-7, bh - 1, 14, 1); if (bh > 10) plus245(0, bh * .5, 8, 1, 1); }
+  ctx.fillStyle = '#d8ccb0'; ctx.beginPath(); ctx.roundRect(-8, bh - 2, 16, 4, 2); ctx.fill(); ctx.fillStyle = '#46d060'; ctx.fillRect(-8, bh - .5, 16, .8); ctx.restore(); }
+FA239.TS = { name: 'Medic’s tent stall', desc: 'A field-hospital stall frames the whole module: a canvas awning with a green trim and hanging tabs runs over the top (the "First Aid" title sits under it like the stall’s sign), wooden poles at both ends, a plank floor the crates stand on, and the basket and ink pad on a small supplies table at the start. Finale: the crates hop in a wave, the stamp hangs over the last crate and thumps it, the green-cross banner by the left pole unfurls with a snap, the awning’s tabs flutter, every plus flashes and the last crate hops into the recipe.',
+  draw(I, ly, t, ts) { const fin = fin240(I, ts); window.H248 = { dy: -2, back(I, ly, Q, base) { tent248(I, ly, fin, ts, base); } }; try { draw246(I, ly, ts); } finally { window.H248 = null; } },
+  jolt: FA239.A2.jolt, pre: FA239.A2.pre, snd: FA239.A2.snd, boom() { FA239.A2.boom(); noise(.06, .25, .014, 900, .8, 'bandpass'); } };
+Object.assign(FAM, { PA: r239('WG'), PB: r239('TS'), PC: r239('A2') }); ['PD', 'PE', 'PF', 'PG', 'PH', 'PI', 'PJ'].forEach(k => delete FAM[k]);
 setTimeout(() => { if (document.getElementById('slowRow')) return; const m = document.querySelector('[data-m="unlock"]'); if (!m) return; const row = document.createElement('div'); row.id = 'slowRow'; setTimeout(() => (document.getElementById('xrows') || m.parentNode).appendChild(row), 0); row.innerHTML = '<small>Speed (to inspect a moment): </small>' + [['1', 'Normal'], ['.25', 'Slow ¼'], ['.1', 'Very slow'], ['0', 'Pause']].map(([v, n]) => `<button data-slow="${v}">${n}</button>`).join(' '); m.parentNode.appendChild(row);
   const mark = () => row.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.slow === (window.SLOWMO ?? 1))); row.querySelectorAll('button').forEach(b => b.onclick = () => { window.SLOWMO = +b.dataset.slow; mark(); }); mark(); }, 300);
 setTimeout(() => { profName = 'First Aid'; fam = 'PA'; const lp = document.getElementById('loop'); if (lp) lp.checked = true; if (typeof sync === 'function') sync(); const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('Reaching the next unlock')); if (b) b.click(); }, 260);
