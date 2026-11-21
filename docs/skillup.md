@@ -723,3 +723,8 @@ Skinning's skill-up (a knife cut through a hide) is taken too.
   `Z.noWhum()`. Measured offline (`meas259`, the loudest 50 ms RMS, no boost): land .0069, lid .0035, stamp .0069, whum .0082,
   impact .0125, thump .0026, unlock .0072 (targets from Enchanting: skill-up .0068, impact .013). I checked silently: every moment at
   every gap, no errors.
+- **Round 260 (sound from scratch):** the user didn't like the Wagon set at all. As with Enchanting: four skill-up families (`SK260`: A Wood
+  marimba, B Warm bell, C Breath flute, D Warm pluck; the seal's stamp is the family's root + fifth) and four finales (`FN260`: A Cannon,
+  B Whip and wheels, C Blast-off, D Fanfare hit; each with `beat(i)` for the three burnout beats + `impact`), picked separately in a row
+  (`#sfx260`, which replaces the Wagon/Placeholder row); the buttons play their sound; Hear: Skill-up, Five, Seal, Finale. Every option is
+  measured offline at load (`TR260`) and trimmed to the skill-up .0068 / beat .008 / impact .013 targets; I checked silently, no errors.
