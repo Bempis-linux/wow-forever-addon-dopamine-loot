@@ -4,8 +4,9 @@ The current focus. Read this file (not plan.md) when working on skill-ups. Page:
 only page; its `<h1>` says the round). Every round is in `docs/skillup-rounds.md` (read only for an old round's detail).
 Design rules that apply everywhere are in CLAUDE.md and memory.
 
-## Next: First Aid (start here)
+## Next: revisit Alchemy (start here), then Tailoring
 
+**First Aid DONE (2026-11-20, rounds 239-264, `docs/mockups/firstaid.html`; its entries and lessons are at the end of this file). Next: revisit Alchemy (its locked design: the bench of bottles, round 117) with `wow-design-ideas` and the First Aid lessons, then Tailoring; maybe a crate-themed First Aid craft ring (ask).**
 Done: Herbalism, Fishing, Skinning, Mining, Blacksmithing, Leatherworking, Alchemy, Tailoring, Engineering, **Cooking**
 (2026-11-19), **Enchanting** (2026-11-20, rounds 184-238, page `docs/mockups/enchant.html`; its entries are at the end of this file). Left: **First Aid**; then revisit **Alchemy and Tailoring** with `wow-design-ideas`
 (user, 2026-11-19). Optional revisits: the Mining and Leatherworking notes below.
